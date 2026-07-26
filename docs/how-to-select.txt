@@ -1,0 +1,76 @@
+
+
+===== PAGE 1/2 =====
+Applicable For Class I tap
+changer (ie: Y For Netural
+Point) Only
+HOW TO CALCULATE
+THE INNER
+INSULATION LEVEL
+Item
+Transformer capacity
+90000
+MVA
+Voltage of transformer high
+voltage winding
+230
+KV
+Transformer connection
+Y
+Reguating range
+±22%
+Basic connections of tap
+winding
+With reversing switch
+Steps
+±13
+±12
+Max operation positions
+27
+27
+Number of divisions for the tap
+selector contacts
+14
+14
+Rated separate source AC
+withstand
+voltage(kV/50Hz,1min) FOR
+OLTC
+230
+KV
+(ie:PF)
+Rated lightning impulse
+withstand voltage
+(kV,1.2/50μs) FOR OLTC
+550
+kV
+(ie:BIL)
+UMAX
+280.6
+KV
+UMIN
+179.4
+KV
+IMAX
+289.649099770598
+A
+Step voltage (Phase voltage）
+UST
+2247.29081542015
+V
+Total regulation voltage
+29214.7806004619
+V
+Across regulation winding for
+the same phase a
+58429.5612009238
+V
+Between any two taps of
+different phases b
+101200
+V
+
+
+===== PAGE 2/2 =====
+SO THIS TRANSFORMER TAP
+SLELECTOR CHOOSE D
