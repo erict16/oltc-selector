@@ -113,13 +113,45 @@ describe("selectOltc fixtures", () => {
     expect(["CV2", "CM2"]).toContain(out.results[0].seriesCode);
   });
 
-  it("single-phase multi-unit omits Y/D connection letter", () => {
-    const out = selectOltc(FIXTURES.case7Multi.input);
+  it("single-phase multi string omits Y/D when multi is forced", () => {
+    // Iᵤ above SHZVG III 1500 → multi required
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 1600,
+      umKv: 72.5,
+      stepVoltageV: 2000,
+      regulation: "reversing",
+      positions: 19,
+    });
     expect(out.ok).toBe(true);
     expect(out.results[0].unitCount).toBe(3);
-    // Was wrongly 3xCM2I-800D/… — D after current is connection, not allowed
-    expect(out.results[0].model).toMatch(/^3xCM2I-\d+\//);
+    expect(out.results[0].model).toMatch(/^3x/);
     expect(out.results[0].model).not.toMatch(/I-\d+[YD]\//);
+  });
+
+  it("one SHZV-1000 beats 3×CM2I when both cover (price list)", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 700,
+      umKv: 72.5,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      positions: 19,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].unitCount).toBe(1);
+    expect(out.results[0].seriesCode).toBe("SHZV");
+    expect(out.results[0].model).toContain("SHZVIII-1000");
+    // multi may appear later as alt, never as #1
+    expect(out.results[0].model).not.toMatch(/^3x/);
   });
 });
 
@@ -145,17 +177,19 @@ describe("training cases (选型案例-答案)", () => {
     expect(out.results[0].model).toBe(FIXTURES.case5Cv2_145.expectModel);
   });
 
-  it("case 7 → 3xCM2I-800… preferred over jumping to SHZV-1000 alone", () => {
-    const out = selectOltc(FIXTURES.case7Multi.input);
+  it("case 7 → SHZVIII-1000D (not 3×CM2I) when I≈626 A", () => {
+    const out = selectOltc(FIXTURES.case7Shzv1000.input);
     expect(out.ok).toBe(true);
-    expect(out.results[0].model).toContain(FIXTURES.case7Multi.expectContains);
-    expect(out.results[0].unitCount).toBe(3);
-    // Selector size from across-tap BIL 320 → C (B a_li=265)
+    expect(out.results[0].model).toContain(FIXTURES.case7Shzv1000.expectContains);
+    expect(out.results[0].unitCount).toBe(1);
+    expect(out.results[0].seriesCode).toBe("SHZV");
     expect(out.results[0].selectorSize).toBe("C");
-    expect(out.results[0].model).toContain("72.5C");
+    // 3×CM2 may be listed as alt, not primary
+    const multi = out.results.find((r) => r.unitCount > 1);
+    if (multi) expect(out.results[0].adequacyScore).toBeGreaterThan(multi.adequacyScore);
   });
 
-  it("case 3-style: mid-winding high across-tap → combined D, not CV2", () => {
+  it("case 3-style: 697 A / 170 → one SHZV-1000, not 3×", () => {
     const out = selectOltc({
       mounting: "in_tank",
       medium: "oil_vacuum",
@@ -175,11 +209,11 @@ describe("training cases (选型案例-答案)", () => {
       acrossTapPfKv: 100,
     });
     expect(out.ok).toBe(true);
-    // III max 600 short → 3× single-phase; grade D from Um 170 + across 450
-    expect(out.results[0].unitCount).toBe(3);
+    // CM2 III max 600 short, but SHZV III 1000 covers → single unit
+    expect(out.results[0].unitCount).toBe(1);
+    expect(out.results[0].seriesCode).toBe("SHZV");
     expect(out.results[0].selectorSize).toBe("D");
-    expect(out.results[0].model).toMatch(/170D/);
-    expect(out.results[0].model).not.toMatch(/I-\d+[YD]\//);
+    expect(out.results[0].model).toMatch(/SHZVIII-1000Y\/170D/);
   });
 });
 

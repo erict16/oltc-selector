@@ -70,3 +70,16 @@ Across-tap LI/PF only raises the floor (e.g. 72.5 + BIL 285 → C).
 3. **72.5 → B/C/D/DE**.  
 4. **CV2 stays 350/600** (confirmed by 2025, not older 250/500 rows).  
 5. Fixtures: `sales2025Cv2_145`, `sales2025Cm2_500`, `sales2025Shzvg`.
+
+## 3× single-phase vs one III (Base Price List 2025)
+
+| Option | Example base (FOB RMB, 10…W / 72.5B) |
+|--------|--------------------------------------|
+| CM2III-600Y | ~194k |
+| SHZVIII-1000Y | ~219k |
+| CM2I-800 × **3** | ~174k × 3 ≈ **522k** |
+| CM2I-1200 × **3** | ~188k × 3 ≈ **564k** |
+| SHZVGIII-1300Y | ~385k |
+
+**Rule:** if a **single III** covers Iᵤ (SHZV ≤1000, SHZVG ≤1500), never pick 3× as primary.  
+3× only when **no** III family covers (e.g. Iᵤ > SHZVG III max, or true single-phase transformer poles).

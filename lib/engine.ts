@@ -122,12 +122,12 @@ function seriesMatchesMedium(s: SeriesDef, input: SelectInput): boolean {
 /**
  * Higher score = better primary pick.
  *
- * Minimum-adequate order (training + 2025 sales):
- *   1. Family rank (CV2 → CM2 → SHZV → SHZVG…) — NEVER let SHZV-400 beat
- *      CV2/CM2 just because the current label matches exactly.
- *   2. Prefer single III over 3× poles (unless III cannot cover I).
- *   3. When Iᵤ > 1000 A, prefer SHZVG single over 3× mid-family.
- *   4. Mild preference for tighter catalogue current / Um.
+ * Commercial min-adequate (Base Price List 2025 + sales practice):
+ *   1. Family: CV2 → CM2 → SHZV → SHZVG (never SHZV-400 over CV2/CM2 on exact I).
+ *   2. **One III unit always beats 3× singles** when both cover duty.
+ *      Price proof: SHZVIII-1000Y/72.5B-10…W ≈ ¥219k vs 3×CM2I-800 ≈ ¥522k.
+ *      → 3×CM2I / 3×SHZVI only when no single III family covers Iᵤ/Um/Ust.
+ *   3. Mild tighter catalogue current / Um.
  */
 function adequacyScore(
   s: SeriesDef,
@@ -157,14 +157,11 @@ function adequacyScore(
   }
   if (input.mounting === "in_tank" && s.id === "hwv") score -= 4000;
 
-  // Multi-unit:
-  //  - case 7: 3×CM2I-800 still beats one SHZV-1000 at ~626 A
-  //  - Wilson 1000 A: one SHZV-1000 beats 3×CM2I-1200 (heavy multi)
-  //  - Iᵤ > 1000: prefer SHZVG single over any 3× mid-family
+  // Multi-unit is last resort commercially (see post-sort hard rule too).
+  // Soft penalty only ranks among multi options when no single exists.
   if (unitCount > 1) {
-    score -= 450;
-    if (current >= 1000) score -= 1100;
-    if (input.throughCurrentA > 1000) score -= 2200;
+    score -= 8000;
+    score -= current * 0.05; // prefer cheaper multi pole rating when forced
   }
 
   // Mild fit preference — must stay << one family step (100 pts)
@@ -440,10 +437,10 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
         if (att.unitCount > 1) {
           reasonsEn.push(
-            `${att.unitCount}× single-phase units — III catalogue current insufficient or single-phase poles required.`,
+            `${att.unitCount}× single-phase — no single III unit covers this Iᵤ (prefer one SHZV/SHZVG when it fits; 3× costs more).`,
           );
           reasonsZh.push(
-            `${att.unitCount} 台单相 — 三相目录电流不够或需单相柱。`,
+            `${att.unitCount} 台单相 — 无三相整机可覆盖此电流（有 SHZV/SHZVG 整机时优先；3× 更贵）。`,
           );
         }
 
@@ -517,13 +514,13 @@ export function selectOltc(input: SelectInput): SelectOutput {
   }
 
   final.sort((a, b) => {
+    // Hard rule: any single-unit option outranks any multi (price list).
+    // 3× only when every single III family fails the duty.
+    if (a.unitCount !== b.unitCount) return a.unitCount - b.unitCount;
     if (b.adequacyScore !== a.adequacyScore)
       return b.adequacyScore - a.adequacyScore;
     return b.confidence - a.confidence;
   });
-
-  // If a unitCount=1 result exists for a family, drop higher multi for same family+current tier? keep both but sorted
-  // Deduplicate: if top is multi and a single III exists with same series that covers I, prefer single already via score
 
   if (!final.length) {
     return {
@@ -663,8 +660,13 @@ export const FIXTURES = {
     },
     expectModel: "CV2III-600D/145-12233W",
   },
-  /** Training case 7 — 626 A > CM2 III 600 → 3× single-phase; across BIL 320 → C */
-  case7Multi: {
+  /**
+   * Training sheet once said 3×CM2I-800 for 626 A Δ.
+   * Base Price List 2025: 3×CM2I-800/72.5B-10…W ≈ ¥522k vs
+   * SHZVIII-1000D/72.5… ≈ ¥219k → one SHZV-1000 is correct primary.
+   * 3×CM2 only as alt when single III cannot cover.
+   */
+  case7Shzv1000: {
     input: {
       mounting: "in_tank" as const,
       medium: "oil_vacuum" as const,
@@ -682,7 +684,7 @@ export const FIXTURES = {
       acrossTapPfKv: 80,
       mdu: "none" as const,
     },
-    expectContains: "3xCM2I-800",
+    expectContains: "SHZVIII-1000D/72.5C",
   },
   /**
    * 2025 shipment volume anchors (HM reference list year=2025).
