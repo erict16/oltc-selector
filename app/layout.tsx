@@ -2,13 +2,24 @@ import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import "./globals.css";
 
+/** Must match next.config basePath for GH Pages favicon URLs */
+const basePath = process.env.GH_PAGES === "true" ? "/oltc-selector" : "";
+
 export const metadata: Metadata = {
   title: "OLTC Selector · 有载开关选型",
   description:
     "Personal private OLTC type-designation helper. Indicative only — not an official manufacturer tool or OS.",
+  metadataBase: new URL(
+    basePath
+      ? "https://erict16.github.io/oltc-selector"
+      : "http://127.0.0.1:3000",
+  ),
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    shortcut: "/favicon.svg",
+    icon: [
+      { url: `${basePath}/favicon.svg`, type: "image/svg+xml" },
+      { url: `${basePath}/icon.svg`, type: "image/svg+xml" },
+    ],
+    shortcut: `${basePath}/favicon.svg`,
   },
 };
 
@@ -18,6 +29,8 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
+        <link rel="icon" href={`${basePath}/favicon.svg`} type="image/svg+xml" />
+        <link rel="shortcut icon" href={`${basePath}/favicon.svg`} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
