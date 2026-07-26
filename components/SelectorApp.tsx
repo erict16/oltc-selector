@@ -268,7 +268,7 @@ export function SelectorApp() {
   const iIsCustom = iCustom || !isCatalogueCurrent(input.throughCurrentA);
 
   return (
-    <div className="mx-auto max-w-[1040px] px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6 sm:py-8">
       <header className="mb-6 flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="font-[family-name:var(--font-display)] text-[1.65rem] font-semibold tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.8rem]">
@@ -289,7 +289,8 @@ export function SelectorApp() {
         </button>
       </header>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:gap-6">
+      {/* Equal halves, centered page */}
+      <div className="grid items-stretch gap-5 lg:grid-cols-2 lg:gap-6">
         {/* —— Form —— */}
         <form
           className="rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white p-5 shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)] sm:p-6"
@@ -754,14 +755,14 @@ export function SelectorApp() {
         </form>
 
         {/* —— Result pane —— */}
-        <aside className="lg:sticky lg:top-6">
+        <aside className="min-w-0 lg:sticky lg:top-6">
           {!hasRun || !result ? (
             <IdlePanel zh={zh} running={running} />
           ) : (
             <div
               key={resultKey}
               className={cx(
-                "result-enter rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)]",
+                "result-enter h-full rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)]",
                 stale && "opacity-70",
               )}
             >
@@ -884,7 +885,7 @@ function IdlePanel({ zh, running }: { zh: boolean; running: boolean }) {
   return (
     <div
       className={cx(
-        "flex min-h-[260px] flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed border-[var(--color-rule-2)] bg-[var(--color-soft)] px-6 py-10 text-center transition-opacity duration-200",
+        "flex h-full min-h-[280px] flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed border-[var(--color-rule-2)] bg-[var(--color-soft)] px-6 py-10 text-center transition-opacity duration-200",
         running && "opacity-70",
       )}
     >
