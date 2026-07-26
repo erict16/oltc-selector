@@ -338,6 +338,7 @@ export function SelectorApp() {
                   : undefined
               }
             >
+              {/* no under-label for catalogue mode — option “自定义” is enough */}
               <select
                 className={controlClass}
                 value={
@@ -361,9 +362,7 @@ export function SelectorApp() {
                     {a} A
                   </option>
                 ))}
-                <option value="custom">
-                  {zh ? "自定义（计算 Imax）" : "Custom (Imax)"}
-                </option>
+                <option value="custom">{zh ? "自定义…" : "Custom…"}</option>
               </select>
               {iCustom || !isCatalogueCurrent(input.throughCurrentA) ? (
                 <div className="relative mt-1.5">
