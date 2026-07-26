@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  CURRENT_MENU,
   CURRENT_OPTIONS_A,
   LINEAR_POSITION_OPTIONS,
   PM_STEP_OPTIONS,
@@ -12,7 +13,11 @@ import {
   nearestCurrent,
 } from "@/lib/catalog";
 import { FIXTURES, selectOltc } from "@/lib/engine";
-import { positionsFromPlusMinus } from "@/lib/tapCode";
+import {
+  midFromPlusMinus,
+  pitchFromPlusMinus,
+  positionsFromPlusMinus,
+} from "@/lib/tapCode";
 import type { Lang, ModelResult, SelectInput, SelectOutput } from "@/lib/types";
 
 const defaultInput: SelectInput = {
@@ -119,15 +124,26 @@ function showSelectorSize(input: SelectInput) {
   return true;
 }
 
-function isCatalogueCurrent(a: number): boolean {
-  return (CURRENT_OPTIONS_A as readonly number[]).some(
-    (c) => Math.abs(c - a) < 0.01,
-  );
+function isMenuCurrent(a: number): boolean {
+  return CURRENT_MENU.some((c) => Math.abs(c.value - a) < 0.01);
 }
 
 /** Ceiling tip from in-tank vacuum III axes only (not dry-type 160 A). */
 function iRoundTip(lang: Lang, wanted: number) {
-  if (!wanted || isCatalogueCurrent(wanted)) return "";
+  if (!wanted || isMenuCurrent(wanted)) {
+    // Still show what catalogue rating the bucket will land on
+    if (wanted > 500) {
+      const pools = SERIES.filter(
+        (s) => s.mounting.includes("in_tank") && s.vacuum,
+      ).flatMap((s) => [...(s.currents.III ?? []), ...(s.currents.I ?? [])]);
+      const uniq = [...new Set(pools)].sort((a, b) => a - b);
+      const n = nearestCurrent(wanted, uniq);
+      if (n != null && n > wanted + 0.5) {
+        return lang === "zh" ? `选型按 ≥ ${n} A` : `Selects ≥ ${n} A`;
+      }
+    }
+    return "";
+  }
   const pools = SERIES.filter(
     (s) => s.mounting.includes("in_tank") && s.vacuum,
   ).flatMap((s) => [...(s.currents.III ?? []), ...(s.currents.I ?? [])]);
@@ -188,7 +204,8 @@ export function SelectorApp() {
       regulation: reg,
       plusMinusSteps: n,
       positions: positionsFromPlusMinus(n),
-      midPositions: 3,
+      midPositions: midFromPlusMinus(n),
+      pitch: pitchFromPlusMinus(n) as 10 | 12 | 14 | 16 | 18,
     }));
   };
 
@@ -205,6 +222,8 @@ export function SelectorApp() {
       ...s,
       plusMinusSteps: n,
       positions: positionsFromPlusMinus(n),
+      midPositions: midFromPlusMinus(n),
+      pitch: pitchFromPlusMinus(n) as 10 | 12 | 14 | 16 | 18,
     }));
   };
 
@@ -240,15 +259,22 @@ export function SelectorApp() {
 
   const loadExample = (ex: (typeof EXAMPLES)[number]) => {
     const f = FIXTURES[ex.key];
-    const next = { ...f.input, mdu: "none" as const };
-    setInput(next);
-    setICustom(!isCatalogueCurrent(next.throughCurrentA));
-    // Keep fixture positions; only set ± display when it matches
-    if (ex.pm && next.positions != null) {
+    let next = { ...f.input, mdu: "none" as const };
+    if (ex.pm && Number(ex.pm) > 0) {
+      const n = Number(ex.pm);
       setPm(ex.pm);
+      next = {
+        ...next,
+        plusMinusSteps: n,
+        positions: positionsFromPlusMinus(n),
+        midPositions: midFromPlusMinus(n),
+        pitch: pitchFromPlusMinus(n) as 10 | 12 | 14 | 16 | 18,
+      };
     } else {
       setPm("");
     }
+    setInput(next);
+    setICustom(!isMenuCurrent(next.throughCurrentA));
     setActiveExample(ex.key);
     setResult(null);
     setHasRun(false);
@@ -265,7 +291,7 @@ export function SelectorApp() {
         : `${input.positions} positions`
       : null;
 
-  const iIsCustom = iCustom || !isCatalogueCurrent(input.throughCurrentA);
+  const iIsCustom = iCustom || !isMenuCurrent(input.throughCurrentA);
 
   return (
     <div className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6 sm:py-8">
@@ -347,10 +373,9 @@ export function SelectorApp() {
                     onClick={(e) => {
                       e.preventDefault();
                       setICustom(false);
-                      const n = nearestCurrent(
-                        input.throughCurrentA,
-                        [...CURRENT_OPTIONS_A],
-                      );
+                      // Snap to nearest menu tier
+                      const vals = CURRENT_MENU.map((c) => c.value);
+                      const n = nearestCurrent(input.throughCurrentA, vals);
                       patch("throughCurrentA", n ?? 400);
                     }}
                   >
@@ -394,19 +419,13 @@ export function SelectorApp() {
                   className={controlClass}
                   value={String(input.throughCurrentA)}
                   onChange={(e) => {
-                    const v = e.target.value;
-                    if (v === "custom") {
-                      setICustom(true);
-                      touch();
-                      return;
-                    }
                     setICustom(false);
-                    patch("throughCurrentA", Number(v));
+                    patch("throughCurrentA", Number(e.target.value));
                   }}
                 >
-                  {CURRENT_OPTIONS_A.map((a) => (
-                    <option key={a} value={a}>
-                      {a} A
+                  {CURRENT_MENU.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {zh ? c.labelZh : c.labelEn}
                     </option>
                   ))}
                 </select>

@@ -32,12 +32,42 @@ export const UM_OPTIONS_KV = [
 ] as const;
 
 /**
- * Catalogue through-current picks (union of family Iᵤ axes + 2025 sales).
- * UI uses this as a select; "custom" still allowed for calculated Imax.
+ * Through-current UI menu.
+ * Low end: exact catalogue floors. Above 500 A: threshold buckets (>500, >800…)
+ * so sales pick a tier instead of hunting 600/800/1000 in a flat list.
+ * `value` = duty A fed to the engine (slightly above the threshold so ceil lands
+ * on the next commercial Iᵤ).
  */
+export type CurrentMenuItem = {
+  /** Duty amperes for the engine */
+  value: number;
+  labelZh: string;
+  labelEn: string;
+};
+
+export const CURRENT_MENU: CurrentMenuItem[] = [
+  { value: 160, labelZh: "≤ 160 A", labelEn: "≤ 160 A" },
+  { value: 200, labelZh: "≤ 200 A", labelEn: "≤ 200 A" },
+  { value: 350, labelZh: "≤ 350 A", labelEn: "≤ 350 A" },
+  { value: 400, labelZh: "≤ 400 A", labelEn: "≤ 400 A" },
+  { value: 500, labelZh: "≤ 500 A", labelEn: "≤ 500 A" },
+  // Buckets: value just over threshold so nearestCurrent picks next rating
+  { value: 501, labelZh: "> 500 A", labelEn: "> 500 A" }, // → 600
+  { value: 601, labelZh: "> 600 A", labelEn: "> 600 A" }, // → 800 / 1000
+  { value: 801, labelZh: "> 800 A", labelEn: "> 800 A" }, // → 1000
+  { value: 1001, labelZh: "> 1000 A", labelEn: "> 1000 A" }, // → 1200 / 1300
+  { value: 1201, labelZh: "> 1200 A", labelEn: "> 1200 A" }, // → 1300
+  { value: 1301, labelZh: "> 1300 A", labelEn: "> 1300 A" }, // → 1500
+  { value: 1501, labelZh: "> 1500 A", labelEn: "> 1500 A" }, // → 1600
+  { value: 1601, labelZh: "> 1600 A", labelEn: "> 1600 A" }, // → 2000 / 2400
+  { value: 2001, labelZh: "> 2000 A", labelEn: "> 2000 A" }, // → 2400
+  { value: 2401, labelZh: "> 2400 A", labelEn: "> 2400 A" }, // → 3000
+];
+
+/** Flat catalogue currents (engine / tip / “is this a menu value?”) */
 export const CURRENT_OPTIONS_A = [
-  160, 200, 350, 400, 500, 600, 700, 800, 1000, 1200, 1300, 1500, 1600, 2000,
-  2400, 2500, 3000,
+  160, 200, 350, 400, 500, 501, 600, 601, 700, 800, 801, 1000, 1001, 1200,
+  1201, 1300, 1301, 1500, 1501, 1600, 1601, 2000, 2001, 2400, 2401, 2500, 3000,
 ] as const;
 
 /** Common max step voltage (Ust) picks — from calc sheet / quotes / brochure ceilings */
@@ -45,8 +75,8 @@ export const STEP_VOLTAGE_OPTIONS_V = [
   500, 800, 1000, 1200, 1400, 1500, 1650, 1800, 2000, 2200, 2500, 3000, 3300, 4000,
 ] as const;
 
-/** Common ± step counts for reversing / coarse-fine */
-export const PM_STEP_OPTIONS = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17] as const;
+/** Re-export ± options (brochure W/G geometry lives in tapCode) */
+export { PM_STEP_OPTIONS } from "./tapCode";
 
 /** Linear service positions (no change-over) — brochure maxima vary by family */
 export const LINEAR_POSITION_OPTIONS = [7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 30, 32, 34] as const;

@@ -5,6 +5,11 @@ import {
   pickSelectorSize,
   defaultSelectorSizeForUm,
 } from "./catalog";
+import {
+  positionsFromPlusMinus,
+  resolveTapFields,
+  midFromPlusMinus,
+} from "./tapCode";
 
 describe("tap / catalogue sanity", () => {
   it("CV2 has no 500 A", () => {
@@ -44,6 +49,48 @@ describe("tap / catalogue sanity", () => {
     expect(pickSelectorSize(252, "auto", undefined, undefined, 520, 110)).toBe(
       "DE",
     );
+  });
+});
+
+describe("tap codes W/G (brochure Fig. 3-3)", () => {
+  it("±8 → 19 positions mid3 (10193), not 18", () => {
+    expect(positionsFromPlusMinus(8)).toBe(19);
+    expect(midFromPlusMinus(8)).toBe(3);
+    expect(
+      resolveTapFields({ regulation: "reversing", plusMinusSteps: 8 }).tapCode,
+    ).toBe("10193W");
+    expect(
+      resolveTapFields({ regulation: "coarse_fine", plusMinusSteps: 8 })
+        .tapCode,
+    ).toBe("10193G");
+  });
+
+  it("±9 → 10191 mid1; ±10 → 12233 mid3", () => {
+    expect(
+      resolveTapFields({ regulation: "coarse_fine", plusMinusSteps: 9 })
+        .tapCode,
+    ).toBe("10191G");
+    expect(
+      resolveTapFields({ regulation: "reversing", plusMinusSteps: 10 })
+        .tapCode,
+    ).toBe("12233W");
+    expect(
+      resolveTapFields({ regulation: "coarse_fine", plusMinusSteps: 10 })
+        .tapCode,
+    ).toBe("12233G");
+  });
+
+  it("case1-style ±8 coarse-fine yields 10193G", () => {
+    const out = selectOltc({
+      ...FIXTURES.case1Cv2.input,
+      plusMinusSteps: 8,
+      positions: undefined,
+      pitch: undefined,
+      midPositions: undefined,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].tapCode).toBe("10193G");
+    expect(out.results[0].model).toContain("10193G");
   });
 });
 
