@@ -3,9 +3,12 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* IBM Plex: industrial / engineering clarity for EN·ES·VI·TR; CJK falls back to system */
+  --font-display: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+    ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+    ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
   --color-paper: oklch(98.5% 0.004 250);
   --color-ink: oklch(24% 0.02 258);
   --color-ink-2: oklch(34% 0.018 257);
@@ -29,7 +32,19 @@ body {
   background: var(--color-paper);
   color: var(--color-ink-2);
   font-family: var(--font-sans);
+  font-feature-settings: "ss01" on, "cv11" on;
+  letter-spacing: 0.005em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings: slightly tighter tracking, same family for a calm professional look */
+h1,
+h2,
+.font-\[family-name\:var\(--font-display\)\] {
+  letter-spacing: -0.02em;
+  font-feature-settings: "ss01" on;
 }
 
 .prose-legal a {
