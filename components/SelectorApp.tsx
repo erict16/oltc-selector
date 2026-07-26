@@ -72,29 +72,35 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-/** Compact control — fits primary duty on one laptop screen */
+/** Comfortable control — slightly tighter than first draft, not cramped */
 const controlClass =
-  "w-full rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-2.5 py-1.5 text-[0.875rem] leading-snug text-[var(--color-ink)] transition-[border-color,box-shadow] duration-150 hover:border-[oklch(70%_0.03_256)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[oklch(58%_0.2_256_/_0.14)]";
+  "w-full rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 py-2 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-[border-color,box-shadow] duration-150 hover:border-[oklch(70%_0.03_256)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[oklch(58%_0.2_256_/_0.15)]";
 
 function Field({
   label,
   tip,
   children,
   className,
+  action,
 }: {
   label: string;
   tip?: string;
   children: React.ReactNode;
   className?: string;
+  /** Right-side label action (same row as label — no height jump) */
+  action?: React.ReactNode;
 }) {
   return (
-    <label className={cx("flex min-w-0 flex-col gap-1", className)}>
-      <span className="text-[0.75rem] font-medium tracking-wide text-[var(--color-ink)]">
-        {label}
+    <label className={cx("flex min-w-0 flex-col gap-1.5", className)}>
+      <span className="flex items-center justify-between gap-2">
+        <span className="text-[0.8125rem] font-medium text-[var(--color-ink)]">
+          {label}
+        </span>
+        {action}
       </span>
       {children}
       {tip ? (
-        <span className="text-[0.6875rem] leading-snug text-[var(--color-muted)]">
+        <span className="text-[0.75rem] leading-snug text-[var(--color-muted)]">
           {tip}
         </span>
       ) : null}
@@ -259,39 +265,41 @@ export function SelectorApp() {
         : `${input.positions} pos`
       : null;
 
+  const iIsCustom = iCustom || !isCatalogueCurrent(input.throughCurrentA);
+
   return (
-    <div className="mx-auto max-w-[1080px] px-4 py-4 sm:px-5 sm:py-5 lg:py-6">
-      <header className="mb-4 flex items-center justify-between gap-3 sm:mb-5">
+    <div className="mx-auto max-w-[1040px] px-4 py-6 sm:px-6 sm:py-8">
+      <header className="mb-6 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-[family-name:var(--font-display)] text-[1.45rem] font-semibold tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.6rem]">
+          <h1 className="font-[family-name:var(--font-display)] text-[1.65rem] font-semibold tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.8rem]">
             {zh ? "有载开关选型" : "OLTC selector"}
           </h1>
-          <p className="mt-0.5 text-[0.8125rem] text-[var(--color-muted)]">
+          <p className="mt-1 text-[0.9rem] text-[var(--color-muted)]">
             {zh
-              ? "填工况 · 点选型 · 最低满足型号"
-              : "Duty in · Select · Lowest fit"}
+              ? "填工况，点选型，拿最低满足型号。"
+              : "Enter duty, run select, get the lowest fit."}
           </p>
         </div>
         <button
           type="button"
           onClick={() => setLang((l) => (l === "en" ? "zh" : "en"))}
-          className="shrink-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] px-2.5 py-1 font-mono text-[0.6875rem] text-[var(--color-ink-2)] transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+          className="shrink-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] px-3 py-1.5 font-mono text-xs text-[var(--color-ink-2)] transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
         >
           {zh ? "EN" : "中文"}
         </button>
       </header>
 
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-5">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:gap-6">
         {/* —— Form —— */}
         <form
-          className="rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white p-4 shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)] sm:p-5"
+          className="rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white p-5 shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)] sm:p-6"
           onSubmit={(e) => {
             e.preventDefault();
             runSelect();
           }}
         >
-          <div className="mb-3.5 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold text-[var(--color-ink)]">
+          <div className="mb-4 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
               {zh ? "工况" : "Duty"}
             </h2>
             <div
@@ -308,65 +316,65 @@ export function SelectorApp() {
                     onClick={() => loadExample(ex)}
                     title={zh ? ex.hintZh : ex.hintEn}
                     className={cx(
-                      "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all duration-150",
+                      "rounded-full border px-2.5 py-1 text-[0.75rem] transition-colors duration-150",
                       on
-                        ? "border-[var(--color-accent)] bg-[oklch(58%_0.2_256_/_0.1)] text-[var(--color-accent)] shadow-[0_0_0_1px_oklch(58%_0.2_256_/_0.2)]"
-                        : "border-[var(--color-rule)] bg-[var(--color-soft)] text-[var(--color-ink-2)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
+                        ? "border-[var(--color-accent)] text-[var(--color-accent)]"
+                        : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
                     )}
                   >
-                    <span
-                      className={cx(
-                        "font-mono text-[0.625rem] tracking-wide uppercase",
-                        on ? "text-[var(--color-accent)]" : "text-[var(--color-muted)]",
-                      )}
-                    >
-                      {zh ? "例" : "Ex"}
-                    </span>
-                    <span>{zh ? ex.zh : ex.en}</span>
+                    {zh ? ex.zh : ex.en}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
+          <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <Field
               label={zh ? "通过电流 Iᵤ" : "Through-current Iᵤ"}
               tip={
-                iCustom
-                  ? iRoundTip(lang, input.throughCurrentA) || undefined
-                  : undefined
+                // Fixed-height slot so examples / custom never reflow the form
+                iIsCustom
+                  ? iRoundTip(lang, input.throughCurrentA) || "\u00a0"
+                  : "\u00a0"
+              }
+              action={
+                iIsCustom ? (
+                  <button
+                    type="button"
+                    className="text-[0.6875rem] text-[var(--color-accent)] hover:underline"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setICustom(false);
+                      const n = nearestCurrent(
+                        input.throughCurrentA,
+                        [...CURRENT_OPTIONS_A],
+                      );
+                      patch("throughCurrentA", n ?? 400);
+                    }}
+                  >
+                    {zh ? "目录" : "List"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="text-[0.6875rem] text-[var(--color-muted)] hover:text-[var(--color-accent)] hover:underline"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setICustom(true);
+                      touch();
+                    }}
+                  >
+                    {zh ? "自定义" : "Custom"}
+                  </button>
+                )
               }
             >
-              <select
-                className={controlClass}
-                value={
-                  iCustom || !isCatalogueCurrent(input.throughCurrentA)
-                    ? "custom"
-                    : String(input.throughCurrentA)
-                }
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v === "custom") {
-                    setICustom(true);
-                    touch();
-                    return;
-                  }
-                  setICustom(false);
-                  patch("throughCurrentA", Number(v));
-                }}
-              >
-                {CURRENT_OPTIONS_A.map((a) => (
-                  <option key={a} value={a}>
-                    {a} A
-                  </option>
-                ))}
-                <option value="custom">{zh ? "自定义…" : "Custom…"}</option>
-              </select>
-              {iCustom || !isCatalogueCurrent(input.throughCurrentA) ? (
-                <div className="relative mt-1.5">
+              {/* Single control slot — swap in place so examples don't reflow */}
+              {iIsCustom ? (
+                <div className="relative">
                   <input
-                    className={cx(controlClass, "pr-8")}
+                    className={cx(controlClass, "pr-9")}
                     type="number"
                     min={1}
                     step="any"
@@ -376,11 +384,32 @@ export function SelectorApp() {
                       patch("throughCurrentA", Number(e.target.value) || 0)
                     }
                   />
-                  <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 font-mono text-[0.6875rem] text-[var(--color-muted)]">
+                  <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs text-[var(--color-muted)]">
                     A
                   </span>
                 </div>
-              ) : null}
+              ) : (
+                <select
+                  className={controlClass}
+                  value={String(input.throughCurrentA)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === "custom") {
+                      setICustom(true);
+                      touch();
+                      return;
+                    }
+                    setICustom(false);
+                    patch("throughCurrentA", Number(v));
+                  }}
+                >
+                  {CURRENT_OPTIONS_A.map((a) => (
+                    <option key={a} value={a}>
+                      {a} A
+                    </option>
+                  ))}
+                </select>
+              )}
             </Field>
 
             <Field label={zh ? "最高电压 Um" : "Um"}>
@@ -530,17 +559,17 @@ export function SelectorApp() {
           </div>
 
           {/* More options */}
-          <div className="mt-3.5 border-t border-[var(--color-rule)] pt-2">
+          <div className="mt-4 border-t border-[var(--color-rule)] pt-2.5">
             <button
               type="button"
               onClick={() => setMoreOpen((o) => !o)}
-              className="flex w-full items-center justify-between py-1 text-left text-[0.75rem] font-medium text-[var(--color-ink-2)]"
+              className="flex w-full items-center justify-between py-1 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)]"
               aria-expanded={moreOpen}
             >
               <span>{zh ? "更多选项" : "More options"}</span>
               <span
                 className={cx(
-                  "font-mono text-[0.6875rem] text-[var(--color-muted)] transition-transform duration-200",
+                  "font-mono text-xs text-[var(--color-muted)] transition-transform duration-200",
                   moreOpen && "rotate-180",
                 )}
               >
@@ -557,7 +586,7 @@ export function SelectorApp() {
               )}
             >
               <div className="overflow-hidden">
-                <div className="grid gap-x-3 gap-y-3 pt-2.5 sm:grid-cols-2">
+                <div className="grid gap-x-4 gap-y-3.5 pt-3 sm:grid-cols-2">
                   <Field label={zh ? "安装" : "Mounting"}>
                     <select
                       className={controlClass}
@@ -690,12 +719,12 @@ export function SelectorApp() {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-1.5 sm:flex-row sm:items-center">
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
             <button
               type="submit"
               disabled={running || !input.throughCurrentA}
               className={cx(
-                "inline-flex min-h-[2.4rem] flex-1 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 text-[0.875rem] font-semibold text-[var(--color-accent-ink)] transition-[transform,opacity,background-color] duration-150",
+                "inline-flex min-h-[2.6rem] flex-1 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-5 text-[0.9rem] font-semibold text-[var(--color-accent-ink)] transition-[transform,opacity,background-color] duration-150",
                 "hover:brightness-105 active:scale-[0.98]",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 running && "pointer-events-none",
@@ -718,14 +747,14 @@ export function SelectorApp() {
                 "Select"
               )}
             </button>
-            <p className="text-center text-[0.6875rem] text-[var(--color-muted)] sm:max-w-[10rem] sm:text-left">
+            <p className="text-center text-[0.75rem] text-[var(--color-muted)] sm:max-w-[11rem] sm:text-left">
               {zh ? "改参后需再点选型" : "Re-run after edits"}
             </p>
           </div>
         </form>
 
         {/* —— Result pane —— */}
-        <aside className="lg:sticky lg:top-4">
+        <aside className="lg:sticky lg:top-6">
           {!hasRun || !result ? (
             <IdlePanel zh={zh} running={running} />
           ) : (
@@ -855,26 +884,26 @@ function IdlePanel({ zh, running }: { zh: boolean; running: boolean }) {
   return (
     <div
       className={cx(
-        "flex min-h-[220px] flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed border-[var(--color-rule-2)] bg-[var(--color-soft)] px-5 py-8 text-center transition-opacity duration-200 lg:min-h-[min(420px,70vh)]",
+        "flex min-h-[260px] flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed border-[var(--color-rule-2)] bg-[var(--color-soft)] px-6 py-10 text-center transition-opacity duration-200",
         running && "opacity-70",
       )}
     >
       {running ? (
         <>
-          <span className="mb-2.5 h-7 w-7 animate-spin rounded-full border-2 border-[var(--color-rule-2)] border-t-[var(--color-accent)]" />
-          <p className="text-[0.8125rem] text-[var(--color-ink-2)]">
+          <span className="mb-3 h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-rule-2)] border-t-[var(--color-accent)]" />
+          <p className="text-sm text-[var(--color-ink-2)]">
             {zh ? "正在选型…" : "Selecting…"}
           </p>
         </>
       ) : (
         <>
-          <div className="mb-2.5 flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-rule)] bg-white font-mono text-sm text-[var(--color-muted)]">
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-rule)] bg-white font-mono text-sm text-[var(--color-muted)]">
             →
           </div>
-          <p className="font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold text-[var(--color-ink)]">
+          <p className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
             {zh ? "还没选型" : "Nothing selected yet"}
           </p>
-          <p className="mt-1.5 max-w-[24ch] text-[0.8125rem] leading-relaxed text-[var(--color-muted)]">
+          <p className="mt-2 max-w-[22ch] text-[0.875rem] leading-relaxed text-[var(--color-muted)]">
             {zh
               ? "左边填参数，点「选型」。或先点上方示例。"
               : "Fill duty, hit Select — or try an example above."}
