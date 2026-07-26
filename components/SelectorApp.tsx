@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  CURRENT_OPTIONS_A,
   LINEAR_POSITION_OPTIONS,
   PM_STEP_OPTIONS,
   POSITION_OPTIONS,
@@ -75,17 +76,29 @@ function showSelectorSize(input: SelectInput) {
   return true;
 }
 
+function isCatalogueCurrent(a: number): boolean {
+  return (CURRENT_OPTIONS_A as readonly number[]).some(
+    (c) => Math.abs(c - a) < 0.01,
+  );
+}
+
 function iRoundTip(lang: Lang, wanted: number) {
-  const pools = SERIES.flatMap((s) => s.currents.III ?? []);
+  if (!wanted || isCatalogueCurrent(wanted)) return "";
+  const pools = SERIES.flatMap((s) => [
+    ...(s.currents.III ?? []),
+    ...(s.currents.I ?? []),
+  ]);
   const uniq = [...new Set(pools)].sort((a, b) => a - b);
   const n = nearestCurrent(wanted, uniq);
   if (n == null || Math.abs(n - wanted) < 0.5) return "";
-  return lang === "zh" ? `目录上靠 ${n} A` : `Ceil to ${n} A`;
+  return lang === "zh" ? `选型时目录上靠 ${n} A` : `Engine ceils to ${n} A`;
 }
 
 export function SelectorApp() {
   const [lang, setLang] = useState<Lang>("zh");
   const [input, setInput] = useState<SelectInput>(defaultInput);
+  /** When true, show free Iᵤ number (calculated Imax); default is catalogue select */
+  const [iCustom, setICustom] = useState(false);
   const [pm, setPm] = useState("9");
   const [moreOpen, setMoreOpen] = useState(false);
   const [altsOpen, setAltsOpen] = useState(false);
@@ -185,7 +198,9 @@ export function SelectorApp() {
 
   const loadExample = (key: keyof typeof FIXTURES, pmVal = "9") => {
     const f = FIXTURES[key];
-    setInput({ ...f.input, mdu: "none" });
+    const next = { ...f.input, mdu: "none" as const };
+    setInput(next);
+    setICustom(!isCatalogueCurrent(next.throughCurrentA));
     setPm(pmVal);
     setResult(null);
     setHasRun(false);
@@ -254,24 +269,60 @@ export function SelectorApp() {
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
               label={zh ? "通过电流 Iᵤ" : "Through-current Iᵤ"}
-              tip={iRoundTip(lang, input.throughCurrentA)}
+              tip={
+                iCustom
+                  ? iRoundTip(lang, input.throughCurrentA) ||
+                    (zh ? "算出的 Imax 可手填" : "Use calculated Imax if needed")
+                  : zh
+                    ? "目录额定档；算出来的 Imax 选「自定义」"
+                    : "Catalogue Iᵤ; use Custom for calculated Imax"
+              }
             >
-              <div className="relative">
-                <input
-                  className={cx(controlClass, "pr-10")}
-                  type="number"
-                  min={1}
-                  step="any"
-                  required
-                  value={input.throughCurrentA || ""}
-                  onChange={(e) =>
-                    patch("throughCurrentA", Number(e.target.value) || 0)
+              <select
+                className={controlClass}
+                value={
+                  iCustom || !isCatalogueCurrent(input.throughCurrentA)
+                    ? "custom"
+                    : String(input.throughCurrentA)
+                }
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "custom") {
+                    setICustom(true);
+                    touch();
+                    return;
                   }
-                />
-                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs text-[var(--color-muted)]">
-                  A
-                </span>
-              </div>
+                  setICustom(false);
+                  patch("throughCurrentA", Number(v));
+                }}
+              >
+                {CURRENT_OPTIONS_A.map((a) => (
+                  <option key={a} value={a}>
+                    {a} A
+                  </option>
+                ))}
+                <option value="custom">
+                  {zh ? "自定义…（计算 Imax）" : "Custom… (calculated Imax)"}
+                </option>
+              </select>
+              {iCustom || !isCatalogueCurrent(input.throughCurrentA) ? (
+                <div className="relative mt-2">
+                  <input
+                    className={cx(controlClass, "pr-10")}
+                    type="number"
+                    min={1}
+                    step="any"
+                    required
+                    value={input.throughCurrentA || ""}
+                    onChange={(e) =>
+                      patch("throughCurrentA", Number(e.target.value) || 0)
+                    }
+                  />
+                  <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs text-[var(--color-muted)]">
+                    A
+                  </span>
+                </div>
+              ) : null}
             </Field>
 
             <Field label={zh ? "最高电压 Um" : "Um"}>

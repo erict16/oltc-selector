@@ -31,6 +31,15 @@ export const UM_OPTIONS_KV = [
   12, 17.5, 35, 40.5, 69, 72.5, 126, 145, 170, 252, 300, 363,
 ] as const;
 
+/**
+ * Catalogue through-current picks (union of family Iᵤ axes + 2025 sales).
+ * UI uses this as a select; "custom" still allowed for calculated Imax.
+ */
+export const CURRENT_OPTIONS_A = [
+  160, 200, 350, 400, 500, 600, 700, 800, 1000, 1200, 1300, 1500, 1600, 2000,
+  2400, 2500, 3000,
+] as const;
+
 /** Common max step voltage (Ust) picks — from calc sheet / quotes / brochure ceilings */
 export const STEP_VOLTAGE_OPTIONS_V = [
   500, 800, 1000, 1200, 1400, 1500, 1650, 1800, 2000, 2200, 2500, 3000, 3300, 4000,
