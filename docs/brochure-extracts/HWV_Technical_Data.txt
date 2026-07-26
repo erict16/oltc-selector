@@ -1,0 +1,2613 @@
+
+===== PAGE 1/34 =====
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+Type HWV
+Externally-mounted Vacuum OLTC
+Technical data
+HM0.154.5001-08.21/2017
+
+===== PAGE 2/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+1
+1. General⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯2
+2. Technical specification⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯3
+3. OLTC structure⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯7
+4. Type designation⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯9
+5. Service condition⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯10
+6. Voltage regulation mode⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯10
+7. Motor drive unit ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯11
+8. Operation controller⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯12
+9. Installation method⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯13
+10. Drying⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯14
+11. Painting ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯14
+12. Appendix⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯14
+Appendix 1: HWVⅢ -400-800-1000 /17.5KV-10 series star connection and
+    delta connection overall dimensions (10193W)⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯15 
+Appendix 2 HWVⅢ-400-800-1000 /40.5KV-10 series delta connection overall dimensions(10193W)⋯⋯⋯⋯16 
+Appendix 3 HWVⅢ-400-800-1000 /72.5KV-10 series delta connection overall dimensions(10193W)⋯⋯⋯⋯17 
+Appendix 4 HWVⅢ-400-800-1000 /40.5KV-10 series star connection overall dimensions (10193W) ⋯⋯⋯⋯18 
+Appendix 5 HWVⅢ-400-800-1000 /72.5KV-10 series star connection overall dimensions (10193W)⋯⋯⋯⋯19 
+Appendix 6 HWVⅢ -400-800-1000A /17.5KV-18 series star connection and 
+    delta connection overall dimensions (18353W)⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯20 
+Appendix 7 HWVⅢ-400-800-1000A/40.5KV-18 series delta connection overall dimensions (18353W) ⋯⋯⋯21 
+Appendix 8 HWVⅢ-400-800-1000A /72.5KV-18 series delta connection overall dimensions (18353W)⋯⋯⋯22 
+Appendix 9 HWVⅢ -400-800-1000A /40.5KV-18 series star connection overall dimensions (18353W) ⋯⋯⋯23 
+Appendix 10  HWVⅢ-400-800-1000A /72.5KV-18 series star connection overall dimensions(18353W)⋯⋯⋯24 
+Appendix 11 HWVⅠ -400/800/1000 A/40.5KV-18 series overall dimensions (18353W)⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯25 
+Appendix 12  Type HWV OLTC operating position table and connection diagram(10070)⋯⋯⋯⋯⋯⋯⋯⋯⋯26 
+Appendix 13: Type HWV OLTC operating position table and connection diagram(10071)⋯⋯⋯⋯⋯⋯⋯⋯⋯27 
+Appendix 14: Type HWV OLTC operating position table and connection diagram(10091W)⋯⋯⋯⋯⋯⋯⋯⋯28 
+Appendix 15: Type HWV OLTC operating position table and connection diagram(10191W)⋯⋯⋯⋯⋯⋯⋯⋯29 
+Appendix 16: Type HWV OLTC operating position table and connection diagram(10193W)⋯⋯⋯⋯⋯⋯⋯⋯30 
+Appendix 17: Type HWV OLTC operating position table and connection diagram(18351W)⋯⋯⋯⋯⋯⋯⋯⋯31 
+Appendix 18: Type HWV OLTC operating position table and connection diagram(18353W)⋯⋯⋯⋯⋯⋯⋯⋯32
+General
+
+===== PAGE 3/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+2
+1. General
+Type HWV externally-mounted vacuum on-load tap changer (Hereafter, referred to as OLTC) is of combined structure. 
+It provides the following features:
+All parts of Type HWV OLTC including tap selector is installed in an independent oil chamber which is completely 
+separated from the transformer main tank, no oil and gas exchange. The tap changer oil chamber is fixed at the side 
+of transformer oil tank, while motor drive unit as a part of tap changer is integrated with tap changer oil chamber at one 
+side;
+It uses vacuum interrupters as arcing contacts. As the arcing generated from the current breaking is extinguished in 
+the vacuum interrupters, it solves the problem of oil carbonization of the extinguishing medium. Therefore, there is no 
+need to equip with online oil filter plant under any conditions;
+As a result of no oil carbonization in the tap changer oil chamber, it not only reduces the mechanical wear but also 
+improves the dielectric strength of the transformer oil in the oil chamber. Hence, the insulation property of tap changer 
+is fundamentally guaranteed;
+The mechanical contacts are designed to carry long-term  through current, while vacuum interrupters only momentarily 
+bear the current in the process of switching. It improves the short circuit current withstand capability. 
+All the vacuum interrupters are fixed firmly and the movement sequence will not change in the process of high speed 
+switching; 
+The moving and fixed contact of tap selector adopts multi—point clamping structure, which significantly increases the 
+current-carrying capacity;
+The moving contact compression spring of tap selector is changed to combined leaf spring, which effectively reduces 
+the axial size; 
+The diverter switch adopts new type quick release mechanism;
+The tap switching operation process is carried out in the oil chamber. The selection of material and craft process of 
+all the movable mechanical parts are taken into account to avoid mechanical wear as much as possible, but there still 
+be a small amount of mechanical wear. It solves the problem that may affect the insulation property of transformer 
+winding from the structure of tap changer;
+Type HWV OLTC if needs maintenance or trouble-shooting, it does not require to drain the transformer oil. As there 
+is a large internal space, it is not necessary to lift up the diverter switch to check or change each component of tap 
+changer. Therefore, it greatly reduces the cost of maintenance or trouble-shooting.
+The highest voltage of equipment of Type HWV on-load tap changer is 17.5kV, 40.5kV and 72.5kV; Three-phase max. 
+rated through current is 400A, 800A and 1000A respectively; Maximum operating positions (with change-over 
+selector) is up to 35. Suitable for frequency of 50Hz or 60Hz three-phase Y connection or D connection power and 
+industrial transformer. 
+Type HWV on-load tap changer is fixed on mounting flange at one side of the transformer oil tank via the flange on the 
+tank. It is driven by the motor drive unit to realize the local or remote operation.
+
+===== PAGE 4/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+3
+2. Technical specification
+2.1 Type HWV OLTC complies with IEC60214-1:2014 Standard, 
+technical data as shown in Table 1.
+Table 1   Type HWV OLTC technical data 
+Model
+HWVⅢ
+HWVⅠ
+Max. rated through current Ium (A)
+400
+800
+1000
+400
+800
+1000
+Rated frequency (Hz)
+50 or 60
+Phase and connection method
+3-phase Y-connection
+D connection
+Single-phase for any selectable 
+winding connection
+Max. rated step voltage Uim (V)
+3300
+Rated step capacity Psin (kVA)
+1200
+2200
+2600
+1200
+2200
+2600
+Short-circuit 
+current test
+Thermal(3s)
+8
+8
+12
+8
+8
+12
+Dynamic(Peak)
+20
+20
+30
+20
+20
+30
+Max. operating positions
+18 without change-over selector; 35 with change-over selector
+Insulation to 
+ground
+(kV)
+Highest voltage for 
+equipment Um (kV)
+Insulation level
+17.5
+40.5
+72.5
+Rated separate source AC withstand 
+voltage (50Hz  1min)
+45
+90
+140
+Rated lightning impulse withstand 
+voltage  (1.2/50µs)
+105
+250
+350
+Mechanical Life
+1,500,000
+Electrical Life
+500,000
+Oil 
+compartment
+Service pressure
+0.03MPa
+Leakage test
+No leakage under 0.08MPa for 24 hours
+Over pressure protection
+Rupture disc bursts at 300±20% kPa 
+Protective relay
+Set oil flow speed at 1.0m/s±10%
+2.2 Rated through-current
+Rated through current Iu: The current flow through an on-load tap changer toward the external circuit, which can 
+transfer from one tap to the other at the relevant rated step voltage and which can be carried continuously while 
+meeting the requirement.
+Maximum rated through current Ium: The highest rated through current for which the tap changer is designed for and 
+which forms the basis for all current related tests. In the selection, Iu≤Ium.
+2.3 Rated step voltage
+Rated step voltage is the operating voltage to successive taps of the transformer, in the whole regulating range it can 
+be  constant or  variable. If it is a variable, the value of rated step voltage is determined by the max. step voltage. 
+
+===== PAGE 5/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+4
+Rated step voltage Ui: For each value of rated through current, the highest permissible voltage.
+Maximum rated step voltage Uim: The highest value of the rated step voltage for which the tap changer is designed. In 
+the selection, Ui≤Uim. The maximum rated step voltage for type HWV OLTC is 3300V.
+2.4 Rated step capacity Pstn
+Step capacity is the product of step voltage and load current, that is Ps=UI. Rated step capacity is the maximum 
+permissible step capacity for the tap changer under continuous working condition, that is PStN=Iux×Ui (Lower load 
+point) and Pstn=Iu×Uim (Upper load point) in the range of envelop curve, to assess whether the selected rated 
+through current and rated step voltage is in the allowed range of the rated step capacity. The rated step capacity of 
+type HWV OLTC (See Fig. 1)
+Fig. 1  Rated step capacity of type HWV OLTC
+0
+200
+400
+600
+800
+1000
+1200
+1400
+200
+400
+600
+800
+1000
+1200
+1400
+1600
+1800
+2000
+2200
+2400
+2600
+2800
+3000
+3200
+3400
+Ui(V)
+Iu(A)
+HWVIII-400Y/D HWVIII-800Y/D HWVIII-1000Y/D
+According to stipulations of IEC60214-1, tap changer shall be able to break two times of maximum rated through 
+current and its relevant step voltage for 40 operations. Breaking capacity of type HWV tap changer is Pst.max≈ 
+2Ium×Ui.
+2.5 Electrical life of vacuum interrupter
+The electrical life of vacuum interrupter is not less than 500,000 operations.
+2.6 Short-circuit current test
+According to IEC 60214-1: 2003, all contacts continuously carrying the current shall be able to withstand 2s (±10%) 
+short circuit test current without melting, deformation or mechanical damage. Meanwhile the starting peak current 
+value shall be 2.5 (±5%) times of the root means square value of rated short circuit test current. For details, please 
+refer to  the short circuit test current values in Table Type HWV Series of On-Load Tap Changer Technical Data.
+
+===== PAGE 6/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+5
+2.7 Tap changer insulation level to earth
+Type HWV Tap changer insulation level to earth is the insulation between tap changer live parts and grounding part. 
+It is decided by rated separate source AC withstand voltage (1 min) and rated lightning impulse withstand voltage. 
+The requirement of which correlates to the transformer tap winding location, regulation range & regulation method, 
+winding connection & arrangement and rated voltage of transformer winding. It's decided by the insulation to earth 
+of transformer tap winding. Tap changer insulation level is decribed by the highest voltage for equipment Um, which 
+is selected from the standard value stipulated by IEC-60214-1: 2003 (See Table. 2), in order to use the minimum 
+insulation value to meet the entire range of requirement.
+Table 2 Tap Changer Insulation Level to Earth 
+The highest voltage for 
+equipment Um
+Rated separate source AC withstand 
+voltage (50HZ 1min)
+Rated lightning impulse withstand voltage 
+(Full wave 1.2/50μs)
+17.5
+45
+105
+40.5
+90
+250
+72.5
+140
+350
+(Unit:kV) 
+2.8 Internal insulation level of tap changer 
+Refer the internal insulation level of Type HWV tap changer to Table 3. Basic connection diagram and insulation 
+distance mark is shown in Fig. 2. Internal insulation must be checked when selecting the proper tap changer, whether 
+it’s qualified for the voltage withstanding requirement.
+Table 3 Tap Changer Insulation Level 
+(Unit:kV) 
+Note: When the insulation distance of a0 represents ZnO gap protection, its insulation is 1.2/50 μs; 
+65~70kV,75kV100% responsive.
+Insulation 
+distance mark
+17.5kV
+40.5kV
+72.5kV
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+a
+105
+45
+135
+50
+265
+50
+b
+HWVⅢD
+150
+50
+200
+80
+325
+140
+HWVⅢY
+105
+45
+135
+50
+265
+50
+a0
+65
+20
+65
+20
+65
+20
+a1
+150
+30
+150
+30
+150
+30
+C1
+500
+145
+500
+145
+500
+145
+C2
+500
+145
+500
+145
+500
+145
+
+===== PAGE 7/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+6
+a: between start and end of a fine tap winding; also between start and end of coarse tap winding;
+b: between any tapping of different fine tap windings, or between ends of different coarse windings;
+a0: between selected and preset diverter switch tapping;
+a1: between any selected and preselected taps of the tap selector (Connected or unconnected);
+c1: between the start of coarse tap winding and the current take-off terminal for the same phase;
+c2: between start contacts (-)of coarse winding for different phases.
+Fig. 2
+a1
+b
+a
+a
+b
+b
+a
+a1
+a1
+a
+C1
+C2
++
+-
+-
++
++
+-
+k
+k
+k
+o
+o
+o
+k
++
+-
+o
+o
+-
++
+k
+o
+-
++
+k
+0
+Reversing Regulation
+Internal insulation of diverter switch 
+Linear Regulation
+Coarse/Fine Regulation
+
+===== PAGE 8/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+7
+3 OLTC structure
+Type HWV tap changer is composed of three parts: oil compartment and its accessories, tap changer body and motor 
+drive unit, as shown in Fig. 3. 
+Fig. 3
+Motor drive unit
+Tap changer body 
+Oil compartment and its accessories 
+3.1 Tap changer body 
+Tap changer body is composed of three parts: tap selector, diverter switch and drive unit. (See Fig. 4)
+Fig. 4
+Drive unit
+Tap selector
+Diverter switch
+
+===== PAGE 9/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+8
+3.2 Oil compartment and its accessories 
+3.2.1 Standard type oil compartment and its accessories
+Standard type oil compartment means tap changer oil compartment is connected with one independent oil conservator 
+and separated from the oil in the transformer. The accessories mainly include pressure release valve, protective relay, 
+rupture disk, oil filling pipe, oil outlet valve. (See Fig. 5) Tap changer oil compartment is always filled with oil. The tap 
+changer oil compartment can be fixed with one side of transformer oil tank by bolts or directly welding with one side of 
+transformer oil tank. 
+Fig. 5  Standard type oil compartment and its accessories
+Pressure release valve
+Protective relay    Oil filling pipe 
+Rupture disk  
+Oil outlet valve
+3.2.2 Non-standard type oil compartment and its accessories
+Non-standard type oil compartment means tap changer oil compartment is not connected with independent oil 
+conservator. The space between the oil level of tap changer oil compartment and its top cover is 100~150mm. The 
+accessories includes pressure release valve, rapid pressure rise relay, breather, oil gauge, oil filling pipe, oil outlet 
+valve, etc. (See Fig. 5) The tap changer oil compartment can be fixed with transformer oil tank by bolts or directly 
+welding with transformer oil tank.
+ Oil outlet valve 
+Fig. 6  Non-standard type oil compartment and its accessories
+Pressure release valve
+Oil filling pipe 
+Oil gauge
+Rapid pressure rise relay
+Breather 
+
+===== PAGE 10/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+9
+3.3 Motor drive unit
+Type HWV OLTC is equipped with new model motor drive unit (SHM-DA).
+4. Type designation
+4.1 Model designation
+Due to the different combinations of number of phases, maximum rated through current, the highest voltage for 
+equipment and connections, type HWV comes with various models. Hence, the type designation shall provide all the 
+above technical parameter and below is its detailed explanation in Fig. 7.
+HWV  III - 400 Y/72.5-10193W
+Basic connection diagram of tap selector
+Highest voltage for equipment (KV)
+Connection mode (Y/D)
+Max. rated through current(A)
+Number of phases
+Type
+Fig. 7
+Fig. 8
+4.2 Designation of basic connection diagram
+The tap selector may have different specifications with respect to the number of the steps required and connection 
+of the tap winding. The basic connection diagrams reflects the relevant pitch of the contact circuit, the number of 
+operating positions, the number of mid-positions and type of change-over selector. The designation of the basic 
+connection diagram is according to Fig. 8.
+10 19 3 W
+Change-over selector, represented by W, G
+      W: with reversing switch
+      G: with coarse change-over selector
+Number of mid positions, represented by 0, 1, 3
+Max. operating position
+Tap selector pitch (divided into 10, 12, 14, 16, and 18)
+
+===== PAGE 11/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+10
+Fig. 9  Basic Connections of Tap Winding
+without change-over selector 
+with reversing switch 
+with coarse tap selector 
+5 Service condition
+5.1 Service temperature range of tap changer in oil is -25℃～105℃.
+5.2 Service ambient air temperature range of tap changer is -25℃～40℃.
+5.3 There shall be no serious dust, explosive gas or corrosive gas on 
+service site.
+Remark: Please contact us if special application required. 
+6. Voltage regulation mode
+Tap changer can be used for any selectable winding connections for a three-phase D connection transformer and 
+Y connection at neutral point. The basic voltage regulation mode includes three models: linear regualtion without 
+change-over selector; reversing regulation with reversing switch or coarse and fine regulation with coarse tap selector. 
+As shown in Fig. 9.
+
+===== PAGE 12/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+11
+7. Motor drive unit
+Type HWV OLTC is driven by SHM-DA motor drive unt. Please refer to Table 4 for technical data. Table 4.
+Item
+Specifications
+Step motor & Subdivision
+driver
+Rated voltage (V)
+220V/AC
+Max. output current (A)
+6
+Frequency (Hz)
+50 or 60
+Rotary torque on output shaft (N·m)
+35
+Revolution of the drive shaft per switching operation (Circle)
+33
+Revolution of the hand crank per switching operation (Circle)
+33
+Running time per switching operation (S)
+About 5
+Max. operation positions
+107
+Insulation level kV (50Hz, 1min)
+2
+Weight (kg)
+80
+Protective degree
+IP66
+Controller
+Model
+SHM-K
+Rated voltage (V)
+220V/AC
+Frequency (Hz)
+50 or 60
+Table 4 Technical Data of Motor Drive Unit
+
+===== PAGE 13/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+12
+8. Controller
+SHM-K controller (hereafter referred as controller) is a controlling device used to combine with SHM-DA motor drive 
+unit by its controlling operation mechanism to realize electrical control of switching operation for on-load tap changer. 
+Controller can indicate the operation status of tap changer and tap positions.~
+Power supply
+AC 85~264V AC:50/60HZ, DC 100V~250V
+Power
+About 7W
+CPU
+ARM9, 32-bit, Basic Frequency 400M
+Bus architecture
+AMBA
+Internal memory
+256MB FLASH,64MB SDRAM
+Operating system
+Linux 2.6.30.4+QT4.5
+Switch output
+Passive, relay output ,contact rating: 5A220VAC,3A30VDC
+One route running signal (motor rotation signal)
+One route 6-bit BCD code position (8421 code); The output can be defined as other content of dry 
+contact output according to customer’s requirements. 
+State signal input
+External “raise”, “lower” and “stop” signals; Photoelectric isolation >2500V
+*Analog input
+The bus voltage acquisition: 0~100V or 0~380V,ABC three phases
+The current acquisition: 0~5A, ABC three phases
+Statistical function
+Action time, “raise”, “lower” record, failure logging, log space: 800 items 
+Communication 
+function
+One route optical fiber: multimode, 62.5/125μm, ST connector, wavelength 820nm, the maximum 
+transmission distance 1KM; One RS485 communication interface (RJ45) 
+Above two interfaces can be used for local control module communication and alternate each other. One 
+route RS485,600~9600bps can be used to communicate with position transducer and other IDE. One 
+routine RS232 is maintenance interface.
+One TCP/IP 100M RJ45 network interface. 
+Support protocol: IEC60870-5-101,104;SC1801;MODBUS;CDT, etc.
+LCD
+4.3 inch touch screen, 16-bit true color, 320*240pixel, 96dpi 
+Position display: 1~107 positions (determined by SHM-DL local control module)
+Alarm function, communication failure, local side equipment fault.
+Status display: local/digital control status, hand crank status, position operation status, temperature, etc. 
+Service condition
+Operating temperature: -20℃~70℃,Relative humidity ≤RH95% Non-condensation 
+Installation method
+Screen cabinet
+Anti interference level
+Ⅲ degree
+Technical specifications of SHM-K 
+
+===== PAGE 14/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+13
+9. Installation method
+There are two methods to connect type HWV OLTC and transformer.
+9.1 Type HWV OLTC directly welded with transformer oil tank. (See Fig. 10) 
+Fig. 10
+Connection terminal linked with 
+transformer winding wire 
+ Welded with transformer flange 
+9.2 Connect Type HWV OLTC and mounting flange of transformer oil 
+tank with screw thread. (See Fig. 11) 
+Connection terminal linked 
+with transformer winding wire 
+Fig. 11
+Connect with transformer flange 
+Bolt connection hole
+
+===== PAGE 15/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+14
+10. Drying
+If the tap changer is transported or stored without moisture, generally it does not require drying. If drying treatment is 
+necessary, please refer to the installation instructions.
+11. Painting
+Type HWV OLTC and its motor drive unit can be coated with a variety of paint color according to customers' 
+requirements when ordering. Standard paint color is RAL7040.
+12. Appendix
+Appendix 1: HWVⅢ -400-800-1000 /17.5KV-10 series star connection and 
+    delta connection overall dimensions (10193W)⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯15 
+Appendix 2 HWVⅢ -400-800-1000 /40.5KV-10 series delta connection overall dimensions(10193W)⋯⋯⋯⋯⋯⋯⋯16 
+Appendix 3 HWVⅢ -400-800-1000 /72.5KV-10 series delta connection overall dimensions (10193W)⋯⋯⋯⋯⋯17 
+Appendix 4 HWVⅢ -400-800-1000 /40.5KV-10 series star connection overall dimensions (10193W) ⋯⋯⋯⋯⋯18 
+Appendix 5 HWVⅢ -400-800-1000 /72.5KV-10 series star connection overall dimensions (10193W)⋯⋯⋯⋯⋯19 
+Appendix 6 HWVⅢ -400-800-1000A /17.5KV-18 series star connection and 
+    delta connection overall dimensions (18353W)⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯20 
+Appendix 7 HWVⅢ -400-800-1000A/40.5KV-18 series delta connection overall dimensions (18353W) ⋯⋯⋯⋯⋯⋯21 
+Appendix 8 HWVⅢ -400-800-1000A /72.5KV-18 series delta connection overall dimensions (18353W)⋯⋯⋯⋯⋯⋯22 
+Appendix 9 HWVⅢ -400-800-1000A /40.5KV-18 series star connection overall dimensions (18353W) ⋯⋯⋯⋯⋯⋯23 
+Appendix 10  HWVⅢ -400-800-1000A /72.5KV-18 series star connection overall dimensions (18353W)⋯⋯⋯⋯⋯⋯24 
+Appendix 11 HWVⅠ -400/800/1000 A/40.5KV-18 series overall dimensions (18353W)⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯25 
+Appendix 12  Type HWV OLTC operating position table and connection diagram (10070) ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯26 
+Appendix 13: Type HWV OLTC operating position table and connection diagram (10071)⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯27 
+Appendix 14: Type HWV OLTC operating position table and connection diagram (10091W)⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯28 
+Appendix 15: Type HWV OLTC operating position table and connection diagram (10191W) ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯29 
+Appendix 16: Type HWV OLTC operating position table and connection diagram (10193W) ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯30 
+Appendix 17: Type HWV OLTC operating position table and connection diagram (18351W) ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯31 
+Appendix 18: Type HWV OLTC operating position table and connection diagram (18353W) ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯32
+
+===== PAGE 16/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+15
+Appendix 1: HWV Ⅲ -400, 800, 1000 /17.5KV-10 series star connection and 
+delta connection overall dimensions (10193W)
+Unit: mm
+O
+1
+3
+5
+6
+4
+2
+8
+K
+-
++
+7
+9
+2
+8
+K
+4
+6
+O
++
+-
+1
+3
+7
+9
+5
+2
+8
+K
+4
+6
+O
++
+-
+1
+3
+7
+9
+5
+100
+66
+305
+66
+100
+66
+100
+305
+10×122=1220
+1274
+60
+60
+1187
+60
+60
+125
+376
+1225.5
+115
+120
+120
+120
+120
+115
+57
+57
+568.5
+1216
+627
+103
+860
+40×Ø15
+867
+1469
+320
+714
+1599
+Ⅰ
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+15
+175
+120
+120
+175
+16
+632
+105
+10×114=1140
+378
+122
+114
+457
+210
+247
+586
+283
+756
+377.5
+253
+45°
+Ⅰ
+1:3 Connection terminal
+(400A)
+Ⅰ
+1:3 Connection terminal
+(800, 1000A)
+
+===== PAGE 17/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+16
+Appendix 2 HWV Ⅲ -400, 800, 1000 /40.5KV-10 series delta connection 
+overall dimensions(10193W)
+Unit: mm
+O
+1
+3
+5
+6
+4
+2
+8
+K
+-
++
+7
+9
+2
+8
+K
+4
+6
+O
++
+-
+1
+3
+7
+9
+5
+2
+8
+K
+4
+6
+O
++
+-
+1
+3
+7
+9
+5
+100 66
+345
+66
+100
+66
+100
+345
+12×115=1380
+1434
+60
+60
+1187
+60
+60
+125
+376
+1225.5
+115
+120
+120
+120
+120
+115
+57
+57
+568.5
+1216
+627
+103
+900
+44×Ø15
+907
+1629
+360
+794
+1759
+Ⅰ
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+15
+175
+120
+120
+175
+16
+632
+105
+114
+10×114=1140
+418
+115
+756
+377.5
+457
+253
+210
+293
+45°
+586
+303
+Ⅰ
+Ⅰ
+1:3 Connection terminal
+(400A)
+1:3 Connection terminal
+(800, 1000A)
+
+===== PAGE 18/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+17
+Appendix 3 HWV Ⅲ -400, 800, 1000 /72.5KV-10 series delta connection 
+overall dimensions(10193W)
+Unit: mm
+O
+1
+3
+5
+6
+4
+2
+8
+K
+-
++
+7
+9
+2
+8
+K
+4
+6
+O
++
+-
+1
+3
+7
+9
+5
+2
+8
+K
+4
+6
+O
++
+-
+1
+3
+7
+9
+5
+10066
+405
+66
+100
+66
+100
+405
+135
+12×135=1620
+140
+9×140=1260
+503
+1674
+60
+60
+1307
+60
+60
+125
+376
+1345.5
+115
+120
+120
+120
+120
+115
+57
+57
+618.5
+1336
+504
+103
+979
+105
+42×Ø15
+986
+1869
+400
+874
+1999
+Ⅰ
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+15
+175
+120
+120
+175
+16
+692
+279.5
+45°
+556
+263
+443.5
+756
+586
+342.5
+Ⅰ
+Ⅰ
+1:3 Connection terminal
+(400A)
+1:3 Connection terminal
+(800, 1000A)
+
+===== PAGE 19/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+18
+Appendix 4 HWV Ⅲ -400, 800, 1000 /40.5KV-10 series star connection 
+overall dimensions (10193W) 
+Unit: mm
+O
+1
+3
+5
+6
+4
+2
+8
+K
+-
++
+7
+9
+2
+8
+K
+4
+6
+O
++
+-
+1
+3
+7
+9
+5
+2
+8
+K
+4
+6
+O
++
+-
+1
+3
+7
+9
+5
+10066
+315
+66
+100
+66
+100
+315
+12×110=1320
+1374
+60
+60
+1187
+60
+60
+125
+376
+1225.5
+115
+120
+120
+120
+120
+115
+57
+57
+568.5
+44×Ø15
+907
+1569
+360
+764
+1699
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+15
+175
+120
+120
+175
+632
+105
+114
+10×114=1140
+413
+110
+45°
+293
+210
+253
+457
+377.5
+756
+16
+Ⅰ
+900
+103
+627
+1216
+586
+303
+
+===== PAGE 20/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+19
+ Appendix 5 HWV Ⅲ -400, 800, 1000 /72.5KV-10 series star connection 
+overall dimensions (10193W)
+Unit: mm
+O
+1
+3
+5
+6
+4
+2
+8
+K
+-
++
+7
+9
+2
+8
+K
+4
+6
+O
++
+-
+1
+3
+7
+9
+5
+2
+8
+K
+4
+6
+O
++
+-
+1
+3
+7
+9
+5
+10066
+315
+66
+100
+66
+100
+315
+120
+12×120=1440
+140
+9×140=1260
+413
+1494
+60
+60
+1307
+60
+60
+125
+302.5
+1345.5
+115
+120
+120
+120
+120
+115
+57
+57
+618.5
+105
+42×Ø15
+986
+1689
+400
+784
+1819
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+15
+175
+120
+120
+175
+692
+756
+443.5
+263
+556
+45°
+279.5
+16
+Ⅰ
+979
+103
+504
+1336
+586
+342.5
+Ⅰ
+Ⅰ
+1:3 Connection terminal
+(400A)
+1:3 Connection terminal
+(800, 1000A)
+
+===== PAGE 21/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+20
+ Appendix 6: HWV Ⅲ -400, 800, 1000A /17.5KV-18 series star connection and 
+delta connection overall dimensions (18353W)
+Unit: mm
+14
+8
+2
+4
+10
+16
+K
+12
+6
+-
++
+O
+13
+7
+1
+3
+9
+15
+17
+11
+5
+14
+8
+2
+16
+10
+4
+6
+12
+K
+O
+-
++
+1
+3
+5
+7
+9
+11
+13
+15
+17
+14
+8
+2
+16
+10
+4
+6
+12
+K
+O
+-
++
+1
+3
+5
+7
+9
+11
+13
+15
+17
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+113
+12×113=1356
+1419
+125
+376
+40×Ø15
+343.5
+100
+100
+340
+100
+100
+100100
+340
+90
+90
+235
+235
+90
+90
+114
+50
+1744
+605.5
+105
+60
+60
+60
+60
+134.5
+8×134.5=1076
+1138
+1174.5
+1614
+320
+786
+627
+860
+103
+16
+1157.5
+Ⅰ
+261.5
+867
+457
+253
+347
+253
+45°
+756
+586
+305.5
+Ⅰ
+Ⅰ
+1:3 Connection terminal
+(400A)
+1:3 Connection terminal
+(800, 1000A)
+
+===== PAGE 22/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+21
+Appendix 7: HWV Ⅲ -400, 800, 1000A/40.5KV-18 series delta connection 
+overall dimensions (18353W)
+Unit: mm
+17
+15
+13
+11
+9
+7
+5
+3
+1
++
+-
+O
+K
+12
+6
+4
+10
+16
+2
+8
+14
+17
+15
+13
+11
+9
+7
+5
+3
+1
++
+-
+O
+K
+12
+6
+4
+10
+16
+2
+8
+14
+5
+11
+17
+15
+9
+3
+1
+7
+13
+O
++
+-
+6
+12
+K
+16
+10
+4
+2
+8
+14
+667
+900
+103
+16
+1157.5
+Ⅰ
+1774
+1174.5
+1138
+8×134.5=1076
+134.5
+60
+60
+60
+60
+105
+605.5
+1904
+50
+114
+90
+90
+235
+235
+90
+90
+380
+100
+100
+100 100
+380
+100100
+40×Ø15
+376
+125
+1579
+866
+360
+126.5
+12×126.5=1518
+383.5
+907
+246.5
+563
+45°
+226
+325.5
+586
+345.5
+756
+293
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+Ⅰ
+Ⅰ
+1:3 Connection terminal
+(400A)
+1:3 Connection terminal
+(800, 1000A)
+
+===== PAGE 23/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+22
+Appendix 8: HWV Ⅲ -400, 800, 1000A /72.5KV-18 series delta 
+connection overall dimensions (18353W)
+Unit: mm
+45°
+443.5
+12×146.5=1758
+400
+986
+1819
+125
+376
+40×Ø15
+100
+100
+440
+100
+100
+100100
+440
+90
+90
+235
+235
+90
+90
+114
+50
+2144
+665.5
+105
+60
+60
+60
+60
+149.5
+8×149.5=1196
+1258
+1294.5
+2014
+Ⅰ
+1277.5
+16
+103
+979
+504
+301.5
+986
+146.5
+556
+263
+405.5
+756
+586
+365
+14
+8
+2
+4
+10
+16
+K
+12
+6
+-
++
+O
+13
+7
+1
+3
+9
+15
+17
+11
+5
+14
+8
+2
+16
+10
+4
+6
+12
+K
+O
+-
++
+1
+3
+5
+7
+9
+11
+13
+15
+17
+14
+8
+2
+16
+10
+4
+6
+12
+K
+O
+-
++
+1
+3
+5
+7
+9
+11
+13
+15
+17
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+Ⅰ
+Ⅰ
+1:3 Connection terminal
+(400A)
+1:3 Connection terminal
+(800, 1000A)
+
+===== PAGE 24/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+23
+ Appendix 9: HWV Ⅲ -400, 800, 1000A /40.5KV-18 series star connection 
+overall dimensions (18353W)
+Unit: mm
+17
+15
+13
+11
+9
+7
+5
+3
+1
++
+-
+O
+K
+12
+6
+4
+10
+16
+2
+8
+14
+17
+15
+13
+11
+9
+7
+5
+3
+1
++
+-
+O
+K
+12
+6
+4
+10
+16
+2
+8
+14
+5
+11
+17
+15
+9
+3
+1
+7
+13
+O
++
+-
+6
+12
+K
+16
+10
+4
+2
+8
+14
+1714
+1174.5
+1138
+8×134.5=1076
+134.5
+60
+60
+60
+60
+105
+605.5
+1844
+50
+114
+90
+90
+235
+235
+90
+90
+350
+100
+100
+100100
+350
+100100
+40×Ø15
+302.5
+125
+1519
+836
+360
+121.5
+12×121.5=1458
+353.5
+907
+756
+345.5
+226
+45°
+563
+246.5
+Ⅰ
+1157.5
+16
+103
+900
+667
+586
+325.5
+293
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+Ⅰ
+Ⅰ
+1:3 Connection terminal
+(400A)
+1:3 Connection terminal
+(800, 1000A)
+
+===== PAGE 25/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+24
+Unit: mm
+Appendix 10: HWV Ⅲ -400, 800, 1000A /72.5KV-18 series star 
+connection overall dimensions (18353W)
+Unit: mm
+353.5
+12×131.5=1578
+400
+896
+1639
+125
+376
+40×Ø15
+100
+100
+350
+100
+100
+100100
+440
+90
+90
+235
+235
+90
+90
+114
+50
+1964
+665.5
+105
+60
+60
+60
+60
+149.5
+8×149.5=1196
+1258
+1294.5
+1834
+986
+131.5
+756
+405.5
+263
+556
+301.5
+504
+979
+103
+16
+1277.5
+Ⅰ
+45°
+586
+365
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+Ⅰ
+Ⅰ
+1:3 Connection terminal
+(400A)
+1:3 Connection terminal
+(800, 1000A)
+14
+8
+2
+4
+10
+16
+K
+12
+6
+-
++
+O
+13
+7
+1
+3
+9
+15
+17
+11
+5
+14
+8
+2
+16
+10
+4
+6
+12
+K
+O
+-
++
+1
+3
+5
+7
+9
+11
+13
+15
+17
+14
+8
+2
+16
+10
+4
+6
+12
+K
+O
+-
++
+1
+3
+5
+7
+9
+11
+13
+15
+17
+
+===== PAGE 26/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+25
+Unit: mm
+Appendix 11: HWV Ⅰ -400, 800, 1000 A/40.5KV-18 series overall 
+dimensions (18353W)
+13
+15
+17
+7
+9
+11
+1
+3
+5
+14
+8
+2
+4
+6
+10
+12
+K
+16
+O
+-
++
+134
+90
+90
+235
+120 120
+235
+90
+90
+67
+40×Ø15
+134.5
+8×134.5=1076
+1138
+1174.5
+1224
+105
+60
+60
+60
+60
+30.5
+104.5
+8×104.5=836
+899
+125
+376
+605.5
+Ⅰ
+676
+16
+103
+900
+45°
+1157.5
+293
+563
+226
+246.5
+345.5
+756
+907
+247
+541
+325.5
+586
+1094
+36
+Ø22
+Ø11
+41
+36
+41
+Ø22
+Ø11
+22
+Ⅰ
+Ⅰ
+1:3 Connection terminal
+(400A)
+1:3 Connection terminal
+(800, 1000A)
+
+===== PAGE 27/34 =====
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+26
+HM0.460.5001 
+Appendix 12: Type HWV OLTC operating position table and 
+connection diagram (10070) 
+4
+7
+7
+1
+2
+3
+4
+5
+6
+7
+7
+6
+5
+4
+3
+2
+1
+1
+2
+3
+4
+5
+6
+7
+5
+O
+1
+3
+6
+4
+2
+7
+U2
+U1
+A
+Diverter switch
+Upper layer 
+connection terminal
+Lower layer 
+connection terminal
+Operation position number
+Drawing is shown at the set position
+Tap position display
+Tap position display
+Different voltage number
+Set position
+
+===== PAGE 28/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+27
+Appendix 13: Type HWV OLTC operating position table and 
+connection diagram (10071)
+7
+7
+4
+1
++
+-
+K
+K
+2
+3
+4
+O
+2
+4
+3
+K
+2
+-
++
+1
+3
+U 2
+U1
+A
+U2
+U1
+Diverter switch
+Upper layer 
+connection terminal
+Lower layer 
+connection terminal
+Operation position number
+Please connect 1 and “-”, 4 and “+”, 2 and 2, 3 and 3 with wires
+Different voltage number
+Set position
+
+===== PAGE 29/34 =====
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+28
+HM0.460.5001  
+Appendix 14: Type HWV OLTC operating position table and 
+connection diagram (10091W) 
+5
+9
+9
+3
+4
+7
+6
+K -
++
+K
+1
+2
+4
+5
+3
+2
+2
+1
+K
+3
+4
+5
+9
+8
+O
+2
+4
+1
+5
+3
+K
+3
+-
++
+2
+4
+U 2
+U1
+A
+5
+4
+3
+2
+1
+K
+K
+-
++
+1
+U
+2
+U
+Diverter switch
+Upper layer connection terminal
+Lower layer 
+connection terminal
+Operation position number
+Please connect 1 and “-”, 5 and “+”, 2 and 2, 3 and 3, 4 and 4 with wires
+Different voltage number
+Set position
+Tap selector contact 
+Tap position display
+Drawing is shown at the set position
+
+===== PAGE 30/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+29
+ Appendix 15: Type HWV OLTC operating position table and 
+connection diagram (10191W) 
+10
+19
+19
+5
+O
+1
+3
+6
+4
+2
+K
+8
+-
++
+7
+9
+U2
+U1
+A
+19
+18
+1
+2
+3
+4
+5
+6
+7
+8
+14
+13
+12
+11
+10
+K
+9
+15
+16
+17
+9
+8
+7
+6
+5
+4
+3
+2
+1
+9
+8
+7
+6
+5
+4
+3
+2
+1
+K+
+-
+K
+9
+8
+7
+6
+5
+4
+3
+2
+K
+K
+-
++
+U2
+U1
+1
+Diverter switch
+Upper layer 
+connection 
+terminal
+Lower layer 
+connection 
+terminal
+Operation position number
+Different voltage number
+Set position
+Tap selector contact 
+Tap position display
+Drawing is shown at the set position
+Drawing is shown at the set position
+
+===== PAGE 31/34 =====
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+30
+HM0.460.5001 
+Appendix 16: Type HWV OLTC operating position table and 
+connection diagram (10193W) 
+9b
+19
+17
+1
++
+-
+K
+K
+2
+3
+4
+5
+6
+7
+8
+9
+K-
++
+K
+1
+2
+3
+4
+5
+6
+7
+8
+9b
+9a
+1
+2
+3
+4
+5
+6
+7
+8
+9
+17
+16
+15
+9
+K
+9c
+10 11 12 13 14
+8
+7
+6
+5
+4
+3
+2
+1
+5
+O
+1
+3
+6
+4
+2
+K
+8
+-
++
+7
+9
+U2
+U1
+A
+1
+U
+2
+U
+Diverter switch
+Upper layer 
+connection 
+terminal
+Lower layer 
+connection 
+terminal
+Operation position number
+Please connect 1 and “-”, 9 and “+” with wires
+Different voltage number
+Set position
+Tap selector contact 
+Tap position display
+Drawing is shown at the set position
+Drawing is shown at the set position
+
+===== PAGE 32/34 =====
+HM0.460.5001
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+31
+Appendix 17: Type HWV OLTC operating position table and 
+connection diagram (18351W)  
+Unit: mm
+18
+22 23
+25
+24
+20 21
+19
+18
+28 29
+31
+30
+33
+32
+27
+26
+35
+34
+1
+14 15
+17
+16
+12 13
+11
+9 10
+5
+6
+8
+7
+3
+4
+2
+k
+2
+4
+3
+7
+8
+6
+5
+10
+9
+11
+13
+12
+16 17
+15
+14
+14 15
+17
+16
+12 13
+11
+9 10
+5
+6
+8
+7
+3
+4
+2
+4
+3
+2
+1
+17
+K-
+K+
+1
+K
+-
++
+K
+14
+15
+16
+1
+35
+35
+5
+11
+17
+15
+9
+3
+1
+7
+13
+O
++
+-
+6
+12
+K
+16
+10
+4
+2
+8
+14
+A
+1
+U
+2
+U
+1
+U2
+U
+Diverter switch
+Upper layer connection terminal
+Lower layer connection terminal
+Operation position number
+Different voltage number
+Set position
+Tap selector contact 
+Tap position display
+Drawing is shown at the set position
+
+===== PAGE 33/34 =====
+TYPE HWV EXTERNALLY-MOUNTED VACUUM OLTC TECGNICAL DATA
+32
+HM0.460.5001 
+Appendix 18: Type HWV OLTC operating position table and 
+connection diagram (18353W) 
+17b
+20 21
+23
+22
+18 19
+17c
+17b
+26 27
+29
+28
+31
+30
+25
+24
+33
+32
+1
+14 15
+17
+16
+12 13
+11
+9 10
+5
+6
+8
+7
+3
+4
+2
+k
+2
+4
+3
+7
+8
+6
+5
+10
+9
+11
+13
+12
+16 17a
+15
+14
+14 15
+17
+16
+12 13
+11
+9 10
+5
+6
+8
+7
+3
+4
+2
+K-
+K+
+1
+1
+33
+35
+U
+2
+U
+16
+15
+14
+K
++
+-
+K
+17
+1
+2
+3
+4
+1
+U2
+U1
+A
+14
+8
+2
+4
+10
+16
+K
+12
+6
+-
++
+O
+13
+7
+1
+3
+9
+15
+17
+11
+5
+Diverter switch
+Upper layer connection terminal
+Lower layer connection terminal
+Operation position number
+Different voltage number
+Set position
+Tap selector contact 
+Tap position display
+Drawing is shown at the set position
+
+===== PAGE 34/34 =====
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+Address:977 Tong Pu Road,Shanghai,P.R.China 200333
+Tel:+86 21 5270 3965(direct)
++86 21 5270 8966 Ext.
+8688/8123/8698/8158/8110/8658
+Fax:+86 21 5270 2715
+Web:www.huaming.com
+E-mail:export@huaming.com

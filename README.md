@@ -1,48 +1,30 @@
-# Huaming OLTC Selector · 华明有载开关选型
+# OLTC Selector
 
-Bilingual (EN/中文) web tool that turns transformer / OLTC parameters into a **precise Huaming type designation**, including:
+Minimum-adequate on-load tap-changer **type designation** helper.
 
-- Product family (SHZV, HWV, CM2, CM, CV2, …)
-- Phases · through-current · **Y/D connection**
-- **Um** and **tap selector insulation grade** (B / C / D / DE) where the catalogue uses it
-- Tap code (`10193W` = pitch · positions · mid · W/G)
-- Recommended MDU (CMA7 / SHM-D / …)
+## Stack
 
-Built for **Eric, colleagues, and customers**. **No prices** on the public page.
-
-> Indicative only — final OS / drawings need Huaming engineering confirmation.
-
-## Data sources
-
-- `HOW TO SELECT TAP CHANGER` decision tree  
-- Type designation figures in SHZV / HWV technical data (HM0.154…)  
-- Catalogue currents & Um from Base Price List structure (models only, not selling prices)
+- **Next.js 15** (App Router) + **React 19** + **Tailwind CSS v4**
+- Engine: pure TS in `lib/` (`catalog`, `engine`, `tapCode`)
 
 ## Dev
 
 ```bash
 npm install
-npm run dev
-# http://localhost:5173
-```
-
-```bash
+npm run dev    # http://127.0.0.1:5173
 npm test
 npm run build
 ```
 
-## Live
+## Form semantics
 
-**Production:** https://oltc-selector.vercel.app
+| Field | Meaning |
+|-------|---------|
+| **调压方式** | Tap-winding scheme: linear (0) / reversing (W) / coarse-fine (G) |
+| **开关连接方式** | OLTC application: Y star-neutral / D delta-or-any — **not** Dyn11 |
+| **Um / Ust** | Catalogue dropdowns |
+| **± 级数** | Only for W/G; linear uses **positions** only |
 
-## Deploy
+## Selection rule
 
-Static Vite build (`dist/`). Linked to Vercel project `oltc-selector` (GitHub auto-deploy on push). `base: "./"` for project pages.
-
-## Privacy
-
-All selection runs in the browser. No backend, no telemetry.
-
-## License
-
-Private / internal Huaming sales productivity tool unless otherwise approved.
+Lowest catalogue type that meets the duty (compound before combined, CM2 before SHZV when both fit).

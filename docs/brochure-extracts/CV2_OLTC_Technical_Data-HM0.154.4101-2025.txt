@@ -1,0 +1,805 @@
+
+===== PAGE 1/44 =====
+Caution:
+For safe and proper use, 
+follow these instructions.
+Retain for future reference.
+CV2 Type 
+Oil-Immersed 
+Vacuum On-Load Tap-Changer
+Technical Data
+HM 0.154.5601-08.15/2024
+
+===== PAGE 2/44 =====
+
+===== PAGE 3/44 =====
+…
+	
+…
+	
+…
+	
+…
+I
+HM 0.154.5601
+…
+TABLE OF CONTENTS
+	
+…
+	
+…
+	
+…
+	
+…
+	
+…
+	
+…
+	
+…
+	
+…
+1. General…………………………………………………………………………………………………… 01
+2. Technical Specifications ………………………………………………………………………… 02
+3. Model Designation ………………………………………………………………………………… 03
+…
+3.1
+Model Designation Structure …………………………………………………………………………………………………………………… 03
+3.2
+Tap Selector Basic Connection Types ……………………………………………………………………………………………………… 03
+3.3
+Basic Wiring Diagram ……………………………………………………………………………………………………………………………… 03
+	
+…
+	
+…
+4. Technical Performance Parameters………………………………………………………… 05
+…
+4.1
+Rated Step Capacity (PStn) ……………………………………………………………………………………………………………………… 05
+4.2
+Breaking Capacity……………………………………………………………………………………………………………………………………… 05
+4.3
+Short-Circuit Withstand Capability …………………………………………………………………………………………………………… 05
+4.4
+Operating Conditions ……………………………………………………………………………………………………………………………… 06
+4.5
+Voltage Gradient Across Components of the Selector Switch………………………………………………………………… 06
+4.6
+Internal Insulation Level …………………………………………………………………………………………………………………………… 07
+4.7
+Insulation Level to Ground ……………………………………………………………………………………………………………………… 08
+4.8
+Installation Method…………………………………………………………………………………………………………………………………… 08
+	
+…
+	
+…
+5. Special Designs ……………………………………………………………………………………… 09
+6. Motor Drive Unit…………… ………………………………………………………………………… 10 
+7. Tap Changer Controller………… ………………………………………………………………… 11
+…
+7.1
+SHM-K Remote Digital Controller …………………………………………………………………………………………………………… 11
+7.2
+HMC-3C On-Load Tap Changer Position Indicator ………………………………………………………………………………… 11
+8. Tap Changer Accessories ………………………………………………………………………… 12
+9. Appendix…………………………………………………………………………………………………
+8.1
+Bevel Gearbox…………………………………………………………………………………………………………………………………………… 12 
+8.2
+Protective Relay………………………………………………………………………………………………………………………………………… 12
+13
+
+===== PAGE 4/44 =====
+01
+1. General
+The CV2 type oil-immersed vacuum on-load tap-changer (hereinafter referred to as "OLTC") is an improved 
+vacuum composite product, suitable for oil-immersed transformers with a maximum system voltage of 40.5 kV to 
+145 kV, a maximum rated through-current of 600 A, and a rated frequency of 50 Hz or 60 Hz. It complies with the 
+requirements of GB/T 10230.1-2019 and IEC 60214-1:2014, "Tap-changers – Part 1: Performance requirements 
+and test methods."
+The OLTC is mounted on the transformer tank cover via a mounting flange.
+The OLTC is driven by a motor drive unit (MDU). It connects to the MDU via a Top gearbox, a Driving shaft, and a 
+Bevel gearbox, enabling manual or electric tap-changing operations, either locally or remotely.
+The OLTC is available in three connection types: three-phase wye (star) neutral, three-phase delta, and single-
+phase. The basic connection diagrams are shown in Figure 1-1:
+a)  Linear Adjust
+b) Reversing Adjust
+c) Coarse/Fine Adjust
+Figure 1-1 Basic Winding Connection for Voltage Regulation
+
+===== PAGE 5/44 =====
+02
+2. Technical Specifications
+The OLTC conforms to IEC 60214-1:2014 and GB/T 10230.1-2019 standards. Its technical parameters are listed 
+in Table 2-1.
+Table 2-1 Technical Data for On-Load Tap-Changers
+Type
+CV2 III 350
+CV2 III 600
+Max. Rated Through Current (A)
+350
+600
+Phase
+I
+III
+III
+I
+III
+III
+Connection
+-
+Y
+D
+-
+Y
+D
+Max. Rated Step Voltage (V)
+2000 for 10 contacts
+1500 for 12 contact
+2000 for 10 contacts
+1500 for 12 contact
+Rated Step Capacity (kVA)
+700
+800
+Short circuit capacity 
+(kA)
+ Thermal(3s)
+5
+8
+Dynamic (peak)
+12.5
+20
+Max. operating positions
+12 without change-over selector; 23 
+with change-over selector
+12 without change-over selector; 23 
+with change-over selector
+Insulation
+level to earth (kV)
+The highest voltage for
+equipment (kV)
+40.5
+72.5
+126
+145
+Rated separate source
+AC withstand voltage
+(kV/50Hz, 1min)
+95
+140
+230
+275
+Rated lightning impulse
+withstand voltage- full wave
+(1.2/50μs)
+250
+350
+550
+650
+Rated lightning impulse
+withstand voltage-chop wave
+(3~6μs)
+275
+285
+605
+715
+Mechanical life
+1,500,000
+ Maintenance free
+300,000
+Oil compartment
+Service pressure
+0.03MPa
+Leakage test
+0.1MPa 24h No leakage
+Over pressure
+protection
+ Rupture disc bursts at 0.3±20%MPa
+ Protective relay
+Set oil flow speed at 1.0m/s±10%
+Motor drive unit
+SHM or CMA7
+
+===== PAGE 6/44 =====
+	
+03
+HM 0.154.5601
+3. Model Designation
+3.1 Model Designation Structure
+OLTC models vary based on the number of phases, maximum rated through-current, maximum system voltage, 
+and connection type. The model designation clearly indicates these parameters. See Figure 3-1 for a detailed 
+explanation of each code.
+	
+Figure 3-1 OLTC Model Designation Structure
+Figure 3-2 Basic Connection of Selector Switch
+3.2 Selector Switch Basic Connection Types
+Selector switches are available in various specifications, depending on the voltage regulation range and winding 
+connection of the transformer. The selector switch specification is defined by the number of selector switch 
+contacts, number of Operation position number, number of intermediate positions, and the type of Change-over 
+selector. The representation of each parameter in the selector switch Product model designation is shown in 
+Figure 3-2.
+	
+3.3 Basic Wiring Diagram
+Different tapping arrangements of the transformer regulating winding correspond to different basic wiring 
+diagrams for the OLTC. Figure 3-3 shows common basic wiring diagrams. Special designs are available for 
+specific user requirements.
+
+===== PAGE 7/44 =====
+04
+Figure 3-3 Basic Wiring Diagram of On-Load Tap-Changer
+
+===== PAGE 8/44 =====
+05
+4. Technical Performance Parameters
+4.1	 Rated Step Capacity (PStn)
+Step capacity is defined as the product of the step voltage and the load current, i.e., Ps = UI.  Rated step capacity 
+is the maximum step capacity of the OLTC under continuous operation, i.e., PStn = Iux × Ui. See Figure 4-1 for 
+rated step capacities.
+Figure 4-1 Rated Switching Capacity of Three-Phase On-Load Tap-Changer (Iu, Ui)
+4.2 Breaking Capacity
+Breaking capacity (Pstmax) is the maximum switching capacity under load that can be safely interrupted. 
+According to IEC 60214-1:2014, the breaking capacity must be at least twice the rated switching capacity (Pstn), 
+i.e., twice the maximum rated through-current (Ium) at the relevant rated step voltage (Ui).
+4.3 Short-Circuit Withstand Capability
+According to IEC 60214-1:2014 , all continuously current-carrying contacts of the OLTC must withstand a short-
+circuit current for 2 s (±10%) without welding, deformation, or mechanical damage. The initial peak current must 
+be 2.5 (±5%) times the RMS value of the rated short-circuit current. Refer the short circuit test current values to 
+Table 1.
+
+===== PAGE 9/44 =====
+	
+HM 0.154.5601
+4.4 Operating Conditions
+1. The operating temperature range for the OLTC in oil is -25 °C to +105 °C.
+2. The ambient temperature range for the OLTC installation location is -25 °C to +40 °C.
+3. After installation on the transformer, the verticality of the OLTC to the ground should not exceed 2%.
+4. The installation location must be free of heavy dust and explosive or corrosive gases.
+Note: For more severe environmental conditions for the OLTC or MDU, contact Huaming's technical department
+for confirmation.
+4.5 Voltage Gradient Across Components of the Selector Switch
+a1 = Between tap selector contacts (connected or unconnected) at any tap position.
+a = Between the start and end of the tap winding. If a coarse tap winding is present, it is also 
+between the start and end of the coarse tap winding.
+Note: When the coarse tap is in the Change-over selector (-) position: The permissible withstand 
+voltage value "a" must be observed between the end of the coarse tap winding connected to the 
+tap selector K-contacts and the tap selector contacts located at the end of the same tap winding, 
+when subjected to impulse voltages.
+b = Between tap selector contacts of different phases, and also between Change-over selector 
+contacts of different phases. This gap is connected to the start (or end) of the tap winding or to 
+one of the tap selector contacts.
+The permissible voltage between the delta-connected tap changer contacts varies with the 
+position of the Change-over selector and the tap selector. Therefore, different withstand voltage 
+values for b1, b2, and b3 must be observed for this insulation gap:
+b1 = Between selected contacts of different phases;
+b2 = Between the selected contact of one phase and the unselected contact of another phase;
+b3 = Between unselected contacts of different phases.
+f = Between tap selector contacts and Change-over selector (+) contacts to ground.
+Two values are used for the delta connection design:
+f1 = Between the terminals and ground when the Change-over selector is in the (+) position, and 
+between the Change-over selector (+) contacts and ground;
+f2 = Between tap selector unselected contacts when the Change-over selector is in the (-) position, 
+and between the Change-over selector (+) contacts and ground.
+Additionally, when the coarse tap winding is located in the (+) position of the Change-over selector:
+c1 = Between the (-) contacts of the Change-over selector and the terminals of the same phase.
+c2 = Between the (-) contacts of the Change-over selector of a different phase, and between the (-) 
+contact of the Change-over selector and the (+) contact of the Change-over selector of the other 
+phase.
+The following different permissible values are used for the delta-connected switches:
+c21 = Between the Change-over selector (-) contact and the (+) contact of the Change-over selector 
+of the other phase;
+c22 = Between the Change-over selector (-) contacts of different phases.
+Figure 4-2 Voltage Gradient at Each Location
+06
+
+===== PAGE 10/44 =====
+07
+4.6	 Internal Insulation Level
+The internal insulation level of the OLTC (see Table 4-1) is related to the basic voltage regulation method (see 
+Figure 4-2). It must be verified during OLTC selection to ensure that the internal insulation level meets the 
+withstand voltage requirements.
+Table 4-1 Internal Insulation Level (kV)
+Insulation 
+Distance 
+Symbol
+Switch Type
+Test Method
+III 350/600A (D)
+III 350/600A (Y)
+a
+10 Contacts
+kV 1.2/50μs
+200
+kV 50Hz 1min
+50
+12 Contacts
+kV 1.2/50μs
+200
+kV 50Hz 1min
+60
+a1
+10 Contacts
+kV 1.2/50μs
+200
+kV 50Hz 1min
+50
+12 Contacts
+kV 1.2/50μs
+200
+kV 50Hz 1min
+50
+b
+b1
+b2
+b3
+40.5 kV
+kV 1.2/50μs
+200
+250
+300
+kV 50Hz 1min
+70
+80
+90
+72.5 kV
+kV 1.2/50μs
+350
+490
+520
+kV 50Hz 1min
+140
+165
+180
+126 kV
+kV 1.2/50μs
+550
+570
+600
+kV 50Hz 1min
+230
+240
+250
+145 kV
+kV 1.2/50μs
+650
+730
+800
+kV 50Hz 1min
+275
+285
+300
+C1
+40.5 kV
+72.5 kV
+kV 1.2/50μs
+400
+400
+kV 50Hz 1min
+100
+100
+126 kV
+kV 1.2/50μs
+470
+470
+kV 50Hz 1min
+120
+120
+145 kV
+kV 1.2/50μs
+500
+500
+kV 50Hz 1min
+130
+130
+C2
+C21
+C22
+40.5 kV
+kV 1.2/50μs
+250
+300
+200
+kV 50Hz 1min
+80
+90
+85
+72.5 kV
+kV 1.2/50μs
+490
+520
+200
+kV 50Hz 1min
+165
+180
+85
+126 kV
+kV 1.2/50μs
+570
+600
+200
+kV 50Hz 1min
+240
+250
+85
+145 kV
+kV 1.2/50μs
+730
+800
+200
+kV 50Hz 1min
+285
+300
+85
+
+===== PAGE 11/44 =====
+08
+Insulation 
+Distance 
+Symbol
+Switch Type
+Test Method
+III 350/600A (D)
+III 350/600A (Y)
+f
+f1
+f2
+40.5 kV
+kV 1.2/50μs
+200
+250
+200
+kV 50Hz 1min
+85
+85
+85
+72.5 kV
+kV 1.2/50μs
+350
+490
+350
+kV 50Hz 1min
+140
+165
+140
+126 kV
+kV 1.2/50μs
+550
+570
+550
+kV 50Hz 1min
+230
+240
+230
+145 kV
+kV 1.2/50μs
+650
+730
+650
+kV 50Hz 1min
+275
+285
+275
+4.7	 Insulation Level to Ground
+The insulation level to ground is defined as the insulation between the live parts of the OLTC and grounded 
+components. It is determined by the AC power-frequency one-minute voltage withstand test and the impulse 
+voltage withstand test. It is related to the location of the transformer tap winding, the regulation range and 
+method, the winding connection method and arrangement, and the rated voltage of the transformer windings. 
+It is determined by the insulation level to ground of the transformer regulating winding.
+The insulation level to ground of the OLTC must be selected from the standard values specified in IEC 60214-
+1:2014 and GB/T 10230.1-2019 (see Table 4-2) based on the maximum operating voltage (Um) of the equipment, 
+using the lowest possible insulation value to meet the entire operating range.
+Table 4-2 Insulation Level to Ground
+Maximum System Voltage (Um)
+Rated Applied Withstand Voltage (50 
+Hz, 1 min)
+Rated Lightning Impulse Withstand 
+Voltage (Full Wave, 1.2/50 µs)
+40.5
+95
+250
+72.5
+140
+350
+126
+230
+550
+145
+275
+650
+4.8	 Installation Method
+The OLTC is mounted on the transformer tank cover using a mounting flange. The transformer must be 
+equipped with a mounting flange. See Appendix Figures 9 and 10 for dimensions. For bell-type transformers, 
+the OLTC support flange serves only as temporary support during transformer wiring. After the transformer is 
+installed, the OLTC is secured to the transformer mounting flange.
+
+===== PAGE 12/44 =====
+09
+5. Special Designs
+Potential Connection of Regulating Winding
+In on-load tap-changing transformers with high voltage ratings and large regulating ranges, the regulating 
+winding is momentarily electrically disconnected from the main winding during Change-over selector operation, 
+entering a "floating" state. At this time, the regulating winding will acquire a new potential, determined by 
+the coupling capacitance to ground (Ce) and the coupling capacitance to adjacent windings (Cw) (see Figure 
+5-2). This potential is typically different from the regulating winding potential before the Change-over selector 
+operation. The potential difference between the two is called the offset voltage, which appears as a recovery 
+voltage at the Change-over selector contact break. When the offset voltage reaches a critical value, it can cause a 
+discharge at the Change-over selector, generating a large amount of gas, which is a serious problem. Therefore, 
+if the OLTC offset voltage exceeds 15 kV (RMS), the potential connection of the regulating winding must be 
+considered to prevent discharge during Change-over selector operation.
+To facilitate Huaming's determination of the load on the Change-over selector and the size and number of 
+potential Grading ring resistor elements, the following transformer parameters must be specified during OLTC 
+selection:
+1.	All transformer performance parameters: rated capacity, rated voltage, voltage regulation range, winding 
+connection type, and insulation level;
+2.	Relative arrangement of windings: the relative position of the regulating winding with respect to adjacent 
+windings or winding components;
+3.	The voltage at the terminals adjacent to the regulating winding and the electrical position of that coil in the 
+transformer winding;
+4.	Capacitance between the regulating winding and adjacent winding components;
+5.	Capacitance between the regulating winding and ground or adjacent grounded winding (if present);
+6.	Impulse load across half of the regulating winding;
+7.	Operating and power-frequency test voltages across half of the regulating winding.
+Figure 5-1 Tie-in Resistor Fixed Connection
+Figure 5-2  Arrangement of Reversing Winding in a 
+Two-Winding Transformer
+
+===== PAGE 13/44 =====
+10
+HM 0.154.5601
+6. Motor Drive Unit
+The OLTC is driven by a Motor Drive Unit (MDU). Users can select the appropriate MDU based on the OLTC 
+model. Technical parameters for the MDUs are listed in Table 6-1.
+Table 6-1 Motor Drive Unit Technical Parameters (Partial)
+Motor Drive Unit
+Parameter
+SHM-D
+CMA7
+Motor
+Rated Power (W)
+750
+750
+1100
+Rated Voltage (V)
+200~240 (AC)
+Three-Phase 380 (AC)
+Rated Current (A)
+4
+2.0
+2.8
+Frequency (Hz)
+50 or 60
+50 or 60
+Speed (r/min)
+330 Direct Drive
+1400
+Output Shaft Torque (Nm)
+35 Static Torque
+18
+26
+Rev. of drive shaft/ per switching operation
+33
+33
+Handle Revolutions per Tap Change
+33
+33
+Motorized Operating Time per Tap Change (s)
+Approx. 6
+Approx. 5
+Maximum Number of Operating Positions
+107
+107
+Control Circuit and Heater Voltage (V)
+220 (AC)
+220 (AC)
+Heater Power Consumption (W)
+100
+50
+Auxiliary Circuit Insulation Test (kV/50 Hz, 1 min)
+2
+2
+Weight (kg)
+80
+90
+Ingress protection
+IP66
+IP56
+Mechanical Endurance of MDU
+≥2,000,000
+≥800,000
+
+===== PAGE 14/44 =====
+	
+11
+HM 0.154.5601
+7. Tap Changer Controller
+7.1 SHM-K Remote Digital Controller
+The SHM-K remote digital controller (hereinafter referred to as SHM-K) can be used with the MDU for manual 
+and automatic control of the OLTC. The SHM-K features a color, high-resolution touch screen with a 400 MHz 
+main processor, 256 MB Flash memory, and 64 MB RAM, providing fast operation and large memory capacity. It 
+communicates bidirectionally and digitally with the local control module via fiber optic cable.
+SHM-K Remote Digital Controller Technical Parameters:
+	
+Operating Voltage: 85 V to 264 V (AC), 50/60 Hz; 100 V to 250 V (DC)
+Power Consumption: Approx. 7 W
+Maximum Number of Display position : 107
+Operating Environment: Indoor, 0 °C to 50 °C; Relative Humidity < 95% non-condensing
+7.2 HMC-3C On-Load Tap Changer Position Indicator
+The HMC-3C on-load tap changer position indicator can be used with the MDU's remote position indication 
+circuit to remotely display the tap position. It also provides "1-N", "Stop", and "N-1" functions, outputs BCD code 
+position signals, and includes a remote control indicator.
+HMC-3C Monitor Technical Parameters:
+Operating Voltage: 220 V (AC)
+Operating Frequency: 50 Hz
+Maximum Number of Display position: 107
+Operating Temperature: -10 °C to +40 °C
+Note: Specify any other power supply technical requirements for the controller at the time of order.
+
+===== PAGE 15/44 =====
+	
+12
+HM 0.154.5601
+8. Tap Changer Accessories
+8.1 Bevel Gearbox
+The bevel gearbox connects the horizontal shaft of the OLTC to the vertical shaft of the MDU, transmitting the 
+drive torque to the OLTC. See Appendix Figure 25 for the external dimensions of the bevel gearbox.
+The Protective relay is a protective device used in oil-immersed OLTCs. In the event of gas generation due to 
+oil decomposition caused by an internal fault in the OLTC, or a surge in oil flow, the relay contacts actuate, 
+connecting the designated control circuit and sending a signal or automatically tripping the transformer.
+The Protective relay is installed in the connection pipe between the elbow at the top of the OLTC and the oil 
+conservator, with the arrow on the relay pointing towards the oil conservator. Huaming offers various models of 
+8.2 Protective Relay
+Protective relays. See Appendix Figure 26 for the mounting dimensions of the Protective relay.
+
+===== PAGE 16/44 =====
+13
+9. Appendix
+Figure 1 Outline Dimensions of CV2 Type III 350/600 - 10070 (Tank Top) OLTC………………… 14
+Figure 2 Outline Dimensions of CV2 Type III 350/600 - 10070 (Bell-Type) OLTC………………… 15
+Figure 3 Outline Dimensions of CV2 Type III OLTC with Change-over Selector… ……………… 16
+Figure 4 Outline Dimensions of CV2 Type III OLTC without Change-over Selector… ………… 17
+Figure 5 Outline Dimensions of CV2 Type I OLTC with Change-over Selector… ………………… 18
+Figure 6 Outline Dimensions of CV2 Type I OLTC without Change-over Selector… …………… 19
+Figure 7 Outline Dimensions of CV2 Type III 350/600 - 10071 (10091) OLTC……………………… 20
+Figure 8 Outline Dimensions of CV2 Type III 350/600 - 12111 OLTC… ……………………………… 21
+Figure 9 Mounting Dimensions of CV2 Type Transformer Mounting Flange (Tank Top)… … 22
+Figure 10 Mounting Dimensions of CV2 Type Transformer Mounting Flange (Bell-Type)… 23
+Figure 11 Mounting Dimensions of CV2 Type OLTC (Bell-Type)… ……………………………………… 24
+Figure 12 Mounting Dimensions of Tie-in Resistor… ………………………………………………………… 25
+Figure 13 Top Cover Arrangement of CV2 Type OLTC… …………………………………………………… 26
+Figure 14 Basic Connection Diagram of CV2 Type OLTC 10070… ……………………………………… 27
+Figure 15 Basic Connection Diagram of CV2 Type OLTC 10071W… …………………………………… 28
+Figure 16 Basic Connection Diagram of CV2 Type OLTC 10191W… …………………………………… 29
+Figure 17 Basic Connection Diagram of CV2 Type OLTC 10191G… …………………………………… 30
+Figure 18 Basic Connection Diagram of CV2 Type OLTC 10193W… …………………………………… 31
+Figure 19 Basic Connection Diagram of CV2 Type OLTC 10193G… …………………………………… 32
+Figure 20 Basic Connection Diagram of CV2 Type OLTC 12231W… …………………………………… 33
+Figure 21 Basic Connection Diagram of CV2 Type OLTC 12231G… …………………………………… 34
+Figure 22 Basic Connection Diagram of CV2 Type OLTC 12233W… …………………………………… 35
+Figure 23 Basic Connection Diagram of CV2 Type OLTC 12233G… …………………………………… 36
+Figure 24 Mechanical Interlocking Arrangement of Three OLTCs……………………………………… 37
+Figure 25 Outline Dimensions of Bevel Gearbox… …………………………………………………………… 38
+Figure 26 Outline Dimensions of Protective relay……………………………………………………………… 39
+
+===== PAGE 17/44 =====
+14
+Figure 1 Outline Dimensions of CV2 Type III 350/600 - 10070 (Tank Top) OLTC
+
+===== PAGE 18/44 =====
+15
+Figure 2 Outline Dimensions of CV2 Type III 350/600 - 10070 (Bell-Type) OLTC
+
+===== PAGE 19/44 =====
+16
+Figure 3 Outline Dimensions of CV2 Type III OLTC with Change-over Selector
+
+===== PAGE 20/44 =====
+17
+Figure 4 Outline Dimensions of CV2 Type III OLTC without Change-over Selector
+
+===== PAGE 21/44 =====
+18
+Figure 5 Outline Dimensions of CV2 Type I OLTC with Change-over Selector
+
+===== PAGE 22/44 =====
+19
+Figure 6 Outline Dimensions of CV2 Type I OLTC without Change-over Selector
+
+===== PAGE 23/44 =====
+20
+Figure 7 Outline Dimensions of CV2 Type III 350/600 - 10071 (10091) OLTC
+
+===== PAGE 24/44 =====
+21
+Figure 8 Outline Dimensions of CV2 Type III 350/600 - 12111 OLTC
+
+===== PAGE 25/44 =====
+22
+Figure 9	 Mounting Dimensions of CV2 Type Transformer Mounting Flange 
+(Tank Top)
+
+===== PAGE 26/44 =====
+23
+Figure 10 Mounting Dimensions of CV2 Type Transformer Mounting Flange 
+(Bell-Type)
+
+===== PAGE 27/44 =====
+24
+Figure 11 Mounting Dimensions of CV2 Type OLTC (Bell-Type)
+
+===== PAGE 28/44 =====
+25
+Figure 12 Mounting Dimensions of Tie-in Resistor
+When the tap changer selector is in operation, the tap winding is in a "floating" state. Due to the coupling 
+capacitance Cw between the main winding and the tap winding, and a coupling capacitance Ce between the tap 
+winding and the tank, the Change-over selector generates a spark discharge. To reduce spark discharge gas, 
+fixed Tie-in resistors are employed.
+
+===== PAGE 29/44 =====
+26
+Figure 13 Top Cover Arrangement of CV2 Type OLTC
+
+===== PAGE 30/44 =====
+27
+Figure 14 Basic Connection Diagram of CV2 Type OLTC 10070
+
+===== PAGE 31/44 =====
+28
+Figure 15 Basic Connection Diagram of CV2 Type OLTC 10071W
+
+===== PAGE 32/44 =====
+29
+Figure 16 Basic Connection Diagram of CV2 Type OLTC 10191W
+
+===== PAGE 33/44 =====
+30
+Figure 17 Basic Connection Diagram of CV2 Type OLTC 10191G
+
+===== PAGE 34/44 =====
+31
+Figure 18 Basic Connection Diagram of CV2 Type OLTC 10193W
+
+===== PAGE 35/44 =====
+32
+Figure 19 Basic Connection Diagram of CV2 Type OLTC 10193G
+
+===== PAGE 36/44 =====
+33
+Figure 20 Basic Connection Diagram of CV2 Type OLTC 12231W
+
+===== PAGE 37/44 =====
+34
+Figure 21 Basic Connection Diagram of CV2 Type OLTC 12231G
+
+===== PAGE 38/44 =====
+35
+Figure 22 Basic Connection Diagram of CV2 Type OLTC 12233W
+
+===== PAGE 39/44 =====
+36
+Figure 23 Basic Connection Diagram of CV2 Type OLTC 12233G
+
+===== PAGE 40/44 =====
+37
+Figure 24 Mechanical Interlocking Arrangement of Three OLTCs
+When ordering CV2 three mechanically interlocked switches, select the desired top cover arrangement. 
+Otherwise, it will be produced according to standard drawing C11. For special arrangements, specify 
+requirements at the time of order.
+
+===== PAGE 41/44 =====
+38
+Figure 25 Outline Dimensions of Bevel Gearbox
+
+===== PAGE 42/44 =====
+39
+Figure 26 Outline Dimensions of Protective Relay
+
+===== PAGE 43/44 =====
+
+===== PAGE 44/44 =====
+Shanghai Huaming Power Equipment Co., Ltd.
+Address: No.977 Tongpu Road, Putuo District, Shanghai, China
+Postal Code: 200333
+Tel.: +86 21 5270 8966 (Main line)
+Fax: +86 21 5270 3385

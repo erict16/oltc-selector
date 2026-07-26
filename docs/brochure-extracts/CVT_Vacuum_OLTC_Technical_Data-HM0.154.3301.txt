@@ -1,0 +1,220 @@
+
+===== PAGE 1/10 =====
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+TECHNICAL DATA
+TYPE CVT VACUUM ON-LOAD TAP CHANGER
+FOR DRY TYPE TRANSFORMER
+HM0.154.001
+
+===== PAGE 2/10 =====
+HM0.154.3301
+TYPE CVT VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+1
+General
+1. General⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯2
+2. Technical specification⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯2
+3. Model designation⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯2
+4. Terms and definitions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯2
+5. Installation of CVT OLTCr⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯4
+6. Appendices⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯4
+Appendix 1 CVT OLTC connection principle diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯5
+Appendix 2 CVTIII-160Y(D) / 12-0909, overall and installation dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯6
+Appendix 3 Connection between OLTC and HMJK-10Z AVR  ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯7
+Appendix 4 HMJK-10Z AVR dimensions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯8
+
+===== PAGE 3/10 =====
+HM0.154.3301
+TYPE CVT VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+2
+1. General
+Type CVT vacuum on-load tap changer (hereafter refer as CVT or CVT OLTC) is a combined structure on-load tap 
+changer, It comprises of diverter switch and tap selector. The tap selector changes tap from one to the adjacent 
+without carrying current, and then the diverter switch switches under the load, the vacuum interrupters work as arcing 
+contacts, which enables reliable performance and long life expectancy.   
+CVT OLTC is applicable to dry type transformer with voltage up to 12kV, the max. rated through current 160A, linear 
+regulation up to 9 operation positions, regulation at any winding location of Delta or Start connection. CVT is equipped 
+with HMJK-10Z automatic voltage regulator for manual and automatic operation.   
+2. Technical specifications
+CVT OLTC is designed and manufactured according to IEC60214-1:2003. Please refer  Table 1 on page 3 for the 
+technical specifications.  
+3. Model designation
+CVT Ⅲ -160 □ / 12 - 09 09
+Operation positions (Maximum 9)
+Number of tap selector contact pitch
+The highest voltage for equipment (kV)
+Connection mode	   Y: for neutral point of star connection
+   D: for any selectable winding connection
+Max. rated through current (A)
+No. of phase III: Three phases
+         I: single phase
+Tap changer model
+4. Terms and Definitions
+4.1 Through current 
+Rated through current Iu: 
+The current flowing through an OLTC towards the external circuit, which the apparatus is capable of transferring 
+from one tap to the other at the relevant rated step voltage and which can be carried continuously while meeting the 
+requirement.   
+Max. rated through current Ium:  
+The highest rated through-current for which the tap changer is designed for and which forms the basis for all current 
+related tests.  
+
+===== PAGE 4/10 =====
+HM0.154.3301
+TYPE CVT VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+3
+Table 1 CVT OLTC Technical Specifications
+Note: Please contact with us for special requirement.
+4.2 Step voltage   
+Rated step voltage (Ui) 
+For each value of rated through-current, the highest permissible voltage between terminals which are intended to be 
+connected to successive taps of the transformer. 
+Maximum rated step voltage (Uim) 
+The highest value of the rated step voltage for which the tap-changer is designed. 
+No.
+Type
+CVT
+1
+Number of phase
+3-phases
+2
+Maximum rated through current (A)
+160
+3
+Short-circuit
+current test (kA)
+Thermal stability (3s)
+3
+Dynamic stability (peak value)
+7.5
+4
+Connection
+Y- neutral point
+D-any connection
+5
+Maximum step voltage (V)
+500
+6
+Rated step capacity (kVA)
+80
+7
+Rated frequency (Hz)
+50 or 60
+8
+Max. operation positions
+9
+9
+To ground
+The highest voltage for equipment
+12
+To ground and
+between phases
+Rated separate source AC withstand voltage(kV/50Hz,1min)
+35
+Rated lightning impulse withstand voltage (kV,1.2/50μs)
+75
+Between 
+adjacent taps
+Rated separate source AC withstand voltage(kV/50Hz,1min)
+5
+Rated lightning impulse withstand voltage (kV,1.2/50μs)
+20
+Across the tap
+winding
+Rated separate source AC withstand voltage(kV/50Hz,1min)
+15
+Rated lightning impulse withstand voltage (kV,1.2/50μs)
+50
+10
+Motor
+Power (kW)
+0.37
+Voltage (V)
+220V AC single phase
+Rated current (A)
+2.68
+Rated frequency (Hz)
+50 or 60
+11
+Time for one operation (second)
+4
+12
+Maintenance free (operations)
+100,000
+13
+Mechanical life (operations)
+500,000
+14
+controller
+HMBK-10Z
+15
+Net weight (kg) approx.
+200
+Insulation level (kV)
+
+===== PAGE 5/10 =====
+HM0.154.3301
+TYPE CVT VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+4
+4.3 Step capacity 
+Step capacity is the product of step voltage and load current, that is Ps=UI. Rated step capacity is the maximum 
+permissible step capacity for the tap changer under continuous working condition, that is PstN=Ium×Ui. For a certain 
+range of load, its rated step capacity can be represented by the range curve shown in Fig. 1. This range is defined by 
+the maximum rated through-current on the horizontal axis and maximum permissible step voltage on the vertical axis. 
+Loads within the defined curve is the rated values of the tap changer.  
+Fig1 Correlation between Rated Step Capacity, Step Voltage and Load Current
+4.4 Operation conditions  
+4.4.1. It should be installed in indoor.  
+4.4.2. The ambient air temperature for OLTC is from -25 ℃ to 45℃ . 
+4.4.3. The atmosphere humidity is not higher than 90% at 25℃ . 
+4.4.4. There shall be no gas, steam or chemical dust which may seriously affect the insulation of the tap changer on 
+site, or any explosives gas which may cause the explosion.  
+4.4.5. There shall be no serious vibrations on site.  
+5. Installation of CVT OLTC
+CVT OLTC shall be fixed to the ground by four M12 screws at the bottom. The detailed installation dimensions are 
+shown in Appendix 2  When connecting CVT OLTC to the transformer, note that the connection leads should have sui-
+table length to avoid any force applied to the tap changer, and sufficient insulation distance should be also considered 
+between the leads.   
+After connection, the tap changer should be operated a complete cycle without load, then measure the DC resistance 
+of the winding and perform transformer ratio test. Be sure to check if the real operating position is in accordance with 
+displayed position.   
+6. Appendixes
+
+===== PAGE 6/10 =====
+HM0.154.3301
+TYPE CVT VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+5
+Appendix 1. CVT OLTC connection principle diagram
+
+===== PAGE 7/10 =====
+HM0.154.3301
+TYPE CVT VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+6
+Appendix 2. CVTIII-160Y(D)/12-0909 Overall and installation dimensions
+Unit: mm
+
+===== PAGE 8/10 =====
+HM0.154.3301
+TYPE CVT VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+7
+Appendix 3. Connection between OLTC and HMBK-10Z AVR
+
+===== PAGE 9/10 =====
+HM0.154.3301
+TYPE CVT VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+8
+Appendix 4. HMBK-10Z AVR dimensions
+Unit: mm
+
+===== PAGE 10/10 =====
+69
+TYPE VCM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+HM0.154.5701
+Printing: FEB.2010
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+Address: 977  Tong Pu  Road, Shanghai, P.R.China  200333
+Tel: +86  21 5270 3965(direct)
++86  21 5270 8966 Ext.
+8688/8123/8698/8158/8110/8658
+Fax: +86  21 5270 2715
+Web:www.huaming.com
+E-mail: export@huaming.com

@@ -1,0 +1,1036 @@
+
+===== PAGE 1/70 =====
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+TECHNICAL DATA
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER
+FOR OIL-IMMERSED TRANSFORMER
+HM0.154.5701
+
+===== PAGE 2/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+1
+General
+1. General ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯3 
+2. Technical specification⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯4 
+3. Model designation  ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯5 
+4. Terms and definitions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯7 
+5. Special designs⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯10 
+6. Motor drive unit ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯12 
+7. Controllers for On-Load tap changer ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯13 
+8. OLTC accessories⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯13 
+9. Appendixes⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯14 
+   9.1 CM2 III 500Y/600Y without change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯15
+   9.2 CM2 III 500Y / 600Y with reversing switch, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯16
+   9.3 CM2 III 500Y / 600Y with coarse change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯17
+   9.4 CM2 II 500 / 600 without change-over selector, overall dimensions…⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯18
+   9.5 CM2 II 500 / 600 with reversing switch, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯19
+   9.6 CM2 II 500 / 600 with coarse change-over selector, overall dimensions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯20
+   9.7 CM2 I 500 / 600 without change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯21
+   9.8 CM2 I 500 / 600 with reversing switch, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯22
+   9.9 CM2 I 500 / 600 with coarse change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯23
+   9.10 CM2 I 800 without change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯24
+   9.11 CM2 I 800 with reversing switch, overall dimensions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯25
+   9.12 CM2 I 800 with coarse change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯26
+   9.13 CM2 I 1200 / 1500 without change-over selector, overall dimensions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯27
+   9.14 CM2 I 1200 / 1500 with reversing switch, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯28
+   9.15 CM2 I 1200 / 1500 with coarse change-over selector, overall dimensions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯29
+   9.16 CM2 OLTC mounted with tie-in resistor, overall dimensions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯30
+   9.17 CM2 OLTC General layout Drawing (With insulated bottom)⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯31
+   9.18 CM2 Tap selector contacts arrangement   ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯32
+   9.19 CM2 OLTC head flange for standard tank type, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯33
+   9.20 CM2 OLTC head flange with pressure relief valve, overall dimensions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯34
+   9.21 CM2 OLTC head flange with pressure relief valve, overall dimensions(with raised seat) ⋯⋯⋯⋯⋯⋯⋯⋯⋯35
+   9.22 Transformer connection flange for CM2 OLTC, overall dimensions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯36
+   9.23 CM2 OLTC head flange installation for bell-type, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯37
+   9.24 Upper gear unit, arrangement and swiveling range ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯38
+   9.25-1 CM2 OLTC arrangement drawing-1  ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯39
+   9.25-2 CM2 OLTC arrangement drawing-2  ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯40
+   9.26 CM2 OLTC, general layout drawing  ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯41
+   9.27 Bevel gear unit, overall & installation dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯42
+
+===== PAGE 3/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+2
+9.28 CM2 I 800 / 1200 / 1500 OLTC,
+        parallel connection plate of tap selector terminals, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯43
+9.29 Protective relay, overall & installation dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯44
+9.30 CM2(10070) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯45
+9.31 CM2(10090) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯46
+9.32 CM2(10071W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯47
+9.33 CM2(10091W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯48
+9.34 CM2(10191W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯49
+9.35 CM2(10193W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯50
+9.36 CM2(10191G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯51
+9.37 CM2(10193G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯52
+9.38 CM2(12110) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯53
+9.39 CM2(12111W) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯54
+9.40 CM2(12233W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯55
+9.41 CM2(12233G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯56
+9.42 CM2(14130) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯57
+9.43 CM2(14131W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯58
+9.44 CM2(14273W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯59
+9.45 CM2(14273G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯60
+9.46 CM2(16150) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯61
+9.47 CM2(16151W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯62
+9.48 CM2(16313W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯63
+9.49 CM2(16313G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯64
+9.50 CM2(18170) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯65
+9.51 CM2(18171W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯66
+9.52 CM2(18353W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯67
+9.53 CM2(18353G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯68
+
+===== PAGE 4/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+3
+1. General   
+Type CM2 Vacuum On-Load Tap Changer (hereinafter referred as CM2 or CM2 OLTC) is a typical combined-structure 
+tap changer applicable in oil-immersed transformer, comprising of two major parts: diverter switch and tap selector. 
+The CM2 OLTC is put in transformer oil tank and its diverter switch has a separate oil compartment from transformer 
+tank, while tap selector, together with transformer windings, is completely laid inside the tank. OLTC's installation is 
+divided into two types - standard tank flange and bell-type flange.    
+Three-phase CM2 OLTC could be used at neutral point of star-connection, and a combination of three units of single-
+phase CM2 OLTC  is designed for any selectable winding connection.   
+Basic connections of tap winding as in fig.1  
+a) Without change-over selector
+b) With reversing switch
+Fig.1  Basic Connections of Tap Winding
+c) With coarse tap selector
+a) without change-over selector  
+This linear regulation can be designed by a maximum of 9, 11,13,15 or 17 steps, namely 10, 12,14,16 or 18 operating 
+positions at maximum.   
+b) with change-over selector 
+With reversing switch or coarse tap selector, the regulating range will be doubled to maximum ±9, ±11, ±13, ±15 or 
+±17 steps, namely 19,23,27,31 or 35 operating positions at maximum, when actual positions are less than above 
+mentioned ones, it can be easily realized by passing over continuous operation of motor drive unit or equal potential 
+connection of multiple operating positions.      
+
+===== PAGE 5/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+4
+Tabe1 CM2 Series OLTC Main Technical Specifications
+2. Technical specification  
+Type CM2 OLTC complies with IEC60214-1: 2003 standard, please refer to below table 1.  
+Item
+Specification
+CM2Ⅲ500Y
+CM2Ⅰ500
+CM2Ⅲ600Y
+CM2Ⅰ600
+CM2Ⅰ800
+CM2Ⅰ1200 CM2Ⅰ1500
+1
+Max. rated through-current (A)
+500
+600
+800
+1200
+1500
+2
+Rated frequency
+50 or 60
+3
+Connection
+Three-phases for neutral point of star connection
+Single-phase for any selectable winding connection
+4
+Max. rated step voltage (V)
+3300
+5
+Rated step capacity (kVA)
+1400
+1500
+2000
+3100
+3500
+6
+Short-circuit
+current test (kA)
+Thermal (3s)
+8
+8
+16
+24
+24
+Dynamic (Peak)
+20
+20
+40
+60
+60
+7
+Max. Operating
+Positions
+Without change-over selector
+18 
+With change-over selector
+35 
+8
+Insulation 
+to ground
+(kV)
+Highest voltage for
+equipment Um
+            72.5               126               170               252
+Rated separate source AC
+withstand voltage(kV/50Hz,1min)            140                230               325               460
+Rated lightning impulse
+withstand voltage (kV,1.2/50μs)            350                550               750              1050
+9
+Tap selector
+4 grades of B, C, D and DE according to insulation level
+10
+Mechanical life
+Not less than 1,500,000 operations
+11
+Contact life
+Not less than 600,000 operations
+12
+Oil
+compartment
+of diverter
+switch
+Service pressure
+0.03MPa
+Leakage test
+No leakage under 0.08MPa for 24 hours
+Over pressure protection
+Bursting cap busts at 300 ± 20%kPa
+Protection relay
+Oil flow speed set at 1.0m/s ±10%
+13
+Motor drive unit
+SHM-III or CMA7
+
+===== PAGE 6/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+5
+3. Model designation   
+3.1 Model designation  
+Type CM2 OLTC models varies with number of phase, maximum.rated through current,  the highest voltage for 
+equipment, insulation grade of tap selector and connection mode, etc.The parameters are represented as in Fig.2 
+below.  
+CM2  III - 600  Y  /  126  D - 10193W
+Basic connection diagram of tap selector
+Tap selector insulation grade
+Highest voltage for equipment
+Connection mode: Y for regulation at neutral point
+Max .rated through current
+Number of phase
+Type
+10     19     3     W
+Change-over selector (W: with reversing switch; G: with coarse 
+tap selector)
+Number of Mid-position (divided into 0, 1, 3)
+Max.operating positions (depends on with or without change-over 
+selector, max.up to 107)
+Tap selector pitch (divided into 10, 12, 14, 16, and 18)
+Fig.2 Designation of CM2 OLTC
+Fig.3 Designation of Basic Connection Diagram of Tap Selector
+3.2 Designation of basic connection of tap selector  
+The tap selector may have different spec with respect to the number of the steps required and connection of the 
+tap winding. The basic connection model reflects the relevant pitch of the contact circuit, the number of operating 
+positions, the number of pitches of tap selector, the number of operating positions, the number of mid-positions and 
+change-over selector type. See below Fig.3 for the indications of tap selector model. 
+3.3 Survey of basic connection diagram of tap selector  
+Different numbers of taps correspond to different connection diagram. Fig.4 shows regular basic connection diagrams 
+of the tap selector,  and special design depends on the from customers.  
+
+===== PAGE 7/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+6
+Fig.4 Survey of Basic Connection Diagram of Tap Selector
+
+===== PAGE 8/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+7
+4. Terms and definitions  
+4.1 Through current  
+Rated through current ( Iu) : The current flowing through an on-load tap-changer towards the external circuit, which 
+is capable of transferring from one tap to the other at the relevant rated step voltage and which can be carried 
+continuously while meeting the requirements of the standard.   
+Max. rated though-current (Ium): The highest rated through-current for which the tap-changer is designed for and which 
+is the current reference for all related test.  
+4.2 Step voltage 
+Rated step voltage (Ui): For each rated through-current, the max. permitted voltage between two terminals which 
+connect to two adjacent taps of the transformer.  
+Maximum rated step voltage (Uim): The highest value of the rated step voltage for which the tap-changer is designed. 
+The maximum rated step voltage of type CM2 is 3300 volt.   
+4.3 Rated step capacity Pstn 
+The step capacity equals to the product of step voltage multiplied by current. While the rated step capacity of OLTC is 
+a permissible maximum step capacity during continuous operation. That is Pstn=Ui×Iu, The rated step capacity refers 
+to Fig.5. 
+Fig. 5 Curve of The Rated Step Capacity of CM2 OLTC
+4.4 Breaking capacity  
+The breaking capacity refers to the maximum switching capacity under the safe changeover load, according to 
+IEC60214-1(2003) stipulation, 40-time breaking switches shall be performed at a current corresponding to twice the 
+maximum rated through-current (Ium) and at its relevant rated step voltage(Ui).  
+The breaking capacity of CM2 OLTC: Pstmax = 2Pstn ≈ 2Ium × Ustn   
+Pstn: Rated step capacity   
+Ium: Max. rated through current   
+Ustn: relevant step voltage 
+Ui—— Rated step voltage
+Iu —— Rated through current
+
+===== PAGE 9/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+8
+4.5 Electrical life of vacuum interrupter 
+The electrical life of vacuum interrupter is 600,000 operations.  
+4.6 Short-circuit current test  
+According to IEC 60214-1: 2003, all contacts continuously carrying the current shall be able to withstand 2s (±10%) 
+short circuit test current without melting, deformation or mechanical damage. Meanwhile the starting peak current 
+value shall be 2.5 (±5%) times of the root means square value of rated short circuit test current. Refer the short circuit 
+test current values to Table 1. CM2 Series of OLTC Main Technical Specifications.  
+4.7 Conditions for OLTC's operations  
+4.7.1 Oil temperature for OLTC's operation ranges from -25℃ to 105℃. 
+4.7.2 Ambient air temperature for OLTC's operation ranges from -25℃ to 40℃. 
+4.7.3 The vertical inclination level of OLTC being installed into transformer towards ground should be less than 2%. 
+4.7.4 The installation site should be free of heavy dust, explosive or corrosive gas. 
+Note: Please contact us if special application required.   
+4.8 Internal insulation level  
+The internal insulation of CM2 OLTC is divided into four levels from low to high: B, C, D and DE.The withstand 
+voltage is different between adjacent taps, max. and min. taps and between phases for tap changers with different 
+insulation grade, Fig.6 shows the potential distribution of various parts after tap changer has been connected to 
+voltage regulation winding. Table 2 shows CM2 OLTC power frequency withstand voltages and BIL values according 
+to different insulation distance.   
+4.9 Insulation level to ground  
+The insulation level to ground refers to insulation of OLTC live parts against grounding parts, the rated value of which 
+depends on dielectric tests according to IEC-60214-1(2003), please refer to Table 3.  
+The requirement of insulation to earth for OLTC is relevant to OLTC connection location at transformer tap winding, 
+regulation range and mode, tap winding connection model and structure, as well as the rated voltage of transformer 
+tap winding, anyhow. It is determined by insulation to ground of transformer voltage regulating winding.  
+
+===== PAGE 10/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+9
+10 10 0 … 18 18 0 	 	
+         10 09 1W … 18 17 1W	 	
+         10 19 1G … 18 35 1G
+	
+	
+	
+         10 19 1W … 18 35 1W	 	
+         10 19 3G … 18 35 3G
+	
+	
+	
+         10 19 3W … 18 35 3W	 	
+10 10 0 … 18 18 0 	 	
+         10 09 1W … 18 17 1W	 	
+         10 19 1G … 18 35 1G
+	
+	
+	
+         10 19 1W … 18 35 1W	 	
+         10 19 3G … 18 35 3G
+	
+	
+	
+         10 19 3W … 18 35 3W	 	
+1. Linear regulation
+2. With reversing switch
+3. With coarse change-over selector
+4. Diverter switch
+Fig. 6  The Rated Voltage Stress on Tap Winding
+Explanation of designation code:
+a: across regulation winding for the same phase
+a1: between any selected and preselected taps of the tap selector
+b: between any two taps of different phases
+a0: between any adjacent taps of diverter switch
+c1: between the beginning of coarse tap winding and neutral of fine tap winding of the same phase
+c2: between beginnings of coarse tap winding of different phases
+d: between begining and end of coarse tap winding of the same phase
+SF: spark gap
+
+===== PAGE 11/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+10
+Table 3 Insulation Level to Ground of OLTC
+a0: The inherent insulation level refers to insulation level with spark gap protection when full wave 
+voltage impulse is 130kV, the spark gap will response 100%
+Table 2 CM2 OLTC internal Insulation
+4.10 Installation models  
+Type CM2 OLTC is mounted onto the transformer cover by tap changer head, a mounting flange (see appendix) 
+must be provided by transformer producer for connection. CM2 OLTC is suitable for either standard tank or bell-type 
+mounting. For bell-type tank transformer, the OLTC support flange is supplied as a temporary support, OLTC will be 
+secured onto transformer mounting flange after complete installation of transformer bell-tank.  
+5 Special designs  
+5.1 Potential connection of the tap winding  
+For high voltage or wide regulation range on-load regulating transformer, during the operation of the change-over 
+selector the tap winding is disconnected momentarily from the main winding, the regulating section will be broken 
+away from the main coil and at status of "suspend", thus voltage regulating winding will gain the new potential that 
+depends upon coupling capacities Ce (to ground) and Cw (between adjacent tap winding), refer to Fig.8. Generally 
+this potential is different from the one of voltage regulating winding before change-over selector acting, the difference 
+of them is designated as recovery voltage. This recovery voltage is produced at the breaking point of the separated 
+contacts during the operation of change-over selector. If these differential voltages exceed a certain limit value, it may 
+cause flashover on change-over selector and bring gas, it will be the serious problem. Therefore measures regarding 
+potential connection of the winding must be taken. 
+CM2 OLTC could withstand a limit value of recovery voltage of 35 kV,  when the potential is expected to overrun the 
+limit value, tap winding should be permanently connected to a fixed potential resistance via a tie-in resistor, see Fig.7. 
+For mounting location and dimensions of CM2 OLTC tie-in resistors, please refer to appendix 9.16  
+The highest voltage for equipment
+Um
+Rated separate source AC
+withstand voltage(kV/50Hz,1min)
+Rated lightning impulse withstand
+voltage (1.2/50μs)
+72.5
+140
+350
+126
+230
+550
+170
+325
+750
+252
+460
+1050
+(unit: kV)
+(unit: kV)
+Designation
+code
+Tap selector size B
+Tap selector size C
+Tap selector size D
+Tap selector size DE
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+a
+265
+50
+350
+82
+460
+105
+550
+120
+b
+265
+50
+350
+82
+460
+146
+550
+160
+a0
+90
+20
+90
+20
+90
+20
+90
+20
+a1
+150
+30
+150
+30
+150
+30
+150
+30
+c1
+485
+143
+545
+178
+590
+208
+660
+230
+c2
+495
+150
+550
+182
+590
+225
+660
+250
+d
+265
+50
+350
+82
+460
+105
+550
+120
+
+===== PAGE 12/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+11
+For calculating the change-over selector stress and dimensioning the tie-in resistors, the following details of the 
+transformer specifications required when ordering:  
+a) Complete transformer parameter:  rated capacity, rated voltage, voltage regulating range, winding connection mode, 
+insulation level and so on. 
+b) Arrangement of the windings, i.e. the relative position of the tap winding to the adjacent coil or winding parts 
+c) Operating A.C.voltage across windings or layers of windings adjacent to the tap windings 
+d) Capacitance of the tap winding to adjacent windings(Cw) 
+e) Capacitance of the tap winding to ground or grounded adjacent windings (if exist) (Ce) 
+f) Voltage stress across half the tap winding at lightning impulse voltage test 
+g) A.C.voltage across half the tap winding under operation and test conditions.( Normally derived from order 
+specification sheet for tap changer)  
+Fig.7 Potential Connection by Tie-In Resistor Rp
+Fig.8 Arrangement of Winding and Coupling Capacitance
+5.2 Special CM2 OLTC combinations (3×CM2I or CM2I+CM2II), driven 
+by one or separated motor drive units and used for delta connection of 
+windings or others except neutral point.  
+
+===== PAGE 13/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+12
+Motor drive unit
+SHM-III
+CMA7
+Motor
+Rated power (W)
+750 
+1100
+750 
+1100
+Rated voltage (V)
+380,3AC/N
+380/3AC
+Rated current (A)
+2.1 
+2.8
+2.0 
+2.8
+Rate frequency(Hz)
+50 or 60
+50 or 60
+Rotate speed (r.p.m.)
+1400
+1400
+Rated torque on drive shaft (Nm)
+45 
+66
+18 
+26
+Revolution of the drive shaft per switching operation
+33
+33
+Revolution of the hand crank per switching operation
+33
+33
+Running time per switching operation (S)
+5.6
+About 5
+Max. operation positions
+35
+107
+Voltage for control circuit and heater circuit (V)
+220/AC
+220/AC
+Heater power (W)
+50
+50
+A.C. voltage test to ground (kV/50Hz, 1min)
+2
+2
+Approx. weight (kg)
+73
+90
+Protective degree
+IP66
+IP56
+Mechanical endurance (operations)
+Not less than 2,000,000
+Not less than 800,000
+Table 4  Technical Data of Motor Drive Unit
+Fig.9 Connection Diagram for Multiple CM OLTC Applications
+Note: Please specify if special voltage required for motor, and control & heater circuit.
+Regulating at Coil End of 3-Phase
+Delta Connection
+OLTC Combination
+(CMI+CMII) for the Specific
+Delta Connection
+Regulating at Middle of 3-Phase 
+Delta Connection
+6. Motor drive unit  
+CM2 OLTC may operated by SHM-III or CMA7 motor drive unit according to the requirement, please refer to Table 4 
+for technical data.  
+
+===== PAGE 14/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+13
+7. Controllers for On-Load tap changer  
+7.1 HMK8 controller  
+HMK8 controller is the device for remote control of SHM-III motor drive unit; it realizes OLTC switching operation 
+through SHM-III. HMK8 can display the OLTC switching operation status and tap positions.   
+HMK8 has BCD code position signal output (contact capacity:AC250V/5A or DC30V/5A) and remote control signal 
+input (non potential contact), it can also communicate with host computer via RS485 interface to realize remote 
+supervising of OLTC position.   
+HMK8 main technical data is as below, refer to HMK8 manual for more details.  
+Working voltage: 380V, 3AC/N 
+Power frequency: 50Hz/60Hz 
+Maximum operation positions: 35 
+Environment temperature: -10℃ to 40℃ Indoor   
+7.2 HMC-3C position indicator  
+HMC-3C OLTC position indicator is a support fitting for CMA7 and CMA9 motor drive unit, it can be used to indicate 
+the OLTC step, and has the function of "1-N", "STOP", "N-1" control as well as remote control indicator lamp, its input 
+is decimal code and output is BCD code. Please refer to HMC-3C manual for details.  
+HMC-3C technical data is as below, refer to manual for more details.  
+Working voltage: 220V AC 
+Power frequency: 50/60Hz 
+Maximum operation positions: 107 
+Environment temperature: -10℃ to 40℃ Indoor   
+7.3 Automatic voltage regulator ET-SZ6 and HMK-2A 
+Automatic voltage regulator ET-SZ6 and HMK-2A is adopted for OLTC automatic voltage regulation, ET-SZ6 can be 
+used for parallel operation in model of master and slave, please refer to relevant manual for details.  
+If you have any special technical requirements of above controller, please specify when ordering.  
+8. OLTC accessories  
+8.1 Bevel gear unit  
+Bevel gear unit is used for connection horizontal shaft and vertical shaft between OLTC body and motor drive unit, 
+thus driving torque of motor drive unit can be transmitted to on-load tap changer, the overall dimensions of bevel gear 
+unit is shown on appendix 9.25  
+8.2 Protective relay  
+Protective relay is the one of protective devices for oil-immersed on-load tap changer, when OLTC interior failure 
+produces gas and oil surge, the protective relay contact acts, and switches on to the tripping circuit of the transformer 
+circuit breaker, the transformer will be cut off at once.   
+Protective relay is mounted onto the connection pipe between OLTC head and conservator; make sure that protective 
+relay marked with arrowhead side shall be connected to conservator. Huaming provides two types of protective relay 
+which are QJ4-25 and QJ4-25 A, both of them have gas signal contact and trip contact, especially QJ4-25A can be 
+equipped gas release device to man position. Please refer to Appendix.  
+
+===== PAGE 15/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+14
+8.3 Pressure relief devices  
+Pressure relief valve and pressure release cover is the security protective device for oil-immersed OLTC, when any 
+failure happens inside the OLTC, oil in oil chamber is gasified to produce plenty of gas, thus oil pressure of oil chamber 
+is increased rapidly, OLTC oil compartment will be deform or even explode if the pressure inside is not released in 
+time, therefore, pressure relief device is necessary be installed to avoid failures extending.   
+Pressure relief valve is an auto-sealed valve, when over pressure, the cover is open and pressure will be released, 
+and then it will close again. It can be used repeatedly, and the liquid loss could be controlled to be minimum volume 
+when it is acting.   
+Pressure release cover is the weak portion on the OLTC head cover, once oil chamber pressure exceeds adjusted 
+value, the pressure release cover will be broken, thus over-pressure is released, and OLTC oil compartment is 
+protected.   
+Pressure relief valve is a device for low energy failure, and pressure release cover is the device for high energy failure, 
+whereas most of failure of OLTC body is of high energy failure, so our standard offer is OLTC equipped with pressure 
+release cover, and pressure relief valve is only provided when customer specifies.  
+9. Appendixes 
+
+===== PAGE 16/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+15
+9.1. CM2 III 500Y/600Y without change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 17/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+16
+9.2. CM2 III 500Y / 600Y with reversing switch, overall dimensions
+Unit: mm
+
+===== PAGE 18/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+17
+9.3. CM2 III 500Y / 600Y with coarse change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 19/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+18
+9.4. CM2 II 500 / 600 without change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 20/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+19
+9.5. CM2 II 500 / 600 with reversing switch,overall dimensions
+Unit: mm
+
+===== PAGE 21/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+20
+9.6. CM2 II 500 / 600 with coarse change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 22/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+21
+9.7. CM2 I 500 / 600 without change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 23/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+22
+9.8. CM2 I 500 / 600 with reversing switch, overall dimensions
+Unit: mm
+
+===== PAGE 24/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+23
+9.9. CM2 I 500 / 600 with coarse change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 25/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+24
+9.10. CM2 I 800 without change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 26/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+25
+9.11. CM2 I 800 with reversing switch, overall dimensions
+Unit: mm
+
+===== PAGE 27/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+26
+9.12. CM2 I 800 with coarse change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 28/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+27
+9.13. CM2 I 1200 / 1500 without change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 29/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+28
+9.14. CM2 I 1200 / 1500 with reversing switch, overall dimensions
+Unit: mm
+
+===== PAGE 30/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+29
+9.15. CM2 I 1200 / 1500 with coarse change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 31/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+30
+9.16. CM2 OLTC mounted with tie-in resistor, overall dimensions
+Unit: mm
+
+===== PAGE 32/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+31
+9.17. CM2 OLTC General layout Drawing (With insulated bottom)  
+Unit: mm
+
+===== PAGE 33/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+32
+9.18. CM2 tap selector contacts arrangement
+Unit: mm
+
+===== PAGE 34/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+33
+9.19. CM2 OLTC head flange for standard tank type, overall dimensions
+Unit: mm
+
+===== PAGE 35/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+34
+9.20. CM2 OLTC head flange with pressure relief valve, overall dimensions
+Unit: mm
+
+===== PAGE 36/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+35
+Unit: mm
+9.21. CM2 OLTC head flange with pressure relief valve, 
+overall dimensions(with raised seat)
+
+===== PAGE 37/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+36
+9.22. Transformer connection flange for CM2 OLTC, overall dimensions
+Unit: mm
+
+===== PAGE 38/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+37
+9.23. CM2 OLTC head flange installation for bell-type, overall dimensions
+Unit: mm
+
+===== PAGE 39/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+38
+9.24. Upper gear unit, arrangement and swiveling range
+Unit: mm
+
+===== PAGE 40/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+39
+9.25-1. CM2 OLTC arrangement drawing-1
+Unit: mm
+
+===== PAGE 41/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+40
+9.25-2. CM2 OLTC arrangement drawing-2
+Unit: mm
+
+===== PAGE 42/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+41
+9.26. CM2 OLTC, general layout drawing
+Unit: mm
+
+===== PAGE 43/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+42
+9.27. Bevel gear unit, overall & installation dimensions
+Unit: mm
+
+===== PAGE 44/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+43
+9.28. CM2 I 800 / 1200 / 1500 OLTC,
+parallel connection plate of tap selector terminals, overall dimensions
+Unit: mm
+Connection plate
+CM2Ⅰ800 contacts connection drawing
+CM2Ⅰ1200/1500 contacts connection drawing
+
+===== PAGE 45/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+44
+9.29. Protective relay, overall & installation dimensions
+Type QJ4-25A protective relay
+Unit: mm
+Type QJ4-25 protective relay
+
+===== PAGE 46/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+45
+9.30. CM2(10070) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 47/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+46
+9.31. CM2(10090) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 48/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+47
+9.32. CM2(10071W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 49/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+48
+9.33. CM2(10091W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 50/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+49
+9.34. CM2(10191W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 51/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+50
+9.35. CM2(10193W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 52/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+51
+9.36. CM2(10191G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 53/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+52
+9.37. CM2(10193G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 54/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+53
+9.38. CM2(12110) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 55/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+54
+9.39. CM2(12111W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 56/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+55
+9.40. CM2(12233W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 57/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+56
+9.41. CM2(12233G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 58/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+57
+9.42. CM2(14130) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 59/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+58
+9.43. CM2(14131W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 60/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+59
+9.44. CM2(14273W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 61/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+60
+9.45. CM2(14273G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 62/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+61
+9.46. CM2(16150) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 63/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+62
+9.47. CM2(16151W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 64/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+63
+9.48. CM2(16313W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 65/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+64
+9.49. CM2(16313G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 66/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+65
+9.50. CM2(18170) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 67/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+66
+9.51. CM2(18171W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 68/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+67
+9.52. CM2(18353W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 69/70 =====
+HM0.154.5701
+TYPE CM2 VACUUM ON-LOAD TAP CHANGER TECHNICAL DATA
+68
+9.53. CM2(18353G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 70/70 =====
+69
+TYPE VCM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+HM0.154.5701
+Printing: FEB.2010
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+Address: 977  Tong Pu  Road, Shanghai, P.R.China  200333
+Tel: +86  21 5270 3965(direct)
++86  21 5270 8966 Ext.
+8688/8123/8698/8158/8110/8658
+Fax: +86  21 5270 2715
+Web:www.huaming.com
+E-mail: export@huaming.com

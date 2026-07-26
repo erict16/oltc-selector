@@ -1,0 +1,927 @@
+
+===== PAGE 1/65 =====
+Caution:
+For safe and proper use, 
+follow these instructions.
+Retain for future reference.
+SHZV Type  Vacuum
+ On-load Tap-Changer
+Technical Data
+HM 0.154.3901-09.25/2024
+
+===== PAGE 2/65 =====
+I
+TABLE OF CONTENTS
+1. General… ………………………………………………………………………………………………… 01
+2. Technical Specifications… ………………………………………………………………………… 02
+3. Type designation… …………………………………………………………………………………… 03
+3.1	
+Type designation… ……………………………………………………………………………………………………………………………………… 03
+3.2	
+Tap selector basic connection method… …………………………………………………………………………………………………… 03
+3.3	
+Tap selector basic connection diagram……………………………………………………………………………………………………… 04
+4. Terms and definitions… …………………………………………………………………………… 05
+4.1	
+Rated through-current………………………………………………………………………………………………………………………………… 05
+4.2	
+Step voltage………………………………………………………………………………………………………………………………………………… 05
+4.3	
+Breaking capacity………………………………………………………………………………………………………………………………………… 05
+4.4	
+Electrical life of vacuum interrupter…………………………………………………………………………………………………………… 06
+4.5	
+Short-circuit current test…………………………………………………………………………………………………………………………… 06
+4.6	
+Service condition of tap-changer ……………………………………………………………………………………………………………… 06
+4.7	
+Tap-changer insulation level to ground …………………………………………………………………………………………………… 06
+4.8 
+Insulation Classification and Internal Withstand Voltage Levels… …………………………………………………………… 07
+4.9	
+Tap-changer mounting method ……………………………………………………………………………………………………………… 08
+5. Special designs… ……………………………………………………………………………………… 09
+5.1	
+Potential connection of the tap winding… ………………………………………………………………………………………………… 09
+5.2 
+Two phase and single phase of type SHZV………………………………………………………………………………………………… 10
+5.3	
+Structures and application… ……………………………………………………………………………………………………………………… 10
+5.4	
+Step protection and application… ……………………………………………………………………………………………………………… 10
+6. Motor drive unit… …………………………………………………………………………………… 11
+7. Operation controllers… …………………………………………………………………………… 12
+7.1	
+SHM-KX remote digital controller ……………………………………………………………………………………………………………… 12
+7.2	
+HMC-3C position indicator… ……………………………………………………………………………………………………………………… 12
+8. Accessories… …………………………………………………………………………………………… 13
+8.1	
+Bevel gearbox……………………………………………………………………………………………………………………………………………… 13
+8.2	
+Protective relay… ………………………………………………………………………………………………………………………………………… 13
+8.3	
+Pressure relief valve… ………………………………………………………………………………………………………………………………… 13
+9. Appendix…………………………………………………………………………………………………… 14
+
+===== PAGE 3/65 =====
+01
+HM 0.154.3901
+1. General
+Type SHZV vacuum on-load tap-changer (herein referred to as tap-changer) is of combined structure, applicable 
+to oil-immersed voltage regulating transformers. The tap-changer is composed of a diverter switch and a tap 
+selector, immersed in transformer oil. Diverter switch is in a separate oil compartment. Tap selector is in the 
+same transformer oil tank as the windings. Tap-changer is to be mounted on transformer tank top by means of 
+bell type mounting through a top flange. Tap-changer is operated by a motor drive unit. Tap-changer and 
+motor drive unit are connected by an upper gearbox, driving shaft and a bevel gearbox. Tap-changer provides 
+both local and remote operation modes.
+Tap-changer connection includes neutral point of star connection for three-phase and any connection for single 
+phase, three units of single phase tap-changers can be used for any selectable winding connections for a three 
+phase transformer.
+Its basic connection diagram is shown in Fig. 1-1 below:
+1 Linear Regulation
+2 Reversing Regulation
+3 Coarse/Fine Regulation
+Fig.1-1 Basic Connection Diagram of Tap Winding
+1
+10
+1
+k
+9
+k
++
+-
+1
+k
+9
++
+-
+o
+
+===== PAGE 4/65 =====
+02
+2. Technical Speci ications
+Type SHZV OLTC complies with GB/T 10230.1-2019 and IEC 60214-2014 standard. Tap-changer technical data 
+is listed in Table 2 1 below.
+Table 2-1 Tap-Changer Technical Data
+Description
+SHZV III
+SHZV I
+Max. rated through current (A)
+400
+600
+1000
+400
+600
+1000
+1600
+2400
+Rated frequency (Hz)
+50 or 60
+Connection
+3-phase Y-connection
+Single-phase any connection
+Max. rated step voltage (V)
+4000
+Rated step capacity (kVA)
+1500
+1600
+3000
+1500
+1600
+3000
+4400
+5600
+Short-circuit current 
+test (kA)
+Thermal (3s)
+6
+8
+12
+6
+8
+12
+20
+24
+Dynamic (peak)
+15
+20
+30
+15
+20
+30
+50
+60
+Max. operating positions
+1. Max. 18 without change-over selector; max. 35 with change-over selector.
+2. Current ≤600A, selector is the same as the type CM, and max. 107 are
+allowed.
+Insulation to ground 
+(kV)
+The highest voltage for 
+equipment
+72.5
+126
+170
+252
+300
+363
+Rated separate source AC 
+withstand voltage (50Hz, 1min)
+140
+230
+325
+460
+480
+510
+Rated lightning impulse 
+withstand voltage (1.2/50µs)
+350
+550
+750
+1050
+1100
+1175
+Tap selector
+Categorized into B, C, D & DE four sizes by insulation level
+Mechanical life
+1,500,000 operations
+Maintenance-free times
+300,000 operations
+Oil compartment of 
+diverter switch
+Service pressure
+0.03MPa
+Leakage test
+No leakage under 0.1 MPa for 24 hours
+Over pressure protection
+Rupture disc bursts at 0.3 ± 20% MPa
+Protective relay
+Set oil flow speed at 1.0m/s ± 10%
+Motor drive unit
+SHM Series or CMA7
+
+===== PAGE 5/65 =====
+03
+HM 0.154.3901
+3. Type designation
+3.1	 Type designation
+Due to the different combinations of number of phases, maximum rated through current, the highest voltage for 
+equipment, selector size and connections, type SHZV comes with various models. Hence, the type designation 
+shall provide all the above technical parameter and below is its detailed explanation in Fig. 3 1.
+Fig. 3-1 Tap-Changer Type Explanation
+Fig. 3-2 Tap Selector Basic Connection Method Explanation
+3.2 Tap selector basic connection method
+Because of voltage regulation range difference and winding connection variations, tap selector has a number 
+of different specifications. Tap selector specification is decided by number of inherent contacts, number of 
+operating positions, number of mid positions and type of change-over selector. Please refer to Fig. 3-2. for 
+indications of different tap selector parameters.
+SHZV  III  -  600  Y  /  126  C  -  10193W
+Tap selector basic connection diagram
+Tap selector insulation grade
+The highest voltage for equipment (kV)
+Connection method
+Max. rated through current (A)
+No. of phases
+Product type
+10  19  1  W
+W: with reversing change-over selector
+G: with coarse and fine change-over selector
+Change-over selector, represented by W, G 
+0: with linear regulation
+Number of mid position
+Max. number of service tap positions 
+Tap selector pitch
+
+===== PAGE 6/65 =====
+HM 0.154.3901
+3.3	 Tap selector basic connection diagram
+Different transformer tapping corresponds to different tap selector basic connection diagrams. Fig. 3 3 shows 
+common basic connection diagrams. Special requirement can also be specially designed.
+Fig. 3-3 Tap Selector Basic Connection Diagram 
+04
+
+===== PAGE 7/65 =====
+05
+HM 0.154.3901
+4. Terms and definitions
+4.1 Rated through-current
+Rated through current Iu: The current flowing through an on-load tap-changer toward the external circuit, 
+which can be transferring from one tap to the other at the relevant rated step voltage and which can be carried 
+continuously while meeting the requirement.
+Maximum rated through-current Ium: The highest rated through-current for which the tap-changer is 
+designed for and which forms the basis for all current related tests.
+4.2 Step voltage
+Rated step voltage Ui: For each value of rated through current, the highest permissible voltage between 
+terminals which are intended to be connected to successive taps of the transformer.
+Maximum rated step voltage Uim: The highest value of the rated step voltage for which the tap-changer is 
+designed. The maximum rated step voltage for type SHZV OLTC is 4000V.
+4.3 Breaking capacity
+Fig. 4 -1 Curve of SHZV Rated Step Capacity
+
+===== PAGE 8/65 =====
+06
+According to stipulations of IEC 60214-1:2014 and GB/T 10230.1-2019, tap-changer shall be able to break 
+two times of maximum rated through- current and its relevant step voltage for 40 operations. Breaking 
+capacity:
+Pst.max=2PStN ≈ 2Ium × UStN
+PStN: rated step capacity
+Ium: maximum rated through-current
+UStN: relevant rated step voltage
+4.4 Electrical lie o vacuum interrupter
+The electrical life of vacuum interrupt is 600,000 operations
+4.5 Short-circuit current test
+According to IEC 60214-1:2014 and GB/T 10230.1-2019, all contacts continuously carrying the current shall 
+be able to withstand 2s (±10%) short circuit test current without melting, deformation or mechanical damage. 
+Meanwhile the starting peak current value shall be 2.5 (±5%) times of the root means square value of rated short 
+circuit test current. Refer the short circuit test current values to Table 2-1 of Tap- Changer.
+4.6 Service condition of tap-changer
+1. Service temperature range of tap-changer in oil is -25℃ ~ + 100℃
+2. Service ambient air temperature range of tap-changer is -25℃ ~ + 40℃ and humidity ≤85%.
+Operating ambient air temperature range of tap-changer designed according to the standard is -25℃ ~ + 40℃. If
+the service ambient temperature is >40℃ or <-25℃, it should be indicated in the order specifications. The
+material and accessories will be specially treated to suit the needs.
+3. Perpendicular deflection between ground and tap-changer after being mounting on transformer shall be less
+than 2%.
+4. There shall be no serious dust, explosive gas or corrosive gas on service site.
+Remark: For more severe environmental conditions of tap changers or motor drive units, users need to contact
+the technical department of Huaming for confirmation.
+4.7 Tap-changer insulation level to ground
+Tap-changer insulation level to earth is the insulation between tap-changer live parts and grounding part. It is 
+determined by dielectric tests according to IEC 60214-1:2014 and GB/T 10230.1-2019 (Please refer to Table 4 1) 
+The requirement of which correlates to the transformer tap winding location, regulation range & regulation 
+method, winding connection & arrangement and rated voltage of transformer winding. It's decided by the 
+insulation to earth of transformer tap winding.
+
+===== PAGE 9/65 =====
+07
+HM 0.154.3901
+Table 4 -1 Tap- Changer Insulation Level to ground
+(unit: kV)
+The highest voltage for equipment Um
+Rated separate source AC withstand 
+voltage (50Hz, 1min)
+Rated lightning impulse withstand 
+voltage (1.2/50μs)
+72.5
+140
+350
+126
+230
+550
+170
+325
+750
+252
+460
+1050
+300
+480
+1100
+363
+510
+1175
+4.8	 Insulation Classification and Internal Withstand Voltage Levels
+The internal insulation level of the on-load tap-changer (OLTC) is classified into four categories: B, C, D, and DE, 
+in increasing order of dielectric strength. The power frequency and lightning impulse withstand voltages vary 
+depending on the insulation class, for:
+• Step-to-step insulation,
+• Highest-to-lowest tap insulation,
+• Phase-to-phase insulation.
+Class B has the lowest withstand voltage ratings, while class DE has the highest.
+Potential Distribution and Dielectric Requirements
+Figure 4.2 illustrates the insulation distance designation across the OLTC when connected to the regulating 
+winding. Table 4.2 specifies the power frequency (50 Hz, 1 min) and lightning impulse (1.2/50 μs) withstand 
+voltages for each insulation distance.
+Fig. 4.2 – OLTC Basic Connection Diagram and Insulation Distance Designation
+Linear Regulation
+Coarse/Fine Regulation
+Reversing Regulation
+Diverter switch internal insulation
+
+===== PAGE 10/65 =====
+08
+Definitions of Insulation Distances:
+• a: Between start and end of a fine tap winding; or between start and end of a coarse tap winding.
+• b: Between any tap of different fine tap windings, or between ends of different coarse windings.
+• a0: Between selected and preset diverter switch taps.
+• a1: Between any selected and preselected taps of the tap selector.
+• c1: Between the start of the coarse tap winding and the current take-off terminal (same phase).
+• c2: Between start contacts (–) of coarse windings (different phases).
+Key OLTC Components:
+• T1, T2: Isolating contacts.
+• V1, V2: Vacuum interrupters.
+• R1, R2: Transition resistors.
+• A: Odd-numbered shunt contact.
+• B: Even-numbered shunt contact.
+Table 4-2 Tap-Changer Internal Insulation Level
+(unit: kV)
+Insulation 
+distance 
+mark
+Tap selector size B
+Tap selector size C
+Tap selector size D
+Tap selector size DE
+1.2/50μs
+50Hz, 1min
+1.2/50μs
+50Hz, 1min
+1.2/50μs
+50Hz, 1min
+1.2/50μs
+50Hz, 1min
+a
+265
+50
+365
+82
+460
+105
+550
+120
+b
+265
+50
+350
+82
+460
+146
+550
+160
+a01
+90
+20
+90
+20
+90
+20
+90
+20
+a02
+70
+20
+70
+20
+70
+20
+70
+20
+a1
+150
+30
+150
+30
+150
+30
+150
+30
+c1
+500
+145
+550
+180
+590
+225
+660
+230
+c2
+500
+145
+550
+195
+590
+225
+660
+250
+Notes:
+• a01 (Spark gap protection): Lightning impulse (1.2/50 μs) withstand range: 90–130 kV (100% response at 130 kV).
+• a02 (ZnO arrester protection): Lightning impulse (1.2/50 μs) withstand range: 50–70 kV (100% response at 70 kV).
+4.9 Tap-changer mounting method
+Type SHZV tap-changer is mounted to transformer tank top by a head flange. Hence, a mounting flange shall 
+be provided by transformer producer, the dimension of which shall refer to the drawing of Appendix 36. Type 
+SHZV tap-changer is only applicable to bell type mounting. The supporting flange of the tap-changer is only for 
+temporary support during the transformer conductor connection. After putting the bell tank, tap-changer shall 
+be fixed to the mounting flange of the transformer. The connection pipes on head flange of type SHZV tap-
+changer is of spread around arrangement (Refer details to appendix 33, appendix 34).
+
+===== PAGE 11/65 =====
+09
+HM 0.154.3901
+5. Special designs
+5.1 Potential connection of the tap winding
+For transformers with high voltage rating and big regulation range, during the operation of the change-over 
+selector, the tap winding is disconnected momentarily from the main winding and in a so-called "suspension" 
+status. At that moment, the tap winding takes a new potential which is determined together by the coupling 
+capacitance to ground Ce and coupling capacitance to the adjacent winding Cw (refer details to Fig. 5 2). Usually 
+this potential is different from the previous potential of the tap winding before the operation. The difference 
+between the two is called bias voltage. This bias voltage turns out to be the recovery voltage on the gap of the 
+change-over selector. When the recovery voltage exceeds a certain critical value, the change-over selector would 
+discharge electricity and produce considerable amount of gas. This could be a serious problem. Therefore, 
+potential connection of the tap winding must be considered when this recovery voltage exceeds a certain value, 
+in order to avoid the discharge during the operation of the change-over selector.
+The permissible recovery voltage to type SHZV tap-changer is 35kV. In case the recovery voltage of the change-
+over selector exceeds this value, a tie-in resistor with fixed value shall be permanently connected into the tap 
+winding (refer to Fig. 5 1). The mounting location and dimension of tie-in resistor for SHZV can be found in 
+Appendix 40.
+Fig. 5-1 Potential Connection 
+by Tie-In Resistor
+Fig. 5 -2 Arrangement of Winding and Coupling Capacitance
+For the convenience of Huaming to define the load of the change-over selector and size & quantity of the tie-in 
+resistor, please provide the following transformer data when selecting tap-changer:
+1. Complete transformer data: rated capacity, rated voltage, regulation range, connection of winding and
+insulation level, etc.
+2. Arrangement of winding: relative location between tap winding and adjacent winding or winding part
+3. Operating A.C. voltage across windings or layers of windings adjacent to the tap windings
+4. Capacitance between tap winding and adjacent winding (Cw)
+5. Capacitance of the tap winding to ground or grounded adjacent windings (if exist) (Ce)
+6. Voltage stress across half the tap winding at lightning impulse voltage test
+7. A.C. voltage across half the tap winding under operation and test conditions.
+
+===== PAGE 12/65 =====
+10
+5.2 Two phase and single phase of type SHZV
+Type SHZV tap-changer can be designed as one motor drive unit (or three motor drive unit) driving three single 
+phase tap changers or one two phases plus one single phase tap-changer, for regulation of delta connection 
+or other regulation locations other than neutral point.
+Three Single Phase Regulation at 
+Line End of Delta Connection
+One Single Phase + One Two 
+phase Regulation at Line End
+Three Single Phase Regulation at 
+Middle of Delta Connection
+Fig. 5 -3 Basic Connections for Delta-connected Transformer Winding
+5.3 Structures and application
+Common structure: It is suitable for the contact pitch of 10, 12 and 14 in linear, reversing and coarse and fine 
+regulating.
+Strip-type selector structure: SHZV strip-type selector is the same as the tap selector of type CM. Thus it can 
+meet the technical data of CM tap selector.
+Note: The maximum current of SHZV with cage tap selector is 600A for 3-phase and 1500A for single phase. 
+Please refer to CM technical data for connection diagram or contact us.
+Please contact us when choosing SHZV with strip-type selector for the drawings (in linear, reversing regulation 
+or in other regulation) which are excluded in this SHZV technical data.
+5.4 Step protection and application
+SHZV over voltage between steps a0 protection can be realized via spark gaps or varistor (ZnO).
+The spark gap protection mechanism has a simple structure and small size. When the over voltage attacks, the 
+breakdown first happens to the spark gap so as to protect the insulation between steps. After that, the spark gap 
+must be replaced to ensure the tap-changer’s normal operation.
+The varistor (ZnO) has the same function and better performance. The size, however, is bigger. So usually the 
+spark gap is adopted. If the varistor (ZnO) is needed, please specify in the order specification.
+
+===== PAGE 13/65 =====
+11
+HM 0.154.3901
+6. Motor drive unit
+OLTC may operate by motor drive unit according to the requirement, please refer to table 6 1 for technical data.
+Table 6-1 Technical Data of Motor Drive Unit
+Motor drive unit
+Item
+SHM-D
+CMA7
+Motor
+Rated power (W)
+750
+750
+1100
+Rated voltage (V)
+200~240 (AC)
+3-Phase 380 (AC)
+Rated current (A)
+4
+2.0
+2.8
+Rate frequency(Hz)
+50 or 60
+50 or 60
+Rotate speed (r/min)
+330 direct drive
+1400
+Rated torque on drive shaft (Nm)
+35 static torque
+18
+26
+Revolution of the drive shaft per switching operation (turns)
+33
+33
+Revolution of the hand crank per switching operation (turns)
+33
+33
+Running time per switching operation (s)
+about 6
+about 5
+Max. operation positions
+107
+107
+Voltage for control circuit and heater circuit (V)
+220 (AC)
+220 (AC)
+Heater power consumption (W)
+100
+50
+A.C. voltage test to ground (kV/50Hz, 1min)
+2
+2
+Approx. weight (kg)
+80
+90
+Protective degree
+IP66
+IP66
+Mechanical life (operations)
+≥2,000,000
+≥800,000
+
+===== PAGE 14/65 =====
+12
+7. Operation controllers
+7.1 SHM-KX remote digital controller
+SHM-KX remote digital controller (hereinafter referred to as SHM-KX) can be used together with motor to 
+realize manual and automatic control of tap-changer. SHM-KX uses LCD screen, which is connected with 
+the local control module for bilateral digital communication.
+SHM-KX main technical data is as below:
+Working voltage: AC 85V to 264V or DC 100-250V
+Power consumption: about 7W
+Environment temperature: 0℃ to 50℃ Indoor; Comparative humidity ≤H95% (no condensation)
+7.2	 HMC-3C position indicator
+HMC-3C OLTC position indicator is a support fitting for motor drive unit, it can be used to indicate the OLTC 
+position, and has the function of "1-> N", "STOP", "N-> 1" control as well as remote control indicator lamp, its 
+input is decimal code and output is BCD code.
+HMC-3C Monitor Technical Parameters:
+Operating Voltage: 220 V (AC)
+Operating Frequency: 50 Hz
+Maximum Number of Display position Number: 107
+Operating Temperature: -10 °C to +40 °C
+Note: Specify any other power supply technical requirements for the controller at the time of order.
+Installation Method: Panel or cabinet mounting.
+
+===== PAGE 15/65 =====
+13
+HM 0.154.3901
+8. Accessories
+8.1 Bevel gearbox
+Bevel gearbox is used for the inter-connection of tap-changer horizontal shaft and vertical shaft, in order to 
+transfer the driving torque from motor drive unit to the tap-changer. Please refer to Appendix 41 for the overall 
+dimension.
+8.2 Protective relay
+Protective relay is the one of protective devices for oil-immersed on-load tap-changer, when OLTC interior 
+failure produces gas and oil surge, the protective relay contact acts, and switches on to the tripping circuit of the 
+transformer circuit breaker, the transformer will be cut off at once.
+Protective relay is mounted onto the connection pipe between OLTC head and oil conservator; make sure that 
+protective relay marked with arrowhead side shall be connected to oil conservator There are multiple types 
+of protective relays configured for tap-changer of Huaming for users to select. See Appendix 47 for details 
+of installation dimensions of protective relays. (If the user has any special requirements, please contact the 
+technical department of our company)
+8.3 Pressure relief valve
+Pressure relief valve and rupture disc are safety protection devices of the on-load tap-changer. In case tap-
+changer has an internal failure, which decomposes the oil in the compartment and produces large amount gas, 
+the internal pressure inside the oil compartment will increase dramatically. If this pressure couldn't be released, 
+tap-changer will deform or even explode. Therefore, pressure relief devices can avoid the upgrade of the failure.
+Pressure relief valve is a self-sealing relief valve. It opens the cover in case of over pressure and re-closes after 
+the pressure is released, which can be used repeatedly and minimize the liquid loss during the operation.
+The rupture disc is a weak point on the top cover of tap-changer. Once the pressure in the oil compartment 
+exceeds the set value, the disc will explode to release the over pressure of the compartment, as a result the oil 
+compartment will be prevented from damage.
+Pressure relief valve is a low-energy failure protection device. The rupture disc is a high-energy protection 
+device. Tap-changer failure usually tends to be high-energy failure. Hence, rupture disc is recommended for 
+tap-changer, or use it as an assistant protection besides the rupture disc. Pressure relief valve is an optional 
+accessory of tap-changer for customer to select when ordering the tap-changer.
+
+===== PAGE 16/65 =====
+14
+9. Appendix
+Appendix 1 SHZV III 400/600/1000A overall dimensions without change-over selector, cylinder 
+tap selector…………………………………………………………………………………………………………………………… 16
+Appendix 2 SHZV III 400/600/1000A overall dimensions with reversing switch, cylinder tap 
+selector………………………………………………………………………………………………………………………………… 17
+Appendix 3 SHZV III 400/600/1000A overall dimensions with coarse change-over selector, 
+cylinder tap selector……………………………………………………………………………………………………………… 18
+Appendix 4 SHZV I 400/600/1000A overall dimensions without change-over selector, cylinder 
+tap selector…………………………………………………………………………………………………………………………… 19
+Appendix 5 SHZV I 400/600/1000A overall dimensions with reversing switch, cylinder tap 
+selector………………………………………………………………………………………………………………………………… 20
+Appendix 6 SHZV I 400/600/1000A overall dimensions with coarse change-over selector, 
+cylinder tap selector……………………………………………………………………………………………………………… 21
+Appendix 7 SHZV I 1600A overall dimensions without change-over selector, cylinder type…… 22
+Appendix 8 SHZV I 1600A overall dimensions with reversing switch, cylinder tap selector… … 23
+Appendix 9 SHZV I 1600A overall dimensions with coarse and fine change-over selector, 
+cylinder tap selector……………………………………………………………………………………………………………… 24
+Appendix 10 SHZV I 2400A overall dimensions without change-over selector, cylinder type…
+25
+Appendix 11 SHZV I 2400A overall dimensions with reversing switch, cylinder tap selector…… 26
+Appendix 12 SHZV I 2400A overall dimensions with coarse and fine change-over selector, 
+cylinder tap selector……………………………………………………………………………………………………………… 27
+Appendix 13 SHZV tap selector contacts arrangement, cylinder tap selector………………………… 28
+Appendix 14 SHZV (10050) operating position table and connection diagram… …………………… 29
+Appendix 15 SHZV (10070) operating position table and connection diagram… …………………… 30
+Appendix 16 SHZV (10090) operating position table and connection diagram… …………………… 31
+Appendix 17 SHZV (10100) operating position table and connection diagram… …………………… 32
+Appendix 18 SHZV (14140) operating position table and connection diagram… …………………… 33
+Appendix 19 SHZV (10051W) operating position table and connection diagram…………………… 34
+Appendix 20 SHZV (10071W) operating position table and connection diagram…………………… 35
+Appendix 21 SHZV (10091W) operating position table and connection diagram…………………… 36
+
+===== PAGE 17/65 =====
+15
+HM 0.154.3901
+Appendix 22 SHZV (10191W) operating position table and connection diagram… ………………… 37
+Appendix 23 SHZV (10191G) operating position table and connection diagram… ………………… 38
+Appendix 24 SHZV (10193W) operating position table and connection diagram… ………………… 39
+Appendix 25 SHZV (10193G) operating position table and connection diagram… ………………… 40
+Appendix 26 SHZV (12111W) operating position table and connection diagram… ………………… 41
+Appendix 27 SHZV (12231W) operating position table and connection diagram… ………………… 42
+Appendix 28 SHZV (12231G) operating position table and connection diagram… ………………… 43
+Appendix 29 SHZV (12233W) operating position table and connection diagram… ………………… 44
+Appendix 30 SHZV (14131W) operating position table and connection diagram… ………………… 45
+Appendix 31 SHZV (14271W) operating position table and connection diagram… ………………… 46
+Appendix 32 SHZV (14273W) operating position table and connection diagram… ………………… 47
+Appendix 33 SHZV bell-type mounting flange overall dimension, cylinder tap selector… ……… 48
+Appendix 34 SHZV bell-type mounting flange with pressure relief valve overall dimension, 
+cylinder tap selector……………………………………………………………………………………………………………… 49
+Appendix 35 SHZV bell-type supporting flange, overall dimension, cage tap selector…………… 50
+Appendix 36 Transformer mounting flange for SHZV overall dimension… …………………………… 51
+Appendix 37 By-pass pipe overall dimension………………………………………………………………………… 52
+Appendix 38 Bell-type lifting plate, overall dimension…………………………………………………………… 53
+Appendix 39 Schematic drawing for connecting of horizontal shaft and vertical shaft… ……… 54
+Appendix 40 Tie-in resistor mounting for overall dimension… ……………………………………………… 55
+Appendix 41 Bevel gearbox, overall dimension… ………………………………………………………………… 56
+Appendix 42 Middle supporting box, overall dimension… …………………………………………………… 57
+Appendix 43 Transformer oil pressure relief valve operating lever… …………………………………… 58
+Appendix 44 Schematic drawing for connecting of SHZV OLTC and SHM……………………………… 59
+Appendix 45 Schematic drawing for connecting of SHZV OLTC and CMA7… ………………………… 60
+Appendix 46 Schematic drawing for 3 units of single-phase SHZV connection arrangement… 61
+Appendix 47 Protective relay, overall dimension…………………………………………………………………… 62
+
+===== PAGE 18/65 =====
+16
+Appendix 1	SHZV III 400/600/1000A overall dimensions without change-over 
+selector, cylinder tap selector
+
+===== PAGE 19/65 =====
+17
+HM 0.154.3901
+Appendix 2	SHZV III 400/600/1000A overall dimensions with reversing switch, 
+cylinder tap selector
+
+===== PAGE 20/65 =====
+18
+Appendix 3	SHZV III 400/600/1000A overall dimensions with coarse change-
+over selector, cylinder tap selector
+
+===== PAGE 21/65 =====
+19
+HM 0.154.3901
+Appendix 4	SHZV I 400/600/1000A overall dimensions without change-over 
+selector, cylinder tap selector
+
+===== PAGE 22/65 =====
+20
+Appendix 5	SHZV I 400/600/1000A overall dimensions with reversing switch, 
+cylinder tap selector
+
+===== PAGE 23/65 =====
+21
+HM 0.154.3901
+Appendix 6	SHZV I 400/600/1000A overall dimensions with coarse change-over 
+selector, cylinder tap selector
+
+===== PAGE 24/65 =====
+22
+Appendix 7	SHZV I 1600A overall dimensions without change-over selector, 
+cylinder type
+
+===== PAGE 25/65 =====
+23
+HM 0.154.3901
+Appendix 8	SHZV I 1600A overall dimensions with reversing switch, cylinder 
+tap selector
+
+===== PAGE 26/65 =====
+24
+Appendix 9	SHZV I 1600A overall dimensions with coarse and fine change-over 
+selector, cylinder tap selector
+
+===== PAGE 27/65 =====
+25
+HM 0.154.3901
+Appendix 10	 SHZV I 2400A overall dimensions without change-over selector, 
+cylinder type
+
+===== PAGE 28/65 =====
+26
+Appendix 11	 SHZV I 2400A overall dimensions with reversing switch, cylinder 
+tap selector
+
+===== PAGE 29/65 =====
+27
+HM 0.154.3901
+Appendix 12	 SHZV I 2400A overall dimensions with coarse and fine change-
+over selector, cylinder tap selector
+
+===== PAGE 30/65 =====
+28
+Appendix 13	 SHZV tap selector contacts arrangement, cylinder tap selector
+
+===== PAGE 31/65 =====
+29
+HM 0.154.3901
+Appendix 14	 SHZV (10050) operating position table and connection diagram
+
+===== PAGE 32/65 =====
+30
+Appendix 15	 SHZV (10070) operating position table and connection diagram
+
+===== PAGE 33/65 =====
+31
+HM 0.154.3901
+Appendix 16	 SHZV (10090) operating position table and connection diagram
+
+===== PAGE 34/65 =====
+32
+Appendix 17	 SHZV (10100) operating position table and connection diagram
+
+===== PAGE 35/65 =====
+33
+HM 0.154.3901
+Appendix 18	 SHZV (14140) operating position table and connection diagram
+
+===== PAGE 36/65 =====
+34
+Appendix 19	 SHZV (10051W) operating position table and connection diagram
+
+===== PAGE 37/65 =====
+35
+HM 0.154.3901
+Appendix 20	 SHZV (10071W) operating position table and connection diagram
+
+===== PAGE 38/65 =====
+36
+Appendix 21	 SHZV (10091W) operating position table and connection diagram
+
+===== PAGE 39/65 =====
+37
+HM 0.154.3901
+Appendix 22	 SHZV (10191W) operating position table and connection diagram
+
+===== PAGE 40/65 =====
+38
+Appendix 23	 SHZV (10191G) operating position table and connection diagram
+
+===== PAGE 41/65 =====
+39
+HM 0.154.3901
+Appendix 24	 SHZV (10193W) operating position table and connection diagram
+
+===== PAGE 42/65 =====
+40
+Appendix 25	 SHZV (10193G) operating position table and connection diagram
+
+===== PAGE 43/65 =====
+41
+HM 0.154.3901
+Appendix 26	 SHZV (12111W) operating position table and connection diagram
+
+===== PAGE 44/65 =====
+42
+Appendix 27	 SHZV (12231W) operating position table and connection diagram
+
+===== PAGE 45/65 =====
+43
+HM 0.154.3901
+Appendix 28	 SHZV (12231G) operating position table and connection diagram
+
+===== PAGE 46/65 =====
+44
+Appendix 29	 SHZV (12233W) operating position table and connection diagram
+
+===== PAGE 47/65 =====
+45
+HM 0.154.3901
+Appendix 30	 SHZV (14131W) operating position table and connection diagram
+
+===== PAGE 48/65 =====
+46
+Appendix 31	 SHZV (14271W) operating position table and connection diagram
+
+===== PAGE 49/65 =====
+47
+HM 0.154.3901
+Appendix 32	 SHZV (14273W) operating position table and connection diagram
+
+===== PAGE 50/65 =====
+48
+Appendix 33	 SHZV bell-type mounting flange overall dimension, cylinder tap 
+selector
+
+===== PAGE 51/65 =====
+49
+HM 0.154.3901
+Appendix 34	 SHZV bell-type mounting flange with pressure relief valve overall 
+dimension, cylinder tap selector
+
+===== PAGE 52/65 =====
+50
+Appendix 35	 SHZV bell-type supporting flange, overall dimension, cage tap 
+selector
+
+===== PAGE 53/65 =====
+51
+HM 0.154.3901
+Appendix 36	 Transformer mounting flange for SHZV overall dimension
+
+===== PAGE 54/65 =====
+52
+Appendix 37	 By-pass pipe overall dimension
+
+===== PAGE 55/65 =====
+53
+HM 0.154.3901
+Appendix 38	 Bell-type lifting plate, overall dimension
+
+===== PAGE 56/65 =====
+54
+Appendix 39	 Schematic drawing for connecting of horizontal shaft and vertical 
+shaft
+
+===== PAGE 57/65 =====
+55
+HM 0.154.3901
+Appendix 40	 Tie-in resistor mounting for overall dimension
+
+===== PAGE 58/65 =====
+56
+Appendix 41	 Bevel gearbox, overall dimension
+
+===== PAGE 59/65 =====
+57
+HM 0.154.3901
+Appendix 42	 Middle supporting box, overall dimension
+
+===== PAGE 60/65 =====
+58
+Appendix 43	 Transformer oil pressure relief valve operating lever
+
+===== PAGE 61/65 =====
+59
+HM 0.154.3901
+Appendix 44	 Schematic drawing for connecting of SHZV OLTC and SHM
+
+===== PAGE 62/65 =====
+60
+Appendix 45	 Schematic drawing for connecting of SHZV OLTC and CMA7
+
+===== PAGE 63/65 =====
+61
+HM 0.154.3901
+Appendix 46	 Schematic drawing for 3 units of single-phase SHZV connection 
+arrangement
+
+===== PAGE 64/65 =====
+62
+Appendix 47	 Protective relay, overall dimension
+
+===== PAGE 65/65 =====
+Shanghai Huaming Power Equipment Co., Ltd.
+Address: No.977 Tongpu Road, Putuo District, Shanghai, China
+Postal Code: 200333
+Tel.: +86 21 5270 8966 (Main line)
+Fax: +86 21 5270 3385

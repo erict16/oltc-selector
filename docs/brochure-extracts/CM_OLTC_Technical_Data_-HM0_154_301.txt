@@ -1,0 +1,1948 @@
+
+===== PAGE 1/83 =====
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+TECHNICAL DATA
+TYPE CM
+OIL-IMMERSED ON-LOAD TAP CHANGER
+HM0.154.301
+
+===== PAGE 2/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+1
+General
+1. General ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯3
+2. Technical specification⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯4
+3. Model designation  ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯5
+4. Terms and definitions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯7
+5. Special designs⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯10
+6. Motor drive unit ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯12
+7. Controllers for On-Load tap changer ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯13
+8. OLTC accessories⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯13
+9. Appendixes⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯14
+9.1 CM III 500Y/600Y without change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯15
+9.2 CM III 500Y / 600Y with reversing switch, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯16
+9.3 CM III 500Y / 600Y with coarse change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯17
+9.4 CM II 500 / 600 without change-over selector, overall dimensions…⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯18
+9.5 CM II 500 / 600 with reversing switch, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯19
+9.6 CM II 500 / 600 with coarse change-over selector, overall dimensions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯20
+9.7 CM I 500 / 600 without change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯21
+9.8 CM I 500 / 600 with reversing switch, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯22
+9.9 CM I 500 / 600 with coarse change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯23
+9.10 CM I 800 without change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯24
+9.11 CM I 800 with reversing switch, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯25
+9.12 CM I 800 with coarse change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯26
+9.13 CM I 1200 / 1500 without change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯27
+9.14 CM I 1200 / 1500 with reversing switch, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯28
+9.15 CM I 1200 / 1500 with coarse change-over selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯29
+9.16 CM OLTC mounted with tie-in resistor, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯30
+9.17 CM Tap selector contacts arrangement⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯31
+9.18 CM OLTC head flange for standard tank type, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯32
+9.19 CM OLTC head flange with pressure relief valve, overall dimensions ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯33
+9.20 Transformer connection flange for CM OLTC, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯34
+9.21 CM OLTC head flange installation for bell-type, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯35
+9.22 Upper gear unit, arrangement and swiveling range⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯36
+9.23-1 CM OLTC arrangement drawing-1 ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯37
+9.23-2 CM OLTC arrangement drawing-2 ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯38
+9.24 CM OLTC, general layout drawing ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯39
+9.25 Bevel gear unit, overall & installation dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯40
+9.26 CM I 800 / 1200 / 1500 OLTC,
+ parallel connection plate of tap selector terminals, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯41
+
+===== PAGE 3/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+2
+9.27 Protective relay, overall & installation dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯42
+9.28 CM OLTC with multiple coarse and fine tap selector, connection drawing⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯43
+9.29 CM III 500Y/600Y with multiple coarse and fine tap selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯44
+9.30 CM I 500/600 with multiple coarse and fine tap selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯45
+9.31 CM I 800 with multiple coarse and fine tap selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯46
+9.32 CM I 1200/1500 with multiple coarse and fine tap selector, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯47
+9.33 CM(10070) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯48
+9.34 CM(10090) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯49
+9.35 CM(10071W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯50
+9.36 CM(10091W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯51
+9.37 CM(10191W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯52
+9.38 CM(10193W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯53
+9.39 CM(10191G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯54
+9.40 CM(10193G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯55
+9.41 CM(12110) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯56
+9.42 CM(12111W) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯57
+9.43 CM(12233W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯58
+9.44 CM(12233G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯59
+9.45 CM(14130) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯60
+9.46 CM(14131W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯61
+9.47 CM(14273W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯62
+9.48 CM(14273G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯63
+9.49 CM(16150) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯64
+9.50 CM(16151W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯65
+9.51 CM(16313W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯66
+9.52 CM(16313G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯67
+9.53 CM(18170) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯68
+9.54 CM(18171W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯69
+9.55 CM(18353W) operating position table and connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯70
+9.56 CM(18353G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯71
+9.57 CM(10491G) connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯72
+9.58 CM( 10491G) operating position table ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯73
+9.59 CM(12591G) connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯74
+9.60 CM(12591G) operating position table  ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯75
+9.61 CM(14551G) connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯76
+9.62 CM( 14551G) operating position table⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯77
+9.63 CM(16791G) connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯78
+9.64 CM( 16791G) operating position table⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯79
+9.65 CM(181071G) connection diagram ⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯80
+9.66 CM(181071G) operating position table⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯81
+
+===== PAGE 4/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+3
+1. General
+Type CM On-Load Tap Changer (hereinafter referred as CM or CM OLTC) is a typical combined-structure tap changer 
+applicable in oil-immersed transformer, comprising of two major parts: diverter switch and tap selector. The CM OLTC 
+is put in transformer oil tank and its diverter switch has a separate oil compartment from transformer tank, while tap 
+selector, together with transformer windings, is completely laid inside the tank. OLTC’s installation is divided into two 
+types - standard tank flange and bell-type flange.   
+Three-phase CM OLTC could be used at neutral point of star-connection, and a combination of three units of single-
+phase CM OLTC  is designed for any selectable winding connection.  
+Basic connections of tap winding as in fig.1  
+a) Without change-over selector
+b) With reversing switch
+Fig.1  Basic Connections of Tap Winding
+c) With coarse tap selector
+a) without change-over selector
+This linear regulation can be designed by a maximum of 9, 11,13,15 or 17 steps, namely 10, 12,14,16 or 18 operating
+positions at maximum.
+b) with change-over selector
+With reversing switch or coarse tap selector, the regulating range will be doubled to maximum ±9,±11, ±13,±15
+or ±17 steps, namely 19,23,27,31 or 35 operating positions at maximum, when actual positions are less than above
+mentioned ones, it can be easily obtained passing by the positions.
+
+===== PAGE 5/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+4
+Tabe1 CM Series OLTC Main Technical Specifications
+c) Multiple coarse tap selector
+With multiple coarse tap selector , CM OLTC can be reached to maximum 106 steps, i.e. 107 operation positions at
+maximum.
+d) Multiple linear voltage regulation
+A special design of tap selector can make OLTC have up to maximum 33 steps, i.e. 34 operation positions at
+maximum.
+2. Technical specification
+Type CM OLTC complies with  IEC60214-1 (2003), please refer to below table 1.  
+Item
+Specification
+CMⅢ500Y
+CMⅠ500
+CMⅢ600Y
+CMⅠ600
+CMⅠ800
+CMⅠ1200 CMⅠ1500
+1
+Max. rated through-current (A)
+500
+600
+800
+1200
+1500
+2
+Rated frequency
+50 or 60
+3
+Connection
+Three-phases for neutral point of star connection
+Single-phase for any selectable winding connection
+4
+Max. rated step voltage (V)
+3300
+5
+Rated step capacity (kVA)
+1400
+1500
+2000
+3100
+3500
+6
+Short-circuit
+current test (kA)
+Thermal (3s)
+8
+8
+16
+24
+24
+Dynamic (Peak)
+20
+20
+40
+60
+60
+7
+Max. Operating
+Positions
+Without change-over selector
+18 (special linear regulation can be up to 34)
+With change-over selector
+35 (special multiple coarse regulation can be up to 107)
+8
+Insulation 
+to ground
+(kV)
+Highest voltage for
+equipment Um
+            72.5       
+        126               170
+252
+Rated separate source AC
+withstand voltage(kV/50Hz,1min)            140        
+        230               325
+460
+Rated lightning impulse
+withstand voltage (kV,1.2/50μs)            350
+550               750              1050
+9
+Tap selector
+4 grades of B, C, D and DE according to insulation level
+10
+Mechanical life
+Not less than 800,000 operations
+11
+Contact life
+Not less than 200,000 operations
+12
+Oil
+compartment
+of diverter
+switch
+Service pressure
+0.03Mpa
+Leakage test
+Over pressure protection
+Protection relay
+13
+Motor drive unit
+14
+Oil filter plant
+No leakage under 0.08Mpa for 24 hours
+Bursting cap busts at 300 ± 20%kPa
+Oil flow speed set at 1.0m/s ±10%
+SHM-III or CMA7
+ZXJY-1 /ZXJY-2 /ZXJY-3 according to requirement
+300
+480
+1100
+
+===== PAGE 6/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+5
+3. Model designation
+3.1 Model designation  
+Type CM OLTC models varies with number of phase, maximum.rated through current, highest voltage for equipment, 
+insulation level of tap selector and connection ways, etc.The parameters are represented as in Fig.2 below.  
+CM  III - 600  Y  /  126  D - 10193W
+Basic connection diagram of tap selector
+Tap selector insulation grade
+Highest voltage for equipment
+Connection mode: Y for regulation at neutral point
+Max .rated through current
+Number of phase
+Type
+10     19     3     W
+Change-over selector (W: with reversing switch; G: with coarse 
+tap selector)
+Number of Mid-position (divided into 0, 1, 3)
+Max.operating positions (depends on with or without change-over 
+selector, max.up to 107)
+Tap selector pitch (divided into 10, 12, 14, 16, and 18)
+Fig.2 Designation of CM OLTC
+Fig.3 Designation of Basic Connection Diagram of Tap Selector
+3.2 Designation of basic connection diagram of tap selector  
+The tap selector may have different spec with respect to the number of the steps required and connection of the tap 
+winding. The basic connection diagrams  reflects the relevant pitch of the contact circuit, the number of operating 
+positions, the number of mid-positions and type of  change-over selector. The designation of the basic connection 
+diagram is according to Fig.3.   
+3.3 Survey of basic connection diagram of tap selector  
+Different numbers of taps correspond to different connection diagram. Fig.4 shows regular basic connection diagrams 
+of the tap selector,  and special design depends on the requirement. 
+
+===== PAGE 7/83 =====
+
+===== PAGE 8/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+7
+4. Terms and definitions
+4.1 Through current  
+Rated through current ( Iu) : The current flowing through an on-load tap-changer towards the external circuit, which 
+the apparatus is capable of transferring from one tap to the other at the relevant rated step voltage and which can be 
+carried continuously while meeting the requirements of the standard.   
+Max. rated though-current (Ium): The highest rated through-current for which the tap-changer is designed for and which 
+forms the basis for all current related tests. 
+4.2 Step voltage 
+Rated step voltage (Ui): For each value of rated through-current, the highest permissible voltage between terminals 
+which are intended to be connected to successive taps of the transformer.  
+Maximum rated step voltage (Uim): The highest value of the rated step voltage for which the tap-changer is designed. 
+The maximum rated step voltage of type CM is 3300 volt.   
+4.3 Rated step capacity Pstn 
+The step capacity equals to product of step voltage multiplied by current. While the rated step capacity of OLTC is a 
+permissible maximum step capacity during continuous operation. That is Pstn=Ui Iu,The rated step capacity refers to 
+fig.5. 
+Fig. 5 Curve of The Rated Step Capacity of CM OLTC
+4.4 Breaking capacity  
+The breaking capacity refers to the maximum switching capacity under the safe changeover load, according to 
+IEC60214-1(2003) stipulation, 40-time breaking switches shall be performed at a current corresponding to twice the 
+maximum rated through-current (Ium) and at its relevant rated step voltage(Ui).  
+The breaking capacity of CM OLTC: Pstmax = 2Pstn ≈2Ium×Ustn   
+Pstn: Rated step capacity   
+Ium: Max. rated through current   
+Ustn: relevant step voltage 
+Ui—— Rated step voltage
+Iu —— Rated through current
+
+===== PAGE 9/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+8
+4.5 Electrical life of arcing contact 
+The main expected electrical life of the arcing contacts can be estimated based on the relevant load (Iu/Ium) shown in 
+below fig.6, whereas actual burn of arcing contacts may depend on many influencing factors such as contact material, 
+matching of transition resistance, operation status and so on, fig.6 is only an approximate value of contact life.  
+n: number of operation
+Iu: Rated through current
+Ium: Maximum rated through current
+Fig.6 Average Expected Contact Life under Average Load Condition
+4.6 Short-circuit current test  
+According to IEC 60214-1: 2003, all contacts continuously carrying the current shall be able to withstand 2s (±10%) 
+short circuit test current without melting, deformation or mechanical damage. Meanwhile the starting peak current 
+value shall be 2.5 (±5%) times of the root means square value of rated short circuit test current. Refer the short circuit 
+test current values to Table 1. CM Series OLTC Main Technical Specifications.  
+4.7 Conditions for OLTC's operations 
+4.7.1 Oil temperature for OLTC's operation ranges from -25℃ to 105℃. 
+4.7.2 Ambient air temperature for OLTC's operation ranges from -25℃ to 40℃. 
+4.7.3 The vertical inclination level of OLTC being installed into transformer towards ground should be less than 2% 
+4.7.4 The installation site should be free of heavy dust, explosive or corrosive gas. 
+Note: Please contact us if special application required.   
+4.8 Internal insulation level  
+The internal insulation of CM OLTC is divided into four levels from low to high: B, C, D and DE.The withstand voltage 
+is different between adjacent taps, max. and min. taps and between phases for tap changers with different insulation 
+grade, Fig.7 shows the potential distribution of various parts after tap changer has been connected to voltage 
+regulation winding. Table 2 gives CM OLTC power frequency withstand voltages and BIL values according to different 
+insulation distance.   
+4.9 Insulation level to ground  
+The insulation level to ground refers to insulation of OLTC live parts against grounding parts, the rated value of which 
+depends on dielectric tests according to IEC-60214-1(2003), please refer to table 3.  
+The requirement of insulation to earth for OLTC is relevant to OLTC connection location at transformer tap winding, 
+regulation range and mode, tap winding connection model and structure, as well as the rated voltage of transformer 
+tap winding, anyhow, it is determined by insulation to ground of transformer voltage regulating winding.  
+
+===== PAGE 10/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+9
+10 10 0 … 18 18 0 
+         10 09 1W … 18 17 1W		
+         10 19 1G … 18 35 1G
+         10 19 1W … 18 35 1W		
+         10 19 3G … 18 35 3G
+         10 19 3W … 18 35 3W		
+10 10 0 … 18 18 0 
+         10 09 1W … 18 17 1W		
+         10 19 1G … 18 35 1G
+         10 19 1W … 18 35 1W		
+         10 19 3G … 18 35 3G
+         10 19 3W … 18 35 3W		
+1. Linear regulation
+2. With reversing switch
+3. With coarse change-over selector
+4. Diverter switch
+Fig. 7 The Rated Voltage Stress on Tap Winding
+Explanation of designation code:
+a: across regulation winding for the same phase
+a1: between any selected and preselected taps of the tap selector
+b: between any two taps of different phases
+a0: between any adjacent taps of diverter switch
+c1: between the beginning of coarse tap winding and neutral of fine tap winding of the same phase
+c2: between beginnings of coarse tap winding of different phases
+d: between begining and end of coarse tap winding of the same phase
+SF: spark gap
+
+===== PAGE 11/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+10
+Table 3 Insulation Level to Ground of OLTC
+a0: The inherent insulation level refers to insulation level with spark gap protection when full wave 
+voltage impulse is 130kV, the spark gap will response 100%
+Table 2 CM OLTC internal Insulation
+4.10 Installation models  
+Type CM OLTC is mounted onto the transformer cover by tap changer head, a mounting flange (see appendix) 
+must be provided by transformer producer for connection. CM OLTC is suitable for either standard tank or bell-type 
+mounting. For bell-type tank transformer, the OLTC support flange is supplied as a temporary support, OLTC will be 
+secured onto transformer mounting flange after complete installation of transformer bell-tank.  
+5 Special designs  
+5.1 Potential connection of the tap winding  
+For high voltage or wide regulation range on-load regulating transformer, during the operation of the change-over 
+selector the tap winding is disconnected momentarily from the main winding, the regulating section will be broken 
+away from the main coil and at status of "suspend", thus voltage regulating winding will gain the new potential that 
+depends upon coupling capacities Ce (to ground) and Cw (between adjacent tap winding), refer to Fig.9. Generally 
+this potential is different from the one of voltage regulating winding before change-over selector acting, the difference 
+of them is designated as recovery voltage. This recovery voltage is produced at the breaking point of the separated 
+contacts during the operation of change-over selector. If these differential voltages exceed a certain limit value, it may 
+cause flashover on change-over selector and bring gas, it will be the serious problem. Therefore measures regarding 
+potential connection of the winding must be taken. 
+CM OLTC could withstand a limit value of bias voltage of 35 kV,  when the potential is expected to overrun the limit 
+value, tap winding should be permanently connected to a fixed potential resistance via a tie-in resistor, see fig.8. For 
+The highest voltage for equipment
+Um
+Rated separate source AC
+withstand voltage(kV/50Hz,1min)
+Rated lightning impulse withstand
+voltage (1.2/50μs)
+72.5
+140
+350
+126
+230
+550
+170
+325
+750
+252
+460
+1050
+(unit: kV)
+(unit: kV)
+Designation
+code
+Tap selector size B
+Tap selector size C
+Tap selector size D
+Tap selector size DE
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+a
+265
+50
+350
+82
+460
+105
+550
+120
+b
+265
+50
+350
+82
+460
+146
+550
+160
+a0
+90
+20
+90
+20
+90
+20
+90
+20
+a1
+150
+30
+150
+30
+150
+30
+150
+30
+c1
+485
+143
+545
+178
+590
+208
+660
+230
+c2
+495
+150
+550
+182
+590
+225
+660
+250
+d
+265
+50
+350
+82
+460
+105
+550
+120
+300
+480
+1100
+
+===== PAGE 12/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+11
+mounting location and dimensions of CM OLTC tie-in resistors, please refer to appendix 9.16  
+For calculating the change-over selector stress and dimensioning the tie-in resistors, the following details of the 
+transformer specifications required when ordering:  
+a) Complete transformer parameter:  rated capacity, rated voltage, voltage regulating range, winding connection
+model, insulation level and so on
+b) Arrangement of the windings, i.e. the relative position of the tap winding to the adjacent coil or winding parts
+c) Operating A.C.voltage across windings or layers of windings adjacent to the tap windings
+d) Capacitance of the tap winding to adjacent windings(Cw)
+e) Capacitance of the tap winding to ground or grounded adjacent windings (if exist) (Ce)
+f) Voltage stress across half the tap winding at lightning impulse voltage test
+g) A.C.voltage across half the tap winding under operation and test conditions.( is normally derived from order
+specification sheet for tap changer)
+Fig.8 Potential Connection by Tie-In Resistor Rp
+Fig.9 Arrangement of Winding and Coupling Capacitance
+5.2 Special CM OLTC combinations ( 3×CMI or CMI+CMII), driven by 
+one or separated motor drive units and used for delta connection of 
+windings or others except neutral point. 
+
+===== PAGE 13/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+12
+Motor drive unit
+SHM-III
+CMA7
+Motor
+Rated power (W)
+750 
+1100
+750 
+1100
+Rated voltage (V)
+380,3AC/N
+380/3AC
+Rated current (A)
+2.1 
+2.8
+2.0 
+2.8
+Rate frequency(Hz)
+50 or 60
+50 or 60
+Rotate speed (r.p.m.)
+1400
+1400
+Rated torque on drive shaft (Nm)
+45 
+66
+18 
+26
+Revolution of the drive shaft per switching operation
+33
+33
+Revolution of the hand crank per switching operation
+33
+33
+Running time per switching operation (S)
+5.6
+About 5
+Max. operation positions
+35
+107
+Voltage for control circuit and heater circuit (V)
+220/AC
+220/AC
+Heater power (W)
+50
+50
+A.C. voltage test to ground (kV/50Hz, 1min)
+2
+2
+Approx. weight (kg)
+73
+90
+Protective degree
+IP66
+IP56
+Mechanical endurance (operations)
+Not less than 2,000,000
+Not less than 800,000
+Table 4  Technical Data of Motor Drive Unit
+Fig.10 Connection Diagram for Multiple CM OLTC Applications
+Note: Please specify if special voltage required for motor, and control & heater circuit.
+Regulating at Coil End of 3-Phase
+Delta Connection
+OLTC Combination
+(CMI+CMII) for the Specific
+Delta Connection
+Regulating at Middle of 3-Phase 
+Delta Connection
+6. Motor drive unit
+CM OLTC may operated by SHM-III or CMA7 motor drive unit according to the requirement, please refer to table 4 
+for technical data.  
+
+===== PAGE 14/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+13
+7. Controllers for On-Load tap changer
+7.1 HMK8 controller  
+HMK8 controller is the device for remote control of SHM-III motor drive unit; it realizes OLTC switching operation 
+through SHM-III. HMK8 can display the OLTC switching operation status and tap positions.   
+HMK8 has BCD code position signal output (contact capacity: AC250V/5A or DC30V/5A) and remote control signal 
+input (non potential contact), it can also communicate with host computer via RS485 interface to realize remote 
+supervising of OLTC position.   
+HMK8 main technical data is as below, refer to HMK8 manual for more details.  
+Working voltage: 380V, 3AC/N 
+Power frequency: 50Hz/60Hz 
+Maximum operation positions: 35 
+Environment temperature: -10℃ to 40℃ Indoor   
+7.2 HMC-3C position indicator  
+HMC-3C OLTC position indicator is a support fitting for CMA7 and CMA9 motor drive unit, it can be used to indicate 
+the OLTC step, and has the function of "1→N", "STOP", "N→1" control as well as remote control indicator lamp, its 
+input is decimal code and output is BCD code. Please refer to HMC-3C manual for details.  
+HMC-3C technical data is as below, refer to manual for more details.  
+Working voltage: 220V AC 
+Power frequency: 50Hz 
+Maximum operation positions: 107 
+Environment temperature: -10℃ to 40℃ Indoor   
+7.3 Automatic voltage regulator ET-SZ6 and HMK-2A 
+Automatic voltage regulator ET-SZ6 and HMK-2A is adopted for OLTC automatic voltage regulation, ET-SZ6 can be 
+used for parallel operation in model of master and slave, please refer to relevant manual for details.   
+8. OLTC accessories
+8.1 Bevel gear unit  
+Bevel gear unit is used for connection horizontal shaft and vertical shaft between OLTC body and motor drive unit, 
+thus driving torque of motor drive unit can be transmitted to on-load tap changer, the overall dimensions of bevel gear 
+unit is shown on appendix 9.26  
+8.2 Protective Relay  
+Protective relay is the one of protective devices for oil-immersed on-load tap changer, when OLTC interior failure 
+produces gas and oil surge, the protective relay contact acts, and switches on to the tripping circuit of the transformer 
+circuit breaker, the transformer will be cut off at once.   
+Protective relay is mounted onto the connection pipe between OLTC head and conservator, make sure that protective 
+relay marked with arrowhead side shall be connected to conservator. Huaming provides two types of protective relay 
+which are QJ4G-25 (with 1 pair of trip contact)  and QJ6-25 (with 2 pairs of trip contact), please refer to appendix 9.28  
+
+===== PAGE 15/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+14
+8.3 Pressure relief devices  
+Pressure relief valve and pressure release cover is the security protective device for oil-immersed OLTC, when 
+OLTC interior fails, oil in oil chamber is gasified and a number of gases produced, thus oil pressure of oil chamber is 
+increased rapidly, OLTC oil compartment will be deformation even explosion if the pressure inside is not released in 
+time, therefore, pressure relief device is necessary to install to avoid failures extending.   
+Pressure relief valve is a auto-sealed valve, when over pressure, the cover is open and pressure will be released, and 
+then it will close again. It can be used repeatedly, and the liquid lost could be controlled to minimum volume when it is 
+acting.   
+Pressure release cover is the weak portion on the OLTC head cover, once oil chamber pressure exceeds adjusted 
+value, the pressure release cover will be broken, thus over-pressure is released, and OLTC oil compartment is 
+protected.   
+Pressure relief valve is a device for low energy failure, and pressure release cover is the device for high energy failure, 
+whereas most of failure of OLTC body is of high energy failure, so our standard offer is OLTC equipped with pressure 
+release cover, and pressure relief valve is only provided when customer specifies.  
+8.4 Oil filter plant  
+Oil filter plant is applied to filter out metal particles and uncombined carbon, and moisture from transformer oil in OLTC 
+oil compartment while OLTC in operation, as a result, OLTC operation reliability has been improved and maintenance 
+interval will be prolonged. It is proposed that those OLTCs for furnace transformer, rectification transformer, which 
+operates in relatively frequent situation, should be fit up with oil filter plant, in addition, there is a must for those OLTCs 
+in ultra-high voltage transformers to furnish with it.  
+9. Appendixes
+
+===== PAGE 16/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+15
+9.1. CM III 500Y/600Y without change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 17/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+16
+9.2. CM III 500Y / 600Y with reversing switch, overall dimensions
+Unit: mm
+
+===== PAGE 18/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+17
+9.3. CM III 500Y / 600Y with coarse change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 19/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+18
+9.4. CM II 500 / 600 without change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 20/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+19
+9.5. CM II 500 / 600 with reversing switch,overall dimensions
+Unit: mm
+
+===== PAGE 21/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+20
+9.6. CM II 500 / 600 with coarse change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 22/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+21
+9.7. CM I 500 / 600 without change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 23/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+22
+9.8. CM I 500 / 600 with reversing switch, overall dimensions
+Unit: mm
+
+===== PAGE 24/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+23
+9.9. CM I 500 / 600 with coarse change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 25/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+24
+9.10. CM I 800 without change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 26/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+25
+9.11. CM I 800 with reversing switch, overall dimensions
+Unit: mm
+
+===== PAGE 27/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+26
+9.12. CM I 800 with coarse change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 28/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+27
+9.13. CM I 1200 / 1500 without change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 29/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+28
+9.14. CM I 1200 / 1500 with reversing switch, overall dimensions
+Unit: mm
+
+===== PAGE 30/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+29
+9.15. CM I 1200 / 1500 with coarse change-over selector, overall dimensions
+Unit: mm
+
+===== PAGE 31/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+30
+9.16. CM OLTC mounted with tie-in resistor, overall dimensions
+Unit: mm
+
+===== PAGE 32/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+31
+9.17. CM tap selector contacts arrangement
+Unit: mm
+
+===== PAGE 33/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+32
+9.18. CM OLTC head flange for standard tank type, overall dimensions
+Unit: mm
+
+===== PAGE 34/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+33
+9.19. CM OLTC head flange with pressure relief valve, overall dimensions
+Unit: mm
+
+===== PAGE 35/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+34
+9.20. Transformer connection flange for CM OLTC, overall dimensions
+Unit: mm
+
+===== PAGE 36/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+35
+9.21. CM OLTC head flange installation for bell-type, overall dimensions
+Unit: mm
+
+===== PAGE 37/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+36
+9.22. Upper gear unit, arrangement and swiveling range
+Unit: mm
+
+===== PAGE 38/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+37
+9.23-1. CM OLTC arrangement drawing-1
+Unit: mm
+
+===== PAGE 39/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+38
+9.23-2. CM OLTC arrangement drawing-2
+Unit: mm
+
+===== PAGE 40/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+39
+Unit: mm
+
+===== PAGE 41/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+40
+9.25. Bevel gear unit, overall & installation dimensions
+Unit: mm
+
+===== PAGE 42/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+41
+9.26. CM I 800 / 1200 / 1500 OLTC,
+parallel connection plate of tap selector terminals, overall dimensions
+Unit: mm
+Connection plate
+CMⅠ800 contacts connection drawing
+CMⅠ1200/1500 contacts connection drawing
+
+===== PAGE 43/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+42
+9.27. Protective relay, overall & installation dimensions
+Type QJ6-25 protective relay 
+Unit: mm
+Type QJ4G-25 protective relay
+
+===== PAGE 44/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+43
+9.28. CM OLTC with multiple coarse and fine tap selector
+Unit: mm
+To meet demand of industrial development, the industrial transformers are needed to provide widely voltage regulation 
+range, CM OLTC can be designed with 106 steps for multiple and fine regulation.
+The general performances of CM on-load tap changer with multiple coarse and fine tap selector is the same as regular 
+models of CM tap changer.
+For CM on-load tap changer with multiple coarse and fine regulation, the number of regulation steps can be obtained 
+according to combinations of fine taps and coarse taps, see table 5 below
+Table 5 Combinations of Fine Taps and Coarse Taps
+Principle diagram of wiring
+10
+12
+14
+16
+18
+3
+29
+35
+41
+47
+53
+4
+39
+47
+55
+63
+71
+5
+49
+59
+69
+79
+89
+6
+59
+71
+83
+95
+107
+No. of fine tap
+positions
+Operation
+positions
+No. of coarse
+tap positions
+
+===== PAGE 45/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+44
+9.29. CM III 500Y/600Y with multiple coarse and fine tap selector, overall dimensions
+Unit: mm
+
+===== PAGE 46/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+45
+9.30. CM I 500/600 with multiple coarse and fine tap selector, overall dimensions
+Unit: mm
+
+===== PAGE 47/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+46
+9.31. CM I 800 with multiple coarse and fine tap selector, overall dimensions 
+Unit: mm
+
+===== PAGE 48/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+47
+9.32. CM I 1200/1500 with multiple coarse and fine tap selector, 
+overall dimensions
+Unit: mm
+
+===== PAGE 49/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+48
+9.33. CM(10070) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 50/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+49
+9.34. CM(10090) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 51/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+50
+9.35. CM(10071W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 52/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+51
+9.36. CM(10091W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 53/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+52
+9.37. CM(10191W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 54/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+53
+9.38. CM(10193W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 55/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+54
+9.39. CM(10191G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 56/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+55
+9.40. CM(10193G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 57/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+56
+9.41. CM(12110) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 58/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+57
+9.42. CM(12111W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 59/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+58
+9.43. CM(12233W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 60/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+59
+9.44. CM(12233G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 61/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+60
+9.45. CM(14130) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 62/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+61
+9.46. CM(14131W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 63/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+62
+9.47. CM(14273W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 64/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+63
+9.48. CM(14273G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 65/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+64
+9.49. CM(16150) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 66/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+65
+9.50. CM(16151W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 67/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+66
+9.51. CM(16313W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 68/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+67
+9.52. CM(16313G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 69/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+68
+9.53. CM(18170) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 70/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+69
+9.54. CM(18171W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 71/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+70
+9.55. CM(18353W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 72/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+71
+9.56. CM(18353G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 73/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+72
+9.57. CM(10491G) connectiondiagram
+Set position shown in above diagram
+
+===== PAGE 74/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+73
+9.58. CM( 10491G) operating position table
+(    Set position)
+Voltage regulation positions
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Fine tap positions
+1
+2
+3
+4
+5
+6
+7
+8
+9
+K
+Coarse tap positions
+K--11
+                                                       10--11 
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+1
+2
+3
+4
+5
+6
+7
+8
+9
+K
+                                                               K--11
+10--12 
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+1
+2
+3
+4
+5
+6
+7
+8
+9
+K
+                                                               K--13
+10--14 
+41
+42
+43
+44
+45
+46
+47
+48
+49
+1
+2
+3
+4
+5
+6
+7
+8
+9
+                                                               K--14
+                                                              10--15
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+1
+2
+3
+4
+5
+6
+7
+8
+9
+K
+                                                              K--12
+10--13 
+
+===== PAGE 75/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+74
+9.59. CM(12591G) connectiondiagram
+Set position shown in above diagram
+
+===== PAGE 76/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+75
+9.60. CM(12591G) operating position table
+(    Set position)
+Voltage regulation positions
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+Fine tap positions
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+K
+Coarse tap positions
+K--13
+                                                        12--13 
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+K
+                                                               K--13
+12--14 
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+K
+                                                               K--14
+12--15 
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+K
+                                                               K--15
+12--16 
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+                                                               K--16
+             12--17 
+
+===== PAGE 77/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+76
+9.61. CM(14551G) connectiondiagram
+Set position shown in above diagram
+
+===== PAGE 78/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+77
+9.62. CM( 14551G) operating position table
+(    Set position)
+Voltage regulation positions
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+Fine tap positions
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+K
+Coarse tap positions
+K--15
+                                                        14--15 
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+K
+                                                                        K--15
+                   14--16 
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+K
+                                                                        K--16
+                   14--17 
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+                                                                        K--17
+                            14--18 
+
+===== PAGE 79/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+78
+Set position shown in above diagram
+
+===== PAGE 80/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+79
+9.64. CM( 16791G) operating position table
+(    Set position)
+Voltage regulation positions
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+Fine tap positions
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+K
+Coarse tap positions
+                                              K--17
+                                            16--17 
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+K
+                                             K--17
+                                            16--18 
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+K
+                                             K--18
+                                            16--19 
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+K
+                                             K--19
+                                            16--20 
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+                                             K--20
+                                            16--21 
+
+===== PAGE 81/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+80
+9.65. CM(181071G) connectiondiagram
+Set position shown in above diagram
+
+===== PAGE 82/83 =====
+HM0.154.301
+TYPE CM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+81
+9.66. CM(181071G) operating position table
+(    Set position)
+Voltage regulation positions
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+Fine tap positions
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+K
+Coarse tap positions
+                                        K--19
+                                       18--19 
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+K
+                                             K--19
+                                            18--20 
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+K
+                                             K--20
+                                            18--21 
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+K
+                                             K--21
+                                            18--22 
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+K
+                                             K--22
+                                            18--23 
+91
+92
+93
+94
+95
+96
+97
+98
+99 100 101 102 103 104 105 106 107
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+                                             K--23
+                                            18--24 
+
+===== PAGE 83/83 =====
+69
+TYPE VCM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+HM0.154.5701
+Printing: FEB.2010
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+Address: 977  Tong Pu  Road, Shanghai, P.R.China  200333
+Tel: +86  21 5270 3965(direct)
++86  21 5270 8966 Ext.
+8688/8123/8698/8158/8110/8658
+Fax: +86  21 5270 2715
+Web:www.huaming.com
+E-mail: export@huaming.com

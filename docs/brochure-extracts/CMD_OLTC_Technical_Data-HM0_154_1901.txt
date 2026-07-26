@@ -1,0 +1,963 @@
+
+===== PAGE 1/59 =====
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+TECHNICAL DATA
+TYPE CMD
+OIL-IMMERSED ON-LOAD TAP CHANGER
+HM0.154.1901
+
+===== PAGE 2/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+1
+General
+1. General⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯3
+2. Technical specifications⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯4
+3. Type explanation⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯5
+4. Terms and definitions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯7
+5. Special designs⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯12
+6. Motor drive units⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯13
+7. Operation controllers⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯14
+8. Accessories⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯14
+9. Appendixes⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯15
+Appendix 1 CMDIII-400/600A overall dimensions, without change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯16
+Appendix 2 CMDIII-400/600A overall dimensions, with reversing switch⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯17
+Appendix 3 CMDIII-400/600A overall dimensions, with coarse change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯18
+Appendix 4 CMDI-400/600A overall dimensions, without change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯19
+Appendix 5 CMDI-400/600A overall dimensions, with reversing switch⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯20
+Appendix 6 CMDI-400/600A overall dimensions, with coarse change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯21
+Appendix 7 CMDIII-1000A overall dimensions, without change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯22
+Appendix 8 CMDIII-1000A overall dimensions, with reversing switch⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯23
+Appendix 9 CMDIII-1000A overall dimensions, with coarse change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯24
+Appendix 10 CMDI-1000A overall dimensions, without change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯25
+Appendix 11 CMDI-1000A overall dimensions, with reversing switch⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯26
+Appendix 12 CMDI-1000A overall dimensions, with coarse change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯27
+Appendix 13 CMDI-1600A overall dimensions, without change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯28
+Appendix 14 CMDI-1600A overall dimensions, with reversing switch⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯29
+Appendix 15 CMDI-1600A overall dimensions, with coarse change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯30
+Appendix 16 CMDI-2400A overall dimensions, without change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯31
+Appendix 17 CMDI-2400A overall dimensions, with reversing switch⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯32
+Appendix 18 CMDI-2400A overall dimensions, with coarse change-over selector⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯33
+Appendix 19 CMD tap selector contacts arrangement⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯34
+Appendix 20 CMD (10070) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯35
+Appendix 21 CMD (10090) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯36
+Appendix 22 CMD (10100) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯37
+Appendix 23 CMD (10051W) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯38
+Appendix 24 CMD (10071W) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯39
+Appendix 25 CMD (10091W) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯40
+Appendix 26 CMD (10193W) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯41
+
+===== PAGE 3/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+2
+Appendix 27 CMD (10191W) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯42
+Appendix 28 CMD (10191G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯43
+Appendix 29 CMD (10193G) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯44
+Appendix 30 CMD (14271W) operating position table and connection diagram⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯45
+Appendix 31 CMD bell-type head flange, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯46
+Appendix 32 CMD bell-type head flange with pressure relief valve, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯47
+Appendix 33 CMD supporting flange, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯48
+Appendix 34 Transformer mounting flange for CMD, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯49
+Appendix 35 By-pass pipe, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯50
+Appendix 36 Bell type structure lifting plate dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯50
+Appendix 37-1 CMD OLTC mounted with tie-in-resistor on cylinder, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯51
+Appendix 37-2 CMD OLTC mounted with tie-in-resistor on plate, overall dimensions⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯51
+Appendix 38 Schematic drawing for connection of horizontal shaft and vertical shaft⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯52
+Appendix 39 Bevel gearbox dimension, applicable for MDU SHM-III & CMA7⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯53
+Appendix 40 Operation key for oil discharge inside tap change oil compartment⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯54
+Appendix 41 Schematic drawing for connecting of CMD OLTC and MDU⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯55
+Appendix 42 Schematic drawing for 3 units of single-phase CMD connection arrangement⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯56
+Appendix 43 Protective relay overall dimension⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯57
+
+===== PAGE 4/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+3
+1. General
+Type CMD on-load tap changer (herein referred as tap changer) is of combined structure, applicable to oil-immersed 
+voltage regulating transformers. The tap changer is composed by diverter switch and tap selector, which is an in-
+tank structure mounted inside the transformer. Diverter switch is in a separate oil compartment. Tap selector is in the 
+same oil as the windings in transformer tank . Tap changer is to be mounted on transformer tank top by means of bell 
+type mounting through a top flange. Tap changer is operated by a motor drive unit. Tap changer and motor drive unit 
+are connected by an upper gearbox, driving shaft and a bevel gear box. Tap changer provides both local and remote 
+operation modes.
+Three-phase Y-connection tap changer is applicable to neutral point, three units of single phase tap changers can be 
+used for any selectable wingding connections for a three phase transformer. Its basic connection diagram is shown in 
+Fig. 1 below.
+a) Linear regulation
+b) Reversing regulation
+Fig.1 Basic Connection Diagram of Tap Winding
+c) Coarse/fine regulation
+
+===== PAGE 5/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+4
+Table 1 Type CMD Series of On-Load Tap Changer Technical Specification
+2. Technical specifications
+Type CMD on-load tap changer complies with IEC 60214-1:2003 standard. Tap changer technical specifications are 
+listed in Table 1 below.
+Item
+Type
+CMDIII
+CMDI
+1
+Max. rated through current (A)
+400
+600
+1000
+400
+600
+1000
+1600
+2400
+2
+Rated frequency (Hz)
+50 or 60
+3
+Connection
+3-phase Y-connection
+for neutral point only
+Single-phase for any selectable
+winding connection
+4
+Max. rated step voltage (V)
+3300
+4000
+3300
+4000
+5
+Rated step capacity
+1320
+1600
+3000
+1320
+1600
+3000
+4400
+5600
+6
+Short-circuit
+current test (kA)
+Thermal (3s)
+6
+8
+12
+6
+8
+12
+20
+24
+Dynamic (peak)
+15
+20
+30
+15
+20
+30
+50
+60
+7
+Max. operating positions
+14 without change-over selector; 27 with change-over selector
+8
+The highest voltage for
+equipment (kV)
+         72.5          
+         126           
+           170
+252
+         140           230             
+           325
+460
+         350
+550          
+            750
+1050
+Rated separate source AC
+withstand voltage (kV/50Hz,1min)
+Rated lightning impulse
+withstand voltage (kV,1.2/50μs)
+9
+Tap selector
+Categorized into B, C, D, DE four sizes
+10
+Mechanical life
+Not less than 800,000 operations
+11
+Electrical life
+Not less than 200,000 operations
+12
+Oil compartment
+of diverter switch
+Service pressure
+0.03 MPa
+Leakage test
+No leakage under 0.08 MPa for 24 hours
+Over pressure
+protection
+Rupture disc bursts at 300±20% KPa
+Protective relay
+Set oil flow speed at 1.0m/s ±10% (≤600A)
+or 1.2m/s ±10% (≥1000A)
+13
+Motor drive unit
+SHM or CMA7
+14
+On line oil filter
+Oil filter is recommended when max. rated through current 
+is 600A and above or OLTC used for industrial applications)
+Insulation to earth
+300
+363
+480
+1100
+1175
+510
+
+===== PAGE 6/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+5
+3. Type explanation
+3.1. Type designation
+Due to the different combinations of no. of phases, maximum rated through current, the highest voltage for equipment, 
+tap selector size and connections, type CMD comes with various models. Hence, the type designation shall provide all 
+the above technical parameter and below is its detailed explanation. 
+CMD   III - 600  Y  /  126  C - 10193W
+Tap selector basic connection method
+Tap selector size
+The highest voltage for equipment (kV)
+OLTC connection method (Y for neutral point only)
+Max. rated through current (A)
+No. of phase
+Product type
+10     19     1     W
+Change-over selector, represented by W, G
+        W: with reserving switch
+        G: with coarse change-over selector
+No. of mid position
+Operating positions
+No. of inherent tap selector contacts
+Fig. 2 Tap Changer Type Designation
+Fig. 3. Tap Selector Basic Connection Method Explanation
+3.2. Tap selector basic connection method
+Because of voltage regulation range difference and winding connection variations, tap selector has a number of 
+different specifications. Tap selector specification is decided by no. of inherent contacts, no. of operating positions, 
+no. of mid positions and type of change-over selector. Please refer to Fig. 3. for indications of different tap selector 
+parameters.
+
+===== PAGE 7/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+6
+Fig. 4 Tap Selector Basic Connection diagram
+
+===== PAGE 8/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+7
+3.3. Tap selector basic connection diagram
+Different transformer tapping corresponds to different tap selector basic connection diagrams. Fig. 4 shows common 
+basic connection diagrams. Special requirement can also be specially designed. 
+4.  Terms and definitions
+4.1. Through-current
+Rated through current IU:  
+The current flows through an on-load tap changer toward the external circuit, which can transferring from one tap to 
+the other at the relevant rated step voltage and which can be carried continuously while meeting the requirement.
+Maximum rated through-current Ium: 
+The highest rated through-current for which the tap changer is designed for and which forms the basis for all current 
+related tests.
+4.2. Step voltage
+Rated step voltage Ui: 
+For each value of rated through current, the highest permissible voltage between terminals which are intended to be 
+connected to successive taps of the transformer.
+Maximum rated step voltage Uim: 
+The highest value of the rated step voltage for which the tap changer is designed. The maximum rated step voltage for 
+type CMD OLTC is 4kV.
+4.3. Step capacity
+Step capacity is the product of step voltage and load current, that is Ps=UI. Rated step capacity is the maximum 
+permissible step capacity for the tap changer under continuous working condition, that is PstN=Iu × Ui. For a certain 
+range of load, its rated step capacity can be represented by the range curve shown in Fig. 5. This range is defined by 
+the maximum rated through-current on the horizontal axis and maximum permissible step voltage on the vertical axis. 
+Loads within the defined curve are the rated values of the tap changer.
+
+===== PAGE 9/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+8
+Fig.6 Estimated Mean Contact Life under
+Average Load Conditions
+4.4. Breaking capacity
+According to stipulations of IEC60214-1, tap changer shall be able to break two times of maximum rated through-
+current and its relevant step voltage for 40 operations. Breaking capacity of type CMD OLTC is Pst.max=2PStN ≈2Ium ×UStN 
+Where,
+PStN: rated step capacity
+Ium: the maximum rated through-current
+UStN: relevant rated step voltage
+4.5. Electrical life of arcing contact
+Fig. 5 Rated Step Capacity of Type CMD OLTC
+The electrical life of type CMD OLTC relates to the 
+current it breaks. Hence the electrical life can be 
+estimated by its relative load. However, as the actual 
+wear of the arcing contact is also subject to various 
+factors during field operation, such as the contact 
+material, transition resistors matching, etc, only the 
+approximate value of electrical life can be given ( as 
+the shadow area in Fig. 6)
+n: Number of operation
+Iu: rated through-current
+Ium: the maximum rated through-current
+
+===== PAGE 10/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+9
+Note:
+When a0 represents insulation of zinc oxide varistors, its insulation is 1.2/50μs, 90kV, 100% 
+responsive; When a0 represents insulation of park gap, its insulation is 1.2/50μs, 90~130kV, 130kV is 
+100% responsive.
+Table 3 Tap Changer Internal Insulation Level
+4.6. Short-circuit current test 
+According to IEC 60214-1: 2003, all contacts continuously carrying the current shall be able to withstand 2s (±10%) 
+short circuit test current without melting, deformation or mechanical damage. Meanwhile the starting peak current 
+value shall be 2.5 (±5%) times of the root means square value of rated short circuit test current. Refer the short circuit 
+test current values to Table 1. Type CMD Series On-Load Tap Changer Technical Specification.
+4.7. Service condition of tap changer
+4.7.1. Service temperature range of tap changer in oil  is -25℃ ~ +100℃
+4.7.2. Service ambient air temperature range of tap changer is -25℃~ +40℃
+4.7.3. Perpendicular deflection between ground and tap changer after being mounted on transformer shall be less 
+          than 2%.
+4.7.4. There shall be no serious dust, explosive gas or corrosive gas on service site
+Remark: Please contact us if special application required. 
+4.8. Internal insulation level of tap changer
+The internal insulation level of type CMD tap changer is categorized into B, C, D, DE four sizes. Refer the internal 
+insulation level to table 2. Basic connection diagram and insulation distance mark is shown in Fig. 7. Internal insulation 
+must be checked when selecting the proper tap changer whether it's qualified for the voltage withstand requirement.
+(unit: kV)
+Designation
+code
+Tap selector size B
+Tap selector size C
+Tap selector size D
+Tap selector size DE
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+1.2/50μs
+50Hz 1min
+a
+265
+50
+365
+82
+490
+105
+550
+120
+b
+265
+50
+350
+82
+490
+146
+550
+160
+a0
+90
+20
+90
+20
+90
+20
+90
+20
+a1
+150
+30
+150
+30
+150
+30
+150
+30
+c1
+500
+145
+550
+180
+590
+225
+660
+230
+c2
+500
+145
+550
+195
+590
+225
+660
+250
+
+===== PAGE 11/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+10
+Fig. 7 Basic Connection Diagram and Insulation Distance Mark
+a: between start and end of a fine tap winding; also between start and end of coarse tap winding;
+b: between any tapping of different fine tap windings, or between ends of different coarse windings;
+a0: between selected and preselected of the diverter switch tapping;
+a1: between any selected and preselected taps of the tap selector
+c1: between the start of coarse tap winding and the current take-off terminal for the same phase;
+c2: between start contacts (-)of coarse winding for different phases.
+Spark Protection Gap ( I≤600A)
+Zinc Oxide Varistor ( I≥1000A)
+Coarse/Fine Regulation
+Linear Regulation 
+Reversing Regulation
+
+===== PAGE 12/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+11
+4.9. Tap changer insulation level to earth
+Tap changer insulation level is the insulation between tap changer live part and grounding part. It is determined by 
+dielectric tests according to IEC-60214-1-2003. The requirement correlates to the transformer tap winding location, 
+regulation range & regulation method, winding connection & arrangement and rated voltage of transformer winding. 
+It's decided by the insulation to earth of transformer tap winding.
+Table 3 Tap Changer Insulation Level to Earth
+The highest voltage for equipment
+Um (kV)
+Rated separate source AC
+withstand voltage(kV/50Hz,1min)
+Rated lightning impulse 
+withstand voltage (1.2/50μs)
+72.5
+140
+350
+126
+230
+550
+170
+325
+750
+252
+460
+1050
+(unit: kV)
+4.10. Tap changer mounting method
+CMD tap changer is mounted to transformer tank top by a head flange. Hence, a mounting flange shall be provided by 
+transformer producer, the dimension of which shall refer to the drawing of Appendix 34. Type CMD tap changer is only 
+applicable to bell type mounting. The supporting flange of the tap changer is only for temporary support during the 
+transformer conductor connection. After putting the bell tank, tap changer shall be fixed to the mounting flange of the 
+transformer. 
+The connection pipes on head flange of Type CMD tap changer have two arrangement models. That is standard 
+and left-right. (Refer details to Appendix 31). For tap changer with current of 1000A or above, only left-right model 
+can be used. For tap changer with current of or less than 600A, either model is applicable and up to the customer's 
+preference. 
+
+===== PAGE 13/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+12
+5. Special designs
+5.1. Potential connection of the tap winding
+For transformers with high voltage rating and big regulation range, during the operation of the change-over selector, 
+the tap winding is disconnected momentarily from the main winding and in a so-called (suspension) status. At that 
+moment, the tap winding takes a new potential which is determined together by the coupling capacitance to ground 
+Ce and coupling capacitance to the adjacent winding Cw. (refer details to Fig.9). Usually this potential is different 
+from the previous potential of the tap winding before the operation. The difference between the two is called bias 
+voltage. This bias voltage turns out to be the recovery voltage on the gap of the change-over selector. When the 
+recovery voltage exceeds a certain critical value, the change-over selector would discharge electricity and produce 
+considerable amount of gas. This could be a serious problem. Therefore, potential connection of the tap winding must 
+be considered when this bias voltage exceeds a certain value, in order to avoid the discharge during the operation of 
+the change-over selector. 
+The permissible recovery voltage to type CMD tap changer is 35kV. In case the bias voltage of the change-over 
+selector exceeds this value, a tie-in resistor with fixed value shall be permanently connected into the tap winding (refer 
+to Fig. 8). The mounting location and dimension of tie-in resistor for CMD can be found in Appendix 37-1 and 37-2. 
+For calculating the change-over selector stress and dimensioning the tie-in resistors, the following details of the 
+transformer specifications required when ordering: 
+a) All transformer performance data: rated capacity, rated voltage, regulation range, connection of  winding and 
+    insulation level, etc.; 
+b) Relative arrangement of winding: relative location between tap winding and adjacent winding or  winding part;
+c) Operating A.C.voltage across windings or layers of windings adjacent to the tap windings
+d) Capacitance between tap winding and part of adjacent winding(Cw)
+e) Capacitance of the tap winding to ground or grounded adjacent windings (if exist) (Ce)
+f) Voltage stress across half the tap winding at lightning impulse voltage test
+g) A.C. voltage across half the tap winding under operation and test conditions.( is normally derived  from order 
+specification sheet for tap changer) 
+Fig. 8  Permanent Connection of
+the Tie-in Resistor Rp
+Fig.9  Winding Arrangement of Reversing
+Regulation of Double Winding Transformer
+
+===== PAGE 14/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+13
+Fig. 10  Basic Connections for Delta-Connected Transformer Winding
+Three Single Phase Regulation at
+Line End of Delta Connection
+One Single Phase + One Twophase
+Regulation at Line End
+Three Single Phase Regulation at
+Middle of Delta Connection
+Motor drive unit
+SHM-III
+CMA7
+Motor
+Rated power (W)
+750 
+1100
+750 
+1100
+Rated voltage (V)
+380,3AC/N
+380/3AC
+Rated current (A)
+2.1 
+2.8
+2.0 
+2.8
+Rate frequency(Hz)
+50 or 60
+50 or 60
+Rotate speed (r.p.m.)
+1400
+1400
+Rated torque on drive shaft (Nm)
+45 
+66
+18 
+26
+Revolution of the drive shaft per switching operation
+33
+33
+Revolution of the hand crank per switching operation
+33
+33
+Running time per switching operation (S)
+5.6
+About 5
+Max. operation positions
+35
+107
+Voltage for control circuit and heater circuit (V)
+220/AC
+220/AC
+Heater power (W)
+50
+50
+A.C. voltage test to ground (kV/50Hz, 1min)
+2
+2
+Approx. weight (kg)
+73
+90
+Protective degree
+IP66
+IP56
+Mechanical endurance (operations)
+Not less than 2,000,000
+Not less than 800,000
+Table 4 Technical Data of Motor Drive Unit
+Note: Please specify if special voltage required for motor, and control & heater circuit.
+5.2. Two phase and single phase of CMD
+Type CMD tap changer can be designed as one motor drive unit (or three motor drive unit) driving three single 
+phase tap changers or one two-phase plus one single phase tap changer, for regulation of delta connection or other 
+regulation locations other than neutral point.
+6. Motor drive unit
+CMD OLTC may be operated by SHM-III or CMA7 motor drive unit according to the requirement, please refer to table 
+4 for technical data. 
+
+===== PAGE 15/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+14
+7. Operation controllers
+7.1 HMK8 controller 
+HMK8 controller is the device for remote control of SHM-III motor drive unit; it realizes OLTC switching operation 
+through SHM-III. HMK8 can display the OLTC switching operation status and tap positions. 
+HMK8 has BCD code position signal output (contact capacity:AC250V/5A or DC30V/5A) and remote control signal 
+input (non potential contact), it can also communicate with host computer via RS485 interface to realize remote 
+supervising of OLTC position. 
+HMK8 main technical data is as below, refer to HMK8 manual for more details. 
+Working voltage: 380V, 3AC/N
+Power frequency: 50Hz/60Hz
+Maximum operation positions: 35
+Environment temperature: -10℃ to 40℃ Indoor 
+7.2 HMC-3C position indicator 
+HMC-3C OLTC position indicator is a support fitting for CMA7 and CMA9 motor drive unit, it can be used to indicate 
+the OLTC position, and has the function of "1→N", "STOP", "N→1" control as well as remote control indicator lamp, 
+its input is decimal code and output is BCD code. Please refer to HMC-3C manual for details. 
+HMC-3C technical data is as below:  
+Working voltage: 220V AC
+Power frequency: 50Hz
+Maximum operation positions: 107
+Environment temperature: -10℃ to 40℃ Indoor 
+7.3 Automatic voltage regulator ET-SZ6 and HMK-2A
+Automatic voltage regulator ET-SZ6 and HMK-2A is adopted for OLTC automatic voltage regulation, ET-SZ6 can be 
+used for parallel operation in model of master and slave; please refer to relevant manual for details. 
+8. Accessories
+8.1. Bevel gearbox 
+Bevel gearbox is used for the inter-connection of tap changer horizontal shaft and motor drive vertical shaft, in order to 
+transfer the motor drive driving torque to the tap changer. Its overall dimension is shown in Appendix.
+8.2. Protective relay 
+Protective relay is the one of protective devices for oil-immersed on-load tap changer, when OLTC interior failure 
+produces gas and oil surge, the protective relay contact acts, and switches on to the tripping circuit of the transformer 
+circuit breaker, the transformer will be cut off at once. 
+Protective relay is mounted onto the connection pipe between OLTC head and conservator, make sure that protective 
+relay marked with arrowhead side shall be connected to conservator. Huaming provides two types of protective relay 
+which are QJ4G-25 (with 1 pair of trip contact) and QJ6-25 (with 2 pairs of trip contact), please refer to Appendix.
+ 
+
+===== PAGE 16/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+15
+8.3. Pressure relief device
+Pressure relief valve and rupture disc are safety protection devices of oil-immersed on-load tap changer. In case 
+tap changer has an internal failure, which decomposes the oil in the compartment and produces large amount gas, 
+the internal pressure inside the oil compartment will increase dramatically. If this pressure couldn't be released, tap 
+changer will be deformed or even explode. Therefore, pressure relief devices can avoid the upgrade of the failure. 
+Pressure relief valve is a self-sealing relief valve. It opens the cover in case of over pressure and re-closes after the 
+pressure is released, which can be used repeatedly and minimize the liquid loss during the operation. 
+The rupture disc is a weak point on the top cover of tap changer. Once the pressure in the oil compartment exceeds 
+the set value, the disc will explode to release the over pressure of the compartment, as a result the oil compartment 
+will be prevented from damage.
+Pressure relief valve is a low-energy failure protection device. The rupture disc is a high-energy protection device. 
+Tap changer failure usually tends to be high-energy failure. Hence, pressure relief valve is not recommended for tap 
+changer, or use it as an assistant protection besides the rupture disc. Therefore, pressure relief valve is an optional 
+accessory of tap changer for customer to select when ordering the tap changer. 
+8.4. On-line oil filter plant 
+On-line oil filter is used to filter the transformer oil inside tap changer in circulation. This device can effectively filter 
+carbon and metallic particles from the oil inside tap changer, and reduce its moisture. As a result, tap changer 
+operation reliability is increased and maintenance interval is extended. For tap changer under frequent operations, 
+such as furnace transformer, rectification transformer etc, the on-line oil filter plant is recommended. Meanwhile, for 
+high rating voltage regulating transformer, on-line oil filter is also recommended. For CMD tap changer with the max. 
+rated current Ium ≥1000A, on-line oil filter must be used.   
+9. Appendixes 
+
+===== PAGE 17/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+16
+Appendix 1. CMDIII-400/600A overall dimensions without change-over selector
+Unit: mm
+
+===== PAGE 18/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+17
+Appendix 2. CMDIII-400/600A overall dimensions with reversing switch
+Unit: mm
+
+===== PAGE 19/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+18
+Appendix 3. CMDIII-400/600A overall dimensions
+with coarse change-over selector
+Unit: mm
+
+===== PAGE 20/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+19
+Appendix 4. CMDI-400/600A overall dimensions without change-over selector
+Unit: mm
+
+===== PAGE 21/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+20
+Appendix 5. CMDI-400/600A overall dimensions with reversing switch
+Unit: mm
+
+===== PAGE 22/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+21
+Appendix 6. CMDI-400/600A overall dimensions with coarse change-over selector
+Unit: mm
+
+===== PAGE 23/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+22
+Appendix 7. CMDIII-1000A overall dimensions without change-over selector
+Unit: mm
+
+===== PAGE 24/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+23
+Appendix 8. CMDIII-1000A overall dimensions with reversing switch
+Unit: mm
+
+===== PAGE 25/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+24
+Appendix 9. CMDIII-1000A overall dimensions with coarse change-over selector
+Unit: mm
+
+===== PAGE 26/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+25
+Appendix 10. CMDI-1000A overall dimensions without change-over selector
+Unit: mm
+
+===== PAGE 27/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+26
+Appendix 11. CMDI-1000A overall dimensions with reversing switch
+Unit: mm
+
+===== PAGE 28/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+27
+Appendix 12. CMDI-1000A overall dimensions with coarse change-over selector
+Unit: mm
+
+===== PAGE 29/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+28
+Appendix 13. CMDI-1600A overall dimensions without change-over selector
+Unit: mm
+
+===== PAGE 30/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+29
+Appendix 14. CMDI-1600A overall dimensions with reversing switch
+Unit: mm
+
+===== PAGE 31/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+30
+Appendix 15. CMDI-1600A overall dimensions with coarse change-over selector
+Unit: mm
+
+===== PAGE 32/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+31
+Appendix 16. CMDI-2400A overall dimensions without change-over selector
+Unit: mm
+
+===== PAGE 33/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+32
+Appendix 17. CMDI-2400A overall dimensions with reversing switch
+Unit: mm
+
+===== PAGE 34/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+33
+Appendix 18. CMDI-2400A overall dimensions with coarse change-over selector
+Unit: mm
+
+===== PAGE 35/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+34
+Appendix 19. CMD tap selector contacts arrangement
+Unit: mm
+
+===== PAGE 36/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+35
+Appendix 20. CMD (10070) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 37/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+36
+Appendix 21. CMD (10090) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 38/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+37
+Appendix 22. CMD (10100) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 39/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+38
+Appendix 23. CMD (10051W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 40/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+39
+Appendix 24. CMD (10071W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 41/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+40
+Appendix 25. CMD (10091W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 42/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+41
+Appendix 26. CMD (10193W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 43/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+42
+Appendix 27. CMD (10191W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 44/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+43
+Appendix 28. CMD (10191G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 45/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+44
+Appendix 29. CMD (10193G) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 46/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+45
+Appendix 30. CMD (14271W) operating position table and connection diagram
+Drawing is shown at the set position
+
+===== PAGE 47/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+46
+Appendix 31. CMD bell-type head flange, overall dimensions
+Unit: mm
+
+===== PAGE 48/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+47
+Appendix 32. CMD bell-type head flange with pressure relief 
+valve overall dimensions
+Unit: mm
+
+===== PAGE 49/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+48
+Appendix 33. CMD supporting flange overall dimensions
+Unit: mm
+
+===== PAGE 50/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+49
+Unit: mm
+Appendix 34. Transformer mounting flange for CMD overall dimensions
+
+===== PAGE 51/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+50
+Appendix 35. By-pass pipe, overall dimensions
+Unit: mm
+Appendix 36. Bell type structure lifting plate dimensions
+
+===== PAGE 52/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+51
+Unit: mm
+Appendix 37-2. CMD OLTC mounted with tie-in-resistor 
+on plate overall dimensions
+Appendix 37-1. CMD OLTC mounted with tie-in-resistor 
+on cylinder overall dimensions
+
+===== PAGE 53/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+52
+Unit: mm
+Appendix 38. Schematic drawing for connection of 
+horizontal shaft and vertical shaft
+
+===== PAGE 54/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+53
+Appendix 39. Bevel gearbox dimension, applicable for MDU SHM-III & CMA7
+Unit: mm
+
+===== PAGE 55/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+54
+Appendix 40. Operation key for oil discharge inside tap change oil compartment
+Unit: mm
+
+===== PAGE 56/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+55
+Appendix 41. Schematic drawing for connecting of CMD OLTC and MDU
+Unit: mm
+
+===== PAGE 57/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+56
+Appendix 42. Schematic drawing for 3 units of 
+single phase CMD connection arrangement
+Unit: mm
+
+===== PAGE 58/59 =====
+HM0.154.1901
+TYPE CMD OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+57
+Unit: mm
+Appendix 43. Protective relay overall dimension
+Type QJ6-25 protective relay      
+Type QJ4G-25 protective relay
+
+===== PAGE 59/59 =====
+69
+TYPE VCM OIL-IMMERSED ON-LOAD TAP CHANGER TECHNICAL DATA
+HM0.154.5701
+Printing: FEB.2010
+SHANGHAI HUAMING POWER EQUIPMENT CO., LTD.
+Address: 977  Tong Pu  Road, Shanghai, P.R.China  200333
+Tel: +86  21 5270 3965(direct)
++86  21 5270 8966 Ext.
+8688/8123/8698/8158/8110/8658
+Fax: +86  21 5270 2715
+Web:www.huaming.com
+E-mail: export@huaming.com
