@@ -31,9 +31,13 @@ npm test
 npm run build
 ```
 
+## Live
+
+**Production:** https://oltc-selector.vercel.app
+
 ## Deploy
 
-Static Vite build (`dist/`). GitHub Pages or Vercel both fine. `base: "./"` for project pages.
+Static Vite build (`dist/`). Linked to Vercel project `oltc-selector` (GitHub auto-deploy on push). `base: "./"` for project pages.
 
 ## Privacy
 
