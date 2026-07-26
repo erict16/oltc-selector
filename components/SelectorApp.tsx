@@ -343,8 +343,8 @@ export function SelectorApp() {
               label={zh ? "开关连接" : "OLTC connection"}
               tip={
                 zh
-                  ? "开关装在哪：Y 星点 / D 角形或线端。不是 Dyn。"
-                  : "Where the OLTC sits: Y neutral / D delta. Not Dyn."
+                  ? "开关装在哪：Y 星点 / D 角形或线端。"
+                  : "Where the OLTC sits: Y neutral / D delta."
               }
             >
               <select
