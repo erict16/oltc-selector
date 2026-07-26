@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   title: "OLTC Selector · 有载开关选型",
   description:
     "Personal private OLTC type-designation helper. Indicative only — not an official manufacturer tool or OS.",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
