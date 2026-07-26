@@ -39,7 +39,8 @@ describe("selectOltc fixtures", () => {
     const out = selectOltc(FIXTURES.ueHwv.input);
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toBe(FIXTURES.ueHwv.expectModel);
-    expect(out.results[0].modelWithMdu).toBe(FIXTURES.ueHwv.expectWithMdu);
+    expect(out.results[0].modelWithMdu).toBe(FIXTURES.ueHwv.expectModel);
+    expect(out.results[0].selectorSize).toBe("");
   });
 
   it("Wilson-style SHZV includes selector size D", () => {
@@ -68,5 +69,19 @@ describe("selectOltc fixtures", () => {
     const codes = out.results.map((r) => r.seriesCode);
     expect(codes.some((c) => c === "SHZV" || c === "CM2")).toBe(true);
     expect(out.results[0].model.includes("/126")).toBe(true);
+  });
+
+  it("CV2 compound type has no selector size letter", () => {
+    const out = selectOltc({
+      ...FIXTURES.cv2NoSelectorSize.input,
+      // force low step so CV2 stays eligible
+      preferVacuum: true,
+    });
+    expect(out.ok).toBe(true);
+    const cv2 = out.results.find((r) => r.seriesCode === "CV2");
+    if (cv2) {
+      expect(cv2.selectorSize).toBe("");
+      expect(cv2.model).not.toMatch(/\/\d+(\.\d+)?[BCDE]/);
+    }
   });
 });

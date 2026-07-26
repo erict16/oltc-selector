@@ -156,10 +156,10 @@ export function selectOltc(input: SelectInput): SelectOutput {
       ok: false,
       results: [],
       errorsEn: [
-        "No OLTC family matches this mounting / medium / phase combination. Adjust application filters or contact Huaming engineering.",
+        "No OLTC family matches this mounting / medium / phase combination. Adjust application filters or contact engineering.",
       ],
       errorsZh: [
-        "没有系列匹配当前安装位置/介质/相数。请调整应用条件，或联系华明工程。",
+        "没有系列匹配当前安装位置/介质/相数。请调整应用条件，或联系工程确认。",
       ],
     };
   }
@@ -205,13 +205,12 @@ export function selectOltc(input: SelectInput): SelectOutput {
         : input.connection;
 
     let mduStr = "";
-    const mduPref = input.mdu ?? "auto";
-    if (mduPref === "none") {
-      mduStr = "";
-    } else if (mduPref === "auto" || !mduPref) {
-      mduStr = s.id === "hwv" ? "CMA7" : s.defaultMdu;
-    } else {
+    const mduPref = input.mdu ?? "none";
+    // MDU / motor drive is not a selection requirement — only attach when explicitly requested
+    if (mduPref && mduPref !== "none" && mduPref !== "auto") {
       mduStr = mduPref;
+    } else if (mduPref === "auto") {
+      mduStr = s.defaultMdu;
     }
 
     const model = buildModelString(
@@ -289,10 +288,10 @@ export function selectOltc(input: SelectInput): SelectOutput {
       input.mounting === "in_tank"
     ) {
       warningsEn.push(
-        "Switching >50/day: vacuum OLTC (SHZV/CM2/CV2) is usually preferred over oil switching.",
+        "High switching duty: vacuum OLTC (SHZV/CM2/CV2) is usually preferred over oil switching.",
       );
       warningsZh.push(
-        "日切换 >50 次：通常优先真空有载（SHZV/CM2/CV2）而非油切换。",
+        "切换频繁时：通常优先真空有载（SHZV/CM2/CV2）而非油切换。",
       );
     }
 
@@ -310,10 +309,10 @@ export function selectOltc(input: SelectInput): SelectOutput {
     }
 
     warningsEn.push(
-      "Indicative selection from published technical data / type designation rules. Special design, retrofit flanges, and final OS require Huaming engineering confirmation.",
+      "Indicative selection from published technical data / type designation rules. Special design, retrofit flanges, and final OS require engineering confirmation.",
     );
     warningsZh.push(
-      "本结果依据公开技术样本与型号规则的选型建议。特殊设计、改造法兰与最终 OS 须华明工程确认。",
+      "本结果依据公开技术样本与型号规则的选型建议。特殊设计、改造法兰与最终 OS 须工程确认。",
     );
 
     let confidence = 0.85;
@@ -399,10 +398,9 @@ export const FIXTURES = {
       positions: 19,
       midPositions: 3 as const,
       pitch: 10 as const,
-      mdu: "CMA7" as const,
+      mdu: "none" as const,
     },
     expectModel: "HWVIII-400Y/72.5-10193W",
-    expectWithMdu: "HWVIII-400Y/72.5-10193W+CMA7",
   },
   wilsonShzv: {
     input: {
@@ -419,8 +417,23 @@ export const FIXTURES = {
       midPositions: 3 as const,
       pitch: 12 as const,
       selectorSize: "D" as const,
-      mdu: "CMA7" as const,
+      mdu: "none" as const,
     },
     expectContains: "SHZVIII-1000Y/170D-12233W",
+  },
+  cv2NoSelectorSize: {
+    input: {
+      mounting: "in_tank" as const,
+      medium: "oil_vacuum" as const,
+      preferVacuum: true,
+      phases: "III" as const,
+      connection: "Y" as const,
+      throughCurrentA: 350,
+      umKv: 40.5,
+      stepVoltageV: 1000,
+      regulation: "reversing" as const,
+      positions: 19,
+      mdu: "none" as const,
+    },
   },
 };

@@ -3,6 +3,7 @@ import { FIXTURES, selectOltc } from "./lib/engine";
 import type { Lang, ModelResult, SelectInput } from "./lib/types";
 import { t } from "./i18n/messages";
 import { positionsFromPlusMinus } from "./lib/tapCode";
+import { SERIES } from "./lib/catalog";
 
 const defaultInput: SelectInput = {
   mounting: "in_tank",
@@ -18,38 +19,53 @@ const defaultInput: SelectInput = {
   pitch: 10,
   midPositions: 3,
   selectorSize: "auto",
-  mdu: "auto",
+  mdu: "none", // not part of selection requirements — model without drive
 };
 
 function Field({
   label,
+  hint,
   children,
 }: {
   label: string;
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
     <label className="field">
       <span className="field-label">{label}</span>
       {children}
+      {hint ? <span className="field-hint">{hint}</span> : null}
     </label>
   );
 }
 
+/** Selector grade only for combined (split) in-tank types — not CV/CV2 compound. */
+function showSelectorSizeField(input: SelectInput): boolean {
+  if (input.mounting === "dry_type" || input.mounting === "reactor") return false;
+  if (
+    input.mounting === "on_tank" ||
+    input.mounting === "external_compartment"
+  ) {
+    return false; // HWV commercial strings omit grade
+  }
+  // in-tank: combined families use B/C/D/DE
+  return true;
+}
+
 export default function App() {
-  const [lang, setLang] = useState<Lang>("en");
+  const [lang, setLang] = useState<Lang>("zh");
   const [input, setInput] = useState<SelectInput>(defaultInput);
   const [pm, setPm] = useState<string>("9");
   const [advanced, setAdvanced] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
-  const [ran, setRan] = useState(true);
 
   const patch = <K extends keyof SelectInput>(key: K, value: SelectInput[K]) => {
     setInput((s) => ({ ...s, [key]: value }));
-    setRan(true);
   };
 
   const output = useMemo(() => selectOltc(input), [input]);
+  const selectorVisible = showSelectorSizeField(input);
 
   const copy = async (text: string) => {
     try {
@@ -74,14 +90,13 @@ export default function App() {
       plusMinusSteps: n,
       positions: pos,
     }));
-    setRan(true);
   };
 
   return (
     <div className="page">
       <header className="top">
-        <div>
-          <p className="eyebrow">Huaming · OLTC</p>
+        <div className="brand-block">
+          <p className="eyebrow">OLTC · Type designation</p>
           <h1>{t(lang, "brand")}</h1>
           <p className="tagline">{t(lang, "tagline")}</p>
         </div>
@@ -101,9 +116,8 @@ export default function App() {
           type="button"
           className="ghost"
           onClick={() => {
-            setInput({ ...FIXTURES.ueHwv.input });
+            setInput({ ...FIXTURES.ueHwv.input, mdu: "none" });
             setPm("9");
-            setRan(true);
           }}
         >
           {t(lang, "presetUe")}
@@ -112,9 +126,8 @@ export default function App() {
           type="button"
           className="ghost"
           onClick={() => {
-            setInput({ ...FIXTURES.wilsonShzv.input });
+            setInput({ ...FIXTURES.wilsonShzv.input, mdu: "none" });
             setPm("");
-            setRan(true);
           }}
         >
           {t(lang, "presetShzv")}
@@ -126,7 +139,6 @@ export default function App() {
           className="panel form"
           onSubmit={(e) => {
             e.preventDefault();
-            setRan(true);
           }}
         >
           <h2>{t(lang, "apply")}</h2>
@@ -227,19 +239,6 @@ export default function App() {
                 onChange={(e) => patch("stepVoltageV", Number(e.target.value))}
               />
             </Field>
-            <Field label={t(lang, "switches")}>
-              <input
-                type="number"
-                min={0}
-                value={input.switchesPerDay ?? ""}
-                onChange={(e) =>
-                  patch(
-                    "switchesPerDay",
-                    e.target.value === "" ? undefined : Number(e.target.value),
-                  )
-                }
-              />
-            </Field>
           </div>
 
           <h2>{t(lang, "tapping")}</h2>
@@ -267,7 +266,7 @@ export default function App() {
                 min={0}
                 value={pm}
                 onChange={(e) => applyPm(e.target.value)}
-                placeholder="e.g. 8 → 19 pos"
+                placeholder="e.g. 9 → 19 pos"
               />
             </Field>
             <Field label={t(lang, "positions")}>
@@ -283,37 +282,28 @@ export default function App() {
                 }
               />
             </Field>
-            <Field label={t(lang, "selectorSize")}>
-              <select
-                value={input.selectorSize ?? "auto"}
-                onChange={(e) =>
-                  patch(
-                    "selectorSize",
-                    e.target.value as SelectInput["selectorSize"],
-                  )
-                }
+            {selectorVisible && (
+              <Field
+                label={t(lang, "selectorSize")}
+                hint={t(lang, "selectorSizeHint")}
               >
-                <option value="auto">{t(lang, "size_auto")}</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-                <option value="DE">DE</option>
-              </select>
-            </Field>
-            <Field label={t(lang, "mdu")}>
-              <select
-                value={input.mdu ?? "auto"}
-                onChange={(e) =>
-                  patch("mdu", e.target.value as SelectInput["mdu"])
-                }
-              >
-                <option value="auto">Auto</option>
-                <option value="CMA7">CMA7</option>
-                <option value="SHM-D">SHM-D</option>
-                <option value="SHM-DA">SHM-DA</option>
-                <option value="none">—</option>
-              </select>
-            </Field>
+                <select
+                  value={input.selectorSize ?? "auto"}
+                  onChange={(e) =>
+                    patch(
+                      "selectorSize",
+                      e.target.value as SelectInput["selectorSize"],
+                    )
+                  }
+                >
+                  <option value="auto">{t(lang, "size_auto")}</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="DE">DE</option>
+                </select>
+              </Field>
+            )}
           </div>
 
           <button
@@ -328,38 +318,6 @@ export default function App() {
             <>
               <h3>{t(lang, "advanced")}</h3>
               <div className="grid2">
-                <Field label={t(lang, "pitch")}>
-                  <select
-                    value={input.pitch ?? 10}
-                    onChange={(e) =>
-                      patch(
-                        "pitch",
-                        Number(e.target.value) as SelectInput["pitch"],
-                      )
-                    }
-                  >
-                    {[10, 12, 14, 16, 18].map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label={t(lang, "mid")}>
-                  <select
-                    value={input.midPositions ?? 3}
-                    onChange={(e) =>
-                      patch(
-                        "midPositions",
-                        Number(e.target.value) as 0 | 1 | 3,
-                      )
-                    }
-                  >
-                    <option value={0}>0</option>
-                    <option value={1}>1</option>
-                    <option value={3}>3</option>
-                  </select>
-                </Field>
                 <Field label={t(lang, "bil")}>
                   <input
                     type="number"
@@ -417,7 +375,7 @@ export default function App() {
             <p className="muted">{t(lang, "hwvNote")}</p>
           </div>
 
-          {ran && !output.ok && (
+          {!output.ok && (
             <div className="error-box">
               {(lang === "zh" ? output.errorsZh : output.errorsEn).map((e) => (
                 <p key={e}>{e}</p>
@@ -425,11 +383,10 @@ export default function App() {
             </div>
           )}
 
-          {ran &&
-            output.ok &&
+          {output.ok &&
             output.results.map((r, i) => (
               <ResultCard
-                key={r.modelWithMdu + i}
+                key={r.model + i}
                 r={r}
                 lang={lang}
                 primary={i === 0}
@@ -458,17 +415,29 @@ function ResultCard({
   copied: string | null;
   onCopy: (s: string) => void;
 }) {
+  const series = SERIES.find((s) => s.id === r.seriesId);
   const reasons = lang === "zh" ? r.reasonsZh : r.reasonsEn;
   const warnings = lang === "zh" ? r.warningsZh : r.warningsEn;
+  const structureLabel =
+    series?.structure === "compound"
+      ? t(lang, "structureCompound")
+      : t(lang, "structureCombined");
+
   return (
     <article className={`card ${primary ? "card-primary" : ""}`}>
       {primary && <span className="badge">#1</span>}
-      <code className="model">{r.modelWithMdu}</code>
-      <p className="model-sub">{r.model}</p>
+      <code className="model">{r.model}</code>
+      {r.mdu ? (
+        <p className="model-sub">
+          {t(lang, "mduNote")}: {r.mdu}
+          {r.modelWithMdu !== r.model ? ` · ${r.modelWithMdu}` : ""}
+        </p>
+      ) : null}
       <div className="meta-row">
+        <span className="pill">{structureLabel}</span>
         <span>
           Um {r.umToken}
-          {r.selectorSize ? ` · size ${r.selectorSize}` : ""}
+          {r.selectorSize ? ` · ${r.selectorSize}` : ""}
         </span>
         <span>
           {r.connection} · {r.currentA} A · {r.phases}
@@ -481,11 +450,8 @@ function ResultCard({
         </span>
       </div>
       <div className="card-actions">
-        <button type="button" className="primary" onClick={() => onCopy(r.modelWithMdu)}>
-          {copied === r.modelWithMdu ? t(lang, "copied") : t(lang, "copy")}
-        </button>
-        <button type="button" className="ghost" onClick={() => onCopy(r.model)}>
-          {lang === "zh" ? "复制（无机构）" : "Copy without MDU"}
+        <button type="button" className="primary" onClick={() => onCopy(r.model)}>
+          {copied === r.model ? t(lang, "copied") : t(lang, "copy")}
         </button>
       </div>
       <details open={primary}>
