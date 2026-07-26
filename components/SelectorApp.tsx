@@ -338,7 +338,6 @@ export function SelectorApp() {
                   : undefined
               }
             >
-              {/* no under-label for catalogue mode — option “自定义” is enough */}
               <select
                 className={controlClass}
                 value={
