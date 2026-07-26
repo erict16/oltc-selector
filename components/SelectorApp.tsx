@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   CURRENT_MENU,
   LINEAR_POSITION_OPTIONS,
-  PM_STEP_OPTIONS,
   POSITION_OPTIONS,
   STEP_VOLTAGE_OPTIONS_V,
   UM_OPTIONS_KV,
@@ -14,6 +13,7 @@ import { FIXTURES, selectOltc } from "@/lib/engine";
 import {
   midFromPlusMinus,
   pitchFromPlusMinus,
+  pmStepOptionsFor,
   positionsFromPlusMinus,
 } from "@/lib/tapCode";
 import type { Lang, ModelResult, SelectInput, SelectOutput } from "@/lib/types";
@@ -171,7 +171,10 @@ export function SelectorApp() {
       }));
       return;
     }
-    const n = pm && Number(pm) > 0 ? Number(pm) : 9;
+    // G brochure set starts at ±8; clamp small W-only steps when switching to G
+    const allowed = pmStepOptionsFor(reg);
+    let n = pm && Number(pm) > 0 ? Number(pm) : 8;
+    if (!allowed.includes(n)) n = allowed[0] ?? 8;
     setPm(String(n));
     setInput((s) => ({
       ...s,
@@ -265,6 +268,7 @@ export function SelectorApp() {
         : `${input.positions} positions`
       : null;
 
+  const pmOptions = pmStepOptionsFor(input.regulation);
   const iIsCustom = iCustom || !isMenuCurrent(input.throughCurrentA);
 
   return (
@@ -492,7 +496,7 @@ export function SelectorApp() {
                   value={pm}
                   onChange={(e) => applyPm(e.target.value)}
                 >
-                  {PM_STEP_OPTIONS.map((n) => (
+                  {pmOptions.map((n) => (
                     <option key={n} value={String(n)}>
                       ±{n}
                       {zh ? " 级" : ""}

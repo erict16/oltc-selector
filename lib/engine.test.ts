@@ -80,6 +80,14 @@ describe("tap codes W/G (brochure Fig. 3-3)", () => {
     ).toBe("12233G");
   });
 
+  it("G menu is ±8…±17 only (not ±4…±7)", async () => {
+    const { pmStepOptionsFor } = await import("./tapCode");
+    expect(pmStepOptionsFor("coarse_fine")).toEqual([
+      8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+    ]);
+    expect(pmStepOptionsFor("reversing")[0]).toBe(4);
+  });
+
   it("case1-style ±8 coarse-fine yields 10193G", () => {
     const out = selectOltc({
       ...FIXTURES.case1Cv2.input,

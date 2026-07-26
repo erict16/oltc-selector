@@ -39,10 +39,28 @@ export const PM_TAP_MAP: Record<
   17: { pitch: 18, positions: 35, mid: 1 }, // 18351W / 18351G
 };
 
-/** ± options shown for reversing (W) and coarse–fine (G) — same brochure set */
-export const PM_STEP_OPTIONS = [
+/**
+ * Reversing (W): full brochure set including small ±4…±7 (10091W…).
+ * Coarse–fine (G): Fig. 3-3 G rows start at ±8 / ±9 (10193G / 10191G) through ±17.
+ *   Brochure text: max ±9/11/13/15/17 (mid1) and standard mid3 ±8/10/12/14/16.
+ *   Do not offer ±4…±7 for G — those diagrams are W-family small pitches.
+ */
+export const PM_STEP_OPTIONS_W = [
   4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 ] as const;
+
+export const PM_STEP_OPTIONS_G = [
+  8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+] as const;
+
+/** Union for maps / reverse lookup */
+export const PM_STEP_OPTIONS = PM_STEP_OPTIONS_W;
+
+export function pmStepOptionsFor(regulation: Regulation): readonly number[] {
+  if (regulation === "coarse_fine") return PM_STEP_OPTIONS_G;
+  if (regulation === "reversing") return PM_STEP_OPTIONS_W;
+  return [];
+}
 
 export function positionsFromPlusMinus(n: number): number {
   if (n <= 0) return 0;
