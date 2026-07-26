@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
   CURRENT_MENU,
-  CURRENT_OPTIONS_A,
   LINEAR_POSITION_OPTIONS,
   PM_STEP_OPTIONS,
   POSITION_OPTIONS,
