@@ -47,16 +47,16 @@ const EXAMPLES: {
     pm: "8",
     zh: "小容量 Δ",
     en: "Small Δ",
-    hintZh: "CV2 · 33 kV",
-    hintEn: "CV2 · 33 kV",
+    hintZh: "CV2 · 33 kV 线端",
+    hintEn: "CV2 · 33 kV delta / line end",
   },
   {
     key: "case2Cm2",
     pm: "8",
     zh: "中压 Y",
     en: "MV Y",
-    hintZh: "CM2 · 72.5C",
-    hintEn: "CM2 · 72.5C",
+    hintZh: "CM2 · 72.5C 星点",
+    hintEn: "CM2 · 72.5C neutral point",
   },
   {
     key: "case5Cv2_145",
@@ -64,7 +64,7 @@ const EXAMPLES: {
     zh: "145 kV",
     en: "145 kV",
     hintZh: "CV2 · 线端",
-    hintEn: "CV2 · line",
+    hintEn: "CV2 · line-end regulation",
   },
 ];
 
@@ -134,7 +134,7 @@ function iRoundTip(lang: Lang, wanted: number) {
   const uniq = [...new Set(pools)].sort((a, b) => a - b);
   const n = nearestCurrent(wanted, uniq);
   if (n == null || Math.abs(n - wanted) < 0.5) return "";
-  return lang === "zh" ? `目录上靠 ${n} A` : `Ceil → ${n} A`;
+  return lang === "zh" ? `目录上靠 ${n} A` : `Rounds up to ${n} A`;
 }
 
 export function SelectorApp() {
@@ -262,7 +262,7 @@ export function SelectorApp() {
     !isLinear && input.positions != null
       ? zh
         ? `${input.positions} 位`
-        : `${input.positions} pos`
+        : `${input.positions} positions`
       : null;
 
   const iIsCustom = iCustom || !isCatalogueCurrent(input.throughCurrentA);
@@ -272,12 +272,12 @@ export function SelectorApp() {
       <header className="mb-6 flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="font-[family-name:var(--font-display)] text-[1.65rem] font-semibold tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.8rem]">
-            {zh ? "有载开关选型" : "OLTC selector"}
+            {zh ? "有载开关选型" : "OLTC Selector"}
           </h1>
           <p className="mt-1 text-[0.9rem] text-[var(--color-muted)]">
             {zh
               ? "填工况，点选型，拿最低满足型号。"
-              : "Enter duty, run select, get the lowest fit."}
+              : "Enter the duty, run Select, get the lowest-fit type."}
           </p>
         </div>
         <button
@@ -301,12 +301,12 @@ export function SelectorApp() {
         >
           <div className="mb-4 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
-              {zh ? "工况" : "Duty"}
+              {zh ? "工况" : "Duty parameters"}
             </h2>
             <div
               className="flex flex-wrap gap-1.5"
               role="group"
-              aria-label={zh ? "示例工况" : "Example duties"}
+              aria-label={zh ? "示例工况" : "Load an example"}
             >
               {EXAMPLES.map((ex) => {
                 const on = activeExample === ex.key;
@@ -354,7 +354,7 @@ export function SelectorApp() {
                       patch("throughCurrentA", n ?? 400);
                     }}
                   >
-                    {zh ? "目录" : "List"}
+                    {zh ? "目录" : "Ratings"}
                   </button>
                 ) : (
                   <button
@@ -413,7 +413,11 @@ export function SelectorApp() {
               )}
             </Field>
 
-            <Field label={zh ? "最高电压 Um" : "Um"}>
+            <Field
+              label={
+                zh ? "最高电压 Um" : "Highest voltage Um"
+              }
+            >
               <select
                 className={controlClass}
                 value={String(input.umKv)}
@@ -427,7 +431,9 @@ export function SelectorApp() {
               </select>
             </Field>
 
-            <Field label={zh ? "开关连接" : "OLTC connection"}>
+            <Field
+              label={zh ? "开关连接" : "Connection"}
+            >
               <select
                 className={controlClass}
                 value={input.connection}
@@ -438,15 +444,19 @@ export function SelectorApp() {
                   )
                 }
               >
-                <option value="Y">{zh ? "Y · 星点" : "Y · neutral"}</option>
+                <option value="Y">
+                  {zh ? "Y · 星点" : "Y · neutral point"}
+                </option>
                 <option value="D">
-                  {zh ? "D · 角形 / 线端" : "D · delta / line"}
+                  {zh ? "D · 角形 / 线端" : "D · delta / line end"}
                 </option>
                 <option value="any">{zh ? "不限" : "Any"}</option>
               </select>
             </Field>
 
-            <Field label={zh ? "调压方式" : "Regulation"}>
+            <Field
+              label={zh ? "调压方式" : "Tap winding"}
+            >
               <select
                 className={controlClass}
                 value={input.regulation}
@@ -458,16 +468,16 @@ export function SelectorApp() {
                   {zh ? "正反调（W）" : "Reversing (W)"}
                 </option>
                 <option value="coarse_fine">
-                  {zh ? "粗细调（G）" : "Coarse-fine (G)"}
+                  {zh ? "粗细调（G）" : "Coarse–fine (G)"}
                 </option>
                 <option value="linear">
-                  {zh ? "线性调（无转换）" : "Linear (no CO)"}
+                  {zh ? "线性调（无转换）" : "Linear (no change-over)"}
                 </option>
               </select>
             </Field>
 
             {isLinear ? (
-              <Field label={zh ? "工作位置数" : "Positions"}>
+              <Field label={zh ? "工作位置数" : "Service positions"}>
                 <select
                   className={controlClass}
                   value={input.positions ?? 9}
@@ -483,7 +493,13 @@ export function SelectorApp() {
             ) : (
               <Field
                 label={zh ? "± 级数" : "± steps"}
-                tip={posHint ? (zh ? `→ ${posHint}` : `→ ${posHint}`) : undefined}
+                tip={
+                  posHint
+                    ? zh
+                      ? `→ ${posHint}`
+                      : `→ ${posHint}`
+                    : undefined
+                }
               >
                 <select
                   className={controlClass}
@@ -497,14 +513,14 @@ export function SelectorApp() {
                     </option>
                   ))}
                   <option value="">
-                    {zh ? "自定义位置…" : "Custom pos…"}
+                    {zh ? "自定义位置…" : "Custom positions…"}
                   </option>
                 </select>
               </Field>
             )}
 
             {!isLinear && !pm ? (
-              <Field label={zh ? "工作位置数" : "Positions"}>
+              <Field label={zh ? "工作位置数" : "Service positions"}>
                 <select
                   className={controlClass}
                   value={input.positions ?? 19}
@@ -526,7 +542,9 @@ export function SelectorApp() {
               </Field>
             ) : null}
 
-            <Field label={zh ? "最大级电压 Ust" : "Max step voltage Ust"}>
+            <Field
+              label={zh ? "最大级电压 Ust" : "Max step voltage Ust"}
+            >
               <select
                 className={controlClass}
                 value={
@@ -599,18 +617,24 @@ export function SelectorApp() {
                         )
                       }
                     >
-                      <option value="in_tank">{zh ? "箱内" : "In-tank"}</option>
+                      <option value="in_tank">
+                        {zh ? "箱内" : "In tank"}
+                      </option>
                       <option value="on_tank">
-                        {zh ? "箱顶 / 侧" : "On-tank"}
+                        {zh ? "箱顶 / 侧" : "On tank / side"}
                       </option>
                       <option value="external_compartment">
-                        {zh ? "外置油室" : "External"}
+                        {zh ? "外置油室" : "External compartment"}
                       </option>
-                      <option value="dry_type">{zh ? "干式" : "Dry-type"}</option>
-                      <option value="reactor">{zh ? "电抗器" : "Reactor"}</option>
+                      <option value="dry_type">
+                        {zh ? "干式" : "Dry type"}
+                      </option>
+                      <option value="reactor">
+                        {zh ? "电抗器" : "Reactor"}
+                      </option>
                     </select>
                   </Field>
-                  <Field label={zh ? "切换介质" : "Medium"}>
+                  <Field label={zh ? "切换介质" : "Switching medium"}>
                     <select
                       className={controlClass}
                       value={input.medium}
@@ -648,11 +672,15 @@ export function SelectorApp() {
                     {zh ? "优先真空" : "Prefer vacuum"}
                   </label>
                   <Field
-                    label={zh ? "调压绕组间 BIL（kV）" : "Across-tap BIL (kV)"}
+                    label={
+                      zh
+                        ? "调压绕组间 BIL（kV）"
+                        : "Across-tap BIL (kV)"
+                    }
                     tip={
                       zh
                         ? "抬 B/C/D；空则按 Um"
-                        : "Raises grade; empty → Um floor"
+                        : "Raises B/C/D. Leave blank to use the Um default."
                     }
                   >
                     <input
@@ -673,7 +701,11 @@ export function SelectorApp() {
                     />
                   </Field>
                   <Field
-                    label={zh ? "调压绕组间工频（kV）" : "Across-tap PF (kV)"}
+                    label={
+                      zh
+                        ? "调压绕组间工频（kV）"
+                        : "Across-tap power-frequency (kV)"
+                    }
                   >
                     <input
                       className={controlClass}
@@ -694,8 +726,12 @@ export function SelectorApp() {
                   </Field>
                   {selectorVisible ? (
                     <Field
-                      label={zh ? "选择器等级" : "Selector size"}
-                      tip={zh ? "组合式；一般自动" : "Combined; usually Auto"}
+                      label={zh ? "选择器等级" : "Tap-selector size"}
+                      tip={
+                        zh
+                          ? "组合式；一般自动"
+                          : "Combined types only. Auto is usually fine."
+                      }
                     >
                       <select
                         className={controlClass}
@@ -734,7 +770,7 @@ export function SelectorApp() {
               {running ? (
                 <>
                   <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  {zh ? "计算中…" : "Running…"}
+                  {zh ? "计算中…" : "Working…"}
                 </>
               ) : stale ? (
                 zh ? (
@@ -748,8 +784,10 @@ export function SelectorApp() {
                 "Select"
               )}
             </button>
-            <p className="text-center text-[0.75rem] text-[var(--color-muted)] sm:max-w-[11rem] sm:text-left">
-              {zh ? "改参后需再点选型" : "Re-run after edits"}
+            <p className="text-center text-[0.75rem] text-[var(--color-muted)] sm:max-w-[14rem] sm:text-left">
+              {zh
+                ? "改参后需再点选型"
+                : "Run Select again after you change inputs."}
             </p>
           </div>
         </form>
@@ -770,14 +808,14 @@ export function SelectorApp() {
                 <div className="border-b border-[var(--color-rule)] bg-[oklch(96%_0.03_85)] px-4 py-1.5 text-center text-[0.75rem] text-[var(--color-warn)]">
                   {zh
                     ? "参数已改，请再点「重新选型」"
-                    : "Inputs changed — run Select again"}
+                    : "Parameters changed — click Select again"}
                 </div>
               ) : null}
 
               {!result.ok || !primary ? (
                 <div className="p-5">
                   <p className="font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold text-[var(--color-err)]">
-                    {zh ? "没有合规格型号" : "No catalogue fit"}
+                    {zh ? "没有合规格型号" : "No matching type"}
                   </p>
                   <ul className="mt-2 list-disc space-y-1 pl-5 text-[0.8125rem] text-[var(--color-ink-2)]">
                     {(zh ? result.errorsZh : result.errorsEn).map((e) => (
@@ -789,7 +827,7 @@ export function SelectorApp() {
                 <>
                   <div className="border-b border-[var(--color-rule)] px-4 pt-4 pb-3">
                     <p className="font-mono text-[10px] tracking-[0.08em] text-[var(--color-accent)] uppercase">
-                      {zh ? "推荐 · 最低满足" : "Pick · minimum fit"}
+                      {zh ? "推荐 · 最低满足" : "Recommended · lowest fit"}
                     </p>
                     <p className="mt-2 break-all font-mono text-[1.05rem] leading-snug font-medium tracking-tight text-[var(--color-ink)] sm:text-[1.15rem]">
                       {primary.model}
@@ -805,7 +843,7 @@ export function SelectorApp() {
                           : "Copied"
                         : zh
                           ? "复制型号"
-                          : "Copy model"}
+                          : "Copy type"}
                     </button>
                   </div>
 
@@ -814,7 +852,7 @@ export function SelectorApp() {
                     <p className="text-[0.75rem] text-[var(--color-muted)]">
                       {zh
                         ? "仅供参考，正式 OS 以工程确认为准。"
-                        : "Indicative only. Confirm with engineering before OS."}
+                        : "For reference only. Confirm with engineering before the OS."}
                     </p>
                   </div>
 
@@ -828,7 +866,7 @@ export function SelectorApp() {
                         <span>
                           {zh
                             ? `其他可选（${alts.length}）`
-                            : `Alternatives (${alts.length})`}
+                            : `Other options (${alts.length})`}
                         </span>
                         <span
                           className={cx(
@@ -902,12 +940,12 @@ function IdlePanel({ zh, running }: { zh: boolean; running: boolean }) {
             →
           </div>
           <p className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
-            {zh ? "还没选型" : "Nothing selected yet"}
+            {zh ? "还没选型" : "No result yet"}
           </p>
-          <p className="mt-2 max-w-[22ch] text-[0.875rem] leading-relaxed text-[var(--color-muted)]">
+          <p className="mt-2 max-w-[26ch] text-[0.875rem] leading-relaxed text-[var(--color-muted)]">
             {zh
               ? "左边填参数，点「选型」。或先点上方示例。"
-              : "Fill duty, hit Select — or try an example above."}
+              : "Fill in the parameters on the left, then click Select. Or start from an example above."}
           </p>
         </>
       )}
@@ -927,8 +965,11 @@ function plainWhyZh(r: ModelResult): string {
 function plainWhyEn(r: ModelResult): string {
   const bits = [
     `${r.seriesCode}, ${r.currentA} A, Um ${r.umKv} kV`,
-    r.selectorSize ? `selector ${r.selectorSize}` : null,
+    r.selectorSize ? `tap selector ${r.selectorSize}` : null,
     r.unitCount > 1 ? `${r.unitCount}× single-phase` : null,
   ].filter(Boolean);
-  return bits.join(" · ") + ". Lowest catalogue fit for this duty.";
+  return (
+    bits.join(" · ") +
+    ". Lowest catalogue rating that covers this duty."
+  );
 }
