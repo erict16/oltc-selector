@@ -6,7 +6,6 @@ import {
   LINEAR_POSITION_OPTIONS,
   PM_STEP_OPTIONS,
   POSITION_OPTIONS,
-  SERIES,
   STEP_VOLTAGE_OPTIONS_V,
   UM_OPTIONS_KV,
   nearestCurrent,
@@ -128,30 +127,6 @@ function isMenuCurrent(a: number): boolean {
 }
 
 /** Ceiling tip from in-tank vacuum III axes only (not dry-type 160 A). */
-function iRoundTip(lang: Lang, wanted: number) {
-  if (!wanted || isMenuCurrent(wanted)) {
-    // Still show what catalogue rating the bucket will land on
-    if (wanted > 500) {
-      const pools = SERIES.filter(
-        (s) => s.mounting.includes("in_tank") && s.vacuum,
-      ).flatMap((s) => [...(s.currents.III ?? []), ...(s.currents.I ?? [])]);
-      const uniq = [...new Set(pools)].sort((a, b) => a - b);
-      const n = nearestCurrent(wanted, uniq);
-      if (n != null && n > wanted + 0.5) {
-        return lang === "zh" ? `选型按 ≥ ${n} A` : `Selects ≥ ${n} A`;
-      }
-    }
-    return "";
-  }
-  const pools = SERIES.filter(
-    (s) => s.mounting.includes("in_tank") && s.vacuum,
-  ).flatMap((s) => [...(s.currents.III ?? []), ...(s.currents.I ?? [])]);
-  const uniq = [...new Set(pools)].sort((a, b) => a - b);
-  const n = nearestCurrent(wanted, uniq);
-  if (n == null || Math.abs(n - wanted) < 0.5) return "";
-  return lang === "zh" ? `目录上靠 ${n} A` : `Rounds up to ${n} A`;
-}
-
 export function SelectorApp() {
   const [lang, setLang] = useState<Lang>("zh");
   const [input, setInput] = useState<SelectInput>(defaultInput);
@@ -358,12 +333,6 @@ export function SelectorApp() {
           <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <Field
               label={zh ? "通过电流 Iᵤ" : "Through-current Iᵤ"}
-              tip={
-                // Fixed-height slot so examples / custom never reflow the form
-                iIsCustom
-                  ? iRoundTip(lang, input.throughCurrentA) || "\u00a0"
-                  : "\u00a0"
-              }
               action={
                 iIsCustom ? (
                   <button
@@ -372,7 +341,6 @@ export function SelectorApp() {
                     onClick={(e) => {
                       e.preventDefault();
                       setICustom(false);
-                      // Snap to nearest menu tier
                       const vals = CURRENT_MENU.map((c) => c.value);
                       const n = nearestCurrent(input.throughCurrentA, vals);
                       patch("throughCurrentA", n ?? 400);
