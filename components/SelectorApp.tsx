@@ -233,7 +233,7 @@ export function SelectorApp() {
 
   const loadExample = (ex: (typeof EXAMPLES)[number]) => {
     const f = FIXTURES[ex.key];
-    let next = { ...f.input, mdu: "none" as const };
+    let next: SelectInput = { ...f.input, mdu: "none" };
     if (ex.pm && Number(ex.pm) > 0) {
       const n = Number(ex.pm);
       setPm(ex.pm);
@@ -268,7 +268,7 @@ export function SelectorApp() {
   const iIsCustom = iCustom || !isMenuCurrent(input.throughCurrentA);
 
   return (
-    <div className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-6 flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="font-[family-name:var(--font-display)] text-[1.65rem] font-semibold tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.8rem]">
@@ -276,8 +276,8 @@ export function SelectorApp() {
           </h1>
           <p className="mt-1 text-[0.9rem] text-[var(--color-muted)]">
             {zh
-              ? "填工况，点选型，拿最低满足型号。"
-              : "Enter the duty, run Select, get the lowest-fit type."}
+              ? "填工况，点选型，拿最低满足型号。个人私人项目 · 仅供参考。"
+              : "Enter the duty, run Select, get the lowest-fit type. Private project · reference only."}
           </p>
         </div>
         <button

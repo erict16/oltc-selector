@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { SiteFooter } from "@/components/SiteFooter";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "OLTC Selector · 有载开关选型",
   description:
-    "Minimum-adequate OLTC type designation from published technical data. Indicative only.",
+    "Personal private OLTC type-designation helper. Indicative only — not an official manufacturer tool or OS.",
 };
 
 export default function RootLayout({
@@ -24,7 +25,12 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="antialiased">
+        <div className="flex min-h-dvh flex-col">
+          <main className="flex flex-1 flex-col justify-center">{children}</main>
+          <SiteFooter />
+        </div>
+      </body>
     </html>
   );
 }

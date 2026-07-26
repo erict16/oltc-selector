@@ -25,10 +25,23 @@
 html,
 body {
   min-height: 100%;
+  min-height: 100dvh;
   background: var(--color-paper);
   color: var(--color-ink-2);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+.prose-legal a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.prose-legal a:hover {
+  text-decoration: underline;
+}
+.prose-legal strong {
+  color: var(--color-ink);
+  font-weight: 600;
 }
 
 ::selection {
