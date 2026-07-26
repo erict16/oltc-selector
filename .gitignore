@@ -8,3 +8,4 @@ dist
 .next
 .hallmark
 tsconfig.tsbuildinfo
+out
