@@ -1,6 +1,6 @@
 /** Shared types for OLTC selection */
 
-export type Lang = "en" | "zh";
+export type { Lang } from "./i18n";
 
 export type Mounting =
   | "in_tank"
