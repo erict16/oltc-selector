@@ -100,6 +100,24 @@ describe("tap codes W/G (brochure Fig. 3-3)", () => {
     expect(out.results[0].tapCode).toBe("10193G");
     expect(out.results[0].model).toContain("10193G");
   });
+
+  it("user mid=1 with ±8 → 10191W (override default mid 3)", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 400,
+      umKv: 72.5,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      midPositions: 1,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].tapCode).toBe("10191W");
+  });
 });
 
 describe("selectOltc fixtures", () => {

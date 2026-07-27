@@ -481,6 +481,25 @@ export function SelectorApp() {
               </Field>
             ) : null}
 
+            {!isLinear ? (
+              <Field label={t(lang, "mid")} tip={t(lang, "midTip")}>
+                <select
+                  className={controlClass}
+                  value={String(input.midPositions ?? 3)}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    patch(
+                      "midPositions",
+                      (v === 1 ? 1 : 3) as 1 | 3,
+                    );
+                  }}
+                >
+                  <option value="1">1</option>
+                  <option value="3">3</option>
+                </select>
+              </Field>
+            ) : null}
+
             <Field
               label={t(lang, "ust")}
             >
