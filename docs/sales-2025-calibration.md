@@ -2,8 +2,8 @@
 
 Source (year **2025 only**):
 
-- `Attachments/Excel/Sales/HM reference list -2019-2025.xlsx` → sheet `2019-2025 `, Year=2025  
-- Cross-check: `直接出口数据.xlsx` 2025 column, `间接出口数据.xlsx` 2025 by-model  
+- Internal sales reference list (year filter = 2025)  
+- Cross-check: export shipment tables for the same year  
 
 **Do not calibrate on 2024 rows.**
 

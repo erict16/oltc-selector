@@ -272,7 +272,7 @@ describe("training cases (选型案例-答案)", () => {
   });
 });
 
-describe("2025 sales calibration (HM reference list year=2025)", () => {
+describe("2025 sales calibration (year=2025)", () => {
   it("CV2 III currents stay 350/600 (no 500 in 2025 shipments)", () => {
     const cv2 = SERIES.find((s) => s.id === "cv2")!;
     expect(cv2.currents.III).toEqual([350, 600]);

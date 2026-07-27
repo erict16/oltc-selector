@@ -3,7 +3,7 @@ import type { ChangeOver, Regulation } from "./types";
 const PITCHES = [10, 12, 14, 16, 18] as const;
 
 /**
- * Huaming tap-code (technical data Fig. type designation):
+ * OLTC commercial tap-code (technical data Fig. type designation):
  *   [pitch][max positions][mid][W|G| empty for linear→0]
  * Example: 10193W = pitch 10, 19 positions, mid 3, reversing W
  *          10193G = same geometry, coarse–fine change-over G

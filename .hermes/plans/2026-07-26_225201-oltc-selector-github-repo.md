@@ -1,10 +1,10 @@
-# Huaming OLTC Selector — GitHub Repo & Product Plan
+# OLTC Selector — GitHub Repo & Product Plan
 
 > **For Hermes:** Execute repo creation immediately after this plan; further product tasks can use subagent-driven-development.
 
 **Goal:** Put the bilingual OLTC type-designation web tool on GitHub under `erict16`, ready for deploy and iterative hardening against real quotes.
 
-**Architecture:** Client-only Vite + React + TypeScript app. Selection engine is pure functions (`catalog` + `tapCode` + `engine`). No backend, no prices on the public surface. Data derived from Huaming published technical brochures and type-designation rules.
+**Architecture:** Client-only Vite + React + TypeScript app. Selection engine is pure functions (`catalog` + `tapCode` + `engine`). No backend, no prices on the public surface. Data derived from published technical brochures and type-designation rules.
 
 **Tech stack:** Vite 6, React 19, TypeScript, Vitest. Deploy target: Vercel or GitHub Pages (`base: "./"`).
 
@@ -51,11 +51,11 @@ gh repo create oltc-selector \
   --private \
   --source=. \
   --remote=origin \
-  --description "Huaming OLTC bilingual selector — precise type designation (Y/D, Um, selector size, tap code)" \
+  --description "OLTC bilingual selector — precise type designation (Y/D, Um, selector size, tap code)" \
   --push
 ```
 
-If name taken: `oltc-type-selector` or `huaming-oltc-selector`.
+If name taken: `oltc-type-selector` or `oltc-type-selector`.
 
 ### Task 3: Confirm
 
@@ -68,7 +68,7 @@ git status -sb
 ### Task 4: Topics (optional)
 
 ```bash
-gh repo edit erict16/oltc-selector --add-topic oltc,huaming,selector,typescript,vite
+gh repo edit erict16/oltc-selector --add-topic oltc,selector,typescript,vite
 ```
 
 ---
@@ -140,7 +140,7 @@ curl -sI https://github.com/erict16/oltc-selector | head -5
 |------|------------|
 | Public leak of internal pricing | Repo **private**; no prices in UI |
 | Model wrong vs engineering | Disclaimer + fixture tests from real quotes |
-| Branding “Huaming” on personal GitHub | Private + “personal sales tool” README; escalate if company wants org repo |
+| Branding on personal GitHub | Private + “personal sales tool” README; escalate if company wants org repo |
 | Large PDF binaries in git | Prefer text extracts; prune `docs/source` heavy binaries later if needed |
 
 **Open questions (non-blocking for repo create)**

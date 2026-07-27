@@ -687,7 +687,7 @@ export const FIXTURES = {
     expectContains: "SHZVIII-1000D/72.5C",
   },
   /**
-   * 2025 shipment volume anchors (HM reference list year=2025).
+   * 2025 shipment volume anchors (sales reference year=2025).
    * CV2-600D/145 is among top vacuum compound models.
    */
   sales2025Cv2_145: {

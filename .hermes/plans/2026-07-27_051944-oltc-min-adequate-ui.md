@@ -39,7 +39,7 @@ Among electrically eligible models, primary = **minimum adequate**:
 - ± steps: dropdown of common N + derived positions
 - Positions: dropdown common service positions
 - Iᵤ / step V: number (from calc) + live “rounds to …” hint
-- Hallmark Cobalt workbench: hairlines, mono model string, no 华明 chrome
+- Hallmark Cobalt workbench: hairlines, mono model string, no manufacturer brand chrome
 
 ### Files
 

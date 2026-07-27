@@ -1,13 +1,17 @@
 # OLTC Selector
 
-Minimum-adequate on-load tap-changer **type designation** helper.
+Personal **type-designation helper** for on-load tap changers (OLTC).
+
+Enter duty parameters (through-current, Um, connection, regulation, step voltage, …) and get a **lowest-fit catalogue model string**. Results are **indicative only** — confirm with engineering before any OS or commercial commitment.
 
 **Live:** https://erict16.github.io/oltc-selector/
+
+This is a **private personal project**, not an official manufacturer tool.
 
 ## Stack
 
 - **Next.js 15** (static export) + **React 19** + **Tailwind CSS v4**
-- Engine: pure TS in `lib/` (`catalog`, `engine`, `tapCode`)
+- Engine: pure TypeScript in `lib/` (`catalog`, `engine`, `tapCode`, `i18n`)
 - Hosted on **GitHub Pages** (Actions → `out/`)
 
 ## Dev
@@ -20,15 +24,23 @@ npm run build     # local static export → out/
 npm run build:gh  # export with /oltc-selector basePath (Pages)
 ```
 
-## Form semantics
+## Form fields
 
 | Field | Meaning |
 |-------|---------|
-| **调压方式** | Tap-winding scheme: linear (0) / reversing (W) / coarse-fine (G) |
-| **开关连接方式** | OLTC application: Y star-neutral / D delta-or-any — **not** Dyn11 |
+| **Regulation** | Tap winding: linear (0) / reversing (W) / coarse–fine (G) |
+| **Connection** | OLTC application: Y neutral / D delta or line end |
 | **Iᵤ / Um / Ust** | Catalogue dropdowns (Iᵤ has Custom for calculated Imax) |
-| **± 级数** | Only for W/G; linear uses **positions** only |
+| **± steps** | For W/G only; linear uses positions only |
 
 ## Selection rule
 
-Lowest catalogue type that meets the duty (compound before combined, CM2 before SHZV when both fit).
+Lowest catalogue type that meets the duty (compound before combined when both fit; single III before 3× when a single unit covers Iᵤ).
+
+## Languages
+
+中文 · English · Tiếng Việt · Español · Türkçe
+
+## License / use
+
+See [Terms](https://erict16.github.io/oltc-selector/terms/) and [Privacy](https://erict16.github.io/oltc-selector/privacy/). Reference only.

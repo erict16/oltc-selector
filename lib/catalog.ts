@@ -4,7 +4,7 @@ import type { PhaseCode, SeriesDef, SelectorSize } from "./types";
  * Catalogue axes grounded in:
  *  - Technical brochures
  *  - QS/a. Base Price List 2025.xlsx
- *  - **2025** sales reference (HM reference list year=2025) — not 2024
+ *  - **2025** sales reference (year filter = 2025) — not 2024
  *
  * Ranking: minimum adequate (not SHZV-by-default).
  */
