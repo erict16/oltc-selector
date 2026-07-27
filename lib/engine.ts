@@ -294,9 +294,10 @@ export function selectOltc(input: SelectInput): SelectOutput {
   for (const s of candidates) {
       if (!compoundCoversAcrossTap(s, input)) continue;
 
-      const maxStep = maxStepVoltageForSeries(s, tap.pitch);
-      // Allow modest exceed on CV2 12-contact path only if higher Ium envelope used (handled below)
-      if (input.stepVoltageV > s.maxStepVoltageV + 0.5) continue;
+      // Pitch-aware Ust limit (CV2 brochure: 2000 V @ 10 contacts, 1500 V @ 12).
+      // Hard reject — do not keep the family by bumping current.
+      const pitchMaxUst = maxStepVoltageForSeries(s, tap.pitch);
+      if (input.stepVoltageV > pitchMaxUst + 0.5) continue;
 
       const maxPos =
         input.regulation === "linear"
@@ -308,13 +309,12 @@ export function selectOltc(input: SelectInput): SelectOutput {
         let current = att.current;
         const phaseCurrents = s.currents[att.phases] ?? s.currents.I ?? [];
 
-        // Choose smallest catalogue I that covers duty + step-capacity + CV2 high-Ust practice
+        // Choose smallest catalogue I that covers duty + step capacity
         {
           const need =
             input.stepVoltageV > 0
               ? (input.throughCurrentA * input.stepVoltageV) / 1000
               : 0;
-          const pitchMax = maxStepVoltageForSeries(s, tap.pitch);
           const okI = phaseCurrents.find((c) => {
             if (c + 0.01 < input.throughCurrentA) return false;
             // Headroom: if duty sits in the top ~3% of a rating, bump (case 2: 489.7 → 600).
@@ -325,9 +325,6 @@ export function selectOltc(input: SelectInput): SelectOutput {
             ) {
               return false;
             }
-            if (s.id === "cv2" && input.stepVoltageV > pitchMax + 0.5 && c < 600)
-              return false;
-            if (input.stepVoltageV > s.maxStepVoltageV + 0.5) return false;
             const psin = s.stepCapacityByCurrent?.[c];
             if (psin != null && need > psin + 0.5) return false;
             return true;
@@ -640,6 +637,10 @@ export const FIXTURES = {
     expectModel: "CM2III-600Y/72.5C-10193W",
   },
   /** Training case 5 — CV2-600D/145 */
+  /**
+   * Training case 5 — CV2 @ 145 kV Δ, 12-contact path.
+   * Brochure: max Ust 1500 V @ 12 contacts (not 1650). Use 1500 so CV2 remains valid.
+   */
   case5Cv2_145: {
     input: {
       mounting: "in_tank" as const,
@@ -649,7 +650,7 @@ export const FIXTURES = {
       connection: "D" as const,
       throughCurrentA: 346.34,
       umKv: 145,
-      stepVoltageV: 1650,
+      stepVoltageV: 1500,
       regulation: "reversing" as const,
       positions: 23,
       midPositions: 3 as const,

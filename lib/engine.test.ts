@@ -290,6 +290,68 @@ describe("training cases (选型案例-答案)", () => {
   });
 });
 
+describe("CV2 step voltage vs contacts (pitch)", () => {
+  it("rejects CV2 when Ust 1650 V with 12 contacts (max 1500 V)", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 350,
+      umKv: 145,
+      stepVoltageV: 1650,
+      regulation: "reversing",
+      positions: 23,
+      midPositions: 3,
+      pitch: 12,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).not.toBe("CV2");
+    expect(out.results.every((r) => r.seriesCode !== "CV2")).toBe(true);
+  });
+
+  it("allows CV2 when Ust 1500 V with 12 contacts", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 350,
+      umKv: 145,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      positions: 23,
+      midPositions: 3,
+      pitch: 12,
+      acrossTapBilKv: 200,
+      acrossTapPfKv: 50,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results.some((r) => r.seriesCode === "CV2")).toBe(true);
+  });
+
+  it("allows CV2 when Ust 2000 V with 10 contacts", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 350,
+      umKv: 72.5,
+      stepVoltageV: 2000,
+      regulation: "reversing",
+      positions: 19,
+      midPositions: 3,
+      pitch: 10,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results.some((r) => r.seriesCode === "CV2")).toBe(true);
+  });
+});
+
 describe("2025 sales calibration (year=2025)", () => {
   it("CV2 III currents stay 350/600 (no 500 in 2025 shipments)", () => {
     const cv2 = SERIES.find((s) => s.id === "cv2")!;
