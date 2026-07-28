@@ -281,6 +281,44 @@ export function SelectorApp() {
       : ([3, 1] as Array<1 | 3>);
   const iIsCustom = iCustom || !isMenuCurrent(input.throughCurrentA);
 
+  /** Collapsed “more options” summary — non-default advanced fields */
+  const moreBits: string[] = [];
+  if (input.mounting !== "in_tank") {
+    moreBits.push(
+      t(
+        lang,
+        input.mounting === "on_tank"
+          ? "mountOn"
+          : input.mounting === "external_compartment"
+            ? "mountExt"
+            : input.mounting === "dry_type"
+              ? "mountDry"
+              : "mountReactor",
+      ),
+    );
+  }
+  if (input.medium !== "oil_vacuum") {
+    moreBits.push(
+      t(lang, input.medium === "oil" ? "medOil" : "medDry"),
+    );
+  }
+  if (!input.preferVacuum) moreBits.push(t(lang, "preferVacOff"));
+  if (input.acrossTapBilKv != null && input.acrossTapBilKv > 0) {
+    moreBits.push(`BIL ${input.acrossTapBilKv} kV`);
+  }
+  if (input.acrossTapPfKv != null && input.acrossTapPfKv > 0) {
+    moreBits.push(`PF ${input.acrossTapPfKv} kV`);
+  }
+  if (
+    selectorVisible &&
+    input.selectorSize &&
+    input.selectorSize !== "auto"
+  ) {
+    moreBits.push(`${t(lang, "selectorSize")} ${input.selectorSize}`);
+  }
+  const moreSummaryCount = moreBits.length;
+  const moreSummaryText = moreBits.join(" · ");
+
   return (
     <div className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-6 flex items-start justify-between gap-4">
@@ -596,20 +634,49 @@ export function SelectorApp() {
             </Field>
           </div>
 
-          {/* More options */}
-          <div className="mt-4 border-t border-[var(--color-rule)] pt-2.5">
+          {/* More options — grouped advanced duty */}
+          <div className="mt-4 border-t border-[var(--color-rule)] pt-3">
             <button
               type="button"
               onClick={() => setMoreOpen((o) => !o)}
-              className="flex w-full items-center justify-between py-1 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)]"
+              className={cx(
+                "flex w-full items-center gap-3 rounded-[var(--radius-sm)] px-2.5 py-2 text-left transition-colors duration-150",
+                "hover:bg-[var(--color-soft)]",
+                moreOpen && "bg-[var(--color-soft)]",
+              )}
               aria-expanded={moreOpen}
             >
-              <span>{t(lang, "more")}</span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-2">
+                  <span className="text-[0.8125rem] font-semibold text-[var(--color-ink)]">
+                    {t(lang, "more")}
+                  </span>
+                  {moreSummaryCount > 0 ? (
+                    <span className="rounded-full bg-[oklch(58%_0.2_256_/_0.12)] px-1.5 py-0.5 font-mono text-[0.65rem] font-medium text-[var(--color-accent)]">
+                      {moreSummaryCount}
+                    </span>
+                  ) : (
+                    <span className="text-[0.7rem] font-normal text-[var(--color-muted)]">
+                      {t(lang, "moreOptional")}
+                    </span>
+                  )}
+                </span>
+                {!moreOpen && moreSummaryText ? (
+                  <span className="mt-0.5 block truncate text-[0.72rem] leading-snug text-[var(--color-muted)]">
+                    {moreSummaryText}
+                  </span>
+                ) : (
+                  <span className="mt-0.5 block text-[0.72rem] leading-snug text-[var(--color-muted)]">
+                    {t(lang, "moreLead")}
+                  </span>
+                )}
+              </span>
               <span
                 className={cx(
-                  "font-mono text-xs text-[var(--color-muted)] transition-transform duration-200",
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--color-rule-2)] bg-white text-[0.65rem] text-[var(--color-muted)] transition-transform duration-200",
                   moreOpen && "rotate-180",
                 )}
+                aria-hidden
               >
                 ▾
               </span>
@@ -624,108 +691,187 @@ export function SelectorApp() {
               )}
             >
               <div className="overflow-hidden">
-                <div className="grid gap-x-4 gap-y-3.5 pt-3 sm:grid-cols-2">
-                  <Field label={t(lang, "mounting")}>
-                    <select
-                      className={controlClass}
-                      value={input.mounting}
-                      onChange={(e) =>
-                        patch(
-                          "mounting",
-                          e.target.value as SelectInput["mounting"],
-                        )
-                      }
+                <div className="mt-2 space-y-3 rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-[var(--color-soft)]/60 p-3 sm:p-3.5">
+                  {/* —— Install & medium —— */}
+                  <section className="space-y-2.5">
+                    <header className="flex items-baseline justify-between gap-2">
+                      <h3 className="text-[0.7rem] font-semibold tracking-wide text-[var(--color-ink)] uppercase">
+                        {t(lang, "moreSecInstall")}
+                      </h3>
+                      <span className="text-[0.68rem] text-[var(--color-muted)]">
+                        {t(lang, "moreSecInstallHint")}
+                      </span>
+                    </header>
+                    <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
+                      <Field label={t(lang, "mounting")}>
+                        <select
+                          className={controlClass}
+                          value={input.mounting}
+                          onChange={(e) =>
+                            patch(
+                              "mounting",
+                              e.target.value as SelectInput["mounting"],
+                            )
+                          }
+                        >
+                          <option value="in_tank">{t(lang, "mountIn")}</option>
+                          <option value="on_tank">{t(lang, "mountOn")}</option>
+                          <option value="external_compartment">
+                            {t(lang, "mountExt")}
+                          </option>
+                          <option value="dry_type">{t(lang, "mountDry")}</option>
+                          <option value="reactor">
+                            {t(lang, "mountReactor")}
+                          </option>
+                        </select>
+                      </Field>
+                      <Field label={t(lang, "medium")}>
+                        <select
+                          className={controlClass}
+                          value={input.medium}
+                          onChange={(e) =>
+                            patch(
+                              "medium",
+                              e.target.value as SelectInput["medium"],
+                            )
+                          }
+                        >
+                          <option value="oil_vacuum">
+                            {t(lang, "medVac")}
+                          </option>
+                          <option value="oil">{t(lang, "medOil")}</option>
+                          <option value="dry">{t(lang, "medDry")}</option>
+                        </select>
+                      </Field>
+                    </div>
+                    <label
+                      className={cx(
+                        "flex cursor-pointer items-start gap-3 rounded-[var(--radius-sm)] border bg-white px-3 py-2.5 transition-colors",
+                        input.preferVacuum
+                          ? "border-[oklch(58%_0.2_256_/_0.35)] ring-1 ring-[oklch(58%_0.2_256_/_0.12)]"
+                          : "border-[var(--color-rule-2)] hover:border-[oklch(70%_0.03_256)]",
+                      )}
                     >
-                      <option value="in_tank">{t(lang, "mountIn")}</option>
-                      <option value="on_tank">{t(lang, "mountOn")}</option>
-                      <option value="external_compartment">{t(lang, "mountExt")}</option>
-                      <option value="dry_type">{t(lang, "mountDry")}</option>
-                      <option value="reactor">{t(lang, "mountReactor")}</option>
-                    </select>
-                  </Field>
-                  <Field label={t(lang, "medium")}>
-                    <select
-                      className={controlClass}
-                      value={input.medium}
-                      onChange={(e) =>
-                        patch("medium", e.target.value as SelectInput["medium"])
-                      }
-                    >
-                      <option value="oil_vacuum">{t(lang, "medVac")}</option>
-                      <option value="oil">{t(lang, "medOil")}</option>
-                      <option value="dry">{t(lang, "medDry")}</option>
-                    </select>
-                  </Field>
-                  <label className="flex items-center gap-2 self-end pb-1.5 text-[0.8125rem] text-[var(--color-ink-2)]">
-                    <input
-                      type="checkbox"
-                      className="accent-[var(--color-accent)]"
-                      checked={input.preferVacuum}
-                      onChange={(e) => patch("preferVacuum", e.target.checked)}
-                    />
-                    {t(lang, "preferVac")}
-                  </label>
-                  <Field
-                    label={t(lang, "acrossBil")}
-                    tip={t(lang, "acrossBilTip")}
-                  >
-                    <input
-                      className={controlClass}
-                      type="number"
-                      min={0}
-                      step={1}
-                      placeholder={lang === "zh" ? "如 285" : "e.g. 285"}
-                      value={input.acrossTapBilKv ?? ""}
-                      onChange={(e) =>
-                        patch(
-                          "acrossTapBilKv",
-                          e.target.value === ""
-                            ? undefined
-                            : Number(e.target.value),
-                        )
-                      }
-                    />
-                  </Field>
-                  <Field label={t(lang, "acrossPf")}>
-                    <input
-                      className={controlClass}
-                      type="number"
-                      min={0}
-                      step={1}
-                      placeholder={lang === "zh" ? "如 65" : "e.g. 65"}
-                      value={input.acrossTapPfKv ?? ""}
-                      onChange={(e) =>
-                        patch(
-                          "acrossTapPfKv",
-                          e.target.value === ""
-                            ? undefined
-                            : Number(e.target.value),
-                        )
-                      }
-                    />
-                  </Field>
-                  {selectorVisible ? (
-                    <Field
-                      label={t(lang, "selectorSize")}
-                      tip={t(lang, "selectorTip")}
-                    >
-                      <select
-                        className={controlClass}
-                        value={input.selectorSize ?? "auto"}
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 size-3.5 shrink-0 accent-[var(--color-accent)]"
+                        checked={input.preferVacuum}
                         onChange={(e) =>
-                          patch(
-                            "selectorSize",
-                            e.target.value as SelectInput["selectorSize"],
-                          )
+                          patch("preferVacuum", e.target.checked)
                         }
-                      >
-                        <option value="auto">{t(lang, "auto")}</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                        <option value="D">D</option>
-                        <option value="DE">DE</option>
-                      </select>
-                    </Field>
+                      />
+                      <span className="min-w-0">
+                        <span className="block text-[0.8125rem] font-medium text-[var(--color-ink)]">
+                          {t(lang, "preferVac")}
+                        </span>
+                        <span className="mt-0.5 block text-[0.72rem] leading-snug text-[var(--color-muted)]">
+                          {t(lang, "preferVacTip")}
+                        </span>
+                      </span>
+                    </label>
+                  </section>
+
+                  <div className="border-t border-[var(--color-rule)]" />
+
+                  {/* —— Across-tap insulation —— */}
+                  <section className="space-y-2.5">
+                    <header className="flex items-baseline justify-between gap-2">
+                      <h3 className="text-[0.7rem] font-semibold tracking-wide text-[var(--color-ink)] uppercase">
+                        {t(lang, "moreSecInsul")}
+                      </h3>
+                      <span className="text-[0.68rem] text-[var(--color-muted)]">
+                        {t(lang, "moreSecInsulHint")}
+                      </span>
+                    </header>
+                    <p className="text-[0.72rem] leading-snug text-[var(--color-muted)]">
+                      {t(lang, "acrossLead")}
+                    </p>
+                    <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
+                      <Field label={t(lang, "acrossBil")}>
+                        <div className="relative">
+                          <input
+                            className={cx(controlClass, "pr-10")}
+                            type="number"
+                            min={0}
+                            step={1}
+                            placeholder={t(lang, "acrossBilPh")}
+                            value={input.acrossTapBilKv ?? ""}
+                            onChange={(e) =>
+                              patch(
+                                "acrossTapBilKv",
+                                e.target.value === ""
+                                  ? undefined
+                                  : Number(e.target.value),
+                              )
+                            }
+                          />
+                          <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs text-[var(--color-muted)]">
+                            kV
+                          </span>
+                        </div>
+                      </Field>
+                      <Field label={t(lang, "acrossPf")}>
+                        <div className="relative">
+                          <input
+                            className={cx(controlClass, "pr-10")}
+                            type="number"
+                            min={0}
+                            step={1}
+                            placeholder={t(lang, "acrossPfPh")}
+                            value={input.acrossTapPfKv ?? ""}
+                            onChange={(e) =>
+                              patch(
+                                "acrossTapPfKv",
+                                e.target.value === ""
+                                  ? undefined
+                                  : Number(e.target.value),
+                              )
+                            }
+                          />
+                          <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs text-[var(--color-muted)]">
+                            kV
+                          </span>
+                        </div>
+                      </Field>
+                    </div>
+                  </section>
+
+                  {selectorVisible ? (
+                    <>
+                      <div className="border-t border-[var(--color-rule)]" />
+                      {/* —— Selector grade —— */}
+                      <section className="space-y-2.5">
+                        <header className="flex items-baseline justify-between gap-2">
+                          <h3 className="text-[0.7rem] font-semibold tracking-wide text-[var(--color-ink)] uppercase">
+                            {t(lang, "moreSecSel")}
+                          </h3>
+                          <span className="text-[0.68rem] text-[var(--color-muted)]">
+                            {t(lang, "moreSecSelHint")}
+                          </span>
+                        </header>
+                        <Field
+                          label={t(lang, "selectorSize")}
+                          tip={t(lang, "selectorTip")}
+                        >
+                          <select
+                            className={controlClass}
+                            value={input.selectorSize ?? "auto"}
+                            onChange={(e) =>
+                              patch(
+                                "selectorSize",
+                                e.target.value as SelectInput["selectorSize"],
+                              )
+                            }
+                          >
+                            <option value="auto">{t(lang, "auto")}</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                            <option value="DE">DE</option>
+                          </select>
+                        </Field>
+                      </section>
+                    </>
                   ) : null}
                 </div>
               </div>
