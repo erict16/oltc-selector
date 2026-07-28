@@ -53,9 +53,16 @@ describe("tap / catalogue sanity", () => {
 });
 
 describe("tap codes W/G (brochure Fig. 3-3)", () => {
-  it("±8 → 19 positions mid3 (10193), not 18", () => {
-    expect(positionsFromPlusMinus(8)).toBe(19);
+  it("P = 2N + mid: ±8 mid3 → 19, ±8 mid1 → 17, ±9 mid1 → 19", () => {
+    expect(positionsFromPlusMinus(8)).toBe(19); // preferred mid3
+    expect(positionsFromPlusMinus(8, 3)).toBe(19);
+    expect(positionsFromPlusMinus(8, 1)).toBe(17);
+    expect(positionsFromPlusMinus(9, 1)).toBe(19);
     expect(midFromPlusMinus(8)).toBe(3);
+    expect(midFromPlusMinus(9)).toBe(1);
+  });
+
+  it("±8 default → 10193 (mid3), not 18-pos or 10191", () => {
     expect(
       resolveTapFields({ regulation: "reversing", plusMinusSteps: 8 }).tapCode,
     ).toBe("10193W");
@@ -65,7 +72,33 @@ describe("tap codes W/G (brochure Fig. 3-3)", () => {
     ).toBe("10193G");
   });
 
-  it("±9 → 10191 mid1; ±10 → 12233 mid3", () => {
+  it("±8 mid1 → 18171W (NOT 10191W); ±9 mid1 → 10191W", () => {
+    // Fig. 3-3: ±8 mid1 is pitch 18 / 17 pos / 18171W — never 10191
+    expect(
+      resolveTapFields({
+        regulation: "reversing",
+        plusMinusSteps: 8,
+        midPositions: 1,
+      }).tapCode,
+    ).toBe("18171W");
+    expect(
+      resolveTapFields({
+        regulation: "reversing",
+        plusMinusSteps: 9,
+        midPositions: 1,
+      }).tapCode,
+    ).toBe("10191W");
+    // Invalid mid for ±9 (only mid1 in brochure) falls back to mid1 → 10191
+    expect(
+      resolveTapFields({
+        regulation: "reversing",
+        plusMinusSteps: 9,
+        midPositions: 3,
+      }).tapCode,
+    ).toBe("10191W");
+  });
+
+  it("±9 → 10191 mid1; ±10 → 12233 mid3; ±13 → 14271 mid1", () => {
     expect(
       resolveTapFields({ regulation: "coarse_fine", plusMinusSteps: 9 })
         .tapCode,
@@ -78,14 +111,23 @@ describe("tap codes W/G (brochure Fig. 3-3)", () => {
       resolveTapFields({ regulation: "coarse_fine", plusMinusSteps: 10 })
         .tapCode,
     ).toBe("12233G");
+    // Training case: 500 kV ±13 → 14271W
+    expect(
+      resolveTapFields({ regulation: "reversing", plusMinusSteps: 13 })
+        .tapCode,
+    ).toBe("14271W");
   });
 
-  it("G menu is ±8…±17 only (not ±4…±7)", async () => {
-    const { pmStepOptionsFor } = await import("./tapCode");
+  it("G menu is ±8…±17 only (not ±4…±7); G has no ±8 mid1", async () => {
+    const { pmStepOptionsFor, midOptionsFor } = await import("./tapCode");
     expect(pmStepOptionsFor("coarse_fine")).toEqual([
       8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
     ]);
     expect(pmStepOptionsFor("reversing")[0]).toBe(4);
+    expect(midOptionsFor(8, "reversing")).toEqual([3, 1]);
+    expect(midOptionsFor(8, "coarse_fine")).toEqual([3]);
+    expect(midOptionsFor(9, "reversing")).toEqual([1]);
+    expect(midOptionsFor(10, "reversing")).toEqual([3]);
   });
 
   it("case1-style ±8 coarse-fine yields 10193G", () => {
@@ -101,7 +143,7 @@ describe("tap codes W/G (brochure Fig. 3-3)", () => {
     expect(out.results[0].model).toContain("10193G");
   });
 
-  it("user mid=1 with ±8 → 10191W (override default mid 3)", () => {
+  it("user mid=1 with ±8 → 18171W (Fig. 3-3, not 10191)", () => {
     const out = selectOltc({
       mounting: "in_tank",
       medium: "oil_vacuum",
@@ -116,7 +158,23 @@ describe("tap codes W/G (brochure Fig. 3-3)", () => {
       midPositions: 1,
     });
     expect(out.ok).toBe(true);
-    expect(out.results[0].tapCode).toBe("10191W");
+    expect(out.results[0].tapCode).toBe("18171W");
+    expect(out.results[0].positions).toBe(17);
+  });
+
+  it("training cases: ±9 → 10191W, ±10 → 12233W, ±13 → 14271W", () => {
+    // 220 MVA / 132 kV ±9 → 10191W
+    expect(
+      resolveTapFields({ regulation: "reversing", plusMinusSteps: 9 }).tapCode,
+    ).toBe("10191W");
+    // 120 MVA / 132 kV ±10 → 12233W
+    expect(
+      resolveTapFields({ regulation: "reversing", plusMinusSteps: 10 }).tapCode,
+    ).toBe("12233W");
+    // 333 MVA / 500 kV ±13 → 14271W
+    expect(
+      resolveTapFields({ regulation: "reversing", plusMinusSteps: 13 }).tapCode,
+    ).toBe("14271W");
   });
 });
 

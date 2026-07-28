@@ -11,14 +11,32 @@ import {
 } from "@/lib/catalog";
 import { FIXTURES, selectOltc } from "@/lib/engine";
 import {
-  midFromPlusMinus,
+  lookupDiagram,
+  midOptionsFor,
   pitchFromPlusMinus,
   pmStepOptionsFor,
-  positionsFromPlusMinus,
+  positionsFor,
+  preferredMid,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { currentLabel, t, type Lang } from "@/lib/i18n";
 import type { ModelResult, SelectInput, SelectOutput } from "@/lib/types";
+
+/** Apply brochure (±N, mid) geometry onto a SelectInput patch. */
+function geometryForPm(
+  n: number,
+  regulation: SelectInput["regulation"],
+  mid?: 1 | 3,
+): Pick<SelectInput, "plusMinusSteps" | "positions" | "midPositions" | "pitch"> {
+  const m = mid ?? preferredMid(n, regulation);
+  const row = lookupDiagram(n, m, regulation);
+  return {
+    plusMinusSteps: n,
+    midPositions: m,
+    positions: row?.positions ?? positionsFor(n, m),
+    pitch: (row?.pitch ?? pitchFromPlusMinus(n, m)) as 10 | 12 | 14 | 16 | 18,
+  };
+}
 
 const defaultInput: SelectInput = {
   mounting: "in_tank",
@@ -30,6 +48,8 @@ const defaultInput: SelectInput = {
   umKv: 72.5,
   stepVoltageV: 1500,
   regulation: "reversing",
+  // Brochure default: ±8 mid3 → 10193W (most common); must stay in sync with `pm`
+  plusMinusSteps: 8,
   positions: 19,
   pitch: 10,
   midPositions: 3,
@@ -64,16 +84,20 @@ function Field({
   tip?: string;
   children: React.ReactNode;
   className?: string;
-  /** Right-side label action (same row as label — no height jump) */
+  /** Right-side of the label row (e.g. →19位 next to ±级数) */
   action?: React.ReactNode;
 }) {
   return (
     <label className={cx("flex min-w-0 flex-col gap-1.5", className)}>
-      <span className="flex items-center justify-between gap-2">
+      <span className="flex min-h-[1.125rem] items-center justify-between gap-2">
         <span className="text-[0.8125rem] font-medium text-[var(--color-ink)]">
           {label}
         </span>
-        {action}
+        {action ? (
+          <span className="shrink-0 text-[0.75rem] leading-none text-[var(--color-accent)]">
+            {action}
+          </span>
+        ) : null}
       </span>
       {children}
       {tip ? (
@@ -105,7 +129,7 @@ export function SelectorApp() {
   const [lang, setLang] = useState<Lang>("zh");
   const [input, setInput] = useState<SelectInput>(defaultInput);
   const [iCustom, setICustom] = useState(false);
-  const [pm, setPm] = useState("9");
+  const [pm, setPm] = useState("8");
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [altsOpen, setAltsOpen] = useState(false);
@@ -152,10 +176,7 @@ export function SelectorApp() {
     setInput((s) => ({
       ...s,
       regulation: reg,
-      plusMinusSteps: n,
-      positions: positionsFromPlusMinus(n),
-      midPositions: midFromPlusMinus(n),
-      pitch: pitchFromPlusMinus(n) as 10 | 12 | 14 | 16 | 18,
+      ...geometryForPm(n, reg),
     }));
   };
 
@@ -168,13 +189,24 @@ export function SelectorApp() {
     }
     const n = Number(raw);
     if (!Number.isFinite(n) || n <= 0) return;
+    // Changing ±N resets mid to brochure preferred and recomputes P = 2N+mid
     setInput((s) => ({
       ...s,
-      plusMinusSteps: n,
-      positions: positionsFromPlusMinus(n),
-      midPositions: midFromPlusMinus(n),
-      pitch: pitchFromPlusMinus(n) as 10 | 12 | 14 | 16 | 18,
+      ...geometryForPm(n, s.regulation),
     }));
+  };
+
+  const applyMid = (raw: string) => {
+    const mid = (Number(raw) === 1 ? 1 : 3) as 1 | 3;
+    touch();
+    setInput((s) => {
+      const n = s.plusMinusSteps;
+      if (n != null && n > 0) {
+        // Mid is part of the connection diagram: P and pitch must follow
+        return { ...s, ...geometryForPm(n, s.regulation, mid) };
+      }
+      return { ...s, midPositions: mid };
+    });
   };
 
   const runSelect = () => {
@@ -215,10 +247,7 @@ export function SelectorApp() {
       setPm(ex.pm);
       next = {
         ...next,
-        plusMinusSteps: n,
-        positions: positionsFromPlusMinus(n),
-        midPositions: midFromPlusMinus(n),
-        pitch: pitchFromPlusMinus(n) as 10 | 12 | 14 | 16 | 18,
+        ...geometryForPm(n, next.regulation),
       };
     } else {
       setPm("");
@@ -240,6 +269,16 @@ export function SelectorApp() {
       : null;
 
   const pmOptions = pmStepOptionsFor(input.regulation);
+  const pmN =
+    pm && Number(pm) > 0
+      ? Number(pm)
+      : input.plusMinusSteps && input.plusMinusSteps > 0
+        ? input.plusMinusSteps
+        : null;
+  const midOpts =
+    !isLinear && pmN != null
+      ? midOptionsFor(pmN, input.regulation)
+      : ([3, 1] as Array<1 | 3>);
   const iIsCustom = iCustom || !isMenuCurrent(input.throughCurrentA);
 
   return (
@@ -405,6 +444,20 @@ export function SelectorApp() {
               </select>
             </Field>
 
+            <Field label={t(lang, "phases")}>
+              <select
+                className={controlClass}
+                value={input.phases}
+                onChange={(e) =>
+                  patch("phases", e.target.value as SelectInput["phases"])
+                }
+              >
+                <option value="III">III</option>
+                <option value="II">II</option>
+                <option value="I">I</option>
+              </select>
+            </Field>
+
             <Field
               label={t(lang, "regulation")}
             >
@@ -438,7 +491,13 @@ export function SelectorApp() {
             ) : (
               <Field
                 label={t(lang, "pmSteps")}
-                tip={posHint || undefined}
+                action={
+                  posHint ? (
+                    <span className="font-mono font-medium tabular-nums">
+                      {posHint}
+                    </span>
+                  ) : undefined
+                }
               >
                 <select
                   className={controlClass}
@@ -482,20 +541,22 @@ export function SelectorApp() {
             ) : null}
 
             {!isLinear ? (
-              <Field label={t(lang, "mid")} tip={t(lang, "midTip")}>
+              <Field label={t(lang, "mid")}>
                 <select
                   className={controlClass}
-                  value={String(input.midPositions ?? 3)}
-                  onChange={(e) => {
-                    const v = Number(e.target.value);
-                    patch(
-                      "midPositions",
-                      (v === 1 ? 1 : 3) as 1 | 3,
-                    );
-                  }}
+                  value={String(
+                    midOpts.includes((input.midPositions as 1 | 3) ?? 3)
+                      ? input.midPositions
+                      : midOpts[0] ?? 3,
+                  )}
+                  onChange={(e) => applyMid(e.target.value)}
+                  disabled={midOpts.length <= 1}
                 >
-                  <option value="1">1</option>
-                  <option value="3">3</option>
+                  {midOpts.map((m) => (
+                    <option key={m} value={String(m)}>
+                      {m === 1 ? t(lang, "midOpt1") : t(lang, "midOpt3")}
+                    </option>
+                  ))}
                 </select>
               </Field>
             ) : null}
@@ -593,19 +654,6 @@ export function SelectorApp() {
                       <option value="oil_vacuum">{t(lang, "medVac")}</option>
                       <option value="oil">{t(lang, "medOil")}</option>
                       <option value="dry">{t(lang, "medDry")}</option>
-                    </select>
-                  </Field>
-                  <Field label={t(lang, "phases")}>
-                    <select
-                      className={controlClass}
-                      value={input.phases}
-                      onChange={(e) =>
-                        patch("phases", e.target.value as SelectInput["phases"])
-                      }
-                    >
-                      <option value="III">III</option>
-                      <option value="II">II</option>
-                      <option value="I">I</option>
                     </select>
                   </Field>
                   <label className="flex items-center gap-2 self-end pb-1.5 text-[0.8125rem] text-[var(--color-ink-2)]">
