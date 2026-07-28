@@ -67,6 +67,7 @@ const en: Dict = {
   preferVacOff: "Vacuum not preferred",
   acrossLead:
     "Optional. Leave blank to size the selector from Um only. Fill when the transformer specifies across-tap insulation.",
+  acrossUnset: "— from Um only —",
   acrossBil: "Lightning impulse (BIL)",
   acrossBilPh: "e.g. 285",
   acrossBilTip: "Raises B/C/D. Leave blank to use the Um default.",
@@ -154,6 +155,7 @@ const zh: Dict = {
   preferVacOff: "不优先真空",
   acrossLead:
     "选填。空着则仅按 Um 定选择器等级；变压器给出调压绕组间绝缘时再填。",
+  acrossUnset: "— 仅按 Um —",
   acrossBil: "雷电冲击（BIL）",
   acrossBilPh: "如 285",
   acrossBilTip: "抬 B/C/D；空则按 Um",
@@ -240,6 +242,7 @@ const vi: Dict = {
   preferVacOff: "Không ưu tiên vacuum",
   acrossLead:
     "Tùy chọn. Để trống thì chỉ theo Um. Điền khi máy biến áp cho cách điện giữa cuộn điều áp.",
+  acrossUnset: "— chỉ theo Um —",
   acrossBil: "Xung sét (BIL)",
   acrossBilPh: "vd. 285",
   acrossBilTip: "Nâng B/C/D. Để trống thì theo Um.",
@@ -328,6 +331,7 @@ const es: Dict = {
   preferVacOff: "Sin preferencia de vacío",
   acrossLead:
     "Opcional. En blanco se dimensiona solo con Um. Rellene si el transformador da aislamiento entre tomas.",
+  acrossUnset: "— solo Um —",
   acrossBil: "Impulso tipo rayo (BIL)",
   acrossBilPh: "p. ej. 285",
   acrossBilTip: "Sube B/C/D. Vacío = valor por Um.",
@@ -416,6 +420,7 @@ const tr: Dict = {
   preferVacOff: "Vakum tercihi yok",
   acrossLead:
     "İsteğe bağlı. Boşsa yalnızca Um’ye göre. Transformatör sargılar arası yalıtım veriyorsa doldurun.",
+  acrossUnset: "— yalnız Um —",
   acrossBil: "Yıldırım darbesi (BIL)",
   acrossBilPh: "örn. 285",
   acrossBilTip: "B/C/D yükseltir. Boş bırakırsanız Um varsayılanı.",

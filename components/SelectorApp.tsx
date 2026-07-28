@@ -2,6 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  ChevronDownIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/outline";
+import {
+  ACROSS_BIL_OPTIONS_KV,
+  ACROSS_PF_OPTIONS_KV,
   CURRENT_MENU,
   LINEAR_POSITION_OPTIONS,
   POSITION_OPTIONS,
@@ -673,12 +679,12 @@ export function SelectorApp() {
               </span>
               <span
                 className={cx(
-                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--color-rule-2)] bg-white text-[0.65rem] text-[var(--color-muted)] transition-transform duration-200",
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--color-rule-2)] bg-white text-[var(--color-muted)] transition-transform duration-200",
                   moreOpen && "rotate-180",
                 )}
                 aria-hidden
               >
-                ▾
+                <ChevronDownIcon className="h-4 w-4" />
               </span>
             </button>
 
@@ -788,50 +794,75 @@ export function SelectorApp() {
                     </p>
                     <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
                       <Field label={t(lang, "acrossBil")}>
-                        <div className="relative">
-                          <input
-                            className={cx(controlClass, "pr-10")}
-                            type="number"
-                            min={0}
-                            step={1}
-                            placeholder={t(lang, "acrossBilPh")}
-                            value={input.acrossTapBilKv ?? ""}
-                            onChange={(e) =>
-                              patch(
-                                "acrossTapBilKv",
-                                e.target.value === ""
-                                  ? undefined
-                                  : Number(e.target.value),
-                              )
-                            }
-                          />
-                          <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs text-[var(--color-muted)]">
-                            kV
-                          </span>
-                        </div>
+                        <select
+                          className={controlClass}
+                          value={
+                            input.acrossTapBilKv != null &&
+                            input.acrossTapBilKv > 0
+                              ? String(input.acrossTapBilKv)
+                              : ""
+                          }
+                          onChange={(e) =>
+                            patch(
+                              "acrossTapBilKv",
+                              e.target.value === ""
+                                ? undefined
+                                : Number(e.target.value),
+                            )
+                          }
+                        >
+                          <option value="">{t(lang, "acrossUnset")}</option>
+                          {/* Keep fixture / odd values visible if not in menu */}
+                          {input.acrossTapBilKv != null &&
+                          input.acrossTapBilKv > 0 &&
+                          !(ACROSS_BIL_OPTIONS_KV as readonly number[]).includes(
+                            input.acrossTapBilKv,
+                          ) ? (
+                            <option value={input.acrossTapBilKv}>
+                              {input.acrossTapBilKv} kV
+                            </option>
+                          ) : null}
+                          {ACROSS_BIL_OPTIONS_KV.map((v) => (
+                            <option key={v} value={v}>
+                              {v} kV
+                            </option>
+                          ))}
+                        </select>
                       </Field>
                       <Field label={t(lang, "acrossPf")}>
-                        <div className="relative">
-                          <input
-                            className={cx(controlClass, "pr-10")}
-                            type="number"
-                            min={0}
-                            step={1}
-                            placeholder={t(lang, "acrossPfPh")}
-                            value={input.acrossTapPfKv ?? ""}
-                            onChange={(e) =>
-                              patch(
-                                "acrossTapPfKv",
-                                e.target.value === ""
-                                  ? undefined
-                                  : Number(e.target.value),
-                              )
-                            }
-                          />
-                          <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 font-mono text-xs text-[var(--color-muted)]">
-                            kV
-                          </span>
-                        </div>
+                        <select
+                          className={controlClass}
+                          value={
+                            input.acrossTapPfKv != null &&
+                            input.acrossTapPfKv > 0
+                              ? String(input.acrossTapPfKv)
+                              : ""
+                          }
+                          onChange={(e) =>
+                            patch(
+                              "acrossTapPfKv",
+                              e.target.value === ""
+                                ? undefined
+                                : Number(e.target.value),
+                            )
+                          }
+                        >
+                          <option value="">{t(lang, "acrossUnset")}</option>
+                          {input.acrossTapPfKv != null &&
+                          input.acrossTapPfKv > 0 &&
+                          !(ACROSS_PF_OPTIONS_KV as readonly number[]).includes(
+                            input.acrossTapPfKv,
+                          ) ? (
+                            <option value={input.acrossTapPfKv}>
+                              {input.acrossTapPfKv} kV
+                            </option>
+                          ) : null}
+                          {ACROSS_PF_OPTIONS_KV.map((v) => (
+                            <option key={v} value={v}>
+                              {v} kV
+                            </option>
+                          ))}
+                        </select>
                       </Field>
                     </div>
                   </section>
@@ -970,14 +1001,13 @@ export function SelectorApp() {
                         <span>
                           {t(lang, "otherOpts", { n: alts.length })}
                         </span>
-                        <span
+                        <ChevronDownIcon
                           className={cx(
-                            "font-mono text-[0.6875rem] transition-transform duration-200",
+                            "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
                             altsOpen && "rotate-180",
                           )}
-                        >
-                          ▾
-                        </span>
+                          aria-hidden
+                        />
                       </button>
                       <div
                         className={cx(
@@ -1036,8 +1066,8 @@ function IdlePanel({ lang, running }: { lang: Lang; running: boolean }) {
         </>
       ) : (
         <>
-          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-rule)] bg-white font-mono text-sm text-[var(--color-muted)]">
-            →
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-rule)] bg-white text-[var(--color-muted)]">
+            <ClipboardDocumentListIcon className="h-5 w-5" aria-hidden />
           </div>
           <p className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
             {t(lang, "idleTitle")}

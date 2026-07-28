@@ -75,6 +75,18 @@ export const STEP_VOLTAGE_OPTIONS_V = [
   500, 800, 1000, 1200, 1400, 1500, 1650, 1800, 2000, 2200, 2500, 3000, 3300, 4000,
 ] as const;
 
+/**
+ * Across-tap winding insulation menus (training cases + brochure a-distance ladder).
+ * Empty selection = size selector from Um only.
+ */
+export const ACROSS_BIL_OPTIONS_KV = [
+  75, 95, 105, 120, 150, 170, 200, 250, 285, 320, 350, 450, 520, 550, 650, 750,
+] as const;
+
+export const ACROSS_PF_OPTIONS_KV = [
+  20, 30, 38, 45, 50, 65, 70, 80, 85, 95, 100, 110, 125, 140, 150,
+] as const;
+
 /** Re-export ± options (brochure W/G geometry lives in tapCode) */
 export { PM_STEP_OPTIONS } from "./tapCode";
 

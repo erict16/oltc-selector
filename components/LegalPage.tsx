@@ -1,3 +1,4 @@
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -15,9 +16,10 @@ export function LegalPage({
       <p className="mb-4 text-[0.8125rem]">
         <Link
           href="/"
-          className="font-medium text-[var(--color-accent)] hover:underline"
+          className="inline-flex items-center gap-1.5 font-medium text-[var(--color-accent)] hover:underline"
         >
-          ← OLTC Selector
+          <ArrowLeftIcon className="h-4 w-4 shrink-0" aria-hidden />
+          OLTC Selector
         </Link>
       </p>
       <h1 className="font-[family-name:var(--font-display)] text-[1.65rem] font-semibold tracking-[-0.03em] text-[var(--color-ink)]">
