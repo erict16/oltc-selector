@@ -77,7 +77,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 
 /** Comfortable control — slightly tighter than first draft, not cramped */
 const controlClass =
-  "w-full rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 py-2 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-[border-color,box-shadow] duration-150 hover:border-[oklch(70%_0.03_256)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[oklch(58%_0.2_256_/_0.15)]";
+  "w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 py-2 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-[border-color,box-shadow] duration-150 hover:border-[oklch(70%_0.03_256)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[oklch(58%_0.2_256_/_0.15)]";
 
 function Field({
   label,
@@ -95,12 +95,13 @@ function Field({
 }) {
   return (
     <label className={cx("flex min-w-0 flex-col gap-1.5", className)}>
-      <span className="flex min-h-[1.125rem] items-center justify-between gap-2">
-        <span className="text-[0.8125rem] font-medium text-[var(--color-ink)]">
+      {/* min-w-0 + nowrap action keeps label/action row stable across long locales (ES, RU). */}
+      <span className="flex min-h-[1.25rem] items-start justify-between gap-2">
+        <span className="min-w-0 flex-1 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
           {label}
         </span>
         {action ? (
-          <span className="shrink-0 text-[0.75rem] leading-none text-[var(--color-accent)]">
+          <span className="shrink-0 whitespace-nowrap pt-0.5 text-[0.75rem] leading-none text-[var(--color-accent)]">
             {action}
           </span>
         ) : null}
@@ -327,12 +328,12 @@ export function SelectorApp() {
 
   return (
     <div className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6 sm:py-10">
-      <header className="mb-6 flex items-start justify-between gap-4">
-        <div className="min-w-0">
+      <header className="mb-6 flex items-start justify-between gap-3 sm:gap-4">
+        <div className="min-w-0 flex-1 pr-1">
           <h1 className="font-[family-name:var(--font-display)] text-[1.65rem] font-semibold tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.8rem]">
             {t(lang, "title")}
           </h1>
-          <p className="mt-1 text-[0.9rem] text-[var(--color-muted)]">
+          <p className="mt-1 max-w-[52rem] text-[0.9rem] leading-snug text-[var(--color-muted)]">
             {t(lang, "subtitle")}
           </p>
         </div>
@@ -354,11 +355,11 @@ export function SelectorApp() {
           }}
         >
           <div className="mb-4 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
+            <h2 className="shrink-0 font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
               {t(lang, "duty")}
             </h2>
             <div
-              className="flex flex-wrap gap-1.5"
+              className="flex flex-wrap gap-1.5 sm:justify-end"
               role="group"
               aria-label={t(lang, "examplesAria")}
             >
@@ -845,7 +846,7 @@ export function SelectorApp() {
                 t(lang, "select")
               )}
             </button>
-            <p className="text-center text-[0.75rem] text-[var(--color-muted)] sm:max-w-[14rem] sm:text-left">
+            <p className="text-center text-[0.75rem] leading-snug text-[var(--color-muted)] sm:max-w-[16rem] sm:text-left">
               {t(lang, "reRunHint")}
             </p>
           </div>
