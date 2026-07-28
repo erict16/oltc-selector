@@ -16,15 +16,15 @@ export default function PrivacyPage() {
       <LegalSection title="1. What this site is / 本站性质">
         <p>
           This website (“OLTC Selector”) is a{" "}
-          <strong>personal, private, non-commercial project</strong> built for
-          learning and convenience. It is{" "}
+          <strong>private, non-commercial project</strong> built for learning
+          and convenience. It is{" "}
           <strong>
             not an official product of any manufacturer, employer, or brand
           </strong>
           , and is not endorsed by them.
         </p>
         <p>
-          本站为<strong>个人私人、非商业项目</strong>
+          本站为<strong>私人、非商业项目</strong>
           ，仅供学习与自用便利。
           <strong>并非任何制造商、雇主或品牌的官方产品</strong>
           ，亦不代表其立场或背书。

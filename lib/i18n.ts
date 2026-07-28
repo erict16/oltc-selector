@@ -101,7 +101,7 @@ const en: Dict = {
 
 const zh: Dict = {
   title: "有载开关选型",
-  subtitle: "填工况，点选型，拿最低满足型号。个人私人项目 · 仅供参考。",
+  subtitle: "填工况，点选型，拿最低满足型号。私人项目 · 仅供参考。",
   duty: "工况",
   examplesAria: "示例工况",
   exSmall: "小容量 Δ",

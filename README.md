@@ -6,7 +6,7 @@ Enter duty parameters (through-current, Um, connection, regulation, step voltage
 
 **Live:** https://erict16.github.io/oltc-selector/
 
-This is a **private personal project**, not an official manufacturer tool.
+This is a **private project**, not an official manufacturer tool.
 
 ## Stack
 

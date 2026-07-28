@@ -26,7 +26,7 @@ export function SiteFooter() {
               </span>
             </p>
             <p className="max-w-md text-[0.72rem] leading-relaxed text-[var(--color-muted)]">
-              Personal project · 私人项目 · Indicative only — confirm with
+              私人项目 · Private project · Indicative only — confirm with
               engineering before any OS.
             </p>
           </div>

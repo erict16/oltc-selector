@@ -13,10 +13,10 @@ export default function TermsPage() {
         Last updated: 27 July 2026 · 更新日期：2026 年 7 月 27 日
       </p>
 
-      <LegalSection title="1. Private personal project / 个人私人项目">
+      <LegalSection title="1. Private project / 私人项目">
         <p>
           By using this site you acknowledge that it is a{" "}
-          <strong>personal private project</strong> of the author. It is
+          <strong>private project</strong> of the author. It is
           provided for educational and convenience purposes only. It is{" "}
           <strong>
             not an official tool, quotation system, order sheet (OS), or sales
@@ -25,7 +25,7 @@ export default function TermsPage() {
           of any company, including any on-load tap-changer manufacturer.
         </p>
         <p>
-          使用本站即表示您知悉：本站为作者的<strong>个人私人项目</strong>
+          使用本站即表示您知悉：本站为作者的<strong>私人项目</strong>
           ，仅供学习与便利参考。
           <strong>
             不是任何公司的官方工具、报价系统、OS 订单或销售承诺
