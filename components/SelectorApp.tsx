@@ -65,35 +65,10 @@ const defaultInput: SelectInput = {
 
 type ExampleKey = "case1Cv2" | "case2Cm2" | "case5Cv2_145";
 
-const EXAMPLES: {
-  key: ExampleKey;
-  pm: string;
-  labelKey: string;
-  hintKey: string;
-  /** Compact mono tag under the label (scheme / Um) */
-  tag: string;
-}[] = [
-  {
-    key: "case1Cv2",
-    pm: "8",
-    labelKey: "exSmall",
-    hintKey: "exHint1",
-    tag: "Δ · 40.5",
-  },
-  {
-    key: "case2Cm2",
-    pm: "8",
-    labelKey: "exMv",
-    hintKey: "exHint2",
-    tag: "Y · 72.5",
-  },
-  {
-    key: "case5Cv2_145",
-    pm: "10",
-    labelKey: "ex145",
-    hintKey: "exHint3",
-    tag: "D · 145",
-  },
+const EXAMPLES: { key: ExampleKey; pm: string; labelKey: string; hintKey: string }[] = [
+  { key: "case1Cv2", pm: "8", labelKey: "exSmall", hintKey: "exHint1" },
+  { key: "case2Cm2", pm: "8", labelKey: "exMv", hintKey: "exHint2" },
+  { key: "case5Cv2_145", pm: "10", labelKey: "ex145", hintKey: "exHint3" },
 ];
 
 function cx(...parts: Array<string | false | null | undefined>) {
@@ -378,16 +353,16 @@ export function SelectorApp() {
             runSelect();
           }}
         >
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-4 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
               {t(lang, "duty")}
             </h2>
             <div
-              className="inline-flex w-full shrink-0 overflow-hidden rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-[var(--color-paper)] p-0.5 sm:w-auto"
+              className="flex flex-wrap gap-1.5"
               role="group"
               aria-label={t(lang, "examplesAria")}
             >
-              {EXAMPLES.map((ex, i) => {
+              {EXAMPLES.map((ex) => {
                 const on = activeExample === ex.key;
                 return (
                   <button
@@ -396,33 +371,13 @@ export function SelectorApp() {
                     onClick={() => loadExample(ex)}
                     title={t(lang, ex.hintKey)}
                     className={cx(
-                      "relative min-w-0 flex-1 px-2.5 py-1.5 text-left transition-colors duration-150 sm:flex-none sm:px-3",
-                      i > 0 &&
-                        "before:absolute before:top-1.5 before:bottom-1.5 before:left-0 before:w-px before:bg-[var(--color-rule)]",
+                      "rounded-full border px-2.5 py-1 text-[0.75rem] transition-colors duration-150",
                       on
-                        ? "rounded-[calc(var(--radius-sm)-1px)] bg-white text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
-                        : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]",
-                      on && i > 0 && "before:opacity-0",
+                        ? "border-[var(--color-accent)] text-[var(--color-accent)]"
+                        : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
                     )}
                   >
-                    <span
-                      className={cx(
-                        "block truncate text-[0.75rem] leading-tight",
-                        on ? "font-semibold" : "font-medium",
-                      )}
-                    >
-                      {t(lang, ex.labelKey)}
-                    </span>
-                    <span
-                      className={cx(
-                        "mt-0.5 block truncate font-mono text-[0.65rem] leading-none tracking-tight",
-                        on
-                          ? "text-[var(--color-accent)]"
-                          : "text-[var(--color-muted)]",
-                      )}
-                    >
-                      {ex.tag}
-                    </span>
+                    {t(lang, ex.labelKey)}
                   </button>
                 );
               })}
