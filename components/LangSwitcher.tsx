@@ -30,7 +30,8 @@ export function LangSwitcher({
             title={opt.label}
             onClick={() => onChange(opt.id)}
             className={cx(
-              "rounded-[var(--radius-sm)] border px-2 py-1 font-mono text-[0.6875rem] tracking-wide transition-colors duration-150",
+              // Fixed width: 中文 is widest of the short codes; keep peers equal across locales.
+              "inline-flex h-7 w-11 items-center justify-center rounded-[var(--radius-sm)] border font-mono text-[0.6875rem] tracking-wide transition-colors duration-150",
               on
                 ? "border-[var(--color-accent)] bg-[oklch(58%_0.2_256_/_0.1)] font-semibold text-[var(--color-accent)]"
                 : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",

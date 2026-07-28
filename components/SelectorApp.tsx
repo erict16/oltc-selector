@@ -371,7 +371,8 @@ export function SelectorApp() {
                     onClick={() => loadExample(ex)}
                     title={t(lang, ex.hintKey)}
                     className={cx(
-                      "rounded-full border px-2.5 py-1 text-[0.75rem] transition-colors duration-150",
+                      // min-w covers longest locale (e.g. ES “Pequeño Δ”, ZH “小容量 Δ”) so chips don’t reflow on lang change.
+                      "inline-flex min-h-7 min-w-[5.75rem] items-center justify-center rounded-full border px-2.5 py-1 text-center text-[0.75rem] transition-colors duration-150",
                       on
                         ? "border-[var(--color-accent)] text-[var(--color-accent)]"
                         : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
@@ -826,7 +827,8 @@ export function SelectorApp() {
               type="submit"
               disabled={running || !input.throughCurrentA}
               className={cx(
-                "inline-flex min-h-[2.6rem] flex-1 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-5 text-[0.9rem] font-semibold text-[var(--color-accent-ink)] transition-[transform,opacity,background-color] duration-150",
+                // min-w fits longest locale (“Seleccionar de nuevo”); flex-1 still fills the row on sm+.
+                "inline-flex min-h-[2.6rem] min-w-[12.5rem] flex-1 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-5 text-center text-[0.9rem] font-semibold text-[var(--color-accent-ink)] transition-[transform,opacity,background-color] duration-150",
                 "hover:brightness-105 active:scale-[0.98]",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 running && "pointer-events-none",
@@ -890,7 +892,7 @@ export function SelectorApp() {
                     <button
                       type="button"
                       onClick={() => copyModel(primary.model)}
-                      className="mt-3 rounded-[var(--radius-sm)] bg-[var(--color-graphite)] px-3 py-1.5 text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
+                      className="mt-3 inline-flex min-h-8 min-w-[9.5rem] items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-graphite)] px-3 py-1.5 text-center text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
                     >
                       {copied ? t(lang, "copied") : t(lang, "copyType")}
                     </button>
@@ -942,7 +944,7 @@ export function SelectorApp() {
                                 <button
                                   type="button"
                                   onClick={() => copyModel(r.model)}
-                                  className="shrink-0 text-[0.6875rem] text-[var(--color-accent)] hover:underline"
+                                  className="inline-flex min-w-[4.5rem] shrink-0 justify-end text-[0.6875rem] text-[var(--color-accent)] hover:underline"
                                 >
                                   {t(lang, "copy")}
                                 </button>
