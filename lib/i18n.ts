@@ -1,4 +1,4 @@
-export type Lang = "zh" | "en" | "vi" | "es" | "tr";
+export type Lang = "zh" | "en" | "vi" | "es" | "tr" | "ru";
 
 export const LANG_OPTIONS: { id: Lang; label: string; short: string }[] = [
   { id: "zh", label: "中文", short: "中文" },
@@ -6,6 +6,7 @@ export const LANG_OPTIONS: { id: Lang; label: string; short: string }[] = [
   { id: "vi", label: "Tiếng Việt", short: "VI" },
   { id: "es", label: "Español", short: "ES" },
   { id: "tr", label: "Türkçe", short: "TR" },
+  { id: "ru", label: "Русский", short: "RU" },
 ];
 
 type Dict = Record<string, string>;
@@ -452,7 +453,98 @@ const tr: Dict = {
   langAria: "Dil",
 };
 
-const TABLES: Record<Lang, Dict> = { en, zh, vi, es, tr };
+const ru: Dict = {
+  title: "Подбор РПН",
+  subtitle:
+    "Введите режим, нажмите «Подобрать», получите минимально подходящий тип. Частный проект · Только для справки.",
+  duty: "Параметры режима",
+  examplesAria: "Примеры",
+  exSmall: "Малый Δ",
+  exMv: "СН Y",
+  ex145: "145 кВ",
+  exHint1: "CV2 · 33 кВ треугольник / конец линии",
+  exHint2: "CM2 · 72.5C нейтраль",
+  exHint3: "CV2 · регулирование на конце линии",
+  throughCurrent: "Сквозной ток Iᵤ",
+  custom: "Свой",
+  ratings: "Каталог",
+  um: "Наибольшее напряжение Um",
+  connection: "Схема включения",
+  connY: "Y · нейтраль",
+  connD: "D · треугольник / конец линии",
+  connAny: "Любая",
+  regulation: "Способ регулирования",
+  regW: "Реверс (W)",
+  regG: "Грубо–тонко (G)",
+  regLinear: "Линейное (без переключателя)",
+  positions: "Рабочие положения",
+  pmSteps: "± ступени",
+  posHint: "→ {n} пол.",
+  customPos: "Свои положения…",
+  mid: "Средние положения",
+  midOpt1: "1",
+  midOpt3: "3",
+  ust: "Макс. напряжение ступени Ust",
+  more: "Дополнительно",
+  moreOptional: "по желанию",
+  moreLead: "Монтаж, среда, изоляция обмотки РПН, класс селектора",
+  moreSecInstall: "Монтаж и среда",
+  moreSecInstallHint: "Фильтр серии",
+  moreSecInsul: "Изоляция обмотки РПН",
+  moreSecInsulHint: "Повышает B / C / D",
+  moreSecSel: "Селектор",
+  moreSecSelHint: "Комбинированные типы",
+  mounting: "Монтаж",
+  mountIn: "В баке",
+  mountOn: "На баке / сбоку",
+  mountExt: "Внешний отсек",
+  mountDry: "Сухой",
+  mountReactor: "Реактор",
+  medium: "Среда коммутации",
+  medVac: "Масло + вакуум",
+  medOil: "Масло",
+  medDry: "Сухой",
+  phases: "Фазы",
+  preferVac: "Предпочитать вакуум",
+  preferVacTip:
+    "Предпочитает вакуумные серии (CV2 / CM2 / SHZV), если они покрывают режим.",
+  preferVacOff: "Вакуум не предпочтителен",
+  acrossLead:
+    "Необязательно. Пусто — класс селектора только по Um. Заполните, если задана изоляция по обмотке РПН.",
+  acrossUnset: "— только Um —",
+  acrossBil: "Грозовой импульс (BIL)",
+  acrossBilPh: "напр. 285",
+  acrossBilTip: "Повышает B/C/D. Пусто — по Um.",
+  acrossPf: "Промчастота (1 мин)",
+  acrossPfPh: "напр. 65",
+  selectorSize: "Класс изоляции селектора",
+  selectorTip:
+    "Авто по Um и изоляции обмотки. Меняйте вручную только если OS требует букву.",
+  auto: "Авто",
+  select: "Подобрать",
+  selectAgain: "Подобрать снова",
+  working: "Считаем…",
+  reRunHint: "После изменения параметров нажмите «Подобрать» снова.",
+  stale: "Параметры изменены — нажмите «Подобрать» снова",
+  noMatch: "Нет подходящего типа",
+  recommended: "Рекомендация · минимально подходящий",
+  copyType: "Копировать тип",
+  copied: "Скопировано",
+  disclaimer:
+    "Только для справки. Перед OS подтвердите у инженеров.",
+  otherOpts: "Другие варианты ({n})",
+  copy: "Копировать",
+  idleTitle: "Результата пока нет",
+  idleBody:
+    "Заполните параметры слева и нажмите «Подобрать». Или выберите пример выше.",
+  selecting: "Подбор…",
+  why: "{code}, {i} A, Um {um} kV{sel}{multi}. Наименьший каталожный рейтинг для этого режима.",
+  whySel: ", селектор {s}",
+  whyMulti: ", {n}× однофазных",
+  langAria: "Язык",
+};
+
+const TABLES: Record<Lang, Dict> = { en, zh, vi, es, tr, ru };
 
 export function t(
   lang: Lang,
