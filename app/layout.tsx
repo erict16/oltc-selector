@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import "./globals.css";
 
@@ -23,6 +23,13 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#f7f8fa",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -43,8 +50,9 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        {/* No justify-center: tall forms on mobile must start at top or scroll breaks */}
         <div className="flex min-h-dvh flex-col">
-          <main className="flex flex-1 flex-col justify-center">{children}</main>
+          <main className="flex flex-1 flex-col">{children}</main>
           <SiteFooter />
         </div>
       </body>

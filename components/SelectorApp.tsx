@@ -148,6 +148,7 @@ export function SelectorApp() {
   const [stale, setStale] = useState(false);
   const [running, setRunning] = useState(false);
   const runTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resultPaneRef = useRef<HTMLElement | null>(null);
 
   const isLinear = input.regulation === "linear";
   const selectorVisible = showSelectorSize(input);
@@ -227,6 +228,18 @@ export function SelectorApp() {
       setHasRun(true);
       setStale(false);
       setRunning(false);
+      // Mobile: result sits below the form — scroll it into view after select
+      if (
+        typeof window !== "undefined" &&
+        window.matchMedia("(max-width: 1023px)").matches
+      ) {
+        window.setTimeout(() => {
+          resultPaneRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 40);
+      }
     }, 280);
   };
 
@@ -327,13 +340,14 @@ export function SelectorApp() {
   const moreSummaryText = moreBits.join(" · ");
 
   return (
-    <div className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6 sm:py-10">
-      <header className="mb-6 flex items-start justify-between gap-3 sm:gap-4">
-        <div className="min-w-0 flex-1 pr-1">
-          <h1 className="font-[family-name:var(--font-display)] text-[1.65rem] font-semibold tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.8rem]">
+    <div className="mx-auto w-full min-w-0 max-w-[1100px] px-4 py-5 sm:px-6 sm:py-10">
+      {/* Stack on phone: title full width, langs row below — avoids squashed header */}
+      <header className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-[family-name:var(--font-display)] text-[1.45rem] font-semibold leading-tight tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.8rem]">
             {t(lang, "title")}
           </h1>
-          <p className="mt-1 max-w-[52rem] text-[0.9rem] leading-snug text-[var(--color-muted)]">
+          <p className="mt-1.5 max-w-[52rem] text-[0.875rem] leading-snug text-[var(--color-muted)] sm:text-[0.9rem]">
             {t(lang, "subtitle")}
           </p>
         </div>
@@ -344,11 +358,11 @@ export function SelectorApp() {
         />
       </header>
 
-      {/* Equal halves, centered page */}
-      <div className="grid items-stretch gap-5 lg:grid-cols-2 lg:gap-6">
+      {/* Single column phone → two columns desktop; result below form on mobile */}
+      <div className="grid min-w-0 items-stretch gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6">
         {/* —— Form —— */}
         <form
-          className="rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white p-5 shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)] sm:p-6"
+          className="min-w-0 rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white p-4 shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)] sm:p-6"
           onSubmit={(e) => {
             e.preventDefault();
             runSelect();
@@ -359,7 +373,7 @@ export function SelectorApp() {
               {t(lang, "duty")}
             </h2>
             <div
-              className="flex flex-wrap gap-1.5 sm:justify-end"
+              className="flex max-w-full flex-wrap gap-1.5 sm:justify-end"
               role="group"
               aria-label={t(lang, "examplesAria")}
             >
@@ -372,8 +386,8 @@ export function SelectorApp() {
                     onClick={() => loadExample(ex)}
                     title={t(lang, ex.hintKey)}
                     className={cx(
-                      // min-w covers longest locale (e.g. ES “Pequeño Δ”, ZH “小容量 Δ”) so chips don’t reflow on lang change.
-                      "inline-flex min-h-7 min-w-[5.75rem] items-center justify-center rounded-full border px-2.5 py-1 text-center text-[0.75rem] transition-colors duration-150",
+                      // Mobile: flexible chips; sm+: stable min width for locales
+                      "inline-flex min-h-8 flex-1 items-center justify-center rounded-full border px-2.5 py-1 text-center text-[0.75rem] transition-colors duration-150 sm:min-h-7 sm:min-w-[5.75rem] sm:flex-none",
                       on
                         ? "border-[var(--color-accent)] text-[var(--color-accent)]"
                         : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
@@ -828,8 +842,8 @@ export function SelectorApp() {
               type="submit"
               disabled={running || !input.throughCurrentA}
               className={cx(
-                // min-w fits longest locale (“Seleccionar de nuevo”); flex-1 still fills the row on sm+.
-                "inline-flex min-h-[2.6rem] min-w-[12.5rem] flex-1 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-5 text-center text-[0.9rem] font-semibold text-[var(--color-accent-ink)] transition-[transform,opacity,background-color] duration-150",
+                // Full-width on phone; min-w only from sm up (avoids horizontal overflow)
+                "inline-flex min-h-11 w-full flex-1 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 text-center text-[0.9rem] font-semibold text-[var(--color-accent-ink)] transition-[transform,opacity,background-color] duration-150 sm:min-h-[2.6rem] sm:min-w-[12.5rem] sm:px-5",
                 "hover:brightness-105 active:scale-[0.98]",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 running && "pointer-events-none",
@@ -853,7 +867,10 @@ export function SelectorApp() {
         </form>
 
         {/* —— Result pane —— */}
-        <aside className="min-w-0 lg:sticky lg:top-6">
+        <aside
+          ref={resultPaneRef}
+          className="min-w-0 scroll-mt-3 lg:sticky lg:top-6"
+        >
           {!hasRun || !result ? (
             <IdlePanel lang={lang} running={running} />
           ) : (
@@ -970,7 +987,7 @@ function IdlePanel({ lang, running }: { lang: Lang; running: boolean }) {
   return (
     <div
       className={cx(
-        "flex h-full min-h-[280px] flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed border-[var(--color-rule-2)] bg-[var(--color-soft)] px-6 py-10 text-center transition-opacity duration-200",
+        "flex h-full min-h-[200px] flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed border-[var(--color-rule-2)] bg-[var(--color-soft)] px-5 py-8 text-center transition-opacity duration-200 sm:min-h-[280px] sm:px-6 sm:py-10",
         running && "opacity-70",
       )}
     >
