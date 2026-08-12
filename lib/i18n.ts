@@ -91,8 +91,7 @@ const en: Dict = {
   otherOpts: "Other options ({n})",
   copy: "Copy",
   idleTitle: "No result yet",
-  idleBody:
-    "Fill in the parameters on the left, then click Select. Or start from an example above.",
+  idleBody: "Fill the duty, then click Select. Or start from an example.",
   selecting: "Selecting…",
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Lowest catalogue rating that covers this duty.",
   whySel: ", tap selector {s}",
@@ -178,7 +177,7 @@ const zh: Dict = {
   otherOpts: "其他可选（{n}）",
   copy: "复制",
   idleTitle: "还没选型",
-  idleBody: "左边填参数，点「选型」。或先点上方示例。",
+  idleBody: "填参数，点「选型」。也可先点上方示例。",
   selecting: "正在选型…",
   why: "{code}，{i} A，Um {um} kV{sel}{multi}。满足工况的最低目录档。",
   whySel: " · 选择器 {s}",
@@ -266,8 +265,7 @@ const vi: Dict = {
   otherOpts: "Lựa chọn khác ({n})",
   copy: "Chép",
   idleTitle: "Chưa có kết quả",
-  idleBody:
-    "Điền thông số bên trái, rồi bấm Chọn. Hoặc dùng ví dụ phía trên.",
+  idleBody: "Điền thông số, rồi bấm Chọn. Hoặc dùng ví dụ.",
   selecting: "Đang chọn…",
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Mức danh mục thấp nhất đủ cho nhiệm vụ này.",
   whySel: ", bộ chọn {s}",
@@ -356,8 +354,7 @@ const es: Dict = {
   otherOpts: "Otras opciones ({n})",
   copy: "Copiar",
   idleTitle: "Aún sin resultado",
-  idleBody:
-    "Rellene los parámetros a la izquierda y pulse Seleccionar. O use un ejemplo arriba.",
+  idleBody: "Rellene el régimen y pulse Seleccionar. O use un ejemplo.",
   selecting: "Seleccionando…",
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Menor valor de catálogo que cubre este régimen.",
   whySel: ", selector {s}",
@@ -445,8 +442,7 @@ const tr: Dict = {
   otherOpts: "Diğer seçenekler ({n})",
   copy: "Kopyala",
   idleTitle: "Henüz sonuç yok",
-  idleBody:
-    "Soldaki parametreleri doldurun, Seç’e basın. Veya yukarıdaki örnekleri kullanın.",
+  idleBody: "Parametreleri doldurun, Seç’e basın. Veya bir örnek kullanın.",
   selecting: "Seçiliyor…",
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Bu işletmeyi karşılayan en düşük katalog değeri.",
   whySel: ", seçici {s}",
@@ -536,8 +532,7 @@ const ru: Dict = {
   otherOpts: "Другие варианты ({n})",
   copy: "Копировать",
   idleTitle: "Результата пока нет",
-  idleBody:
-    "Заполните параметры слева и нажмите «Подобрать». Или выберите пример выше.",
+  idleBody: "Заполните режим и нажмите «Подобрать». Или возьмите пример.",
   selecting: "Подбор…",
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Наименьший каталожный рейтинг для этого режима.",
   whySel: ", селектор {s}",

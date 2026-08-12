@@ -50,9 +50,17 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-[var(--radius-sm)] focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:shadow"
+        >
+          Skip to content
+        </a>
         {/* No justify-center: tall forms on mobile must start at top or scroll breaks */}
         <div className="flex min-h-dvh flex-col">
-          <main className="flex flex-1 flex-col">{children}</main>
+          <main id="main" className="flex flex-1 flex-col">
+            {children}
+          </main>
           <SiteFooter />
         </div>
       </body>

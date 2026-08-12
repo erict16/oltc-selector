@@ -28,10 +28,10 @@ export function LangSwitcher({
             key={opt.id}
             type="button"
             title={opt.label}
+            aria-pressed={on}
             onClick={() => onChange(opt.id)}
             className={cx(
-              // Slightly tighter on narrow screens so 6 langs fit without horizontal scroll
-              "inline-flex h-8 min-w-[2.5rem] flex-1 items-center justify-center rounded-[var(--radius-sm)] border px-1.5 font-mono text-[0.6875rem] tracking-wide transition-colors duration-150 sm:h-7 sm:min-w-0 sm:w-11 sm:flex-none",
+              "inline-flex h-8 min-w-[2.25rem] items-center justify-center rounded-[var(--radius-sm)] border px-2 font-mono text-[0.6875rem] tracking-wide transition-colors duration-150 sm:h-7 sm:min-w-0 sm:px-2.5",
               on
                 ? "border-[var(--color-accent)] bg-[oklch(58%_0.2_256_/_0.1)] font-semibold text-[var(--color-accent)]"
                 : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",

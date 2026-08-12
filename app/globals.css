@@ -90,12 +90,12 @@ h2,
   outline-offset: 2px;
 }
 
-/* Native controls */
+/* Native controls — white field on paper page */
 select,
 input[type="number"],
 input[type="text"] {
   appearance: none;
-  background-color: var(--color-paper);
+  background-color: #fff;
 }
 
 select {

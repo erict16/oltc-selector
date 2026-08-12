@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ChevronDownIcon,
+  ClipboardDocumentIcon,
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -75,9 +76,9 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-/** Comfortable control — slightly tighter than first draft, not cramped */
+/** Comfortable control — one hover signal (border), shared height */
 const controlClass =
-  "w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 py-2 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-[border-color,box-shadow] duration-150 hover:border-[oklch(70%_0.03_256)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[oklch(58%_0.2_256_/_0.15)]";
+  "h-10 w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
 
 function Field({
   label,
@@ -322,6 +323,7 @@ export function SelectorApp() {
       t(lang, input.medium === "oil" ? "medOil" : "medDry"),
     );
   }
+  if (input.phases !== "III") moreBits.push(input.phases);
   if (!input.preferVacuum) moreBits.push(t(lang, "preferVacOff"));
   if (input.acrossTapBilKv != null && input.acrossTapBilKv > 0) {
     moreBits.push(`BIL ${input.acrossTapBilKv} kV`);
@@ -386,8 +388,7 @@ export function SelectorApp() {
                     onClick={() => loadExample(ex)}
                     title={t(lang, ex.hintKey)}
                     className={cx(
-                      // Mobile: flexible chips; sm+: stable min width for locales
-                      "inline-flex min-h-8 flex-1 items-center justify-center rounded-full border px-2.5 py-1 text-center text-[0.75rem] transition-colors duration-150 sm:min-h-7 sm:min-w-[5.75rem] sm:flex-none",
+                      "inline-flex min-h-8 items-center justify-center rounded-full border px-3 py-1 text-center text-[0.75rem] transition-colors duration-150 sm:min-h-7 sm:min-w-[5.75rem]",
                       on
                         ? "border-[var(--color-accent)] text-[var(--color-accent)]"
                         : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
@@ -504,20 +505,6 @@ export function SelectorApp() {
               </select>
             </Field>
 
-            <Field label={t(lang, "phases")}>
-              <select
-                className={controlClass}
-                value={input.phases}
-                onChange={(e) =>
-                  patch("phases", e.target.value as SelectInput["phases"])
-                }
-              >
-                <option value="III">III</option>
-                <option value="II">II</option>
-                <option value="I">I</option>
-              </select>
-            </Field>
-
             <Field
               label={t(lang, "regulation")}
             >
@@ -600,7 +587,7 @@ export function SelectorApp() {
               </Field>
             ) : null}
 
-            {!isLinear ? (
+            {!isLinear && midOpts.length > 1 ? (
               <Field label={t(lang, "mid")}>
                 <select
                   className={controlClass}
@@ -610,7 +597,6 @@ export function SelectorApp() {
                       : midOpts[0] ?? 3,
                   )}
                   onChange={(e) => applyMid(e.target.value)}
-                  disabled={midOpts.length <= 1}
                 >
                   {midOpts.map((m) => (
                     <option key={m} value={String(m)}>
@@ -730,6 +716,20 @@ export function SelectorApp() {
                     </select>
                   </Field>
 
+                  <Field label={t(lang, "phases")}>
+                    <select
+                      className={controlClass}
+                      value={input.phases}
+                      onChange={(e) =>
+                        patch("phases", e.target.value as SelectInput["phases"])
+                      }
+                    >
+                      <option value="III">III</option>
+                      <option value="II">II</option>
+                      <option value="I">I</option>
+                    </select>
+                  </Field>
+
                   <Field label={t(lang, "acrossBil")}>
                     <select
                       className={controlClass}
@@ -842,9 +842,8 @@ export function SelectorApp() {
               type="submit"
               disabled={running || !input.throughCurrentA}
               className={cx(
-                // Full-width on phone; min-w only from sm up (avoids horizontal overflow)
-                "inline-flex min-h-11 w-full flex-1 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 text-center text-[0.9rem] font-semibold text-[var(--color-accent-ink)] transition-[transform,opacity,background-color] duration-150 sm:min-h-[2.6rem] sm:min-w-[12.5rem] sm:px-5",
-                "hover:brightness-105 active:scale-[0.98]",
+                "inline-flex min-h-11 w-full flex-1 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 text-center text-[0.9rem] font-semibold text-[var(--color-accent-ink)] transition-opacity duration-150 sm:min-h-[2.6rem] sm:min-w-[12.5rem] sm:px-5",
+                "hover:opacity-90",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 running && "pointer-events-none",
               )}
@@ -904,16 +903,20 @@ export function SelectorApp() {
                     <p className="font-mono text-[10px] tracking-[0.08em] text-[var(--color-accent)] uppercase">
                       {t(lang, "recommended")}
                     </p>
-                    <p className="mt-2 break-all font-mono text-[1.05rem] leading-snug font-medium tracking-tight text-[var(--color-ink)] sm:text-[1.15rem]">
-                      {primary.model}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => copyModel(primary.model)}
-                      className="mt-3 inline-flex min-h-8 min-w-[9.5rem] items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-graphite)] px-3 py-1.5 text-center text-[0.8125rem] font-medium text-white transition-opacity hover:opacity-90"
-                    >
-                      {copied ? t(lang, "copied") : t(lang, "copyType")}
-                    </button>
+                    <div className="mt-2 flex items-start gap-2">
+                      <p className="min-w-0 flex-1 font-mono text-[1.125rem] leading-snug font-medium tracking-tight break-words text-[var(--color-ink)] sm:text-[1.25rem]">
+                        {primary.model}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => copyModel(primary.model)}
+                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border border-[var(--color-rule)] px-2.5 text-[0.75rem] font-medium text-[var(--color-ink-2)] transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                        aria-label={t(lang, "copyType")}
+                      >
+                        <ClipboardDocumentIcon className="h-4 w-4" aria-hidden />
+                        {copied ? t(lang, "copied") : t(lang, "copy")}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-2 px-4 py-3 text-[0.8125rem] leading-relaxed text-[var(--color-ink-2)]">
@@ -962,7 +965,8 @@ export function SelectorApp() {
                                 <button
                                   type="button"
                                   onClick={() => copyModel(r.model)}
-                                  className="inline-flex min-w-[4.5rem] shrink-0 justify-end text-[0.6875rem] text-[var(--color-accent)] hover:underline"
+                                  className="inline-flex h-7 shrink-0 items-center rounded-[var(--radius-sm)] px-1.5 text-[0.6875rem] text-[var(--color-accent)] hover:underline"
+                                  aria-label={t(lang, "copy")}
                                 >
                                   {t(lang, "copy")}
                                 </button>
