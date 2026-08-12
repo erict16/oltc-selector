@@ -1,0 +1,108 @@
+import { describe, expect, it } from "vitest";
+import { selectOltc } from "./engine";
+import {
+  ORDER_REPLAY,
+  commercialMatch,
+  parseTypeString,
+  runOrderReplay,
+} from "./orderReplay";
+
+describe("order-replay parse / match", () => {
+  it("parses combined, compound, and 3× strings", () => {
+    expect(parseTypeString("SHZVIII-1000Y/72.5C-12233W")).toMatchObject({
+      family: "SHZV",
+      phases: "III",
+      currentA: 1000,
+      connection: "Y",
+      umKv: 72.5,
+      selectorSize: "C",
+      tapCode: "12233W",
+    });
+    expect(parseTypeString("CV2III-350D/40.5-10193W")).toMatchObject({
+      family: "CV2",
+      selectorSize: "",
+      connection: "D",
+    });
+    expect(parseTypeString("3×SHZVI-2400/72.5C-10193W")).toMatchObject({
+      unitCount: 3,
+      family: "SHZV",
+      phases: "I",
+      currentA: 2400,
+    });
+  });
+
+  it("matches family / I / Um / grade / tap (criterion 2)", () => {
+    expect(
+      commercialMatch(
+        "SHZVIII-1000Y/170D-12233W",
+        "SHZV III 1000Y / 170D – 12233W",
+      ),
+    ).toBe(true);
+    expect(
+      commercialMatch("CM2III-500Y/72.5B-10193W", "CV2III-350Y/72.5-10193W"),
+    ).toBe(false);
+  });
+});
+
+describe("order-replay: shipped selectOltc on real QS/OS", () => {
+  it("every fixture drives selectOltc (no mock)", () => {
+    for (const c of ORDER_REPLAY) {
+      const out = selectOltc(c.input);
+      expect(out.ok, c.id).toBe(true);
+      expect(out.results.length, c.id).toBeGreaterThan(0);
+    }
+  });
+
+  it("min-adequate #1 matches the ordered type (criterion 2)", () => {
+    for (const c of ORDER_REPLAY.filter((x) => x.tag === "min-adequate")) {
+      const out = selectOltc(c.input);
+      expect(
+        commercialMatch(out.results[0].model, c.expectPrimary),
+        `${c.id}: #1=${out.results[0].model} expected ${c.expectPrimary}`,
+      ).toBe(true);
+    }
+  });
+
+  it("customer-specified ordered type appears in the ranked list", () => {
+    for (const c of ORDER_REPLAY.filter((x) => x.tag === "customer-specified")) {
+      const out = selectOltc(c.input);
+      const hit = out.results.some((r) =>
+        commercialMatch(r.model, c.expectPrimary),
+      );
+      expect(
+        hit,
+        `${c.id}: ${c.expectPrimary} not in ${out.results.map((r) => r.model).join(" | ")}`,
+      ).toBe(true);
+    }
+  });
+
+  it("named backup sits in non-primary results; otherwise remaining list is non-empty", () => {
+    for (const c of ORDER_REPLAY) {
+      const out = selectOltc(c.input);
+      const rest = out.results.slice(1);
+      if (c.expectBackup) {
+        expect(
+          rest.some((r) => commercialMatch(r.model, c.expectBackup!)),
+          `${c.id}: backup ${c.expectBackup} not in ${rest.map((r) => r.model).join(" | ")}`,
+        ).toBe(true);
+      } else {
+        expect(rest.length, `${c.id}: no remaining eligible types`).toBeGreaterThan(
+          0,
+        );
+      }
+    }
+  });
+
+  it("in-tank vacuum 350 A / 40.5 D ±8 is the commercial CV2 type, not merely ok", () => {
+    const c = ORDER_REPLAY.find((x) => x.id === "Qu-ET260002")!;
+    const out = selectOltc(c.input);
+    expect(out.results[0].model).toBe("CV2III-350D/40.5-10193W");
+  });
+
+  it("runOrderReplay uses the shipped entry point on every case", () => {
+    const rows = runOrderReplay();
+    expect(rows.length).toBe(ORDER_REPLAY.length);
+    const failed = rows.filter((r) => !r.pass);
+    expect(failed.map((r) => `${r.id} #1=${r.actualPrimary}`)).toEqual([]);
+  });
+});

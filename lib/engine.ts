@@ -306,33 +306,33 @@ export function selectOltc(input: SelectInput): SelectOutput {
       if (tap.positions > maxPos) continue;
 
       for (const att of buildAttempts(s, input)) {
-        let current = att.current;
         const phaseCurrents = s.currents[att.phases] ?? s.currents.I ?? [];
 
-        // Choose smallest catalogue I that covers duty + step capacity
-        {
-          const need =
-            input.stepVoltageV > 0
-              ? (input.throughCurrentA * input.stepVoltageV) / 1000
-              : 0;
-          const okI = phaseCurrents.find((c) => {
-            if (c + 0.01 < input.throughCurrentA) return false;
-            // Headroom: if duty sits in the top ~3% of a rating, bump (case 2: 489.7 → 600).
-            // 480 A must still accept CM2-500 (2025 sales).
-            if (
-              input.throughCurrentA + 0.01 < c &&
-              input.throughCurrentA > c * 0.97
-            ) {
-              return false;
-            }
-            const psin = s.stepCapacityByCurrent?.[c];
-            if (psin != null && need > psin + 0.5) return false;
-            return true;
-          });
-          if (okI == null) continue;
-          current = okI;
-        }
+        // Covering catalogue I: smallest first, then the next step so a
+        // customer-locked larger rating (CM-600, SHZV-1000, SHZVG-1500)
+        // still appears in the ranked list.
+        const need =
+          input.stepVoltageV > 0
+            ? (input.throughCurrentA * input.stepVoltageV) / 1000
+            : 0;
+        const covering = phaseCurrents.filter((c) => {
+          if (c + 0.01 < input.throughCurrentA) return false;
+          // Headroom: if duty sits in the top ~3% of a rating, bump (case 2: 489.7 → 600).
+          // 480 A must still accept CM2-500 (2025 sales).
+          if (
+            input.throughCurrentA + 0.01 < c &&
+            input.throughCurrentA > c * 0.97
+          ) {
+            return false;
+          }
+          const psin = s.stepCapacityByCurrent?.[c];
+          if (psin != null && need > psin + 0.5) return false;
+          return true;
+        });
+        if (!covering.length) continue;
+        const currentsToEmit = covering.slice(0, 2);
 
+        for (const current of currentsToEmit) {
         const selectorSize = s.usesSelectorSize
           ? pickSelectorSize(
               att.um,
@@ -498,6 +498,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           confidence,
           adequacyScore: score,
         });
+        }
       }
     }
 
