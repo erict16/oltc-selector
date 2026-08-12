@@ -95,8 +95,24 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
 
   it("in-tank vacuum 350 A / 40.5 D ±8 is the commercial CV2 type, not merely ok", () => {
     const c = ORDER_REPLAY.find((x) => x.id === "Qu-ET260002")!;
-    const out = selectOltc(c.input);
-    expect(out.results[0].model).toBe("CV2III-350D/40.5-10193W");
+    const fromOrder = selectOltc(c.input);
+    expect(fromOrder.results[0].model).toBe("CV2III-350D/40.5-10193W");
+
+    // Same commercial string from the plan's representative duty (350 A, not the 15 MVA I).
+    const fromDuty = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 350,
+      umKv: 40.5,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+    });
+    expect(fromDuty.ok).toBe(true);
+    expect(fromDuty.results[0].model).toBe("CV2III-350D/40.5-10193W");
   });
 
   it("runOrderReplay uses the shipped entry point on every case", () => {
