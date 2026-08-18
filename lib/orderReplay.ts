@@ -8,6 +8,10 @@
  */
 import { selectOltc } from "./engine";
 import type { SelectInput } from "./types";
+import {
+  ANTHONY_REPLAY,
+  ANTHONY_REPLAY_SKIPPED,
+} from "./anthonyQs.fixtures";
 
 export type ReplayTag = "min-adequate" | "customer-specified";
 
@@ -333,6 +337,8 @@ export const ORDER_REPLAY: ReplayCase[] = [
     },
     expectPrimary: "CVIII-350D/40.5-10193W",
   },
+
+  ...ANTHONY_REPLAY,
 ];
 
 /** Skipped Qu-ET / OS rows — recorded so inventory does not invent duty. */
@@ -358,6 +364,7 @@ export const ORDER_REPLAY_SKIPPED: Array<{
     source: "QS/Qu-ET260010-WDLVIII-2000-145-5_2B-TBA.docx",
     reason: "OCTC / WDL (de-energized). Out of OLTC engine scope.",
   },
+  ...ANTHONY_REPLAY_SKIPPED,
 ];
 
 export type TypeParts = {
@@ -467,6 +474,19 @@ export function runOrderReplay(): ReplayRow[] {
       pass: Boolean(out.ok && primaryOk && backupOk),
     };
   });
+}
+
+export function replaySummary(rows: ReplayRow[] = runOrderReplay()) {
+  return {
+    total: rows.length,
+    match: rows.filter((r) => r.tag === "min-adequate" && r.pass).length,
+    eligibleDifferent: rows.filter(
+      (r) => r.tag === "customer-specified" && r.pass,
+    ).length,
+    fail: rows.filter((r) => !r.pass).length,
+    skip: ORDER_REPLAY_SKIPPED.length,
+    engineBugFixed: 0,
+  };
 }
 
 export function formatReplayMarkdown(rows: ReplayRow[]): string {
