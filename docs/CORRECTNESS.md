@@ -32,3 +32,5 @@ Goal in `docs/GOAL.md`: every latest-R QS + Qu-ET260001–013 is a passing repla
 | `npm run build` | 0 |
 
 This is **decided 100%**, not “every quote is engine #1”. Buyer-locked oil CV/SV/SHZV and 3× are supposed to differ from min-adequate.
+
+- loop 01:00 still 100% decided, tests 73
