@@ -66,6 +66,9 @@ const en: Dict = {
   preferVac: "Prefer vacuum interrupter",
   preferVacTip: "Favours vacuum series (CV2 / CM2 / SHZV) when they cover the duty.",
   preferVacOff: "Vacuum not preferred",
+  dutyKind: "On-load / off-circuit",
+  dutyOltc: "OLTC",
+  dutyOctc: "OCTC",
   acrossLead:
     "Optional. Leave blank to size the selector from Um only. Fill when the transformer specifies across-tap insulation.",
   acrossUnset: "— from Um only —",
@@ -161,6 +164,9 @@ const zh: Dict = {
   preferVac: "优先真空灭弧",
   preferVacTip: "在满足工况时优先真空系列（CV2 / CM2 / SHZV）。",
   preferVacOff: "不优先真空",
+  dutyKind: "有载 / 无载",
+  dutyOltc: "有载",
+  dutyOctc: "无载",
   acrossLead:
     "选填。空着则仅按 Um 定选择器等级；变压器给出调压绕组间绝缘时再填。",
   acrossUnset: "— 仅按 Um —",
@@ -256,6 +262,9 @@ const vi: Dict = {
   preferVac: "Ưu tiên chân không",
   preferVacTip: "Ưu tiên dòng vacuum (CV2 / CM2 / SHZV) khi đủ điều kiện.",
   preferVacOff: "Không ưu tiên vacuum",
+  dutyKind: "Có tải / không tải",
+  dutyOltc: "OLTC",
+  dutyOctc: "OCTC",
   acrossLead:
     "Tùy chọn. Để trống thì chỉ theo Um. Điền khi máy biến áp cho cách điện giữa cuộn điều áp.",
   acrossUnset: "— chỉ theo Um —",
@@ -353,6 +362,9 @@ const es: Dict = {
   preferVac: "Preferir vacío",
   preferVacTip: "Prioriza series de vacío (CV2 / CM2 / SHZV) si cubren el régimen.",
   preferVacOff: "Sin preferir vacío",
+  dutyKind: "En carga / sin tensión",
+  dutyOltc: "OLTC",
+  dutyOctc: "OCTC",
   acrossLead:
     "Opcional. En blanco se dimensiona solo con Um. Rellene si el transformador da aislamiento entre tomas.",
   acrossUnset: "— solo Um —",
@@ -449,6 +461,9 @@ const tr: Dict = {
   preferVac: "Vakum tercih et",
   preferVacTip: "Uygunsa vakum serilerini (CV2 / CM2 / SHZV) öne alır.",
   preferVacOff: "Vakum tercihi yok",
+  dutyKind: "Yükte / yüksüz",
+  dutyOltc: "OLTC",
+  dutyOctc: "OCTC",
   acrossLead:
     "İsteğe bağlı. Boşsa yalnızca Um’ye göre. Transformatör sargılar arası yalıtım veriyorsa doldurun.",
   acrossUnset: "— yalnız Um —",
@@ -546,6 +561,9 @@ const ru: Dict = {
   preferVacTip:
     "Предпочитает вакуумные серии (CV2 / CM2 / SHZV), если они покрывают режим.",
   preferVacOff: "Вакуум не предпочтителен",
+  dutyKind: "Под нагрузкой / без напряжения",
+  dutyOltc: "РПН",
+  dutyOctc: "ПБВ",
   acrossLead:
     "Необязательно. Пусто — класс селектора только по Um. Заполните, если задана изоляция по обмотке РПН.",
   acrossUnset: "— только Um —",

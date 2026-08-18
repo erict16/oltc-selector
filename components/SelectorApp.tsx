@@ -63,6 +63,7 @@ const defaultInput: SelectInput = {
   midPositions: 3,
   selectorSize: "auto",
   mdu: "none",
+  dutyKind: "oltc",
 };
 
 type ExampleKey = "case1Cv2" | "case2Cm2" | "case5Cv2_145";
@@ -306,6 +307,7 @@ export function SelectorApp() {
 
   /** Collapsed “more options” summary — non-default advanced fields */
   const moreBits: string[] = [];
+  if (input.dutyKind === "octc") moreBits.push(t(lang, "dutyOctc"));
   if (input.mounting !== "in_tank") {
     moreBits.push(
       t(
@@ -680,6 +682,34 @@ export function SelectorApp() {
             >
               <div className="overflow-hidden">
                 <div className="grid gap-x-4 gap-y-3.5 pt-3 sm:grid-cols-2">
+                  <Field label={t(lang, "dutyKind")}>
+                    <div
+                      className="grid h-10 grid-cols-2 gap-1"
+                      role="group"
+                      aria-label={t(lang, "dutyKind")}
+                    >
+                      {(["oltc", "octc"] as const).map((k) => {
+                        const on = (input.dutyKind ?? "oltc") === k;
+                        return (
+                          <button
+                            key={k}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => patch("dutyKind", k)}
+                            className={cx(
+                              "inline-flex h-10 items-center justify-center rounded-[var(--radius-sm)] border text-[0.8125rem] transition-colors duration-150",
+                              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+                              on
+                                ? "border-[var(--color-accent)] font-medium text-[var(--color-accent)]"
+                                : "border-[var(--color-rule-2)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",
+                            )}
+                          >
+                            {t(lang, k === "oltc" ? "dutyOltc" : "dutyOctc")}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </Field>
                   <Field label={t(lang, "mounting")}>
                     <select
                       className={controlClass}

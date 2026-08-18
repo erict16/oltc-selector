@@ -123,8 +123,8 @@ function buildModelString(
   let core: string;
   if (isOctcSeries(series)) {
     // tapCode already includes contact + size (6x5B). Roman is the product series, not phase.
-    const roman = octcRoman(conn === "" || conn === "any" ? "Y" : conn);
-    const yd = conn === "any" || !conn ? "Y" : conn;
+    const yd: "Y" | "D" = conn === "D" ? "D" : "Y";
+    const roman = octcRoman(yd);
     core = `${series.code}${roman}-${current}${yd}/${umToken}-${tapCode}`;
   } else if (series.code === "HWDK") {
     core = `${series.code}${phases}-${current}/${umToken}`;
