@@ -58,15 +58,22 @@ function stripMdu(raw: string): string {
   );
 }
 
+const LIST_FAMILIES = new Set(BASE_PRICE_ROWS.map((r) => r.family));
+
 function pitchFromTap(tap: string): number | null {
   const m = tap.match(/^(\d{2})/);
   return m ? Number(m[1]) : null;
 }
 
-function changeOverFromTap(tap: string): string {
-  const last = tap.slice(-1).toUpperCase();
-  if (last === "W" || last === "G") return last;
+/** Linear (10070) and list rows written `10...` (no W/G/0) are change-over 0. */
+function normChangeOver(value: string | null | undefined): string {
+  const c = (value ?? "").trim().toUpperCase();
+  if (c === "W" || c === "G") return c;
   return "0";
+}
+
+function changeOverFromTap(tap: string): string {
+  return normChangeOver(tap.slice(-1));
 }
 
 type Index = {
@@ -92,7 +99,7 @@ function sig(parts: {
     parts.umKv,
     parts.selectorSize,
     parts.pitch ?? "",
-    parts.changeOver ?? "",
+    normChangeOver(parts.changeOver),
   ].join("|");
 }
 
@@ -161,6 +168,9 @@ export function lookupListPrice(model: string): ListPriceHit {
 
   const parsed = parseTypeString(cleaned);
   if (!parsed) return { found: false, reason: "unparsed" };
+  if (!LIST_FAMILIES.has(parsed.family)) {
+    return { found: false, reason: "no-row" };
+  }
 
   const pitch = pitchFromTap(parsed.tapCode);
   const changeOver = changeOverFromTap(parsed.tapCode);

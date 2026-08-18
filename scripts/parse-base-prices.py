@@ -167,12 +167,20 @@ def parse_label(raw: str) -> dict | None:
     tap = d.get("tap")
     if tap:
         pitch = int(tap[:2])
-        change_over = tap[-1] if tap[-1] in "WG0" else None
+        last = tap[-1].upper()
+        # 10070 / 18353W / missing letter: linear is 0, never leave null
+        change_over = last if last in "WG0" else "0"
     else:
         if d.get("pitch"):
             pitch = int(d["pitch"])
         reg = (d.get("reg") or "").upper()
-        change_over = reg if reg in ("W", "G", "0") else None
+        if reg in ("W", "G", "0"):
+            change_over = reg
+        elif pitch is not None:
+            # CV2 writes linear as 10... (no trailing 0)
+            change_over = "0"
+        else:
+            change_over = None
     return {
         "family": family,
         "phases": d["phases"].upper(),

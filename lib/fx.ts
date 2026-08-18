@@ -82,6 +82,9 @@ function mergeRates(
   return { date, source, live, perCny };
 }
 
+export const FRANKFURTER_LATEST = "https://api.frankfurter.dev/v1/latest";
+export const ER_API_LATEST = "https://open.er-api.com/v6/latest/CNY";
+
 /** Frankfurter (ECB) first; fill gaps from open.er-api. Offline → dated fallback. */
 export async function fetchListRates(
   fetcher: typeof fetch = fetch,
@@ -89,7 +92,7 @@ export async function fetchListRates(
   try {
     const codes = LIST_CURRENCIES.filter((c) => c !== "CNY").join(",");
     const res = await fetcher(
-      `https://api.frankfurter.dev/v1/latest?base=CNY&symbols=${codes}`,
+      `${FRANKFURTER_LATEST}?base=CNY&symbols=${codes}`,
     );
     if (res.ok) {
       const body = (await res.json()) as {
@@ -107,7 +110,7 @@ export async function fetchListRates(
       );
       if (!missing.length) return merged;
       try {
-        const extra = await fetcher("https://open.er-api.com/v6/latest/CNY");
+        const extra = await fetcher(ER_API_LATEST);
         if (extra.ok) {
           const er = (await extra.json()) as {
             time_last_update_utc?: string;
@@ -129,7 +132,7 @@ export async function fetchListRates(
     /* fall through */
   }
   try {
-    const res = await fetcher("https://open.er-api.com/v6/latest/CNY");
+    const res = await fetcher(ER_API_LATEST);
     if (res.ok) {
       const body = (await res.json()) as {
         time_last_update_utc?: string;
