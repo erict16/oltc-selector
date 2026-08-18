@@ -61,18 +61,16 @@ const fallbackFx: FxRates = {
 const selectClass =
   "h-10 w-[7.5rem] shrink-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)]";
 
-/** 2025 list RMB FOB Shanghai × mid-market FX. Mount only after a successful select. */
-export function ListPrice({ model, lang }: { model: string; lang: Lang }) {
-  const hit = useMemo(() => lookupListPrice(model), [model]);
-  const [currency, setCurrency] = useState<ListCurrency>("CNY");
+/** Shared list currency + FX. One instance in SelectorApp; alts follow the primary select. */
+export function useListFx() {
+  const [currency, setCurrencyState] = useState<ListCurrency>("CNY");
   const [fx, setFx] = useState<FxRates>(fallbackFx);
 
   useEffect(() => {
-    setCurrency(readStoredCurrency());
+    setCurrencyState(readStoredCurrency());
   }, []);
 
   useEffect(() => {
-    if (!hit.found) return;
     let cancelled = false;
     fetchListRates().then((rates) => {
       if (!cancelled) setFx(rates);
@@ -80,11 +78,11 @@ export function ListPrice({ model, lang }: { model: string; lang: Lang }) {
     return () => {
       cancelled = true;
     };
-  }, [hit.found]);
+  }, []);
 
-  const onCurrency = (next: string) => {
+  const setCurrency = (next: string) => {
     if (!isListCurrency(next)) return;
-    setCurrency(next);
+    setCurrencyState(next);
     try {
       localStorage.setItem(FX_STORAGE_KEY, next);
     } catch {
@@ -92,20 +90,124 @@ export function ListPrice({ model, lang }: { model: string; lang: Lang }) {
     }
   };
 
+  return { currency, fx, setCurrency };
+}
+
+function CurrencySelect({
+  lang,
+  currency,
+  onCurrency,
+}: {
+  lang: Lang;
+  currency: ListCurrency;
+  onCurrency: (next: string) => void;
+}) {
+  return (
+    <label className="flex shrink-0 flex-col gap-1.5">
+      <span className="text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
+        {t(lang, "priceCurrency")}
+      </span>
+      <select
+        className={selectClass}
+        value={currency}
+        onChange={(e) => onCurrency(e.target.value)}
+        aria-label={t(lang, "priceCurrency")}
+      >
+        {LIST_CURRENCIES.map((code) => (
+          <option key={code} value={code}>
+            {code}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function amountLine(
+  listRmb: number,
+  currency: ListCurrency,
+  fx: FxRates,
+  lang: Lang,
+): string {
+  const converted = convertFromCny(listRmb, currency, fx.perCny);
+  if (currency === "CNY") {
+    return t(lang, "priceCny", { n: formatMoney(listRmb, "CNY", lang) });
+  }
+  return t(lang, "priceConverted", {
+    ccy: currency,
+    n: formatMoney(converted, currency, lang),
+  });
+}
+
+/** Compact `USD 12,345` (or `—`) for alt rows. Same currency as the primary block. */
+export function AltListAmount({
+  model,
+  lang,
+  currency,
+  fx,
+}: {
+  model: string;
+  lang: Lang;
+  currency: ListCurrency;
+  fx: FxRates;
+}) {
+  const hit = useMemo(() => lookupListPrice(model), [model]);
+  if (!hit.found) {
+    return (
+      <span className="shrink-0 font-mono text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]">
+        —
+      </span>
+    );
+  }
+  const n = convertFromCny(hit.listRmb, currency, fx.perCny);
+  return (
+    <span className="shrink-0 font-mono text-[0.75rem] leading-none tabular-nums text-[var(--color-ink-2)]">
+      {t(lang, "priceConverted", {
+        ccy: currency,
+        n: formatMoney(n, currency, lang),
+      })}
+    </span>
+  );
+}
+
+/** 2025 list × mid-market FX. Mount only after a successful select. */
+export function ListPrice({
+  model,
+  lang,
+  currency,
+  fx,
+  onCurrency,
+}: {
+  model: string;
+  lang: Lang;
+  currency: ListCurrency;
+  fx: FxRates;
+  onCurrency: (next: string) => void;
+}) {
+  const hit = useMemo(() => lookupListPrice(model), [model]);
+
   if (!hit.found) {
     return (
       <div className="border-t border-[var(--color-rule)] px-4 py-3">
-        <p className="text-[0.8125rem] font-medium text-[var(--color-ink)]">
-          {t(lang, "priceTitle")}
-        </p>
-        <p className="mt-1.5 text-[0.8125rem] text-[var(--color-muted)]">
-          {t(lang, "priceNone")}
-        </p>
+        <div className="flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[0.8125rem] font-medium text-[var(--color-ink)]">
+              {t(lang, "priceTitle")}
+            </p>
+            <p className="mt-1.5 text-[0.8125rem] text-[var(--color-muted)]">
+              {t(lang, "priceNone")}
+            </p>
+          </div>
+          <CurrencySelect
+            lang={lang}
+            currency={currency}
+            onCurrency={onCurrency}
+          />
+        </div>
       </div>
     );
   }
 
-  const converted = convertFromCny(hit.listRmb, currency, fx.perCny);
   const fxLine = t(lang, fx.live ? "priceFxLive" : "priceFxFallback", {
     date: fx.date,
   });
@@ -118,37 +220,15 @@ export function ListPrice({ model, lang }: { model: string; lang: Lang }) {
             {t(lang, "priceTitle")}
           </p>
           <p className="mt-1.5 font-mono text-[1rem] leading-snug font-medium tracking-tight tabular-nums text-[var(--color-ink)]">
-            {t(lang, "priceCny", {
-              n: formatMoney(hit.listRmb, "CNY", lang),
-            })}
+            {amountLine(hit.listRmb, currency, fx, lang)}
           </p>
         </div>
-        <label className="flex shrink-0 flex-col gap-1.5">
-          <span className="text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
-            {t(lang, "priceCurrency")}
-          </span>
-          <select
-            className={selectClass}
-            value={currency}
-            onChange={(e) => onCurrency(e.target.value)}
-            aria-label={t(lang, "priceCurrency")}
-          >
-            {LIST_CURRENCIES.map((code) => (
-              <option key={code} value={code}>
-                {code}
-              </option>
-            ))}
-          </select>
-        </label>
+        <CurrencySelect
+          lang={lang}
+          currency={currency}
+          onCurrency={onCurrency}
+        />
       </div>
-      {currency !== "CNY" ? (
-        <p className="mt-2 font-mono text-[0.875rem] tabular-nums text-[var(--color-ink-2)]">
-          {t(lang, "priceConverted", {
-            ccy: currency,
-            n: formatMoney(converted, currency, lang),
-          })}
-        </p>
-      ) : null}
       <p className="mt-2 text-[0.75rem] leading-snug text-[var(--color-muted)]">
         {fxLine}
       </p>
