@@ -47,10 +47,28 @@ KEEP_SHEETS = {
     "CMDI",
     "HWV",
     "HWDK",
+    "WSL(WDL)",
 }
 
 # Longest family first so CV2/CM2/SHZVG/CVIII do not split as CV+II / CVI+I.
 FAM = r"(?P<family>SHZVG|SHZV|HWDK|HWV|CMD|CV2|CM2|CVT|CV|SV|CM|CZ)"
+OCTC_ROMAN = r"(?P<series>VIII|VII|III|II|IV|VI|IX|V|I)"
+# Known Um values, longest first, so 1268x7 → 126-8x7
+OCTC_UMS = (
+    "363",
+    "362",
+    "330",
+    "300",
+    "252",
+    "170",
+    "145",
+    "126",
+    "72.5",
+    "40.5",
+    "17.5",
+    "12.5",
+    "12",
+)
 PHASE = r"(?P<phases>III|II|I)"
 TAIL = (
     r"-"
@@ -118,6 +136,76 @@ def first_num(vals) -> float | None:
             if v > 0:
                 return float(v)
     return None
+
+
+def compact_octc_label(raw: str) -> str:
+    s = raw.replace("\xa0", " ")
+    s = re.sub(r"\s+", "", s)
+    s = s.replace("×", "x").replace("*", "x").replace("X", "x")
+    s = s.replace("（", "(").replace("）", ")")
+    s = s.replace("－", "-").replace("–", "-").replace("—", "-")
+    s = s.replace("／", "/")
+    s = s.replace(",", ".")
+    s = re.sub(r"(\d)_(\d)", r"\1x\2", s)
+    s = re.sub(r"(III|II|I)(\d)", r"\1-\2", s, count=1)
+    s = re.sub(r"(WSL|WDL|WSG)(VIII|VII|IV|VI|IX|V)(\d)", r"\1\2-\3", s, count=1, flags=re.I)
+    if "/" not in s:
+        s = re.sub(r"([YD])(\d+(?:\.\d+)?)-", r"\1/\2-", s, count=1, flags=re.I)
+    um_alt = "|".join(re.escape(u) for u in OCTC_UMS)
+    s = re.sub(rf"({um_alt})(\d{{1,2}}x\d)", r"\1-\2", s, count=1)
+    return s
+
+
+def parse_wsl_label(raw: str) -> dict | None:
+    """WSL/WDL commercial string → list row. Contact is last NxM (4x3(6x5)→6x5)."""
+    s = compact_octc_label(raw)
+    s = re.sub(
+        r"(withhandwheel|withmanualdrive|手动|顶盖.*|头部.*|钟|串并联.*).*$",
+        "",
+        s,
+        flags=re.I,
+    )
+    m = re.match(
+        rf"^(?P<family>WSL|WDL|WSG){OCTC_ROMAN}-"
+        r"(?P<current>\d+)"
+        r"(?P<conn>[YD])?"
+        r"[/-]"
+        r"(?P<um>\d+(?:\.\d+)?)"
+        r"-"
+        r"(?P<tail>.+)$",
+        s,
+        re.I,
+    )
+    if not m:
+        return None
+    tail = m.group("tail")
+    pairs = re.findall(r"(\d+)\s*x\s*(\d+)", tail, re.I)
+    if not pairs:
+        return None
+    contact = f"{int(pairs[-1][0])}x{int(pairs[-1][1])}"
+    size_m = re.search(r"\(([A-E])\)\s*$|([A-E])\s*$", tail, re.I)
+    size = ""
+    if size_m:
+        size = (size_m.group(1) or size_m.group(2) or "").upper()
+    um = float(m.group("um"))
+    family = m.group("family").upper()
+    series = m.group("series").upper()
+    conn = (m.group("conn") or "").upper()
+    current = int(m.group("current"))
+    list_key = f"{family}{series}-{current}{conn}/{um:g}-{contact}{size}"
+    return {
+        "family": family,
+        "phases": series,
+        "currentA": current,
+        "connection": conn,
+        "umKv": um,
+        "selectorSize": size,
+        "pitch": None,
+        "changeOver": None,
+        "listKey": list_key,
+        "tapCode": contact,
+        "unitCount": 1,
+    }
 
 
 def parse_label(raw: str) -> dict | None:
@@ -211,21 +299,32 @@ def main() -> None:
             skipped_sheets.append(name)
             continue
         ws = wb[name]
+        wsl_sheet = name == "WSL(WDL)"
         for row in ws.iter_rows(max_col=8):
             vals = cells(row)
             label = first_str(vals)
             if not label:
                 continue
-            parsed = parse_label(label)
+            parsed = parse_wsl_label(label) if wsl_sheet else parse_label(label)
             if not parsed:
                 continue
-            price = first_num(vals[1:])  # never treat the model cell as the price
+            if wsl_sheet:
+                # Col E = CMA7 motor set (hand wheel / manual / SHM-D / CMA7 / remote).
+                # Skip rows with no CMA7 — do not invent from hand-wheel.
+                cma7 = vals[4] if len(vals) > 4 else None
+                price = (
+                    float(cma7)
+                    if isinstance(cma7, (int, float)) and not isinstance(cma7, bool) and cma7 > 0
+                    else None
+                )
+            else:
+                price = first_num(vals[1:])  # never treat the model cell as the price
             if price is None:
                 unread_labels += 1
                 continue
             parsed["listRmb"] = int(round(price))
             parsed["sheet"] = name
-            parsed["includesMdu"] = True  # standard set; HWV already includes MDU
+            parsed["includesMdu"] = True  # standard set; HWV / WSL CMA7 already includes MDU
             rows.append(parsed)
     wb.close()
 

@@ -119,6 +119,31 @@ function hwvSig(parts: {
   ].join("|");
 }
 
+function isOctcFamily(family: string): boolean {
+  return family === "WSL" || family === "WDL" || family === "WSG";
+}
+
+function octcSig(parts: {
+  family: string;
+  phases: string;
+  currentA: number;
+  connection: string;
+  umKv: number;
+  selectorSize: string;
+  tapCode: string;
+}): string {
+  return [
+    "octc",
+    parts.family,
+    parts.phases,
+    parts.currentA,
+    parts.connection,
+    parts.umKv,
+    parts.selectorSize,
+    parts.tapCode,
+  ].join("|");
+}
+
 let index: Index | null = null;
 
 function getIndex(): Index {
@@ -137,9 +162,59 @@ function getIndex(): Index {
       if (hb) hb.push(row);
       else bySig.set(hk, [row]);
     }
+    if (isOctcFamily(row.family)) {
+      const ok = octcSig({
+        family: row.family,
+        phases: row.phases,
+        currentA: row.currentA,
+        connection: row.connection,
+        umKv: row.umKv,
+        selectorSize: row.selectorSize,
+        tapCode: row.tapCode,
+      });
+      const ob = bySig.get(ok);
+      if (ob) ob.push(row);
+      else bySig.set(ok, [row]);
+    }
   }
   index = { byKey, bySig };
   return index;
+}
+
+const OCTC_SIZE_FALLBACK = ["A", "B", "E", "D", "C", ""];
+
+function lookupOctc(
+  idx: Index,
+  parsed: {
+    family: string;
+    phases: string;
+    currentA: number;
+    connection: string;
+    umKv: number;
+    selectorSize: string;
+    tapCode: string;
+  },
+): BasePriceRow[] | undefined {
+  const tryFam = (family: string): BasePriceRow[] | undefined => {
+    const base = {
+      family,
+      phases: parsed.phases,
+      currentA: parsed.currentA,
+      connection: parsed.connection,
+      umKv: parsed.umKv,
+      selectorSize: parsed.selectorSize,
+      tapCode: parsed.tapCode,
+    };
+    const exact = idx.bySig.get(octcSig(base));
+    if (exact?.length) return exact;
+    if (parsed.selectorSize) return undefined;
+    for (const sz of OCTC_SIZE_FALLBACK) {
+      const hits = idx.bySig.get(octcSig({ ...base, selectorSize: sz }));
+      if (hits?.length) return hits;
+    }
+    return undefined;
+  };
+  return tryFam(parsed.family) ?? (parsed.family === "WDL" ? tryFam("WSL") : undefined);
 }
 
 /**
@@ -188,7 +263,9 @@ export function lookupListPrice(model: string): ListPriceHit {
   const hits =
     parsed.family === "HWV" || parsed.family === "HWDK"
       ? idx.bySig.get(`hwv:${hwvSig(want)}`)
-      : idx.bySig.get(sig(want));
+      : isOctcFamily(parsed.family)
+        ? lookupOctc(idx, parsed)
+        : idx.bySig.get(sig(want));
 
   const row = hits?.[0];
   if (!row) return { found: false, reason: "no-row" };

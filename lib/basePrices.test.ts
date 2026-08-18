@@ -37,6 +37,39 @@ describe("base price list 2025", () => {
       found: true,
       listRmb: 225000,
     });
+    expect(lookupListPrice("HWVIII-800D/40.5-10193W")).toMatchObject({
+      found: true,
+      listRmb: 247500,
+    });
+    expect(lookupListPrice("HWVIII-400D/72.5-18353W")).toMatchObject({
+      found: true,
+      listRmb: 250000,
+    });
+  });
+
+  it("looks up WSL/WDL CMA7 list (not hand-wheel)", () => {
+    expect(lookupListPrice("WSLIV-800Y/170-6x5B")).toMatchObject({
+      found: true,
+      listRmb: 97500,
+      sheet: "WSL(WDL)",
+    });
+    expect(lookupListPrice("WSL IV-800Y/170-6×5B")).toMatchObject({
+      found: true,
+      listRmb: 97500,
+    });
+    expect(lookupListPrice("WSLIV-600Y/72.5-6x5A")).toMatchObject({
+      found: true,
+      listRmb: 45400,
+    });
+    expect(lookupListPrice("WSLII-800D/72.5-6x5A")).toMatchObject({
+      found: true,
+      listRmb: 49600,
+    });
+    // WDL aliases the WSL row when the sheet has no WDL twin
+    expect(lookupListPrice("WDLIV-1000Y/126-6x5B")).toMatchObject({
+      found: true,
+      listRmb: 53100,
+    });
   });
 
   it("maps linear 10070 to change-over 0 (not W)", () => {

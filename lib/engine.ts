@@ -15,8 +15,48 @@ import type {
   PhaseCode,
   SelectInput,
   SelectOutput,
+  SelectorSize,
   SeriesDef,
 } from "./types";
+
+/**
+ * DETC contact from service positions (or ±N → 2N+1).
+ * Only the four commercial codes — no 8x7/10x9 invent.
+ */
+export function octcContactCode(input: SelectInput): string {
+  let pos = input.positions;
+  if (input.plusMinusSteps != null && input.plusMinusSteps > 0) {
+    pos = 2 * input.plusMinusSteps + 1;
+  }
+  if (pos == null || pos <= 6) return "6x5";
+  if (pos <= 7) return "7x6";
+  if (pos <= 12) return "12x11";
+  return "18x17";
+}
+
+/** WSL size letter: 6x5 @ ≤72.5 → A; 18x17 → E; else B. */
+export function octcSizeLetter(
+  um: number,
+  contact: string,
+  requested?: SelectorSize | "auto",
+): SelectorSize {
+  if (requested && requested !== "auto") {
+    if (requested === "DE") return "E";
+    return requested;
+  }
+  if (contact === "18x17") return "E";
+  if (um <= 72.5 + 0.1 && contact === "6x5") return "A";
+  return "B";
+}
+
+/** Linear Y → WSLIV; linear D → WSLII (Anthony + price-list blocks). */
+export function octcRoman(connection: Connection): "IV" | "II" {
+  return connection === "D" ? "II" : "IV";
+}
+
+function isOctcSeries(s: SeriesDef): boolean {
+  return s.dutyKind === "octc";
+}
 
 /** CV2 brochure: 2000 V @ 10 contacts, 1500 V @ 12 contacts (approx by pitch). */
 function maxStepVoltageForSeries(
@@ -81,7 +121,12 @@ function buildModelString(
         : connection;
 
   let core: string;
-  if (series.code === "HWDK") {
+  if (isOctcSeries(series)) {
+    // tapCode already includes contact + size (6x5B). Roman is the product series, not phase.
+    const roman = octcRoman(conn === "" || conn === "any" ? "Y" : conn);
+    const yd = conn === "any" || !conn ? "Y" : conn;
+    core = `${series.code}${roman}-${current}${yd}/${umToken}-${tapCode}`;
+  } else if (series.code === "HWDK") {
     core = `${series.code}${phases}-${current}/${umToken}`;
   } else if (!conn) {
     core = `${series.code}${phases}-${current}/${umToken}-${tapCode}`;
@@ -212,7 +257,8 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
     }
   }
 
-  // 3× single-phase only when III cannot cover the through-current
+  // OCTC: never 3× singles. 3× single-phase only when III cannot cover Iᵤ.
+  if (isOctcSeries(s)) return out;
   if (input.phases === "III") {
     const maxIII = s.currents.III?.length
       ? Math.max(...s.currents.III)
@@ -263,9 +309,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
     midPositions: input.midPositions,
   });
 
-  let candidates = SERIES.filter(
-    (s) => seriesMatchesMounting(s, input) && seriesMatchesMedium(s, input),
-  );
+  const wantOctc = input.dutyKind === "octc";
+  let candidates = SERIES.filter((s) => {
+    if (isOctcSeries(s) !== wantOctc) return false;
+    return seriesMatchesMounting(s, input) && seriesMatchesMedium(s, input);
+  });
 
   candidates = candidates.filter((s) => {
     if (input.connection === "any") return true;
@@ -280,10 +328,14 @@ export function selectOltc(input: SelectInput): SelectOutput {
       ok: false,
       results: [],
       errorsEn: [
-        "No OLTC family matches this mounting / medium combination. Adjust filters or contact engineering.",
+        wantOctc
+          ? "No OCTC family matches this mounting / medium combination. Adjust filters or contact engineering."
+          : "No OLTC family matches this mounting / medium combination. Adjust filters or contact engineering.",
       ],
       errorsZh: [
-        "没有系列匹配当前安装位置/介质。请调整条件，或联系工程确认。",
+        wantOctc
+          ? "没有无载系列匹配当前安装位置/介质。请调整条件，或联系工程确认。"
+          : "没有系列匹配当前安装位置/介质。请调整条件，或联系工程确认。",
       ],
     };
   }
@@ -296,14 +348,23 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
       // Pitch-aware Ust limit (CV2 brochure: 2000 V @ 10 contacts, 1500 V @ 12).
       // Hard reject — do not keep the family by bumping current.
-      const pitchMaxUst = maxStepVoltageForSeries(s, tap.pitch);
-      if (input.stepVoltageV > pitchMaxUst + 0.5) continue;
+      // OCTC is de-energized: skip OLTC tap-position / pitch envelope.
+      if (!isOctcSeries(s)) {
+        const pitchMaxUst = maxStepVoltageForSeries(s, tap.pitch);
+        if (input.stepVoltageV > pitchMaxUst + 0.5) continue;
 
-      const maxPos =
-        input.regulation === "linear"
-          ? s.maxPositionsLinear
-          : s.maxPositionsWithChangeOver;
-      if (tap.positions > maxPos) continue;
+        const maxPos =
+          input.regulation === "linear"
+            ? s.maxPositionsLinear
+            : s.maxPositionsWithChangeOver;
+        if (tap.positions > maxPos) continue;
+      } else {
+        let octcPos = input.positions;
+        if (input.plusMinusSteps != null && input.plusMinusSteps > 0) {
+          octcPos = 2 * input.plusMinusSteps + 1;
+        }
+        if (octcPos != null && octcPos > s.maxPositionsLinear) continue;
+      }
 
       for (const att of buildAttempts(s, input)) {
         const phaseCurrents = s.currents[att.phases] ?? s.currents.I ?? [];
@@ -334,16 +395,22 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const currentsToEmit = covering.slice(0, 2);
 
         for (const current of currentsToEmit) {
-        const selectorSize = s.usesSelectorSize
-          ? pickSelectorSize(
-              att.um,
-              input.selectorSize ?? "auto",
-              input.bilKv,
-              input.pfKv,
-              input.acrossTapBilKv,
-              input.acrossTapPfKv,
-            )
-          : "";
+        const octc = isOctcSeries(s);
+        const contact = octc ? octcContactCode(input) : "";
+        const selectorSize = octc
+          ? octcSizeLetter(att.um, contact, input.selectorSize ?? "auto")
+          : s.usesSelectorSize
+            ? pickSelectorSize(
+                att.um,
+                input.selectorSize ?? "auto",
+                input.bilKv,
+                input.pfKv,
+                input.acrossTapBilKv,
+                input.acrossTapPfKv,
+              )
+            : "";
+        const tapCode = octc ? contact : tap.tapCode;
+        const modelTap = octc ? `${contact}${selectorSize}` : tap.tapCode;
 
         const umToken = formatUmToken(att.um, selectorSize, s.usesSelectorSize);
         const phases = phaseToken(att.phases);
@@ -364,7 +431,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
         // Single-phase commercial strings omit Y/D (e.g. 3xCM2I-800/72.5B-…,
         // 3xSHZVI-1000/170D-…). D after Um is selector size, not connection.
-        const modelConn: Connection = att.phases === "I" ? "any" : conn;
+        const modelConn: Connection = att.phases === "I" && !octc ? "any" : conn;
 
         let finalModel = buildModelString(
           s,
@@ -372,7 +439,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           current,
           modelConn,
           umToken,
-          tap.tapCode,
+          modelTap,
           att.unitCount,
         );
         if (att.phases === "I") {
@@ -400,7 +467,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           `最低满足路径：${s.nameZh}，Ium ${current} A ≥ 需求 ${input.throughCurrentA} A，Um ${att.um} kV。`,
         );
 
-        if (s.structure === "compound") {
+        if (s.structure === "compound" && !octc) {
           reasonsEn.push(
             "Compound type fits duty — preferred over larger combined types when eligible.",
           );
@@ -426,12 +493,21 @@ export function selectOltc(input: SelectInput): SelectOutput {
           );
         }
 
-        reasonsEn.push(
-          `Tap code ${tap.tapCode}: pitch ${tap.pitch}, ${tap.positions} pos, mid ${tap.mid}, ${input.regulation}.`,
-        );
-        reasonsZh.push(
-          `分接代码 ${tap.tapCode}：节距 ${tap.pitch}，${tap.positions} 位，中间位 ${tap.mid}。`,
-        );
+        if (octc) {
+          reasonsEn.push(
+            `OCTC contact ${contact}${selectorSize} (WSL${octcRoman(conn)}).`,
+          );
+          reasonsZh.push(
+            `无载触头 ${contact}${selectorSize}（WSL${octcRoman(conn)}）。`,
+          );
+        } else {
+          reasonsEn.push(
+            `Tap code ${tap.tapCode}: pitch ${tap.pitch}, ${tap.positions} pos, mid ${tap.mid}, ${input.regulation}.`,
+          );
+          reasonsZh.push(
+            `分接代码 ${tap.tapCode}：节距 ${tap.pitch}，${tap.positions} 位，中间位 ${tap.mid}。`,
+          );
+        }
 
         if (att.unitCount > 1) {
           reasonsEn.push(
@@ -484,12 +560,17 @@ export function selectOltc(input: SelectInput): SelectOutput {
           umKv: att.um,
           selectorSize,
           umToken,
-          tapCode: tap.tapCode,
+          tapCode,
           regulation: input.regulation,
-          changeOver: tap.changeOver,
-          pitch: tap.pitch,
-          positions: tap.positions,
-          mid: tap.mid,
+          changeOver: octc ? "0" : tap.changeOver,
+          pitch: octc ? 0 : tap.pitch,
+          positions: octc
+            ? input.positions ??
+              (input.plusMinusSteps != null && input.plusMinusSteps > 0
+                ? 2 * input.plusMinusSteps + 1
+                : 5)
+            : tap.positions,
+          mid: octc ? 0 : tap.mid,
           mdu: mduStr,
           unitCount: att.unitCount,
           reasonsEn,
