@@ -26,6 +26,7 @@ import {
   preferredMid,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
+import { ListPrice } from "@/components/ListPrice";
 import { currentLabel, t, type Lang } from "@/lib/i18n";
 import type { ModelResult, SelectInput, SelectOutput } from "@/lib/types";
 
@@ -925,6 +926,7 @@ export function SelectorApp() {
                       {t(lang, "disclaimer")}
                     </p>
                   </div>
+                  <ListPrice model={primary.model} lang={lang} />
 
                   {alts.length > 0 ? (
                     <div className="border-t border-[var(--color-rule)] px-4 py-2.5">

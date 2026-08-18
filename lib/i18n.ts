@@ -96,6 +96,14 @@ const en: Dict = {
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Lowest catalogue rating that covers this duty.",
   whySel: ", tap selector {s}",
   whyMulti: ", {n}× single-phase",
+  priceTitle: "2025 list · FOB Shanghai",
+  priceCny: "RMB {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "Currency",
+  priceNone: "No 2025 list row for this type.",
+  priceDisclaimer: "Indicative list, not a quotation.",
+  priceFxLive: "FX {date}",
+  priceFxFallback: "FX {date} (offline table)",
   langAria: "Language",
 };
 
@@ -182,6 +190,14 @@ const zh: Dict = {
   why: "{code}，{i} A，Um {um} kV{sel}{multi}。满足工况的最低目录档。",
   whySel: " · 选择器 {s}",
   whyMulti: " · {n} 台单相",
+  priceTitle: "2025 目录价 · FOB 上海",
+  priceCny: "人民币 {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "币种",
+  priceNone: "2025 目录没有这一档。",
+  priceDisclaimer: "目录价，不是报价。",
+  priceFxLive: "汇率 {date}",
+  priceFxFallback: "汇率 {date}（离线表）",
   langAria: "语言",
 };
 
@@ -270,6 +286,14 @@ const vi: Dict = {
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Mức danh mục thấp nhất đủ cho nhiệm vụ này.",
   whySel: ", bộ chọn {s}",
   whyMulti: ", {n}× đơn pha",
+  priceTitle: "Giá 2025 · FOB Thượng Hải",
+  priceCny: "RMB {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "Tiền tệ",
+  priceNone: "Không có dòng giá 2025 cho kiểu này.",
+  priceDisclaimer: "Giá danh mục, không phải báo giá.",
+  priceFxLive: "Tỷ giá {date}",
+  priceFxFallback: "Tỷ giá {date} (ngoại tuyến)",
   langAria: "Ngôn ngữ",
 };
 
@@ -359,6 +383,14 @@ const es: Dict = {
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Menor valor de catálogo que cubre este régimen.",
   whySel: ", selector {s}",
   whyMulti: ", {n}× monofásico",
+  priceTitle: "Lista 2025 · FOB Shanghai",
+  priceCny: "RMB {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "Moneda",
+  priceNone: "Sin fila 2025 para este tipo.",
+  priceDisclaimer: "Lista indicativa, no es oferta.",
+  priceFxLive: "FX {date}",
+  priceFxFallback: "FX {date} (tabla)",
   langAria: "Idioma",
 };
 
@@ -447,6 +479,14 @@ const tr: Dict = {
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Bu işletmeyi karşılayan en düşük katalog değeri.",
   whySel: ", seçici {s}",
   whyMulti: ", {n}× tek faz",
+  priceTitle: "2025 liste · FOB Şanghay",
+  priceCny: "RMB {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "Para birimi",
+  priceNone: "Bu tip için 2025 liste satırı yok.",
+  priceDisclaimer: "Liste fiyatı, teklif değildir.",
+  priceFxLive: "Kur {date}",
+  priceFxFallback: "Kur {date} (çevrimdışı)",
   langAria: "Dil",
 };
 
@@ -537,6 +577,14 @@ const ru: Dict = {
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Наименьший каталожный рейтинг для этого режима.",
   whySel: ", селектор {s}",
   whyMulti: ", {n}× однофазных",
+  priceTitle: "Прайс 2025 · FOB Шанхай",
+  priceCny: "RMB {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "Валюта",
+  priceNone: "Нет строки прайса 2025 для этого типа.",
+  priceDisclaimer: "Справочная цена, не оферта.",
+  priceFxLive: "Курс {date}",
+  priceFxFallback: "Курс {date} (офлайн)",
   langAria: "Язык",
 };
 
