@@ -319,8 +319,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
           if (c + 0.01 < input.throughCurrentA) return false;
           // Headroom: if duty sits in the top ~3% of a rating, bump (case 2: 489.7 → 600).
           // 480 A must still accept CM2-500 (2025 sales).
+          // ~1 A epsilon: 349.9 A is S/√3U rounding of 350, not a commercial bump to 600.
           if (
-            input.throughCurrentA + 0.01 < c &&
+            input.throughCurrentA + 1 < c &&
             input.throughCurrentA > c * 0.97
           ) {
             return false;

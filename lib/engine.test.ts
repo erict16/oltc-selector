@@ -448,4 +448,49 @@ describe("2025 sales calibration (year=2025)", () => {
     const cmd = SERIES.find((s) => s.id === "cmd")!;
     expect(cmd.currents.I).toContain(1200);
   });
+
+  it("349.9 A accepts CV2-350 (S/√3U rounding; ~1 A epsilon)", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 349.9,
+      umKv: 40.5,
+      stepVoltageV: 544.5,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("CV2III-350D/40.5-10193W");
+    expect(out.results[0].seriesCode).toBe("CV2");
+    expect(out.results[0].currentA).toBe(350);
+  });
+
+  it("SHZV III stays 400/600/1000; 1300 A III is SHZVG-1300", () => {
+    const shzv = SERIES.find((s) => s.id === "shzv")!;
+    expect(shzv.currents.III).toEqual([400, 600, 1000]);
+    expect(shzv.currents.III).not.toContain(1300);
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 1300,
+      umKv: 126,
+      stepVoltageV: 2000,
+      regulation: "reversing",
+      plusMinusSteps: 16,
+      selectorSize: "DE",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("SHZVG");
+    expect(out.results[0].model).toContain("SHZVGIII-1300Y/126DE");
+    expect(out.results[0].unitCount).toBe(1);
+    expect(out.results.every((r) => r.seriesCode !== "SHZV" || r.unitCount > 1)).toBe(
+      true,
+    );
+  });
 });
