@@ -64,8 +64,12 @@ const selectClass =
 /** 2025 list RMB FOB Shanghai × mid-market FX. Mount only after a successful select. */
 export function ListPrice({ model, lang }: { model: string; lang: Lang }) {
   const hit = useMemo(() => lookupListPrice(model), [model]);
-  const [currency, setCurrency] = useState<ListCurrency>(readStoredCurrency);
+  const [currency, setCurrency] = useState<ListCurrency>("CNY");
   const [fx, setFx] = useState<FxRates>(fallbackFx);
+
+  useEffect(() => {
+    setCurrency(readStoredCurrency());
+  }, []);
 
   useEffect(() => {
     if (!hit.found) return;
