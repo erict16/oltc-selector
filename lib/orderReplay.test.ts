@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { selectOltc } from "./engine";
+import { lookupListPrice } from "./basePrices";
 import {
   ORDER_REPLAY,
+  ORDER_REPLAY_SKIPPED,
   commercialMatch,
   parseTypeString,
+  replaySummary,
   runOrderReplay,
 } from "./orderReplay";
 
@@ -120,5 +123,53 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
     expect(rows.length).toBe(ORDER_REPLAY.length);
     const failed = rows.filter((r) => !r.pass);
     expect(failed.map((r) => `${r.id} #1=${r.actualPrimary}`)).toEqual([]);
+  });
+
+  it("replaySummary is zero FAIL", () => {
+    const rows = runOrderReplay();
+    const s = replaySummary(rows);
+    // Printed for CORRECTNESS.md — fail must stay 0.
+    // eslint-disable-next-line no-console
+    console.log("replaySummary", s);
+    expect(s.fail).toBe(0);
+    expect(s.total).toBe(ORDER_REPLAY.length);
+    expect(s.match + s.eligibleDifferent).toBe(s.total);
+    expect(s.skip).toBe(ORDER_REPLAY_SKIPPED.length);
+    expect(s.skip).toBeGreaterThan(0);
+  });
+
+  it("HWV / WSL replay rows exist; list lookup hits those types", () => {
+    const hwv = ORDER_REPLAY.filter((c) =>
+      parseTypeString(c.expectPrimary)?.family === "HWV",
+    );
+    const wsl = ORDER_REPLAY.filter(
+      (c) =>
+        c.input.dutyKind === "octc" ||
+        ["WSL", "WDL"].includes(parseTypeString(c.expectPrimary)?.family ?? ""),
+    );
+    expect(hwv.length).toBeGreaterThan(0);
+    expect(wsl.length).toBeGreaterThan(0);
+    expect(
+      hwv.some((c) => c.expectPrimary === "HWVIII-400Y/72.5-10193W"),
+    ).toBe(true);
+    expect(
+      wsl.some((c) =>
+        /^WSLIV-800Y\/170-6x5[AB]$/.test(c.expectPrimary),
+      ),
+    ).toBe(true);
+    expect(lookupListPrice("HWVIII-400Y/72.5-10193W")).toMatchObject({
+      found: true,
+      listRmb: 225000,
+    });
+    expect(lookupListPrice("HWVIII-800D/40.5-10193W")).toMatchObject({
+      found: true,
+    });
+    expect(lookupListPrice("WSLIV-800Y/170-6x5B")).toMatchObject({
+      found: true,
+    });
+    expect(lookupListPrice("CV2III-350D/40.5-10193W")).toMatchObject({
+      found: true,
+      listRmb: 148700,
+    });
   });
 });

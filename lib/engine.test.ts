@@ -554,6 +554,23 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
     expect(out.results.every((r) => r.seriesCode !== "WSL")).toBe(true);
   });
 
+  it("dutyKind unset on 800 A / 170 Y must not emit WSL", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 800,
+      umKv: 170,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 5,
+    });
+    expect(out.results.every((r) => r.seriesCode !== "WSL")).toBe(true);
+    expect(out.results.every((r) => !r.model.startsWith("WSL"))).toBe(true);
+  });
+
   it("800 A / 170 Y → WSLIV-800Y/170-6x5B", () => {
     const out = selectOltc({
       mounting: "in_tank",
