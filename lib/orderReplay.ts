@@ -26,6 +26,8 @@ export type ReplayCase = {
   expectPrimary: string;
   /** Named backup / alternate from the same source, if any */
   expectBackup?: string;
+  /** Non-catalogue tap: match family / I / Um / grade only. */
+  match?: "full" | "family-i-um";
 };
 
 const inTankVac = {
@@ -362,7 +364,8 @@ export const ORDER_REPLAY_SKIPPED: Array<{
   {
     id: "Qu-ET260010",
     source: "QS/Qu-ET260010-WDLVIII-2000-145-5_2B-TBA.docx",
-    reason: "OCTC / WDL (de-energized). Out of OLTC engine scope.",
+    reason:
+      "WDLVIII-2000-145; no recoverable transformer Ust. Do not invent OCTC duty.",
   },
   ...ANTHONY_REPLAY_SKIPPED,
 ];
@@ -452,7 +455,11 @@ export function parseTypeString(raw: string): TypeParts | null {
  * includes it), Um, selector grade on combined types, tap code.
  * Single-phase strings omit Y/D after current (D after Um is grade).
  */
-export function commercialMatch(actual: string, expected: string): boolean {
+export function commercialMatch(
+  actual: string,
+  expected: string,
+  mode: "full" | "family-i-um" = "full",
+): boolean {
   const a = parseTypeString(actual);
   const e = parseTypeString(expected);
   if (!a || !e) return normalizeType(actual) === normalizeType(expected);
@@ -464,7 +471,7 @@ export function commercialMatch(actual: string, expected: string): boolean {
   }
   if (a.umKv !== e.umKv) return false;
   if (e.selectorSize && a.selectorSize !== e.selectorSize) return false;
-  if (e.tapCode && a.tapCode !== e.tapCode) return false;
+  if (mode === "full" && e.tapCode && a.tapCode !== e.tapCode) return false;
   if (e.unitCount > 1 && a.unitCount !== e.unitCount) return false;
   return true;
 }
@@ -487,10 +494,11 @@ export function runOrderReplay(): ReplayRow[] {
     const models = out.results.map((r) => r.model);
     const actualPrimary = models[0] ?? "";
     const next = models.slice(1, 4);
+    const mode = c.match ?? "full";
     const primaryOk =
       c.tag === "min-adequate"
-        ? commercialMatch(actualPrimary, c.expectPrimary)
-        : models.some((m) => commercialMatch(m, c.expectPrimary));
+        ? commercialMatch(actualPrimary, c.expectPrimary, mode)
+        : models.some((m) => commercialMatch(m, c.expectPrimary, mode));
     let backupOk: boolean | null = null;
     if (c.expectBackup) {
       backupOk = next.some((m) => commercialMatch(m, c.expectBackup!));

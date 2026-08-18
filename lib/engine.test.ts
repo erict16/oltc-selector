@@ -631,6 +631,72 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toBe("WSLII-800D/72.5-6x5A");
   });
+
+  it("WSG 800 A D 40.5 pos 5 is eligible; WSL still #1 at 6x5", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 800,
+      umKv: 40.5,
+      stepVoltageV: 1000,
+      regulation: "linear",
+      positions: 5,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results.some((r) => r.model === "WSGII-800D/40.5-4x5A")).toBe(
+      true,
+    );
+  });
+});
+
+describe("3× stays eligible when III also covers", () => {
+  it("1000 A / 170 still lists 3xSHZVI after SHZVIII", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 1000,
+      umKv: 170,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      selectorSize: "C",
+      mdu: "none",
+    });
+    expect(out.results[0].model).toMatch(/^SHZVIII-1000Y\/170/);
+    expect(out.results.some((r) => r.model.startsWith("3xSHZVI-1000"))).toBe(
+      true,
+    );
+  });
+});
+
+describe("CZ dry", () => {
+  it("500 A dry 40.5 linear 17 lists 3xCZI", () => {
+    const out = selectOltc({
+      mounting: "dry_type",
+      medium: "dry",
+      preferVacuum: true,
+      phases: "III",
+      connection: "any",
+      throughCurrentA: 500,
+      umKv: 40.5,
+      stepVoltageV: 600,
+      regulation: "linear",
+      positions: 17,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results.some((r) => r.model === "3xCZI-500/40.5-17")).toBe(
+      true,
+    );
+  });
 });
 
 describe("HWV catalogue lock", () => {

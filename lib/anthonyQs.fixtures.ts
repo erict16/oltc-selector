@@ -3,6 +3,7 @@
  * orderReplay concatenates these onto Qu-ET260001–013 — do not drop those.
  */
 import type { ReplayCase } from "./orderReplay";
+import { ANTHONY_PROMOTED } from "./anthonyQs.promoted";
 
 export type AnthonyFileRow = {
   file: string;
@@ -1203,6 +1204,7 @@ export const ANTHONY_REPLAY: ReplayCase[] = [
     },
     expectPrimary: "WSLIV-600Y/72.5-6x5A",
   },
+  ...ANTHONY_PROMOTED,
 ];
 
 export const ANTHONY_REPLAY_SKIPPED: Array<{
@@ -1211,169 +1213,74 @@ export const ANTHONY_REPLAY_SKIPPED: Array<{
   reason: string;
 }> = [
   {
-    id: "QS260192",
-    source: "Anthony/2026-04-24__UID3640__QS260192-R2-SHZVIII-1000Y-72.5C-10181W - OLTC PX356_24 Apr 2026.pdf | Bambang Djaja | 165MVA 150kV",
-    reason: "non-catalogue tap 10181W — engine cannot emit. Duty I=635.1 A (165 MVA / 150 kV Y); min-adequate family is SHZV-1000. Do not invent 10181.",
-  },
-  {
-    id: "QS260187",
-    source: "Anthony/2026-02-26__UID2021__QS260187R0-Budgetary-CM2III-600Y-170D-10192G-GAIA2 Datacentre 90MVA_26Feb26.pdf | GE (UNINDO) / OLTC GAIA2 Datacentre 90MVA | 90MVA, 150kV",
-    reason: "non-catalogue tap 10192G — engine cannot emit.",
-  },
-  {
     id: "QS260193",
-    source: "Anthony/2026-02-09__UID1654__QS260193-R0- CMA7_Replacement.pdf | HL-Global / PTC1 - M08305 MDU replacement",
-    reason: "MDU-only (CMA7/SHM-D/SHM-KX replacement). Selector does not pick drives.",
+    source: "Anthony CMA7 replacement",
+    reason: "MDU-only. Selector does not pick drives.",
   },
   {
     id: "QS260196",
-    source: "Anthony/2026-03-11__UID2365__QS-260196-R0_SHM-KX AVR_11 Mar 2026.pdf | GE (UNINDO) / PLN GI BALONGAN 971",
-    reason: "MDU-only (CMA7/SHM-D/SHM-KX replacement). Selector does not pick drives.",
-  },
-  {
-    id: "QS2602101",
-    source: "Anthony/Quotation Huaming - QS2602101R0- 3xCZI-500-40.5-17 -CMA7 ( 25.02.2026 ) Approved.PDF | Bambang Djaja / 2600059 // OHOV.500.407 and AVHM.080.450 | 1.250kVA, 20kV",
-    reason: "CZ dry/reactor — engine coverage not asserted.",
+    source: "Anthony SHM-KX AVR",
+    reason: "MDU-only. Selector does not pick drives.",
   },
   {
     id: "QS2603114",
-    source: "Anthony/2026-03-10__UID2316__QS2603114-R0-SVIII500D-40.5-10193W-CMA7_dtd 10Mar26.pdf | Bambang Djaja | 25MVA, 20kV, +/- 8 x 1.25%",
+    source: "Anthony SV-500 vs 25 MVA 20 kV (I=721.7 A)",
     reason: "quoted Iᵤ 500 A below transformer duty I=721.7 A; do not invent a cover.",
   },
   {
     id: "QS2603118",
-    source: "Anthony/2026-03-10__UID2312__QS2603118R0-EEMC-EVN Std OLTC_CV2III_3xCM2I_10Mar26.pdf | EEMC / s - Inquiry for standard OLTC models",
-    reason: "incomplete duty (no recoverable Iᵤ/Ust from QS header).",
+    source: "Anthony EEMC EVN standard model list (CV2-350 + CV2-600 + 3xCM2I)",
+    reason: "price list of several types on one QS — not a single duty.",
   },
   {
     id: "QS2603127",
-    source: "Anthony/2026-07-14__UID6015__QS2603127R1-CM2III-500Y72.5C-10191W (CIF Haiphong) -Hanaka Industrial Park Pjt.pdf | HANAKA / OLTC Model: CM2III-500Y/72.5C-10191W",
-    reason: "two ratings 40 MVA & 63 MVA / 110 kV on one QS; latest R is one type qty 2 — not a single replay row.",
-  },
-  {
-    id: "QS2603130",
-    source: "Anthony/2026-03-26__UID2811__QS-2603130R0-3xSHZVI-1000-170C-10193W-EEMC.pdf | EEMC | TRANSFORMER: 250000kVA, 225kV (OLTC on 225kV side), Yna0d11, +/-10 x 1.25%,",
-    reason: "3× singles; engine will not list 3× when a III cover exists.",
-  },
-  {
-    id: "QS2604133",
-    source: "Anthony/2026-04-10__UID3230__QS2604133-R0 - 3XCZI-500-40.5-9_10 Apr 26.pdf | Bambang Djaja / Dry Type OLTC Inquiry - Ref. 20242414 | TBA",
-    reason: "CZ dry/reactor — engine coverage not asserted.",
-  },
-  {
-    id: "QS2604134",
-    source: "Anthony/2026-04-07__UID3051__QS2604134-SHZVIII-1000Y-72.5B-10213G- SYD02_dtd 07Mar26.pdf | GE (UTR) / 26_02_UTR_06_E - SYD02 | 110MVA 132kV",
-    reason: "non-catalogue tap 10213G — engine cannot emit.",
+    source: "Anthony Hanaka 40 & 63 MVA / 110 kV",
+    reason: "two ratings on one QS; not a single replay row.",
   },
   {
     id: "QS2604138",
-    source: "Anthony/2026-07-10__UID5936__QS2604138-R0-CVIII-350Y72.5-12233W-CMIII500Y126B-14273W- Angola prjt- 10July2026_Best & Final Price.pdf | GE (UNINDO) / ANGOLA 75 MVA & 25 MVA | 992-75MVA, 220kV; 993-25MVA, 60kV",
-    reason: "two transformers (75 MVA 220 kV and 25 MVA 60 kV) on one QS; not a single replay row.",
-  },
-  {
-    id: "QS2604139",
-    source: "Anthony/2026-04-09__UID3158__QS2604139-R0-SVIII500Y-40.5-10193W-CMA7.pdf | MEE / Haiphong Aquaculture Factory | 35kV",
-    reason: "incomplete duty (no recoverable Iᵤ/Ust from QS header).",
+    source: "Anthony Angola 75 MVA + 25 MVA",
+    reason: "two transformers on one QS; not a single replay row.",
   },
   {
     id: "QS2605150",
-    source: "Anthony/2026-05-04__UID3879__Quotation - QS2605150-R0-CVIII-350D-40.5-10091W-CMA7_04 May26.pdf | Bambang Djaja | 7/8.5 MVA, 13.8kV/6.3kV, Dyn11, +/-4x2.5%",
+    source: "Anthony CV-350 vs 8.5 MVA 13.8 kV (I=355.6 A)",
     reason: "quoted Iᵤ 350 A below transformer duty I=355.6 A; do not invent a cover.",
   },
   {
-    id: "QS2605156",
-    source: "Anthony/2026-05-12__UID4161__QS2605156-Budgetary-SHZVIII-600Y72.5C-18353W-EEMC_11 May 26.pdf | EEMC | TBA",
-    reason: "incomplete duty (no recoverable Iᵤ/Ust from QS header).",
-  },
-  {
-    id: "QS2605160",
-    source: "Anthony/2026-05-19__UID4337__QS-2605160-R0-CM2-III-500Y-72.5B-10181W- PX342- dtd 19 May 26.pdf | PT Bambang Djaja | 65MVA 150kV",
-    reason: "non-catalogue tap 10181W — engine cannot emit.",
-  },
-  {
-    id: "QS2605161",
-    source: "Anthony/2026-06-03__UID4782__QS2605161-Budgetary-SHZVIII-600Y72.5C-10193W-MEE - Soc Trang.pdf | MEE / Soc Trang | TBA",
-    reason: "incomplete duty (no recoverable Iᵤ/Ust from QS header).",
-  },
-  {
-    id: "QS2605166",
-    source: "Anthony/2026-05-26__UID4569__QS2605166-R0-SVIII500D-40.5-10193W-CMA7_26.05.26.pdf | Bambang Djaja | TBA",
-    reason: "incomplete duty (no recoverable Iᵤ/Ust from QS header).",
-  },
-  {
-    id: "QS2606168",
-    source: "Anthony/2026-06-03__UID4798__QS2606168-R0-CVIII350D-40.5-10091W-CMA7_HLG_03Jun26.pdf | HLG | TBA",
-    reason: "incomplete duty (no recoverable Iᵤ/Ust from QS header).",
-  },
-  {
-    id: "QS2606171",
-    source: "Anthony/2026-06-17__UID5206__QS2606171R0-SHZVIII-1000Y72.5C-10091W- HLG Hai Ha 1 prjt-12 June26_edit 17 Jun 26pdf.pdf | HLG / Dong Phat Hai Ha 1 Thermal Power Plant | TBA",
-    reason: "incomplete duty (no recoverable Iᵤ/Ust from QS header).",
-  },
-  {
     id: "QS2606175",
-    source: "Anthony/INBOX_UID6940_QS2606175-R2-CV2III-350D (600D)-40.5-10193W-CMA7_ Final Price_edit 23July26_edit27July26.pdf | SANAKY / Transformer: 26 MVA, 22 kV (+8/-8 × 1.25%) / 6.6 kV, Dyn11 | 26 MVA, 22 kV (+8/-8 × 1.25%) / 6.6 kV, Dyn11",
+    source: "Anthony CV2-350/600 vs 26 MVA 22 kV (I=682.3 A)",
     reason: "quoted Iᵤ 600 A below transformer duty I=682.3 A; do not invent a cover.",
   },
   {
     id: "QS2607181",
-    source: "Anthony/2026-07-02__UID5652__QS2607181R0-CV2III-500Y-72.5-10191W-MEE-EVNCPC prjt.pdf | MEE / erence: OLTC for 40 & 63MVA transformer - EVNCPC | - EVNCPC",
+    source: "Anthony CV2III-500",
     reason: "CV2-500 is not a 2025 catalogue row.",
   },
   {
     id: "QS2607182",
-    source: "Anthony/2026-07-08__UID5832__QS2607182-Budgetary-CM2I-15000-72.5B-10191W-CMA7_MBT_Aust Prjt.pdf | HLG (MBT) / for Australia market | 40 MVA, 13.8 / 24.9 / 34.5 kV, 60 Hz, ONAN",
-    reason: "quoted Iᵤ 1500 A below transformer duty I=1673.5 A (40 MVA / 13.8 kV HV, mail); do not invent a cover.",
+    source: "Anthony CM2I-1500 vs 40 MVA 13.8 kV (I=1673.5 A)",
+    reason: "quoted Iᵤ 1500 A below transformer duty; do not invent a cover.",
   },
   {
     id: "QS2607184",
-    source: "Anthony/2026-07-06__UID5763__QS2607184-R1_CV2III350D-40.5 (350Y-72.5)-10193W_SHMD-HMIET-HMJK-II_HiSEM - ESE.pdf | Hitachi Soe / OLTC for 3T ESE -2026-2027 Tender | 10MVA (33-11) kV, Dyn11; 20MVA (33-11) kV, Dyn11",
-    reason: "two OLTC types / three transformer ratings on one QS; duty is not a single replay row.",
-  },
-  {
-    id: "QS2607195",
-    source: "Anthony/2026-07-15__UID6076__QS-2607195-Budgetary-SHZVI-1000-170C-10193W-MEE-Soji SPP.pdf | MEE | 250MVA, 220kV",
-    reason: "3× singles; engine will not list 3× when a III cover exists.",
-  },
-  {
-    id: "QS2607198",
-    source: "Anthony/2026-07-23__UID6282__QS-2607198 -Budgetary-SHZVIII-1000Y72.5C_MEE_Nam Manh SPP Pjt.pdf | MEE / Nam Manh SPP | 145MVA, KV(TBA)",
-    reason: "145 MVA Nam Manh SPP; mail still has kV TBA — do not invent Iᵤ.",
-  },
-  {
-    id: "QS2607203",
-    source: "Anthony/2026-07-24__UID6327__QS-2607203R0_EEMC-WSG II-800D-40.5-4x5A.pdf | EEMC / EEMC PO26-028 - OCTC WSG II -800D/40.5-4x5A | TBA",
-    reason: "WSG OCTC — no engine series this cycle.",
+    source: "Anthony HiSEM two types / three ratings",
+    reason: "two OLTC types on one QS; not a single replay row.",
   },
   {
     id: "QS2607207",
-    source: "Anthony/2026-08-04__UID6917__QS2607207-Budgetary-2xSVIII500D-40.5-10193W-CMA7-SHM-KX_edit 04.08.26.pdf | Bambang Djaja | 25MVA, 20kV (TBC)",
-    reason: "3× singles; engine will not list 3× when a III cover exists.",
-  },
-  {
-    id: "QS2607210",
-    source: "Anthony/2026-07-31__UID6825__QS2607210-R0-EEMC-CV2III-350Y-72.5-10193W.pdf | EEMC / EEMC PO26-033. OLTC CV2-III-350Y-72.5-10193W",
-    reason: "EEMC PO26-033; mail confirms 10193W only — no transformer MVA/kV. Do not invent Iᵤ.",
+    source: "Anthony 2xSVIII-500",
+    reason: "2-unit set; engine models 1 or 3, not 2.",
   },
   {
     id: "QS2608213",
-    source: "Anthony/INBOX_UID6905_QS2608213R0-CV2III-500Y-72.5-10191W-MEE-EVNCPC 110kV Tien Yen prjt_04.08.26.pdf | MEE / erence: EVNNPC 110kV Substation | 110kV, 40MVA",
+    source: "Anthony CV2III-500 Tien Yen",
     reason: "CV2-500 is not a 2025 catalogue row.",
   },
   {
-    id: "QS2608215",
-    source: "Anthony/2026-08-17__UID7165__QS2608215-R0-CM2III-500Y126C-10191W-HLG-EVNNPC Retrofit-ABB VCGNR_17.08.26.pdf | HLG (EVNNPC) / EVNNPC OLTC Retrofit | TBA",
-    reason: "EVNNPC ABB VCGNR retrofit; mail has no transformer MVA/kV. Do not invent Iᵤ.",
-  },
-  {
     id: "QS2608217",
-    source: "Anthony/2026-08-12__UID7100__QS2608217-Budgetary-3xCMI-50072.5B-18353W.pdf | Bambang Djaja | (N2): 20MVA, 13.8kV, +/-16 x 0.625",
-    reason: "3× singles; engine will not list 3× when a III cover exists.",
-  },
-  {
-    id: "QS2608219",
-    source: "Anthony/INBOX_UID7125_QS2608219-Budgetary-CV2III-600Y-72.5-10191W-MEE (EVN-EREX Biomass prjt).pdf | MEE / erence: Yen Bai & Tuyen Quang Biomass Power Plant | TBA",
-    reason: "Yen Bai / Tuyen Quang biomass; Anthony asked mail for MVA/kV — still TBA. Do not invent Iᵤ.",
+    source: "Anthony 3xCMI-500 vs 20 MVA 13.8 kV (I=836.7 A)",
+    reason: "quoted Iᵤ 500 A below transformer duty I=836.7 A; do not invent a cover.",
   },
 ];
 

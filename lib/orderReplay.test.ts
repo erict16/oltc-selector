@@ -60,7 +60,11 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
     for (const c of ORDER_REPLAY.filter((x) => x.tag === "min-adequate")) {
       const out = selectOltc(c.input);
       expect(
-        commercialMatch(out.results[0].model, c.expectPrimary),
+        commercialMatch(
+          out.results[0].model,
+          c.expectPrimary,
+          c.match ?? "full",
+        ),
         `${c.id}: #1=${out.results[0].model} expected ${c.expectPrimary}`,
       ).toBe(true);
     }
@@ -70,7 +74,7 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
     for (const c of ORDER_REPLAY.filter((x) => x.tag === "customer-specified")) {
       const out = selectOltc(c.input);
       const hit = out.results.some((r) =>
-        commercialMatch(r.model, c.expectPrimary),
+        commercialMatch(r.model, c.expectPrimary, c.match ?? "full"),
       );
       expect(
         hit,
@@ -85,7 +89,9 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
       const rest = out.results.slice(1);
       if (c.expectBackup) {
         expect(
-          rest.some((r) => commercialMatch(r.model, c.expectBackup!)),
+          rest.some((r) =>
+            commercialMatch(r.model, c.expectBackup!, c.match ?? "full"),
+          ),
           `${c.id}: backup ${c.expectBackup} not in ${rest.map((r) => r.model).join(" | ")}`,
         ).toBe(true);
       } else {
@@ -170,6 +176,37 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
     expect(lookupListPrice("CV2III-350D/40.5-10193W")).toMatchObject({
       found: true,
       listRmb: 148700,
+    });
+  });
+
+  it("closed skips only: MDU, CV2-500, under-duty, multi-QS, 2-unit", () => {
+    const reasons = ORDER_REPLAY_SKIPPED.map((s) => s.reason);
+    for (const r of reasons) {
+      const ok =
+        /MDU-only|CV2-500|below transformer duty|two |price list of several|2-unit set|catalogue max|WDLVIII/.test(
+          r,
+        );
+      expect(ok, r).toBe(true);
+    }
+    expect(ORDER_REPLAY_SKIPPED.some((s) => /CV2-500/.test(s.reason))).toBe(
+      true,
+    );
+    expect(ORDER_REPLAY_SKIPPED.some((s) => /MDU-only/.test(s.reason))).toBe(
+      true,
+    );
+  });
+
+  it("parses CZ 3× and WSG", () => {
+    expect(parseTypeString("3xCZI-500/40.5-17")).toMatchObject({
+      unitCount: 3,
+      family: "CZ",
+      currentA: 500,
+      tapCode: "17",
+    });
+    expect(parseTypeString("WSGII-800D/40.5-4x5A")).toMatchObject({
+      family: "WSG",
+      currentA: 800,
+      tapCode: "4x5",
     });
   });
 });

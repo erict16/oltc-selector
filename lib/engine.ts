@@ -23,10 +23,17 @@ import type {
  * DETC contact from service positions (or ±N → 2N+1).
  * Only the four commercial codes — no 8x7/10x9 invent.
  */
-export function octcContactCode(input: SelectInput): string {
+export function octcContactCode(
+  input: SelectInput,
+  seriesId?: string,
+): string {
   let pos = input.positions;
   if (input.plusMinusSteps != null && input.plusMinusSteps > 0) {
     pos = 2 * input.plusMinusSteps + 1;
+  }
+  if (seriesId === "wsg") {
+    if (pos == null || pos <= 5) return "4x5";
+    return "6x5";
   }
   if (pos == null || pos <= 6) return "6x5";
   if (pos <= 7) return "7x6";
@@ -45,7 +52,7 @@ export function octcSizeLetter(
     return requested;
   }
   if (contact === "18x17") return "E";
-  if (um <= 72.5 + 0.1 && contact === "6x5") return "A";
+  if (um <= 72.5 + 0.1 && (contact === "6x5" || contact === "4x5")) return "A";
   return "B";
 }
 
@@ -257,23 +264,20 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
     }
   }
 
-  // OCTC: never 3× singles. 3× single-phase only when III cannot cover Iᵤ.
+  // OCTC: never 3× singles.
+  // 3× I-units: always emit a covering set so a customer-locked 3× stays
+  // eligible. Ranking still puts any single III first.
   if (isOctcSeries(s)) return out;
-  if (input.phases === "III") {
-    const maxIII = s.currents.III?.length
-      ? Math.max(...s.currents.III)
-      : null;
-    if (maxIII == null || input.throughCurrentA > maxIII + 0.01) {
-      const curI = nearestCurrent(input.throughCurrentA, s.currents.I);
-      if (curI != null) {
-        out.push({
-          series: s,
-          phases: "I",
-          current: curI,
-          um,
-          unitCount: 3,
-        });
-      }
+  if (input.phases === "III" && s.currents.I?.length) {
+    const curI = nearestCurrent(input.throughCurrentA, s.currents.I);
+    if (curI != null) {
+      out.push({
+        series: s,
+        phases: "I",
+        current: curI,
+        um,
+        unitCount: 3,
+      });
     }
   }
 
@@ -396,7 +400,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
         for (const current of currentsToEmit) {
         const octc = isOctcSeries(s);
-        const contact = octc ? octcContactCode(input) : "";
+        const contact = octc ? octcContactCode(input, s.id) : "";
         const selectorSize = octc
           ? octcSizeLetter(att.um, contact, input.selectorSize ?? "auto")
           : s.usesSelectorSize
@@ -410,7 +414,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
               )
             : "";
         const tapCode = octc ? contact : tap.tapCode;
-        const modelTap = octc ? `${contact}${selectorSize}` : tap.tapCode;
+        const modelTap = octc
+          ? `${contact}${selectorSize}`
+          : s.id === "cz"
+            ? String(tap.positions)
+            : tap.tapCode;
 
         const umToken = formatUmToken(att.um, selectorSize, s.usesSelectorSize);
         const phases = phaseToken(att.phases);
@@ -617,7 +625,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
   return {
     ok: true,
-    results: final.slice(0, 8),
+    results: final.slice(0, 12),
     errorsEn: [],
     errorsZh: [],
   };

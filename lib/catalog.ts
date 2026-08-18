@@ -150,6 +150,7 @@ export const FAMILY_MIN_RANK: Record<string, number> = {
   hwv: 15, // only wins on on-tank path
   cvt: 12,
   cz: 14,
+  wsg: 6,
   hwdk: 80,
   wsl: 5, // OCTC-only list (never mixed into CV2→CM2→SHZV)
   wdl: 6,
@@ -547,6 +548,32 @@ export const SERIES: SeriesDef[] = [
     notesZh:
       "笼式无载开关。仅 dutyKind=octc 时入选。Y→WSLIV，D→WSLII。档位映射触头 6x5/7x6/12x11/18x17。WDL 走同一价目表。",
     rank: 5,
+  },
+  {
+    id: "wsg",
+    code: "WSG",
+    nameEn: "WSG off-circuit tap changer (OCTC)",
+    nameZh: "WSG 无载分接开关（OCTC）",
+    mounting: ["in_tank"],
+    medium: "oil",
+    structure: "compound",
+    vacuum: false,
+    dutyKind: "octc",
+    currents: {
+      I: [250, 300, 400, 600, 800, 1000, 1250],
+      II: [250, 300, 400, 600, 800, 1000, 1250],
+      III: [300, 600, 800],
+    },
+    umKv: [40.5],
+    usesSelectorSize: false,
+    maxStepVoltageV: 10000,
+    connections: ["Y", "D"],
+    maxPositionsLinear: 12,
+    maxPositionsWithChangeOver: 12,
+    defaultMdu: "CMA7",
+    notesEn: "WG sheet. dutyKind=octc only. D → WSGII (Anthony WSG II-800D/40.5-4x5A).",
+    notesZh: "WG 价目表。仅 dutyKind=octc。D → WSGII。",
+    rank: 6,
   },
 ];
 
