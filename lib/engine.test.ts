@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { selectOltc, FIXTURES } from "./engine";
+import { parseTypeString } from "./orderReplay";
 import {
   SERIES,
   pickSelectorSize,
@@ -447,5 +448,289 @@ describe("2025 sales calibration (year=2025)", () => {
   it("CMD I includes 1200 A (2025 CMDI-1200 volume)", () => {
     const cmd = SERIES.find((s) => s.id === "cmd")!;
     expect(cmd.currents.I).toContain(1200);
+  });
+
+  it("349.9 A accepts CV2-350 (S/√3U rounding; ~1 A epsilon)", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 349.9,
+      umKv: 40.5,
+      stepVoltageV: 544.5,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("CV2III-350D/40.5-10193W");
+    expect(out.results[0].seriesCode).toBe("CV2");
+    expect(out.results[0].currentA).toBe(350);
+  });
+
+  it("on-tank 175 A / 72.5 Y ±8 → HWVIII-400Y/72.5-10193W", () => {
+    const out = selectOltc({
+      mounting: "on_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 175,
+      umKv: 72.5,
+      stepVoltageV: 476,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("HWVIII-400Y/72.5-10193W");
+    expect(out.results[0].seriesCode).toBe("HWV");
+    expect(out.results[0].selectorSize).toBe("");
+    expect(out.results[0].currentA).toBe(400);
+  });
+
+  it("on-tank 523 A → HWV-800 (not 400; 97% epsilon)", () => {
+    const out = selectOltc({
+      mounting: "on_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 523,
+      umKv: 40.5,
+      stepVoltageV: 172.5,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("HWV");
+    expect(out.results[0].currentA).toBe(800);
+    expect(out.results[0].model).toBe("HWVIII-800D/40.5-10193W");
+    expect(out.results[0].selectorSize).toBe("");
+  });
+});
+
+describe("OCTC / WSL (dutyKind=octc)", () => {
+  it("parses WSLIV-800Y/170-6x5B (spaces / × / *)", () => {
+    expect(parseTypeString("WSLIV-800Y/170-6x5B")).toMatchObject({
+      family: "WSL",
+      phases: "IV",
+      currentA: 800,
+      connection: "Y",
+      umKv: 170,
+      selectorSize: "B",
+      tapCode: "6x5",
+    });
+    expect(parseTypeString("WSL IV-800Y/170-6×5B")).toMatchObject({
+      family: "WSL",
+      tapCode: "6x5",
+      selectorSize: "B",
+    });
+    expect(parseTypeString("WDLIV-1000Y/126-6*5B")).toMatchObject({
+      family: "WDL",
+      phases: "IV",
+      currentA: 1000,
+      tapCode: "6x5",
+    });
+  });
+
+  it("WSL is absent from the default OLTC ranking", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 350,
+      umKv: 40.5,
+      stepVoltageV: 1000,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("CV2");
+    expect(out.results.every((r) => r.seriesCode !== "WSL")).toBe(true);
+  });
+
+  it("dutyKind unset on 800 A / 170 Y must not emit WSL", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 800,
+      umKv: 170,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 5,
+    });
+    expect(out.results.every((r) => r.seriesCode !== "WSL")).toBe(true);
+    expect(out.results.every((r) => !r.model.startsWith("WSL"))).toBe(true);
+  });
+
+  it("800 A / 170 Y → WSLIV-800Y/170-6x5B", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 800,
+      umKv: 170,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 5,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLIV-800Y/170-6x5B");
+    expect(out.results[0].seriesCode).toBe("WSL");
+    expect(out.results[0].tapCode).toBe("6x5");
+    expect(out.results[0].selectorSize).toBe("B");
+    expect(out.results.every((r) => r.seriesCode === "WSL")).toBe(true);
+  });
+
+  it("600 A / 72.5 Y → WSLIV-600Y/72.5-6x5A", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 600,
+      umKv: 72.5,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 6,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLIV-600Y/72.5-6x5A");
+  });
+
+  it("800 A / 72.5 D → WSLII-800D/72.5-6x5A", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 800,
+      umKv: 72.5,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 6,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLII-800D/72.5-6x5A");
+  });
+
+  it("WSG 800 A D 40.5 pos 5 is eligible; WSL still #1 at 6x5", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 800,
+      umKv: 40.5,
+      stepVoltageV: 1000,
+      regulation: "linear",
+      positions: 5,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results.some((r) => r.model === "WSGII-800D/40.5-4x5A")).toBe(
+      true,
+    );
+  });
+});
+
+describe("3× stays eligible when III also covers", () => {
+  it("1000 A / 170 still lists 3xSHZVI after SHZVIII", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 1000,
+      umKv: 170,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      selectorSize: "C",
+      mdu: "none",
+    });
+    expect(out.results[0].model).toMatch(/^SHZVIII-1000Y\/170/);
+    expect(out.results.some((r) => r.model.startsWith("3xSHZVI-1000"))).toBe(
+      true,
+    );
+  });
+});
+
+describe("CZ dry", () => {
+  it("500 A dry 40.5 linear 17 lists 3xCZI", () => {
+    const out = selectOltc({
+      mounting: "dry_type",
+      medium: "dry",
+      preferVacuum: true,
+      phases: "III",
+      connection: "any",
+      throughCurrentA: 500,
+      umKv: 40.5,
+      stepVoltageV: 600,
+      regulation: "linear",
+      positions: 17,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results.some((r) => r.model === "3xCZI-500/40.5-17")).toBe(
+      true,
+    );
+  });
+});
+
+describe("HWV catalogue lock", () => {
+  it("HWV is on-tank/external only; currents 400/800/1000; Um 17.5/40.5/72.5", () => {
+    const hwv = SERIES.find((s) => s.id === "hwv")!;
+    expect(hwv.mounting).toEqual(["on_tank", "external_compartment"]);
+    expect(hwv.currents.III).toEqual([400, 800, 1000]);
+    expect(hwv.umKv).toEqual([17.5, 40.5, 72.5]);
+    expect(hwv.usesSelectorSize).toBe(false);
+  });
+
+  it("SHZV III stays 400/600/1000; 1300 A III is SHZVG-1300", () => {
+    const shzv = SERIES.find((s) => s.id === "shzv")!;
+    expect(shzv.currents.III).toEqual([400, 600, 1000]);
+    expect(shzv.currents.III).not.toContain(1300);
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 1300,
+      umKv: 126,
+      stepVoltageV: 2000,
+      regulation: "reversing",
+      plusMinusSteps: 16,
+      selectorSize: "DE",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("SHZVG");
+    expect(out.results[0].model).toContain("SHZVGIII-1300Y/126DE");
+    expect(out.results[0].unitCount).toBe(1);
+    expect(out.results.every((r) => r.seriesCode !== "SHZV" || r.unitCount > 1)).toBe(
+      true,
+    );
   });
 });

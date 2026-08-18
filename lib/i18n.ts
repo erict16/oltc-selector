@@ -66,6 +66,9 @@ const en: Dict = {
   preferVac: "Prefer vacuum interrupter",
   preferVacTip: "Favours vacuum series (CV2 / CM2 / SHZV) when they cover the duty.",
   preferVacOff: "Vacuum not preferred",
+  dutyKind: "On-load / off-circuit",
+  dutyOltc: "OLTC",
+  dutyOctc: "OCTC",
   acrossLead:
     "Optional. Leave blank to size the selector from Um only. Fill when the transformer specifies across-tap insulation.",
   acrossUnset: "— from Um only —",
@@ -96,6 +99,14 @@ const en: Dict = {
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Lowest catalogue rating that covers this duty.",
   whySel: ", tap selector {s}",
   whyMulti: ", {n}× single-phase",
+  priceTitle: "2025 list · FOB Shanghai",
+  priceCny: "RMB {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "Currency",
+  priceNone: "No 2025 list row for this type.",
+  priceDisclaimer: "Indicative list, not a quotation.",
+  priceFxLive: "FX {date}",
+  priceFxFallback: "FX {date} (offline table)",
   langAria: "Language",
 };
 
@@ -153,6 +164,9 @@ const zh: Dict = {
   preferVac: "优先真空灭弧",
   preferVacTip: "在满足工况时优先真空系列（CV2 / CM2 / SHZV）。",
   preferVacOff: "不优先真空",
+  dutyKind: "有载 / 无载",
+  dutyOltc: "有载",
+  dutyOctc: "无载",
   acrossLead:
     "选填。空着则仅按 Um 定选择器等级；变压器给出调压绕组间绝缘时再填。",
   acrossUnset: "— 仅按 Um —",
@@ -182,6 +196,14 @@ const zh: Dict = {
   why: "{code}，{i} A，Um {um} kV{sel}{multi}。满足工况的最低目录档。",
   whySel: " · 选择器 {s}",
   whyMulti: " · {n} 台单相",
+  priceTitle: "2025 目录价 · FOB 上海",
+  priceCny: "人民币 {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "币种",
+  priceNone: "2025 目录没有这一档。",
+  priceDisclaimer: "目录价，不是报价。",
+  priceFxLive: "汇率 {date}",
+  priceFxFallback: "汇率 {date}（离线表）",
   langAria: "语言",
 };
 
@@ -240,6 +262,9 @@ const vi: Dict = {
   preferVac: "Ưu tiên chân không",
   preferVacTip: "Ưu tiên dòng vacuum (CV2 / CM2 / SHZV) khi đủ điều kiện.",
   preferVacOff: "Không ưu tiên vacuum",
+  dutyKind: "Có tải / không tải",
+  dutyOltc: "OLTC",
+  dutyOctc: "OCTC",
   acrossLead:
     "Tùy chọn. Để trống thì chỉ theo Um. Điền khi máy biến áp cho cách điện giữa cuộn điều áp.",
   acrossUnset: "— chỉ theo Um —",
@@ -270,6 +295,14 @@ const vi: Dict = {
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Mức danh mục thấp nhất đủ cho nhiệm vụ này.",
   whySel: ", bộ chọn {s}",
   whyMulti: ", {n}× đơn pha",
+  priceTitle: "Giá 2025 · FOB Thượng Hải",
+  priceCny: "RMB {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "Tiền tệ",
+  priceNone: "Không có dòng giá 2025 cho kiểu này.",
+  priceDisclaimer: "Giá danh mục, không phải báo giá.",
+  priceFxLive: "Tỷ giá {date}",
+  priceFxFallback: "Tỷ giá {date} (ngoại tuyến)",
   langAria: "Ngôn ngữ",
 };
 
@@ -329,6 +362,9 @@ const es: Dict = {
   preferVac: "Preferir vacío",
   preferVacTip: "Prioriza series de vacío (CV2 / CM2 / SHZV) si cubren el régimen.",
   preferVacOff: "Sin preferir vacío",
+  dutyKind: "En carga / sin tensión",
+  dutyOltc: "OLTC",
+  dutyOctc: "OCTC",
   acrossLead:
     "Opcional. En blanco se dimensiona solo con Um. Rellene si el transformador da aislamiento entre tomas.",
   acrossUnset: "— solo Um —",
@@ -359,6 +395,14 @@ const es: Dict = {
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Menor valor de catálogo que cubre este régimen.",
   whySel: ", selector {s}",
   whyMulti: ", {n}× monofásico",
+  priceTitle: "Lista 2025 · FOB Shanghai",
+  priceCny: "RMB {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "Moneda",
+  priceNone: "Sin fila 2025 para este tipo.",
+  priceDisclaimer: "Lista indicativa, no es oferta.",
+  priceFxLive: "FX {date}",
+  priceFxFallback: "FX {date} (tabla)",
   langAria: "Idioma",
 };
 
@@ -417,6 +461,9 @@ const tr: Dict = {
   preferVac: "Vakum tercih et",
   preferVacTip: "Uygunsa vakum serilerini (CV2 / CM2 / SHZV) öne alır.",
   preferVacOff: "Vakum tercihi yok",
+  dutyKind: "Yükte / yüksüz",
+  dutyOltc: "OLTC",
+  dutyOctc: "OCTC",
   acrossLead:
     "İsteğe bağlı. Boşsa yalnızca Um’ye göre. Transformatör sargılar arası yalıtım veriyorsa doldurun.",
   acrossUnset: "— yalnız Um —",
@@ -447,6 +494,14 @@ const tr: Dict = {
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Bu işletmeyi karşılayan en düşük katalog değeri.",
   whySel: ", seçici {s}",
   whyMulti: ", {n}× tek faz",
+  priceTitle: "2025 liste · FOB Şanghay",
+  priceCny: "RMB {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "Para birimi",
+  priceNone: "Bu tip için 2025 liste satırı yok.",
+  priceDisclaimer: "Liste fiyatı, teklif değildir.",
+  priceFxLive: "Kur {date}",
+  priceFxFallback: "Kur {date} (çevrimdışı)",
   langAria: "Dil",
 };
 
@@ -506,6 +561,9 @@ const ru: Dict = {
   preferVacTip:
     "Предпочитает вакуумные серии (CV2 / CM2 / SHZV), если они покрывают режим.",
   preferVacOff: "Вакуум не предпочтителен",
+  dutyKind: "Под нагрузкой / без напряжения",
+  dutyOltc: "РПН",
+  dutyOctc: "ПБВ",
   acrossLead:
     "Необязательно. Пусто — класс селектора только по Um. Заполните, если задана изоляция по обмотке РПН.",
   acrossUnset: "— только Um —",
@@ -537,6 +595,14 @@ const ru: Dict = {
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Наименьший каталожный рейтинг для этого режима.",
   whySel: ", селектор {s}",
   whyMulti: ", {n}× однофазных",
+  priceTitle: "Прайс 2025 · FOB Шанхай",
+  priceCny: "RMB {n}",
+  priceConverted: "{ccy} {n}",
+  priceCurrency: "Валюта",
+  priceNone: "Нет строки прайса 2025 для этого типа.",
+  priceDisclaimer: "Справочная цена, не оферта.",
+  priceFxLive: "Курс {date}",
+  priceFxFallback: "Курс {date} (офлайн)",
   langAria: "Язык",
 };
 

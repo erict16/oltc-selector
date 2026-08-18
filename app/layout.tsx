@@ -15,10 +15,7 @@ export const metadata: Metadata = {
       : "http://127.0.0.1:3000",
   ),
   icons: {
-    icon: [
-      { url: `${basePath}/favicon.svg`, type: "image/svg+xml" },
-      { url: `${basePath}/icon.svg`, type: "image/svg+xml" },
-    ],
+    icon: [{ url: `${basePath}/favicon.svg`, type: "image/svg+xml" }],
     shortcut: `${basePath}/favicon.svg`,
   },
 };

@@ -20,12 +20,18 @@ export type Connection = "Y" | "D" | "any";
 export type Regulation = "linear" | "reversing" | "coarse_fine";
 
 export type ChangeOver = "0" | "W" | "G"; // linear / reversing / coarse-fine
-export type SelectorSize = "B" | "C" | "D" | "DE" | "";
+export type SelectorSize = "A" | "B" | "C" | "D" | "DE" | "E" | "";
+export type DutyKind = "oltc" | "octc";
 
 export interface SelectInput {
   mounting: Mounting;
   medium: SwitchingMedium;
   preferVacuum: boolean;
+  /**
+   * OLTC (on-load) vs OCTC / 无载 (de-energized).
+   * Unset defaults to oltc so in-tank vacuum ranking is unchanged.
+   */
+  dutyKind?: DutyKind;
 
   phases: PhaseCode;
   connection: Connection;
@@ -82,6 +88,8 @@ export interface SeriesDef {
   notesZh: string;
   /** Base family order for minimum-adequate ranking (lower preferred when eligible) */
   rank: number;
+  /** Unset = oltc. WSL/WDL only join the list when input.dutyKind === "octc". */
+  dutyKind?: DutyKind;
 }
 
 export interface ModelResult {

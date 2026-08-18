@@ -1,46 +1,53 @@
 # OLTC Selector
 
-Personal **type-designation helper** for on-load tap changers (OLTC).
+Fill in the transformer duty. Click Select. You get the lowest catalogue type that covers it, plus the 2025 list price in RMB FOB Shanghai (and 14 other currencies).
 
-Enter duty parameters (through-current, Um, connection, regulation, step voltage, …) and get a **lowest-fit catalogue model string**. Results are **indicative only** — confirm with engineering before any OS or commercial commitment.
+Live: https://erict16.github.io/oltc-selector/
 
-**Live:** https://erict16.github.io/oltc-selector/
+This is a private helper. It is not an official manufacturer page. The type is a starting point. Confirm with engineering before an OS.
 
-This is a **private project**, not an official manufacturer tool.
+## What it does
 
-## Stack
+You enter through-current, Um, Y or D, reversing / coarse-fine / linear, ± steps, and max step voltage. The engine walks the 2025 catalogue (CV2, CM2, SHZV, SHZVG, HWV, CZ, WSL, WSG, …) and ranks **minimum adequate**:
 
-- **Next.js 15** (static export) + **React 19** + **Tailwind CSS v4**
-- Engine: pure TypeScript in `lib/` (`catalog`, `engine`, `tapCode`, `i18n`)
-- Hosted on **GitHub Pages** (Actions → `out/`)
+1. Family: CV2, then CM2, then SHZV, then SHZVG.
+2. One three-phase unit beats three single-phase units when both cover the duty.
+3. No invented rows. There is no CV2-500 in 2025 (oil 500 A is SV).
 
-## Dev
+On-tank duty picks HWV. Under More options, switch to off-circuit (OCTC) for WSL / WSG.
+
+After Select, the result shows the 2025 list amount. Pick a currency. That is list × mid-market FX only. No country coefficient, no quotation sheet.
+
+## Use it
 
 ```bash
 npm install
-npm run dev       # http://127.0.0.1:3000
+npm run dev      # http://127.0.0.1:3000
 npm test
-npm run build     # local static export → out/
-npm run build:gh  # export with /oltc-selector basePath (Pages)
+npm run build
 ```
 
-## Form fields
+GitHub Pages build: `npm run build:gh`.
 
-| Field | Meaning |
-|-------|---------|
-| **Regulation** | Tap winding: linear (0) / reversing (W) / coarse–fine (G) |
-| **Connection** | OLTC application: Y neutral / D delta or line end |
-| **Iᵤ / Um / Ust** | Catalogue dropdowns (Iᵤ has Custom for calculated Imax) |
-| **± steps** | For W/G only; linear uses positions only |
+Languages: 中文, English, Tiếng Việt, Español, Türkçe, Русский.
 
-## Selection rule
+## Field names
 
-Lowest catalogue type that meets the duty (compound before combined when both fit; single III before 3× when a single unit covers Iᵤ).
+| Field | Means |
+|---|---|
+| Regulation | Tap winding: linear 0, reversing W, coarse-fine G |
+| Connection | Where the switch sits: Y neutral, or D / line end |
+| Iᵤ / Um / Ust | Catalogue menus. Custom Iᵤ is for a calculated Imax |
+| ± steps | W/G only. Linear uses positions |
 
-## Languages
+Idle result pane stays empty until you click Select. If you change inputs after a run, the old type stays on screen until you Select again.
 
-中文 · English · Tiếng Việt · Español · Türkçe
+## Tests
 
-## License / use
+`npm test` runs the engine, the 2025 price lookup, and a replay of real Qu-ET / Anthony QS cases (84 replay rows, 0 fail). Closed skips (MDU-only, CV2-500, two transformers on one sheet) are listed with a reason.
 
-See [Terms](https://erict16.github.io/oltc-selector/terms/) and [Privacy](https://erict16.github.io/oltc-selector/privacy/). Reference only.
+See `docs/GOAL.md` and `docs/CORRECTNESS.md`.
+
+## License
+
+[Terms](https://erict16.github.io/oltc-selector/terms/) · [Privacy](https://erict16.github.io/oltc-selector/privacy/). Reference only.

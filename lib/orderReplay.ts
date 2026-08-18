@@ -8,6 +8,10 @@
  */
 import { selectOltc } from "./engine";
 import type { SelectInput } from "./types";
+import {
+  ANTHONY_REPLAY,
+  ANTHONY_REPLAY_SKIPPED,
+} from "./anthonyQs.fixtures";
 
 export type ReplayTag = "min-adequate" | "customer-specified";
 
@@ -22,6 +26,8 @@ export type ReplayCase = {
   expectPrimary: string;
   /** Named backup / alternate from the same source, if any */
   expectBackup?: string;
+  /** Non-catalogue tap: match family / I / Um / grade only. */
+  match?: "full" | "family-i-um";
 };
 
 const inTankVac = {
@@ -333,6 +339,8 @@ export const ORDER_REPLAY: ReplayCase[] = [
     },
     expectPrimary: "CVIII-350D/40.5-10193W",
   },
+
+  ...ANTHONY_REPLAY,
 ];
 
 /** Skipped Qu-ET / OS rows — recorded so inventory does not invent duty. */
@@ -356,8 +364,10 @@ export const ORDER_REPLAY_SKIPPED: Array<{
   {
     id: "Qu-ET260010",
     source: "QS/Qu-ET260010-WDLVIII-2000-145-5_2B-TBA.docx",
-    reason: "OCTC / WDL (de-energized). Out of OLTC engine scope.",
+    reason:
+      "WDLVIII-2000-145; no recoverable transformer Ust. Do not invent OCTC duty.",
   },
+  ...ANTHONY_REPLAY_SKIPPED,
 ];
 
 export type TypeParts = {
@@ -373,22 +383,57 @@ export type TypeParts = {
 
 /** Normalize commercial type strings from QS/OS (spaces, ×, *, en-dash). */
 export function normalizeType(raw: string): string {
-  return raw
+  let t = raw
     .replace(/[×*]/g, "x")
-    .replace(/[–—]/g, "-")
+    .replace(/[–—－]/g, "-")
     .replace(/,/g, ".")
+    .replace(/（/g, "(")
+    .replace(/）/g, ")")
     .replace(/\s+/g, "")
-    .replace(/(III|II|I)(\d)/, "$1-$2");
+    .replace(/(\d)_(\d)/g, "$1x$2")
+    .replace(/(III|II|I)(\d)/, "$1-$2")
+    .replace(/(WSL|WDL|WSG)(VIII|VII|IV|VI|IX|V)(\d)/i, "$1$2-$3");
+  // WSLIV-800Y170-6x5B → insert slash before Um
+  if (!t.includes("/")) {
+    t = t.replace(/([YD])(\d+(?:\.\d+)?)-/i, "$1/$2-");
+  }
+  // WSLIV-600Y/1268x7E → 126-8x7E (glued Um + contact)
+  t = t.replace(
+    /(363|362|330|300|252|170|145|126|72\.5|40\.5|17\.5|12\.5|12)(\d{1,2}x\d)/,
+    "$1-$2",
+  );
+  return t;
 }
+
+const OCTC_TYPE_RE =
+  /^(?:(\d+)x)?(WSL|WDL|WSG)(VIII|VII|III|II|IV|VI|IX|V|I)-(\d+)([YD])?[/-](\d+(?:\.\d+)?)-(\d+)x(\d+)(?:\((\d+)x(\d+)\))?(?:\(([A-E])\)|([A-E]))?$/i;
 
 /**
  * Parse a Huaming commercial type.
  *   SHZVIII-1000Y/72.5C-12233W
  *   3xSHZVI-2400/72.5C-10193W
  *   CV2III-350D/40.5-10193W
+ *   WSLIV-800Y/170-6x5B
  */
 export function parseTypeString(raw: string): TypeParts | null {
   const t = normalizeType(raw);
+  const octc = t.match(OCTC_TYPE_RE);
+  if (octc) {
+    // 4x3(6x5)A → commercial contact is the inner/last pair (6x5)
+    const contact = octc[9] && octc[10]
+      ? `${Number(octc[9])}x${Number(octc[10])}`
+      : `${Number(octc[7])}x${Number(octc[8])}`;
+    return {
+      unitCount: octc[1] ? Number(octc[1]) : 1,
+      family: octc[2].toUpperCase(),
+      phases: octc[3].toUpperCase(),
+      currentA: Number(octc[4]),
+      connection: (octc[5] ?? "").toUpperCase(),
+      umKv: Number(octc[6]),
+      selectorSize: (octc[11] || octc[12] || "").toUpperCase(),
+      tapCode: contact,
+    };
+  }
   const re =
     /^(?:(\d+)x)?([A-Z][A-Z0-9]*?)(III|II|I)-(\d+)([YD])?\/(\d+(?:\.\d+)?)([BCDE]+)?-(\d+[WG0]?)$/;
   const m = t.match(re);
@@ -410,7 +455,11 @@ export function parseTypeString(raw: string): TypeParts | null {
  * includes it), Um, selector grade on combined types, tap code.
  * Single-phase strings omit Y/D after current (D after Um is grade).
  */
-export function commercialMatch(actual: string, expected: string): boolean {
+export function commercialMatch(
+  actual: string,
+  expected: string,
+  mode: "full" | "family-i-um" = "full",
+): boolean {
   const a = parseTypeString(actual);
   const e = parseTypeString(expected);
   if (!a || !e) return normalizeType(actual) === normalizeType(expected);
@@ -422,7 +471,7 @@ export function commercialMatch(actual: string, expected: string): boolean {
   }
   if (a.umKv !== e.umKv) return false;
   if (e.selectorSize && a.selectorSize !== e.selectorSize) return false;
-  if (e.tapCode && a.tapCode !== e.tapCode) return false;
+  if (mode === "full" && e.tapCode && a.tapCode !== e.tapCode) return false;
   if (e.unitCount > 1 && a.unitCount !== e.unitCount) return false;
   return true;
 }
@@ -445,10 +494,11 @@ export function runOrderReplay(): ReplayRow[] {
     const models = out.results.map((r) => r.model);
     const actualPrimary = models[0] ?? "";
     const next = models.slice(1, 4);
+    const mode = c.match ?? "full";
     const primaryOk =
       c.tag === "min-adequate"
-        ? commercialMatch(actualPrimary, c.expectPrimary)
-        : models.some((m) => commercialMatch(m, c.expectPrimary));
+        ? commercialMatch(actualPrimary, c.expectPrimary, mode)
+        : models.some((m) => commercialMatch(m, c.expectPrimary, mode));
     let backupOk: boolean | null = null;
     if (c.expectBackup) {
       backupOk = next.some((m) => commercialMatch(m, c.expectBackup!));
@@ -467,6 +517,19 @@ export function runOrderReplay(): ReplayRow[] {
       pass: Boolean(out.ok && primaryOk && backupOk),
     };
   });
+}
+
+export function replaySummary(rows: ReplayRow[] = runOrderReplay()) {
+  return {
+    total: rows.length,
+    match: rows.filter((r) => r.tag === "min-adequate" && r.pass).length,
+    eligibleDifferent: rows.filter(
+      (r) => r.tag === "customer-specified" && r.pass,
+    ).length,
+    fail: rows.filter((r) => !r.pass).length,
+    skip: ORDER_REPLAY_SKIPPED.length,
+    engineBugFixed: 0,
+  };
 }
 
 export function formatReplayMarkdown(rows: ReplayRow[]): string {

@@ -24,6 +24,13 @@ Early scaffold put **CV2 currents = 350 / 500 / 600**.
 | CVT | 160 / 200 | Um **12** only |
 | CZ | 500 / 600 | Um 40.5 / 72.5; often `3×CZI-…` |
 | HWDK | 1500 / 2000 / 2500 | 35 / 69 kV |
+| **WSL / WDL** | **600 / 800 / 1000 / 1200 / 1600 / 2000 / 2400** | Um 12 / 40.5 / 72.5 / 126 / 145 / 170. OCTC (无载). `dutyKind=octc` only. Y→WSLIV, D→WSLII. Contact `6x5` / `7x6` / `12x11` / `18x17` + size A/B/E. List = CMA7 column on sheet `WSL(WDL)`. WDL aliases WSL when no twin row. Do not invent missing rows (no 7x6E @ 72.5; no WSLIV-2000D/126). WSG/WG is a different sheet — not this family. |
+
+## OCTC / 无载 (WSL · WDL)
+
+De-energized cage tap changers. **Not** in the OLTC ranking (CV2→CM2→SHZV). Engine path is `dutyKind: "octc"` only; unset keeps today’s OLTC-only behaviour.
+
+Commercial string: `WSLIV-800Y/170-6x5B` (family + roman series + Iᵤ + Y/D + Um + contact + size). List lookup uses the **CMA7** column on `WSL(WDL)` — never the hand-wheel cell, never an invented row. WSG lives on the `WG` sheet and is still out of catalogue.
 
 ## Compound vs combined
 

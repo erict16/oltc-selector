@@ -26,6 +26,7 @@ import {
   preferredMid,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
+import { AltListAmount, ListPrice, useListFx } from "@/components/ListPrice";
 import { currentLabel, t, type Lang } from "@/lib/i18n";
 import type { ModelResult, SelectInput, SelectOutput } from "@/lib/types";
 
@@ -62,6 +63,7 @@ const defaultInput: SelectInput = {
   midPositions: 3,
   selectorSize: "auto",
   mdu: "none",
+  dutyKind: "oltc",
 };
 
 type ExampleKey = "case1Cv2" | "case2Cm2" | "case5Cv2_145";
@@ -150,6 +152,7 @@ export function SelectorApp() {
   const [running, setRunning] = useState(false);
   const runTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resultPaneRef = useRef<HTMLElement | null>(null);
+  const { currency, fx, setCurrency } = useListFx();
 
   const isLinear = input.regulation === "linear";
   const selectorVisible = showSelectorSize(input);
@@ -304,6 +307,7 @@ export function SelectorApp() {
 
   /** Collapsed “more options” summary — non-default advanced fields */
   const moreBits: string[] = [];
+  if (input.dutyKind === "octc") moreBits.push(t(lang, "dutyOctc"));
   if (input.mounting !== "in_tank") {
     moreBits.push(
       t(
@@ -375,7 +379,7 @@ export function SelectorApp() {
               {t(lang, "duty")}
             </h2>
             <div
-              className="flex max-w-full flex-wrap gap-1.5 sm:justify-end"
+              className="grid w-full grid-cols-3 gap-1.5 sm:w-[21rem] sm:shrink-0"
               role="group"
               aria-label={t(lang, "examplesAria")}
             >
@@ -388,7 +392,8 @@ export function SelectorApp() {
                     onClick={() => loadExample(ex)}
                     title={t(lang, ex.hintKey)}
                     className={cx(
-                      "inline-flex min-h-8 items-center justify-center rounded-full border px-3 py-1 text-center text-[0.75rem] transition-colors duration-150 sm:min-h-7 sm:min-w-[5.75rem]",
+                      "inline-flex h-8 w-full items-center justify-center whitespace-nowrap rounded-full border px-1.5 text-center text-[0.75rem] leading-none transition-colors duration-150 sm:h-7",
+                      "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
                       on
                         ? "border-[var(--color-accent)] text-[var(--color-accent)]"
                         : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
@@ -677,6 +682,34 @@ export function SelectorApp() {
             >
               <div className="overflow-hidden">
                 <div className="grid gap-x-4 gap-y-3.5 pt-3 sm:grid-cols-2">
+                  <Field label={t(lang, "dutyKind")}>
+                    <div
+                      className="grid h-10 grid-cols-2 gap-1"
+                      role="group"
+                      aria-label={t(lang, "dutyKind")}
+                    >
+                      {(["oltc", "octc"] as const).map((k) => {
+                        const on = (input.dutyKind ?? "oltc") === k;
+                        return (
+                          <button
+                            key={k}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => patch("dutyKind", k)}
+                            className={cx(
+                              "inline-flex h-10 items-center justify-center rounded-[var(--radius-sm)] border text-[0.8125rem] transition-colors duration-150",
+                              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+                              on
+                                ? "border-[var(--color-accent)] font-medium text-[var(--color-accent)]"
+                                : "border-[var(--color-rule-2)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",
+                            )}
+                          >
+                            {t(lang, k === "oltc" ? "dutyOltc" : "dutyOctc")}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </Field>
                   <Field label={t(lang, "mounting")}>
                     <select
                       className={controlClass}
@@ -925,6 +958,13 @@ export function SelectorApp() {
                       {t(lang, "disclaimer")}
                     </p>
                   </div>
+                  <ListPrice
+                    model={primary.model}
+                    lang={lang}
+                    currency={currency}
+                    fx={fx}
+                    onCurrency={setCurrency}
+                  />
 
                   {alts.length > 0 ? (
                     <div className="border-t border-[var(--color-rule)] px-4 py-2.5">
@@ -957,19 +997,27 @@ export function SelectorApp() {
                             {alts.map((r) => (
                               <li
                                 key={r.model}
-                                className="flex items-start justify-between gap-2 rounded-[var(--radius-sm)] border border-[var(--color-rule)] px-2.5 py-1.5"
+                                className="flex items-center justify-between gap-2 rounded-[var(--radius-sm)] border border-[var(--color-rule)] px-2.5 py-1.5"
                               >
-                                <span className="break-all font-mono text-[0.75rem] text-[var(--color-ink)]">
+                                <span className="min-w-0 break-all font-mono text-[0.75rem] text-[var(--color-ink)]">
                                   {r.model}
                                 </span>
-                                <button
-                                  type="button"
-                                  onClick={() => copyModel(r.model)}
-                                  className="inline-flex h-7 shrink-0 items-center rounded-[var(--radius-sm)] px-1.5 text-[0.6875rem] text-[var(--color-accent)] hover:underline"
-                                  aria-label={t(lang, "copy")}
-                                >
-                                  {t(lang, "copy")}
-                                </button>
+                                <span className="flex shrink-0 items-center gap-2">
+                                  <AltListAmount
+                                    model={r.model}
+                                    lang={lang}
+                                    currency={currency}
+                                    fx={fx}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => copyModel(r.model)}
+                                    className="inline-flex h-7 shrink-0 items-center rounded-[var(--radius-sm)] px-1.5 text-[0.6875rem] text-[var(--color-accent)] hover:underline"
+                                    aria-label={t(lang, "copy")}
+                                  >
+                                    {t(lang, "copy")}
+                                  </button>
+                                </span>
                               </li>
                             ))}
                           </ul>

@@ -126,10 +126,12 @@ export const INTERNAL_INSULATION: Record<
   { a_li: number; a_pf: number; b_li: number; b_pf: number }
 > = {
   "": { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
+  A: { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
   B: { a_li: 265, a_pf: 50, b_li: 265, b_pf: 50 },
   C: { a_li: 365, a_pf: 82, b_li: 350, b_pf: 82 },
   D: { a_li: 460, a_pf: 105, b_li: 460, b_pf: 146 },
   DE: { a_li: 550, a_pf: 120, b_li: 550, b_pf: 160 },
+  E: { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
 };
 
 /**
@@ -148,7 +150,10 @@ export const FAMILY_MIN_RANK: Record<string, number> = {
   hwv: 15, // only wins on on-tank path
   cvt: 12,
   cz: 14,
+  wsg: 6,
   hwdk: 80,
+  wsl: 5, // OCTC-only list (never mixed into CV2→CM2→SHZV)
+  wdl: 6,
 };
 
 export const SERIES: SeriesDef[] = [
@@ -514,6 +519,61 @@ export const SERIES: SeriesDef[] = [
     notesEn: "Reactor family — confirm with engineering.",
     notesZh: "电抗器系列，需工程确认。",
     rank: 80,
+  },
+  {
+    id: "wsl",
+    code: "WSL",
+    nameEn: "WSL in-tank de-energized tap changer (OCTC)",
+    nameZh: "WSL 箱内无载分接开关（OCTC）",
+    mounting: ["in_tank"],
+    medium: "oil",
+    structure: "compound",
+    vacuum: false,
+    dutyKind: "octc",
+    // Regular WSL(WDL) 2025 blocks only — no one-off 350/400/3500 rows.
+    currents: {
+      I: [600, 800, 1000, 1200, 1600, 2000, 2400],
+      II: [600, 800, 1000, 1200, 1600, 2000, 2400],
+      III: [600, 800, 1000, 1200, 1600, 2000, 2400],
+    },
+    umKv: [12, 40.5, 72.5, 126, 145, 170],
+    usesSelectorSize: false,
+    maxStepVoltageV: 10000,
+    connections: ["Y", "D"],
+    maxPositionsLinear: 18,
+    maxPositionsWithChangeOver: 18,
+    defaultMdu: "CMA7",
+    notesEn:
+      "Cage OCTC. Eligible only when dutyKind=octc. Y→WSLIV, D→WSLII. Contact 6x5/7x6/12x11/18x17 from positions. WDL aliases the same list.",
+    notesZh:
+      "笼式无载开关。仅 dutyKind=octc 时入选。Y→WSLIV，D→WSLII。档位映射触头 6x5/7x6/12x11/18x17。WDL 走同一价目表。",
+    rank: 5,
+  },
+  {
+    id: "wsg",
+    code: "WSG",
+    nameEn: "WSG off-circuit tap changer (OCTC)",
+    nameZh: "WSG 无载分接开关（OCTC）",
+    mounting: ["in_tank"],
+    medium: "oil",
+    structure: "compound",
+    vacuum: false,
+    dutyKind: "octc",
+    currents: {
+      I: [250, 300, 400, 600, 800, 1000, 1250],
+      II: [250, 300, 400, 600, 800, 1000, 1250],
+      III: [300, 600, 800],
+    },
+    umKv: [40.5],
+    usesSelectorSize: false,
+    maxStepVoltageV: 10000,
+    connections: ["Y", "D"],
+    maxPositionsLinear: 12,
+    maxPositionsWithChangeOver: 12,
+    defaultMdu: "CMA7",
+    notesEn: "WG sheet. dutyKind=octc only. D → WSGII (Anthony WSG II-800D/40.5-4x5A).",
+    notesZh: "WG 价目表。仅 dutyKind=octc。D → WSGII。",
+    rank: 6,
   },
 ];
 
