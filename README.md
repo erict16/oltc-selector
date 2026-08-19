@@ -1,6 +1,6 @@
 # OLTC Selector
 
-Fill in the transformer duty. Click Select. You get the lowest catalogue type that covers it, plus the 2025 list price in RMB FOB Shanghai (and 14 other currencies).
+Fill in the transformer duty. Click Select. You get the lowest catalogue type that covers it, plus the 2025 base quotation price in RMB FOB Shanghai (and 14 other currencies).
 
 Live: https://erict16.github.io/oltc-selector/
 
@@ -16,7 +16,7 @@ You enter through-current, Um, Y or D, reversing / coarse-fine / linear, ± step
 
 On-tank duty picks HWV. Under More options, switch to off-circuit (OCTC) for WSL / WSG.
 
-After Select, the result shows the 2025 list amount. Pick a currency. That is list × mid-market FX only. No country coefficient, no quotation sheet.
+After Select, the result shows the 2025 base quotation price. Pick a currency. That is base price × mid-market FX only. No regional sales coefficient.
 
 ## Use it
 

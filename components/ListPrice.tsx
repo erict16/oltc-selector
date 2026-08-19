@@ -170,7 +170,7 @@ export function AltListAmount({
   );
 }
 
-/** 2025 list × mid-market FX. Mount only after a successful select. */
+/** 2025 base quotation × mid-market FX. Mount only after a successful select. */
 export function ListPrice({
   model,
   lang,

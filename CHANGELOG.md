@@ -17,7 +17,7 @@ Shipped the selector people can actually use for a first type and a first list n
 - After Select: 2025 Base Price List, RMB FOB Shanghai.
 - 15 currencies. One amount on screen (the currency you picked).
 - Other options show a list figure too.
-- No country coefficient. One line: indicative list, not a quotation.
+- No country coefficient. One line: base quotation price, no regional sales coefficient.
 
 ### Replay
 

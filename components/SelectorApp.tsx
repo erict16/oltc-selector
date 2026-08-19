@@ -875,8 +875,9 @@ export function SelectorApp() {
               type="submit"
               disabled={running || !input.throughCurrentA}
               className={cx(
-                "inline-flex min-h-11 w-full flex-1 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 text-center text-[0.9rem] font-semibold text-[var(--color-accent-ink)] transition-opacity duration-150 sm:min-h-[2.6rem] sm:min-w-[12.5rem] sm:px-5",
-                "hover:opacity-90",
+                // Phone: full width. sm+: fixed box so ZH/EN/ES/RU labels cannot stretch it.
+                "inline-flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 text-center text-[0.9rem] font-semibold whitespace-nowrap text-[var(--color-accent-ink)] transition-[opacity,transform] duration-150 sm:h-[2.6rem] sm:min-h-0 sm:w-[15rem] sm:shrink-0 sm:px-5",
+                "hover:opacity-90 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 running && "pointer-events-none",
               )}
@@ -892,7 +893,7 @@ export function SelectorApp() {
                 t(lang, "select")
               )}
             </button>
-            <p className="text-center text-[0.75rem] leading-snug text-[var(--color-muted)] sm:max-w-[16rem] sm:text-left">
+            <p className="text-center text-[0.75rem] leading-snug text-[var(--color-muted)] sm:min-w-0 sm:flex-1 sm:text-left">
               {t(lang, "reRunHint")}
             </p>
           </div>
