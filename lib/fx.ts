@@ -56,6 +56,37 @@ export function isListCurrency(value: string): value is ListCurrency {
   return (LIST_CURRENCIES as readonly string[]).includes(value);
 }
 
+const FX_DATE_LOCALE: Record<string, string> = {
+  zh: "zh-CN",
+  en: "en-US",
+  vi: "vi-VN",
+  es: "es",
+  tr: "tr-TR",
+  ru: "ru-RU",
+};
+
+/** Normalize API dates (`2026-08-19` or `Tue, 18 Aug 2026 …`) to YYYY-MM-DD. */
+export function toIsoDate(raw?: string | null): string {
+  if (!raw) return FX_FALLBACK.date;
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return FX_FALLBACK.date;
+  return d.toISOString().slice(0, 10);
+}
+
+/** FX date in the UI language (20 авг. 2026 г. / 2026年8月20日). */
+export function formatFxDate(raw: string, lang: string): string {
+  const iso = toIsoDate(raw);
+  const d = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return raw;
+  return new Intl.DateTimeFormat(FX_DATE_LOCALE[lang] ?? "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(d);
+}
+
 export function convertFromCny(
   cny: number,
   currency: ListCurrency,
@@ -101,7 +132,7 @@ export async function fetchListRates(
       };
       const merged = mergeRates(
         body.rates ?? {},
-        body.date ?? FX_FALLBACK.date,
+        toIsoDate(body.date),
         "frankfurter.dev",
         true,
       );
@@ -118,7 +149,7 @@ export async function fetchListRates(
           };
           return mergeRates(
             { ...(body.rates ?? {}), ...(er.rates ?? {}) },
-            er.time_last_update_utc?.slice(0, 16) ?? merged.date,
+            toIsoDate(er.time_last_update_utc) || merged.date,
             "frankfurter.dev + open.er-api.com",
             true,
           );
@@ -140,7 +171,7 @@ export async function fetchListRates(
       };
       return mergeRates(
         body.rates ?? {},
-        body.time_last_update_utc?.slice(0, 16) ?? FX_FALLBACK.date,
+        toIsoDate(body.time_last_update_utc),
         "open.er-api.com",
         true,
       );

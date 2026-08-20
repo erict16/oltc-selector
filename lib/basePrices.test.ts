@@ -1,12 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
-import { lookupListPrice, BASE_PRICE_META } from "./basePrices";
+import {
+  lookupListPrice,
+  estimateListPrice,
+  resolveListPrice,
+  BASE_PRICE_META,
+} from "./basePrices";
 import {
   convertFromCny,
   ER_API_LATEST,
   fetchListRates,
+  formatFxDate,
   FRANKFURTER_LATEST,
   FX_FALLBACK,
   LIST_CURRENCIES,
+  toIsoDate,
 } from "./fx";
 
 function expectNoPrice(model: string) {
@@ -150,6 +157,51 @@ describe("base price list 2025", () => {
     });
   });
 
+  it("estimates missing rows from neighbours without changing exact lookup", () => {
+    expect(lookupListPrice("SHZVGIII-1500Y/72.5C-10193W")).toEqual({
+      found: false,
+      reason: "no-row",
+    });
+    const shzvg = estimateListPrice("SHZVGIII-1500Y/72.5C-10193W");
+    expect(shzvg).toMatchObject({ found: true, estimated: true });
+    expect(resolveListPrice("SHZVGIII-1500Y/72.5C-10193W")).toMatchObject({
+      found: true,
+      estimated: true,
+    });
+    if (shzvg.found) {
+      expect(shzvg.listRmb).toBeGreaterThan(200_000);
+      expect(shzvg.listRmb).toBeLessThan(1_000_000);
+      expect(shzvg.listRmb % 100).toBe(0);
+      expect(shzvg.method).toMatch(/nearest-neighbor/);
+    }
+
+    expect(lookupListPrice("CV2III-350D/40.5-14193W")).toEqual({
+      found: false,
+      reason: "no-row",
+    });
+    const cv14 = resolveListPrice("CV2III-350D/40.5-14193W");
+    expect(cv14).toMatchObject({ found: true, estimated: true });
+    if (cv14.found) {
+      expect(cv14.listRmb).toBeGreaterThan(148_700);
+      expect(cv14.listRmb).toBeLessThan(170_000);
+      expect(cv14.listRmb % 100).toBe(0);
+    }
+
+    const exact = resolveListPrice("CV2III-350D/40.5-10193W");
+    expect(exact).toMatchObject({ found: true, listRmb: 148700 });
+    expect(exact.found && exact.estimated).toBeFalsy();
+
+    expect(estimateListPrice("not-a-type")).toEqual({
+      found: false,
+      reason: "unparsed",
+    });
+    expect(resolveListPrice("")).toEqual({ found: false, reason: "unparsed" });
+    expect(estimateListPrice("WSLVIII-500/72.5-10193W")).toEqual({
+      found: false,
+      reason: "no-row",
+    });
+  });
+
   it("converts list × FX only (no coefficient)", () => {
     expect(LIST_CURRENCIES).toHaveLength(15);
     const usd = convertFromCny(148700, "USD");
@@ -221,6 +273,16 @@ describe("fetchListRates", () => {
     expect(rates.source).toBe("open.er-api.com");
     expect(rates.perCny.USD).toBe(0.16);
     expect(rates.perCny.EUR).toBe(FX_FALLBACK.perCny.EUR);
+  });
+
+  it("formats FX dates in the UI language", () => {
+    expect(toIsoDate("Tue, 18 Aug 2026 00:00:01 +0000")).toBe("2026-08-18");
+    expect(toIsoDate("2026-08-19")).toBe("2026-08-19");
+    expect(formatFxDate("2026-08-20", "zh")).toMatch(/2026/);
+    expect(formatFxDate("2026-08-20", "zh")).toMatch(/8/);
+    expect(formatFxDate("Tue, 20 Aug 2026 00:00:01 +0000", "ru")).toMatch(
+      /2026/,
+    );
   });
 
   it("uses the dated table when both sources fail", async () => {

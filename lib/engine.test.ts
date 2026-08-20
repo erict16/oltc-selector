@@ -287,12 +287,31 @@ describe("selectOltc fixtures", () => {
   });
 });
 
+describe("UI voltage-class presets", () => {
+  it("66 / 110 / 220 kV land on the common catalogue types", () => {
+    const k66 = selectOltc(FIXTURES.preset66.input);
+    expect(k66.ok).toBe(true);
+    expect(k66.results[0].model).toBe(FIXTURES.preset66.expectModel);
+    const k110 = selectOltc(FIXTURES.preset110.input);
+    expect(k110.ok).toBe(true);
+    expect(k110.results[0].model).toBe(FIXTURES.preset110.expectModel);
+    const k220 = selectOltc(FIXTURES.preset220.input);
+    expect(k220.ok).toBe(true);
+    expect(k220.results[0].model).toBe(FIXTURES.preset220.expectModel);
+  });
+});
+
 describe("training cases (选型案例-答案)", () => {
   it("case 1 → CV2III-350D/40.5-10193G as #1 (not SHZV)", () => {
     const out = selectOltc(FIXTURES.case1Cv2.input);
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toBe(FIXTURES.case1Cv2.expectModel);
     expect(out.results[0].seriesCode).toBe("CV2");
+    expect(out.results[0].currentA).toBe(350);
+    expect(out.results[0].maxStepVoltageV).toBe(2000);
+    expect(out.results[0].stepCapacityKva).toBe(700);
+    expect(out.results[0].earthPfKv).toBe(90);
+    expect(out.results[0].earthBilKv).toBe(250);
   });
 
   it("case 2 → CM2III-600Y/72.5C-10193W as #1 (not SHZV)", () => {
@@ -301,12 +320,17 @@ describe("training cases (选型案例-答案)", () => {
     expect(out.results[0].model).toBe(FIXTURES.case2Cm2.expectModel);
     expect(out.results[0].seriesCode).toBe("CM2");
     expect(out.results[0].selectorSize).toBe("C");
+    expect(out.results[0].currentA).toBe(600);
+    expect(out.results[0].maxStepVoltageV).toBe(3300);
+    expect(out.results[0].stepCapacityKva).toBe(1500);
   });
 
   it("case 5 → CV2III-600D/145-12233W as #1", () => {
     const out = selectOltc(FIXTURES.case5Cv2_145.input);
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toBe(FIXTURES.case5Cv2_145.expectModel);
+    expect(out.results[0].maxStepVoltageV).toBe(1500);
+    expect(out.results[0].currentA).toBe(600);
   });
 
   it("case 7 → SHZVIII-1000D (not 3×CM2I) when I≈626 A", () => {
@@ -534,6 +558,24 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
       currentA: 1000,
       tapCode: "6x5",
     });
+  });
+
+  it("oil interrupter prefers CV/SV/CM over CV2", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 400,
+      umKv: 72.5,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+    });
+    expect(out.ok).toBe(true);
+    expect(["CV", "SV", "CM"]).toContain(out.results[0].seriesCode);
+    expect(out.results[0].seriesCode).not.toBe("CV2");
   });
 
   it("WSL is absent from the default OLTC ranking", () => {

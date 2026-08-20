@@ -112,6 +112,13 @@ export interface ModelResult {
   mdu: string;
   /** 1 = single unit; 3 = three single-phase units driven together */
   unitCount: number;
+  /** Catalogue max Ust for this family/pitch. Null on OCTC. */
+  maxStepVoltageV: number | null;
+  /** Brochure step capacity (kVA) at this Iᵤ. */
+  stepCapacityKva: number | null;
+  /** Earth PF / LI from Um table. */
+  earthPfKv: number | null;
+  earthBilKv: number | null;
   reasonsEn: string[];
   reasonsZh: string[];
   warningsEn: string[];

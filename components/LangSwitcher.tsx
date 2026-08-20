@@ -31,7 +31,7 @@ export function LangSwitcher({
             aria-pressed={on}
             onClick={() => onChange(opt.id)}
             className={cx(
-              "inline-flex h-8 w-10 shrink-0 items-center justify-center rounded-[var(--radius-sm)] border font-mono text-[0.6875rem] leading-none tracking-wide tabular-nums transition-colors duration-150 sm:h-7 sm:w-9",
+              "inline-flex h-[1.625rem] w-[2.125rem] shrink-0 items-center justify-center rounded-[var(--radius-sm)] border font-mono text-[0.625rem] leading-none tracking-wide tabular-nums transition-colors duration-150",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
               on
                 ? "border-[var(--color-accent)] bg-[oklch(58%_0.2_256_/_0.1)] font-semibold text-[var(--color-accent)]"

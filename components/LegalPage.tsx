@@ -12,7 +12,7 @@ export function LegalPage({
   children: ReactNode;
 }) {
   return (
-    <div className="mx-auto w-full max-w-[720px] px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto w-full max-w-[880px] px-4 py-10 sm:px-6 sm:py-14">
       <p className="mb-4 text-[0.8125rem]">
         <Link
           href="/"
@@ -26,26 +26,38 @@ export function LegalPage({
         {title}
       </h1>
       <p className="mt-1 text-[0.9rem] text-[var(--color-muted)]">{titleZh}</p>
-      <div className="prose-legal mt-8 space-y-5 text-[0.9rem] leading-relaxed text-[var(--color-ink-2)]">
+      <div className="prose-legal mt-8 space-y-8 text-[var(--color-ink-2)]">
         {children}
       </div>
     </div>
   );
 }
 
-export function LegalSection({
+export function LegalPair({
   title,
-  children,
+  en,
+  zh,
 }: {
   title: string;
-  children: ReactNode;
+  en: ReactNode;
+  zh: ReactNode;
 }) {
   return (
     <section>
-      <h2 className="mb-2 text-[0.95rem] font-semibold text-[var(--color-ink)]">
+      <h2 className="mb-3 text-[0.95rem] font-semibold text-[var(--color-ink)]">
         {title}
       </h2>
-      <div className="space-y-2 text-[var(--color-ink-2)]">{children}</div>
+      <div className="grid gap-4 sm:grid-cols-2 sm:gap-x-10">
+        <div lang="en" className="space-y-2 text-[0.9rem] leading-[1.7]">
+          {en}
+        </div>
+        <div
+          lang="zh"
+          className="space-y-2 text-[0.9rem] leading-[1.75] sm:border-l sm:border-[var(--color-rule)] sm:pl-10"
+        >
+          {zh}
+        </div>
+      </div>
     </section>
   );
 }

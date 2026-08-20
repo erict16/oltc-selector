@@ -42,7 +42,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
@@ -53,9 +53,12 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        {/* No justify-center: tall forms on mobile must start at top or scroll breaks */}
-        <div className="flex min-h-dvh flex-col">
-          <main id="main" className="flex flex-1 flex-col">
+        {/* Shell fills the viewport; main scrolls; footer stays in view. */}
+        <div className="flex h-dvh min-h-0 flex-col">
+          <main
+            id="main"
+            className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-y-contain"
+          >
             {children}
           </main>
           <SiteFooter />

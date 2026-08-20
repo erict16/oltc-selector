@@ -198,6 +198,7 @@ function adequacyScore(
   if (input.preferVacuum && s.vacuum) score += 40;
   if (input.preferVacuum && !s.vacuum) score -= 800;
   if (!input.preferVacuum && input.medium === "oil" && !s.vacuum) score += 40;
+  if (!input.preferVacuum && input.medium === "oil" && s.vacuum) score -= 800;
 
   // Mounting lock
   if (
@@ -552,6 +553,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
           "依据公开技术样本的选型建议。最终 OS 须工程确认。",
         );
 
+        const maxStepVoltageV = octc
+          ? null
+          : maxStepVoltageForSeries(s, tap.pitch);
+        const stepCapacityKva = s.stepCapacityByCurrent?.[current] ?? null;
+
         let confidence = 0.88;
         if (att.unitCount > 1) confidence -= 0.08;
         if (warningsEn.length > 2) confidence -= 0.03;
@@ -581,6 +587,10 @@ export function selectOltc(input: SelectInput): SelectOutput {
           mid: octc ? 0 : tap.mid,
           mdu: mduStr,
           unitCount: att.unitCount,
+          maxStepVoltageV,
+          stepCapacityKva,
+          earthPfKv: earth?.pf ?? null,
+          earthBilKv: earth?.bil ?? null,
           reasonsEn,
           reasonsZh,
           warningsEn,
@@ -592,13 +602,19 @@ export function selectOltc(input: SelectInput): SelectOutput {
       }
     }
 
-  // Prefer vacuum set when requested and any vacuum exists
+  // Prefer vacuum set when requested and any vacuum exists.
+  // Oil interrupter: keep oil families when they cover (symmetric to vacuum).
   let final = results;
   if (input.preferVacuum) {
     const vac = results.filter(
       (r) => SERIES.find((s) => s.id === r.seriesId)?.vacuum,
     );
     if (vac.length) final = vac;
+  } else if (input.medium === "oil") {
+    const oil = results.filter(
+      (r) => SERIES.find((s) => s.id === r.seriesId)?.vacuum === false,
+    );
+    if (oil.length) final = oil;
   }
 
   final.sort((a, b) => {
@@ -684,6 +700,64 @@ export const FIXTURES = {
       positions: 19,
       mdu: "none" as const,
     },
+  },
+  /** UI presets: 66 / 110 / 220 kV class (Um 72.5 / 126 / 252). */
+  preset66: {
+    input: {
+      mounting: "in_tank" as const,
+      medium: "oil_vacuum" as const,
+      preferVacuum: true,
+      phases: "III" as const,
+      connection: "Y" as const,
+      throughCurrentA: 350,
+      umKv: 72.5,
+      stepVoltageV: 1000,
+      regulation: "reversing" as const,
+      plusMinusSteps: 8,
+      positions: 19,
+      midPositions: 3 as const,
+      pitch: 10 as const,
+      mdu: "none" as const,
+    },
+    expectModel: "CV2III-350Y/72.5-10193W",
+  },
+  preset110: {
+    input: {
+      mounting: "in_tank" as const,
+      medium: "oil_vacuum" as const,
+      preferVacuum: true,
+      phases: "III" as const,
+      connection: "Y" as const,
+      throughCurrentA: 400,
+      umKv: 126,
+      stepVoltageV: 1400,
+      regulation: "reversing" as const,
+      plusMinusSteps: 8,
+      positions: 19,
+      midPositions: 3 as const,
+      pitch: 10 as const,
+      mdu: "none" as const,
+    },
+    expectModel: "CV2III-600Y/126-10193W",
+  },
+  preset220: {
+    input: {
+      mounting: "in_tank" as const,
+      medium: "oil_vacuum" as const,
+      preferVacuum: true,
+      phases: "III" as const,
+      connection: "Y" as const,
+      throughCurrentA: 500,
+      umKv: 252,
+      stepVoltageV: 1800,
+      regulation: "reversing" as const,
+      plusMinusSteps: 8,
+      positions: 19,
+      midPositions: 3 as const,
+      pitch: 10 as const,
+      mdu: "none" as const,
+    },
+    expectModel: "CM2III-500Y/252D-10193W",
   },
   /** Training case 1 — 10 MVA 33 kV Δ coarse-fine → CV2-350 not SHZV */
   case1Cv2: {

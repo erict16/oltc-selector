@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { lookupListPrice } from "@/lib/basePrices";
+import { resolveListPrice } from "@/lib/basePrices";
 import {
   FX_FALLBACK,
   FX_STORAGE_KEY,
   LIST_CURRENCIES,
   convertFromCny,
   fetchListRates,
+  formatFxDate,
   isListCurrency,
   type FxRates,
   type ListCurrency,
@@ -59,7 +60,7 @@ const fallbackFx: FxRates = {
 };
 
 const selectClass =
-  "h-10 w-[7.5rem] shrink-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)]";
+  "h-9 w-[7rem] shrink-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-2 text-[0.8125rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
 
 /** Shared list currency + FX. One instance in SelectorApp; alts follow the primary select. */
 export function useListFx() {
@@ -103,8 +104,8 @@ function CurrencySelect({
   onCurrency: (next: string) => void;
 }) {
   return (
-    <label className="flex shrink-0 flex-col gap-1.5">
-      <span className="text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
+    <label className="flex shrink-0 items-center gap-2">
+      <span className="text-[0.75rem] leading-none text-[var(--color-muted)]">
         {t(lang, "priceCurrency")}
       </span>
       <select
@@ -151,21 +152,18 @@ export function AltListAmount({
   currency: ListCurrency;
   fx: FxRates;
 }) {
-  const hit = useMemo(() => lookupListPrice(model), [model]);
+  const hit = useMemo(() => resolveListPrice(model), [model]);
   if (!hit.found) {
     return (
-      <span className="shrink-0 font-mono text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]">
+      <span className="shrink-0 text-[0.8125rem] leading-none tabular-nums text-[var(--color-muted)]">
         —
       </span>
     );
   }
-  const n = convertFromCny(hit.listRmb, currency, fx.perCny);
+  const amount = amountLine(hit.listRmb, currency, fx, lang);
   return (
-    <span className="shrink-0 font-mono text-[0.75rem] leading-none tabular-nums text-[var(--color-ink-2)]">
-      {t(lang, "priceConverted", {
-        ccy: currency,
-        n: formatMoney(n, currency, lang),
-      })}
+    <span className="shrink-0 text-[0.8125rem] leading-none tabular-nums text-[var(--color-ink-2)]">
+      {hit.estimated ? `~ ${amount}` : amount}
     </span>
   );
 }
@@ -184,17 +182,17 @@ export function ListPrice({
   fx: FxRates;
   onCurrency: (next: string) => void;
 }) {
-  const hit = useMemo(() => lookupListPrice(model), [model]);
+  const hit = useMemo(() => resolveListPrice(model), [model]);
 
   if (!hit.found) {
     return (
-      <div className="border-t border-[var(--color-rule)] px-4 py-3">
-        <div className="flex items-end justify-between gap-3">
+      <div className="border-t border-[var(--color-rule)] px-4 py-3.5">
+        <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[0.8125rem] font-medium text-[var(--color-ink)]">
               {t(lang, "priceTitle")}
             </p>
-            <p className="mt-1.5 text-[0.8125rem] text-[var(--color-muted)]">
+            <p className="mt-2 text-[0.875rem] text-[var(--color-muted)]">
               {t(lang, "priceNone")}
             </p>
           </div>
@@ -209,18 +207,20 @@ export function ListPrice({
   }
 
   const fxLine = t(lang, fx.live ? "priceFxLive" : "priceFxFallback", {
-    date: fx.date,
+    date: formatFxDate(fx.date, lang),
   });
 
   return (
-    <div className="border-t border-[var(--color-rule)] px-4 py-3">
-      <div className="flex items-end justify-between gap-3">
+    <div className="border-t border-[var(--color-rule)] px-4 py-3.5">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[0.8125rem] font-medium text-[var(--color-ink)]">
             {t(lang, "priceTitle")}
           </p>
-          <p className="mt-1.5 font-mono text-[1rem] leading-snug font-medium tracking-tight tabular-nums text-[var(--color-ink)]">
-            {amountLine(hit.listRmb, currency, fx, lang)}
+          <p className="mt-1.5 text-[1.0625rem] leading-none font-normal tabular-nums tracking-tight text-[var(--color-ink)]">
+            {hit.estimated
+              ? `~ ${amountLine(hit.listRmb, currency, fx, lang)}`
+              : amountLine(hit.listRmb, currency, fx, lang)}
           </p>
         </div>
         <CurrencySelect
@@ -231,9 +231,8 @@ export function ListPrice({
       </div>
       <p className="mt-2 text-[0.75rem] leading-snug text-[var(--color-muted)]">
         {fxLine}
-      </p>
-      <p className="mt-1 text-[0.75rem] leading-snug text-[var(--color-muted)]">
-        {t(lang, "priceDisclaimer")}
+        <span className="text-[var(--color-rule-2)]"> · </span>
+        {t(lang, hit.estimated ? "priceEstimated" : "priceDisclaimer")}
       </p>
     </div>
   );

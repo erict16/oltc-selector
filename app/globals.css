@@ -3,10 +3,10 @@
 @import "tailwindcss";
 
 @theme {
-  /* IBM Plex: industrial / engineering clarity for EN·ES·VI·TR; CJK falls back to system */
-  --font-display: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+  /* One UI face for CJK + Latin so the page doesn’t split; mono only for type strings */
+  --font-display: "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+  --font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
   --color-paper: oklch(98.5% 0.004 250);
@@ -25,30 +25,25 @@
   --radius-md: 10px;
 }
 
-html {
-  overflow-x: clip;
-}
-
 html,
 body {
-  min-height: 100%;
-  min-height: 100dvh;
-  overflow-x: clip;
+  height: 100dvh;
+  overflow: hidden;
   background: var(--color-paper);
   color: var(--color-ink-2);
   font-family: var(--font-sans);
   font-feature-settings: "ss01" on, "cv11" on;
-  letter-spacing: 0.005em;
+  letter-spacing: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* Safe area for notched phones; keep content off edges */
+/* Document is locked; #main scrolls. Side insets only — footer owns the
+   bottom safe area so it is never covered by the home indicator. */
 body {
   padding-left: env(safe-area-inset-left, 0);
   padding-right: env(safe-area-inset-right, 0);
-  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 /* Avoid iOS zoom-on-focus for inputs under 16px */
@@ -60,12 +55,8 @@ body {
   }
 }
 
-/* Headings: slightly tighter tracking, same family for a calm professional look */
-h1,
-h2,
-.font-\[family-name\:var\(--font-display\)\] {
+h1 {
   letter-spacing: -0.02em;
-  font-feature-settings: "ss01" on;
 }
 
 .prose-legal a {
@@ -103,6 +94,12 @@ select {
   background-repeat: no-repeat;
   background-position: right 0.7rem center;
   padding-right: 2rem;
+}
+
+/* Native list is painted by the OS; hide our chevron while open so it
+   doesn’t sit on top of the popup’s right edge. */
+select:open {
+  background-image: none;
 }
 
 /* Result card enter — calm rise, no bounce */
