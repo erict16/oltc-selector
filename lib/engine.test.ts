@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { selectOltc, FIXTURES } from "./engine";
+import { selectOltc, stepUpOf, FIXTURES } from "./engine";
 import { parseTypeString } from "./orderReplay";
 import {
   SERIES,
@@ -284,6 +284,32 @@ describe("selectOltc fixtures", () => {
     expect(out.results[0].model).toContain("SHZVIII-1000");
     // multi may appear later as alt, never as #1
     expect(out.results[0].model).not.toMatch(/^3x/);
+  });
+});
+
+describe("step-up (same family, next current)", () => {
+  it("tags CV2-600 as the step-up of a 350 A lowest-fit", () => {
+    const out = selectOltc(FIXTURES.preset66.input);
+    expect(out.ok).toBe(true);
+    const primary = out.results[0];
+    expect(primary.seriesCode).toBe("CV2");
+    expect(primary.currentA).toBe(350);
+    const up = stepUpOf(primary, out.results);
+    expect(up?.seriesCode).toBe("CV2");
+    expect(up?.currentA).toBe(600);
+    expect(up?.unitCount).toBe(1);
+  });
+
+  it("has no same-family step-up when the lowest-fit is already the family max", () => {
+    const out = selectOltc({
+      ...FIXTURES.preset66.input,
+      throughCurrentA: 400,
+    });
+    expect(out.ok).toBe(true);
+    const primary = out.results[0];
+    expect(primary.seriesCode).toBe("CV2");
+    expect(primary.currentA).toBe(600);
+    expect(stepUpOf(primary, out.results)).toBeNull();
   });
 });
 

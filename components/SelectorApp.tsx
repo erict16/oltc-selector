@@ -22,7 +22,7 @@ import {
   STEP_VOLTAGE_OPTIONS_V,
   UM_OPTIONS_KV,
 } from "@/lib/catalog";
-import { FIXTURES, selectOltc } from "@/lib/engine";
+import { FIXTURES, selectOltc, stepUpOf } from "@/lib/engine";
 import {
   lookupDiagram,
   midOptionsFor,
@@ -356,7 +356,20 @@ export function SelectorApp() {
   };
 
   const primary = result?.ok ? result.results[0] : null;
-  const alts = result?.ok ? result.results.slice(1, 4) : [];
+  const stepUp =
+    result?.ok && primary ? stepUpOf(primary, result.results) : null;
+  const alts = (() => {
+    if (!result?.ok || !primary) return [];
+    const out: typeof result.results = [];
+    if (stepUp) out.push(stepUp);
+    for (const r of result.results.slice(1)) {
+      if (out.length >= 3) break;
+      if (r.model === primary.model) continue;
+      if (out.some((x) => x.model === r.model)) continue;
+      out.push(r);
+    }
+    return out;
+  })();
   const idle = !hasRun || !result;
   const posHint =
     !isLinear && input.positions != null
@@ -409,9 +422,9 @@ export function SelectorApp() {
   const moreSummaryText = moreBits.join(" · ");
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[1100px] px-4 py-5 sm:px-6 sm:py-6">
+    <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-6 pb-6 sm:gap-6 sm:px-6 sm:pt-8 sm:pb-8">
       {/* Stack on phone: title full width, langs row below — avoids squashed header */}
-      <header className="mb-5 flex flex-col gap-2.5 sm:mb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <header className="flex shrink-0 flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
           <h1 className="font-[family-name:var(--font-display)] text-[1.45rem] font-semibold leading-tight tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.8rem]">
             {t(lang, "title")}
@@ -426,6 +439,9 @@ export function SelectorApp() {
           ariaLabel={t(lang, "langAria")}
         />
       </header>
+
+      {/* Leftover space, biased slightly up (bottom spacer grows more). Collapses when the page scrolls. */}
+      <div className="min-h-0 flex-1" aria-hidden />
 
       {/* Single column phone → two columns desktop; result below form on mobile */}
       <div
@@ -937,7 +953,7 @@ export function SelectorApp() {
                 t(lang, "select")
               )}
             </button>
-            <p className="text-center text-[0.8125rem] leading-snug text-[var(--color-muted)] sm:max-w-[18rem] sm:text-left">
+            <p className="text-center text-[0.8125rem] leading-snug text-[var(--color-muted)] sm:max-w-[22rem] sm:text-left">
               {t(lang, "reRunHint")}
             </p>
           </div>
@@ -1082,8 +1098,15 @@ export function SelectorApp() {
                                         )}
                                         aria-hidden
                                       />
-                                      <span className="min-w-0 break-all font-mono text-[0.875rem] leading-snug text-[var(--color-ink)]">
-                                        {r.model}
+                                      <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                        <span className="min-w-0 break-all font-mono text-[0.875rem] leading-snug text-[var(--color-ink)]">
+                                          {r.model}
+                                        </span>
+                                        {stepUp?.model === r.model ? (
+                                          <span className="shrink-0 rounded-full border border-[var(--color-rule-2)] px-1.5 py-0.5 text-[0.625rem] leading-none text-[var(--color-ink-2)]">
+                                            {t(lang, "stepUp")}
+                                          </span>
+                                        ) : null}
                                       </span>
                                     </button>
                                     <span className="flex shrink-0 items-center gap-1.5">
@@ -1125,6 +1148,7 @@ export function SelectorApp() {
           )}
         </aside>
       </div>
+      <div className="min-h-0 flex-[1.55]" aria-hidden />
     </div>
   );
 }

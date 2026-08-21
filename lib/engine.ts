@@ -647,6 +647,24 @@ export function selectOltc(input: SelectInput): SelectOutput {
   };
 }
 
+/** Same family / phase / unit count, next catalogue current above the primary. */
+export function stepUpOf(
+  primary: ModelResult,
+  results: ModelResult[],
+): ModelResult | null {
+  const same = results.filter(
+    (r) =>
+      r.model !== primary.model &&
+      r.seriesId === primary.seriesId &&
+      r.phases === primary.phases &&
+      r.unitCount === primary.unitCount &&
+      r.currentA > primary.currentA,
+  );
+  if (!same.length) return null;
+  same.sort((a, b) => a.currentA - b.currentA);
+  return same[0];
+}
+
 /** Regression helpers + training-case fixtures */
 export const FIXTURES = {
   ueHwv: {
