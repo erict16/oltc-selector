@@ -179,6 +179,59 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
     });
   });
 
+  it("2026 OS-style #1 and other options have 2025 list rows", () => {
+    const duties = [
+      {
+        mounting: "in_tank" as const,
+        medium: "oil_vacuum" as const,
+        preferVacuum: true,
+        phases: "III" as const,
+        connection: "Y" as const,
+        throughCurrentA: 400,
+        umKv: 72.5,
+        stepVoltageV: 1500,
+        regulation: "reversing" as const,
+        plusMinusSteps: 8,
+        mdu: "none" as const,
+      },
+      {
+        mounting: "in_tank" as const,
+        medium: "oil_vacuum" as const,
+        preferVacuum: true,
+        phases: "III" as const,
+        connection: "Y" as const,
+        throughCurrentA: 180,
+        umKv: 126,
+        stepVoltageV: 1500,
+        regulation: "coarse_fine" as const,
+        plusMinusSteps: 12,
+        mdu: "none" as const,
+      },
+      {
+        mounting: "in_tank" as const,
+        medium: "oil_vacuum" as const,
+        preferVacuum: true,
+        phases: "III" as const,
+        connection: "D" as const,
+        throughCurrentA: 350,
+        umKv: 145,
+        stepVoltageV: 1500,
+        regulation: "reversing" as const,
+        plusMinusSteps: 8,
+        mdu: "none" as const,
+      },
+    ];
+    for (const input of duties) {
+      const out = selectOltc(input);
+      expect(out.ok).toBe(true);
+      for (const r of out.results.slice(0, 4)) {
+        if (r.unitCount > 1) continue;
+        const hit = lookupListPrice(r.model);
+        expect(hit.found, r.model).toBe(true);
+      }
+    }
+  });
+
   it("closed skips only: MDU, CV2-500, under-duty, multi-QS, 2-unit", () => {
     const reasons = ORDER_REPLAY_SKIPPED.map((s) => s.reason);
     for (const r of reasons) {

@@ -262,12 +262,23 @@ export function lookupListPrice(model: string): ListPriceHit {
     changeOver,
   };
 
-  const hits =
+  const Y_TWIN_FAMILIES = new Set(["CM", "CM2", "CMD", "SHZV", "SHZVG"]);
+
+  let hits =
     parsed.family === "HWV" || parsed.family === "HWDK"
       ? idx.bySig.get(`hwv:${hwvSig(want)}`)
       : isOctcFamily(parsed.family)
         ? lookupOctc(idx, parsed)
         : idx.bySig.get(sig(want));
+
+  // Combined sheets only print Y. D uses the Y twin (same I / Um / grade / tap).
+  if (
+    !hits?.length &&
+    Y_TWIN_FAMILIES.has(parsed.family) &&
+    parsed.connection === "D"
+  ) {
+    hits = idx.bySig.get(sig({ ...want, connection: "Y" }));
+  }
 
   const row = hits?.[0];
   if (!row) return { found: false, reason: "no-row" };

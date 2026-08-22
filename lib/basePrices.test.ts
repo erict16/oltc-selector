@@ -40,6 +40,11 @@ describe("base price list 2025", () => {
       found: true,
       listRmb: 276700,
     });
+    const cm2Y = lookupListPrice("CM2III-500Y/170D-10193W");
+    const cm2D = lookupListPrice("CM2III-500D/170D-10193W");
+    expect(cm2Y.found).toBe(true);
+    expect(cm2D.found).toBe(true);
+    if (cm2Y.found && cm2D.found) expect(cm2D.listRmb).toBe(cm2Y.listRmb);
     expect(lookupListPrice("HWVIII-400Y/72.5-10193W+CMA7")).toMatchObject({
       found: true,
       listRmb: 225000,

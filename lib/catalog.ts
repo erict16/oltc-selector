@@ -171,6 +171,7 @@ export const SERIES: SeriesDef[] = [
       II: [400, 600, 1000],
       III: [400, 600, 1000],
     },
+    // List 72.5/126/170/252. 300 from 2026 OS. 363 brochure-only (no 2025 list row).
     umKv: [72.5, 126, 170, 252, 300, 363],
     usesSelectorSize: true,
     maxStepVoltageV: 4000,
@@ -202,18 +203,19 @@ export const SERIES: SeriesDef[] = [
     medium: "oil_vacuum",
     structure: "combined",
     vacuum: true,
-    // 2025 sales + price list: III 1300/1500; I 1300 (3000 special)
+    // 2025 list: III 1300/1500; I 1300/2000/3000. Um 72.5/126/170/252 only.
     currents: {
-      I: [1300, 3000],
+      I: [1300, 2000, 3000],
       II: [1300],
       III: [1300, 1500],
     },
-    umKv: [72.5, 126, 170, 252, 300],
+    umKv: [72.5, 126, 170, 252],
     usesSelectorSize: true,
     maxStepVoltageV: 4000,
     stepCapacityByCurrent: {
       1300: 3000,
       1500: 3500,
+      2000: 4400,
       3000: 5600,
     },
     connections: ["Y", "D"],
@@ -337,7 +339,7 @@ export const SERIES: SeriesDef[] = [
       II: [400, 600, 1000],
       III: [400, 600, 1000],
     },
-    umKv: [72.5, 126, 170, 252, 300, 363],
+    umKv: [72.5, 126, 170, 252],
     usesSelectorSize: true,
     maxStepVoltageV: 4000,
     stepCapacityByCurrent: {
@@ -584,6 +586,18 @@ export function nearestUm(wanted: number, allowed: number[]): number | null {
   return ge ?? sorted[sorted.length - 1];
 }
 
+/**
+ * Covering Um plus the next catalogue step (2025 list / 2026 OS).
+ * 72.5 duty → 72.5 and 126, not 170/252. 145 (CV2) has no next combined twin.
+ */
+export function coveringUms(wanted: number, allowed: number[]): number[] {
+  if (!allowed.length) return [];
+  const sorted = [...allowed].sort((a, b) => a - b);
+  const ge = sorted.filter((u) => u >= wanted - 0.01);
+  if (!ge.length) return [];
+  return ge.length > 1 ? [ge[0], ge[1]] : [ge[0]];
+}
+
 export function nearestCurrent(
   wanted: number,
   allowed: number[] | undefined,
@@ -591,7 +605,11 @@ export function nearestCurrent(
   if (!allowed?.length) return null;
   const sorted = [...allowed].sort((a, b) => a - b);
   const ge = sorted.find((c) => c >= wanted - 0.01);
-  return ge ?? null;
+  if (ge != null) return ge;
+  const max = sorted[sorted.length - 1];
+  // 2026 OS: 603.75 A shipped on CV2-600. 1% commercial overcurrent.
+  if (wanted <= max * 1.01 + 0.5) return max;
+  return null;
 }
 
 export function phaseToken(p: PhaseCode): string {

@@ -3,6 +3,7 @@ import { selectOltc, stepUpOf, FIXTURES } from "./engine";
 import { parseTypeString } from "./orderReplay";
 import {
   SERIES,
+  coveringUms,
   pickSelectorSize,
   defaultSelectorSizeForUm,
 } from "./catalog";
@@ -800,5 +801,116 @@ describe("HWV catalogue lock", () => {
     expect(out.results.every((r) => r.seriesCode !== "SHZV" || r.unitCount > 1)).toBe(
       true,
     );
+  });
+});
+
+describe("2026 OS — other options + list axes", () => {
+  const vacY = {
+    mounting: "in_tank" as const,
+    medium: "oil_vacuum" as const,
+    preferVacuum: true,
+    phases: "III" as const,
+    connection: "Y" as const,
+    stepVoltageV: 1500,
+    regulation: "reversing" as const,
+    plusMinusSteps: 8,
+    mdu: "none" as const,
+  };
+
+  it("coveringUms is duty Um plus the next list step (72.5 → 126)", () => {
+    expect(coveringUms(72.5, [72.5, 126, 170, 252])).toEqual([72.5, 126]);
+    expect(coveringUms(126, [72.5, 126, 170, 252])).toEqual([126, 170]);
+    expect(coveringUms(145, [40.5, 72.5, 126, 145])).toEqual([145]);
+    expect(coveringUms(40.5, [40.5, 72.5, 126, 145])).toEqual([40.5, 72.5]);
+  });
+
+  it("400 A / 72.5 other options include 126 before SHZV", () => {
+    const out = selectOltc({
+      ...vacY,
+      throughCurrentA: 400,
+      umKv: 72.5,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("CV2III-600Y/72.5-10193W");
+    const alts = out.results.slice(1, 4);
+    expect(alts.some((r) => /\/126/.test(r.model))).toBe(true);
+    const i126 = alts.findIndex((r) => /\/126/.test(r.model));
+    const iShzv = alts.findIndex((r) => r.seriesCode === "SHZV");
+    expect(i126).toBeGreaterThanOrEqual(0);
+    if (iShzv >= 0) expect(i126).toBeLessThan(iShzv);
+  });
+
+  it("SHZV does not occupy other-options when a 126 twin exists", () => {
+    const out = selectOltc({
+      ...vacY,
+      throughCurrentA: 350,
+      umKv: 72.5,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("CV2");
+    const alts = out.results.slice(1, 4);
+    expect(alts.some((r) => r.seriesCode === "CV2" && /\/126/.test(r.model))).toBe(
+      true,
+    );
+    expect(alts[0].seriesCode).not.toBe("SHZV");
+  });
+
+  it("603.75 A / 72.5 Δ stays on CV2-600 (2026 OS E-CV2260277)", () => {
+    const out = selectOltc({
+      ...vacY,
+      connection: "D",
+      throughCurrentA: 603.75,
+      umKv: 72.5,
+      stepVoltageV: 1000,
+      plusMinusSteps: 10,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("CV2");
+    expect(out.results[0].currentA).toBe(600);
+    expect(out.results[0].model).toContain("CV2III-600D/72.5");
+  });
+
+  it("626 A still steps to SHZV-1000 (case 7; 1% is not 4%)", () => {
+    const out = selectOltc(FIXTURES.case7Shzv1000.input);
+    expect(out.results[0].seriesCode).toBe("SHZV");
+    expect(out.results[0].currentA).toBe(1000);
+  });
+
+  it("126 kV 180 A 27-pos G → CM2-500/126C not SHZV (2026 OS SHZV-600/126D volume)", () => {
+    const out = selectOltc({
+      ...vacY,
+      throughCurrentA: 180.4,
+      umKv: 126,
+      stepVoltageV: 1500,
+      regulation: "coarse_fine",
+      plusMinusSteps: 12,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("CM2");
+    expect(out.results[0].model).toContain("CM2III-500Y/126C");
+    expect(out.results[0].selectorSize).toBe("C");
+  });
+
+  it("145 kV other options do not drop to 126 (126 does not cover 145)", () => {
+    const out = selectOltc(FIXTURES.case5Cv2_145.input);
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toContain("/145");
+    expect(
+      out.results
+        .slice(1, 4)
+        .every((r) => r.umKv + 0.1 >= 145 || r.seriesCode === "CV2"),
+    ).toBe(true);
+    expect(out.results.slice(1, 4).every((r) => r.umKv !== 126)).toBe(true);
+  });
+
+  it("CM2 / SHZV commercial Ums stay on the 2025 list", () => {
+    expect(SERIES.find((s) => s.id === "cm2")!.umKv).toEqual([
+      72.5, 126, 170, 252,
+    ]);
+    expect(SERIES.find((s) => s.id === "shzv")!.umKv.slice(0, 4)).toEqual([
+      72.5, 126, 170, 252,
+    ]);
+    expect(SERIES.find((s) => s.id === "cv2")!.umKv).toContain(126);
+    expect(SERIES.find((s) => s.id === "shzvg")!.currents.I).toContain(2000);
   });
 });

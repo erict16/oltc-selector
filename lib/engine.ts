@@ -3,6 +3,7 @@ import {
   FAMILY_MIN_RANK,
   INTERNAL_INSULATION,
   SERIES,
+  coveringUms,
   nearestCurrent,
   nearestUm,
   phaseToken,
@@ -243,31 +244,47 @@ type Attempt = {
   unitCount: number;
 };
 
+/** Catalogue I covers duty, with 1% commercial overcurrent (2026 OS: 603.75 on CV2-600). */
+function ratingCoversDuty(wanted: number, rating: number): boolean {
+  if (wanted <= rating + 0.01) return true;
+  return wanted <= rating * 1.01 + 0.5;
+}
+
 function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
   const out: Attempt[] = [];
-  const um = nearestUm(input.umKv, s.umKv);
-  if (um == null || um < input.umKv - 0.1) return out;
+  const covering = coveringUms(input.umKv, s.umKv).filter(
+    (u) => u >= input.umKv - 0.1,
+  );
+  if (!covering.length) return out;
+  const um0 = covering[0];
+  // 126 twin only on the min-adequate families (CV2/CM2/…). SHZV extra Ums
+  // crowd the ranked list and hide customer-locked oil CM rows (QS2607197).
+  const ums =
+    (FAMILY_MIN_RANK[s.id] ?? s.rank) < 40 ? covering : [um0];
 
   const list = s.currents[input.phases];
   const maxPhase = list?.length ? Math.max(...list) : null;
 
   // Primary phase as requested when catalogue can cover current at all
-  if (maxPhase != null && input.throughCurrentA <= maxPhase + 0.01) {
+  if (maxPhase != null && ratingCoversDuty(input.throughCurrentA, maxPhase)) {
     const cur = nearestCurrent(input.throughCurrentA, list);
     if (cur != null) {
-      out.push({
-        series: s,
-        phases: input.phases,
-        current: cur,
-        um,
-        unitCount: 1,
-      });
+      for (const um of ums) {
+        out.push({
+          series: s,
+          phases: input.phases,
+          current: cur,
+          um,
+          unitCount: 1,
+        });
+      }
     }
   }
 
   // OCTC: never 3× singles.
   // 3× I-units: always emit a covering set so a customer-locked 3× stays
   // eligible. Ranking still puts any single III first.
+  // Extra Um is only for single-unit alts (the 126 twin), not 3×.
   if (isOctcSeries(s)) return out;
   if (input.phases === "III" && s.currents.I?.length) {
     const curI = nearestCurrent(input.throughCurrentA, s.currents.I);
@@ -276,13 +293,60 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
         series: s,
         phases: "I",
         current: curI,
-        um,
+        um: um0,
         unitCount: 3,
       });
     }
   }
 
   return out;
+}
+
+/**
+ * Other-options order: same family next I → next list Um (126 after 72.5) →
+ * next family at the duty Um → then SHZV / 3×. Stops SHZV filling the first
+ * three alts when a 126 twin is on the 2025 list (2026 OS).
+ */
+function diversifyResults(ranked: ModelResult[]): ModelResult[] {
+  if (ranked.length <= 1) return ranked;
+  const primary = ranked[0];
+  const used = new Set<string>([primary.model]);
+  const rest: ModelResult[] = [];
+
+  const take = (pred: (r: ModelResult) => boolean) => {
+    const hit = ranked.find((r) => !used.has(r.model) && pred(r));
+    if (hit) {
+      rest.push(hit);
+      used.add(hit.model);
+    }
+  };
+
+  take(
+    (r) =>
+      r.seriesId === primary.seriesId &&
+      r.unitCount === primary.unitCount &&
+      Math.abs(r.umKv - primary.umKv) < 0.1 &&
+      r.currentA !== primary.currentA,
+  );
+  take(
+    (r) =>
+      r.seriesId === primary.seriesId &&
+      r.unitCount === primary.unitCount &&
+      r.umKv > primary.umKv + 0.1,
+  );
+  take(
+    (r) =>
+      r.seriesId !== primary.seriesId &&
+      r.unitCount === 1 &&
+      r.umKv <= primary.umKv + 0.1,
+  );
+
+  for (const r of ranked) {
+    if (used.has(r.model)) continue;
+    rest.push(r);
+    used.add(r.model);
+  }
+  return [primary, ...rest];
 }
 
 export function selectOltc(input: SelectInput): SelectOutput {
@@ -382,7 +446,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
             ? (input.throughCurrentA * input.stepVoltageV) / 1000
             : 0;
         const covering = phaseCurrents.filter((c) => {
-          if (c + 0.01 < input.throughCurrentA) return false;
+          if (!ratingCoversDuty(input.throughCurrentA, c)) return false;
           // Headroom: if duty sits in the top ~3% of a rating, bump (case 2: 489.7 → 600).
           // 480 A must still accept CM2-500 (2025 sales).
           // ~1 A epsilon: 349.9 A is S/√3U rounding of 350, not a commercial bump to 600.
@@ -541,7 +605,17 @@ export function selectOltc(input: SelectInput): SelectOutput {
           warningsEn.push(`Through-current rounded up to ${current} A.`);
           warningsZh.push(`通过电流已上靠至 ${current} A。`);
         }
-        if (att.um > input.umKv + 0.1) {
+        const coveringUm = nearestUm(input.umKv, s.umKv);
+        const extraUm =
+          coveringUm != null && att.um > coveringUm + 0.1;
+        if (extraUm) {
+          reasonsEn.push(
+            `Next catalogue Um ${att.um} kV (list twin of ${coveringUm} kV).`,
+          );
+          reasonsZh.push(
+            `目录下一档 Um ${att.um} kV（${coveringUm} kV 的价目表配对）。`,
+          );
+        } else if (att.um > input.umKv + 0.1) {
           warningsEn.push(`Um rounded up to ${att.um} kV.`);
           warningsZh.push(`Um 已上靠至 ${att.um} kV。`);
         }
@@ -641,7 +715,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
   return {
     ok: true,
-    results: final.slice(0, 12),
+    results: diversifyResults(final).slice(0, 20),
     errorsEn: [],
     errorsZh: [],
   };
