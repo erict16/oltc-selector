@@ -20,7 +20,7 @@ import {
   POSITION_OPTIONS,
   SERIES,
   STEP_VOLTAGE_OPTIONS_V,
-  UM_OPTIONS_KV,
+  UM_MENU,
 } from "@/lib/catalog";
 import { FIXTURES, selectOltc, stepUpOf } from "@/lib/engine";
 import {
@@ -261,6 +261,7 @@ export function SelectorApp() {
       setHasRun(true);
       setStale(false);
       setRunning(false);
+      setAltsOpen(out.ok && out.results.length > 1);
       // Mobile: result sits below the form — scroll it into view after select
       if (
         typeof window !== "undefined" &&
@@ -517,9 +518,9 @@ export function SelectorApp() {
                 value={String(input.umKv)}
                 onChange={(e) => patch("umKv", Number(e.target.value))}
               >
-                {UM_OPTIONS_KV.map((u) => (
-                  <option key={u} value={u}>
-                    {u} kV
+                {UM_MENU.map((u) => (
+                  <option key={u.value} value={u.value}>
+                    {currentLabel(lang, u.labelZh, u.labelEn)}
                   </option>
                 ))}
               </select>
@@ -1071,7 +1072,7 @@ export function SelectorApp() {
                       >
                         <div className="min-h-0 overflow-hidden">
                           <ul className="space-y-2 pt-2.5 pb-0.5">
-                            {alts.map((r) => {
+                            {alts.map((r, i) => {
                               const open = openAlts.includes(r.model);
                               return (
                                 <li
@@ -1102,6 +1103,11 @@ export function SelectorApp() {
                                         <span className="min-w-0 break-all font-mono text-[0.875rem] leading-snug text-[var(--color-ink)]">
                                           {r.model}
                                         </span>
+                                        {i === 0 ? (
+                                          <span className="shrink-0 rounded-full border border-[var(--color-rule-2)] px-1.5 py-0.5 text-[0.625rem] leading-none text-[var(--color-ink-2)]">
+                                            {t(lang, "allRound")}
+                                          </span>
+                                        ) : null}
                                         {stepUp?.model === r.model ? (
                                           <span className="shrink-0 rounded-full border border-[var(--color-rule-2)] px-1.5 py-0.5 text-[0.625rem] leading-none text-[var(--color-ink-2)]">
                                             {t(lang, "stepUp")}

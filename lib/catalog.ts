@@ -32,6 +32,22 @@ export const UM_OPTIONS_KV = [
 ] as const;
 
 /**
+ * Um UI menu. Labels are covering intervals (same idea as CURRENT_MENU ≤ / >).
+ * Values stay catalogue Um — no bucket offsets.
+ */
+export type UmMenuItem = {
+  value: number;
+  labelZh: string;
+  labelEn: string;
+};
+
+export const UM_MENU: UmMenuItem[] = UM_OPTIONS_KV.map((u) => ({
+  value: u,
+  labelZh: `≤ ${u} kV`,
+  labelEn: `≤ ${u} kV`,
+}));
+
+/**
  * Through-current UI menu.
  * Low end: exact catalogue floors. Above 500 A: threshold buckets (>500, >800…)
  * so sales pick a tier instead of hunting 600/800/1000 in a flat list.
