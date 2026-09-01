@@ -27,8 +27,7 @@
 
 html,
 body {
-  height: 100dvh;
-  overflow: hidden;
+  min-height: 100dvh;
   background: var(--color-paper);
   color: var(--color-ink-2);
   font-family: var(--font-sans);
@@ -39,22 +38,14 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Document is locked; #main scrolls. Side insets only — footer owns the
-   bottom safe area so it is never covered by the home indicator. */
-
-/* Size container: 100cqh = the visible scrollport, not content height.
-   min-height: 100% inside overflow:auto flex items otherwise collapses. */
-#main {
-  container-type: size;
+body {
+  overflow-x: hidden;
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
 }
 
 .selector-shell {
   min-height: 100%;
-  min-height: 100cqh;
-}
-body {
-  padding-left: env(safe-area-inset-left, 0);
-  padding-right: env(safe-area-inset-right, 0);
 }
 
 /* Avoid iOS zoom-on-focus for inputs under 16px */

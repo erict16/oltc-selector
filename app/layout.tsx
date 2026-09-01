@@ -53,12 +53,9 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        {/* Shell fills the viewport; main scrolls; footer stays in view. */}
-        <div className="flex h-dvh min-h-0 flex-col">
-          <main
-            id="main"
-            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain"
-          >
+        {/* Document scrolls; footer sits at the end, not pinned to the viewport. */}
+        <div className="flex min-h-dvh flex-col">
+          <main id="main" className="min-w-0 flex-1">
             {children}
           </main>
           <SiteFooter />
