@@ -103,6 +103,34 @@ export const ACROSS_PF_OPTIONS_KV = [
   20, 30, 38, 45, 50, 65, 70, 80, 85, 95, 100, 110, 125, 140, 150,
 ] as const;
 
+/**
+ * BIL / PF UI menus. Same covering-interval marks as UM_MENU (`≤ n kV`).
+ * First step is ≤ that kV; last is ≥ that kV; middles are the band up to the step.
+ * Values stay the discrete catalogue steps — no bucket offsets.
+ */
+export type AcrossKvMenuItem = {
+  value: number;
+  labelZh: string;
+  labelEn: string;
+};
+
+function acrossKvMenu(steps: readonly number[]): AcrossKvMenuItem[] {
+  const last = steps.length - 1;
+  return steps.map((v, i) => {
+    const mark = i === last ? "≥" : "≤";
+    const label = `${mark} ${v} kV`;
+    return { value: v, labelZh: label, labelEn: label };
+  });
+}
+
+export const ACROSS_BIL_MENU: AcrossKvMenuItem[] = acrossKvMenu(
+  ACROSS_BIL_OPTIONS_KV,
+);
+
+export const ACROSS_PF_MENU: AcrossKvMenuItem[] = acrossKvMenu(
+  ACROSS_PF_OPTIONS_KV,
+);
+
 /** Re-export ± options (brochure W/G geometry lives in tapCode) */
 export { PM_STEP_OPTIONS } from "./tapCode";
 

@@ -13,7 +13,9 @@ import {
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import {
+  ACROSS_BIL_MENU,
   ACROSS_BIL_OPTIONS_KV,
+  ACROSS_PF_MENU,
   ACROSS_PF_OPTIONS_KV,
   CURRENT_MENU,
   LINEAR_POSITION_OPTIONS,
@@ -884,9 +886,9 @@ export function SelectorApp() {
                             {input.acrossTapBilKv} kV
                           </option>
                         ) : null}
-                        {ACROSS_BIL_OPTIONS_KV.map((v) => (
-                          <option key={v} value={v}>
-                            {v} kV
+                        {ACROSS_BIL_MENU.map((item) => (
+                          <option key={item.value} value={item.value}>
+                            {currentLabel(lang, item.labelZh, item.labelEn)}
                           </option>
                         ))}
                       </select>
@@ -918,9 +920,9 @@ export function SelectorApp() {
                             {input.acrossTapPfKv} kV
                           </option>
                         ) : null}
-                        {ACROSS_PF_OPTIONS_KV.map((v) => (
-                          <option key={v} value={v}>
-                            {v} kV
+                        {ACROSS_PF_MENU.map((item) => (
+                          <option key={item.value} value={item.value}>
+                            {currentLabel(lang, item.labelZh, item.labelEn)}
                           </option>
                         ))}
                       </select>

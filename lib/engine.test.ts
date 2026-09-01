@@ -3,6 +3,10 @@ import { selectOltc, stepUpOf, FIXTURES } from "./engine";
 import { parseTypeString } from "./orderReplay";
 import {
   SERIES,
+  ACROSS_BIL_MENU,
+  ACROSS_BIL_OPTIONS_KV,
+  ACROSS_PF_MENU,
+  ACROSS_PF_OPTIONS_KV,
   coveringUms,
   pickSelectorSize,
   defaultSelectorSizeForUm,
@@ -51,6 +55,47 @@ describe("tap / catalogue sanity", () => {
     expect(pickSelectorSize(252, "auto", undefined, undefined, 520, 110)).toBe(
       "DE",
     );
+  });
+});
+
+describe("across-tap BIL / PF menu labels", () => {
+  it("marks covering intervals like Um (≤ first and middle, ≥ last)", () => {
+    expect(ACROSS_BIL_MENU[0]).toMatchObject({
+      value: 75,
+      labelEn: "≤ 75 kV",
+      labelZh: "≤ 75 kV",
+    });
+    expect(ACROSS_BIL_MENU.find((x) => x.value === 350)).toMatchObject({
+      labelEn: "≤ 350 kV",
+    });
+    expect(ACROSS_BIL_MENU.find((x) => x.value === 650)).toMatchObject({
+      labelEn: "≤ 650 kV",
+    });
+    expect(ACROSS_BIL_MENU.at(-1)).toMatchObject({
+      value: 750,
+      labelEn: "≥ 750 kV",
+    });
+
+    expect(ACROSS_PF_MENU[0]).toMatchObject({
+      value: 20,
+      labelEn: "≤ 20 kV",
+    });
+    expect(ACROSS_PF_MENU.find((x) => x.value === 65)).toMatchObject({
+      labelEn: "≤ 65 kV",
+    });
+    expect(ACROSS_PF_MENU.at(-1)).toMatchObject({
+      value: 150,
+      labelEn: "≥ 150 kV",
+    });
+  });
+
+  it("keeps option values as the discrete steps (filter values unchanged)", () => {
+    expect(ACROSS_BIL_MENU.map((x) => x.value)).toEqual([
+      ...ACROSS_BIL_OPTIONS_KV,
+    ]);
+    expect(ACROSS_PF_MENU.map((x) => x.value)).toEqual([
+      ...ACROSS_PF_OPTIONS_KV,
+    ]);
   });
 });
 
