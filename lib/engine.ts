@@ -464,8 +464,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           return capacityOk(c);
         });
         if (!covering.length) {
-          // Top 3% of the family's max rating, no next step: keep the max
-          // (2026 OS: CMDIII-1000 @ 983 A). Do not drop the family to 3×.
+          // Keep max rating when the 97% bump has no next step.
           const maxKeep = phaseCurrents.filter(
             (c) =>
               ratingCoversDuty(input.throughCurrentA, c) && capacityOk(c),

@@ -298,7 +298,7 @@ function identityMatch(actual: string, expected: string): boolean {
   const a = parseTypeString(actual);
   const e = parseTypeString(expected);
   if (!a || !e) return false;
-  if (!familyCompatible(a, e)) return false;
+  if (a.family !== e.family) return false;
   if (a.phases !== e.phases) return false;
   if (a.currentA !== e.currentA) return false;
   if (a.umKv !== e.umKv) return false;

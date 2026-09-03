@@ -112,6 +112,7 @@ function Field({
   children,
   className,
   action,
+  as = "label",
 }: {
   label: string;
   tip?: string;
@@ -119,9 +120,12 @@ function Field({
   className?: string;
   /** Right-side of the label row (e.g. →19位 next to ±级数) */
   action?: React.ReactNode;
+  /** Button groups must not use <label> — a click on the tip would fire the first button. */
+  as?: "label" | "div";
 }) {
+  const Tag = as;
   return (
-    <label className={cx("flex min-w-0 flex-col gap-1.5", className)}>
+    <Tag className={cx("flex min-w-0 flex-col gap-1.5", className)}>
       <span className="flex min-h-[1.25rem] items-center gap-2">
         <span className="min-w-0 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
           {label}
@@ -138,7 +142,7 @@ function Field({
           {tip}
         </span>
       ) : null}
-    </label>
+    </Tag>
   );
 }
 
@@ -547,7 +551,7 @@ export function SelectorApp() {
             </Field>
 
             {input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
-              <Field label={t(lang, "arcMode")} tip={t(lang, "arcTip")}>
+              <Field label={t(lang, "arcMode")} tip={t(lang, "arcTip")} as="div">
                 <div
                   className="grid h-10 grid-cols-2 gap-1"
                   role="group"

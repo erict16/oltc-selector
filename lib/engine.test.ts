@@ -608,6 +608,52 @@ describe("2025 sales calibration (year=2025)", () => {
   });
 });
 
+describe("97% bump at family max III", () => {
+  it("CMD III 1000 stays at 983 A (no next III step)", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 983,
+      umKv: 72.5,
+      stepVoltageV: 1417,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      midPositions: 3,
+      mdu: "none",
+      selectorSize: "auto",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("CMD");
+    expect(out.results[0].currentA).toBe(1000);
+    expect(out.results[0].unitCount).toBe(1);
+    expect(out.results[0].model).toMatch(/^CMDIII-1000Y\/72\.5/);
+  });
+
+  it("CM2 III 600 stays at 585 A (no next III step, not SHZV)", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 585,
+      umKv: 170,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      mdu: "none",
+      selectorSize: "auto",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("CM2");
+    expect(out.results[0].currentA).toBe(600);
+    expect(out.results[0].unitCount).toBe(1);
+  });
+});
+
 describe("OCTC / WSL (dutyKind=octc)", () => {
   it("parses WSLIV-800Y/170-6x5B (spaces / × / *)", () => {
     expect(parseTypeString("WSLIV-800Y/170-6x5B")).toMatchObject({
@@ -630,29 +676,6 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
       currentA: 1000,
       tapCode: "6x5",
     });
-  });
-
-  it("CMD III 1000 stays at 983 A (top 3% of max, no next III step)", () => {
-    const out = selectOltc({
-      mounting: "in_tank",
-      medium: "oil",
-      preferVacuum: false,
-      phases: "III",
-      connection: "Y",
-      throughCurrentA: 983,
-      umKv: 72.5,
-      stepVoltageV: 1417,
-      regulation: "reversing",
-      plusMinusSteps: 8,
-      midPositions: 3,
-      mdu: "none",
-      selectorSize: "auto",
-    });
-    expect(out.ok).toBe(true);
-    expect(out.results[0].seriesCode).toBe("CMD");
-    expect(out.results[0].currentA).toBe(1000);
-    expect(out.results[0].unitCount).toBe(1);
-    expect(out.results[0].model).toMatch(/^CMDIII-1000Y\/72\.5/);
   });
 
   it("oil interrupter prefers CV/SV/CM over CV2", () => {

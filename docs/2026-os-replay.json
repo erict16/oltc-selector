@@ -4317,7 +4317,7 @@
     "steps": 10,
     "connection": "Y",
     "phases": "III",
-    "verdict": "exact"
+    "verdict": "family-i-um"
   },
   {
     "serial": "E-SHZV260050-051",

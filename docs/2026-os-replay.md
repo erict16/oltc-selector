@@ -5,8 +5,8 @@ Rows: 675. Judged: 388. Skipped: 287.
 
 | verdict | n | % of judged | meaning |
 |---|---:|---:|---|
-| exact | 308 | 79.4% | engine #1 = sold type (selector letter / 3× prefix ignored) |
-| family-i-um | 10 | 2.6% | #1 same family / I / Um (tap or grade differs) |
+| exact | 307 | 79.1% | engine #1 = sold type (selector letter / 3× prefix ignored) |
+| family-i-um | 11 | 2.8% | #1 same family / I / Um (tap or grade differs) |
 | family | 28 | 7.2% | #1 same family, different I or Um |
 | eligible | 36 | 9.3% | sold type is in the list, not #1 |
 | oil-vs-vac | 0 | 0.0% | sold oil (CM/CV/CMD), engine vacuum twin |

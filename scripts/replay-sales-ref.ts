@@ -78,7 +78,8 @@ function buildInput(parsed: NonNullable<ReturnType<typeof parseTypeString>>): Se
       : "III";
   const connection: Connection =
     parsed.connection === "D" || parsed.connection === "Y" ? parsed.connection : "Y";
-  const tap = parsed.tapCode || "";
+  const tap = (parsed.tapCode || "").replace(/\s+/g, "");
+  const shortLinear = /^\d{1,2}$/.test(tap);
   const m = tap.match(/^(\d{2})(\d{2})(\d)([WG0]?)$/i);
   const input: SelectInput = {
     mounting,
@@ -90,17 +91,21 @@ function buildInput(parsed: NonNullable<ReturnType<typeof parseTypeString>>): Se
     throughCurrentA: parsed.currentA,
     umKv: parsed.umKv,
     stepVoltageV: 0,
-    regulation: !m
-      ? "reversing"
-      : (m[4] || "0").toUpperCase() === "G"
-        ? "coarse_fine"
-        : (m[4] || "0").toUpperCase() === "W"
-          ? "reversing"
-          : "linear",
+    regulation: shortLinear
+      ? "linear"
+      : !m
+        ? "reversing"
+        : (m[4] || "0").toUpperCase() === "G"
+          ? "coarse_fine"
+          : (m[4] || "0").toUpperCase() === "W"
+            ? "reversing"
+            : "linear",
     mdu: "none",
     selectorSize: "auto",
   };
-  if (m) {
+  if (shortLinear) {
+    input.positions = Number(tap);
+  } else if (m) {
     const mid = Number(m[3]);
     const pos = Number(m[2]);
     if (input.regulation !== "linear" && (mid === 1 || mid === 3)) {
