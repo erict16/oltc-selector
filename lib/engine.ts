@@ -445,7 +445,12 @@ export function selectOltc(input: SelectInput): SelectOutput {
           input.stepVoltageV > 0
             ? (input.throughCurrentA * input.stepVoltageV) / 1000
             : 0;
-        const covering = phaseCurrents.filter((c) => {
+        const capacityOk = (c: number) => {
+          const psin = s.stepCapacityByCurrent?.[c];
+          if (psin != null && need > psin + 0.5) return false;
+          return true;
+        };
+        let covering = phaseCurrents.filter((c) => {
           if (!ratingCoversDuty(input.throughCurrentA, c)) return false;
           // Headroom: if duty sits in the top ~3% of a rating, bump (case 2: 489.7 → 600).
           // 480 A must still accept CM2-500 (2025 sales).
@@ -456,10 +461,17 @@ export function selectOltc(input: SelectInput): SelectOutput {
           ) {
             return false;
           }
-          const psin = s.stepCapacityByCurrent?.[c];
-          if (psin != null && need > psin + 0.5) return false;
-          return true;
+          return capacityOk(c);
         });
+        if (!covering.length) {
+          // Top 3% of the family's max rating, no next step: keep the max
+          // (2026 OS: CMDIII-1000 @ 983 A). Do not drop the family to 3×.
+          const maxKeep = phaseCurrents.filter(
+            (c) =>
+              ratingCoversDuty(input.throughCurrentA, c) && capacityOk(c),
+          );
+          if (maxKeep.length) covering = [Math.max(...maxKeep)];
+        }
         if (!covering.length) continue;
         const currentsToEmit = covering.slice(0, 2);
 

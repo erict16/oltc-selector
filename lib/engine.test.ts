@@ -632,6 +632,29 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
     });
   });
 
+  it("CMD III 1000 stays at 983 A (top 3% of max, no next III step)", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 983,
+      umKv: 72.5,
+      stepVoltageV: 1417,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      midPositions: 3,
+      mdu: "none",
+      selectorSize: "auto",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("CMD");
+    expect(out.results[0].currentA).toBe(1000);
+    expect(out.results[0].unitCount).toBe(1);
+    expect(out.results[0].model).toMatch(/^CMDIII-1000Y\/72\.5/);
+  });
+
   it("oil interrupter prefers CV/SV/CM over CV2", () => {
     const out = selectOltc({
       mounting: "in_tank",

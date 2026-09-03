@@ -251,27 +251,65 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
   return input;
 }
 
+/** 3×CMI vs CMI: same switch, OS wrote the set count. */
+function unitsCompatible(
+  a: NonNullable<ReturnType<typeof parseTypeString>>,
+  e: NonNullable<ReturnType<typeof parseTypeString>>,
+): boolean {
+  if (a.unitCount === e.unitCount) return true;
+  if (e.unitCount === 3 && e.phases === "I" && a.unitCount === 1) return true;
+  if (a.unitCount === 3 && a.phases === "I" && e.unitCount === 1) return true;
+  return false;
+}
+
+/** SHZV III 1300 is the old commercial name for SHZVG. */
+function familyCompatible(
+  a: NonNullable<ReturnType<typeof parseTypeString>>,
+  e: NonNullable<ReturnType<typeof parseTypeString>>,
+): boolean {
+  if (a.family === e.family) return true;
+  const pair = `${a.family}/${e.family}`;
+  if (pair === "SHZVG/SHZV" || pair === "SHZV/SHZVG") {
+    return Math.max(a.currentA, e.currentA) >= 1300;
+  }
+  return false;
+}
+
 /** Family + phase + I + Um. Ignore selector letter and tap (OS often upsizes grade). */
 function looseMatch(actual: string, expected: string): boolean {
   const a = parseTypeString(actual);
   const e = parseTypeString(expected);
   if (!a || !e) return false;
-  if (a.family !== e.family) return false;
+  if (!familyCompatible(a, e)) return false;
   if (a.phases !== e.phases) return false;
   if (a.currentA !== e.currentA) return false;
   if (a.umKv !== e.umKv) return false;
-  if (e.unitCount > 1 && a.unitCount !== e.unitCount) {
-    // Duty already single-phase: engine emits CZI-500, OS wrote 3×CZI-500.
-    if (!(e.unitCount === 3 && e.phases === "I" && a.unitCount === 1)) {
-      return false;
-    }
-  }
+  if (!unitsCompatible(a, e)) return false;
+  return true;
+}
+
+/**
+ * Same commercial identity as the sold type: family / I / Um / tap / 3×.
+ * Selector letter is auto (OS often writes C when B covers) — still #1 exact
+ * for a colleague copying the type.
+ */
+function identityMatch(actual: string, expected: string): boolean {
+  if (commercialMatch(actual, expected, "full")) return true;
+  const a = parseTypeString(actual);
+  const e = parseTypeString(expected);
+  if (!a || !e) return false;
+  if (!familyCompatible(a, e)) return false;
+  if (a.phases !== e.phases) return false;
+  if (a.currentA !== e.currentA) return false;
+  if (a.umKv !== e.umKv) return false;
+  if (!unitsCompatible(a, e)) return false;
+  if (e.tapCode && a.tapCode && a.tapCode !== e.tapCode) return false;
   return true;
 }
 
 function classify(sold: string, models: string[]): Verdict {
   const primary = models[0] ?? "";
-  if (commercialMatch(primary, sold, "full")) return "exact";
+  if (identityMatch(primary, sold)) return "exact";
   if (looseMatch(primary, sold)) return "family-i-um";
   const soldParts = parseTypeString(sold);
   const primParts = parseTypeString(primary);
@@ -396,7 +434,7 @@ const lines = [
   "",
   "| verdict | n | % of judged | meaning |",
   "|---|---:|---:|---|",
-  `| exact | ${counts.exact} | ${pct("exact")}% | engine #1 = sold type |`,
+  `| exact | ${counts.exact} | ${pct("exact")}% | engine #1 = sold type (selector letter / 3× prefix ignored) |`,
   `| family-i-um | ${counts["family-i-um"]} | ${pct("family-i-um")}% | #1 same family / I / Um (tap or grade differs) |`,
   `| family | ${counts.family} | ${pct("family")}% | #1 same family, different I or Um |`,
   `| eligible | ${counts.eligible} | ${pct("eligible")}% | sold type is in the list, not #1 |`,
