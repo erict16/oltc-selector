@@ -411,6 +411,7 @@ export function SelectorApp() {
       ),
     );
   }
+  if (!input.preferVacuum) moreBits.push(t(lang, "arcOil"));
   if (input.acrossTapBilKv != null && input.acrossTapBilKv > 0) {
     moreBits.push(`BIL ${input.acrossTapBilKv} kV`);
   }
@@ -549,49 +550,6 @@ export function SelectorApp() {
                 <option value="any">{t(lang, "connAny")}</option>
               </select>
             </Field>
-
-            {input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
-              <Field label={t(lang, "arcMode")} tip={t(lang, "arcTip")} as="div">
-                <div
-                  className="grid h-10 grid-cols-2 gap-1"
-                  role="group"
-                  aria-label={t(lang, "arcMode")}
-                >
-                  {(
-                    [
-                      [true, "arcVac"],
-                      [false, "arcOil"],
-                    ] as const
-                  ).map(([vac, key]) => {
-                    const on = input.preferVacuum === vac;
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        aria-pressed={on}
-                        onClick={() => {
-                          setInput((s) => ({
-                            ...s,
-                            preferVacuum: vac,
-                            medium: mediumFor(s.mounting, vac),
-                          }));
-                          touch();
-                        }}
-                        className={cx(
-                          "inline-flex h-10 items-center justify-center rounded-[var(--radius-sm)] border text-[0.8125rem] transition-colors duration-150",
-                          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-                          on
-                            ? "border-[var(--color-accent)] font-medium text-[var(--color-accent)]"
-                            : "border-[var(--color-rule-2)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",
-                        )}
-                      >
-                        {t(lang, key)}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
-            ) : null}
 
             <Field
               label={t(lang, "regulation")}
@@ -812,6 +770,48 @@ export function SelectorApp() {
                       })}
                     </div>
                   </Field>
+                  {input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
+                    <Field label={t(lang, "arcMode")} as="div">
+                      <div
+                        className="grid h-10 grid-cols-2 gap-1"
+                        role="group"
+                        aria-label={t(lang, "arcMode")}
+                      >
+                        {(
+                          [
+                            [true, "arcVac"],
+                            [false, "arcOil"],
+                          ] as const
+                        ).map(([vac, key]) => {
+                          const on = input.preferVacuum === vac;
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              aria-pressed={on}
+                              onClick={() => {
+                                setInput((s) => ({
+                                  ...s,
+                                  preferVacuum: vac,
+                                  medium: mediumFor(s.mounting, vac),
+                                }));
+                                touch();
+                              }}
+                              className={cx(
+                                "inline-flex h-10 items-center justify-center rounded-[var(--radius-sm)] border text-[0.8125rem] transition-colors duration-150",
+                                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+                                on
+                                  ? "border-[var(--color-accent)] font-medium text-[var(--color-accent)]"
+                                  : "border-[var(--color-rule-2)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",
+                              )}
+                            >
+                              {t(lang, key)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </Field>
+                  ) : null}
                   {selectorVisible ? (
                     <Field label={t(lang, "selectorSize")}>
                       <select
