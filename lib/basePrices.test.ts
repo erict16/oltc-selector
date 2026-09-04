@@ -208,7 +208,7 @@ describe("base price list 2025", () => {
   });
 
   it("converts list × FX only (no coefficient)", () => {
-    expect(LIST_CURRENCIES).toHaveLength(15);
+    expect(LIST_CURRENCIES).toHaveLength(17);
     const usd = convertFromCny(148700, "USD");
     expect(usd).toBeCloseTo(148700 * 0.14808, 5);
     expect(convertFromCny(100, "CNY")).toBe(100);
