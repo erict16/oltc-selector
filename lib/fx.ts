@@ -16,6 +16,8 @@ export const LIST_CURRENCIES = [
   "THB",
   "IDR",
   "VND",
+  "TRY",
+  "RUB",
 ] as const;
 
 export type ListCurrency = (typeof LIST_CURRENCIES)[number];
@@ -42,6 +44,8 @@ export const FX_FALLBACK = {
     THB: 4.892642,
     IDR: 2645.502646,
     VND: 3875.968992,
+    TRY: 7.153076,
+    RUB: 13.03781,
   } satisfies Record<ListCurrency, number>,
 };
 
