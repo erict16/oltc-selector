@@ -62,7 +62,7 @@ type Dict = Record<string, string>;
 const en: Dict = {
   title: "OLTC Selector",
   subtitle: "Enter the duty, then Select.",
-  footerNote: "Not a final quotation · Reference only",
+  footerNote: "Reference only",
   duty: "Duty parameters",
   presets: "Presets",
   ex66: "66 kV",
@@ -180,7 +180,7 @@ const en: Dict = {
 const zh: Dict = {
   title: "有载开关选型",
   subtitle: "填工况，点选型。",
-  footerNote: "并非最终报价，仅供参考",
+  footerNote: "仅供参考",
   duty: "工况",
   presets: "预选",
   ex66: "66 kV",
@@ -296,7 +296,7 @@ const zh: Dict = {
 const vi: Dict = {
   title: "Chọn OLTC",
   subtitle: "Nhập thông số, bấm Chọn.",
-  footerNote: "Không phải báo giá cuối · Chỉ tham khảo",
+  footerNote: "Chỉ tham khảo",
   duty: "Thông số làm việc",
   presets: "Chọn sẵn",
   ex66: "66 kV",
@@ -415,7 +415,7 @@ const vi: Dict = {
 const es: Dict = {
   title: "Selector OLTC",
   subtitle: "Introduzca el régimen y pulse Seleccionar.",
-  footerNote: "No es cotización final · Solo referencia",
+  footerNote: "Solo referencia",
   duty: "Parámetros",
   presets: "Preselección",
   ex66: "66 kV",
@@ -533,7 +533,7 @@ const es: Dict = {
 const tr: Dict = {
   title: "OLTC Seçici",
   subtitle: "İşletme verilerini girin, Seç’e basın.",
-  footerNote: "Nihai teklif değildir · Yalnızca referans",
+  footerNote: "Yalnızca referans",
   duty: "İşletme parametreleri",
   presets: "Ön seçim",
   ex66: "66 kV",
@@ -650,7 +650,7 @@ const tr: Dict = {
 const ru: Dict = {
   title: "Подбор РПН",
   subtitle: "Введите режим и нажмите «Подобрать».",
-  footerNote: "Не окончательное КП · для справки",
+  footerNote: "Только для справки",
   duty: "Параметры режима",
   presets: "Предвыбор",
   ex66: "66 кВ",
