@@ -7,6 +7,8 @@ import {
   ACROSS_BIL_OPTIONS_KV,
   ACROSS_PF_MENU,
   ACROSS_PF_OPTIONS_KV,
+  STEP_VOLTAGE_MENU,
+  STEP_VOLTAGE_OPTIONS_V,
   coveringUms,
   pickSelectorSize,
   defaultSelectorSizeForUm,
@@ -95,6 +97,29 @@ describe("across-tap BIL / PF menu labels", () => {
     ]);
     expect(ACROSS_PF_MENU.map((x) => x.value)).toEqual([
       ...ACROSS_PF_OPTIONS_KV,
+    ]);
+  });
+});
+
+describe("Ust menu labels", () => {
+  it("marks covering intervals like Um / BIL (≤ first and middle, ≥ last)", () => {
+    expect(STEP_VOLTAGE_MENU[0]).toMatchObject({
+      value: 500,
+      labelEn: "≤ 500 V",
+      labelZh: "≤ 500 V",
+    });
+    expect(STEP_VOLTAGE_MENU.find((x) => x.value === 1500)).toMatchObject({
+      labelEn: "≤ 1500 V",
+    });
+    expect(STEP_VOLTAGE_MENU.at(-1)).toMatchObject({
+      value: 4000,
+      labelEn: "≥ 4000 V",
+    });
+  });
+
+  it("keeps option values as the discrete steps (filter values unchanged)", () => {
+    expect(STEP_VOLTAGE_MENU.map((x) => x.value)).toEqual([
+      ...STEP_VOLTAGE_OPTIONS_V,
     ]);
   });
 });

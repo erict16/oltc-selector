@@ -92,6 +92,23 @@ export const STEP_VOLTAGE_OPTIONS_V = [
 ] as const;
 
 /**
+ * Ust UI menu. Same covering-interval marks as UM_MENU / BIL (`≤ n`, last `≥ n`).
+ * Values stay the discrete steps — no bucket offsets.
+ */
+export type StepVoltageMenuItem = {
+  value: number;
+  labelZh: string;
+  labelEn: string;
+};
+
+export const STEP_VOLTAGE_MENU: StepVoltageMenuItem[] =
+  STEP_VOLTAGE_OPTIONS_V.map((v, i) => {
+    const mark = i === STEP_VOLTAGE_OPTIONS_V.length - 1 ? "≥" : "≤";
+    const label = `${mark} ${v} V`;
+    return { value: v, labelZh: label, labelEn: label };
+  });
+
+/**
  * Across-tap winding insulation menus (training cases + brochure a-distance ladder).
  * Empty selection = size selector from Um only.
  */
