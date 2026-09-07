@@ -44,8 +44,9 @@ body {
   padding-right: env(safe-area-inset-right, 0);
 }
 
+/* Fill leftover height above the unpinned footer so inner spacers can center. */
 .selector-shell {
-  min-height: 100%;
+  flex: 1 1 auto;
 }
 
 /* Avoid iOS zoom-on-focus for inputs under 16px */
