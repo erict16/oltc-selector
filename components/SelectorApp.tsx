@@ -8,6 +8,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import {
+  AdjustmentsHorizontalIcon,
   ChevronDownIcon,
   ClipboardDocumentIcon,
   ClipboardDocumentListIcon,
@@ -169,6 +170,7 @@ export function SelectorApp() {
   const [pm, setPm] = useState("8");
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [moreUnlocked, setMoreUnlocked] = useState(false);
   const [altsOpen, setAltsOpen] = useState(false);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
@@ -309,6 +311,16 @@ export function SelectorApp() {
     return () => ro.disconnect();
   }, [moreOpen]);
 
+  useEffect(() => {
+    if (!moreOpen) {
+      setMoreUnlocked(false);
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setMoreUnlocked(true);
+    }
+  }, [moreOpen]);
+
   const copyModel = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -394,39 +406,6 @@ export function SelectorApp() {
     !isLinear && pmN != null
       ? midOptionsFor(pmN, input.regulation)
       : ([3, 1] as Array<1 | 3>);
-  /** Collapsed “more options” summary — non-default advanced fields */
-  const moreBits: string[] = [];
-  if (input.dutyKind === "octc") moreBits.push(t(lang, "dutyOctc"));
-  if (input.mounting !== "in_tank") {
-    moreBits.push(
-      t(
-        lang,
-        input.mounting === "on_tank"
-          ? "mountOn"
-          : input.mounting === "external_compartment"
-            ? "mountExt"
-            : input.mounting === "dry_type"
-              ? "mountDry"
-              : "mountReactor",
-      ),
-    );
-  }
-  if (!input.preferVacuum) moreBits.push(t(lang, "arcOil"));
-  if (input.acrossTapBilKv != null && input.acrossTapBilKv > 0) {
-    moreBits.push(`BIL ${input.acrossTapBilKv} kV`);
-  }
-  if (input.acrossTapPfKv != null && input.acrossTapPfKv > 0) {
-    moreBits.push(`PF ${input.acrossTapPfKv} kV`);
-  }
-  if (
-    selectorVisible &&
-    input.selectorSize &&
-    input.selectorSize !== "auto"
-  ) {
-    moreBits.push(`${t(lang, "selectorSize")} ${input.selectorSize}`);
-  }
-  const moreSummaryCount = moreBits.length;
-  const moreSummaryText = moreBits.join(" · ");
 
   return (
     <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:gap-6 sm:px-6 sm:pt-12 sm:pb-10">
@@ -704,27 +683,37 @@ export function SelectorApp() {
             </Field>
           </div>
 
-          {/* More options — same plain grid as main duty fields */}
+          {/* More options — hairline + button; panel drops */}
           <div className="mt-4 border-t border-[var(--color-rule)] pt-2.5">
             <button
               type="button"
               onClick={() => setMoreOpen((o) => !o)}
-              className="flex w-full items-center justify-between gap-3 py-1.5 text-left"
+              className={cx(
+                "flex w-full min-h-11 items-center gap-2.5 rounded-[var(--radius-sm)] border bg-white px-3 py-2 text-left",
+                "transition-[border-color,background-color] duration-150",
+                "hover:border-[var(--color-accent)]",
+                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+                moreOpen
+                  ? "border-[var(--color-accent)] bg-[oklch(58%_0.2_256_/_0.04)]"
+                  : "border-[var(--color-rule-2)]",
+              )}
               aria-expanded={moreOpen}
             >
-              <span className="flex min-w-0 items-center gap-2">
-                <span className="text-[0.8125rem] font-medium text-[var(--color-ink)]">
+              <AdjustmentsHorizontalIcon
+                className="h-4 w-4 shrink-0 text-[var(--color-muted)]"
+                aria-hidden
+              />
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="text-[0.875rem] font-semibold text-[var(--color-ink)]">
                   {t(lang, "more")}
                 </span>
-                {moreSummaryCount > 0 ? (
-                  <span className="truncate text-[0.72rem] text-[var(--color-muted)]">
-                    {moreSummaryText}
-                  </span>
-                ) : null}
+                <span className="truncate text-[0.75rem] leading-snug text-[var(--color-muted)]">
+                  {t(lang, "moreLead")}
+                </span>
               </span>
               <ChevronDownIcon
                 className={cx(
-                  "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
+                  "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]",
                   moreOpen && "rotate-180",
                 )}
                 aria-hidden
@@ -732,18 +721,19 @@ export function SelectorApp() {
             </button>
 
             <div
-              className={cx(
-                "grid transition-[grid-template-rows] duration-200 ease-out",
-                moreOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
-              )}
+              className={cx("more-drop", moreOpen && "more-drop-open")}
+              onTransitionEnd={(e) => {
+                if (e.propertyName !== "grid-template-rows") return;
+                if (moreOpen) setMoreUnlocked(true);
+              }}
             >
               <div
                 className={cx(
                   "min-h-0",
-                  moreOpen ? "overflow-visible" : "overflow-hidden",
+                  moreUnlocked ? "overflow-visible" : "overflow-hidden",
                 )}
               >
-                <div className="grid gap-x-4 gap-y-3.5 pt-3 sm:grid-cols-2">
+                <div className="more-drop-inner grid gap-x-4 gap-y-3.5 pt-3 sm:grid-cols-2">
                   <Field label={t(lang, "dutyKind")} as="div">
                     <div
                       className="grid h-10 grid-cols-2 gap-1"
