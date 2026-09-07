@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dump docs/2026-os-sales.xlsx sheet `sales` to docs/2026-os-sales.json."""
+"""Dump docs/replay/2026-os-sales.xlsx sheet `sales` to docs/replay/2026-os-sales.json."""
 from __future__ import annotations
 
 import json
@@ -9,8 +9,8 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "docs" / "2026-os-sales.xlsx"
-OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "docs" / "2026-os-sales.json"
+SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "docs" / "replay" / "2026-os-sales.xlsx"
+OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "docs" / "replay" / "2026-os-sales.json"
 
 
 def cell(v):

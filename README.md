@@ -44,9 +44,7 @@ Idle result pane stays empty until you click Select. If you change inputs after 
 
 ## Tests
 
-`npm test` runs the engine, the 2025 price lookup, and a replay of real Qu-ET / Anthony QS cases (84 replay rows, 0 fail). Closed skips (MDU-only, CV2-500, two transformers on one sheet) are listed with a reason.
-
-See `docs/GOAL.md` and `docs/CORRECTNESS.md`.
+`npm test` runs the engine, the 2025 price lookup, and a replay of real Qu-ET / Anthony QS cases (84 replay rows, 0 fail). Closed skips (MDU-only, CV2-500, two transformers on one sheet) are listed with a reason. Replay notes live in `docs/replay/`.
 
 ## License
 

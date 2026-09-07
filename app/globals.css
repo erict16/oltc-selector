@@ -38,6 +38,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Expanding More options makes the page scroll. Without a reserved gutter
+   the classic scrollbar steals width and the mx-auto workbench jumps left. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   overflow-x: hidden;
   padding-left: env(safe-area-inset-left, 0);

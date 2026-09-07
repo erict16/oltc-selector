@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- More options no longer nudges the workbench left when the page starts scrolling.
+- Privacy / Terms contact is `eric.tan.dev@outlook.com` (no repository link).
+- Docs: replay files under `docs/replay/`; dropped stale overnight notes and duplicate extracts.
+
 ## 1.1.0 — 2026-08-20
 
 Workbench after 1.0.0: oil vs vacuum, estimated list prices, a spec plate, and the layout Eric actually uses.
@@ -17,7 +23,7 @@ Workbench after 1.0.0: oil vs vacuum, estimated list prices, a spec plate, and t
 
 ### Replay
 
-- 2026 sold OS extract and replay vs min-adequate select. Numbers in `docs/2026-os-replay.md`.
+- 2026 sold OS extract and replay vs min-adequate select. Numbers in `docs/replay/2026-os-replay.md`.
 
 ### UI
 

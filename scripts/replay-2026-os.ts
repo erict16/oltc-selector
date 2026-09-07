@@ -1,7 +1,7 @@
 /**
  * Replay selectOltc against 2026 OS sales extracted to JSON.
  *
- * Usage: npx vite-node scripts/replay-2026-os.ts [docs/2026-os-sales.json]
+ * Usage: npx vite-node scripts/replay-2026-os.ts [docs/replay/2026-os-sales.json]
  *
  * Duty comes from transformer I / Ust / steps + sold Um / Y-D / phases.
  * Sold current rating and family are the *answer*, not the input.
@@ -351,7 +351,7 @@ function loadRows(jsonPath: string): SalesRow[] {
 }
 
 const jsonPath = path.resolve(
-  process.argv[2] ?? path.join(process.cwd(), "docs", "2026-os-sales.json"),
+  process.argv[2] ?? path.join(process.cwd(), "docs", "replay", "2026-os-sales.json"),
 );
 const rows = loadRows(jsonPath);
 
@@ -456,7 +456,7 @@ for (const r of out.filter((x) => x.verdict === "miss").slice(0, 80)) {
   );
 }
 
-const docs = path.join(process.cwd(), "docs");
+const docs = path.join(process.cwd(), "docs", "replay");
 writeFileSync(path.join(docs, "2026-os-replay.md"), lines.join("\n") + "\n");
 writeFileSync(path.join(docs, "2026-os-replay.json"), JSON.stringify(out, null, 2));
 
@@ -472,4 +472,4 @@ const csv = [
 writeFileSync(path.join(docs, "2026-os-replay.csv"), csv);
 
 console.log(lines.slice(0, 20).join("\n"));
-console.log(`wrote docs/2026-os-replay.md json csv`);
+console.log(`wrote docs/replay/2026-os-replay.md json csv`);
