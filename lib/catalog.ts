@@ -26,10 +26,24 @@ export const EARTH_INSULATION: Record<
   363: { pf: 510, bil: 1175 },
 };
 
-/** Discrete Um choices for UI dropdown (calculation sheet + brochures) */
+/** Discrete Um choices for UI dropdown (brochure + 2025 sales). No 35 / 69 — those are HWDK Un. */
 export const UM_OPTIONS_KV = [
-  12, 17.5, 35, 40.5, 69, 72.5, 126, 145, 170, 252, 300, 363,
+  12, 17.5, 40.5, 72.5, 126, 145, 170, 252, 300, 363,
 ] as const;
+
+/** Common transformer Un shown next to catalogue Um (same insulation class). */
+const UM_UN_HINT: Record<number, string> = {
+  12: "10 kV",
+  17.5: "15 kV",
+  40.5: "33 kV",
+  72.5: "66 kV",
+  126: "110 kV",
+  145: "132 kV",
+  170: "150 kV",
+  252: "220 kV",
+  300: "275 kV",
+  363: "330 kV",
+};
 
 /** UI menu row. Labels are the catalogue number + unit — no ≤ / ≥ / >. */
 export type CatalogueMenuItem = {
@@ -48,7 +62,14 @@ function catalogueMenu(
   });
 }
 
-export const UM_MENU: CatalogueMenuItem[] = catalogueMenu(UM_OPTIONS_KV, "kV");
+export const UM_MENU: CatalogueMenuItem[] = UM_OPTIONS_KV.map((u) => {
+  const hint = UM_UN_HINT[u];
+  return {
+    value: u,
+    labelZh: hint ? `${u} kV（${hint}）` : `${u} kV`,
+    labelEn: hint ? `${u} kV (${hint})` : `${u} kV`,
+  };
+});
 
 /**
  * Through-current UI menu. Exact catalogue Iᵤ (mobile picker).
