@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Ust dropdown uses covering intervals (`≤ 1500 V`, last `≥ 4000 V`), same marks as Um / BIL.
+- Scrollbar gutter is reserved on both edges so the workbench does not sit left of center.
 - More options no longer nudges the workbench left when the page starts scrolling.
 - Privacy / Terms contact is `eric.tan.dev@outlook.com` (no repository link).
 - Docs: replay files under `docs/replay/`; dropped stale overnight notes and duplicate extracts.

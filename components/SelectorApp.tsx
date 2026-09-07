@@ -22,6 +22,7 @@ import {
   LINEAR_POSITION_OPTIONS,
   POSITION_OPTIONS,
   SERIES,
+  STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
   UM_MENU,
 } from "@/lib/catalog";
@@ -657,12 +658,12 @@ export function SelectorApp() {
                   input.stepVoltageV as (typeof STEP_VOLTAGE_OPTIONS_V)[number],
                 ) && input.stepVoltageV > 0 ? (
                   <option value={input.stepVoltageV}>
-                    {input.stepVoltageV} V
+                    ≤ {input.stepVoltageV} V
                   </option>
                 ) : null}
-                {STEP_VOLTAGE_OPTIONS_V.map((v) => (
-                  <option key={v} value={v}>
-                    {v} V
+                {STEP_VOLTAGE_MENU.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {currentLabel(lang, item.labelZh, item.labelEn)}
                   </option>
                 ))}
               </select>
