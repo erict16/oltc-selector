@@ -658,7 +658,7 @@ export function SelectorApp() {
                   input.stepVoltageV as (typeof STEP_VOLTAGE_OPTIONS_V)[number],
                 ) && input.stepVoltageV > 0 ? (
                   <option value={input.stepVoltageV}>
-                    ≤ {input.stepVoltageV} V
+                    {input.stepVoltageV} V
                   </option>
                 ) : null}
                 {STEP_VOLTAGE_MENU.map((item) => (
@@ -685,7 +685,7 @@ export function SelectorApp() {
           </div>
 
           {/* More options — hairline + button; panel drops */}
-          <div className="mt-4 border-t border-[var(--color-rule)] pt-2.5">
+          <div className="mt-4 border-t border-[var(--color-rule)] pt-4">
             <button
               type="button"
               onClick={() => setMoreOpen((o) => !o)}

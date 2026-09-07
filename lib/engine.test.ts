@@ -7,12 +7,17 @@ import {
   ACROSS_BIL_OPTIONS_KV,
   ACROSS_PF_MENU,
   ACROSS_PF_OPTIONS_KV,
+  CURRENT_MENU,
+  CURRENT_OPTIONS_A,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
+  UM_MENU,
+  UM_OPTIONS_KV,
   coveringUms,
   pickSelectorSize,
   defaultSelectorSizeForUm,
 } from "./catalog";
+import { t } from "./i18n";
 import {
   positionsFromPlusMinus,
   resolveTapFields,
@@ -60,38 +65,40 @@ describe("tap / catalogue sanity", () => {
   });
 });
 
-describe("across-tap BIL / PF menu labels", () => {
-  it("marks covering intervals like Um (≤ first and middle, ≥ last)", () => {
-    expect(ACROSS_BIL_MENU[0]).toMatchObject({
-      value: 75,
-      labelEn: "≤ 75 kV",
-      labelZh: "≤ 75 kV",
-    });
-    expect(ACROSS_BIL_MENU.find((x) => x.value === 350)).toMatchObject({
-      labelEn: "≤ 350 kV",
-    });
-    expect(ACROSS_BIL_MENU.find((x) => x.value === 650)).toMatchObject({
-      labelEn: "≤ 650 kV",
-    });
-    expect(ACROSS_BIL_MENU.at(-1)).toMatchObject({
-      value: 750,
-      labelEn: "≥ 750 kV",
-    });
+describe("catalogue menu labels", () => {
+  const menus = [
+    ...CURRENT_MENU,
+    ...UM_MENU,
+    ...STEP_VOLTAGE_MENU,
+    ...ACROSS_BIL_MENU,
+    ...ACROSS_PF_MENU,
+  ];
 
-    expect(ACROSS_PF_MENU[0]).toMatchObject({
-      value: 20,
-      labelEn: "≤ 20 kV",
-    });
-    expect(ACROSS_PF_MENU.find((x) => x.value === 65)).toMatchObject({
-      labelEn: "≤ 65 kV",
-    });
-    expect(ACROSS_PF_MENU.at(-1)).toMatchObject({
-      value: 150,
-      labelEn: "≥ 150 kV",
-    });
+  it("prints the catalogue number and unit, with no ≤ ≥ >", () => {
+    for (const item of menus) {
+      expect(item.labelEn).not.toMatch(/[≤≥<>]/);
+      expect(item.labelZh).not.toMatch(/[≤≥<>]/);
+    }
+    expect(CURRENT_MENU.find((x) => x.value === 400)?.labelEn).toBe("400 A");
+    expect(CURRENT_MENU.find((x) => x.value === 600)?.labelEn).toBe("600 A");
+    expect(CURRENT_MENU.some((x) => x.value === 501)).toBe(false);
+    expect(UM_MENU.find((x) => x.value === 72.5)?.labelEn).toBe("72.5 kV");
+    expect(STEP_VOLTAGE_MENU.find((x) => x.value === 1500)?.labelEn).toBe(
+      "1500 V",
+    );
+    expect(STEP_VOLTAGE_MENU.at(-1)?.labelEn).toBe("4000 V");
+    expect(ACROSS_BIL_MENU.find((x) => x.value === 285)?.labelEn).toBe(
+      "285 kV",
+    );
+    expect(ACROSS_BIL_MENU.at(-1)?.labelEn).toBe("750 kV");
   });
 
-  it("keeps option values as the discrete steps (filter values unchanged)", () => {
+  it("keeps option values as the discrete steps", () => {
+    expect(CURRENT_MENU.map((x) => x.value)).toEqual([...CURRENT_OPTIONS_A]);
+    expect(UM_MENU.map((x) => x.value)).toEqual([...UM_OPTIONS_KV]);
+    expect(STEP_VOLTAGE_MENU.map((x) => x.value)).toEqual([
+      ...STEP_VOLTAGE_OPTIONS_V,
+    ]);
     expect(ACROSS_BIL_MENU.map((x) => x.value)).toEqual([
       ...ACROSS_BIL_OPTIONS_KV,
     ]);
@@ -99,28 +106,14 @@ describe("across-tap BIL / PF menu labels", () => {
       ...ACROSS_PF_OPTIONS_KV,
     ]);
   });
-});
 
-describe("Ust menu labels", () => {
-  it("marks covering intervals like Um / BIL (≤ first and middle, ≥ last)", () => {
-    expect(STEP_VOLTAGE_MENU[0]).toMatchObject({
-      value: 500,
-      labelEn: "≤ 500 V",
-      labelZh: "≤ 500 V",
-    });
-    expect(STEP_VOLTAGE_MENU.find((x) => x.value === 1500)).toMatchObject({
-      labelEn: "≤ 1500 V",
-    });
-    expect(STEP_VOLTAGE_MENU.at(-1)).toMatchObject({
-      value: 4000,
-      labelEn: "≥ 4000 V",
-    });
-  });
-
-  it("keeps option values as the discrete steps (filter values unchanged)", () => {
-    expect(STEP_VOLTAGE_MENU.map((x) => x.value)).toEqual([
-      ...STEP_VOLTAGE_OPTIONS_V,
-    ]);
+  it("Chinese field labels name the switch, not covering marks", () => {
+    expect(t("zh", "throughCurrent")).toBe("开关通过电流 Iᵤ");
+    expect(t("zh", "um")).toBe("开关最高电压 Um");
+    expect(t("zh", "ust")).toBe("级电压 Ust");
+    expect(t("en", "throughCurrent")).toBe("Switch through-current Iᵤ");
+    expect(t("en", "um")).toBe("Switch highest voltage Um");
+    expect(t("en", "ust")).toBe("Step voltage Ust");
   });
 });
 
