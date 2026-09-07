@@ -82,7 +82,19 @@ describe("catalogue menu labels", () => {
     expect(CURRENT_MENU.find((x) => x.value === 400)?.labelEn).toBe("400 A");
     expect(CURRENT_MENU.find((x) => x.value === 600)?.labelEn).toBe("600 A");
     expect(CURRENT_MENU.some((x) => x.value === 501)).toBe(false);
-    expect(UM_MENU.find((x) => x.value === 72.5)?.labelEn).toBe("72.5 kV");
+    expect(UM_MENU.find((x) => x.value === 72.5)?.labelEn).toBe(
+      "72.5 kV (66 kV)",
+    );
+    expect(UM_MENU.find((x) => x.value === 72.5)?.labelZh).toBe(
+      "72.5 kV（66 kV）",
+    );
+    expect(UM_MENU.find((x) => x.value === 40.5)?.labelEn).toBe(
+      "40.5 kV (33 kV)",
+    );
+    expect(UM_MENU.find((x) => x.value === 126)?.labelEn).toBe(
+      "126 kV (110 kV)",
+    );
+    expect(UM_MENU.some((x) => x.value === 35 || x.value === 69)).toBe(false);
     expect(STEP_VOLTAGE_MENU.find((x) => x.value === 1500)?.labelEn).toBe(
       "1500 V",
     );

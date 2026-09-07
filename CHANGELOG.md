@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Um dropdown: drop 35 / 69; labels show transformer class (`72.5 kV（66 kV）`).
 - More-options lead: 调压绕组, not 级间绝缘.
 - Field label: 设备最高电压 Um (highest voltage for equipment).
 - Catalogue menus print the number (`400 A`, `72.5 kV`, `1500 V`). No ≤ / ≥ / >. Current list includes 600 A.
