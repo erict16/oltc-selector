@@ -1,24 +1,20 @@
-# OLTC Selector
+# 有载开关选型
 
-Fill in the transformer duty. Click Select. You get the lowest catalogue type that covers it, plus the 2025 base quotation price in RMB FOB Shanghai (and 14 other currencies).
+填工况，点选型。给出目录里**最低满足**的型号，以及 2025 基价（FOB 上海，可换 14 种货币）。
 
-Live: https://erict16.github.io/oltc-selector/
+**在线：** [erict16.github.io/oltc-selector](https://erict16.github.io/oltc-selector/)
 
-This is a private helper. It is not an official manufacturer page. The type is a starting point. Confirm with engineering before an OS.
+![工作台](docs/readme.png)
 
-## What it does
+私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。
 
-You enter through-current, Um, Y or D, reversing / coarse-fine / linear, ± steps, and max step voltage. The engine walks the 2025 catalogue (CV2, CM2, SHZV, SHZVG, HWV, CZ, WSL, WSG, …) and ranks **minimum adequate**:
+## 怎么用
 
-1. Family: CV2, then CM2, then SHZV, then SHZVG.
-2. One three-phase unit beats three single-phase units when both cover the duty.
-3. No invented rows. There is no CV2-500 in 2025 (oil 500 A is SV).
+上面三个预选是变压器电压等级（66 / 110 / 220 kV），会填好对应的开关 Um。电流、Um、级电压都是目录下拉，手机上点选。
 
-On-tank duty picks HWV. Under More options, switch to off-circuit (OCTC) for WSL / WSG.
+引擎按 2025 目录排：**CV2 → CM2 → SHZV → SHZVG**。能用一台三相就不拆成三台单相。没有 CV2-500。箱顶走 HWV；更多选项里可切无载（WSL / WSG）。
 
-After Select, the result shows the 2025 base quotation price. Pick a currency. That is base price × mid-market FX only. No regional sales coefficient.
-
-## Use it
+点选型之后才出型号。改参数不会悄悄换结果，要再点一次。
 
 ```bash
 npm install
@@ -27,25 +23,25 @@ npm test
 npm run build
 ```
 
-GitHub Pages build: `npm run build:gh`.
+GitHub Pages：`npm run build:gh`。
 
-Languages: 中文, English, Tiếng Việt, Español, Türkçe, Русский.
+语言：中文、English、Tiếng Việt、Español、Türkçe、Русский。
 
-## Field names
+## 字段
 
-| Field | Means |
+| 栏 | 意思 |
 |---|---|
-| Regulation | Tap winding: linear 0, reversing W, coarse-fine G |
-| Connection | Where the switch sits: Y neutral, or D / line end |
-| Iᵤ / Um / Ust | Catalogue menus. Custom Iᵤ is for a calculated Imax |
-| ± steps | W/G only. Linear uses positions |
+| 开关通过电流 Iᵤ | 目录电流，如 400 A、600 A |
+| 开关最高电压 Um | 开关 Um，如 72.5 kV（不是变压器 66 kV） |
+| 级电压 Ust | 档位电压，如 1500 V |
+| 开关连接 | 开关接在哪：Y 中性点 / D 线端 |
+| 调压方式 | 线性 0 / 正反 W / 粗细 G |
+| ± 级数 | 仅 W/G；线性只选位置数 |
 
-Idle result pane stays empty until you click Select. If you change inputs after a run, the old type stays on screen until you Select again.
+## 测试
 
-## Tests
+`npm test`：引擎、2025 价目、真实 Qu-ET / Anthony 报价回放（84 条，0 fail）。跳过的行（只有机构、CV2-500、一张表两台变）写了原因。笔记在 `docs/replay/`。
 
-`npm test` runs the engine, the 2025 price lookup, and a replay of real Qu-ET / Anthony QS cases (84 replay rows, 0 fail). Closed skips (MDU-only, CV2-500, two transformers on one sheet) are listed with a reason. Replay notes live in `docs/replay/`.
+## 许可
 
-## License
-
-[Terms](https://erict16.github.io/oltc-selector/terms/) · [Privacy](https://erict16.github.io/oltc-selector/privacy/). Reference only.
+[条款](https://erict16.github.io/oltc-selector/terms/) · [隐私](https://erict16.github.io/oltc-selector/privacy/)。仅供参考。

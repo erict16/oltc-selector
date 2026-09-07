@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Ust dropdown uses covering intervals (`≤ 1500 V`, last `≥ 4000 V`), same marks as Um / BIL.
+- Catalogue menus print the number (`400 A`, `72.5 kV`, `1500 V`). No ≤ / ≥ / >. Current list includes 600 A.
+- Field labels: switch through-current, switch highest voltage, step voltage (max stays on the spec plate).
+- Hairline above More options has matching space above and below.
 - Scrollbar gutter is reserved on both edges so the workbench does not sit left of center.
 - More options no longer nudges the workbench left when the page starts scrolling.
 - Privacy / Terms contact is `eric.tan.dev@outlook.com` (no repository link).

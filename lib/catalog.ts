@@ -31,82 +31,48 @@ export const UM_OPTIONS_KV = [
   12, 17.5, 35, 40.5, 69, 72.5, 126, 145, 170, 252, 300, 363,
 ] as const;
 
-/**
- * Um UI menu. Labels are covering intervals (same idea as CURRENT_MENU ≤ / >).
- * Values stay catalogue Um — no bucket offsets.
- */
-export type UmMenuItem = {
+/** UI menu row. Labels are the catalogue number + unit — no ≤ / ≥ / >. */
+export type CatalogueMenuItem = {
   value: number;
   labelZh: string;
   labelEn: string;
 };
 
-export const UM_MENU: UmMenuItem[] = UM_OPTIONS_KV.map((u) => ({
-  value: u,
-  labelZh: `≤ ${u} kV`,
-  labelEn: `≤ ${u} kV`,
-}));
+function catalogueMenu(
+  steps: readonly number[],
+  unit: string,
+): CatalogueMenuItem[] {
+  return steps.map((v) => {
+    const label = `${v} ${unit}`;
+    return { value: v, labelZh: label, labelEn: label };
+  });
+}
+
+export const UM_MENU: CatalogueMenuItem[] = catalogueMenu(UM_OPTIONS_KV, "kV");
 
 /**
- * Through-current UI menu.
- * Low end: exact catalogue floors. Above 500 A: threshold buckets (>500, >800…)
- * so sales pick a tier instead of hunting 600/800/1000 in a flat list.
- * `value` = duty A fed to the engine (slightly above the threshold so ceil lands
- * on the next commercial Iᵤ).
+ * Through-current UI menu. Exact catalogue Iᵤ (mobile picker).
+ * Engine still covers upward from the selected value.
  */
-export type CurrentMenuItem = {
-  /** Duty amperes for the engine */
-  value: number;
-  labelZh: string;
-  labelEn: string;
-};
-
-export const CURRENT_MENU: CurrentMenuItem[] = [
-  { value: 160, labelZh: "≤ 160 A", labelEn: "≤ 160 A" },
-  { value: 200, labelZh: "≤ 200 A", labelEn: "≤ 200 A" },
-  { value: 350, labelZh: "≤ 350 A", labelEn: "≤ 350 A" },
-  { value: 400, labelZh: "≤ 400 A", labelEn: "≤ 400 A" },
-  { value: 500, labelZh: "≤ 500 A", labelEn: "≤ 500 A" },
-  // Buckets: value just over threshold so nearestCurrent picks next rating
-  { value: 501, labelZh: "> 500 A", labelEn: "> 500 A" }, // → 600
-  { value: 601, labelZh: "> 600 A", labelEn: "> 600 A" }, // → 800 / 1000
-  { value: 801, labelZh: "> 800 A", labelEn: "> 800 A" }, // → 1000
-  { value: 1001, labelZh: "> 1000 A", labelEn: "> 1000 A" }, // → 1200 / 1300
-  { value: 1201, labelZh: "> 1200 A", labelEn: "> 1200 A" }, // → 1300
-  { value: 1301, labelZh: "> 1300 A", labelEn: "> 1300 A" }, // → 1500
-  { value: 1501, labelZh: "> 1500 A", labelEn: "> 1500 A" }, // → 1600
-  { value: 1601, labelZh: "> 1600 A", labelEn: "> 1600 A" }, // → 2000 / 2400
-  { value: 2001, labelZh: "> 2000 A", labelEn: "> 2000 A" }, // → 2400
-  { value: 2401, labelZh: "> 2400 A", labelEn: "> 2400 A" }, // → 3000
-];
-
-/** Flat catalogue currents (engine / tip / “is this a menu value?”) */
 export const CURRENT_OPTIONS_A = [
-  160, 200, 350, 400, 500, 501, 600, 601, 700, 800, 801, 1000, 1001, 1200,
-  1201, 1300, 1301, 1500, 1501, 1600, 1601, 2000, 2001, 2400, 2401, 2500, 3000,
+  160, 200, 350, 400, 500, 600, 700, 800, 1000, 1200, 1300, 1500, 1600, 2000,
+  2400, 2500, 3000,
 ] as const;
+
+export const CURRENT_MENU: CatalogueMenuItem[] = catalogueMenu(
+  CURRENT_OPTIONS_A,
+  "A",
+);
 
 /** Common max step voltage (Ust) picks — from calc sheet / quotes / brochure ceilings */
 export const STEP_VOLTAGE_OPTIONS_V = [
   500, 800, 1000, 1200, 1400, 1500, 1650, 1800, 2000, 2200, 2500, 3000, 3300, 4000,
 ] as const;
 
-/**
- * Ust UI menu. Same covering-interval marks as UM_MENU / BIL (`≤ n`, last `≥ n`).
- * Values stay the discrete steps — no bucket offsets.
- */
-export type StepVoltageMenuItem = {
-  value: number;
-  labelZh: string;
-  labelEn: string;
-};
-
-export const STEP_VOLTAGE_MENU: StepVoltageMenuItem[] =
-  STEP_VOLTAGE_OPTIONS_V.map((v, i) => {
-    const mark = i === STEP_VOLTAGE_OPTIONS_V.length - 1 ? "≥" : "≤";
-    const label = `${mark} ${v} V`;
-    return { value: v, labelZh: label, labelEn: label };
-  });
+export const STEP_VOLTAGE_MENU: CatalogueMenuItem[] = catalogueMenu(
+  STEP_VOLTAGE_OPTIONS_V,
+  "V",
+);
 
 /**
  * Across-tap winding insulation menus (training cases + brochure a-distance ladder).
@@ -120,32 +86,14 @@ export const ACROSS_PF_OPTIONS_KV = [
   20, 30, 38, 45, 50, 65, 70, 80, 85, 95, 100, 110, 125, 140, 150,
 ] as const;
 
-/**
- * BIL / PF UI menus. Same covering-interval marks as UM_MENU (`≤ n kV`).
- * First step is ≤ that kV; last is ≥ that kV; middles are the band up to the step.
- * Values stay the discrete catalogue steps — no bucket offsets.
- */
-export type AcrossKvMenuItem = {
-  value: number;
-  labelZh: string;
-  labelEn: string;
-};
-
-function acrossKvMenu(steps: readonly number[]): AcrossKvMenuItem[] {
-  const last = steps.length - 1;
-  return steps.map((v, i) => {
-    const mark = i === last ? "≥" : "≤";
-    const label = `${mark} ${v} kV`;
-    return { value: v, labelZh: label, labelEn: label };
-  });
-}
-
-export const ACROSS_BIL_MENU: AcrossKvMenuItem[] = acrossKvMenu(
+export const ACROSS_BIL_MENU: CatalogueMenuItem[] = catalogueMenu(
   ACROSS_BIL_OPTIONS_KV,
+  "kV",
 );
 
-export const ACROSS_PF_MENU: AcrossKvMenuItem[] = acrossKvMenu(
+export const ACROSS_PF_MENU: CatalogueMenuItem[] = catalogueMenu(
   ACROSS_PF_OPTIONS_KV,
+  "kV",
 );
 
 /** Re-export ± options (brochure W/G geometry lives in tapCode) */
