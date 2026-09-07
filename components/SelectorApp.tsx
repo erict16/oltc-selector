@@ -429,7 +429,12 @@ export function SelectorApp() {
   const moreSummaryText = moreBits.join(" · ");
 
   return (
-    <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-6 pb-6 sm:gap-6 sm:px-6 sm:pt-8 sm:pb-8">
+    <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:gap-6 sm:px-6 sm:pt-12 sm:pb-10">
+      {/* Leftover viewport around the whole workbench (title + cards).
+          Bottom spacer grows more so the block sits slightly above true center.
+          Collapses when the page needs to scroll. */}
+      <div className="min-h-0 flex-1" aria-hidden />
+
       {/* Stack on phone: title full width, langs row below — avoids squashed header */}
       <header className="flex shrink-0 flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0 flex-1">
@@ -446,9 +451,6 @@ export function SelectorApp() {
           ariaLabel={t(lang, "langAria")}
         />
       </header>
-
-      {/* Leftover space, biased slightly up (bottom spacer grows more). Collapses when the page scrolls. */}
-      <div className="min-h-0 flex-1" aria-hidden />
 
       {/* Single column phone → two columns desktop; result below form on mobile */}
       <div

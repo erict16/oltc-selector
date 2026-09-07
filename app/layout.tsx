@@ -53,9 +53,10 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        {/* Document scrolls; footer sits at the end, not pinned to the viewport. */}
+        {/* Document scrolls; footer is not pinned. main is a column so the
+            selector shell can flex-1 fill leftover height and center. */}
         <div className="flex min-h-dvh flex-col">
-          <main id="main" className="min-w-0 flex-1">
+          <main id="main" className="flex min-w-0 flex-1 flex-col">
             {children}
           </main>
           <SiteFooter />
