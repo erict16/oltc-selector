@@ -1255,7 +1255,7 @@ def emit_corpus(parsed: list, latest: dict, by_qs: dict) -> None:
     ts.append("];")
     ts.append("")
 
-    repo_ts = Path("/Users/youming/Github/oltc-selector/lib/anthonyQs.fixtures.ts")
+    repo_ts = Path(__file__).resolve().parents[1] / "lib" / "anthonyQs.fixtures.ts"
     repo_ts.write_text("\n".join(ts) + "\n", encoding="utf-8")
 
     # Inventory
@@ -1313,7 +1313,7 @@ def emit_corpus(parsed: list, latest: dict, by_qs: dict) -> None:
         f"| unread | {n_unread} |",
         "",
     ]
-    repo_md = Path("/Users/youming/Github/oltc-selector/docs/anthony-qs-inventory.md")
+    repo_md = Path(__file__).resolve().parents[1] / "docs" / "replay" / "anthony-qs-inventory.md"
     repo_md.write_text("\n".join(md) + "\n", encoding="utf-8")
     print(f"wrote {repo_ts} replay={n_replay} skip={n_skip}")
     print(f"wrote {repo_md}")

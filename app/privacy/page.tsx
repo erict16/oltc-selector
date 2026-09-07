@@ -10,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage title="Privacy Policy" titleZh="隐私政策">
       <p className="text-[0.8125rem] text-[var(--color-muted)]">
-        Last updated: 27 July 2026 · 更新日期：2026 年 7 月 27 日
+        Last updated: 7 September 2026 · 更新日期：2026 年 9 月 7 日
       </p>
 
       <LegalPair
@@ -90,13 +90,13 @@ export default function PrivacyPage() {
           <p>
             Fonts or scripts may load from third-party CDNs (for example Google
             Fonts). Those providers process requests under their own privacy
-            policies. Source code may be hosted on GitHub.
+            policies.
           </p>
         }
         zh={
           <p>
             字体或脚本可能来自第三方 CDN（如 Google
-            Fonts），适用其隐私政策。源码可能托管于 GitHub。
+            Fonts），适用其隐私政策。
           </p>
         }
       />
@@ -105,20 +105,26 @@ export default function PrivacyPage() {
         title="5. Contact / 联系"
         en={
           <p>
-            For privacy questions about this personal project, open an issue on
-            the public repository:{" "}
+            For privacy questions about this personal project, email{" "}
             <a
               className="text-[var(--color-accent)] hover:underline"
-              href="https://github.com/erict16/oltc-selector"
+              href="mailto:eric.tan.dev@outlook.com"
             >
-              github.com/erict16/oltc-selector
+              eric.tan.dev@outlook.com
             </a>
             .
           </p>
         }
         zh={
           <p>
-            隐私相关问题请在公开仓库提交 Issue（链接同上）。
+            隐私相关问题请发邮件至{" "}
+            <a
+              className="text-[var(--color-accent)] hover:underline"
+              href="mailto:eric.tan.dev@outlook.com"
+            >
+              eric.tan.dev@outlook.com
+            </a>
+            。
           </p>
         }
       />

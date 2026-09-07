@@ -10,7 +10,7 @@ export default function TermsPage() {
   return (
     <LegalPage title="Terms of Use" titleZh="使用条款">
       <p className="text-[0.8125rem] text-[var(--color-muted)]">
-        Last updated: 27 July 2026 · 更新日期：2026 年 7 月 27 日
+        Last updated: 7 September 2026 · 更新日期：2026 年 9 月 7 日
       </p>
 
       <LegalPair
@@ -124,15 +124,14 @@ export default function TermsPage() {
         en={
           <p>
             The software implementation of this site is a personal work of the
-            author unless otherwise stated in the repository license. Product
-            names, type designations, and technical data of third-party
-            manufacturers remain their respective property and are referenced
-            only for identification and selection convenience.
+            author. Product names, type designations, and technical data of
+            third-party manufacturers remain their respective property and are
+            referenced only for identification and selection convenience.
           </p>
         }
         zh={
           <p>
-            本站软件实现除仓库许可另有说明外为作者个人作品。第三方制造商的产品名称、型号与技术资料归其权利人所有，仅供识别与选型便利引用。
+            本站软件实现为作者个人作品。第三方制造商的产品名称、型号与技术资料归其权利人所有，仅供识别与选型便利引用。
           </p>
         }
       />
@@ -185,6 +184,34 @@ export default function TermsPage() {
         zh={
           <p>
             本条款旨在明确项目的私人性质与有限用途。当地不可排除的强制性法律（如适用）仍优先适用。
+          </p>
+        }
+      />
+
+      <LegalPair
+        title="10. Contact / 联系"
+        en={
+          <p>
+            Questions about these terms:{" "}
+            <a
+              className="text-[var(--color-accent)] hover:underline"
+              href="mailto:eric.tan.dev@outlook.com"
+            >
+              eric.tan.dev@outlook.com
+            </a>
+            .
+          </p>
+        }
+        zh={
+          <p>
+            条款相关问题请发邮件至{" "}
+            <a
+              className="text-[var(--color-accent)] hover:underline"
+              href="mailto:eric.tan.dev@outlook.com"
+            >
+              eric.tan.dev@outlook.com
+            </a>
+            。
           </p>
         }
       />

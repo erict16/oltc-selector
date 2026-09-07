@@ -1,6 +1,6 @@
 # Catalogue source notes
 
-`src/lib/catalog.ts` current axes are **not invented**. They come from:
+`lib/catalog.ts` current axes are **not invented**. They come from:
 
 1. **Technical brochures** (OneDrive `Attachments/Techincal Brochure/`)
 2. **Commercial model headers** in `QS/a. Base Price List 2025.xlsx`

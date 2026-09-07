@@ -7,5 +7,6 @@ dist
 .vercel
 .next
 .hallmark
+.hermes
 tsconfig.tsbuildinfo
 out
