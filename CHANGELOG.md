@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Field label: 设备最高电压 Um (highest voltage for equipment).
 - Catalogue menus print the number (`400 A`, `72.5 kV`, `1500 V`). No ≤ / ≥ / >. Current list includes 600 A.
 - Field labels: switch through-current, switch highest voltage, step voltage (max stays on the spec plate).
 - Hairline above More options has matching space above and below.
