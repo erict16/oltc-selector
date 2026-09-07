@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- More-options lead: 调压绕组, not 级间绝缘.
 - Field label: 设备最高电压 Um (highest voltage for equipment).
 - Catalogue menus print the number (`400 A`, `72.5 kV`, `1500 V`). No ≤ / ≥ / >. Current list includes 600 A.
 - Field labels: switch through-current, switch highest voltage, step voltage (max stays on the spec plate).
