@@ -262,6 +262,22 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
   const ums =
     (FAMILY_MIN_RANK[s.id] ?? s.rank) < 40 ? covering : [um0];
 
+  // CZ dry: 2025 list + 2026 OS are 3×CZI only (no CZIII / CZI row).
+  // Do not emit a single-unit CZIII — ranking would put it first.
+  if (s.id === "cz") {
+    const curI = nearestCurrent(input.throughCurrentA, s.currents.I ?? []);
+    if (curI != null && ratingCoversDuty(input.throughCurrentA, curI)) {
+      out.push({
+        series: s,
+        phases: "I",
+        current: curI,
+        um: um0,
+        unitCount: 3,
+      });
+    }
+    return out;
+  }
+
   const list = s.currents[input.phases];
   const maxPhase = list?.length ? Math.max(...list) : null;
 

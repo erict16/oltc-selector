@@ -512,7 +512,6 @@ export const SERIES: SeriesDef[] = [
     vacuum: true,
     currents: {
       I: [500, 600],
-      III: [500, 600],
     },
     umKv: [40.5, 72.5],
     usesSelectorSize: false,
@@ -525,8 +524,8 @@ export const SERIES: SeriesDef[] = [
     maxPositionsLinear: 17,
     maxPositionsWithChangeOver: 17,
     defaultMdu: "CMA7",
-    notesEn: "Dry-type; commercial often 3×CZI-500/…",
-    notesZh: "干式；商务常写 3×CZI-500/…",
+    notesEn: "Dry-type; 2025 list and 2026 OS are 3×CZI only (no CZIII row).",
+    notesZh: "干式；价表和 2026 实单只有 3×CZI，没有 CZIII。",
     rank: 14,
   },
   {
