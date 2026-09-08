@@ -21,7 +21,7 @@ export const ANTHONY_PROMOTED: ReplayCase[] = [
     id: "QS2602101",
     source: "Anthony CZ 3xCZI-500/40.5-17",
     tag: "customer-specified",
-    note: "Dry 3×CZI. Engine #1 may be CZIII; 3× must stay eligible.",
+    note: "Dry 3×CZI. Engine #1 is 3xCZI (no CZIII list row).",
     input: {
       mounting: "dry_type",
       medium: "dry",

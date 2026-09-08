@@ -22,7 +22,7 @@ Early scaffold put **CV2 currents = 350 / 500 / 600**.
 | CMD | III 400/600/1000; I +1600/2400 | Positions 14 / 27 |
 | HWV | 400 / **800** / 1000 | No 600 A; Um 17.5 / 40.5 / 72.5 |
 | CVT | 160 / 200 | Um **12** only |
-| CZ | 500 / 600 | Um 40.5 / 72.5; often `3×CZI-…` |
+| CZ | 500 / 600 | Um 40.5 / 72.5; **always `3×CZI-…`** (2025 list has no CZIII row) |
 | HWDK | 1500 / 2000 / 2500 | 35 / 69 kV |
 | **WSL / WDL** | **600 / 800 / 1000 / 1200 / 1600 / 2000 / 2400** | Um 12 / 40.5 / 72.5 / 126 / 145 / 170. OCTC (无载). `dutyKind=octc` only. Y→WSLIV, D→WSLII. Contact `6x5` / `7x6` / `12x11` / `18x17` + size A/B/E. List = CMA7 column on sheet `WSL(WDL)`. WDL aliases WSL when no twin row. Do not invent missing rows (no 7x6E @ 72.5; no WSLIV-2000D/126). WSG/WG is a different sheet — not this family. |
 

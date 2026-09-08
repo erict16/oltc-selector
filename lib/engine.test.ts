@@ -868,24 +868,30 @@ describe("3× stays eligible when III also covers", () => {
 });
 
 describe("CZ dry", () => {
-  it("500 A dry 40.5 linear 17 lists 3xCZI", () => {
-    const out = selectOltc({
-      mounting: "dry_type",
-      medium: "dry",
-      preferVacuum: true,
-      phases: "III",
-      connection: "any",
-      throughCurrentA: 500,
-      umKv: 40.5,
-      stepVoltageV: 600,
-      regulation: "linear",
-      positions: 17,
-      mdu: "none",
-    });
+  const dry500 = {
+    mounting: "dry_type" as const,
+    medium: "dry" as const,
+    preferVacuum: true,
+    phases: "III" as const,
+    connection: "any" as const,
+    throughCurrentA: 500,
+    umKv: 40.5,
+    stepVoltageV: 600,
+    regulation: "linear" as const,
+    mdu: "none" as const,
+  };
+
+  it("500 A dry 40.5 linear 17 primary is 3xCZI, not CZIII", () => {
+    const out = selectOltc({ ...dry500, positions: 17 });
     expect(out.ok).toBe(true);
-    expect(out.results.some((r) => r.model === "3xCZI-500/40.5-17")).toBe(
-      true,
-    );
+    expect(out.results[0].model).toBe("3xCZI-500/40.5-17");
+    expect(out.results.some((r) => r.model.startsWith("CZIII"))).toBe(false);
+  });
+
+  it("Melbourne-like 9 pos primary is 3xCZI-500/40.5-9", () => {
+    const out = selectOltc({ ...dry500, positions: 9 });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("3xCZI-500/40.5-9");
   });
 });
 
