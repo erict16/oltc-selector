@@ -18,7 +18,7 @@ export function SiteFooter() {
     getServerLang,
   );
 
-  if (/\/(privacy|terms)\/?$/.test(pathname)) {
+  if (/\/(privacy|terms|login)\/?$/.test(pathname)) {
     return null;
   }
 
