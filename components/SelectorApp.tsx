@@ -29,7 +29,8 @@ import {
 import { FIXTURES, selectOltc, stepUpOf } from "@/lib/engine";
 import {
   lookupDiagram,
-  midOptionsFor,
+  midControl,
+  nextMidForPm,
   pitchFromPlusMinus,
   pmStepOptionsFor,
   positionsFor,
@@ -238,11 +239,11 @@ export function SelectorApp() {
     }
     const n = Number(raw);
     if (!Number.isFinite(n) || n <= 0) return;
-    // Changing ±N resets mid to brochure preferred and recomputes P = 2N+mid
-    setInput((s) => ({
-      ...s,
-      ...geometryForPm(n, s.regulation),
-    }));
+    // Keep mid when the new ±N still has that brochure pair; else snap.
+    setInput((s) => {
+      const mid = nextMidForPm(n, s.regulation, s.midPositions);
+      return { ...s, ...geometryForPm(n, s.regulation, mid) };
+    });
   };
 
   const applyMid = (raw: string) => {
@@ -403,10 +404,8 @@ export function SelectorApp() {
       : input.plusMinusSteps && input.plusMinusSteps > 0
         ? input.plusMinusSteps
         : null;
-  const midOpts =
-    !isLinear && pmN != null
-      ? midOptionsFor(pmN, input.regulation)
-      : ([3, 1] as Array<1 | 3>);
+  const midCtrl = midControl(pmN, input.regulation);
+  const midOpts = midCtrl.options;
 
   return (
     <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:gap-6 sm:px-6 sm:pt-12 sm:pb-10">
@@ -615,7 +614,7 @@ export function SelectorApp() {
               </Field>
             ) : null}
 
-            {!isLinear && midOpts.length > 1 ? (
+            {midCtrl.show ? (
               <Field label={t(lang, "mid")}>
                 <select
                   className={controlClass}

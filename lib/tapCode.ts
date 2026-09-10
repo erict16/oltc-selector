@@ -130,6 +130,32 @@ export function midOptionsFor(
   return out;
 }
 
+/**
+ * 中间位 form control. Keep it mounted on W/G even when ±N has a single
+ * brochure mid — hiding it on ±4…±7 made the control vanish, and it did
+ * not reliably come back after returning to ±8.
+ */
+export function midControl(
+  n: number | null,
+  regulation: Regulation,
+): { show: boolean; options: Array<1 | 3> } {
+  if (regulation === "linear") return { show: false, options: [] };
+  if (n == null || n <= 0) return { show: true, options: [3, 1] };
+  const options = midOptionsFor(n, regulation);
+  return { show: options.length > 0, options };
+}
+
+/** Keep the current mid across a ±N change when it is still a brochure pair. */
+export function nextMidForPm(
+  n: number,
+  regulation: Regulation,
+  current?: 0 | 1 | 3,
+): 1 | 3 {
+  const opts = midOptionsFor(n, regulation);
+  if ((current === 1 || current === 3) && opts.includes(current)) return current;
+  return preferredMid(n, regulation);
+}
+
 /** Re-export ± options derived from Fig. 3-3 */
 export const PM_STEP_OPTIONS_W = [
   4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
