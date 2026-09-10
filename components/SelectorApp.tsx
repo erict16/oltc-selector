@@ -484,7 +484,7 @@ export function SelectorApp() {
   const midOpts = midCtrl.options;
 
   return (
-    <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pr-14 pb-8 sm:gap-6 sm:px-6 sm:pt-12 sm:pr-6 sm:pb-10">
+    <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:gap-6 sm:px-6 sm:pt-12 sm:pb-10">
       {/* Leftover viewport around the whole workbench (title + cards).
           Bottom spacer grows more so the block sits slightly above true center.
           Collapses when the page needs to scroll. */}
@@ -492,7 +492,7 @@ export function SelectorApp() {
 
       {/* Stack on phone: title full width, langs row below — avoids squashed header */}
       <header className="flex shrink-0 flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 max-sm:pr-11">
           <h1 className="font-[family-name:var(--font-display)] text-[1.45rem] font-semibold leading-tight tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.8rem]">
             {t(lang, "title")}
           </h1>
