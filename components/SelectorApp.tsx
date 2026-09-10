@@ -181,7 +181,7 @@ export function SelectorApp() {
   const [voltageMode, setVoltageMode] = useState<"winding" | "equipment">(
     "winding",
   );
-  const [windingRatedKv, setWindingRatedKv] = useState(0);
+  const [windingRatedKv, setWindingRatedKv] = useState(66);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreUnlocked, setMoreUnlocked] = useState(false);
@@ -234,6 +234,7 @@ export function SelectorApp() {
     if (mode === voltageMode) return;
     setVoltageMode(mode);
     if (mode === "winding") {
+      setWindingRatedKv((kv) => (kv > 0 ? kv : 66));
       setInput((s) => ({ ...s, umKv: 0 }));
     } else {
       setWindingRatedKv(0);
@@ -439,7 +440,7 @@ export function SelectorApp() {
         setInput(defaultInput);
         setPm("8");
         setVoltageMode("winding");
-        setWindingRatedKv(0);
+        setWindingRatedKv(66);
       }
       setActiveExample(null);
       clearResult();
