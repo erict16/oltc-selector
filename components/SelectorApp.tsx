@@ -42,7 +42,6 @@ import {
   positionsFor,
   preferredMid,
 } from "@/lib/tapCode";
-import { AdminEntry } from "@/components/AdminEntry";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { AltListAmount, ListPrice, useListFx } from "@/components/ListPrice";
 import {
@@ -152,7 +151,7 @@ function Field({
           {label}
         </span>
         {action ? (
-          <span className="shrink-0 whitespace-nowrap text-[0.75rem] leading-none text-[var(--color-muted)]">
+          <span className="shrink-0 whitespace-nowrap text-[0.75rem] leading-none">
             {action}
           </span>
         ) : null}
@@ -489,7 +488,7 @@ export function SelectorApp() {
   const midOpts = midCtrl.options;
 
   return (
-    <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:gap-6 sm:px-6 sm:pt-12 sm:pb-10">
+    <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pr-14 pb-8 sm:gap-6 sm:px-6 sm:pt-12 sm:pr-6 sm:pb-10">
       {/* Leftover viewport around the whole workbench (title + cards).
           Bottom spacer grows more so the block sits slightly above true center.
           Collapses when the page needs to scroll. */}
@@ -506,7 +505,6 @@ export function SelectorApp() {
           </p>
         </div>
         <div className="flex w-full max-w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end">
-          <AdminEntry lang={lang} />
           <LangSwitcher
             lang={lang}
             onChange={setLang}
@@ -588,6 +586,39 @@ export function SelectorApp() {
                   ? t(lang, "umWinding")
                   : t(lang, "um")
               }
+              action={
+                <div
+                  className="inline-flex h-[1.625rem] items-center rounded-full bg-[var(--color-soft)] p-0.5"
+                  role="group"
+                  aria-label={t(lang, "umModeAria")}
+                >
+                  {(
+                    [
+                      ["winding", "umWindingBtn"],
+                      ["equipment", "umEquipment"],
+                    ] as const
+                  ).map(([mode, key]) => {
+                    const on = voltageMode === mode;
+                    return (
+                      <button
+                        key={mode}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => setVoltageEntry(mode)}
+                        className={cx(
+                          "inline-flex h-6 items-center rounded-full px-2.5 text-[0.6875rem] leading-none transition-[transform,background-color,color] duration-150 active:scale-[0.96]",
+                          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+                          on
+                            ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
+                            : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]",
+                        )}
+                      >
+                        {t(lang, key)}
+                      </button>
+                    );
+                  })}
+                </div>
+              }
               tip={
                 voltageMode === "winding" &&
                 input.umKv !== windingUmFromRatedKv(windingRatedKv)
@@ -595,37 +626,6 @@ export function SelectorApp() {
                   : undefined
               }
             >
-              <div
-                className="grid h-8 grid-cols-2 gap-1"
-                role="group"
-                aria-label={t(lang, "umModeAria")}
-              >
-                {(
-                  [
-                    ["winding", "umWindingBtn"],
-                    ["equipment", "umEquipment"],
-                  ] as const
-                ).map(([mode, key]) => {
-                  const on = voltageMode === mode;
-                  return (
-                    <button
-                      key={mode}
-                      type="button"
-                      aria-pressed={on}
-                      onClick={() => setVoltageEntry(mode)}
-                      className={cx(
-                        "inline-flex h-8 items-center justify-center rounded-[var(--radius-sm)] border text-[0.75rem] leading-none transition-colors duration-150",
-                        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-                        on
-                          ? "border-[var(--color-accent)] font-medium text-[var(--color-accent)]"
-                          : "border-[var(--color-rule-2)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",
-                      )}
-                    >
-                      {t(lang, key)}
-                    </button>
-                  );
-                })}
-              </div>
               <select
                 className={controlClass}
                 value={String(
@@ -702,7 +702,7 @@ export function SelectorApp() {
                 label={t(lang, "pmSteps")}
                 action={
                   posHint ? (
-                    <span className="font-mono font-medium tabular-nums">
+                    <span className="font-mono font-medium tabular-nums text-[var(--color-muted)]">
                       {posHint}
                     </span>
                   ) : undefined

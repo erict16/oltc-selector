@@ -13,7 +13,7 @@ import {
 import { useSyncExternalStore } from "react";
 
 const fieldClass =
-  "w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 py-2 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
+  "mt-1.5 block w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 py-2 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
 
 export function LoginForm() {
   const lang = useSyncExternalStore(
@@ -41,16 +41,16 @@ export function LoginForm() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col px-4 pt-16 pb-8 sm:px-6">
-      <form
-        onSubmit={onSubmit}
-        className="mx-auto w-full max-w-[22rem] rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white p-6 shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)]"
-      >
-        <h1 className="font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--color-ink)]">
+    <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-6">
+      <form onSubmit={onSubmit} className="w-full max-w-[22rem]">
+        <h1 className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-[-0.02em] text-[var(--color-ink)]">
           {t(lang, "adminTitle")}
         </h1>
-        <label className="mt-4 block">
-          <span className="mb-1.5 block text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
+        <p className="mt-1.5 text-[0.8125rem] leading-snug text-[var(--color-muted)]">
+          {t(lang, "adminHint")}
+        </p>
+        <label className="mt-6 block">
+          <span className="text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
             {t(lang, "adminUser")}
           </span>
           <input
@@ -66,7 +66,7 @@ export function LoginForm() {
           />
         </label>
         <label className="mt-4 block">
-          <span className="mb-1.5 block text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
+          <span className="text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
             {t(lang, "adminPassword")}
           </span>
           <input
@@ -89,7 +89,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={busy || !user || !password}
-          className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 text-[0.875rem] font-medium text-[var(--color-accent-ink)] disabled:opacity-50"
+          className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 text-[0.875rem] font-medium text-[var(--color-accent-ink)] transition-transform duration-150 active:scale-[0.98] disabled:opacity-50"
         >
           {t(lang, "adminSubmit")}
         </button>
