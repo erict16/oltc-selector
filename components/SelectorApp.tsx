@@ -140,12 +140,12 @@ function Field({
   const Tag = as;
   return (
     <Tag className={cx("flex min-w-0 flex-col gap-1.5", className)}>
-      <span className="flex h-5 items-center gap-2">
-        <span className="min-w-0 truncate text-[0.8125rem] leading-none font-medium text-[var(--color-ink)]">
+      <span className="flex h-7 items-center gap-2">
+        <span className="min-w-0 flex-1 truncate text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
           {label}
         </span>
         {action ? (
-          <span className="shrink-0 whitespace-nowrap text-[0.75rem] leading-none">
+          <span className="ml-auto shrink-0 whitespace-nowrap text-[0.75rem] leading-none">
             {action}
           </span>
         ) : null}
@@ -604,7 +604,7 @@ export function SelectorApp() {
               }
               action={
                 <div
-                  className="inline-flex h-5 items-center rounded-full bg-[var(--color-soft)] p-px"
+                  className="inline-flex h-[1.625rem] items-center rounded-full bg-[var(--color-soft)] p-0.5"
                   role="group"
                   aria-label={t(lang, "umModeAria")}
                 >
@@ -622,7 +622,7 @@ export function SelectorApp() {
                         aria-pressed={on}
                         onClick={() => setVoltageEntry(mode)}
                         className={cx(
-                          "inline-flex h-[1.125rem] items-center rounded-full px-2 text-[0.625rem] leading-none whitespace-nowrap transition-[transform,background-color,color] duration-150 active:scale-[0.96]",
+                          "inline-flex h-6 items-center rounded-full px-2.5 text-[0.6875rem] leading-none whitespace-nowrap transition-[transform,background-color,color] duration-150 active:scale-[0.96]",
                           "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
                           on
                             ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
