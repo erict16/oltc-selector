@@ -26,11 +26,7 @@ import {
   STEP_VOLTAGE_OPTIONS_V,
   UM_MENU,
 } from "@/lib/catalog";
-import {
-  WINDING_RATED_KV,
-  oltcUmFromRatedKv,
-  windingUmFromRatedKv,
-} from "@/lib/deriveUm";
+import { WINDING_RATED_KV, oltcUmFromRatedKv } from "@/lib/deriveUm";
 import { FIXTURES, selectOltc, stepUpOf } from "@/lib/engine";
 import {
   defaultMid,
@@ -618,12 +614,6 @@ export function SelectorApp() {
                     );
                   })}
                 </div>
-              }
-              tip={
-                voltageMode === "winding" &&
-                input.umKv !== windingUmFromRatedKv(windingRatedKv)
-                  ? t(lang, "umDerivedHint", { um: input.umKv })
-                  : undefined
               }
             >
               <select
