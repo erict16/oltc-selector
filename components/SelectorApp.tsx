@@ -85,7 +85,7 @@ const defaultInput: SelectInput = {
   phases: "III",
   connection: "Y",
   throughCurrentA: 400,
-  umKv: 72.5,
+  umKv: 0,
   stepVoltageV: 1500,
   regulation: "reversing",
   // Brochure default: ±8 mid3 → 10193W (most common); must stay in sync with `pm`
@@ -181,7 +181,7 @@ export function SelectorApp() {
   const [voltageMode, setVoltageMode] = useState<"winding" | "equipment">(
     "winding",
   );
-  const [windingRatedKv, setWindingRatedKv] = useState(66);
+  const [windingRatedKv, setWindingRatedKv] = useState(0);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreUnlocked, setMoreUnlocked] = useState(false);
@@ -223,7 +223,7 @@ export function SelectorApp() {
     setInput((s) => {
       const next = { ...s, [k]: v };
       if (k === "connection" && voltageMode === "winding") {
-        next.umKv = oltcUmFromRatedKv(windingRatedKv, next.connection);
+        next.umKv = 0;
       }
       return next;
     });
@@ -234,10 +234,10 @@ export function SelectorApp() {
     if (mode === voltageMode) return;
     setVoltageMode(mode);
     if (mode === "winding") {
-      setInput((s) => ({
-        ...s,
-        umKv: oltcUmFromRatedKv(windingRatedKv, s.connection),
-      }));
+      setInput((s) => ({ ...s, umKv: 0 }));
+    } else {
+      setWindingRatedKv(0);
+      setInput((s) => ({ ...s, umKv: 0 }));
     }
     touch();
   };
@@ -245,11 +245,9 @@ export function SelectorApp() {
   const setVoltageKv = (kv: number) => {
     if (voltageMode === "winding") {
       setWindingRatedKv(kv);
-      setInput((s) => ({
-        ...s,
-        umKv: oltcUmFromRatedKv(kv, s.connection),
-      }));
+      setInput((s) => ({ ...s, umKv: 0 }));
     } else {
+      setWindingRatedKv(0);
       patch("umKv", kv);
       return;
     }
@@ -319,13 +317,40 @@ export function SelectorApp() {
     });
   };
 
+  const dutyForSelect = (): SelectInput | { error: true } => {
+    if (voltageMode === "winding") {
+      if (!(windingRatedKv > 0)) return { error: true };
+      return {
+        ...input,
+        umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
+      };
+    }
+    if (!(input.umKv > 0)) return { error: true };
+    return { ...input, umKv: input.umKv };
+  };
+
   const runSelect = () => {
     if (runTimer.current) clearTimeout(runTimer.current);
     setRunning(true);
     setAltsOpen(false);
     setOpenAlts([]);
     runTimer.current = setTimeout(() => {
-      const out = selectOltc(input);
+      const duty = dutyForSelect();
+      if ("error" in duty) {
+        const msg = t(lang, voltageMode === "winding" ? "needRated" : "needUm");
+        setResult({
+          ok: false,
+          results: [],
+          errorsEn: [msg],
+          errorsZh: [msg],
+        });
+        setResultKey((k) => k + 1);
+        setHasRun(true);
+        setStale(false);
+        setRunning(false);
+        return;
+      }
+      const out = selectOltc(duty);
       setResult(out);
       setResultKey((k) => k + 1);
       setHasRun(true);
@@ -414,7 +439,7 @@ export function SelectorApp() {
         setInput(defaultInput);
         setPm("8");
         setVoltageMode("winding");
-        setWindingRatedKv(66);
+        setWindingRatedKv(0);
       }
       setActiveExample(null);
       clearResult();
@@ -440,7 +465,7 @@ export function SelectorApp() {
     setVoltageMode("winding");
     setInput({
       ...next,
-      umKv: oltcUmFromRatedKv(rated, next.connection),
+      umKv: 0,
     });
     setActiveExample(ex.key);
     clearResult();
@@ -612,11 +637,18 @@ export function SelectorApp() {
             >
               <select
                 className={controlClass}
-                value={String(
-                  voltageMode === "winding" ? windingRatedKv : input.umKv,
-                )}
+                value={
+                  voltageMode === "winding"
+                    ? windingRatedKv
+                      ? String(windingRatedKv)
+                      : ""
+                    : input.umKv
+                      ? String(input.umKv)
+                      : ""
+                }
                 onChange={(e) => setVoltageKv(Number(e.target.value))}
               >
+                <option value="">{t(lang, "pickVoltage")}</option>
                 {(voltageMode === "winding"
                   ? WINDING_RATED_KV.map((v) => ({
                       value: v,
@@ -1165,7 +1197,13 @@ export function SelectorApp() {
                           input.connection === "Y"
                             ? "umResultStar"
                             : "umResultLine",
-                          { rated: windingRatedKv, um: input.umKv },
+                          {
+                            rated: windingRatedKv,
+                            um: oltcUmFromRatedKv(
+                              windingRatedKv,
+                              input.connection,
+                            ),
+                          },
                         )}
                       </p>
                     ) : null}

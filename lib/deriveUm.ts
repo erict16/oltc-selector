@@ -58,23 +58,22 @@ export function windingUmFromRatedKv(ratedKv: number): number {
 /**
  * OLTC Um from the tap-winding equipment class + where the switch sits.
  *
- * Y (star / neutral), graded insulation — 2026 OS tap-side confirmed
- * (I matches S/U, so Un is the winding the OLTC sits on):
- *   110–330 kV class → catalogue 72.5 (LI 350 / PF 140)
+ * Y (star / neutral), graded insulation:
+ *   110 / 132 / 150 kV class → catalogue 72.5 (LI 350 / PF 140)
+ *   220 kV class stays 252 — do not silently pick CV2 / 72.5
  *   35 / 66 kV stay at winding Um (40.5 / 72.5)
  *
  * D / any (line end): winding Um. Do not drop — line-end 132 is 145, not 72.5.
  *
  * Wilson Q30136: 132 kV on the OLTC, star → 72.5.
- * A few Y jobs still sell 126 / 170 / 252 (GETRA, Trafoser, Wilson 220 kV /170).
- * Those stay on the Um toggle — do not overfit the default.
+ * 220 kV star that really wants 72.5: switch to the Um tab and pick 72.5.
  */
 export function deriveOltcUm(
   windingUmKv: number,
   connection: SelectInput["connection"],
 ): number {
   if (connection !== "Y") return windingUmKv;
-  if (windingUmKv >= 126 - 0.1) return 72.5;
+  if (windingUmKv >= 125.9 && windingUmKv <= 170.1) return 72.5;
   return windingUmKv;
 }
 

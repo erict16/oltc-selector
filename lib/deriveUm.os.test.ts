@@ -96,17 +96,8 @@ describe("2026 OS: only tap-side Un (I matches S/U)", () => {
     expect(pct).toBeGreaterThanOrEqual(90);
   });
 
-  it("220 / 230 kV star → sold 72.5 at ≥80%", () => {
-    const subset = rows.filter(
-      (r) => r.conn === "Y" && r.rated >= 200 && r.rated <= 250,
-    );
-    const { n, pct } = matchRate(subset);
-    expect(n).toBeGreaterThan(10);
-    expect(pct).toBeGreaterThanOrEqual(80);
-  });
-
-  it("tap-side Y/D excluding 35 kV class matches sold Um at ≥85%", () => {
-    const subset = rows.filter((r) => r.rated >= 48);
+  it("tap-side Y/D 66–150 kV class matches sold Um at ≥85%", () => {
+    const subset = rows.filter((r) => r.rated >= 48 && r.rated < 200);
     const { n, pct } = matchRate(subset);
     expect(n).toBeGreaterThan(50);
     expect(pct).toBeGreaterThanOrEqual(85);
