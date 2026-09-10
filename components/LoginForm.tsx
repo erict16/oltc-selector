@@ -13,8 +13,9 @@ import {
 } from "@/lib/i18n";
 import { useSyncExternalStore } from "react";
 
+/** Tailwind Plus · Application UI / Forms / Sign-in / Simple, recolored. */
 const fieldClass =
-  "mt-1.5 block w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 py-2 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
+  "block w-full rounded-md bg-white px-3 py-1.5 text-base text-[var(--color-ink)] outline-1 -outline-offset-1 outline-[var(--color-rule-2)] placeholder:text-[var(--color-muted)] focus:outline-2 focus:-outline-offset-2 focus:outline-[var(--color-accent)] sm:text-sm/6";
 
 export function LoginForm() {
   const lang = useSyncExternalStore(
@@ -42,63 +43,90 @@ export function LoginForm() {
   };
 
   return (
-    <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-6">
-      <Link
-        href="/"
-        aria-label={t(lang, "adminBack")}
-        className="absolute top-[max(0.75rem,env(safe-area-inset-top))] left-[max(0.75rem,env(safe-area-inset-left))] inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-ink-2)] transition-[transform,color] duration-150 hover:text-[var(--color-ink)] active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-      >
-        <ArrowLeftIcon className="h-5 w-5" aria-hidden />
-      </Link>
-      <form onSubmit={onSubmit} className="w-full max-w-[22rem]">
-        <h1 className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-[-0.02em] text-[var(--color-ink)]">
+    <div className="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+        <h1 className="text-center text-2xl/9 font-bold tracking-tight text-[var(--color-ink)]">
           {t(lang, "adminTitle")}
         </h1>
-        <label className="mt-6 block">
-          <span className="text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
-            {t(lang, "adminUser")}
-          </span>
-          <input
-            className={fieldClass}
-            type="text"
-            name="username"
-            autoComplete="username"
-            value={user}
-            onChange={(e) => {
-              setUser(e.target.value);
-              setWrong(false);
-            }}
-          />
-        </label>
-        <label className="mt-4 block">
-          <span className="text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
-            {t(lang, "adminPassword")}
-          </span>
-          <input
-            className={fieldClass}
-            type="password"
-            name="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setWrong(false);
-            }}
-          />
-        </label>
-        {wrong ? (
-          <p className="mt-2 text-[0.8125rem] text-[var(--color-err)]">
-            {t(lang, "adminWrong")}
-          </p>
-        ) : null}
-        <button
-          type="submit"
-          disabled={busy || !user || !password}
-          className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 text-[0.875rem] font-medium text-[var(--color-accent-ink)] transition-transform duration-150 active:scale-[0.98] disabled:opacity-50"
-        >
-          {t(lang, "adminSubmit")}
-        </button>
-      </form>
+      </div>
+
+      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        <form onSubmit={onSubmit} className="space-y-6">
+          <div>
+            <label
+              htmlFor="username"
+              className="block text-sm/6 font-medium text-[var(--color-ink)]"
+            >
+              {t(lang, "adminUser")}
+            </label>
+            <div className="mt-2">
+              <input
+                id="username"
+                className={fieldClass}
+                type="text"
+                name="username"
+                autoComplete="username"
+                required
+                value={user}
+                onChange={(e) => {
+                  setUser(e.target.value);
+                  setWrong(false);
+                }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm/6 font-medium text-[var(--color-ink)]"
+            >
+              {t(lang, "adminPassword")}
+            </label>
+            <div className="mt-2">
+              <input
+                id="password"
+                className={fieldClass}
+                type="password"
+                name="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setWrong(false);
+                }}
+              />
+            </div>
+          </div>
+
+          {wrong ? (
+            <p className="text-sm/6 text-[var(--color-err)]">
+              {t(lang, "adminWrong")}
+            </p>
+          ) : null}
+
+          <div>
+            <button
+              type="submit"
+              disabled={busy || !user || !password}
+              className="flex w-full justify-center rounded-md bg-[var(--color-accent)] px-3 py-1.5 text-sm/6 font-semibold text-[var(--color-accent-ink)] shadow-xs hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50"
+            >
+              {t(lang, "adminSubmit")}
+            </button>
+          </div>
+        </form>
+
+        <p className="mt-10 text-center text-sm/6">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 font-semibold text-[var(--color-accent)] hover:brightness-110"
+          >
+            <ArrowLeftIcon className="h-4 w-4" aria-hidden />
+            {t(lang, "adminBack")}
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
