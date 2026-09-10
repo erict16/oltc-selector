@@ -113,11 +113,11 @@ describe("catalogue menu labels", () => {
   });
 
   it("Chinese field labels: switch current, equipment Um, step voltage", () => {
-    expect(t("zh", "throughCurrent")).toBe("开关通过电流 Iᵤ");
+    expect(t("zh", "throughCurrent")).toBe("开关最大通过电流 Iᵤ");
     expect(t("zh", "um")).toBe("设备最高电压 Um");
     expect(t("zh", "umWinding")).toBe("调压侧额定电压");
     expect(t("zh", "ust")).toBe("级电压 Ust");
-    expect(t("en", "throughCurrent")).toBe("Switch through-current Iᵤ");
+    expect(t("en", "throughCurrent")).toBe("Max. through-current Iᵤ");
     expect(t("en", "um")).toBe("Equipment Um");
     expect(t("en", "umWinding")).toBe("Tap-side voltage");
     expect(t("en", "ust")).toBe("Step voltage Ust");
