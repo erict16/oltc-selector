@@ -36,8 +36,15 @@ import {
   positionsFor,
   preferredMid,
 } from "@/lib/tapCode";
+import { AdminEntry } from "@/components/AdminEntry";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { AltListAmount, ListPrice, useListFx } from "@/components/ListPrice";
+import {
+  getAdminSnapshot,
+  getServerAdmin,
+  subscribeAdmin,
+} from "@/lib/adminSession";
+import type { MarketId } from "@/lib/coefficients";
 import {
   currentLabel,
   getAppLang,
@@ -191,6 +198,12 @@ export function SelectorApp() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const [paneMinH, setPaneMinH] = useState<number | undefined>(undefined);
   const { currency, fx, setCurrency } = useListFx();
+  const [market, setMarket] = useState<MarketId>("list");
+  const admin = useSyncExternalStore(
+    subscribeAdmin,
+    getAdminSnapshot,
+    getServerAdmin,
+  );
 
   const isLinear = input.regulation === "linear";
   const selectorVisible = showSelectorSize(input);
@@ -424,11 +437,14 @@ export function SelectorApp() {
             {t(lang, "subtitle")}
           </p>
         </div>
-        <LangSwitcher
-          lang={lang}
-          onChange={setLang}
-          ariaLabel={t(lang, "langAria")}
-        />
+        <div className="flex w-full max-w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end">
+          <AdminEntry lang={lang} />
+          <LangSwitcher
+            lang={lang}
+            onChange={setLang}
+            ariaLabel={t(lang, "langAria")}
+          />
+        </div>
       </header>
 
       {/* Single column phone → two columns desktop; result below form on mobile */}
@@ -1032,13 +1048,17 @@ export function SelectorApp() {
                     dutyMounting={input.mounting}
                   />
 
-                  <ListPrice
-                    model={primary.model}
-                    lang={lang}
-                    currency={currency}
-                    fx={fx}
-                    onCurrency={setCurrency}
-                  />
+                  {admin ? (
+                    <ListPrice
+                      model={primary.model}
+                      lang={lang}
+                      currency={currency}
+                      fx={fx}
+                      onCurrency={setCurrency}
+                      market={market}
+                      onMarket={setMarket}
+                    />
+                  ) : null}
 
                   {alts.length > 0 ? (
                     <div className="shrink-0 border-t border-[var(--color-rule)] px-4 py-2.5">
@@ -1113,12 +1133,15 @@ export function SelectorApp() {
                                       </span>
                                     </button>
                                     <span className="flex shrink-0 items-center gap-1.5">
-                                      <AltListAmount
-                                        model={r.model}
-                                        lang={lang}
-                                        currency={currency}
-                                        fx={fx}
-                                      />
+                                      {admin ? (
+                                        <AltListAmount
+                                          model={r.model}
+                                          lang={lang}
+                                          currency={currency}
+                                          fx={fx}
+                                          market={market}
+                                        />
+                                      ) : null}
                                       <button
                                         type="button"
                                         onClick={() => copyModel(r.model)}
