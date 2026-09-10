@@ -26,7 +26,11 @@ import {
   STEP_VOLTAGE_OPTIONS_V,
   UM_MENU,
 } from "@/lib/catalog";
-import { deriveOltcUm } from "@/lib/deriveUm";
+import {
+  WINDING_RATED_KV,
+  oltcUmFromRatedKv,
+  windingUmFromRatedKv,
+} from "@/lib/deriveUm";
 import { FIXTURES, selectOltc, stepUpOf } from "@/lib/engine";
 import {
   defaultMid,
@@ -46,7 +50,6 @@ import {
   getServerAdmin,
   subscribeAdmin,
 } from "@/lib/adminSession";
-import type { MarketId } from "@/lib/coefficients";
 import {
   currentLabel,
   getAppLang,
@@ -183,7 +186,7 @@ export function SelectorApp() {
   const [voltageMode, setVoltageMode] = useState<"winding" | "equipment">(
     "winding",
   );
-  const [windingUmKv, setWindingUmKv] = useState(defaultInput.umKv);
+  const [windingRatedKv, setWindingRatedKv] = useState(66);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreUnlocked, setMoreUnlocked] = useState(false);
@@ -194,7 +197,7 @@ export function SelectorApp() {
     input: SelectInput;
     pm: string;
     voltageMode: "winding" | "equipment";
-    windingUmKv: number;
+    windingRatedKv: number;
   } | null>(null);
 
   const [result, setResult] = useState<SelectOutput | null>(null);
@@ -207,7 +210,6 @@ export function SelectorApp() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const [paneMinH, setPaneMinH] = useState<number | undefined>(undefined);
   const { currency, fx, setCurrency } = useListFx();
-  const [market, setMarket] = useState<MarketId>("list");
   const admin = useSyncExternalStore(
     subscribeAdmin,
     getAdminSnapshot,
@@ -226,7 +228,7 @@ export function SelectorApp() {
     setInput((s) => {
       const next = { ...s, [k]: v };
       if (k === "connection" && voltageMode === "winding") {
-        next.umKv = deriveOltcUm(windingUmKv, next.connection);
+        next.umKv = oltcUmFromRatedKv(windingRatedKv, next.connection);
       }
       return next;
     });
@@ -239,7 +241,7 @@ export function SelectorApp() {
     if (mode === "winding") {
       setInput((s) => ({
         ...s,
-        umKv: deriveOltcUm(windingUmKv, s.connection),
+        umKv: oltcUmFromRatedKv(windingRatedKv, s.connection),
       }));
     }
     touch();
@@ -247,8 +249,11 @@ export function SelectorApp() {
 
   const setVoltageKv = (kv: number) => {
     if (voltageMode === "winding") {
-      setWindingUmKv(kv);
-      setInput((s) => ({ ...s, umKv: deriveOltcUm(kv, s.connection) }));
+      setWindingRatedKv(kv);
+      setInput((s) => ({
+        ...s,
+        umKv: oltcUmFromRatedKv(kv, s.connection),
+      }));
     } else {
       patch("umKv", kv);
       return;
@@ -409,19 +414,19 @@ export function SelectorApp() {
         setInput(prev.input);
         setPm(prev.pm);
         setVoltageMode(prev.voltageMode);
-        setWindingUmKv(prev.windingUmKv);
+        setWindingRatedKv(prev.windingRatedKv);
       } else {
         setInput(defaultInput);
         setPm("8");
         setVoltageMode("winding");
-        setWindingUmKv(defaultInput.umKv);
+        setWindingRatedKv(66);
       }
       setActiveExample(null);
       clearResult();
       return;
     }
     if (activeExample == null) {
-      beforePreset.current = { input, pm, voltageMode, windingUmKv };
+      beforePreset.current = { input, pm, voltageMode, windingRatedKv };
     }
     const f = FIXTURES[ex.key];
     let next: SelectInput = { ...f.input, mdu: "none" };
@@ -437,7 +442,6 @@ export function SelectorApp() {
     }
     setInput(next);
     setVoltageMode("equipment");
-    setWindingUmKv(next.umKv);
     setActiveExample(ex.key);
     clearResult();
   };
@@ -575,7 +579,7 @@ export function SelectorApp() {
               }
               tip={
                 voltageMode === "winding" &&
-                input.umKv !== windingUmKv
+                input.umKv !== windingUmFromRatedKv(windingRatedKv)
                   ? t(lang, "umDerivedHint", { um: input.umKv })
                   : undefined
               }
@@ -614,11 +618,18 @@ export function SelectorApp() {
               <select
                 className={controlClass}
                 value={String(
-                  voltageMode === "winding" ? windingUmKv : input.umKv,
+                  voltageMode === "winding" ? windingRatedKv : input.umKv,
                 )}
                 onChange={(e) => setVoltageKv(Number(e.target.value))}
               >
-                {UM_MENU.map((u) => (
+                {(voltageMode === "winding"
+                  ? WINDING_RATED_KV.map((v) => ({
+                      value: v,
+                      labelZh: `${v} kV`,
+                      labelEn: `${v} kV`,
+                    }))
+                  : UM_MENU
+                ).map((u) => (
                   <option key={u.value} value={u.value}>
                     {currentLabel(lang, u.labelZh, u.labelEn)}
                   </option>
@@ -1167,8 +1178,6 @@ export function SelectorApp() {
                       currency={currency}
                       fx={fx}
                       onCurrency={setCurrency}
-                      market={market}
-                      onMarket={setMarket}
                     />
                   ) : null}
 
@@ -1246,7 +1255,6 @@ export function SelectorApp() {
                                           lang={lang}
                                           currency={currency}
                                           fx={fx}
-                                          market={market}
                                         />
                                       ) : null}
                                       <button

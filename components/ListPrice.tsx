@@ -3,12 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { resolveListPrice } from "@/lib/basePrices";
 import {
-  MARKET_IDS,
-  MARKET_LABEL_KEY,
-  priceWithCoeff,
-  type MarketId,
-} from "@/lib/coefficients";
-import {
   FX_FALLBACK,
   FX_STORAGE_KEY,
   LIST_CURRENCIES,
@@ -152,13 +146,11 @@ export function AltListAmount({
   lang,
   currency,
   fx,
-  market,
 }: {
   model: string;
   lang: Lang;
   currency: ListCurrency;
   fx: FxRates;
-  market: MarketId;
 }) {
   const hit = useMemo(() => resolveListPrice(model), [model]);
   if (!hit.found) {
@@ -168,15 +160,7 @@ export function AltListAmount({
       </span>
     );
   }
-  const priced = priceWithCoeff(hit.listRmb, model, market);
-  if (!priced.found) {
-    return (
-      <span className="shrink-0 text-[0.8125rem] leading-none tabular-nums text-[var(--color-muted)]">
-        —
-      </span>
-    );
-  }
-  const amount = amountLine(priced.sellRmb, currency, fx, lang);
+  const amount = amountLine(hit.listRmb, currency, fx, lang);
   return (
     <span className="shrink-0 text-[0.8125rem] leading-none tabular-nums text-[var(--color-ink-2)]">
       {hit.estimated ? `~ ${amount}` : amount}
@@ -191,16 +175,12 @@ export function ListPrice({
   currency,
   fx,
   onCurrency,
-  market,
-  onMarket,
 }: {
   model: string;
   lang: Lang;
   currency: ListCurrency;
   fx: FxRates;
   onCurrency: (next: string) => void;
-  market: MarketId;
-  onMarket: (next: MarketId) => void;
 }) {
   const hit = useMemo(() => resolveListPrice(model), [model]);
 
@@ -229,11 +209,9 @@ export function ListPrice({
   const fxLine = t(lang, fx.live ? "priceFxLive" : "priceFxFallback", {
     date: formatFxDate(fx.date, lang),
   });
-  const priced = priceWithCoeff(hit.listRmb, model, market);
-  const quoteRmb = priced.found ? priced.sellRmb : hit.listRmb;
   const quoteLine = hit.estimated
-    ? `~ ${amountLine(quoteRmb, currency, fx, lang)}`
-    : amountLine(quoteRmb, currency, fx, lang);
+    ? `~ ${amountLine(hit.listRmb, currency, fx, lang)}`
+    : amountLine(hit.listRmb, currency, fx, lang);
 
   return (
     <div className="border-t border-[var(--color-rule)] px-4 py-3.5">
@@ -242,51 +220,15 @@ export function ListPrice({
           <p className="text-[0.8125rem] font-medium text-[var(--color-ink)]">
             {t(lang, "priceTitle")}
           </p>
-          <p className="mt-1.5 text-[0.8125rem] tabular-nums text-[var(--color-ink-2)]">
-            {t(lang, "priceList")}: {amountLine(hit.listRmb, "CNY", fx, lang)}
-          </p>
-          {market !== "list" && priced.found ? (
-            <p className="mt-1 text-[0.75rem] tabular-nums text-[var(--color-muted)]">
-              {t(lang, "priceCoeffLine", {
-                list: formatMoney(hit.listRmb, "CNY", lang),
-                coeff: String(priced.coeff),
-                sell: formatMoney(priced.sellRmb, "CNY", lang),
-              })}
-            </p>
-          ) : null}
-          {market !== "list" && !priced.found ? (
-            <p className="mt-1 text-[0.75rem] text-[var(--color-muted)]">
-              {t(lang, "priceNoCoeff")}
-            </p>
-          ) : null}
           <p className="mt-1.5 text-[1.0625rem] leading-none font-normal tabular-nums tracking-tight text-[var(--color-ink)]">
             {quoteLine}
           </p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-2">
-          <label className="flex shrink-0 items-center gap-2">
-            <span className="text-[0.75rem] leading-none text-[var(--color-muted)]">
-              {t(lang, "priceRegion")}
-            </span>
-            <select
-              className={selectClass}
-              value={market}
-              onChange={(e) => onMarket(e.target.value as MarketId)}
-              aria-label={t(lang, "priceRegion")}
-            >
-              {MARKET_IDS.map((id) => (
-                <option key={id} value={id}>
-                  {t(lang, MARKET_LABEL_KEY[id])}
-                </option>
-              ))}
-            </select>
-          </label>
-          <CurrencySelect
-            lang={lang}
-            currency={currency}
-            onCurrency={onCurrency}
-          />
-        </div>
+        <CurrencySelect
+          lang={lang}
+          currency={currency}
+          onCurrency={onCurrency}
+        />
       </div>
       <p className="mt-2 text-[0.75rem] leading-snug text-[var(--color-muted)]">
         {fxLine}

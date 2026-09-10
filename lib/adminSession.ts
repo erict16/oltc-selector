@@ -1,15 +1,25 @@
 const STORAGE_KEY = "oltc-selector:admin";
+const ADMIN_USER = "admin";
+/** sha256("hm112233") — env NEXT_PUBLIC_ADMIN_PASSWORD_SHA256 overrides. */
+const DEFAULT_PASSWORD_SHA256 =
+  "487d4dd31f7fed4476ac4f22774fcabd63505c36703e8df36e8afe38f5eec51a";
 
 const adminSubs = new Set<() => void>();
 
 function configuredHash(): string {
-  return (process.env.NEXT_PUBLIC_ADMIN_PASSWORD_SHA256 ?? "")
+  const fromEnv = (process.env.NEXT_PUBLIC_ADMIN_PASSWORD_SHA256 ?? "")
     .trim()
     .toLowerCase();
+  if (/^[0-9a-f]{64}$/.test(fromEnv)) return fromEnv;
+  return DEFAULT_PASSWORD_SHA256;
 }
 
 export function isAdminConfigured(): boolean {
   return /^[0-9a-f]{64}$/.test(configuredHash());
+}
+
+export function isAdminUser(name: string): boolean {
+  return name.trim() === ADMIN_USER;
 }
 
 export async function sha256Hex(text: string): Promise<string> {
@@ -50,7 +60,11 @@ export function getServerAdmin(): boolean {
   return false;
 }
 
-export async function tryAdminLogin(password: string): Promise<boolean> {
+export async function tryAdminLogin(
+  user: string,
+  password: string,
+): Promise<boolean> {
+  if (!isAdminUser(user)) return false;
   const want = configuredHash();
   if (!want) return false;
   const got = await sha256Hex(password);

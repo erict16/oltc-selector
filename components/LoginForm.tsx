@@ -22,6 +22,7 @@ export function LoginForm() {
     getServerLang,
   );
   const router = useRouter();
+  const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [wrong, setWrong] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -30,7 +31,7 @@ export function LoginForm() {
     e.preventDefault();
     setBusy(true);
     setWrong(false);
-    const ok = await tryAdminLogin(password);
+    const ok = await tryAdminLogin(user, password);
     setBusy(false);
     if (!ok) {
       setWrong(true);
@@ -48,6 +49,22 @@ export function LoginForm() {
         <h1 className="font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--color-ink)]">
           {t(lang, "adminTitle")}
         </h1>
+        <label className="mt-4 block">
+          <span className="mb-1.5 block text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
+            {t(lang, "adminUser")}
+          </span>
+          <input
+            className={fieldClass}
+            type="text"
+            name="username"
+            autoComplete="username"
+            value={user}
+            onChange={(e) => {
+              setUser(e.target.value);
+              setWrong(false);
+            }}
+          />
+        </label>
         <label className="mt-4 block">
           <span className="mb-1.5 block text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
             {t(lang, "adminPassword")}
@@ -71,7 +88,7 @@ export function LoginForm() {
         ) : null}
         <button
           type="submit"
-          disabled={busy || !password}
+          disabled={busy || !user || !password}
           className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-4 text-[0.875rem] font-medium text-[var(--color-accent-ink)] disabled:opacity-50"
         >
           {t(lang, "adminSubmit")}
