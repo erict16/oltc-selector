@@ -9,10 +9,30 @@ export const LANG_OPTIONS: { id: Lang; label: string; short: string }[] = [
   { id: "ru", label: "Русский", short: "RU" },
 ];
 
-const LANG_STORAGE_KEY = "oltc-selector-lang";
+export const LANG_STORAGE_KEY = "oltc-selector-lang";
 
-function isLang(v: string | null): v is Lang {
-  return LANG_OPTIONS.some((o) => o.id === v);
+export function isLang(v: string | null | undefined): v is Lang {
+  return !!v && LANG_OPTIONS.some((o) => o.id === v);
+}
+
+function readCookieLang(): Lang | null {
+  if (typeof document === "undefined") return null;
+  const m = document.cookie.match(/(?:^|;\s*)oltc-selector-lang=([^;]*)/);
+  const v = m?.[1] ? decodeURIComponent(m[1]) : null;
+  return isLang(v) ? v : null;
+}
+
+function persistLang(l: Lang) {
+  try {
+    localStorage.setItem(LANG_STORAGE_KEY, l);
+  } catch {
+    /* private mode / blocked storage */
+  }
+  try {
+    document.cookie = `${LANG_STORAGE_KEY}=${encodeURIComponent(l)}; Path=/; Max-Age=34560000; SameSite=Lax`;
+  } catch {
+    /* ignore */
+  }
 }
 
 function readStoredLang(): Lang {
@@ -20,9 +40,9 @@ function readStoredLang(): Lang {
     const v = localStorage.getItem(LANG_STORAGE_KEY);
     if (isLang(v)) return v;
   } catch {
-    /* private mode / blocked storage */
+    /* ignore */
   }
-  return "zh";
+  return readCookieLang() ?? "zh";
 }
 
 let appLang: Lang = "zh";
@@ -32,13 +52,12 @@ if (typeof window !== "undefined") {
 const langSubs = new Set<() => void>();
 
 export function setAppLang(l: Lang) {
-  if (l === appLang) return;
-  appLang = l;
-  try {
-    localStorage.setItem(LANG_STORAGE_KEY, l);
-  } catch {
-    /* ignore */
+  if (l === appLang) {
+    persistLang(l);
+    return;
   }
+  appLang = l;
+  persistLang(l);
   langSubs.forEach((fn) => fn());
 }
 

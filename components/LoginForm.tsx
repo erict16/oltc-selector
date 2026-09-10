@@ -5,24 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { tryAdminLogin } from "@/lib/adminSession";
-import {
-  getAppLang,
-  getServerLang,
-  subscribeAppLang,
-  t,
-} from "@/lib/i18n";
-import { useSyncExternalStore } from "react";
+import { useAppLang } from "@/components/LangProvider";
+import { t } from "@/lib/i18n";
 
 /** Tailwind Plus · Application UI / Forms / Sign-in / Simple, recolored. */
 const fieldClass =
   "block w-full rounded-md bg-white px-3 py-1.5 text-base text-[var(--color-ink)] outline-1 -outline-offset-1 outline-[var(--color-rule-2)] placeholder:text-[var(--color-muted)] focus:outline-2 focus:-outline-offset-2 focus:outline-[var(--color-accent)] sm:text-sm/6";
 
 export function LoginForm() {
-  const lang = useSyncExternalStore(
-    subscribeAppLang,
-    getAppLang,
-    getServerLang,
-  );
+  const lang = useAppLang();
   const router = useRouter();
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");

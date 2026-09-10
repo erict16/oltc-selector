@@ -45,12 +45,10 @@ import {
   getServerAdmin,
   subscribeAdmin,
 } from "@/lib/adminSession";
+import { useAppLang } from "@/components/LangProvider";
 import {
   currentLabel,
-  getAppLang,
-  getServerLang,
   setAppLang,
-  subscribeAppLang,
   t,
   type Lang,
 } from "@/lib/i18n";
@@ -175,11 +173,7 @@ function showSelectorSize(input: SelectInput) {
 
 /** Ceiling tip from in-tank vacuum III axes only (not dry-type 160 A). */
 export function SelectorApp() {
-  const lang = useSyncExternalStore(
-    subscribeAppLang,
-    getAppLang,
-    getServerLang,
-  );
+  const lang = useAppLang();
   const setLang = setAppLang;
   const [input, setInput] = useState<SelectInput>(defaultInput);
   const [pm, setPm] = useState("8");
