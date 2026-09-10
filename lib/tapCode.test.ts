@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { midControl, midOptionsFor, nextMidForPm } from "./tapCode";
+import {
+  midControl,
+  midOptionsFor,
+  preferredMid,
+  resolveTapFields,
+} from "./tapCode";
 
 describe("中间位 control across ±N changes", () => {
   it("±8 W offers both mids; lower ± still shows the control", () => {
@@ -26,10 +31,56 @@ describe("中间位 control across ±N changes", () => {
     expect(cycle.at(-1)).toEqual({ show: true, options: [3, 1] });
   });
 
-  it("keeps mid=1 when it is still valid on the way back to ±8", () => {
-    expect(nextMidForPm(4, "reversing", 3)).toBe(1);
-    expect(nextMidForPm(8, "reversing", 1)).toBe(1);
-    expect(nextMidForPm(8, "reversing", 3)).toBe(3);
+  it("changing ±N snaps to brochure preferred mid (not leftover mid=1)", () => {
+    expect(preferredMid(4, "reversing")).toBe(1);
+    expect(preferredMid(8, "reversing")).toBe(3);
+    expect(preferredMid(9, "reversing")).toBe(1);
+    expect(preferredMid(10, "reversing")).toBe(3);
+    // ±8 → ±4 forces mid1; going back to ±8 must be 10193W not 18171W
+    const afterLow = resolveTapFields({
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      midPositions: preferredMid(8, "reversing"),
+    });
+    expect(afterLow.tapCode).toBe("10193W");
+    expect(afterLow.mid).toBe(3);
+    expect(afterLow.positions).toBe(19);
+  });
+
+  it("Fig. 3-3 W rows: P=2N+mid and commercial tap code", () => {
+    const rows: Array<[number, 1 | 3, string]> = [
+      [4, 1, "10091W"],
+      [5, 1, "12111W"],
+      [6, 1, "14131W"],
+      [7, 1, "16151W"],
+      [8, 1, "18171W"],
+      [8, 3, "10193W"],
+      [9, 1, "10191W"],
+      [10, 3, "12233W"],
+      [11, 1, "12231W"],
+      [12, 3, "14273W"],
+      [13, 1, "14271W"],
+      [14, 3, "16313W"],
+      [15, 1, "16311W"],
+      [16, 3, "18353W"],
+      [17, 1, "18351W"],
+    ];
+    for (const [n, mid, code] of rows) {
+      expect(2 * n + mid).toBe(
+        resolveTapFields({
+          regulation: "reversing",
+          plusMinusSteps: n,
+          midPositions: mid,
+        }).positions,
+      );
+      expect(
+        resolveTapFields({
+          regulation: "reversing",
+          plusMinusSteps: n,
+          midPositions: mid,
+        }).tapCode,
+      ).toBe(code);
+    }
   });
 
   it("G ±8 only has mid 3 but the control stays mounted", () => {
