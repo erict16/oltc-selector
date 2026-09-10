@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Drop the 高一档 badge on alternates (it only appeared on some rows).
+- Custom position count picks a brochure mid; ±N still snaps to Fig. 3-3 preferred mid.
 - Um menu is just `72.5 kV` — no transformer-class parentheses.
 - Guest selector has no prices. Top-right **内部** login; admin sees list RMB, a market coefficient, then FX.
 - Hosted on Vercel (`oltc-selector.vercel.app`) as well as GitHub Pages.

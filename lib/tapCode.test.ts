@@ -98,4 +98,19 @@ describe("中间位 control across ±N changes", () => {
   it("linear never shows 中间位", () => {
     expect(midControl(8, "linear").show).toBe(false);
   });
+
+  it("custom position count only offers mids that exist for that P", () => {
+    expect(midControl(null, "reversing", 19)).toEqual({
+      show: true,
+      options: [3, 1],
+    });
+    expect(midControl(null, "reversing", 17)).toEqual({
+      show: true,
+      options: [1],
+    });
+    expect(midControl(null, "reversing", 13)).toEqual({
+      show: true,
+      options: [1],
+    });
+  });
 });

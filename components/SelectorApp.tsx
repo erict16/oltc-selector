@@ -28,6 +28,8 @@ import {
 } from "@/lib/catalog";
 import { FIXTURES, selectOltc, stepUpOf } from "@/lib/engine";
 import {
+  defaultMid,
+  lookupByPositions,
   lookupDiagram,
   midControl,
   pitchFromPlusMinus,
@@ -269,7 +271,14 @@ export function SelectorApp() {
         // Mid is part of the connection diagram: P and pitch must follow
         return { ...s, ...geometryForPm(n, s.regulation, mid) };
       }
-      return { ...s, midPositions: mid };
+      // Custom P: keep position count, take pitch from the matching Fig. 3-3 row.
+      const positions = s.positions ?? 19;
+      const row = lookupByPositions(positions, mid, s.regulation);
+      return {
+        ...s,
+        midPositions: mid,
+        pitch: (row?.pitch ?? s.pitch ?? 10) as 10 | 12 | 14 | 16 | 18,
+      };
     });
   };
 
@@ -418,7 +427,7 @@ export function SelectorApp() {
       : input.plusMinusSteps && input.plusMinusSteps > 0
         ? input.plusMinusSteps
         : null;
-  const midCtrl = midControl(pmN, input.regulation);
+  const midCtrl = midControl(pmN, input.regulation, input.positions);
   const midOpts = midCtrl.options;
 
   return (
@@ -615,11 +624,26 @@ export function SelectorApp() {
                   value={input.positions ?? 19}
                   onChange={(e) => {
                     touch();
-                    setInput((s) => ({
-                      ...s,
-                      positions: Number(e.target.value),
-                      plusMinusSteps: undefined,
-                    }));
+                    const positions = Number(e.target.value);
+                    setInput((s) => {
+                      const mid = defaultMid(positions, s.regulation);
+                      const row =
+                        mid === 1 || mid === 3
+                          ? lookupByPositions(positions, mid, s.regulation)
+                          : null;
+                      return {
+                        ...s,
+                        positions,
+                        plusMinusSteps: undefined,
+                        midPositions: mid,
+                        pitch: (row?.pitch ?? s.pitch ?? 10) as
+                          | 10
+                          | 12
+                          | 14
+                          | 16
+                          | 18,
+                      };
+                    });
                   }}
                 >
                   {POSITION_OPTIONS.map((p) => (
@@ -1124,11 +1148,6 @@ export function SelectorApp() {
                                         {i === 0 ? (
                                           <span className="shrink-0 rounded-full border border-[var(--color-rule-2)] px-1.5 py-0.5 text-[0.625rem] leading-none text-[var(--color-ink-2)]">
                                             {t(lang, "allRound")}
-                                          </span>
-                                        ) : null}
-                                        {stepUp?.model === r.model ? (
-                                          <span className="shrink-0 rounded-full border border-[var(--color-rule-2)] px-1.5 py-0.5 text-[0.625rem] leading-none text-[var(--color-ink-2)]">
-                                            {t(lang, "stepUp")}
                                           </span>
                                         ) : null}
                                       </span>

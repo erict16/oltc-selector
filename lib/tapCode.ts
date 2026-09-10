@@ -97,6 +97,19 @@ export function lookupDiagram(
   );
 }
 
+/** Brochure row for a (P, mid) pair — custom position path. */
+export function lookupByPositions(
+  positions: number,
+  mid: 1 | 3,
+  regulation: Regulation,
+): TapGeometry | null {
+  return (
+    diagramsFor(regulation).find(
+      (d) => d.positions === positions && d.mid === mid,
+    ) ?? null
+  );
+}
+
 /**
  * Pitch from brochure formula when no exact row (should be rare):
  *   mid3: pitch = N + 2
@@ -138,9 +151,21 @@ export function midOptionsFor(
 export function midControl(
   n: number | null,
   regulation: Regulation,
+  positions?: number,
 ): { show: boolean; options: Array<1 | 3> } {
   if (regulation === "linear") return { show: false, options: [] };
-  if (n == null || n <= 0) return { show: true, options: [3, 1] };
+  if (n == null || n <= 0) {
+    if (positions != null && positions > 0) {
+      const mids = diagramsFor(regulation)
+        .filter((d) => d.positions === positions)
+        .map((d) => d.mid as 1 | 3);
+      const options: Array<1 | 3> = [];
+      if (mids.includes(3)) options.push(3);
+      if (mids.includes(1)) options.push(1);
+      if (options.length) return { show: true, options };
+    }
+    return { show: true, options: [3, 1] };
+  }
   const options = midOptionsFor(n, regulation);
   return { show: options.length > 0, options };
 }
