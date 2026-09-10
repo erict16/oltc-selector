@@ -26,6 +26,7 @@ import {
   STEP_VOLTAGE_OPTIONS_V,
   UM_MENU,
 } from "@/lib/catalog";
+import { deriveOltcUm } from "@/lib/deriveUm";
 import { FIXTURES, selectOltc, stepUpOf } from "@/lib/engine";
 import {
   defaultMid,
@@ -178,6 +179,11 @@ export function SelectorApp() {
   const setLang = setAppLang;
   const [input, setInput] = useState<SelectInput>(defaultInput);
   const [pm, setPm] = useState("8");
+  /** Default: fill transformer / tap-winding voltage; engine still gets OLTC Um. */
+  const [voltageMode, setVoltageMode] = useState<"winding" | "equipment">(
+    "winding",
+  );
+  const [windingUmKv, setWindingUmKv] = useState(defaultInput.umKv);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreUnlocked, setMoreUnlocked] = useState(false);
@@ -187,6 +193,8 @@ export function SelectorApp() {
   const beforePreset = useRef<{
     input: SelectInput;
     pm: string;
+    voltageMode: "winding" | "equipment";
+    windingUmKv: number;
   } | null>(null);
 
   const [result, setResult] = useState<SelectOutput | null>(null);
@@ -215,7 +223,36 @@ export function SelectorApp() {
   };
 
   const patch = <K extends keyof SelectInput>(k: K, v: SelectInput[K]) => {
-    setInput((s) => ({ ...s, [k]: v }));
+    setInput((s) => {
+      const next = { ...s, [k]: v };
+      if (k === "connection" && voltageMode === "winding") {
+        next.umKv = deriveOltcUm(windingUmKv, next.connection);
+      }
+      return next;
+    });
+    touch();
+  };
+
+  const setVoltageEntry = (mode: "winding" | "equipment") => {
+    if (mode === voltageMode) return;
+    setVoltageMode(mode);
+    if (mode === "winding") {
+      setInput((s) => ({
+        ...s,
+        umKv: deriveOltcUm(windingUmKv, s.connection),
+      }));
+    }
+    touch();
+  };
+
+  const setVoltageKv = (kv: number) => {
+    if (voltageMode === "winding") {
+      setWindingUmKv(kv);
+      setInput((s) => ({ ...s, umKv: deriveOltcUm(kv, s.connection) }));
+    } else {
+      patch("umKv", kv);
+      return;
+    }
     touch();
   };
 
@@ -371,16 +408,20 @@ export function SelectorApp() {
       if (prev) {
         setInput(prev.input);
         setPm(prev.pm);
+        setVoltageMode(prev.voltageMode);
+        setWindingUmKv(prev.windingUmKv);
       } else {
         setInput(defaultInput);
         setPm("8");
+        setVoltageMode("winding");
+        setWindingUmKv(defaultInput.umKv);
       }
       setActiveExample(null);
       clearResult();
       return;
     }
     if (activeExample == null) {
-      beforePreset.current = { input, pm };
+      beforePreset.current = { input, pm, voltageMode, windingUmKv };
     }
     const f = FIXTURES[ex.key];
     let next: SelectInput = { ...f.input, mdu: "none" };
@@ -395,6 +436,8 @@ export function SelectorApp() {
       setPm("");
     }
     setInput(next);
+    setVoltageMode("equipment");
+    setWindingUmKv(next.umKv);
     setActiveExample(ex.key);
     clearResult();
   };
@@ -524,12 +567,56 @@ export function SelectorApp() {
             </Field>
 
             <Field
-              label={t(lang, "um")}
+              as="div"
+              label={
+                voltageMode === "winding"
+                  ? t(lang, "umWinding")
+                  : t(lang, "um")
+              }
+              tip={
+                voltageMode === "winding" &&
+                input.umKv !== windingUmKv
+                  ? t(lang, "umDerivedHint", { um: input.umKv })
+                  : undefined
+              }
             >
+              <div
+                className="grid h-8 grid-cols-2 gap-1"
+                role="group"
+                aria-label={t(lang, "umModeAria")}
+              >
+                {(
+                  [
+                    ["winding", "umWinding"],
+                    ["equipment", "umEquipment"],
+                  ] as const
+                ).map(([mode, key]) => {
+                  const on = voltageMode === mode;
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => setVoltageEntry(mode)}
+                      className={cx(
+                        "inline-flex h-8 items-center justify-center rounded-[var(--radius-sm)] border text-[0.75rem] leading-none transition-colors duration-150",
+                        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+                        on
+                          ? "border-[var(--color-accent)] font-medium text-[var(--color-accent)]"
+                          : "border-[var(--color-rule-2)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",
+                      )}
+                    >
+                      {t(lang, key)}
+                    </button>
+                  );
+                })}
+              </div>
               <select
                 className={controlClass}
-                value={String(input.umKv)}
-                onChange={(e) => patch("umKv", Number(e.target.value))}
+                value={String(
+                  voltageMode === "winding" ? windingUmKv : input.umKv,
+                )}
+                onChange={(e) => setVoltageKv(Number(e.target.value))}
               >
                 {UM_MENU.map((u) => (
                   <option key={u.value} value={u.value}>

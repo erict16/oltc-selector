@@ -115,9 +115,11 @@ describe("catalogue menu labels", () => {
   it("Chinese field labels: switch current, equipment Um, step voltage", () => {
     expect(t("zh", "throughCurrent")).toBe("开关通过电流 Iᵤ");
     expect(t("zh", "um")).toBe("设备最高电压 Um");
+    expect(t("zh", "umWinding")).toBe("项圈最高电压");
     expect(t("zh", "ust")).toBe("级电压 Ust");
     expect(t("en", "throughCurrent")).toBe("Switch through-current Iᵤ");
     expect(t("en", "um")).toBe("Highest voltage for equipment Um");
+    expect(t("en", "umWinding")).toBe("Tap-winding voltage");
     expect(t("en", "ust")).toBe("Step voltage Ust");
   });
 });
