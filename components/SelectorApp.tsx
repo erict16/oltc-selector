@@ -140,8 +140,13 @@ function Field({
   const Tag = as;
   return (
     <Tag className={cx("flex min-w-0 flex-col gap-1.5 overflow-visible", className)}>
-      <span className="flex min-h-[1.25rem] items-center gap-2 overflow-visible">
-        <span className="min-w-0 flex-1 overflow-visible text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
+      <span className="flex min-h-[1.25rem] flex-nowrap items-center gap-2 overflow-visible">
+        <span
+          className={cx(
+            "min-w-0 flex-1 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]",
+            action ? "truncate" : "overflow-visible",
+          )}
+        >
           {label.split("ᵤ").map((part, i, arr) =>
             i < arr.length - 1 ? (
               <span key={i}>
@@ -1321,14 +1326,23 @@ export function SelectorApp() {
                                       </button>
                                     </span>
                                   </div>
-                                  {open ? (
-                                    <ModelSpec
-                                      lang={lang}
-                                      r={r}
-                                      dutyMounting={input.mounting}
-                                      compact
-                                    />
-                                  ) : null}
+                                  <div
+                                    className={cx(
+                                      "more-drop",
+                                      open && "more-drop-open",
+                                    )}
+                                  >
+                                    <div className="min-h-0 overflow-hidden">
+                                      <div className="more-drop-inner">
+                                        <ModelSpec
+                                          lang={lang}
+                                          r={r}
+                                          dutyMounting={input.mounting}
+                                          compact
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
                                 </li>
                               );
                             })}
