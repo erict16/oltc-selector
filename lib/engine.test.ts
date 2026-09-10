@@ -118,8 +118,8 @@ describe("catalogue menu labels", () => {
     expect(t("zh", "umWinding")).toBe("调压侧额定电压");
     expect(t("zh", "ust")).toBe("级电压 Ust");
     expect(t("en", "throughCurrent")).toBe("Switch through-current Iᵤ");
-    expect(t("en", "um")).toBe("Highest voltage for equipment Um");
-    expect(t("en", "umWinding")).toBe("Tap-side rated voltage");
+    expect(t("en", "um")).toBe("Equipment Um");
+    expect(t("en", "umWinding")).toBe("Tap-side voltage");
     expect(t("en", "ust")).toBe("Step voltage Ust");
   });
 });
