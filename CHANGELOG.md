@@ -8,7 +8,7 @@
 - Custom position count picks a brochure mid; ±N still snaps to Fig. 3-3 preferred mid.
 - Um menu is just `72.5 kV` — no transformer-class parentheses.
 - Guest selector has no prices. Viewport-corner avatar for internal login; admin sees list RMB, a market coefficient, then FX.
-- Label `Iᵤ` / g/p/y: drop `truncate` and the extra 28px row. Overflow visible; tag still `ml-auto`. Layout unchanged.
+- Um tab no longer wraps the title row (nowrap + tag `ml-auto`), so the voltage select does not drop. Alt cards use the same open/close motion as More options.
 - Tap-side rated voltage defaults to 66 kV. Rated tab still does not submit Um.
 - Rated-kV tab does not submit Um; 220 kV star stays 252, not CV2 / 72.5. Login has Remember me; fields are 40px.
 - Language choice is stored (cookie + localStorage) so the next visit opens in that language.
