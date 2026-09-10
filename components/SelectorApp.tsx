@@ -140,10 +140,10 @@ function Field({
   const Tag = as;
   return (
     <Tag className={cx("flex min-w-0 flex-col gap-1.5 overflow-visible", className)}>
-      <span className="flex min-h-[1.25rem] flex-nowrap items-center gap-2 overflow-visible">
+      <span className="flex h-[1.625rem] flex-nowrap items-center gap-2 overflow-visible">
         <span
           className={cx(
-            "min-w-0 flex-1 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]",
+            "min-w-0 flex-1 whitespace-nowrap text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]",
             action ? "truncate" : "overflow-visible",
           )}
         >
