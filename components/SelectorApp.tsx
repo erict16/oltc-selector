@@ -126,6 +126,7 @@ function Field({
   children,
   className,
   action,
+  pinAction,
   as = "label",
 }: {
   label: string;
@@ -134,28 +135,37 @@ function Field({
   className?: string;
   /** Right-side of the label row (e.g. →19位 next to ±级数) */
   action?: React.ReactNode;
+  /** Desktop: keep the control row aligned; pin the tag to the title corner. */
+  pinAction?: boolean;
   /** Button groups must not use <label> — a click on the tip would fire the first button. */
   as?: "label" | "div";
 }) {
   const Tag = as;
   return (
-    <Tag className={cx("flex min-w-0 flex-col gap-1.5", className)}>
+    <Tag
+      className={cx(
+        "flex min-w-0 flex-col gap-1.5",
+        pinAction && "sm:relative",
+        className,
+      )}
+    >
       <span
         className={cx(
           "flex min-h-[1.25rem] items-center gap-x-2 gap-y-1",
-          action ? "flex-wrap" : null,
+          action && !pinAction ? "flex-wrap" : null,
+          pinAction && "max-sm:flex-wrap sm:pr-[4.75rem]",
         )}
       >
-        <span
-          className={cx(
-            "text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]",
-            action ? "min-w-[7rem] flex-1" : "min-w-0",
-          )}
-        >
+        <span className="min-w-0 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
           {label}
         </span>
         {action ? (
-          <span className="shrink-0 whitespace-nowrap text-[0.75rem] leading-none">
+          <span
+            className={cx(
+              "shrink-0 whitespace-nowrap text-[0.75rem] leading-none",
+              pinAction && "sm:absolute sm:top-0 sm:right-0",
+            )}
+          >
             {action}
           </span>
         ) : null}
@@ -607,6 +617,7 @@ export function SelectorApp() {
 
             <Field
               as="div"
+              pinAction
               label={
                 voltageMode === "winding"
                   ? t(lang, "umWinding")
