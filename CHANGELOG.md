@@ -8,7 +8,7 @@
 - Custom position count picks a brochure mid; ±N still snaps to Fig. 3-3 preferred mid.
 - Um menu is just `72.5 kV` — no transformer-class parentheses.
 - Guest selector has no prices. Viewport-corner avatar for internal login; admin sees list RMB, a market coefficient, then FX.
-- Current field: 开关最大通过电流 Iᵤ (catalogue covering). Tap-side stays 额定电压, not 最大 — that is Un, Um already says 最高.
+- Laptop/wide: form and result sit side by side from 768px; vertical padding is tighter so a 13–14\" screen does not need to scroll before Select.
 - Tap-side rated voltage defaults to 66 kV. Rated tab still does not submit Um.
 - Rated-kV tab does not submit Um; 220 kV star stays 252, not CV2 / 72.5. Login has Remember me; fields are 40px.
 - Language choice is stored (cookie + localStorage) so the next visit opens in that language.

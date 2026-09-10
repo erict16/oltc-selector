@@ -375,7 +375,7 @@ export function SelectorApp() {
       // Mobile: result sits below the form — scroll it into view after select
       if (
         typeof window !== "undefined" &&
-        window.matchMedia("(max-width: 1023px)").matches
+        window.matchMedia("(max-width: 767px)").matches
       ) {
         window.setTimeout(() => {
           resultPaneRef.current?.scrollIntoView({
@@ -518,7 +518,7 @@ export function SelectorApp() {
   const midOpts = midCtrl.options;
 
   return (
-    <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:gap-6 sm:px-6 sm:pt-12 sm:pb-10">
+    <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:px-6 md:gap-4 md:pt-6 md:pb-4">
       {/* Leftover viewport around the whole workbench (title + cards).
           Bottom spacer grows more so the block sits slightly above true center.
           Collapses when the page needs to scroll. */}
@@ -546,14 +546,14 @@ export function SelectorApp() {
       {/* Single column phone → two columns desktop; result below form on mobile */}
       <div
         className={cx(
-          "grid min-w-0 gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-6",
-          moreOpen ? "lg:items-start" : "lg:items-stretch",
+          "grid min-w-0 gap-4 sm:gap-5 md:grid-cols-2 md:gap-5",
+          moreOpen ? "md:items-start" : "md:items-stretch",
         )}
       >
         {/* —— Form —— */}
         <form
           ref={formRef}
-          className="min-w-0 rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white p-4 shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)] sm:p-6"
+          className="min-w-0 rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white p-4 shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)] sm:p-5"
           onSubmit={(e) => {
             e.preventDefault();
             runSelect();
@@ -1142,8 +1142,8 @@ export function SelectorApp() {
         <aside
           ref={resultPaneRef}
           className={cx(
-            "flex min-w-0 flex-col scroll-mt-16 lg:h-full lg:sticky lg:top-6",
-            idle && !running && "max-lg:hidden",
+            "flex min-w-0 flex-col scroll-mt-16 md:h-full md:sticky md:top-4",
+            idle && !running && "max-md:hidden",
           )}
           style={
             moreOpen && paneMinH
@@ -1366,7 +1366,7 @@ function IdlePanel({ lang, running }: { lang: Lang; running: boolean }) {
   return (
     <div
       className={cx(
-        "flex h-full min-h-[22rem] flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed border-[var(--color-rule-2)] bg-[var(--color-soft)] px-5 py-8 text-center transition-opacity duration-200 sm:px-6 sm:py-10",
+        "flex h-full min-h-[22rem] flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed border-[var(--color-rule-2)] bg-[var(--color-soft)] px-5 py-8 text-center transition-opacity duration-200 sm:px-6 sm:py-10 md:min-h-0 md:py-8",
         running && "opacity-70",
       )}
     >
