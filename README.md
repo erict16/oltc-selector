@@ -1,8 +1,8 @@
 # 有载开关选型
 
-填工况，点选型。给出目录里**最低满足**的型号，以及 2025 基价（FOB 上海，可换 14 种货币）。
+填工况，点选型。给出目录里**最低满足**的型号。价格只给内部登录后看。
 
-**在线：** [erict16.github.io/oltc-selector](https://erict16.github.io/oltc-selector/)
+**在线：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) · [GitHub Pages](https://erict16.github.io/oltc-selector/)
 
 ![工作台](docs/readme.png)
 
@@ -23,7 +23,15 @@ npm test
 npm run build
 ```
 
-GitHub Pages：`npm run build:gh`。
+GitHub Pages：`npm run build:gh`（`GH_PAGES=true`，路径 `/oltc-selector/`）。Vercel 根路径，不要设 `GH_PAGES`。
+
+内部看价：右上角「内部」，口令。本地 `.env.local`：
+
+```
+NEXT_PUBLIC_ADMIN_PASSWORD_SHA256=<sha256 hex of the password>
+```
+
+GitHub Actions 用 secret `ADMIN_PASSWORD` 在构建时哈希。Vercel 环境变量用同一个 `NEXT_PUBLIC_ADMIN_PASSWORD_SHA256`。没配口令则登不进去，公开页仍然能选型、没有价格。
 
 语言：中文、English、Tiếng Việt、Español、Türkçe、Русский。
 
@@ -32,7 +40,7 @@ GitHub Pages：`npm run build:gh`。
 | 栏 | 意思 |
 |---|---|
 | 开关通过电流 Iᵤ | 目录电流，如 400 A、600 A |
-| 设备最高电压 Um | 开关绝缘等级。选项写成 `72.5 kV（66 kV）`：左边进型号，括号里是常见变压器电压 |
+| 设备最高电压 Um | 开关绝缘等级，如 `72.5 kV` |
 | 级电压 Ust | 档位电压，如 1500 V |
 | 开关连接 | 开关接在哪：Y 中性点 / D 线端 |
 | 调压方式 | 线性 0 / 正反 W / 粗细 G |
