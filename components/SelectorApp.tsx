@@ -113,6 +113,12 @@ const EXAMPLES: { key: ExampleKey; pm: string; labelKey: string; hintKey: string
   { key: "preset220", pm: "8", labelKey: "ex220", hintKey: "exHint220" },
 ];
 
+const EXAMPLE_RATED_KV: Record<ExampleKey, number> = {
+  preset66: 66,
+  preset110: 110,
+  preset220: 220,
+};
+
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -440,8 +446,13 @@ export function SelectorApp() {
     } else {
       setPm("");
     }
-    setInput(next);
-    setVoltageMode("equipment");
+    const rated = EXAMPLE_RATED_KV[ex.key];
+    setWindingRatedKv(rated);
+    setVoltageMode("winding");
+    setInput({
+      ...next,
+      umKv: oltcUmFromRatedKv(rated, next.connection),
+    });
     setActiveExample(ex.key);
     clearResult();
   };
@@ -591,7 +602,7 @@ export function SelectorApp() {
               >
                 {(
                   [
-                    ["winding", "umWinding"],
+                    ["winding", "umWindingBtn"],
                     ["equipment", "umEquipment"],
                   ] as const
                 ).map(([mode, key]) => {
@@ -1163,6 +1174,17 @@ export function SelectorApp() {
                     <p className="mt-2.5 min-w-0 font-mono text-[1.0625rem] leading-snug font-medium tracking-tight break-words text-[var(--color-ink)] sm:text-[1.1875rem]">
                       {primary.model}
                     </p>
+                    {voltageMode === "winding" ? (
+                      <p className="mt-1.5 text-[0.75rem] leading-snug text-[var(--color-muted)]">
+                        {t(
+                          lang,
+                          input.connection === "Y"
+                            ? "umResultStar"
+                            : "umResultLine",
+                          { rated: windingRatedKv, um: input.umKv },
+                        )}
+                      </p>
+                    ) : null}
                   </div>
 
                   <ModelSpec
