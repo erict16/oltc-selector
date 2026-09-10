@@ -10,12 +10,8 @@ import {
   getServerAdmin,
   subscribeAdmin,
 } from "@/lib/adminSession";
-import {
-  getAppLang,
-  getServerLang,
-  subscribeAppLang,
-  t,
-} from "@/lib/i18n";
+import { useAppLang } from "@/components/LangProvider";
+import { t } from "@/lib/i18n";
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -23,11 +19,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 
 export function AdminEntry() {
   const pathname = usePathname();
-  const lang = useSyncExternalStore(
-    subscribeAppLang,
-    getAppLang,
-    getServerLang,
-  );
+  const lang = useAppLang();
   const admin = useSyncExternalStore(
     subscribeAdmin,
     getAdminSnapshot,

@@ -103,17 +103,17 @@ describe("star vs line-end → OLTC Um", () => {
     expect(oltcUmFromRatedKv(33, "D")).toBe(40.5);
   });
 
-  it("220 / 230 kV star → 72.5", () => {
-    expect(oltcUmFromRatedKv(220, "Y")).toBe(72.5);
-    expect(oltcUmFromRatedKv(230, "Y")).toBe(72.5);
+  it("220 / 230 kV star keeps 252 (not CV2 / 72.5)", () => {
+    expect(oltcUmFromRatedKv(220, "Y")).toBe(252);
+    expect(oltcUmFromRatedKv(230, "Y")).toBe(252);
   });
 
   it("220 kV delta keeps 252", () => {
     expect(oltcUmFromRatedKv(220, "D")).toBe(252);
   });
 
-  it("330 kV star → 72.5 (same graded-neutral default as 220)", () => {
-    expect(oltcUmFromRatedKv(330, "Y")).toBe(72.5);
+  it("330 kV star keeps 363", () => {
+    expect(oltcUmFromRatedKv(330, "Y")).toBe(363);
   });
 
   it("any / line-end does not drop", () => {
@@ -180,6 +180,17 @@ describe("same model as filling Um", () => {
     expect(out.ok).toBe(true);
     expect(out.results[0]?.model).toBe("CV2III-600Y/72.5-10193W");
     expect(out.results[0]?.model).not.toBe(FIXTURES.preset110.expectModel);
+  });
+
+  it("220 kV Y is CM2 /252, not CV2 /72.5", () => {
+    const umKv = oltcUmFromRatedKv(220, "Y");
+    expect(umKv).toBe(252);
+    const out = selectOltc(
+      duty(umKv, { throughCurrentA: 500, stepVoltageV: 1800 }),
+    );
+    expect(out.ok).toBe(true);
+    expect(out.results[0]?.model).toBe("CM2III-500Y/252D-10193W");
+    expect(out.results[0]?.model).not.toContain("/72.5");
   });
 });
 

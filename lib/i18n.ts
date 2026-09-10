@@ -9,10 +9,30 @@ export const LANG_OPTIONS: { id: Lang; label: string; short: string }[] = [
   { id: "ru", label: "Русский", short: "RU" },
 ];
 
-const LANG_STORAGE_KEY = "oltc-selector-lang";
+export const LANG_STORAGE_KEY = "oltc-selector-lang";
 
-function isLang(v: string | null): v is Lang {
-  return LANG_OPTIONS.some((o) => o.id === v);
+export function isLang(v: string | null | undefined): v is Lang {
+  return !!v && LANG_OPTIONS.some((o) => o.id === v);
+}
+
+function readCookieLang(): Lang | null {
+  if (typeof document === "undefined") return null;
+  const m = document.cookie.match(/(?:^|;\s*)oltc-selector-lang=([^;]*)/);
+  const v = m?.[1] ? decodeURIComponent(m[1]) : null;
+  return isLang(v) ? v : null;
+}
+
+function persistLang(l: Lang) {
+  try {
+    localStorage.setItem(LANG_STORAGE_KEY, l);
+  } catch {
+    /* private mode / blocked storage */
+  }
+  try {
+    document.cookie = `${LANG_STORAGE_KEY}=${encodeURIComponent(l)}; Path=/; Max-Age=34560000; SameSite=Lax`;
+  } catch {
+    /* ignore */
+  }
 }
 
 function readStoredLang(): Lang {
@@ -20,9 +40,9 @@ function readStoredLang(): Lang {
     const v = localStorage.getItem(LANG_STORAGE_KEY);
     if (isLang(v)) return v;
   } catch {
-    /* private mode / blocked storage */
+    /* ignore */
   }
-  return "zh";
+  return readCookieLang() ?? "zh";
 }
 
 let appLang: Lang = "zh";
@@ -32,13 +52,12 @@ if (typeof window !== "undefined") {
 const langSubs = new Set<() => void>();
 
 export function setAppLang(l: Lang) {
-  if (l === appLang) return;
-  appLang = l;
-  try {
-    localStorage.setItem(LANG_STORAGE_KEY, l);
-  } catch {
-    /* ignore */
+  if (l === appLang) {
+    persistLang(l);
+    return;
   }
+  appLang = l;
+  persistLang(l);
   langSubs.forEach((fn) => fn());
 }
 
@@ -70,7 +89,7 @@ const en: Dict = {
   ex220: "220 kV",
   exHint66: "CV2 · Um 72.5 kV Y",
   exHint110: "CV2 · Um 72.5 kV Y",
-  exHint220: "CV2 · Um 72.5 kV Y",
+  exHint220: "CM2 · Um 252 kV Y",
   throughCurrent: "Switch through-current Iᵤ",
   custom: "Custom",
   ratings: "Ratings",
@@ -79,6 +98,9 @@ const en: Dict = {
   umWindingBtn: "Rated",
   umEquipment: "Um",
   umModeAria: "Voltage entry",
+  pickVoltage: "Select",
+  needRated: "Pick tap-side rated voltage first.",
+  needUm: "Pick equipment Um first.",
   umDerivedHint: "Star point · OLTC sized at {um} kV",
   umResultStar: "{rated} kV star point → switch Um {um} kV",
   umResultLine: "{rated} kV line end → switch Um {um} kV",
@@ -188,6 +210,7 @@ const en: Dict = {
   adminTitle: "Internal login",
   adminUser: "Username",
   adminPassword: "Password",
+  adminRemember: "Remember me",
   adminSubmit: "Log in",
   adminWrong: "Wrong account or password.",
   adminBack: "Back",
@@ -214,7 +237,7 @@ const zh: Dict = {
   ex220: "220 kV",
   exHint66: "CV2 · 开关 72.5 kV 星接",
   exHint110: "CV2 · 开关 72.5 kV 星接",
-  exHint220: "CV2 · 开关 72.5 kV 星接",
+  exHint220: "CM2 · 开关 252 kV 星接",
   throughCurrent: "开关通过电流 Iᵤ",
   custom: "自定义",
   ratings: "目录",
@@ -223,6 +246,9 @@ const zh: Dict = {
   umWindingBtn: "额定",
   umEquipment: "Um",
   umModeAria: "电压填法",
+  pickVoltage: "请选择",
+  needRated: "先选调压侧额定电压。",
+  needUm: "先选开关 Um。",
   umDerivedHint: "星点 · 开关按 {um} 选",
   umResultStar: "{rated} kV 星点 → 开关 Um {um} kV",
   umResultLine: "{rated} kV 线端 → 开关 Um {um} kV",
@@ -330,6 +356,7 @@ const zh: Dict = {
   adminTitle: "内部登录",
   adminUser: "账户",
   adminPassword: "密码",
+  adminRemember: "记住登录",
   adminSubmit: "登录",
   adminWrong: "账户或密码不对。",
   adminBack: "返回",
@@ -356,7 +383,7 @@ const vi: Dict = {
   ex220: "220 kV",
   exHint66: "CV2 · Um 72.5 kV Y",
   exHint110: "CV2 · Um 72.5 kV Y",
-  exHint220: "CV2 · Um 72.5 kV Y",
+  exHint220: "CM2 · Um 252 kV Y",
   throughCurrent: "Dòng qua máy cắt Iᵤ",
   custom: "Tùy chỉnh",
   ratings: "Mức chuẩn",
@@ -365,6 +392,9 @@ const vi: Dict = {
   umWindingBtn: "Định mức",
   umEquipment: "Um",
   umModeAria: "Cách nhập điện áp",
+  pickVoltage: "Chọn",
+  needRated: "Chọn điện áp định mức phía điều áp trước.",
+  needUm: "Chọn Um máy cắt trước.",
   umDerivedHint: "Trung tính · OLTC chọn {um} kV",
   umResultStar: "{rated} kV trung tính → Um {um} kV",
   umResultLine: "{rated} kV đầu dây → Um {um} kV",
@@ -473,6 +503,7 @@ const vi: Dict = {
   adminHint: "Chỉ cần khi xem giá. Chọn kiểu không cần đăng nhập.",
   adminTitle: "Đăng nhập nội bộ",
   adminPassword: "Mật khẩu",
+  adminRemember: "Ghi nhớ đăng nhập",
   adminSubmit: "Đăng nhập",
   adminWrong: "Sai mật khẩu.",
   adminBack: "Về chọn loại",
@@ -500,7 +531,7 @@ const es: Dict = {
   ex220: "220 kV",
   exHint66: "CV2 · Um 72.5 kV Y",
   exHint110: "CV2 · Um 72.5 kV Y",
-  exHint220: "CV2 · Um 72.5 kV Y",
+  exHint220: "CM2 · Um 252 kV Y",
   throughCurrent: "Corriente Iᵤ del OLTC",
   custom: "Manual",
   ratings: "Catálogo",
@@ -509,6 +540,9 @@ const es: Dict = {
   umWindingBtn: "Asignada",
   umEquipment: "Um",
   umModeAria: "Cómo indicar la tensión",
+  pickVoltage: "Elegir",
+  needRated: "Elija primero la tensión asignada del lado de regulación.",
+  needUm: "Elija primero Um del OLTC.",
   umDerivedHint: "Neutro · OLTC a {um} kV",
   umResultStar: "{rated} kV neutro → Um {um} kV",
   umResultLine: "{rated} kV extremo de línea → Um {um} kV",
@@ -617,6 +651,7 @@ const es: Dict = {
   adminHint: "Solo para ver precios. La selección no lo necesita.",
   adminTitle: "Acceso interno",
   adminPassword: "Contraseña",
+  adminRemember: "Recordarme",
   adminSubmit: "Entrar",
   adminWrong: "Contraseña incorrecta.",
   adminBack: "Volver al selector",
@@ -643,7 +678,7 @@ const tr: Dict = {
   ex220: "220 kV",
   exHint66: "CV2 · Um 72.5 kV Y",
   exHint110: "CV2 · Um 72.5 kV Y",
-  exHint220: "CV2 · Um 72.5 kV Y",
+  exHint220: "CM2 · Um 252 kV Y",
   throughCurrent: "Anahtar geçiş akımı Iᵤ",
   custom: "Özel",
   ratings: "Katalog değerleri",
@@ -652,6 +687,9 @@ const tr: Dict = {
   umWindingBtn: "Anma",
   umEquipment: "Um",
   umModeAria: "Gerilim girişi",
+  pickVoltage: "Seçin",
+  needRated: "Önce kademe tarafı anma gerilimini seçin.",
+  needUm: "Önce OLTC Um seçin.",
   umDerivedHint: "Nötr · OLTC {um} kV",
   umResultStar: "{rated} kV nötr → Um {um} kV",
   umResultLine: "{rated} kV hat ucu → Um {um} kV",
@@ -759,6 +797,7 @@ const tr: Dict = {
   adminHint: "Liste fiyatı için. Seçim giriş gerektirmez.",
   adminTitle: "Dahili giriş",
   adminPassword: "Parola",
+  adminRemember: "Beni hatırla",
   adminSubmit: "Giriş",
   adminWrong: "Yanlış parola.",
   adminBack: "Seçiciye dön",
@@ -785,7 +824,7 @@ const ru: Dict = {
   ex220: "220 кВ",
   exHint66: "CV2 · Um 72.5 кВ Y",
   exHint110: "CV2 · Um 72.5 кВ Y",
-  exHint220: "CV2 · Um 72.5 кВ Y",
+  exHint220: "CM2 · Um 252 кВ Y",
   throughCurrent: "Ток Iᵤ РПН",
   custom: "Свой",
   ratings: "Каталог",
@@ -794,6 +833,9 @@ const ru: Dict = {
   umWindingBtn: "Номинал",
   umEquipment: "Um",
   umModeAria: "Как вводить напряжение",
+  pickVoltage: "Выберите",
+  needRated: "Сначала выберите номинал стороны РПН.",
+  needUm: "Сначала выберите Um РПН.",
   umDerivedHint: "Нейтраль · OLTC {um} кВ",
   umResultStar: "{rated} кВ нейтраль → Um {um} кВ",
   umResultLine: "{rated} кВ линейный конец → Um {um} кВ",
@@ -903,6 +945,7 @@ const ru: Dict = {
   adminHint: "Нужно только для цен. Подбор работает без входа.",
   adminTitle: "Внутренний вход",
   adminPassword: "Пароль",
+  adminRemember: "Запомнить вход",
   adminSubmit: "Войти",
   adminWrong: "Неверный пароль.",
   adminBack: "К подбору",

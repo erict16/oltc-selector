@@ -853,7 +853,7 @@ export const FIXTURES = {
       mdu: "none" as const,
     },
   },
-  /** UI chips load tap-side 66 / 110 / 220 kV (star → Um 72.5). These fixtures keep explicit Um for the fill-Um path. */
+  /** UI chips: 66 / 110 star → 72.5; 220 star → 252. Fixtures keep explicit Um for the fill-Um path. */
   preset66: {
     input: {
       mounting: "in_tank" as const,

@@ -1,22 +1,13 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  getAppLang,
-  getServerLang,
-  subscribeAppLang,
-  t,
-} from "@/lib/i18n";
+import { useAppLang } from "@/components/LangProvider";
+import { t } from "@/lib/i18n";
 
 export function SiteFooter() {
   const pathname = usePathname();
-  const lang = useSyncExternalStore(
-    subscribeAppLang,
-    getAppLang,
-    getServerLang,
-  );
+  const lang = useAppLang();
 
   if (/\/(privacy|terms|login)\/?$/.test(pathname)) {
     return null;

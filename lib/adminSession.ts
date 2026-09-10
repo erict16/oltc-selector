@@ -32,13 +32,28 @@ export async function sha256Hex(text: string): Promise<string> {
     .join("");
 }
 
-export function readAdminSession(): boolean {
-  if (typeof window === "undefined") return false;
+function storageGet(which: "local" | "session"): boolean {
   try {
-    return sessionStorage.getItem(STORAGE_KEY) === "1";
+    const store = which === "local" ? localStorage : sessionStorage;
+    return store.getItem(STORAGE_KEY) === "1";
   } catch {
     return false;
   }
+}
+
+function storageSet(which: "local" | "session", on: boolean) {
+  try {
+    const store = which === "local" ? localStorage : sessionStorage;
+    if (on) store.setItem(STORAGE_KEY, "1");
+    else store.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function readAdminSession(): boolean {
+  if (typeof window === "undefined") return false;
+  return storageGet("local") || storageGet("session");
 }
 
 function emitAdmin() {
@@ -63,26 +78,21 @@ export function getServerAdmin(): boolean {
 export async function tryAdminLogin(
   user: string,
   password: string,
+  remember = false,
 ): Promise<boolean> {
   if (!isAdminUser(user)) return false;
   const want = configuredHash();
   if (!want) return false;
   const got = await sha256Hex(password);
   if (got !== want) return false;
-  try {
-    sessionStorage.setItem(STORAGE_KEY, "1");
-  } catch {
-    return false;
-  }
+  storageSet("local", remember);
+  storageSet("session", !remember);
   emitAdmin();
   return true;
 }
 
 export function adminLogout() {
-  try {
-    sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* ignore */
-  }
+  storageSet("local", false);
+  storageSet("session", false);
   emitAdmin();
 }
