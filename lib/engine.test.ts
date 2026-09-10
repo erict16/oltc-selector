@@ -835,6 +835,85 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
       true,
     );
   });
+
+  it("OS 12x11 at 12 kV D uses that contact and size D", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 577,
+      umKv: 12,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 12,
+      octcContact: "12x11",
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLII-600D/12-12x11D");
+  });
+
+  it("5x2 contact is WSLVIII", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 800,
+      umKv: 72.5,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 5,
+      octcContact: "5x2",
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLVIII-800D/72.5-5x2A");
+  });
+});
+
+describe("HWDK / CVT 2025 OS", () => {
+  it("HWDK I 1500 A / 40.5 / 17 pos", () => {
+    const out = selectOltc({
+      mounting: "reactor",
+      medium: "oil",
+      preferVacuum: false,
+      phases: "I",
+      connection: "any",
+      throughCurrentA: 765,
+      umKv: 40.5,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 17,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("HWDKI-1500/40.5-17");
+  });
+
+  it("CVT 160 A / 12 kV linear 9 is eligible", () => {
+    const out = selectOltc({
+      mounting: "dry_type",
+      medium: "dry",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 93,
+      umKv: 12,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 9,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("CVT");
+    expect(out.results[0].currentA).toBe(160);
+  });
 });
 
 describe("3× stays eligible when III also covers", () => {

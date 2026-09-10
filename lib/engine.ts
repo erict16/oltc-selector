@@ -20,14 +20,24 @@ import type {
   SeriesDef,
 } from "./types";
 
+function normOctcContact(raw: string | undefined): string {
+  const t = (raw ?? "").replace(/\s+/g, "").toLowerCase();
+  const m = t.match(/^(\d+)x(\d+)$/);
+  if (!m) return "";
+  return `${Number(m[1])}x${Number(m[2])}`;
+}
+
 /**
  * DETC contact from service positions (or ±N → 2N+1).
- * Only the four commercial codes — no 8x7/10x9 invent.
+ * 2025 list also has 8x7 / 9x8 / 10x9 / 16x15 — map those when P needs them.
+ * A known OS contact (`input.octcContact`) wins.
  */
 export function octcContactCode(
   input: SelectInput,
   seriesId?: string,
 ): string {
+  const hinted = normOctcContact(input.octcContact);
+  if (hinted) return hinted;
   let pos = input.positions;
   if (input.plusMinusSteps != null && input.plusMinusSteps > 0) {
     pos = 2 * input.plusMinusSteps + 1;
@@ -38,11 +48,15 @@ export function octcContactCode(
   }
   if (pos == null || pos <= 6) return "6x5";
   if (pos <= 7) return "7x6";
+  if (pos <= 8) return "8x7";
+  if (pos <= 9) return "9x8";
+  if (pos <= 10) return "10x9";
   if (pos <= 12) return "12x11";
+  if (pos <= 16) return "16x15";
   return "18x17";
 }
 
-/** WSL size letter: 6x5 @ ≤72.5 → A; 18x17 → E; else B. */
+/** WSL size letter from 2025 list / OS. */
 export function octcSizeLetter(
   um: number,
   contact: string,
@@ -52,13 +66,31 @@ export function octcSizeLetter(
     if (requested === "DE") return "E";
     return requested;
   }
-  if (contact === "18x17") return "E";
-  if (um <= 72.5 + 0.1 && (contact === "6x5" || contact === "4x5")) return "A";
+  const c = contact.toLowerCase();
+  if (c === "18x17" || c === "16x15") return "E";
+  if (c === "12x11" || c === "10x9" || c === "12x12") return "D";
+  if (
+    um <= 72.5 + 0.1 &&
+    ["6x5", "4x5", "5x4", "5x2", "4x3", "3x2", "7x6"].includes(c)
+  ) {
+    return "A";
+  }
   return "B";
 }
 
-/** Linear Y → WSLIV; linear D → WSLII (Anthony + price-list blocks). */
-export function octcRoman(connection: Connection): "IV" | "II" {
+/**
+ * Product series roman, not phase.
+ * 5x2 → VIII, 3x2 → VI, 5x4 → V; else Y→IV / D→II (Anthony).
+ */
+export function octcRoman(
+  connection: Connection,
+  contact?: string,
+): "VIII" | "VII" | "VI" | "V" | "IV" | "II" {
+  const c = (contact ?? "").toLowerCase();
+  if (c === "5x2" || c === "12x2") return "VIII";
+  if (c === "3x2" || c === "6x2") return "VI";
+  if (c === "5x4" || c === "4x3") return "V";
+  if (c === "12x12") return "VII";
   return connection === "D" ? "II" : "IV";
 }
 
@@ -132,10 +164,11 @@ function buildModelString(
   if (isOctcSeries(series)) {
     // tapCode already includes contact + size (6x5B). Roman is the product series, not phase.
     const yd: "Y" | "D" = conn === "D" ? "D" : "Y";
-    const roman = octcRoman(yd);
+    const roman = octcRoman(yd, tapCode.replace(/[A-E]$/i, ""));
     core = `${series.code}${roman}-${current}${yd}/${umToken}-${tapCode}`;
   } else if (series.code === "HWDK") {
     core = `${series.code}${phases}-${current}/${umToken}`;
+    if (tapCode && /^\d+$/.test(tapCode)) core += `-${tapCode}`;
   } else if (!conn) {
     core = `${series.code}${phases}-${current}/${umToken}-${tapCode}`;
   } else {
@@ -508,7 +541,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const tapCode = octc ? contact : tap.tapCode;
         const modelTap = octc
           ? `${contact}${selectorSize}`
-          : s.id === "cz"
+          : s.id === "cz" || s.id === "hwdk"
             ? String(tap.positions)
             : tap.tapCode;
 

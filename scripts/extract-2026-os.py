@@ -24,10 +24,13 @@ OUT_XLSX = Path(r"C:\Users\TYM\projects\oltc-selector\docs\2026-os-sales.xlsx")
 OUT_COPY = Path(r"C:\Users\TYM\Desktop\2026-os-sales.xlsx")
 
 INCLUDE_FOLDERS = {
-    "CM", "CMD", "CV", "CVT", "CZ", "HWV", "SHZV", "SY", "VCM", "VCV", "WG", "WL",
+    "CM", "CMD", "CV", "CVT", "CZ", "HWV", "HWDK", "HMDK", "SHZV", "SHZVG",
+    "SY", "VCM", "VCV", "WG", "WL",
 }
 SKIP_FOLDERS = {"MDU", "ZXJY", "售后芯子+油室+散件"}
-FOLDER_ALIAS = {"VCM": "CM2", "VCV": "CV2", "WL": "WSL", "WG": "WSG"}
+FOLDER_ALIAS = {
+    "VCM": "CM2", "VCV": "CV2", "WL": "WSL", "WG": "WSG", "HMDK": "HWDK",
+}
 
 # Longest-first so CM2/CV2/CMD/SHZVG win over CM/CV/SHZV.
 FAMILIES = (
@@ -704,7 +707,8 @@ def extract_pdf_text(path: Path, max_pages: int = MAX_PAGES, time_limit: float =
 def process_file(path_str: str) -> dict:
     path = Path(path_str)
     folder = path.parent.name
-    family_folder = FOLDER_ALIAS.get(folder, folder)
+    key = folder_key(folder) or folder
+    family_folder = FOLDER_ALIAS.get(key, key)
     stem = path.stem
     serial, customer = parse_serial_customer(stem)
     row = empty_row(path.name, folder, serial, customer, family_folder)
@@ -769,14 +773,25 @@ def process_file(path_str: str) -> dict:
     return row
 
 
+def folder_key(name: str) -> str | None:
+    """Map a year-folder name onto INCLUDE_FOLDERS (2025 WL is sometimes mojibake)."""
+    if name in SKIP_FOLDERS:
+        return None
+    if name in INCLUDE_FOLDERS:
+        return name
+    n = name.upper()
+    if n.startswith("W") and "L" in n and "G" not in n:
+        return "WL"
+    return None
+
+
 def list_pdfs(root: Path) -> list[Path]:
     files: list[Path] = []
     for d in sorted(root.iterdir()):
         if not d.is_dir():
             continue
-        if d.name in SKIP_FOLDERS:
-            continue
-        if d.name not in INCLUDE_FOLDERS:
+        key = folder_key(d.name)
+        if not key:
             continue
         files.extend(sorted(d.glob("*.pdf")) + sorted(d.glob("*.PDF")))
     # de-dup case on Windows
@@ -988,7 +1003,13 @@ def main(argv: list[str] | None = None) -> int:
             try:
                 rows.append(process_file(str(p)))
             except Exception as e:
-                r = empty_row(p.name, p.parent.name, p.stem, "", FOLDER_ALIAS.get(p.parent.name, p.parent.name))
+                r = empty_row(
+                    p.name,
+                    p.parent.name,
+                    p.stem,
+                    "",
+                    FOLDER_ALIAS.get(folder_key(p.parent.name) or p.parent.name, p.parent.name),
+                )
                 r["text_status"] = "parse_failed"
                 r["notes"] = f"{type(e).__name__}:{e}"
                 rows.append(r)
