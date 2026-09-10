@@ -139,7 +139,7 @@ function Field({
 }) {
   const Tag = as;
   return (
-    <Tag className={cx("flex min-w-0 flex-col gap-1.5", className)}>
+    <Tag className={cx("flex h-full min-w-0 flex-col gap-1.5", className)}>
       <span className="flex min-h-[1.25rem] items-center gap-2">
         <span className="min-w-0 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
           {label}
@@ -150,7 +150,7 @@ function Field({
           </span>
         ) : null}
       </span>
-      {children}
+      <div className="mt-auto min-w-0">{children}</div>
       {tip ? (
         <span className="text-[0.75rem] leading-snug text-[var(--color-muted)]">
           {tip}
@@ -602,9 +602,40 @@ export function SelectorApp() {
                   ? t(lang, "umWinding")
                   : t(lang, "um")
               }
-              action={
+            >
+              <div className="flex h-10 min-w-0">
+                <select
+                  className={cx(
+                    controlClass,
+                    "rounded-r-none border-r-0",
+                  )}
+                  value={
+                    voltageMode === "winding"
+                      ? windingRatedKv
+                        ? String(windingRatedKv)
+                        : ""
+                      : input.umKv
+                        ? String(input.umKv)
+                        : ""
+                  }
+                  onChange={(e) => setVoltageKv(Number(e.target.value))}
+                >
+                <option value="">{t(lang, "pickVoltage")}</option>
+                {(voltageMode === "winding"
+                  ? WINDING_RATED_KV.map((v) => ({
+                      value: v,
+                      labelZh: `${v} kV`,
+                      labelEn: `${v} kV`,
+                    }))
+                  : UM_MENU
+                ).map((u) => (
+                  <option key={u.value} value={u.value}>
+                    {currentLabel(lang, u.labelZh, u.labelEn)}
+                  </option>
+                ))}
+                </select>
                 <div
-                  className="inline-flex h-[1.625rem] items-center rounded-full bg-[var(--color-soft)] p-0.5"
+                  className="flex shrink-0 overflow-hidden rounded-r-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-[var(--color-soft)]"
                   role="group"
                   aria-label={t(lang, "umModeAria")}
                 >
@@ -622,10 +653,10 @@ export function SelectorApp() {
                         aria-pressed={on}
                         onClick={() => setVoltageEntry(mode)}
                         className={cx(
-                          "inline-flex h-6 items-center rounded-full px-2.5 text-[0.6875rem] leading-none transition-[transform,background-color,color] duration-150 active:scale-[0.96]",
+                          "inline-flex h-10 items-center px-2.5 text-[0.75rem] leading-none whitespace-nowrap transition-[transform,background-color,color] duration-150 active:scale-[0.96]",
                           "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
                           on
-                            ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
+                            ? "bg-white font-medium text-[var(--color-ink)]"
                             : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]",
                         )}
                       >
@@ -634,35 +665,7 @@ export function SelectorApp() {
                     );
                   })}
                 </div>
-              }
-            >
-              <select
-                className={controlClass}
-                value={
-                  voltageMode === "winding"
-                    ? windingRatedKv
-                      ? String(windingRatedKv)
-                      : ""
-                    : input.umKv
-                      ? String(input.umKv)
-                      : ""
-                }
-                onChange={(e) => setVoltageKv(Number(e.target.value))}
-              >
-                <option value="">{t(lang, "pickVoltage")}</option>
-                {(voltageMode === "winding"
-                  ? WINDING_RATED_KV.map((v) => ({
-                      value: v,
-                      labelZh: `${v} kV`,
-                      labelEn: `${v} kV`,
-                    }))
-                  : UM_MENU
-                ).map((u) => (
-                  <option key={u.value} value={u.value}>
-                    {currentLabel(lang, u.labelZh, u.labelEn)}
-                  </option>
-                ))}
-              </select>
+              </div>
             </Field>
 
             <Field
