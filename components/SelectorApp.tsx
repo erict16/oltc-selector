@@ -30,7 +30,6 @@ import { FIXTURES, selectOltc, stepUpOf } from "@/lib/engine";
 import {
   lookupDiagram,
   midControl,
-  nextMidForPm,
   pitchFromPlusMinus,
   pmStepOptionsFor,
   positionsFor,
@@ -252,11 +251,13 @@ export function SelectorApp() {
     }
     const n = Number(raw);
     if (!Number.isFinite(n) || n <= 0) return;
-    // Keep mid when the new ±N still has that brochure pair; else snap.
-    setInput((s) => {
-      const mid = nextMidForPm(n, s.regulation, s.midPositions);
-      return { ...s, ...geometryForPm(n, s.regulation, mid) };
-    });
+    // Always snap to brochure preferred mid for this ±N.
+    // Carrying mid=1 from ±4…±7 onto ±8 would silently emit 18171W
+    // instead of commercial 10193W (P=19, mid3).
+    setInput((s) => ({
+      ...s,
+      ...geometryForPm(n, s.regulation),
+    }));
   };
 
   const applyMid = (raw: string) => {
