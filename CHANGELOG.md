@@ -8,6 +8,7 @@
 - Custom position count picks a brochure mid; ±N still snaps to Fig. 3-3 preferred mid.
 - Um menu is just `72.5 kV` — no transformer-class parentheses.
 - Guest selector has no prices. Viewport-corner avatar for internal login; admin sees list RMB, a market coefficient, then FX.
+- Mobile: the corner avatar overlays; it no longer reserves a right gutter on the form.
 - Voltage mode is a small 额定 / Um pill on the field label. Login is Tailwind Plus Sign-in Simple; back sits under the form.
 - Hosted on Vercel (`oltc-selector.vercel.app`) as well as GitHub Pages.
 - 中间位 stays on the form when ±N has only one brochure mid. Lower ± no longer hides it; returning to ±8 still offers 3 and 1.
