@@ -8,7 +8,7 @@
 - Custom position count picks a brochure mid; ±N still snaps to Fig. 3-3 preferred mid.
 - Um menu is just `72.5 kV` — no transformer-class parentheses.
 - Guest selector has no prices. Viewport-corner avatar for internal login; admin sees list RMB, a market coefficient, then FX.
-- Voltage Rated/Um is the small tag on the title row again; it wraps if the title is long. Select stays full width.
+- Desktop: Rated/Um tag pins to the title corner so the 66 kV select stays level with 400 A. Mobile still wraps in flow.
 - Tap-side rated voltage defaults to 66 kV. Rated tab still does not submit Um.
 - Rated-kV tab does not submit Um; 220 kV star stays 252, not CV2 / 72.5. Login has Remember me; fields are 40px.
 - Language choice is stored (cookie + localStorage) so the next visit opens in that language.
