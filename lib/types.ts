@@ -47,6 +47,8 @@ export interface SelectInput {
   /** ±N steps */
   plusMinusSteps?: number;
   midPositions?: 0 | 1 | 3;
+  /** OCTC contact from OS/QS when known (`6x5`, `12x11`, `5x2`). */
+  octcContact?: string;
   pitch?: 10 | 12 | 14 | 16 | 18;
   /**
    * Required internal insulation class (tap selector size).

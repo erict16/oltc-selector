@@ -90,7 +90,7 @@ const VAC_COMBINED = new Set(["CM2", "SHZV", "SHZVG"]);
 const VAC_COMPOUND = new Set(["CV2"]);
 const OIL_COMBINED = new Set(["CM", "CMD"]);
 const OIL_COMPOUND = new Set(["CV", "SV"]);
-const ON_TANK = new Set(["HWV", "HWDK"]);
+const ON_TANK = new Set(["HWV"]);
 const DRY = new Set(["CVT", "CZ"]);
 const OCTC = new Set(["WSL", "WDL", "WSG"]);
 
@@ -137,6 +137,14 @@ function familyDuty(family: string): {
       medium: "oil",
       preferVacuum: false,
       dutyKind: "octc",
+    };
+  }
+  if (f === "HWDK") {
+    return {
+      mounting: "reactor",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "oltc",
     };
   }
   if (ON_TANK.has(f)) {
@@ -197,16 +205,27 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
   if (!um || um <= 0) return { skip: "no Um" };
 
   const tap = (row.tap_code || parsed.tapCode || "").toString();
+  const tapNorm = tap.replace(/\s+/g, "");
   const tm = tapMeta(tap);
   const ust = num(row.ust_max_v) ?? num(row.ust_v) ?? 0;
+  const nxm = tapNorm.match(/^(\d+)x(\d+)/i);
 
   // Sold tap code beats OS ± boxes (those often pick up mid-position "12"
-  // or +4/−12 leftovers). Short `7`/`9`/`17` = linear contact count.
-  const shortLinear = /^\d{1,2}$/.test(tap.replace(/\s+/g, ""));
+  // or +4/−12 leftovers). Short `7`/`9`/`17` / `0909` = linear contact count.
+  const shortLinear =
+    /^\d{1,2}$/.test(tapNorm) ||
+    /^0\d{1,3}$/.test(tapNorm) ||
+    ((parsed.family === "CVT" || parsed.family === "CZ" || parsed.family === "HWDK") &&
+      /^\d{3,4}$/.test(tapNorm) &&
+      !/[WG]$/i.test(tapNorm));
   let plusMinus: number | null = null;
   let linearPositions: number | null = null;
-  if (shortLinear) {
-    linearPositions = Number(tap.replace(/\s+/g, ""));
+  if (duty.dutyKind === "octc" && nxm) {
+    linearPositions = Number(nxm[1]);
+  } else if (shortLinear) {
+    const stripped = tapNorm.replace(/^0+/, "") || "0";
+    linearPositions =
+      stripped.length >= 3 ? Number(stripped.slice(-2)) : Number(stripped);
   } else if (tm.positions && tm.mid != null && tm.mid > 0) {
     plusMinus = (tm.positions - tm.mid) / 2;
   } else {
@@ -237,7 +256,11 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
     mdu: "none",
   };
 
-  if (plusMinus && plusMinus > 0 && input.regulation !== "linear") {
+  if (duty.dutyKind === "octc" && nxm) {
+    input.regulation = "linear";
+    input.positions = Number(nxm[1]);
+    input.octcContact = `${Number(nxm[1])}x${Number(nxm[2])}`;
+  } else if (plusMinus && plusMinus > 0 && input.regulation !== "linear") {
     input.plusMinusSteps = Math.round(plusMinus);
     if (tm.mid === 1 || tm.mid === 3) input.midPositions = tm.mid;
   } else if (linearPositions) {
@@ -272,6 +295,7 @@ function familyCompatible(
   if (pair === "SHZVG/SHZV" || pair === "SHZV/SHZVG") {
     return Math.max(a.currentA, e.currentA) >= 1300;
   }
+  if (pair === "WSL/WDL" || pair === "WDL/WSL") return true;
   return false;
 }
 
@@ -298,7 +322,7 @@ function identityMatch(actual: string, expected: string): boolean {
   const a = parseTypeString(actual);
   const e = parseTypeString(expected);
   if (!a || !e) return false;
-  if (a.family !== e.family) return false;
+  if (a.family !== e.family && !familyCompatible(a, e)) return false;
   if (a.phases !== e.phases) return false;
   if (a.currentA !== e.currentA) return false;
   if (a.umKv !== e.umKv) return false;
@@ -313,7 +337,7 @@ function classify(sold: string, models: string[]): Verdict {
   if (looseMatch(primary, sold)) return "family-i-um";
   const soldParts = parseTypeString(sold);
   const primParts = parseTypeString(primary);
-  if (soldParts && primParts && soldParts.family === primParts.family) {
+  if (soldParts && primParts && familyCompatible(soldParts, primParts)) {
     return "family";
   }
   if (models.some((m) => looseMatch(m, sold))) return "eligible";
@@ -426,8 +450,23 @@ const n = judged.length || 1;
 const pct = (v: Verdict) =>
   judged.length ? ((counts[v] / judged.length) * 100).toFixed(1) : "0.0";
 
+const outStem =
+  path.basename(jsonPath).replace(/\.json$/i, "").replace(/-sales$/i, "") +
+  "-replay";
+const yearLabel = outStem.replace(/-os-replay$/i, "").replace(/-replay$/i, "");
+
+const familyCounts = new Map<string, { judged: number; miss: number; exact: number }>();
+for (const r of out) {
+  const fam = parseTypeString(r.sold_type)?.family ?? (r.folder ? r.folder : "?");
+  const cur = familyCounts.get(fam) ?? { judged: 0, miss: 0, exact: 0 };
+  if (r.verdict !== "skip") cur.judged++;
+  if (r.verdict === "miss") cur.miss++;
+  if (r.verdict === "exact") cur.exact++;
+  familyCounts.set(fam, cur);
+}
+
 const lines = [
-  "# 2026 OS replay",
+  `# ${yearLabel} OS replay`,
   "",
   `Source: \`${path.basename(jsonPath)}\``,
   `Rows: ${rows.length}. Judged: ${judged.length}. Skipped: ${counts.skip}.`,
@@ -456,9 +495,16 @@ for (const r of out.filter((x) => x.verdict === "miss").slice(0, 80)) {
   );
 }
 
+lines.push("", "## By family (judged)", "", "| family | judged | exact | miss |", "|---|---:|---:|---:|");
+for (const fam of [...familyCounts.keys()].sort()) {
+  const c = familyCounts.get(fam)!;
+  if (!c.judged) continue;
+  lines.push(`| ${fam} | ${c.judged} | ${c.exact} | ${c.miss} |`);
+}
+
 const docs = path.join(process.cwd(), "docs", "replay");
-writeFileSync(path.join(docs, "2026-os-replay.md"), lines.join("\n") + "\n");
-writeFileSync(path.join(docs, "2026-os-replay.json"), JSON.stringify(out, null, 2));
+writeFileSync(path.join(docs, `${outStem}.md`), lines.join("\n") + "\n");
+writeFileSync(path.join(docs, `${outStem}.json`), JSON.stringify(out, null, 2));
 
 const csvHeader = Object.keys(out[0] ?? { serial: "" }).join(",");
 const csv = [
@@ -469,7 +515,7 @@ const csv = [
       .join(","),
   ),
 ].join("\n");
-writeFileSync(path.join(docs, "2026-os-replay.csv"), csv);
+writeFileSync(path.join(docs, `${outStem}.csv`), csv);
 
-console.log(lines.slice(0, 20).join("\n"));
-console.log(`wrote docs/replay/2026-os-replay.md json csv`);
+console.log(lines.slice(0, 22).join("\n"));
+console.log(`wrote docs/replay/${outStem}.md json csv`);
