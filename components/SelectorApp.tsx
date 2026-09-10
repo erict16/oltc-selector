@@ -139,10 +139,19 @@ function Field({
 }) {
   const Tag = as;
   return (
-    <Tag className={cx("flex min-w-0 flex-col gap-1.5", className)}>
-      <span className="flex h-7 items-center gap-2">
-        <span className="min-w-0 flex-1 truncate text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
-          {label}
+    <Tag className={cx("flex min-w-0 flex-col gap-1.5 overflow-visible", className)}>
+      <span className="flex min-h-[1.25rem] items-center gap-2 overflow-visible">
+        <span className="min-w-0 flex-1 overflow-visible text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
+          {label.split("ᵤ").map((part, i, arr) =>
+            i < arr.length - 1 ? (
+              <span key={i}>
+                {part}
+                <sub className="text-[0.7em]">u</sub>
+              </span>
+            ) : (
+              part
+            ),
+          )}
         </span>
         {action ? (
           <span className="ml-auto shrink-0 whitespace-nowrap text-[0.75rem] leading-none">
