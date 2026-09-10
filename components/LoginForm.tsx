@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { tryAdminLogin } from "@/lib/adminSession";
 import {
   getAppLang,
@@ -41,14 +42,18 @@ export function LoginForm() {
   };
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-6">
+    <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-6">
+      <Link
+        href="/"
+        aria-label={t(lang, "adminBack")}
+        className="absolute top-[max(0.75rem,env(safe-area-inset-top))] left-[max(0.75rem,env(safe-area-inset-left))] inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-ink-2)] transition-[transform,color] duration-150 hover:text-[var(--color-ink)] active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+      >
+        <ArrowLeftIcon className="h-5 w-5" aria-hidden />
+      </Link>
       <form onSubmit={onSubmit} className="w-full max-w-[22rem]">
         <h1 className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-[-0.02em] text-[var(--color-ink)]">
           {t(lang, "adminTitle")}
         </h1>
-        <p className="mt-1.5 text-[0.8125rem] leading-snug text-[var(--color-muted)]">
-          {t(lang, "adminHint")}
-        </p>
         <label className="mt-6 block">
           <span className="text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
             {t(lang, "adminUser")}
@@ -93,14 +98,6 @@ export function LoginForm() {
         >
           {t(lang, "adminSubmit")}
         </button>
-        <p className="mt-4 text-center">
-          <Link
-            href="/"
-            className="text-[0.8125rem] text-[var(--color-ink-2)] hover:text-[var(--color-ink)]"
-          >
-            {t(lang, "adminBack")}
-          </Link>
-        </p>
       </form>
     </div>
   );
