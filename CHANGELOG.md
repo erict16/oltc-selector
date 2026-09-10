@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- 中间位 stays on the form when ±N has only one brochure mid. Lower ± no longer hides it; returning to ±8 still offers 3 and 1.
 - CZ dry primary is `3xCZI-…` (2025 list / 2026 OS). Do not invent `CZIII`.
 - Um dropdown: drop 35 / 69; labels show transformer class (`72.5 kV（66 kV）`).
 - More-options lead: 调压绕组, not 级间绝缘.
