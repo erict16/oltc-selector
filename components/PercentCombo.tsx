@@ -51,14 +51,15 @@ export function PercentCombo({
 
   return (
     <div ref={root} className="relative">
-      <div className={cx(controlClass, "flex items-center gap-0.5 pr-8")}>
+      <div className={cx(controlClass, "flex items-center pr-8")}>
         {prefix ? (
-          <span className="shrink-0 text-[0.75rem] text-[var(--color-muted)]">
+          <span className="shrink-0 text-[0.9rem] text-[var(--color-ink)]">
             {prefix}
           </span>
         ) : null}
         <input
-          className="min-w-0 w-[4.75rem] border-0 bg-transparent p-0 text-[0.9rem] text-[var(--color-ink)] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="border-0 bg-transparent p-0 text-[0.9rem] leading-snug tabular-nums text-[var(--color-ink)] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          style={{ width: `${Math.max(raw.length, 1) + 0.4}ch` }}
           inputMode="decimal"
           autoComplete="off"
           spellCheck={false}
@@ -78,7 +79,7 @@ export function PercentCombo({
           onFocus={() => setOpen(true)}
         />
         {suffix ? (
-          <span className="shrink-0 text-[0.75rem] text-[var(--color-muted)]">
+          <span className="shrink-0 text-[0.9rem] leading-snug text-[var(--color-ink)]">
             {suffix}
           </span>
         ) : null}
