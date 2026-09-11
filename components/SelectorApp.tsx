@@ -1009,15 +1009,15 @@ export function SelectorApp() {
                   value={pm}
                   onChange={(e) => applyPm(e.target.value)}
                 >
+                  <option value="">
+                    {t(lang, "customPos")}
+                  </option>
                   {pmOptions.map((n) => (
                     <option key={n} value={String(n)}>
                       ±{n}
                       {lang === "zh" ? " 级" : lang === "ru" ? " ст." : ""}
                     </option>
                   ))}
-                  <option value="">
-                    {t(lang, "customPos")}
-                  </option>
                 </select>
               </Field>
             )}

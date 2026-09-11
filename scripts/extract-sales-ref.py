@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dump Year=2025 rows from HM reference list to docs/sales-2025-ref.json."""
+"""Dump Year=2025 rows from HM reference list to docs/sales/sales-2025-ref.json."""
 from __future__ import annotations
 
 import json
@@ -14,7 +14,7 @@ DEFAULT_SRC = Path(
     r"\Attachments\Excel\Sales\HM reference list -2019-2025.xlsx"
 )
 SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_SRC
-OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "docs" / "sales-2025-ref.json"
+OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "docs" / "sales" / "sales-2025-ref.json"
 YEAR = 2025
 
 

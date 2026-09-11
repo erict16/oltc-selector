@@ -4,7 +4,7 @@
 
 **在线：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) · [GitHub Pages](https://erict16.github.io/oltc-selector/)
 
-![工作台](docs/readme.png)
+![工作台](docs/assets/readme.png)
 
 私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。
 

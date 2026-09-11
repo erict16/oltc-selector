@@ -1,6 +1,6 @@
 # 2025 sales-reference coverage
 
-Source: `sales-2025-ref.json` (Year=2025 only).
+Source: `docs/sales/sales-2025-ref.json` (Year=2025 only).
 Rows: 1492. Retired (not in current catalogue): 23. Unparsed: 73. Judged: 1396.
 
 | verdict | n | % of judged |

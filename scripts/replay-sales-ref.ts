@@ -7,7 +7,7 @@
  *
  * Retired currents (CV2-500, CV2-250, …) are skipped, not failed.
  *
- * Usage: npx vite-node scripts/replay-sales-ref.ts [docs/sales-2025-ref.json]
+ * Usage: npx vite-node scripts/replay-sales-ref.ts [docs/sales/sales-2025-ref.json]
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -130,7 +130,8 @@ function loose(a: string, b: string): boolean {
 }
 
 const jsonPath = path.resolve(
-  process.argv[2] ?? path.join(process.cwd(), "docs", "sales-2025-ref.json"),
+  process.argv[2] ??
+    path.join(process.cwd(), "docs", "sales", "sales-2025-ref.json"),
 );
 const raw = JSON.parse(readFileSync(jsonPath, "utf8"));
 const rows: RefRow[] = Array.isArray(raw) ? raw : raw.rows;
@@ -212,7 +213,7 @@ const lines = [
   "",
 ];
 
-const docs = path.join(process.cwd(), "docs");
+const docs = path.join(process.cwd(), "docs", "sales");
 writeFileSync(path.join(docs, "sales-2025-ref-coverage.md"), lines.join("\n"));
 console.log(lines.slice(0, 22).join("\n"));
-console.log("wrote docs/sales-2025-ref-coverage.md");
+console.log("wrote docs/sales/sales-2025-ref-coverage.md");
