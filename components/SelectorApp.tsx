@@ -2038,7 +2038,7 @@ function ModelSpec({
         "grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3",
         compact
           ? "shrink-0 border-t border-[var(--color-rule)] px-3 py-2.5"
-          : "shrink-0 border-b border-[var(--color-rule)] px-4 py-2.5 gap-x-5 gap-y-2",
+          : "shrink-0 px-4 py-2.5 gap-x-5 gap-y-2",
       )}
     >
       {items.map((item) => (
