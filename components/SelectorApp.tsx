@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   AdjustmentsHorizontalIcon,
+  CheckIcon,
   ChevronDownIcon,
   ClipboardDocumentIcon,
   ClipboardDocumentListIcon,
@@ -26,8 +27,13 @@ import {
   STEP_VOLTAGE_OPTIONS_V,
   UM_MENU,
 } from "@/lib/catalog";
-import { WINDING_RATED_KV, oltcUmFromRatedKv } from "@/lib/deriveUm";
-import { FIXTURES, selectOltc, stepUpOf } from "@/lib/engine";
+import { copyText } from "@/lib/clipboard";
+import {
+  DEFAULT_WINDING_RATED_KV,
+  WINDING_RATED_KV,
+  oltcUmFromRatedKv,
+} from "@/lib/deriveUm";
+import { FIXTURES, pickOtherOptions, selectOltc } from "@/lib/engine";
 import {
   defaultMid,
   lookupByPositions,
@@ -195,13 +201,16 @@ export function SelectorApp() {
   const [voltageMode, setVoltageMode] = useState<"winding" | "equipment">(
     "winding",
   );
-  const [windingRatedKv, setWindingRatedKv] = useState(66);
+  const [windingRatedKv, setWindingRatedKv] = useState(
+    DEFAULT_WINDING_RATED_KV,
+  );
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreUnlocked, setMoreUnlocked] = useState(false);
   const [altsOpen, setAltsOpen] = useState(false);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
-  const [copied, setCopied] = useState(false);
+  const [copiedModel, setCopiedModel] = useState<string | null>(null);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const beforePreset = useRef<{
     input: SelectInput;
     pm: string;
@@ -248,7 +257,7 @@ export function SelectorApp() {
     if (mode === voltageMode) return;
     setVoltageMode(mode);
     if (mode === "winding") {
-      setWindingRatedKv((kv) => (kv > 0 ? kv : 66));
+      setWindingRatedKv((kv) => (kv > 0 ? kv : DEFAULT_WINDING_RATED_KV));
       setInput((s) => ({ ...s, umKv: 0 }));
     } else {
       setWindingRatedKv(0);
@@ -390,6 +399,7 @@ export function SelectorApp() {
   useEffect(() => {
     return () => {
       if (runTimer.current) clearTimeout(runTimer.current);
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
     };
   }, []);
 
@@ -424,13 +434,11 @@ export function SelectorApp() {
   }, [moreOpen]);
 
   const copyModel = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1200);
-    } catch {
-      /* ignore */
-    }
+    const ok = await copyText(text);
+    if (!ok) return;
+    setCopiedModel(text);
+    if (copiedTimer.current) clearTimeout(copiedTimer.current);
+    copiedTimer.current = setTimeout(() => setCopiedModel(null), 2000);
   };
 
   const clearResult = () => {
@@ -454,7 +462,7 @@ export function SelectorApp() {
         setInput(defaultInput);
         setPm("8");
         setVoltageMode("winding");
-        setWindingRatedKv(66);
+        setWindingRatedKv(DEFAULT_WINDING_RATED_KV);
       }
       setActiveExample(null);
       clearResult();
@@ -487,20 +495,7 @@ export function SelectorApp() {
   };
 
   const primary = result?.ok ? result.results[0] : null;
-  const stepUp =
-    result?.ok && primary ? stepUpOf(primary, result.results) : null;
-  const alts = (() => {
-    if (!result?.ok || !primary) return [];
-    const out: typeof result.results = [];
-    if (stepUp) out.push(stepUp);
-    for (const r of result.results.slice(1)) {
-      if (out.length >= 3) break;
-      if (r.model === primary.model) continue;
-      if (out.some((x) => x.model === r.model)) continue;
-      out.push(r);
-    }
-    return out;
-  })();
+  const alts = result?.ok ? pickOtherOptions(result.results, 3) : [];
   const idle = !hasRun || !result;
   const posHint =
     !isLinear && input.positions != null
@@ -1193,12 +1188,27 @@ export function SelectorApp() {
                       <button
                         type="button"
                         onClick={() => copyModel(primary.model)}
-                        className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border border-[var(--color-rule)] px-2.5 text-[0.75rem] font-medium text-[var(--color-ink-2)] transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-                        aria-label={t(lang, "copyType")}
+                        className={cx(
+                          "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border px-2.5 text-[0.75rem] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+                          copiedModel === primary.model
+                            ? "border-[var(--color-accent)] text-[var(--color-accent)]"
+                            : "border-[var(--color-rule)] text-[var(--color-ink-2)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
+                        )}
+                        aria-label={
+                          copiedModel === primary.model
+                            ? t(lang, "copied")
+                            : t(lang, "copyType")
+                        }
                       >
-                        <ClipboardDocumentIcon className="h-4 w-4" aria-hidden />
-                        <span className="hidden min-[380px]:inline">
-                          {copied ? t(lang, "copied") : t(lang, "copy")}
+                        {copiedModel === primary.model ? (
+                          <CheckIcon className="h-4 w-4" aria-hidden />
+                        ) : (
+                          <ClipboardDocumentIcon className="h-4 w-4" aria-hidden />
+                        )}
+                        <span aria-live="polite">
+                          {copiedModel === primary.model
+                            ? t(lang, "copied")
+                            : t(lang, "copy")}
                         </span>
                       </button>
                     </div>
@@ -1320,9 +1330,17 @@ export function SelectorApp() {
                                         type="button"
                                         onClick={() => copyModel(r.model)}
                                         className="inline-flex h-8 shrink-0 items-center rounded-[var(--radius-sm)] px-2 text-[0.75rem] text-[var(--color-accent)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-                                        aria-label={t(lang, "copy")}
+                                        aria-label={
+                                          copiedModel === r.model
+                                            ? t(lang, "copied")
+                                            : t(lang, "copy")
+                                        }
                                       >
-                                        {t(lang, "copy")}
+                                        <span aria-live="polite">
+                                          {copiedModel === r.model
+                                            ? t(lang, "copied")
+                                            : t(lang, "copy")}
+                                        </span>
                                       </button>
                                     </span>
                                   </div>

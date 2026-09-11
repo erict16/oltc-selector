@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { selectOltc, stepUpOf, FIXTURES } from "./engine";
+import { selectOltc, stepUpOf, pickOtherOptions, FIXTURES } from "./engine";
 import { parseTypeString } from "./orderReplay";
 import {
   SERIES,
@@ -1054,6 +1054,49 @@ describe("2026 OS — other options + list axes", () => {
       true,
     );
     expect(alts[0].seriesCode).not.toBe("SHZV");
+  });
+
+  it("oil 350 A / 1400 V other options: SV, CM, CMD (not two CM)", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 350,
+      umKv: 72.5,
+      stepVoltageV: 1400,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      positions: 19,
+      midPositions: 3,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("CVIII-350Y/72.5-10193W");
+    const alts = pickOtherOptions(out.results, 3);
+    expect(alts.map((r) => r.seriesCode)).toEqual(["SV", "CM", "CMD"]);
+    expect(alts.map((r) => r.model)).toEqual([
+      "SVIII-500Y/72.5-10193W",
+      "CMIII-500Y/72.5B-10193W",
+      "CMDIII-400Y/72.5B-10193W",
+    ]);
+  });
+
+  it("vacuum 350 A / 72.5 still keeps the 126 twin in three alts", () => {
+    const out = selectOltc({
+      ...vacY,
+      throughCurrentA: 350,
+      umKv: 72.5,
+    });
+    expect(out.ok).toBe(true);
+    const alts = pickOtherOptions(out.results, 3);
+    expect(alts.some((r) => r.seriesCode === "CV2" && /\/126/.test(r.model))).toBe(
+      true,
+    );
+    expect(alts.filter((r) => r.seriesCode === "CV2").length).toBeLessThanOrEqual(
+      2,
+    );
   });
 
   it("603.75 A / 72.5 Δ stays on CV2-600 (2026 OS E-CV2260277)", () => {
