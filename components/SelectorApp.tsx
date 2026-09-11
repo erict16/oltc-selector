@@ -141,7 +141,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 const fieldCaptionClass =
-  "pointer-events-none absolute top-full right-0 mt-1.5 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]";
+  "pointer-events-none absolute top-full right-0 mt-px text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]";
 
 function CaptionSub({
   name,
@@ -896,7 +896,7 @@ export function SelectorApp() {
             >
               {currentMode === "capacity" ? (
                 <>
-                  <div className="relative pb-5">
+                  <div className="relative">
                     {mvaCustom ||
                     (transformerMva > 0 &&
                       !(MVA_OPTIONS as readonly number[]).includes(
@@ -997,7 +997,7 @@ export function SelectorApp() {
             </Field>
 
             <Field as="div" label={t(lang, "umWinding")}>
-              <div className="relative pb-5">
+              <div className="relative">
                 <select
                   className={controlClass}
                   value={windingRatedKv ? String(windingRatedKv) : ""}
@@ -1012,7 +1012,6 @@ export function SelectorApp() {
                 </select>
                 {umKvShow != null ? (
                   <span className={fieldCaptionClass}>
-                    OLTC{" "}
                     <CaptionSub
                       name="U"
                       sub="m"
@@ -1091,7 +1090,7 @@ export function SelectorApp() {
             )}
 
             <Field as="div" label={t(lang, "stepPercent")}>
-              <div className="relative pb-5">
+              <div className="relative">
                 <PercentCombo
                   value={stepPercentPct}
                   options={STEP_PERCENT_OPTIONS}
