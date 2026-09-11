@@ -141,7 +141,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 const fieldCaptionClass =
-  "pointer-events-none absolute top-full right-3 mt-1 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]";
+  "pointer-events-none absolute top-full right-3 mt-1 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]";
 
 function CaptionSub({
   name,
