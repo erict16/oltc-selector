@@ -9,6 +9,9 @@ export const WINDING_RATED_KV = [
   33, 35, 66, 69, 110, 115, 132, 138, 150, 220, 230, 330,
 ] as const;
 
+/** First-paint tap-side Un. 110 kV is the common HV class; star still → Um 72.5. */
+export const DEFAULT_WINDING_RATED_KV = 110;
+
 /** Un → winding highest voltage (IEC / GB equipment class). */
 export const RATED_TO_WINDING_UM: Record<number, number> = {
   33: 40.5,

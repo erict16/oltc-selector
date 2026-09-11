@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_WINDING_RATED_KV,
   deriveOltcUm,
   isTapSideRatedKv,
   oltcUmFromRatedKv,
@@ -51,6 +52,13 @@ describe("snap nameplate Un", () => {
     expect(snapRatedKv(10.5)).toBe(10.5);
     expect(snapRatedKv(400)).toBe(400);
     expect(snapRatedKv(725)).toBe(725);
+  });
+});
+
+describe("first-paint tap-side Un", () => {
+  it("defaults to 110 kV; star still Um 72.5", () => {
+    expect(DEFAULT_WINDING_RATED_KV).toBe(110);
+    expect(oltcUmFromRatedKv(DEFAULT_WINDING_RATED_KV, "Y")).toBe(72.5);
   });
 });
 
