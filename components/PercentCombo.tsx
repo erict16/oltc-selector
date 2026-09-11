@@ -51,46 +51,44 @@ export function PercentCombo({
 
   return (
     <div ref={root} className="relative">
-      <input
-        className={cx(
-          controlClass,
-          suffix ? "pr-14" : "pr-8",
-          prefix && "pl-7",
-        )}
-        inputMode="decimal"
-        autoComplete="off"
-        spellCheck={false}
-        value={raw}
-        onChange={(e) => {
-          const v = e.target.value.replace(/，/g, ".").replace(/％/g, "");
-          if (v !== "" && !/^\d*\.?\d*$/.test(v)) return;
-          setRaw(v);
-          if (v === "") {
-            onChange(0);
-            return;
-          }
-          if (isPartialDecimal(v)) return;
-          const n = Number(v);
-          if (Number.isFinite(n) && n >= 0) onChange(n);
-        }}
-        onFocus={() => setOpen(true)}
-      />
-      {prefix ? (
-        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[0.75rem] text-[var(--color-muted)]">
-          {prefix}
-        </span>
-      ) : null}
-      {suffix ? (
-        <span className="pointer-events-none absolute inset-y-0 right-8 flex items-center text-[0.75rem] text-[var(--color-muted)]">
-          {suffix}
-        </span>
-      ) : null}
+      <div className={cx(controlClass, "flex items-center gap-0.5 pr-8")}>
+        {prefix ? (
+          <span className="shrink-0 text-[0.75rem] text-[var(--color-muted)]">
+            {prefix}
+          </span>
+        ) : null}
+        <input
+          className="min-w-0 w-[4.75rem] border-0 bg-transparent p-0 text-[0.9rem] text-[var(--color-ink)] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          inputMode="decimal"
+          autoComplete="off"
+          spellCheck={false}
+          value={raw}
+          onChange={(e) => {
+            const v = e.target.value.replace(/，/g, ".").replace(/％/g, "");
+            if (v !== "" && !/^\d*\.?\d*$/.test(v)) return;
+            setRaw(v);
+            if (v === "") {
+              onChange(0);
+              return;
+            }
+            if (isPartialDecimal(v)) return;
+            const n = Number(v);
+            if (Number.isFinite(n) && n >= 0) onChange(n);
+          }}
+          onFocus={() => setOpen(true)}
+        />
+        {suffix ? (
+          <span className="shrink-0 text-[0.75rem] text-[var(--color-muted)]">
+            {suffix}
+          </span>
+        ) : null}
+      </div>
       <button
         type="button"
         tabIndex={-1}
         aria-label="presets"
         onClick={() => setOpen((s) => !s)}
-        className="absolute inset-y-0 right-0 flex w-8 items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"
+        className="absolute top-0 right-0 flex h-10 w-8 items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-ink-2)]"
       >
         <ChevronDownIcon
           className={cx("h-4 w-4 transition-transform", open && "rotate-180")}

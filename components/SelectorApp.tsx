@@ -141,7 +141,33 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 const fieldCaptionClass =
-  "pointer-events-none absolute top-full right-0 mt-0.5 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]";
+  "pointer-events-none absolute top-full right-0 mt-1.5 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]";
+
+function CaptionSub({
+  name,
+  sub,
+  eq,
+  value,
+  unit,
+}: {
+  name: string;
+  sub: string;
+  eq?: boolean;
+  value: string;
+  unit: string;
+}) {
+  return (
+    <>
+      {name}
+      <sub className="relative top-[0.22em] ml-px text-[0.62em] leading-none">
+        {sub}
+      </sub>
+      {eq !== false ? " = " : " "}
+      {value}
+      {unit}
+    </>
+  );
+}
 
 /** Comfortable control — one hover signal (border), shared height */
 const controlClass =
@@ -285,6 +311,7 @@ export function SelectorApp() {
     "capacity",
   );
   const [transformerMva, setTransformerMva] = useState(25);
+  const [mvaCustom, setMvaCustom] = useState(false);
   const [tapPlus, setTapPlus] = useState(8);
   const [tapMinus, setTapMinus] = useState(8);
   const [stepPercentPct, setStepPercentPct] = useState(1.25);
@@ -869,19 +896,85 @@ export function SelectorApp() {
             >
               {currentMode === "capacity" ? (
                 <>
-                  <div className="relative">
-                    <PercentCombo
-                      value={transformerMva}
-                      options={MVA_OPTIONS}
-                      suffix="MVA"
-                      onChange={(n) => {
-                        setTransformerMva(n);
-                        touch();
-                      }}
-                    />
+                  <div className="relative pb-5">
+                    {mvaCustom ||
+                    (transformerMva > 0 &&
+                      !(MVA_OPTIONS as readonly number[]).includes(
+                        transformerMva,
+                      )) ? (
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min={0}
+                        step={0.1}
+                        className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                        value={transformerMva > 0 ? String(transformerMva) : ""}
+                        placeholder={t(lang, "mvaPlaceholder")}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          if (raw === "") {
+                            setTransformerMva(0);
+                            touch();
+                            return;
+                          }
+                          const n = Number(raw);
+                          if (!Number.isFinite(n) || n < 0) return;
+                          setTransformerMva(n);
+                          touch();
+                        }}
+                        onBlur={() => {
+                          if (
+                            (MVA_OPTIONS as readonly number[]).includes(
+                              transformerMva,
+                            )
+                          ) {
+                            setMvaCustom(false);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <select
+                        className={controlClass}
+                        value={
+                          transformerMva > 0 ? String(transformerMva) : ""
+                        }
+                        onChange={(e) => {
+                          if (e.target.value === "__custom__") {
+                            setMvaCustom(true);
+                            return;
+                          }
+                          setTransformerMva(Number(e.target.value));
+                          setMvaCustom(false);
+                          touch();
+                        }}
+                      >
+                        {MVA_OPTIONS.map((n) => (
+                          <option key={n} value={String(n)}>
+                            {n} MVA
+                          </option>
+                        ))}
+                        <option value="__custom__">
+                          {t(lang, "custom")}
+                        </option>
+                      </select>
+                    )}
+                    {mvaCustom ||
+                    (transformerMva > 0 &&
+                      !(MVA_OPTIONS as readonly number[]).includes(
+                        transformerMva,
+                      )) ? (
+                      <span className="pointer-events-none absolute top-0 right-3 flex h-10 items-center text-[0.75rem] text-[var(--color-muted)]">
+                        MVA
+                      </span>
+                    ) : null}
                     {derivedOk && derivedA != null ? (
                       <span className={fieldCaptionClass}>
-                        {t(lang, "currentMax", { a: formatAmps(derivedA) })}
+                        <CaptionSub
+                          name="I"
+                          sub="max"
+                          value={formatAmps(derivedA)}
+                          unit="A"
+                        />
                       </span>
                     ) : null}
                   </div>
@@ -904,7 +997,7 @@ export function SelectorApp() {
             </Field>
 
             <Field as="div" label={t(lang, "umWinding")}>
-              <div className="relative">
+              <div className="relative pb-5">
                 <select
                   className={controlClass}
                   value={windingRatedKv ? String(windingRatedKv) : ""}
@@ -919,7 +1012,13 @@ export function SelectorApp() {
                 </select>
                 {umKvShow != null ? (
                   <span className={fieldCaptionClass}>
-                    {t(lang, "umCaption", { um: String(umKvShow) })}
+                    OLTC{" "}
+                    <CaptionSub
+                      name="U"
+                      sub="m"
+                      value={String(umKvShow)}
+                      unit=" kV"
+                    />
                   </span>
                 ) : null}
               </div>
@@ -992,7 +1091,7 @@ export function SelectorApp() {
             )}
 
             <Field as="div" label={t(lang, "stepPercent")}>
-              <div className="relative">
+              <div className="relative pb-5">
                 <PercentCombo
                   value={stepPercentPct}
                   options={STEP_PERCENT_OPTIONS}
@@ -1006,7 +1105,12 @@ export function SelectorApp() {
                 />
                 {ustV != null ? (
                   <span className={fieldCaptionClass}>
-                    {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
+                    <CaptionSub
+                      name="U"
+                      sub="st"
+                      value={String(Math.round(ustV))}
+                      unit="V"
+                    />
                   </span>
                 ) : null}
               </div>
