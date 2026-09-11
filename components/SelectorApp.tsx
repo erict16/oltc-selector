@@ -135,7 +135,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 const fieldCaptionClass =
-  "pointer-events-none absolute top-full right-0 mt-1 text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]";
+  "pointer-events-none absolute bottom-0 right-0 text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]";
 
 /** Comfortable control — one hover signal (border), shared height */
 const controlClass =
@@ -825,10 +825,13 @@ export function SelectorApp() {
             </div>
           </div>
 
-          <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
+          <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <Field
               as="div"
-              className="relative"
+              className={cx(
+                "relative",
+                currentMode === "capacity" && derivedOk && "pb-3.5",
+              )}
               label={
                 currentMode === "capacity"
                   ? t(lang, "transformerMva")
@@ -905,7 +908,7 @@ export function SelectorApp() {
 
             <Field
               as="div"
-              className="relative"
+              className={cx("relative", umKvShow != null && "pb-3.5")}
               label={t(lang, "umWinding")}
             >
               <select
@@ -1008,7 +1011,11 @@ export function SelectorApp() {
             )}
 
             {!isLinear ? (
-              <Field as="div" className="relative" label={t(lang, "stepPercent")}>
+              <Field
+                as="div"
+                className={cx("relative", ustV != null && "pb-3.5")}
+                label={t(lang, "stepPercent")}
+              >
                 <PercentCombo
                   value={stepPercentPct}
                   options={STEP_PERCENT_OPTIONS}
