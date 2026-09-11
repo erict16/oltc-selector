@@ -33,7 +33,7 @@ import {
   stepVoltageFromPercent,
   throughCurrentFromRated,
 } from "@/lib/deriveUm";
-import { PercentCombo } from "@/components/PercentCombo";
+
 import { FIXTURES, pickOtherOptions, selectOltc } from "@/lib/engine";
 import {
   defaultMid,
@@ -318,6 +318,7 @@ export function SelectorApp() {
   const [stepPercentPct, setStepPercentPct] = useState(1.25);
   const [stepPctCustom, setStepPctCustom] = useState(false);
   const [safetyK, setSafetyK] = useState(1.2);
+  const [safetyKCustom, setSafetyKCustom] = useState(false);
   const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -1592,16 +1593,71 @@ export function SelectorApp() {
                     </div>
                   </Field>
                   <Field as="div" label={t(lang, "safetyK")}>
-                    <PercentCombo
-                      value={safetyK}
-                      options={SAFETY_K_OPTIONS}
-                      prefix="×"
-                      suffix=""
-                      onChange={(k) => {
-                        setSafetyK(k);
-                        touch();
-                      }}
-                    />
+                    <div className="relative">
+                      {safetyKCustom ||
+                      (safetyK > 0 &&
+                        !(SAFETY_K_OPTIONS as readonly number[]).includes(
+                          safetyK,
+                        )) ? (
+                        <input
+                          inputMode="decimal"
+                          className={`${controlClass} pl-7 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                          value={safetyK > 0 ? String(safetyK) : ""}
+                          onChange={(e) => {
+                            const v = e.target.value.replace(/，/g, ".");
+                            if (v !== "" && !/^\d*\.?\d*$/.test(v)) return;
+                            if (v === "" || v === ".") {
+                              setSafetyK(0);
+                              touch();
+                              return;
+                            }
+                            const n = Number(v);
+                            if (!Number.isFinite(n) || n < 0) return;
+                            setSafetyK(n);
+                            touch();
+                          }}
+                          onBlur={() => {
+                            if (
+                              (SAFETY_K_OPTIONS as readonly number[]).includes(
+                                safetyK,
+                              )
+                            ) {
+                              setSafetyKCustom(false);
+                            }
+                          }}
+                        />
+                      ) : (
+                        <select
+                          className={controlClass}
+                          value={safetyK > 0 ? String(safetyK) : "1.2"}
+                          onChange={(e) => {
+                            if (e.target.value === "__custom__") {
+                              setSafetyKCustom(true);
+                              return;
+                            }
+                            setSafetyK(Number(e.target.value));
+                            setSafetyKCustom(false);
+                            touch();
+                          }}
+                        >
+                          <option value="__custom__">{t(lang, "custom")}</option>
+                          {SAFETY_K_OPTIONS.map((n) => (
+                            <option key={n} value={String(n)}>
+                              ×{n}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      {safetyKCustom ||
+                      (safetyK > 0 &&
+                        !(SAFETY_K_OPTIONS as readonly number[]).includes(
+                          safetyK,
+                        )) ? (
+                        <span className="pointer-events-none absolute top-0 left-3 flex h-10 items-center text-[0.9rem] text-[var(--color-ink)]">
+                          ×
+                        </span>
+                      ) : null}
+                    </div>
                   </Field>
                 </div>
               </div>
