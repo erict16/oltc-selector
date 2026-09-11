@@ -89,6 +89,9 @@ function geometryForPm(
 }
 
 const STEP_PERCENT_OPTIONS = [0.625, 1, 1.25, 1.5, 2, 2.5, 3, 5] as const;
+const TAP_SIDE_OPTIONS = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+] as const;
 
 const defaultInput: SelectInput = {
   mounting: "in_tank",
@@ -269,7 +272,7 @@ export function SelectorApp() {
   const [currentMode, setCurrentMode] = useState<"current" | "capacity">(
     "capacity",
   );
-  const [transformerMva, setTransformerMva] = useState(0);
+  const [transformerMva, setTransformerMva] = useState(25);
   const [tapPlus, setTapPlus] = useState(8);
   const [tapMinus, setTapMinus] = useState(8);
   const [stepPercentPct, setStepPercentPct] = useState(1.25);
@@ -626,7 +629,7 @@ export function SelectorApp() {
         setVoltageMode("winding");
         setWindingRatedKv(DEFAULT_WINDING_RATED_KV);
         setCurrentMode("capacity");
-        setTransformerMva(0);
+        setTransformerMva(25);
         setTapPlus(8);
         setTapMinus(8);
         setStepPercentPct(1.25);
@@ -786,17 +789,11 @@ export function SelectorApp() {
           <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <Field
               as="div"
+              className="relative"
               label={
                 currentMode === "capacity"
                   ? t(lang, "transformerMva")
                   : t(lang, "throughCurrent")
-              }
-              meta={
-                currentMode === "capacity" && derivedOk && derivedA != null
-                  ? t(lang, derivedIsMax ? "currentMax" : "currentRated", {
-                      a: formatAmps(derivedA),
-                    })
-                  : undefined
               }
               action={
                 <ModeSeg
@@ -811,32 +808,41 @@ export function SelectorApp() {
               }
             >
               {currentMode === "capacity" ? (
-                <div className="relative">
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step={0.1}
-                    className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                    value={transformerMva > 0 ? String(transformerMva) : ""}
-                    placeholder={t(lang, "mvaPlaceholder")}
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      if (raw === "") {
-                        setTransformerMva(0);
+                <>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step={0.1}
+                      className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                      value={transformerMva > 0 ? String(transformerMva) : ""}
+                      placeholder={t(lang, "mvaPlaceholder")}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          setTransformerMva(0);
+                          touch();
+                          return;
+                        }
+                        const n = Number(raw);
+                        if (!Number.isFinite(n) || n < 0) return;
+                        setTransformerMva(n);
                         touch();
-                        return;
-                      }
-                      const n = Number(raw);
-                      if (!Number.isFinite(n) || n < 0) return;
-                      setTransformerMva(n);
-                      touch();
-                    }}
-                  />
-                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] text-[var(--color-muted)]">
-                    MVA
-                  </span>
-                </div>
+                      }}
+                    />
+                    <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] text-[var(--color-muted)]">
+                      MVA
+                    </span>
+                  </div>
+                  {derivedOk && derivedA != null ? (
+                    <span className="pointer-events-none absolute top-full left-0 mt-px text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]">
+                      {t(lang, derivedIsMax ? "currentMax" : "currentRated", {
+                        a: formatAmps(derivedA),
+                      })}
+                    </span>
+                  ) : null}
+                </>
               ) : (
                 <select
                   className={controlClass}
@@ -982,27 +988,39 @@ export function SelectorApp() {
 
             {!isLinear && !pm ? (
               <>
-                <Field label={t(lang, "stepPercent")}>
-                  <select
-                    className={controlClass}
-                    value={String(stepPercentPct)}
-                    onChange={(e) => {
-                      const pct = Number(e.target.value);
-                      setStepPercentPct(pct);
-                      touch();
-                      commitTapRange(tapPlus, tapMinus, pct);
-                    }}
-                  >
-                    {STEP_PERCENT_OPTIONS.map((p) => (
-                      <option key={p} value={String(p)}>
-                        {p}%
-                      </option>
-                    ))}
-                  </select>
+                <Field as="div" label={t(lang, "stepPercent")}>
+                  <div className="relative">
+                    <input
+                      className={`${controlClass} pr-8`}
+                      list="step-pct-list"
+                      inputMode="decimal"
+                      value={stepPercentPct > 0 ? String(stepPercentPct) : ""}
+                      onChange={(e) => {
+                        const pct = Number(e.target.value);
+                        if (e.target.value === "") {
+                          setStepPercentPct(0);
+                          touch();
+                          commitTapRange(tapPlus, tapMinus, 0);
+                          return;
+                        }
+                        if (!Number.isFinite(pct) || pct <= 0) return;
+                        setStepPercentPct(pct);
+                        touch();
+                        commitTapRange(tapPlus, tapMinus, pct);
+                      }}
+                    />
+                    <datalist id="step-pct-list">
+                      {STEP_PERCENT_OPTIONS.map((p) => (
+                        <option key={p} value={String(p)} />
+                      ))}
+                    </datalist>
+                    <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] text-[var(--color-muted)]">
+                      %
+                    </span>
+                  </div>
                 </Field>
                 <Field
                   as="div"
-                  className="sm:col-span-2"
                   label={t(lang, "positions")}
                   action={
                     input.positions != null ? (
@@ -1018,57 +1036,41 @@ export function SelectorApp() {
                       "flex items-stretch gap-0 px-0",
                     )}
                   >
-                    <label className="flex min-w-0 flex-1 items-center pl-3">
-                      <span className="mr-1 shrink-0 text-[var(--color-muted)]">
-                        +
-                      </span>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min={1}
-                        max={30}
-                        className="h-full w-full min-w-0 border-0 bg-transparent px-0 text-[0.9rem] text-[var(--color-ink)] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        value={tapPlus > 0 ? String(tapPlus) : ""}
-                        onChange={(e) => {
-                          const n = Number(e.target.value);
-                          const plus =
-                            e.target.value === ""
-                              ? 0
-                              : Number.isInteger(n) && n > 0
-                                ? n
-                                : tapPlus;
-                          setTapPlus(plus);
-                          touch();
-                          commitTapRange(plus, tapMinus, stepPercentPct);
-                        }}
-                      />
-                    </label>
+                    <select
+                      className="h-full min-w-0 flex-1 border-0 bg-transparent py-0 pl-3 pr-1 text-[0.9rem] text-[var(--color-ink)] outline-none"
+                      value={tapPlus > 0 ? String(tapPlus) : ""}
+                      onChange={(e) => {
+                        const plus = Number(e.target.value);
+                        setTapPlus(plus);
+                        touch();
+                        commitTapRange(plus, tapMinus, stepPercentPct);
+                      }}
+                      aria-label="+"
+                    >
+                      {TAP_SIDE_OPTIONS.map((n) => (
+                        <option key={`p${n}`} value={String(n)}>
+                          +{n}
+                        </option>
+                      ))}
+                    </select>
                     <span className="my-2 w-px shrink-0 bg-[var(--color-rule)]" />
-                    <label className="flex min-w-0 flex-1 items-center pr-3">
-                      <span className="mr-1 shrink-0 text-[var(--color-muted)]">
-                        −
-                      </span>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min={1}
-                        max={30}
-                        className="h-full w-full min-w-0 border-0 bg-transparent px-0 text-[0.9rem] text-[var(--color-ink)] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                        value={tapMinus > 0 ? String(tapMinus) : ""}
-                        onChange={(e) => {
-                          const n = Number(e.target.value);
-                          const minus =
-                            e.target.value === ""
-                              ? 0
-                              : Number.isInteger(n) && n > 0
-                                ? n
-                                : tapMinus;
-                          setTapMinus(minus);
-                          touch();
-                          commitTapRange(tapPlus, minus, stepPercentPct);
-                        }}
-                      />
-                    </label>
+                    <select
+                      className="h-full min-w-0 flex-1 border-0 bg-transparent py-0 pl-2 pr-3 text-[0.9rem] text-[var(--color-ink)] outline-none"
+                      value={tapMinus > 0 ? String(tapMinus) : ""}
+                      onChange={(e) => {
+                        const minus = Number(e.target.value);
+                        setTapMinus(minus);
+                        touch();
+                        commitTapRange(tapPlus, minus, stepPercentPct);
+                      }}
+                      aria-label="−"
+                    >
+                      {TAP_SIDE_OPTIONS.map((n) => (
+                        <option key={`m${n}`} value={String(n)}>
+                          −{n}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </Field>
               </>
