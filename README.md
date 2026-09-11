@@ -10,11 +10,9 @@
 
 ## 怎么用
 
-上面三个预选是变压器电压等级（66 / 110 / 220 kV），会填好对应的开关 Um。电流、Um、级电压都是目录下拉，手机上点选。
+预选 66 / 110 / 220 kV 会带上常用工况。默认填变压器容量，星接/角接推出最大通过电流 Iₘₐₓ（含最低分接和安全系数）。调压侧电压推出开关 Uₘ；每级 % 推出 Uₛₜ。点选型之后才出型号，改参数要再点一次。
 
-引擎按 2025 目录排：**CV2 → CM2 → SHZV → SHZVG**。能用一台三相就不拆成三台单相。没有 CV2-500。箱顶走 HWV；更多选项里可切无载（WSL / WSG）。
-
-点选型之后才出型号。改参数不会悄悄换结果，要再点一次。
+引擎按 2025 目录排：**CV2 → CM2 → SHZV → SHZVG**。能用一台三相就不拆成三台单相。没有 CV2-500。箱顶走 HWV；更多选项里可切无载（WSL / WSG）、油灭弧、安全系数。
 
 ```bash
 npm install
@@ -31,24 +29,13 @@ GitHub Pages：`npm run build:gh`（`GH_PAGES=true`，路径 `/oltc-selector/`�
 NEXT_PUBLIC_ADMIN_PASSWORD_SHA256=<sha256 hex of the password>
 ```
 
-GitHub Actions 用 secret `ADMIN_PASSWORD` 在构建时哈希。Vercel 环境变量用同一个 `NEXT_PUBLIC_ADMIN_PASSWORD_SHA256`。没配口令则登不进去，公开页仍然能选型、没有价格。
+GitHub Actions 用 secret `ADMIN_PASSWORD` 在构建时哈希。Vercel 用同一个 `NEXT_PUBLIC_ADMIN_PASSWORD_SHA256`。没配口令则登不进去，公开页仍然能选型、没有价格。
 
 语言：中文、English、Tiếng Việt、Español、Türkçe、Русский。
 
-## 字段
-
-| 栏 | 意思 |
-|---|---|
-| 开关最大通过电流 Iᵤ | 目录电流，如 400 A、600 A |
-| 调压侧额定电压 | 接在开关上的那档，如 `132 kV`。星点会推出开关 Um（132 Y → 72.5）。可切到 **开关 Um** 手填 |
-| 级电压 Ust | 档位电压，如 1500 V |
-| 开关连接 | 开关接在哪：Y 中性点 / D 线端 |
-| 调压方式 | 线性 0 / 正反 W / 粗细 G |
-| ± 级数 | 仅 W/G；线性只选位置数 |
-
 ## 测试
 
-`npm test`：引擎、2025 价目、真实 Qu-ET / Anthony 报价回放（84 条，0 fail）。跳过的行（只有机构、CV2-500、一张表两台变）写了原因。笔记在 `docs/replay/`。
+`npm test`：引擎、2025 价目、真实报价回放。笔记在 `docs/replay/`。
 
 ## 许可
 
