@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { selectOltc, stepUpOf, pickOtherOptions, FIXTURES } from "./engine";
+import { maxThroughCurrent, throughCurrentFromRated } from "./deriveUm";
 import { parseTypeString } from "./orderReplay";
 import {
   SERIES,
@@ -569,6 +570,48 @@ describe("2025 sales calibration (year=2025)", () => {
   it("CMD I includes 1200 A (2025 CMDI-1200 volume)", () => {
     const cmd = SERIES.find((s) => s.id === "cmd")!;
     expect(cmd.currents.I).toContain(1200);
+  });
+
+  it("25 MVA 35 kV delta min-tap +4/−2×2.5% still CV2-350", () => {
+    const rated = throughCurrentFromRated(25, 35, "D");
+    const i = maxThroughCurrent(rated, 2, 0.025);
+    expect(i).toBeGreaterThan(rated);
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: i,
+      umKv: 40.5,
+      stepVoltageV: 1000,
+      regulation: "reversing",
+      positions: 7,
+      midPositions: 1,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].currentA).toBe(350);
+  });
+
+  it("25 MVA 35 kV delta (capacity path) → CV2-350 / 40.5", () => {
+    const i = throughCurrentFromRated(25, 35, "D");
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: i,
+      umKv: 40.5,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("CV2III-350D/40.5-10193W");
+    expect(out.results[0].currentA).toBe(350);
   });
 
   it("349.9 A accepts CV2-350 (S/√3U rounding; ~1 A epsilon)", () => {

@@ -101,6 +101,51 @@ export function throughCurrentFromRated(
   return (mva * 1000) / (Math.sqrt(3) * ratedKv);
 }
 
+/** Step voltage from Un and %: delta Un×%; star (Un/√3)×%. */
+export function stepVoltageFromPercent(
+  ratedKv: number,
+  stepPercent: number,
+  connection: SelectInput["connection"],
+): number {
+  if (!(ratedKv > 0) || !(stepPercent > 0)) return NaN;
+  const windingV =
+    connection === "D"
+      ? ratedKv * 1000
+      : (ratedKv * 1000) / Math.sqrt(3);
+  return windingV * stepPercent;
+}
+
+/** Step as a fraction of winding voltage. Delta: Un; star: Un/√3. */
+export function stepPercentFromUst(
+  stepVoltageV: number,
+  ratedKv: number,
+  connection: SelectInput["connection"],
+): number {
+  if (!(stepVoltageV > 0) || !(ratedKv > 0)) return NaN;
+  const windingV =
+    connection === "D"
+      ? ratedKv * 1000
+      : (ratedKv * 1000) / Math.sqrt(3);
+  return stepVoltageV / windingV;
+}
+
+/**
+ * OLTC Iu is the current at the lowest tap (constant MVA), not rated I.
+ * drop = minusSteps × stepPercent; Imax = Irated / (1 − drop).
+ */
+export function maxThroughCurrent(
+  ratedA: number,
+  minusSteps: number,
+  stepPercent: number,
+): number {
+  if (!(ratedA > 0)) return NaN;
+  if (!(minusSteps > 0) || !(stepPercent > 0)) return ratedA;
+  const drop = minusSteps * stepPercent;
+  if (drop <= 0) return ratedA;
+  const denom = 1 - Math.min(drop, 0.45);
+  return ratedA / denom;
+}
+
 /**
  * True when OS through-current matches I from this kV — then the kV is the
  * winding the OLTC sits on, not the other side of the transformer.

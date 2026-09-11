@@ -22,6 +22,50 @@ const PITCHES = [10, 12, 14, 16, 18] as const;
  * ═══════════════════════════════════════════════════════════
  */
 
+export type ParsedTapRange = {
+  plus: number;
+  minus: number;
+  positions: number;
+  /** 0.025 for 2.5%. Null when the string has no ×n%. */
+  stepPercent: number | null;
+};
+
+/**
+ * Early RFQ tap range: `+4-2`, `+4/-2`, `±4/2`, optional `×2.5%`.
+ * Positions = plus + minus + 1 (mid 1).
+ */
+export function parseTapRange(raw: string): ParsedTapRange | null {
+  let s = raw.trim().replace(/\s+/g, "");
+  if (!s) return null;
+  s = s.replace(/[×✕✖]/g, "x").replace(/％/g, "%").replace(/，/g, ",");
+  s = s.replace(/,/g, ".");
+
+  let stepPercent: number | null = null;
+  const pct = s.match(/x(\d+(?:\.\d+)?)%$/i);
+  if (pct && pct.index != null) {
+    const p = Number(pct[1]) / 100;
+    if (p > 0 && p < 0.2) stepPercent = p;
+    s = s.slice(0, pct.index);
+  }
+
+  const patterns = [
+    /^[±](\d+)[/／](\d+)$/,
+    /^[±](\d+)-(\d+)$/,
+    /^\+(\d+)\/-(\d+)$/,
+    /^\+(\d+)-(\d+)$/,
+    /^(\d+)[/／](\d+)$/,
+  ];
+  for (const re of patterns) {
+    const m = s.match(re);
+    if (!m) continue;
+    const plus = Number(m[1]);
+    const minus = Number(m[2]);
+    if (!(plus > 0) || !(minus > 0) || plus > 30 || minus > 30) return null;
+    return { plus, minus, positions: plus + minus + 1, stepPercent };
+  }
+  return null;
+}
+
 export type TapGeometry = {
   plusMinus: number;
   pitch: number;

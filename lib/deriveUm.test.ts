@@ -3,8 +3,11 @@ import {
   DEFAULT_WINDING_RATED_KV,
   deriveOltcUm,
   isTapSideRatedKv,
+  maxThroughCurrent,
   oltcUmFromRatedKv,
   snapRatedKv,
+  stepPercentFromUst,
+  stepVoltageFromPercent,
   throughCurrentFromRated,
   windingUmFromRatedKv,
 } from "./deriveUm";
@@ -158,6 +161,33 @@ describe("tap-side check I = S / U", () => {
   it("delta uses P/(3U)", () => {
     const i = throughCurrentFromRated(40, 138, "D");
     expect(i).toBeCloseTo(96.6, 0);
+  });
+
+  it("SFZ22-25000 35 kV delta HV tap → 238 A", () => {
+    expect(throughCurrentFromRated(25, 35, "D")).toBeCloseTo(238.1, 0);
+  });
+
+  it("50 MVA 110 kV star → 262 A", () => {
+    expect(throughCurrentFromRated(50, 110, "Y")).toBeCloseTo(262.4, 0);
+  });
+
+  it("±8 × 1.25% at 110 kV star: Imax is rated / 0.9", () => {
+    const rated = throughCurrentFromRated(25, 110, "Y");
+    expect(rated).toBeCloseTo(131.2, 0);
+    expect(maxThroughCurrent(rated, 8, 0.0125)).toBeCloseTo(rated / 0.9, 1);
+  });
+
+  it("SFZ +4/−2 × 2.5% uses min-tap current, not rated", () => {
+    const rated = throughCurrentFromRated(25, 35, "D");
+    const iMax = maxThroughCurrent(rated, 2, 0.025);
+    expect(iMax).toBeCloseTo(rated / 0.95, 1);
+    expect(iMax).toBeCloseTo(250.6, 0);
+    expect(iMax * 1.2).toBeCloseTo(300.7, 0);
+  });
+
+  it("Ust 875 V on 35 kV delta is 2.5%", () => {
+    expect(stepPercentFromUst(875, 35, "D")).toBeCloseTo(0.025, 5);
+    expect(stepVoltageFromPercent(35, 0.025, "D")).toBeCloseTo(875, 0);
   });
 });
 

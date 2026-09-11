@@ -20,22 +20,24 @@ import {
   ACROSS_PF_MENU,
   ACROSS_PF_OPTIONS_KV,
   CURRENT_MENU,
-  LINEAR_POSITION_OPTIONS,
-  POSITION_OPTIONS,
   SERIES,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
-  UM_MENU,
 } from "@/lib/catalog";
 import { copyText } from "@/lib/clipboard";
 import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
+  maxThroughCurrent,
   oltcUmFromRatedKv,
+  stepVoltageFromPercent,
+  throughCurrentFromRated,
 } from "@/lib/deriveUm";
+import { PercentCombo } from "@/components/PercentCombo";
 import { FIXTURES, pickOtherOptions, selectOltc } from "@/lib/engine";
 import {
   defaultMid,
+  defaultPitch,
   lookupByPositions,
   lookupDiagram,
   midControl,
@@ -43,6 +45,7 @@ import {
   pmStepOptionsFor,
   positionsFor,
   preferredMid,
+  type ParsedTapRange,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { AltListAmount, ListPrice, useListFx } from "@/components/ListPrice";
@@ -84,6 +87,17 @@ function geometryForPm(
   };
 }
 
+const STEP_PERCENT_OPTIONS = [
+  0.5, 0.625, 0.8, 1, 1.25, 1.5, 1.67, 2, 2.25, 2.5, 2.75, 3, 3.33, 4, 5, 6.25,
+  7.5, 10,
+] as const;
+const TAP_SIDE_OPTIONS = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+] as const;
+const SAFETY_K_OPTIONS = [
+  1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.5, 1.6, 1.7, 1.8,
+] as const;
+
 const defaultInput: SelectInput = {
   mounting: "in_tank",
   medium: "oil_vacuum",
@@ -122,6 +136,9 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
+const fieldCaptionClass =
+  "pointer-events-none absolute bottom-0 right-0 text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]";
+
 /** Comfortable control — one hover signal (border), shared height */
 const controlClass =
   "h-10 w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
@@ -129,6 +146,7 @@ const controlClass =
 function Field({
   label,
   tip,
+  meta,
   children,
   className,
   action,
@@ -136,6 +154,8 @@ function Field({
 }: {
   label: string;
   tip?: string;
+  /** Same-row note (e.g. 最大 251 A) — does not add a second line. */
+  meta?: string;
   children: React.ReactNode;
   className?: string;
   /** Right-side of the label row (e.g. →19位 next to ±级数) */
@@ -149,8 +169,7 @@ function Field({
       <span className="flex h-[1.625rem] flex-nowrap items-center gap-2 overflow-visible">
         <span
           className={cx(
-            "min-w-0 flex-1 whitespace-nowrap text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]",
-            action ? "truncate" : "overflow-visible",
+            "shrink-0 whitespace-nowrap text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]",
           )}
         >
           {label.split("ᵤ").map((part, i, arr) =>
@@ -164,6 +183,13 @@ function Field({
             ),
           )}
         </span>
+        {meta ? (
+          <span className="min-w-0 truncate text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]">
+            {meta}
+          </span>
+        ) : (
+          <span className="min-w-0 flex-1" />
+        )}
         {action ? (
           <span className="ml-auto shrink-0 whitespace-nowrap text-[0.75rem] leading-none">
             {action}
@@ -178,6 +204,53 @@ function Field({
       ) : null}
     </Tag>
   );
+}
+
+function ModeSeg<T extends string>({
+  ariaLabel,
+  value,
+  options,
+  onChange,
+}: {
+  ariaLabel: string;
+  value: T;
+  options: { id: T; label: string }[];
+  onChange: (id: T) => void;
+}) {
+  return (
+    <div
+      className="inline-flex h-[1.625rem] items-center rounded-full bg-[var(--color-soft)] p-0.5"
+      role="group"
+      aria-label={ariaLabel}
+    >
+      {options.map((opt) => {
+        const on = value === opt.id;
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(opt.id)}
+            className={cx(
+              "inline-flex h-6 items-center rounded-full px-2.5 text-[0.6875rem] leading-none whitespace-nowrap transition-[transform,background-color,color] duration-150 active:scale-[0.96]",
+              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+              on
+                ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
+                : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]",
+            )}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function formatAmps(a: number): string {
+  if (!Number.isFinite(a) || a <= 0) return "";
+  const r = Math.round(a * 10) / 10;
+  return Number.isInteger(r) ? String(r) : r.toFixed(1);
 }
 
 function showSelectorSize(input: SelectInput) {
@@ -204,6 +277,15 @@ export function SelectorApp() {
   const [windingRatedKv, setWindingRatedKv] = useState(
     DEFAULT_WINDING_RATED_KV,
   );
+  const [currentMode, setCurrentMode] = useState<"current" | "capacity">(
+    "capacity",
+  );
+  const [transformerMva, setTransformerMva] = useState(25);
+  const [tapPlus, setTapPlus] = useState(8);
+  const [tapMinus, setTapMinus] = useState(8);
+  const [stepPercentPct, setStepPercentPct] = useState(1.25);
+  const [safetyK, setSafetyK] = useState(1.2);
+  const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreUnlocked, setMoreUnlocked] = useState(false);
@@ -216,6 +298,13 @@ export function SelectorApp() {
     pm: string;
     voltageMode: "winding" | "equipment";
     windingRatedKv: number;
+    currentMode: "current" | "capacity";
+    transformerMva: number;
+    tapPlus: number;
+    tapMinus: number;
+    stepPercentPct: number;
+    safetyK: number;
+    tapRange: ParsedTapRange | null;
   } | null>(null);
 
   const [result, setResult] = useState<SelectOutput | null>(null);
@@ -262,6 +351,17 @@ export function SelectorApp() {
     } else {
       setWindingRatedKv(0);
       setInput((s) => ({ ...s, umKv: 0 }));
+      if (currentMode === "capacity") setCurrentMode("current");
+    }
+    touch();
+  };
+
+  const setCurrentEntry = (mode: "current" | "capacity") => {
+    if (mode === currentMode) return;
+    setCurrentMode(mode);
+    if (mode === "capacity" && voltageMode !== "winding") {
+      setVoltageEntry("winding");
+      return;
     }
     touch();
   };
@@ -282,12 +382,29 @@ export function SelectorApp() {
     touch();
     if (reg === "linear") {
       setPm("");
+      const plus = tapPlus > 0 ? tapPlus : 4;
+      const minus = tapMinus > 0 ? tapMinus : 4;
+      setTapPlus(plus);
+      setTapMinus(minus);
+      const range: ParsedTapRange = {
+        plus,
+        minus,
+        positions: plus + minus + 1,
+        stepPercent: stepPercentPct > 0 ? stepPercentPct / 100 : null,
+      };
+      setTapRange(range);
       setInput((s) => ({
         ...s,
         regulation: reg,
         plusMinusSteps: undefined,
-        positions: s.positions && s.positions <= 18 ? s.positions : 9,
+        positions: range.positions,
         midPositions: 0,
+        pitch: defaultPitch(range.positions, "linear") as
+          | 10
+          | 12
+          | 14
+          | 16
+          | 18,
       }));
       return;
     }
@@ -303,13 +420,48 @@ export function SelectorApp() {
     }));
   };
 
+  const commitTapRange = (
+    plus: number,
+    minus: number,
+    pct: number,
+  ) => {
+    if (!(plus > 0) || !(minus > 0)) {
+      setTapRange(null);
+      return;
+    }
+    const range: ParsedTapRange = {
+      plus,
+      minus,
+      positions: plus + minus + 1,
+      stepPercent: pct > 0 ? pct / 100 : null,
+    };
+    setTapRange(range);
+    setInput((s) => ({
+      ...s,
+      positions: range.positions,
+      plusMinusSteps: undefined,
+      midPositions: s.regulation === "linear" ? 0 : 1,
+      pitch: defaultPitch(range.positions, s.regulation) as
+        | 10
+        | 12
+        | 14
+        | 16
+        | 18,
+    }));
+  };
+
   const applyPm = (raw: string) => {
     setPm(raw);
     touch();
     if (!raw) {
-      setInput((s) => ({ ...s, plusMinusSteps: undefined }));
+      const n = Number(pm) > 0 ? Number(pm) : 8;
+      setTapPlus(n);
+      setTapMinus(n);
+      setStepPercentPct(1.25);
+      commitTapRange(n, n, 1.25);
       return;
     }
+    setTapRange(null);
     const n = Number(raw);
     if (!Number.isFinite(n) || n <= 0) return;
     // Always snap to brochure preferred mid for this ±N.
@@ -341,15 +493,76 @@ export function SelectorApp() {
     });
   };
 
-  const dutyForSelect = (): SelectInput | { error: true } => {
+  const stepFraction = (): number | null => {
+    if (tapRange?.stepPercent && tapRange.stepPercent > 0) {
+      return tapRange.stepPercent;
+    }
+    if (stepPercentPct > 0) return stepPercentPct / 100;
+    return null;
+  };
+
+  const minusSteps = (): number => {
+    if (tapRange && tapRange.minus > 0) return tapRange.minus;
+    const n = pm && Number(pm) > 0 ? Number(pm) : input.plusMinusSteps;
+    if (n != null && n > 0) return n;
+    return 0;
+  };
+
+  const capacityThroughA = (): number | null => {
+    if (!(transformerMva > 0) || !(windingRatedKv > 0)) return null;
+    const rated = throughCurrentFromRated(
+      transformerMva,
+      windingRatedKv,
+      input.connection,
+    );
+    if (!Number.isFinite(rated) || rated <= 0) return null;
+    const minus = minusSteps();
+    const pct = stepFraction();
+    const iMax =
+      minus > 0 && pct != null && pct > 0
+        ? maxThroughCurrent(rated, minus, pct)
+        : rated;
+    const k = safetyK > 0 ? safetyK : 1;
+    return iMax * k;
+  };
+
+  const computedStepVoltage = (): number | null => {
+    const pct = stepFraction();
+    if (!(windingRatedKv > 0) || pct == null || !(pct > 0)) return null;
+    const v = stepVoltageFromPercent(
+      windingRatedKv,
+      pct,
+      input.connection,
+    );
+    return Number.isFinite(v) && v > 0 ? v : null;
+  };
+
+  const dutyForSelect = ():
+    | SelectInput
+    | { error: true; msgKey: string } => {
+    if (currentMode === "capacity") {
+      if (!(transformerMva > 0)) return { error: true, msgKey: "needMva" };
+      if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
+      const i = capacityThroughA();
+      if (i == null) return { error: true, msgKey: "needMva" };
+      const ust = computedStepVoltage();
+      return {
+        ...input,
+        throughCurrentA: i,
+        umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
+        ...(ust != null ? { stepVoltageV: ust } : {}),
+      };
+    }
     if (voltageMode === "winding") {
-      if (!(windingRatedKv > 0)) return { error: true };
+      if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
+      const ust = computedStepVoltage();
       return {
         ...input,
         umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
+        ...(ust != null ? { stepVoltageV: ust } : {}),
       };
     }
-    if (!(input.umKv > 0)) return { error: true };
+    if (!(input.umKv > 0)) return { error: true, msgKey: "needUm" };
     return { ...input, umKv: input.umKv };
   };
 
@@ -361,7 +574,7 @@ export function SelectorApp() {
     runTimer.current = setTimeout(() => {
       const duty = dutyForSelect();
       if ("error" in duty) {
-        const msg = t(lang, voltageMode === "winding" ? "needRated" : "needUm");
+        const msg = t(lang, duty.msgKey);
         setResult({
           ok: false,
           results: [],
@@ -458,18 +671,44 @@ export function SelectorApp() {
         setPm(prev.pm);
         setVoltageMode(prev.voltageMode);
         setWindingRatedKv(prev.windingRatedKv);
+        setCurrentMode(prev.currentMode);
+        setTransformerMva(prev.transformerMva);
+        setTapPlus(prev.tapPlus);
+        setTapMinus(prev.tapMinus);
+        setStepPercentPct(prev.stepPercentPct);
+        setSafetyK(prev.safetyK);
+        setTapRange(prev.tapRange);
       } else {
         setInput(defaultInput);
         setPm("8");
         setVoltageMode("winding");
         setWindingRatedKv(DEFAULT_WINDING_RATED_KV);
+        setCurrentMode("capacity");
+        setTransformerMva(25);
+        setTapPlus(8);
+        setTapMinus(8);
+        setStepPercentPct(1.25);
+        setSafetyK(1.2);
+        setTapRange(null);
       }
       setActiveExample(null);
       clearResult();
       return;
     }
     if (activeExample == null) {
-      beforePreset.current = { input, pm, voltageMode, windingRatedKv };
+      beforePreset.current = {
+        input,
+        pm,
+        voltageMode,
+        windingRatedKv,
+        currentMode,
+        transformerMva,
+        tapPlus,
+        tapMinus,
+        stepPercentPct,
+        safetyK,
+        tapRange,
+      };
     }
     const f = FIXTURES[ex.key];
     let next: SelectInput = { ...f.input, mdu: "none" };
@@ -486,6 +725,13 @@ export function SelectorApp() {
     const rated = EXAMPLE_RATED_KV[ex.key];
     setWindingRatedKv(rated);
     setVoltageMode("winding");
+    setCurrentMode("current");
+    setTransformerMva(0);
+    setTapPlus(8);
+    setTapMinus(8);
+    setStepPercentPct(1.25);
+    setSafetyK(1.2);
+    setTapRange(null);
     setInput({
       ...next,
       umKv: 0,
@@ -509,8 +755,26 @@ export function SelectorApp() {
       : input.plusMinusSteps && input.plusMinusSteps > 0
         ? input.plusMinusSteps
         : null;
-  const midCtrl = midControl(pmN, input.regulation, input.positions);
+  const midCtrl = !pm
+    ? { show: false, options: [] as Array<1 | 3> }
+    : midControl(pmN, input.regulation, input.positions);
   const midOpts = midCtrl.options;
+  const derivedA = currentMode === "capacity" ? capacityThroughA() : null;
+  const derivedOk =
+    derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
+  const ratedA =
+    currentMode === "capacity" && transformerMva > 0 && windingRatedKv > 0
+      ? throughCurrentFromRated(
+          transformerMva,
+          windingRatedKv,
+          input.connection,
+        )
+      : null;
+  const ustV = computedStepVoltage();
+  const umKvShow =
+    windingRatedKv > 0
+      ? oltcUmFromRatedKv(windingRatedKv, input.connection)
+      : null;
 
   return (
     <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:px-6 md:gap-4 md:pt-6 md:pb-4">
@@ -588,90 +852,108 @@ export function SelectorApp() {
           </div>
 
           <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
-            <Field label={t(lang, "throughCurrent")}>
-              <select
-                className={controlClass}
-                value={String(input.throughCurrentA)}
-                onChange={(e) =>
-                  patch("throughCurrentA", Number(e.target.value))
-                }
-              >
-                {CURRENT_MENU.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {currentLabel(lang, c.labelZh, c.labelEn)}
-                  </option>
-                ))}
-              </select>
+            <Field
+              as="div"
+              className={cx(
+                "relative",
+                currentMode === "capacity" && derivedOk && "pb-3.5",
+              )}
+              label={
+                currentMode === "capacity"
+                  ? t(lang, "transformerMva")
+                  : t(lang, "throughCurrent")
+              }
+              action={
+                <ModeSeg
+                  ariaLabel={t(lang, "currentModeAria")}
+                  value={currentMode}
+                  options={[
+                    { id: "capacity", label: t(lang, "capacityBtn") },
+                    { id: "current", label: t(lang, "currentBtn") },
+                  ]}
+                  onChange={setCurrentEntry}
+                />
+              }
+            >
+              {currentMode === "capacity" ? (
+                <>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step={0.1}
+                      className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                      value={transformerMva > 0 ? String(transformerMva) : ""}
+                      placeholder={t(lang, "mvaPlaceholder")}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          setTransformerMva(0);
+                          touch();
+                          return;
+                        }
+                        const n = Number(raw);
+                        if (!Number.isFinite(n) || n < 0) return;
+                        setTransformerMva(n);
+                        touch();
+                      }}
+                    />
+                    <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] text-[var(--color-muted)]">
+                      MVA
+                    </span>
+                  </div>
+                  {ratedA != null &&
+                  Number.isFinite(ratedA) &&
+                  ratedA > 0 &&
+                  derivedOk &&
+                  derivedA != null ? (
+                    <span className={fieldCaptionClass}>
+                      {t(lang, "currentRated", { a: formatAmps(ratedA) })}
+                      <span className="inline-block w-2.5" />
+                      {t(lang, "currentMax", { a: formatAmps(derivedA) })}
+                    </span>
+                  ) : null}
+                </>
+              ) : (
+                <select
+                  className={controlClass}
+                  value={String(input.throughCurrentA)}
+                  onChange={(e) =>
+                    patch("throughCurrentA", Number(e.target.value))
+                  }
+                >
+                  {CURRENT_MENU.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {currentLabel(lang, c.labelZh, c.labelEn)}
+                    </option>
+                  ))}
+                </select>
+              )}
             </Field>
 
             <Field
               as="div"
-              label={
-                voltageMode === "winding"
-                  ? t(lang, "umWinding")
-                  : t(lang, "um")
-              }
-              action={
-                <div
-                  className="inline-flex h-[1.625rem] items-center rounded-full bg-[var(--color-soft)] p-0.5"
-                  role="group"
-                  aria-label={t(lang, "umModeAria")}
-                >
-                  {(
-                    [
-                      ["winding", "umWindingBtn"],
-                      ["equipment", "umEquipment"],
-                    ] as const
-                  ).map(([mode, key]) => {
-                    const on = voltageMode === mode;
-                    return (
-                      <button
-                        key={mode}
-                        type="button"
-                        aria-pressed={on}
-                        onClick={() => setVoltageEntry(mode)}
-                        className={cx(
-                          "inline-flex h-6 items-center rounded-full px-2.5 text-[0.6875rem] leading-none whitespace-nowrap transition-[transform,background-color,color] duration-150 active:scale-[0.96]",
-                          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-                          on
-                            ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
-                            : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]",
-                        )}
-                      >
-                        {t(lang, key)}
-                      </button>
-                    );
-                  })}
-                </div>
-              }
+              className={cx("relative", umKvShow != null && "pb-3.5")}
+              label={t(lang, "umWinding")}
             >
               <select
                 className={controlClass}
-                value={
-                  voltageMode === "winding"
-                    ? windingRatedKv
-                      ? String(windingRatedKv)
-                      : ""
-                    : input.umKv
-                      ? String(input.umKv)
-                      : ""
-                }
+                value={windingRatedKv ? String(windingRatedKv) : ""}
                 onChange={(e) => setVoltageKv(Number(e.target.value))}
               >
                 <option value="">{t(lang, "pickVoltage")}</option>
-                {(voltageMode === "winding"
-                  ? WINDING_RATED_KV.map((v) => ({
-                      value: v,
-                      labelZh: `${v} kV`,
-                      labelEn: `${v} kV`,
-                    }))
-                  : UM_MENU
-                ).map((u) => (
-                  <option key={u.value} value={u.value}>
-                    {currentLabel(lang, u.labelZh, u.labelEn)}
+                {WINDING_RATED_KV.map((v) => (
+                  <option key={v} value={v}>
+                    {v} kV
                   </option>
                 ))}
               </select>
+              {umKvShow != null ? (
+                <span className={fieldCaptionClass}>
+                  {t(lang, "umCaption", { um: String(umKvShow) })}
+                </span>
+              ) : null}
             </Field>
 
             <Field
@@ -709,26 +991,14 @@ export function SelectorApp() {
               </select>
             </Field>
 
-            {isLinear ? (
-              <Field label={t(lang, "positions")}>
-                <select
-                  className={controlClass}
-                  value={input.positions ?? 9}
-                  onChange={(e) => patch("positions", Number(e.target.value))}
-                >
-                  {LINEAR_POSITION_OPTIONS.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            ) : (
+            {isLinear ? null : (
               <Field
+                as="div"
+                className="relative"
                 label={t(lang, "pmSteps")}
                 action={
-                  posHint ? (
-                    <span className="font-mono font-medium tabular-nums text-[var(--color-muted)]">
+                  posHint && pm ? (
+                    <span className="font-medium tabular-nums text-[var(--color-muted)]">
                       {posHint}
                     </span>
                   ) : undefined
@@ -739,55 +1009,93 @@ export function SelectorApp() {
                   value={pm}
                   onChange={(e) => applyPm(e.target.value)}
                 >
+                  <option value="">
+                    {t(lang, "customPos")}
+                  </option>
                   {pmOptions.map((n) => (
                     <option key={n} value={String(n)}>
                       ±{n}
                       {lang === "zh" ? " 级" : lang === "ru" ? " ст." : ""}
                     </option>
                   ))}
-                  <option value="">
-                    {t(lang, "customPos")}
-                  </option>
                 </select>
               </Field>
             )}
 
-            {!isLinear && !pm ? (
-              <Field label={t(lang, "positions")}>
-                <select
-                  className={controlClass}
-                  value={input.positions ?? 19}
-                  onChange={(e) => {
-                    touch();
-                    const positions = Number(e.target.value);
-                    setInput((s) => {
-                      const mid = defaultMid(positions, s.regulation);
-                      const row =
-                        mid === 1 || mid === 3
-                          ? lookupByPositions(positions, mid, s.regulation)
-                          : null;
-                      return {
-                        ...s,
-                        positions,
-                        plusMinusSteps: undefined,
-                        midPositions: mid,
-                        pitch: (row?.pitch ?? s.pitch ?? 10) as
-                          | 10
-                          | 12
-                          | 14
-                          | 16
-                          | 18,
-                      };
-                    });
-                  }}
+            <Field
+              as="div"
+              className={cx("relative", ustV != null && "pb-3.5")}
+              label={t(lang, "stepPercent")}
+            >
+              <PercentCombo
+                value={stepPercentPct}
+                options={STEP_PERCENT_OPTIONS}
+                onChange={(pct) => {
+                  setStepPercentPct(pct);
+                  touch();
+                  if (isLinear || !pm) {
+                    commitTapRange(tapPlus, tapMinus, pct);
+                  }
+                }}
+              />
+              {ustV != null ? (
+                <span className={fieldCaptionClass}>
+                  {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
+                </span>
+              ) : null}
+            </Field>
+
+            {isLinear || !pm ? (
+              <>
+                <Field
+                  as="div"
+                  label={t(lang, "positions")}
+                  action={
+                    input.positions != null ? (
+                      <span className="font-medium tabular-nums text-[var(--color-muted)]">
+                        {t(lang, "posHint", { n: input.positions })}
+                      </span>
+                    ) : undefined
+                  }
                 >
-                  {POSITION_OPTIONS.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select
+                      className={controlClass}
+                      value={tapPlus > 0 ? String(tapPlus) : ""}
+                      onChange={(e) => {
+                        const plus = Number(e.target.value);
+                        setTapPlus(plus);
+                        touch();
+                        commitTapRange(plus, tapMinus, stepPercentPct);
+                      }}
+                      aria-label="+"
+                    >
+                      {TAP_SIDE_OPTIONS.map((n) => (
+                        <option key={`p${n}`} value={String(n)}>
+                          +{n}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      className={controlClass}
+                      value={tapMinus > 0 ? String(tapMinus) : ""}
+                      onChange={(e) => {
+                        const minus = Number(e.target.value);
+                        setTapMinus(minus);
+                        touch();
+                        commitTapRange(tapPlus, minus, stepPercentPct);
+                      }}
+                      aria-label="−"
+                    >
+                      {TAP_SIDE_OPTIONS.map((n) => (
+                        <option key={`m${n}`} value={String(n)}>
+                          −{n}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </Field>
+              </>
             ) : null}
 
             {midCtrl.show ? (
@@ -810,6 +1118,7 @@ export function SelectorApp() {
               </Field>
             ) : null}
 
+            {ustV == null ? (
             <Field
               label={t(lang, "ust")}
             >
@@ -843,6 +1152,7 @@ export function SelectorApp() {
                 ))}
               </select>
             </Field>
+            ) : null}
 
             <Field label={t(lang, "phases")}>
               <select
@@ -1028,10 +1338,11 @@ export function SelectorApp() {
                     </select>
                   </Field>
 
-                  <div className="col-span-full grid grid-cols-2 gap-x-4">
-                    <Field label={t(lang, "acrossBil")}>
+                  <Field as="div" label={t(lang, "acrossInsul")}>
+                    <div className="grid grid-cols-2 gap-2">
                       <select
                         className={controlClass}
+                        aria-label={t(lang, "acrossBil")}
                         value={
                           input.acrossTapBilKv != null &&
                           input.acrossTapBilKv > 0
@@ -1063,12 +1374,12 @@ export function SelectorApp() {
                           </option>
                         ))}
                       </select>
-                    </Field>
-                    <Field label={t(lang, "acrossPf")}>
                       <select
                         className={controlClass}
+                        aria-label={t(lang, "acrossPf")}
                         value={
-                          input.acrossTapPfKv != null && input.acrossTapPfKv > 0
+                          input.acrossTapPfKv != null &&
+                          input.acrossTapPfKv > 0
                             ? String(input.acrossTapPfKv)
                             : ""
                         }
@@ -1097,8 +1408,19 @@ export function SelectorApp() {
                           </option>
                         ))}
                       </select>
-                    </Field>
-                  </div>
+                    </div>
+                  </Field>
+                  <Field as="div" label={t(lang, "safetyK")}>
+                    <PercentCombo
+                      value={safetyK}
+                      options={SAFETY_K_OPTIONS}
+                      suffix=""
+                      onChange={(k) => {
+                        setSafetyK(k);
+                        touch();
+                      }}
+                    />
+                  </Field>
                 </div>
               </div>
             </div>
@@ -1107,7 +1429,12 @@ export function SelectorApp() {
           <div className="mt-5 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3">
             <button
               type="submit"
-              disabled={running || !input.throughCurrentA}
+              disabled={
+                running ||
+                (currentMode === "capacity"
+                  ? !derivedOk
+                  : !input.throughCurrentA)
+              }
               className={cx(
                 "inline-flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-accent-ink)] transition-[opacity,transform] duration-150",
                 "sm:h-11 sm:w-auto sm:min-w-[12.5rem] sm:shrink-0 sm:px-8",

@@ -3,10 +3,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* One UI face for CJK + Latin so the page doesn’t split; mono only for type strings */
-  --font-display: "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+  /* Latin (incl. ±) from Noto Sans so the minus bar matches the plus;
+     CJK from SC. Mono only for type strings. */
+  --font-display: "Noto Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+  --font-sans: "Noto Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
   --color-paper: oklch(98.5% 0.004 250);
