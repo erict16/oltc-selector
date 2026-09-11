@@ -933,7 +933,7 @@ export function SelectorApp() {
                 label={t(lang, "pmSteps")}
                 action={
                   posHint && pm ? (
-                    <span className="font-mono font-medium tabular-nums text-[var(--color-muted)]">
+                    <span className="font-medium tabular-nums text-[var(--color-muted)]">
                       {posHint}
                     </span>
                   ) : undefined
@@ -962,7 +962,7 @@ export function SelectorApp() {
                 label={t(lang, "positions")}
                 action={
                   input.positions != null ? (
-                    <span className="font-mono font-medium tabular-nums text-[var(--color-muted)]">
+                    <span className="font-medium tabular-nums text-[var(--color-muted)]">
                       {t(lang, "posHint", { n: input.positions })}
                     </span>
                   ) : undefined

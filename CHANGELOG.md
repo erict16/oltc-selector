@@ -14,6 +14,7 @@
 - Other options (3): skip a second current of the same family at the same Um so oil shows CMD instead of two CM rows.
 - Through-current field can switch to transformer MVA (default). Iᵤ is min-tap current when the range is `+4-2×2.5%`; otherwise S/√3U (Y) or S/3U (D). Derived amps sit inside the field, not a second row.
 - Custom positions accept `+4-2` / `±4/2×2.5%` (P = plus+minus+1).
+- ± and the “19 位” hint use the same UI face as the labels (Noto Sans for Latin, not mono / SC symbols).
 - Rated-kV tab does not submit Um; 220 kV star stays 252, not CV2 / 72.5. Login has Remember me; fields are 40px.
 - Language choice is stored (cookie + localStorage) so the next visit opens in that language.
 - Mobile: the corner avatar overlays; it no longer reserves a right gutter on the form.
