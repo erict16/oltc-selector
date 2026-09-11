@@ -141,7 +141,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 const fieldCaptionClass =
-  "pointer-events-none absolute top-full right-3 mt-1 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]";
+  "pointer-events-none absolute top-full right-0 mt-1 text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-caption)]";
 
 function CaptionSub({
   name,
@@ -315,6 +315,7 @@ export function SelectorApp() {
   const [tapPlus, setTapPlus] = useState(8);
   const [tapMinus, setTapMinus] = useState(8);
   const [stepPercentPct, setStepPercentPct] = useState(1.25);
+  const [stepPctCustom, setStepPctCustom] = useState(false);
   const [safetyK, setSafetyK] = useState(1.2);
   const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
@@ -1091,17 +1092,76 @@ export function SelectorApp() {
 
             <Field as="div" label={t(lang, "stepPercent")}>
               <div className="relative">
-                <PercentCombo
-                  value={stepPercentPct}
-                  options={STEP_PERCENT_OPTIONS}
-                  onChange={(pct) => {
-                    setStepPercentPct(pct);
-                    touch();
-                    if (isLinear || !pm) {
-                      commitTapRange(tapPlus, tapMinus, pct);
+                {stepPctCustom ||
+                (stepPercentPct > 0 &&
+                  !(STEP_PERCENT_OPTIONS as readonly number[]).includes(
+                    stepPercentPct,
+                  )) ? (
+                  <input
+                    inputMode="decimal"
+                    className={`${controlClass} pr-8 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                    value={stepPercentPct > 0 ? String(stepPercentPct) : ""}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/，/g, ".");
+                      if (v !== "" && !/^\d*\.?\d*$/.test(v)) return;
+                      if (v === "" || v === ".") {
+                        setStepPercentPct(0);
+                        touch();
+                        return;
+                      }
+                      const n = Number(v);
+                      if (!Number.isFinite(n) || n < 0) return;
+                      setStepPercentPct(n);
+                      touch();
+                      if (isLinear || !pm) commitTapRange(tapPlus, tapMinus, n);
+                    }}
+                    onBlur={() => {
+                      if (
+                        (STEP_PERCENT_OPTIONS as readonly number[]).includes(
+                          stepPercentPct,
+                        )
+                      ) {
+                        setStepPctCustom(false);
+                      }
+                    }}
+                  />
+                ) : (
+                  <select
+                    className={controlClass}
+                    value={
+                      stepPercentPct > 0 ? String(stepPercentPct) : ""
                     }
-                  }}
-                />
+                    onChange={(e) => {
+                      if (e.target.value === "__custom__") {
+                        setStepPctCustom(true);
+                        return;
+                      }
+                      const n = Number(e.target.value);
+                      setStepPercentPct(n);
+                      setStepPctCustom(false);
+                      touch();
+                      if (isLinear || !pm) {
+                        commitTapRange(tapPlus, tapMinus, n);
+                      }
+                    }}
+                  >
+                    <option value="__custom__">{t(lang, "custom")}</option>
+                    {STEP_PERCENT_OPTIONS.map((n) => (
+                      <option key={n} value={String(n)}>
+                        {n}%
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {stepPctCustom ||
+                (stepPercentPct > 0 &&
+                  !(STEP_PERCENT_OPTIONS as readonly number[]).includes(
+                    stepPercentPct,
+                  )) ? (
+                  <span className="pointer-events-none absolute top-0 right-3 flex h-10 items-center text-[0.9rem] text-[var(--color-ink)]">
+                    %
+                  </span>
+                ) : null}
                 {ustV != null ? (
                   <span className={fieldCaptionClass}>
                     <CaptionSub
