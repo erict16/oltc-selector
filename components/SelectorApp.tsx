@@ -219,7 +219,7 @@ function ModeSeg<T extends string>({
 }) {
   return (
     <div
-      className="inline-flex h-[1.625rem] items-center rounded-full bg-[var(--color-soft)] p-0.5"
+      className="inline-flex h-7 box-border items-stretch overflow-hidden rounded-full bg-[var(--color-soft)] p-0.5"
       role="group"
       aria-label={ariaLabel}
     >
@@ -232,7 +232,7 @@ function ModeSeg<T extends string>({
             aria-pressed={on}
             onClick={() => onChange(opt.id)}
             className={cx(
-              "inline-flex h-6 items-center rounded-full px-2.5 text-[0.6875rem] leading-none whitespace-nowrap transition-[transform,background-color,color] duration-150 active:scale-[0.96]",
+              "inline-flex h-full items-center rounded-full px-2.5 text-[0.6875rem] leading-none whitespace-nowrap transition-colors duration-150",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
               on
                 ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
@@ -762,14 +762,6 @@ export function SelectorApp() {
   const derivedA = currentMode === "capacity" ? capacityThroughA() : null;
   const derivedOk =
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
-  const ratedA =
-    currentMode === "capacity" && transformerMva > 0 && windingRatedKv > 0
-      ? throughCurrentFromRated(
-          transformerMva,
-          windingRatedKv,
-          input.connection,
-        )
-      : null;
   const ustV = computedStepVoltage();
   const umKvShow =
     windingRatedKv > 0
@@ -898,14 +890,8 @@ export function SelectorApp() {
                     <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] text-[var(--color-muted)]">
                       MVA
                     </span>
-                    {ratedA != null &&
-                    Number.isFinite(ratedA) &&
-                    ratedA > 0 &&
-                    derivedOk &&
-                    derivedA != null ? (
+                    {derivedOk && derivedA != null ? (
                       <span className={fieldCaptionClass}>
-                        {t(lang, "currentRated", { a: formatAmps(ratedA) })}
-                        <span className="inline-block w-2.5" />
                         {t(lang, "currentMax", { a: formatAmps(derivedA) })}
                       </span>
                     ) : null}
@@ -1406,6 +1392,7 @@ export function SelectorApp() {
                     <PercentCombo
                       value={safetyK}
                       options={SAFETY_K_OPTIONS}
+                      prefix="×"
                       suffix=""
                       onChange={(k) => {
                         setSafetyK(k);
