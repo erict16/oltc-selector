@@ -33,8 +33,10 @@ import {
   maxThroughCurrent,
   oltcUmFromRatedKv,
   stepPercentFromUst,
+  stepVoltageFromPercent,
   throughCurrentFromRated,
 } from "@/lib/deriveUm";
+import { PercentCombo } from "@/components/PercentCombo";
 import { FIXTURES, pickOtherOptions, selectOltc } from "@/lib/engine";
 import {
   defaultMid,
@@ -88,7 +90,10 @@ function geometryForPm(
   };
 }
 
-const STEP_PERCENT_OPTIONS = [0.625, 1, 1.25, 1.5, 2, 2.5, 3, 5] as const;
+const STEP_PERCENT_OPTIONS = [
+  0.5, 0.625, 0.8, 1, 1.25, 1.5, 1.67, 2, 2.25, 2.5, 2.75, 3, 3.33, 4, 5, 6.25,
+  7.5, 10,
+] as const;
 const TAP_SIDE_OPTIONS = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 ] as const;
@@ -487,6 +492,19 @@ export function SelectorApp() {
     return maxThroughCurrent(rated, tapRange.minus, pct);
   };
 
+  const computedStepVoltage = (): number | null => {
+    const pct =
+      tapRange?.stepPercent ??
+      (!pm && stepPercentPct > 0 ? stepPercentPct / 100 : null);
+    if (!(windingRatedKv > 0) || pct == null || !(pct > 0)) return null;
+    const v = stepVoltageFromPercent(
+      windingRatedKv,
+      pct,
+      input.connection,
+    );
+    return Number.isFinite(v) && v > 0 ? v : null;
+  };
+
   const dutyForSelect = ():
     | SelectInput
     | { error: true; msgKey: string } => {
@@ -495,10 +513,12 @@ export function SelectorApp() {
       if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
       const i = capacityThroughA();
       if (i == null) return { error: true, msgKey: "needMva" };
+      const ust = computedStepVoltage();
       return {
         ...input,
         throughCurrentA: i,
         umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
+        ...(ust != null ? { stepVoltageV: ust } : {}),
       };
     }
     if (voltageMode === "winding") {
@@ -704,12 +724,15 @@ export function SelectorApp() {
   const derivedA = currentMode === "capacity" ? capacityThroughA() : null;
   const derivedOk =
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
-  const derivedIsMax =
-    derivedOk &&
-    tapRange != null &&
-    tapRange.minus > 0 &&
-    tapRange.stepPercent != null &&
-    tapRange.stepPercent > 0;
+  const ratedA =
+    currentMode === "capacity" && transformerMva > 0 && windingRatedKv > 0
+      ? throughCurrentFromRated(
+          transformerMva,
+          windingRatedKv,
+          input.connection,
+        )
+      : null;
+  const ustV = computedStepVoltage();
 
   return (
     <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:px-6 md:gap-4 md:pt-6 md:pb-4">
@@ -835,11 +858,15 @@ export function SelectorApp() {
                       MVA
                     </span>
                   </div>
-                  {derivedOk && derivedA != null ? (
-                    <span className="pointer-events-none absolute top-full left-0 mt-px text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]">
-                      {t(lang, derivedIsMax ? "currentMax" : "currentRated", {
-                        a: formatAmps(derivedA),
-                      })}
+                  {ratedA != null &&
+                  Number.isFinite(ratedA) &&
+                  ratedA > 0 &&
+                  derivedOk &&
+                  derivedA != null ? (
+                    <span className="pointer-events-none absolute top-full right-0 mt-px text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]">
+                      {t(lang, "currentRated", { a: formatAmps(ratedA) })}
+                      <span className="inline-block w-2" />
+                      {t(lang, "currentMax", { a: formatAmps(derivedA) })}
                     </span>
                   ) : null}
                 </>
@@ -862,6 +889,7 @@ export function SelectorApp() {
 
             <Field
               as="div"
+              className="relative"
               label={
                 voltageMode === "winding"
                   ? t(lang, "umWinding")
@@ -906,6 +934,11 @@ export function SelectorApp() {
                   </option>
                 ))}
               </select>
+              {ustV != null ? (
+                <span className="pointer-events-none absolute top-full right-0 mt-px text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]">
+                  {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
+                </span>
+              ) : null}
             </Field>
 
             <Field
@@ -989,35 +1022,15 @@ export function SelectorApp() {
             {!isLinear && !pm ? (
               <>
                 <Field as="div" label={t(lang, "stepPercent")}>
-                  <div className="relative">
-                    <input
-                      className={`${controlClass} pr-8`}
-                      list="step-pct-list"
-                      inputMode="decimal"
-                      value={stepPercentPct > 0 ? String(stepPercentPct) : ""}
-                      onChange={(e) => {
-                        const pct = Number(e.target.value);
-                        if (e.target.value === "") {
-                          setStepPercentPct(0);
-                          touch();
-                          commitTapRange(tapPlus, tapMinus, 0);
-                          return;
-                        }
-                        if (!Number.isFinite(pct) || pct <= 0) return;
-                        setStepPercentPct(pct);
-                        touch();
-                        commitTapRange(tapPlus, tapMinus, pct);
-                      }}
-                    />
-                    <datalist id="step-pct-list">
-                      {STEP_PERCENT_OPTIONS.map((p) => (
-                        <option key={p} value={String(p)} />
-                      ))}
-                    </datalist>
-                    <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] text-[var(--color-muted)]">
-                      %
-                    </span>
-                  </div>
+                  <PercentCombo
+                    value={stepPercentPct}
+                    options={STEP_PERCENT_OPTIONS}
+                    onChange={(pct) => {
+                      setStepPercentPct(pct);
+                      touch();
+                      commitTapRange(tapPlus, tapMinus, pct);
+                    }}
+                  />
                 </Field>
                 <Field
                   as="div"
@@ -1030,14 +1043,9 @@ export function SelectorApp() {
                     ) : undefined
                   }
                 >
-                  <div
-                    className={cx(
-                      controlClass,
-                      "flex items-stretch gap-0 px-0",
-                    )}
-                  >
+                  <div className="grid grid-cols-2 gap-2">
                     <select
-                      className="h-full min-w-0 flex-1 border-0 bg-transparent py-0 pl-3 pr-1 text-[0.9rem] text-[var(--color-ink)] outline-none"
+                      className={controlClass}
                       value={tapPlus > 0 ? String(tapPlus) : ""}
                       onChange={(e) => {
                         const plus = Number(e.target.value);
@@ -1053,9 +1061,8 @@ export function SelectorApp() {
                         </option>
                       ))}
                     </select>
-                    <span className="my-2 w-px shrink-0 bg-[var(--color-rule)]" />
                     <select
-                      className="h-full min-w-0 flex-1 border-0 bg-transparent py-0 pl-2 pr-3 text-[0.9rem] text-[var(--color-ink)] outline-none"
+                      className={controlClass}
                       value={tapMinus > 0 ? String(tapMinus) : ""}
                       onChange={(e) => {
                         const minus = Number(e.target.value);
@@ -1096,6 +1103,7 @@ export function SelectorApp() {
               </Field>
             ) : null}
 
+            {ustV == null ? (
             <Field
               label={t(lang, "ust")}
             >
@@ -1129,6 +1137,7 @@ export function SelectorApp() {
                 ))}
               </select>
             </Field>
+            ) : null}
 
             <Field label={t(lang, "phases")}>
               <select

@@ -7,6 +7,7 @@ import {
   oltcUmFromRatedKv,
   snapRatedKv,
   stepPercentFromUst,
+  stepVoltageFromPercent,
   throughCurrentFromRated,
   windingUmFromRatedKv,
 } from "./deriveUm";
@@ -179,6 +180,7 @@ describe("tap-side check I = S / U", () => {
 
   it("Ust 875 V on 35 kV delta is 2.5%", () => {
     expect(stepPercentFromUst(875, 35, "D")).toBeCloseTo(0.025, 5);
+    expect(stepVoltageFromPercent(35, 0.025, "D")).toBeCloseTo(875, 0);
   });
 });
 

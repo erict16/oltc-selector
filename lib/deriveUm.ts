@@ -101,6 +101,20 @@ export function throughCurrentFromRated(
   return (mva * 1000) / (Math.sqrt(3) * ratedKv);
 }
 
+/** Step voltage from Un and %: delta Un×%; star (Un/√3)×%. */
+export function stepVoltageFromPercent(
+  ratedKv: number,
+  stepPercent: number,
+  connection: SelectInput["connection"],
+): number {
+  if (!(ratedKv > 0) || !(stepPercent > 0)) return NaN;
+  const windingV =
+    connection === "D"
+      ? ratedKv * 1000
+      : (ratedKv * 1000) / Math.sqrt(3);
+  return windingV * stepPercent;
+}
+
 /** Step as a fraction of winding voltage. Delta: Un; star: Un/√3. */
 export function stepPercentFromUst(
   stepVoltageV: number,

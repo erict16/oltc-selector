@@ -12,7 +12,8 @@
 - Tap-side rated voltage defaults to 110 kV (star still Um 72.5). Rated tab still does not submit Um.
 - Copy type always shows Copied / 已复制, including on narrow phones; clipboard falls back when the API rejects.
 - Other options (3): skip a second current of the same family at the same Um so oil shows CMD instead of two CM rows.
-- Capacity defaults to 25 MVA. A tiny Imax caption sits in the row gap under the field (no extra height). Custom +/− are compact dropdowns; step % is typable.
+- Capacity caption (right): 额定 and `Imax = 250.6A`. Ust is derived from Un × step % when known.
+- Custom +/− are two normal selects; step % is a typeable combo with a longer preset list.
 - ± and the “19 位” hint use the same UI face as the labels (Noto Sans for Latin, not mono / SC symbols).
 - Rated-kV tab does not submit Um; 220 kV star stays 252, not CV2 / 72.5. Login has Remember me; fields are 40px.
 - Language choice is stored (cookie + localStorage) so the next visit opens in that language.
