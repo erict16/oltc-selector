@@ -33,7 +33,7 @@ import {
   WINDING_RATED_KV,
   oltcUmFromRatedKv,
 } from "@/lib/deriveUm";
-import { FIXTURES, selectOltc, stepUpOf } from "@/lib/engine";
+import { FIXTURES, pickOtherOptions, selectOltc } from "@/lib/engine";
 import {
   defaultMid,
   lookupByPositions,
@@ -495,20 +495,7 @@ export function SelectorApp() {
   };
 
   const primary = result?.ok ? result.results[0] : null;
-  const stepUp =
-    result?.ok && primary ? stepUpOf(primary, result.results) : null;
-  const alts = (() => {
-    if (!result?.ok || !primary) return [];
-    const out: typeof result.results = [];
-    if (stepUp) out.push(stepUp);
-    for (const r of result.results.slice(1)) {
-      if (out.length >= 3) break;
-      if (r.model === primary.model) continue;
-      if (out.some((x) => x.model === r.model)) continue;
-      out.push(r);
-    }
-    return out;
-  })();
+  const alts = result?.ok ? pickOtherOptions(result.results, 3) : [];
   const idle = !hasRun || !result;
   const posHint =
     !isLinear && input.positions != null

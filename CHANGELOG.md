@@ -11,6 +11,7 @@
 - Laptop/wide: form and result sit side by side from 768px; vertical padding is tighter so a 13–14\" screen does not need to scroll before Select.
 - Tap-side rated voltage defaults to 110 kV (star still Um 72.5). Rated tab still does not submit Um.
 - Copy type always shows Copied / 已复制, including on narrow phones; clipboard falls back when the API rejects.
+- Other options (3): skip a second current of the same family at the same Um so oil shows CMD instead of two CM rows.
 - Rated-kV tab does not submit Um; 220 kV star stays 252, not CV2 / 72.5. Login has Remember me; fields are 40px.
 - Language choice is stored (cookie + localStorage) so the next visit opens in that language.
 - Mobile: the corner avatar overlays; it no longer reserves a right gutter on the form.

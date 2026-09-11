@@ -799,6 +799,34 @@ export function stepUpOf(
   return same[0];
 }
 
+/**
+ * Visible “other options”: keep 3 slots. Same-family next I (step-up) and
+ * a higher-Um twin stay; a second current of the same family at the same Um
+ * yields to another family (oil: CM-600 out, CMD-400 in).
+ */
+export function pickOtherOptions(
+  results: ModelResult[],
+  n = 3,
+): ModelResult[] {
+  if (results.length <= 1) return [];
+  const primary = results[0];
+  const stepUp = stepUpOf(primary, results);
+  const preferred: ModelResult[] = [];
+  const overflow: ModelResult[] = [];
+  if (stepUp) preferred.push(stepUp);
+  for (const r of results.slice(1)) {
+    if (r.model === primary.model) continue;
+    if (preferred.some((x) => x.model === r.model)) continue;
+    const sameFamilyUm = preferred.some(
+      (x) =>
+        x.seriesCode === r.seriesCode && Math.abs(x.umKv - r.umKv) < 0.1,
+    );
+    if (sameFamilyUm) overflow.push(r);
+    else preferred.push(r);
+  }
+  return [...preferred, ...overflow].slice(0, n);
+}
+
 /** Regression helpers + training-case fixtures */
 export const FIXTURES = {
   ueHwv: {
