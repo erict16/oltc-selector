@@ -87,6 +87,10 @@ function geometryForPm(
   };
 }
 
+const MVA_OPTIONS = [
+  6.3, 8, 10, 12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250,
+  315, 400, 500,
+] as const;
 const STEP_PERCENT_OPTIONS = [
   0.5, 0.625, 0.8, 1, 1.25, 1.5, 1.67, 2, 2.25, 2.5, 2.75, 3, 3.33, 4, 5, 6.25,
   7.5, 10,
@@ -866,30 +870,15 @@ export function SelectorApp() {
               {currentMode === "capacity" ? (
                 <>
                   <div className="relative">
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      min={0}
-                      step={0.1}
-                      className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                      value={transformerMva > 0 ? String(transformerMva) : ""}
-                      placeholder={t(lang, "mvaPlaceholder")}
-                      onChange={(e) => {
-                        const raw = e.target.value;
-                        if (raw === "") {
-                          setTransformerMva(0);
-                          touch();
-                          return;
-                        }
-                        const n = Number(raw);
-                        if (!Number.isFinite(n) || n < 0) return;
+                    <PercentCombo
+                      value={transformerMva}
+                      options={MVA_OPTIONS}
+                      suffix="MVA"
+                      onChange={(n) => {
                         setTransformerMva(n);
                         touch();
                       }}
                     />
-                    <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] text-[var(--color-muted)]">
-                      MVA
-                    </span>
                     {derivedOk && derivedA != null ? (
                       <span className={fieldCaptionClass}>
                         {t(lang, "currentMax", { a: formatAmps(derivedA) })}

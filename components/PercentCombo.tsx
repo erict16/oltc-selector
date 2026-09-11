@@ -65,9 +65,13 @@ export function PercentCombo({
           const v = e.target.value.replace(/，/g, ".").replace(/％/g, "");
           if (v !== "" && !/^\d*\.?\d*$/.test(v)) return;
           setRaw(v);
+          if (v === "") {
+            onChange(0);
+            return;
+          }
           if (isPartialDecimal(v)) return;
           const n = Number(v);
-          if (Number.isFinite(n) && n > 0) onChange(n);
+          if (Number.isFinite(n) && n >= 0) onChange(n);
         }}
         onFocus={() => setOpen(true)}
       />
@@ -116,7 +120,7 @@ export function PercentCombo({
                   setOpen(false);
                 }}
               >
-                {`${prefix}${p}${suffix}`}
+                {`${prefix}${p}${suffix === "%" ? "%" : suffix ? ` ${suffix}` : ""}`}
               </button>
             </li>
           ))}
