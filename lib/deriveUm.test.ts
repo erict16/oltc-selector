@@ -171,6 +171,12 @@ describe("tap-side check I = S / U", () => {
     expect(throughCurrentFromRated(50, 110, "Y")).toBeCloseTo(262.4, 0);
   });
 
+  it("±8 × 1.25% at 110 kV star: Imax is rated / 0.9", () => {
+    const rated = throughCurrentFromRated(25, 110, "Y");
+    expect(rated).toBeCloseTo(131.2, 0);
+    expect(maxThroughCurrent(rated, 8, 0.0125)).toBeCloseTo(rated / 0.9, 1);
+  });
+
   it("SFZ +4/−2 × 2.5% uses min-tap current, not rated", () => {
     const rated = throughCurrentFromRated(25, 35, "D");
     const iMax = maxThroughCurrent(rated, 2, 0.025);

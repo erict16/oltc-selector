@@ -24,7 +24,6 @@ import {
   SERIES,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
-  UM_MENU,
 } from "@/lib/catalog";
 import { copyText } from "@/lib/clipboard";
 import {
@@ -32,7 +31,6 @@ import {
   WINDING_RATED_KV,
   maxThroughCurrent,
   oltcUmFromRatedKv,
-  stepPercentFromUst,
   stepVoltageFromPercent,
   throughCurrentFromRated,
 } from "@/lib/deriveUm";
@@ -135,6 +133,9 @@ const EXAMPLE_RATED_KV: Record<ExampleKey, number> = {
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
+
+const fieldCaptionClass =
+  "pointer-events-none absolute top-full right-0 mt-1 text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]";
 
 /** Comfortable control — one hover signal (border), shared height */
 const controlClass =
@@ -472,6 +473,21 @@ export function SelectorApp() {
     });
   };
 
+  const stepFraction = (): number | null => {
+    if (tapRange?.stepPercent && tapRange.stepPercent > 0) {
+      return tapRange.stepPercent;
+    }
+    if (stepPercentPct > 0) return stepPercentPct / 100;
+    return null;
+  };
+
+  const minusSteps = (): number => {
+    if (tapRange && tapRange.minus > 0) return tapRange.minus;
+    const n = pm && Number(pm) > 0 ? Number(pm) : input.plusMinusSteps;
+    if (n != null && n > 0) return n;
+    return 0;
+  };
+
   const capacityThroughA = (): number | null => {
     if (!(transformerMva > 0) || !(windingRatedKv > 0)) return null;
     const rated = throughCurrentFromRated(
@@ -480,22 +496,16 @@ export function SelectorApp() {
       input.connection,
     );
     if (!Number.isFinite(rated) || rated <= 0) return null;
-    if (!tapRange || !(tapRange.minus > 0)) return rated;
-    const pct =
-      tapRange.stepPercent ??
-      stepPercentFromUst(
-        input.stepVoltageV,
-        windingRatedKv,
-        input.connection,
-      );
-    if (!Number.isFinite(pct) || !(pct > 0)) return rated;
-    return maxThroughCurrent(rated, tapRange.minus, pct);
+    const minus = minusSteps();
+    const pct = stepFraction();
+    if (minus > 0 && pct != null && pct > 0) {
+      return maxThroughCurrent(rated, minus, pct);
+    }
+    return rated;
   };
 
   const computedStepVoltage = (): number | null => {
-    const pct =
-      tapRange?.stepPercent ??
-      (!pm && stepPercentPct > 0 ? stepPercentPct / 100 : null);
+    const pct = stepFraction();
     if (!(windingRatedKv > 0) || pct == null || !(pct > 0)) return null;
     const v = stepVoltageFromPercent(
       windingRatedKv,
@@ -523,9 +533,11 @@ export function SelectorApp() {
     }
     if (voltageMode === "winding") {
       if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
+      const ust = computedStepVoltage();
       return {
         ...input,
         umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
+        ...(ust != null ? { stepVoltageV: ust } : {}),
       };
     }
     if (!(input.umKv > 0)) return { error: true, msgKey: "needUm" };
@@ -733,6 +745,10 @@ export function SelectorApp() {
         )
       : null;
   const ustV = computedStepVoltage();
+  const umKvShow =
+    windingRatedKv > 0
+      ? oltcUmFromRatedKv(windingRatedKv, input.connection)
+      : null;
 
   return (
     <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:px-6 md:gap-4 md:pt-6 md:pb-4">
@@ -809,7 +825,7 @@ export function SelectorApp() {
             </div>
           </div>
 
-          <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
+          <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
             <Field
               as="div"
               className="relative"
@@ -863,9 +879,9 @@ export function SelectorApp() {
                   ratedA > 0 &&
                   derivedOk &&
                   derivedA != null ? (
-                    <span className="pointer-events-none absolute top-full right-0 mt-px text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]">
+                    <span className={fieldCaptionClass}>
                       {t(lang, "currentRated", { a: formatAmps(ratedA) })}
-                      <span className="inline-block w-2" />
+                      <span className="inline-block w-2.5" />
                       {t(lang, "currentMax", { a: formatAmps(derivedA) })}
                     </span>
                   ) : null}
@@ -890,53 +906,23 @@ export function SelectorApp() {
             <Field
               as="div"
               className="relative"
-              label={
-                voltageMode === "winding"
-                  ? t(lang, "umWinding")
-                  : t(lang, "um")
-              }
-              action={
-                <ModeSeg
-                  ariaLabel={t(lang, "umModeAria")}
-                  value={voltageMode}
-                  options={[
-                    { id: "winding", label: t(lang, "umWindingBtn") },
-                    { id: "equipment", label: t(lang, "umEquipment") },
-                  ]}
-                  onChange={setVoltageEntry}
-                />
-              }
+              label={t(lang, "umWinding")}
             >
               <select
                 className={controlClass}
-                value={
-                  voltageMode === "winding"
-                    ? windingRatedKv
-                      ? String(windingRatedKv)
-                      : ""
-                    : input.umKv
-                      ? String(input.umKv)
-                      : ""
-                }
+                value={windingRatedKv ? String(windingRatedKv) : ""}
                 onChange={(e) => setVoltageKv(Number(e.target.value))}
               >
                 <option value="">{t(lang, "pickVoltage")}</option>
-                {(voltageMode === "winding"
-                  ? WINDING_RATED_KV.map((v) => ({
-                      value: v,
-                      labelZh: `${v} kV`,
-                      labelEn: `${v} kV`,
-                    }))
-                  : UM_MENU
-                ).map((u) => (
-                  <option key={u.value} value={u.value}>
-                    {currentLabel(lang, u.labelZh, u.labelEn)}
+                {WINDING_RATED_KV.map((v) => (
+                  <option key={v} value={v}>
+                    {v} kV
                   </option>
                 ))}
               </select>
-              {ustV != null ? (
-                <span className="pointer-events-none absolute top-full right-0 mt-px text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]">
-                  {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
+              {umKvShow != null ? (
+                <span className={fieldCaptionClass}>
+                  {t(lang, "umCaption", { um: String(umKvShow) })}
                 </span>
               ) : null}
             </Field>
@@ -992,6 +978,8 @@ export function SelectorApp() {
               </Field>
             ) : (
               <Field
+                as="div"
+                className="relative"
                 label={t(lang, "pmSteps")}
                 action={
                   posHint && pm ? (
@@ -1016,22 +1004,30 @@ export function SelectorApp() {
                     {t(lang, "customPos")}
                   </option>
                 </select>
+                {ustV != null ? (
+                  <span className={fieldCaptionClass}>
+                    {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
+                  </span>
+                ) : null}
               </Field>
             )}
 
+            {!isLinear ? (
+              <Field as="div" label={t(lang, "stepPercent")}>
+                <PercentCombo
+                  value={stepPercentPct}
+                  options={STEP_PERCENT_OPTIONS}
+                  onChange={(pct) => {
+                    setStepPercentPct(pct);
+                    touch();
+                    if (!pm) commitTapRange(tapPlus, tapMinus, pct);
+                  }}
+                />
+              </Field>
+            ) : null}
+
             {!isLinear && !pm ? (
               <>
-                <Field as="div" label={t(lang, "stepPercent")}>
-                  <PercentCombo
-                    value={stepPercentPct}
-                    options={STEP_PERCENT_OPTIONS}
-                    onChange={(pct) => {
-                      setStepPercentPct(pct);
-                      touch();
-                      commitTapRange(tapPlus, tapMinus, pct);
-                    }}
-                  />
-                </Field>
                 <Field
                   as="div"
                   label={t(lang, "positions")}
