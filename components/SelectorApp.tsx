@@ -32,6 +32,7 @@ import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
   oltcUmFromRatedKv,
+  throughCurrentFromRated,
 } from "@/lib/deriveUm";
 import { FIXTURES, pickOtherOptions, selectOltc } from "@/lib/engine";
 import {
@@ -180,6 +181,53 @@ function Field({
   );
 }
 
+function ModeSeg<T extends string>({
+  ariaLabel,
+  value,
+  options,
+  onChange,
+}: {
+  ariaLabel: string;
+  value: T;
+  options: { id: T; label: string }[];
+  onChange: (id: T) => void;
+}) {
+  return (
+    <div
+      className="inline-flex h-[1.625rem] items-center rounded-full bg-[var(--color-soft)] p-0.5"
+      role="group"
+      aria-label={ariaLabel}
+    >
+      {options.map((opt) => {
+        const on = value === opt.id;
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(opt.id)}
+            className={cx(
+              "inline-flex h-6 items-center rounded-full px-2.5 text-[0.6875rem] leading-none whitespace-nowrap transition-[transform,background-color,color] duration-150 active:scale-[0.96]",
+              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+              on
+                ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
+                : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]",
+            )}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function formatAmps(a: number): string {
+  if (!Number.isFinite(a) || a <= 0) return "";
+  const r = Math.round(a * 10) / 10;
+  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+}
+
 function showSelectorSize(input: SelectInput) {
   if (input.mounting === "dry_type" || input.mounting === "reactor") return false;
   if (
@@ -204,6 +252,10 @@ export function SelectorApp() {
   const [windingRatedKv, setWindingRatedKv] = useState(
     DEFAULT_WINDING_RATED_KV,
   );
+  const [currentMode, setCurrentMode] = useState<"current" | "capacity">(
+    "current",
+  );
+  const [transformerMva, setTransformerMva] = useState(0);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreUnlocked, setMoreUnlocked] = useState(false);
@@ -216,6 +268,8 @@ export function SelectorApp() {
     pm: string;
     voltageMode: "winding" | "equipment";
     windingRatedKv: number;
+    currentMode: "current" | "capacity";
+    transformerMva: number;
   } | null>(null);
 
   const [result, setResult] = useState<SelectOutput | null>(null);
@@ -262,6 +316,17 @@ export function SelectorApp() {
     } else {
       setWindingRatedKv(0);
       setInput((s) => ({ ...s, umKv: 0 }));
+      if (currentMode === "capacity") setCurrentMode("current");
+    }
+    touch();
+  };
+
+  const setCurrentEntry = (mode: "current" | "capacity") => {
+    if (mode === currentMode) return;
+    setCurrentMode(mode);
+    if (mode === "capacity" && voltageMode !== "winding") {
+      setVoltageEntry("winding");
+      return;
     }
     touch();
   };
@@ -341,15 +406,34 @@ export function SelectorApp() {
     });
   };
 
-  const dutyForSelect = (): SelectInput | { error: true } => {
+  const dutyForSelect = ():
+    | SelectInput
+    | { error: true; msgKey: string } => {
+    if (currentMode === "capacity") {
+      if (!(transformerMva > 0)) return { error: true, msgKey: "needMva" };
+      if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
+      const i = throughCurrentFromRated(
+        transformerMva,
+        windingRatedKv,
+        input.connection,
+      );
+      if (!Number.isFinite(i) || i <= 0) {
+        return { error: true, msgKey: "needMva" };
+      }
+      return {
+        ...input,
+        throughCurrentA: i,
+        umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
+      };
+    }
     if (voltageMode === "winding") {
-      if (!(windingRatedKv > 0)) return { error: true };
+      if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
       return {
         ...input,
         umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
       };
     }
-    if (!(input.umKv > 0)) return { error: true };
+    if (!(input.umKv > 0)) return { error: true, msgKey: "needUm" };
     return { ...input, umKv: input.umKv };
   };
 
@@ -361,7 +445,7 @@ export function SelectorApp() {
     runTimer.current = setTimeout(() => {
       const duty = dutyForSelect();
       if ("error" in duty) {
-        const msg = t(lang, voltageMode === "winding" ? "needRated" : "needUm");
+        const msg = t(lang, duty.msgKey);
         setResult({
           ok: false,
           results: [],
@@ -458,18 +542,29 @@ export function SelectorApp() {
         setPm(prev.pm);
         setVoltageMode(prev.voltageMode);
         setWindingRatedKv(prev.windingRatedKv);
+        setCurrentMode(prev.currentMode);
+        setTransformerMva(prev.transformerMva);
       } else {
         setInput(defaultInput);
         setPm("8");
         setVoltageMode("winding");
         setWindingRatedKv(DEFAULT_WINDING_RATED_KV);
+        setCurrentMode("current");
+        setTransformerMva(0);
       }
       setActiveExample(null);
       clearResult();
       return;
     }
     if (activeExample == null) {
-      beforePreset.current = { input, pm, voltageMode, windingRatedKv };
+      beforePreset.current = {
+        input,
+        pm,
+        voltageMode,
+        windingRatedKv,
+        currentMode,
+        transformerMva,
+      };
     }
     const f = FIXTURES[ex.key];
     let next: SelectInput = { ...f.input, mdu: "none" };
@@ -486,6 +581,8 @@ export function SelectorApp() {
     const rated = EXAMPLE_RATED_KV[ex.key];
     setWindingRatedKv(rated);
     setVoltageMode("winding");
+    setCurrentMode("current");
+    setTransformerMva(0);
     setInput({
       ...next,
       umKv: 0,
@@ -511,6 +608,16 @@ export function SelectorApp() {
         : null;
   const midCtrl = midControl(pmN, input.regulation, input.positions);
   const midOpts = midCtrl.options;
+  const derivedA =
+    currentMode === "capacity" && transformerMva > 0 && windingRatedKv > 0
+      ? throughCurrentFromRated(
+          transformerMva,
+          windingRatedKv,
+          input.connection,
+        )
+      : null;
+  const derivedOk =
+    derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
 
   return (
     <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:px-6 md:gap-4 md:pt-6 md:pb-4">
@@ -588,20 +695,72 @@ export function SelectorApp() {
           </div>
 
           <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
-            <Field label={t(lang, "throughCurrent")}>
-              <select
-                className={controlClass}
-                value={String(input.throughCurrentA)}
-                onChange={(e) =>
-                  patch("throughCurrentA", Number(e.target.value))
-                }
-              >
-                {CURRENT_MENU.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {currentLabel(lang, c.labelZh, c.labelEn)}
-                  </option>
-                ))}
-              </select>
+            <Field
+              as="div"
+              label={
+                currentMode === "capacity"
+                  ? t(lang, "transformerMva")
+                  : t(lang, "throughCurrent")
+              }
+              action={
+                <ModeSeg
+                  ariaLabel={t(lang, "currentModeAria")}
+                  value={currentMode}
+                  options={[
+                    { id: "current", label: t(lang, "currentBtn") },
+                    { id: "capacity", label: t(lang, "capacityBtn") },
+                  ]}
+                  onChange={setCurrentEntry}
+                />
+              }
+              tip={
+                currentMode === "capacity" && derivedOk && derivedA != null
+                  ? t(lang, "derivedCurrent", { a: formatAmps(derivedA) })
+                  : undefined
+              }
+            >
+              {currentMode === "capacity" ? (
+                <div className="relative">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step={0.1}
+                    className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                    value={transformerMva > 0 ? String(transformerMva) : ""}
+                    placeholder={t(lang, "mvaPlaceholder")}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === "") {
+                        setTransformerMva(0);
+                        touch();
+                        return;
+                      }
+                      const n = Number(raw);
+                      if (!Number.isFinite(n) || n < 0) return;
+                      setTransformerMva(n);
+                      touch();
+                    }}
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.8125rem] text-[var(--color-muted)]">
+                    MVA
+                  </span>
+                </div>
+              ) : (
+                <select
+                  className={controlClass}
+                  value={String(input.throughCurrentA)}
+                  onChange={(e) =>
+                    patch("throughCurrentA", Number(e.target.value))
+                  }
+                >
+                  {CURRENT_MENU.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {currentLabel(lang, c.labelZh, c.labelEn)}
+                    </option>
+                  ))}
+                </select>
+              )}
             </Field>
 
             <Field
@@ -612,37 +771,15 @@ export function SelectorApp() {
                   : t(lang, "um")
               }
               action={
-                <div
-                  className="inline-flex h-[1.625rem] items-center rounded-full bg-[var(--color-soft)] p-0.5"
-                  role="group"
-                  aria-label={t(lang, "umModeAria")}
-                >
-                  {(
-                    [
-                      ["winding", "umWindingBtn"],
-                      ["equipment", "umEquipment"],
-                    ] as const
-                  ).map(([mode, key]) => {
-                    const on = voltageMode === mode;
-                    return (
-                      <button
-                        key={mode}
-                        type="button"
-                        aria-pressed={on}
-                        onClick={() => setVoltageEntry(mode)}
-                        className={cx(
-                          "inline-flex h-6 items-center rounded-full px-2.5 text-[0.6875rem] leading-none whitespace-nowrap transition-[transform,background-color,color] duration-150 active:scale-[0.96]",
-                          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-                          on
-                            ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
-                            : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]",
-                        )}
-                      >
-                        {t(lang, key)}
-                      </button>
-                    );
-                  })}
-                </div>
+                <ModeSeg
+                  ariaLabel={t(lang, "umModeAria")}
+                  value={voltageMode}
+                  options={[
+                    { id: "winding", label: t(lang, "umWindingBtn") },
+                    { id: "equipment", label: t(lang, "umEquipment") },
+                  ]}
+                  onChange={setVoltageEntry}
+                />
               }
             >
               <select
@@ -1107,7 +1244,12 @@ export function SelectorApp() {
           <div className="mt-5 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3">
             <button
               type="submit"
-              disabled={running || !input.throughCurrentA}
+              disabled={
+                running ||
+                (currentMode === "capacity"
+                  ? !derivedOk
+                  : !input.throughCurrentA)
+              }
               className={cx(
                 "inline-flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-accent-ink)] transition-[opacity,transform] duration-150",
                 "sm:h-11 sm:w-auto sm:min-w-[12.5rem] sm:shrink-0 sm:px-8",

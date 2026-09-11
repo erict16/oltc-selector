@@ -159,6 +159,14 @@ describe("tap-side check I = S / U", () => {
     const i = throughCurrentFromRated(40, 138, "D");
     expect(i).toBeCloseTo(96.6, 0);
   });
+
+  it("SFZ22-25000 35 kV delta HV tap → 238 A", () => {
+    expect(throughCurrentFromRated(25, 35, "D")).toBeCloseTo(238.1, 0);
+  });
+
+  it("50 MVA 110 kV star → 262 A", () => {
+    expect(throughCurrentFromRated(50, 110, "Y")).toBeCloseTo(262.4, 0);
+  });
 });
 
 describe("same model as filling Um", () => {
