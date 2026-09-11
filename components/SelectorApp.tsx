@@ -312,6 +312,7 @@ export function SelectorApp() {
   );
   const [transformerMva, setTransformerMva] = useState(25);
   const [mvaCustom, setMvaCustom] = useState(false);
+  const [kvCustom, setKvCustom] = useState(false);
   const [tapPlus, setTapPlus] = useState(8);
   const [tapMinus, setTapMinus] = useState(8);
   const [stepPercentPct, setStepPercentPct] = useState(1.25);
@@ -999,18 +1000,68 @@ export function SelectorApp() {
 
             <Field as="div" label={t(lang, "umWinding")}>
               <div className="relative">
-                <select
-                  className={controlClass}
-                  value={windingRatedKv ? String(windingRatedKv) : ""}
-                  onChange={(e) => setVoltageKv(Number(e.target.value))}
-                >
-                  <option value="">{t(lang, "pickVoltage")}</option>
-                  {WINDING_RATED_KV.map((v) => (
-                    <option key={v} value={v}>
-                      {v} kV
-                    </option>
-                  ))}
-                </select>
+                {kvCustom ||
+                (windingRatedKv > 0 &&
+                  !(WINDING_RATED_KV as readonly number[]).includes(
+                    windingRatedKv,
+                  )) ? (
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step={0.1}
+                    className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                    value={windingRatedKv > 0 ? String(windingRatedKv) : ""}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === "") {
+                        setVoltageKv(0);
+                        return;
+                      }
+                      const n = Number(raw);
+                      if (!Number.isFinite(n) || n < 0) return;
+                      setVoltageKv(n);
+                    }}
+                    onBlur={() => {
+                      if (
+                        (WINDING_RATED_KV as readonly number[]).includes(
+                          windingRatedKv,
+                        )
+                      ) {
+                        setKvCustom(false);
+                      }
+                    }}
+                  />
+                ) : (
+                  <select
+                    className={controlClass}
+                    value={windingRatedKv > 0 ? String(windingRatedKv) : ""}
+                    onChange={(e) => {
+                      if (e.target.value === "__custom__") {
+                        setKvCustom(true);
+                        return;
+                      }
+                      setKvCustom(false);
+                      setVoltageKv(Number(e.target.value));
+                    }}
+                  >
+                    <option value="__custom__">{t(lang, "custom")}</option>
+                    {WINDING_RATED_KV.map((v) => (
+                      <option key={v} value={v}>
+                        {v} kV
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {kvCustom ||
+                (windingRatedKv > 0 &&
+                  !(WINDING_RATED_KV as readonly number[]).includes(
+                    windingRatedKv,
+                  )) ? (
+                  <span className="pointer-events-none absolute top-0 right-3 flex h-10 items-center text-[0.75rem] text-[var(--color-muted)]">
+                    kV
+                  </span>
+                ) : null}
                 {umKvShow != null ? (
                   <span className={fieldCaptionClass}>
                     <CaptionSub
