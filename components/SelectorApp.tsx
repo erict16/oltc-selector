@@ -20,7 +20,6 @@ import {
   ACROSS_PF_MENU,
   ACROSS_PF_OPTIONS_KV,
   CURRENT_MENU,
-  LINEAR_POSITION_OPTIONS,
   SERIES,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
@@ -94,6 +93,9 @@ const STEP_PERCENT_OPTIONS = [
 ] as const;
 const TAP_SIDE_OPTIONS = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+] as const;
+const SAFETY_K_OPTIONS = [
+  1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.5, 1.6, 1.7, 1.8,
 ] as const;
 
 const defaultInput: SelectInput = {
@@ -282,6 +284,7 @@ export function SelectorApp() {
   const [tapPlus, setTapPlus] = useState(8);
   const [tapMinus, setTapMinus] = useState(8);
   const [stepPercentPct, setStepPercentPct] = useState(1.25);
+  const [safetyK, setSafetyK] = useState(1.2);
   const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -300,6 +303,7 @@ export function SelectorApp() {
     tapPlus: number;
     tapMinus: number;
     stepPercentPct: number;
+    safetyK: number;
     tapRange: ParsedTapRange | null;
   } | null>(null);
 
@@ -378,13 +382,29 @@ export function SelectorApp() {
     touch();
     if (reg === "linear") {
       setPm("");
-      setTapRange(null);
+      const plus = tapPlus > 0 ? tapPlus : 4;
+      const minus = tapMinus > 0 ? tapMinus : 4;
+      setTapPlus(plus);
+      setTapMinus(minus);
+      const range: ParsedTapRange = {
+        plus,
+        minus,
+        positions: plus + minus + 1,
+        stepPercent: stepPercentPct > 0 ? stepPercentPct / 100 : null,
+      };
+      setTapRange(range);
       setInput((s) => ({
         ...s,
         regulation: reg,
         plusMinusSteps: undefined,
-        positions: s.positions && s.positions <= 18 ? s.positions : 9,
+        positions: range.positions,
         midPositions: 0,
+        pitch: defaultPitch(range.positions, "linear") as
+          | 10
+          | 12
+          | 14
+          | 16
+          | 18,
       }));
       return;
     }
@@ -498,10 +518,12 @@ export function SelectorApp() {
     if (!Number.isFinite(rated) || rated <= 0) return null;
     const minus = minusSteps();
     const pct = stepFraction();
-    if (minus > 0 && pct != null && pct > 0) {
-      return maxThroughCurrent(rated, minus, pct);
-    }
-    return rated;
+    const iMax =
+      minus > 0 && pct != null && pct > 0
+        ? maxThroughCurrent(rated, minus, pct)
+        : rated;
+    const k = safetyK > 0 ? safetyK : 1;
+    return iMax * k;
   };
 
   const computedStepVoltage = (): number | null => {
@@ -654,6 +676,7 @@ export function SelectorApp() {
         setTapPlus(prev.tapPlus);
         setTapMinus(prev.tapMinus);
         setStepPercentPct(prev.stepPercentPct);
+        setSafetyK(prev.safetyK);
         setTapRange(prev.tapRange);
       } else {
         setInput(defaultInput);
@@ -665,6 +688,7 @@ export function SelectorApp() {
         setTapPlus(8);
         setTapMinus(8);
         setStepPercentPct(1.25);
+        setSafetyK(1.2);
         setTapRange(null);
       }
       setActiveExample(null);
@@ -682,6 +706,7 @@ export function SelectorApp() {
         tapPlus,
         tapMinus,
         stepPercentPct,
+        safetyK,
         tapRange,
       };
     }
@@ -705,6 +730,7 @@ export function SelectorApp() {
     setTapPlus(8);
     setTapMinus(8);
     setStepPercentPct(1.25);
+    setSafetyK(1.2);
     setTapRange(null);
     setInput({
       ...next,
@@ -965,21 +991,7 @@ export function SelectorApp() {
               </select>
             </Field>
 
-            {isLinear ? (
-              <Field label={t(lang, "positions")}>
-                <select
-                  className={controlClass}
-                  value={input.positions ?? 9}
-                  onChange={(e) => patch("positions", Number(e.target.value))}
-                >
-                  {LINEAR_POSITION_OPTIONS.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            ) : (
+            {isLinear ? null : (
               <Field
                 as="div"
                 className="relative"
@@ -1010,30 +1022,30 @@ export function SelectorApp() {
               </Field>
             )}
 
-            {!isLinear ? (
-              <Field
-                as="div"
-                className={cx("relative", ustV != null && "pb-3.5")}
-                label={t(lang, "stepPercent")}
-              >
-                <PercentCombo
-                  value={stepPercentPct}
-                  options={STEP_PERCENT_OPTIONS}
-                  onChange={(pct) => {
-                    setStepPercentPct(pct);
-                    touch();
-                    if (!pm) commitTapRange(tapPlus, tapMinus, pct);
-                  }}
-                />
-                {ustV != null ? (
-                  <span className={fieldCaptionClass}>
-                    {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
-                  </span>
-                ) : null}
-              </Field>
-            ) : null}
+            <Field
+              as="div"
+              className={cx("relative", ustV != null && "pb-3.5")}
+              label={t(lang, "stepPercent")}
+            >
+              <PercentCombo
+                value={stepPercentPct}
+                options={STEP_PERCENT_OPTIONS}
+                onChange={(pct) => {
+                  setStepPercentPct(pct);
+                  touch();
+                  if (isLinear || !pm) {
+                    commitTapRange(tapPlus, tapMinus, pct);
+                  }
+                }}
+              />
+              {ustV != null ? (
+                <span className={fieldCaptionClass}>
+                  {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
+                </span>
+              ) : null}
+            </Field>
 
-            {!isLinear && !pm ? (
+            {isLinear || !pm ? (
               <>
                 <Field
                   as="div"
@@ -1326,10 +1338,11 @@ export function SelectorApp() {
                     </select>
                   </Field>
 
-                  <div className="col-span-full grid grid-cols-2 gap-x-4">
-                    <Field label={t(lang, "acrossBil")}>
+                  <Field as="div" label={t(lang, "acrossInsul")}>
+                    <div className="grid grid-cols-2 gap-2">
                       <select
                         className={controlClass}
+                        aria-label={t(lang, "acrossBil")}
                         value={
                           input.acrossTapBilKv != null &&
                           input.acrossTapBilKv > 0
@@ -1361,12 +1374,12 @@ export function SelectorApp() {
                           </option>
                         ))}
                       </select>
-                    </Field>
-                    <Field label={t(lang, "acrossPf")}>
                       <select
                         className={controlClass}
+                        aria-label={t(lang, "acrossPf")}
                         value={
-                          input.acrossTapPfKv != null && input.acrossTapPfKv > 0
+                          input.acrossTapPfKv != null &&
+                          input.acrossTapPfKv > 0
                             ? String(input.acrossTapPfKv)
                             : ""
                         }
@@ -1395,8 +1408,19 @@ export function SelectorApp() {
                           </option>
                         ))}
                       </select>
-                    </Field>
-                  </div>
+                    </div>
+                  </Field>
+                  <Field as="div" label={t(lang, "safetyK")}>
+                    <PercentCombo
+                      value={safetyK}
+                      options={SAFETY_K_OPTIONS}
+                      suffix=""
+                      onChange={(k) => {
+                        setSafetyK(k);
+                        touch();
+                      }}
+                    />
+                  </Field>
                 </div>
               </div>
             </div>

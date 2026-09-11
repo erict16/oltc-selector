@@ -182,6 +182,7 @@ describe("tap-side check I = S / U", () => {
     const iMax = maxThroughCurrent(rated, 2, 0.025);
     expect(iMax).toBeCloseTo(rated / 0.95, 1);
     expect(iMax).toBeCloseTo(250.6, 0);
+    expect(iMax * 1.2).toBeCloseTo(300.7, 0);
   });
 
   it("Ust 875 V on 35 kV delta is 2.5%", () => {

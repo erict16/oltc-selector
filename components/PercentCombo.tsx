@@ -22,10 +22,12 @@ export function PercentCombo({
   value,
   options,
   onChange,
+  suffix = "%",
 }: {
   value: number;
   options: readonly number[];
   onChange: (n: number) => void;
+  suffix?: string;
 }) {
   const [raw, setRaw] = useState(value > 0 ? String(value) : "");
   const [open, setOpen] = useState(false);
@@ -48,7 +50,7 @@ export function PercentCombo({
   return (
     <div ref={root} className="relative">
       <input
-        className={`${controlClass} pr-14`}
+        className={suffix ? `${controlClass} pr-14` : `${controlClass} pr-8`}
         inputMode="decimal"
         autoComplete="off"
         spellCheck={false}
@@ -63,9 +65,11 @@ export function PercentCombo({
         }}
         onFocus={() => setOpen(true)}
       />
-      <span className="pointer-events-none absolute inset-y-0 right-8 flex items-center text-[0.75rem] text-[var(--color-muted)]">
-        %
-      </span>
+      {suffix ? (
+        <span className="pointer-events-none absolute inset-y-0 right-8 flex items-center text-[0.75rem] text-[var(--color-muted)]">
+          {suffix}
+        </span>
+      ) : null}
       <button
         type="button"
         tabIndex={-1}
@@ -101,7 +105,7 @@ export function PercentCombo({
                   setOpen(false);
                 }}
               >
-                {p}%
+                {suffix ? `${p}${suffix}` : String(p)}
               </button>
             </li>
           ))}
