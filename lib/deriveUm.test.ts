@@ -3,8 +3,10 @@ import {
   DEFAULT_WINDING_RATED_KV,
   deriveOltcUm,
   isTapSideRatedKv,
+  maxThroughCurrent,
   oltcUmFromRatedKv,
   snapRatedKv,
+  stepPercentFromUst,
   throughCurrentFromRated,
   windingUmFromRatedKv,
 } from "./deriveUm";
@@ -166,6 +168,17 @@ describe("tap-side check I = S / U", () => {
 
   it("50 MVA 110 kV star → 262 A", () => {
     expect(throughCurrentFromRated(50, 110, "Y")).toBeCloseTo(262.4, 0);
+  });
+
+  it("SFZ +4/−2 × 2.5% uses min-tap current, not rated", () => {
+    const rated = throughCurrentFromRated(25, 35, "D");
+    const iMax = maxThroughCurrent(rated, 2, 0.025);
+    expect(iMax).toBeCloseTo(rated / 0.95, 1);
+    expect(iMax).toBeCloseTo(250.6, 0);
+  });
+
+  it("Ust 875 V on 35 kV delta is 2.5%", () => {
+    expect(stepPercentFromUst(875, 35, "D")).toBeCloseTo(0.025, 5);
   });
 });
 

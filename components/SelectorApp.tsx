@@ -21,7 +21,6 @@ import {
   ACROSS_PF_OPTIONS_KV,
   CURRENT_MENU,
   LINEAR_POSITION_OPTIONS,
-  POSITION_OPTIONS,
   SERIES,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
@@ -31,19 +30,24 @@ import { copyText } from "@/lib/clipboard";
 import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
+  maxThroughCurrent,
   oltcUmFromRatedKv,
+  stepPercentFromUst,
   throughCurrentFromRated,
 } from "@/lib/deriveUm";
 import { FIXTURES, pickOtherOptions, selectOltc } from "@/lib/engine";
 import {
   defaultMid,
+  defaultPitch,
   lookupByPositions,
   lookupDiagram,
   midControl,
+  parseTapRange,
   pitchFromPlusMinus,
   pmStepOptionsFor,
   positionsFor,
   preferredMid,
+  type ParsedTapRange,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { AltListAmount, ListPrice, useListFx } from "@/components/ListPrice";
@@ -253,9 +257,11 @@ export function SelectorApp() {
     DEFAULT_WINDING_RATED_KV,
   );
   const [currentMode, setCurrentMode] = useState<"current" | "capacity">(
-    "current",
+    "capacity",
   );
   const [transformerMva, setTransformerMva] = useState(0);
+  const [customPosRaw, setCustomPosRaw] = useState("");
+  const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [moreUnlocked, setMoreUnlocked] = useState(false);
@@ -270,6 +276,8 @@ export function SelectorApp() {
     windingRatedKv: number;
     currentMode: "current" | "capacity";
     transformerMva: number;
+    customPosRaw: string;
+    tapRange: ParsedTapRange | null;
   } | null>(null);
 
   const [result, setResult] = useState<SelectOutput | null>(null);
@@ -347,6 +355,8 @@ export function SelectorApp() {
     touch();
     if (reg === "linear") {
       setPm("");
+      setCustomPosRaw("");
+      setTapRange(null);
       setInput((s) => ({
         ...s,
         regulation: reg,
@@ -372,9 +382,13 @@ export function SelectorApp() {
     setPm(raw);
     touch();
     if (!raw) {
+      setCustomPosRaw("");
+      setTapRange(null);
       setInput((s) => ({ ...s, plusMinusSteps: undefined }));
       return;
     }
+    setCustomPosRaw("");
+    setTapRange(null);
     const n = Number(raw);
     if (!Number.isFinite(n) || n <= 0) return;
     // Always snap to brochure preferred mid for this ±N.
@@ -384,6 +398,45 @@ export function SelectorApp() {
       ...s,
       ...geometryForPm(n, s.regulation),
     }));
+  };
+
+  const applyCustomPos = (raw: string) => {
+    setCustomPosRaw(raw);
+    touch();
+    const range = parseTapRange(raw);
+    if (range) {
+      setTapRange(range);
+      setInput((s) => ({
+        ...s,
+        positions: range.positions,
+        plusMinusSteps: undefined,
+        midPositions: s.regulation === "linear" ? 0 : 1,
+        pitch: defaultPitch(range.positions, s.regulation) as
+          | 10
+          | 12
+          | 14
+          | 16
+          | 18,
+      }));
+      return;
+    }
+    setTapRange(null);
+    const positions = Number(raw);
+    if (!Number.isInteger(positions) || positions <= 0) return;
+    setInput((s) => {
+      const mid = defaultMid(positions, s.regulation);
+      const row =
+        mid === 1 || mid === 3
+          ? lookupByPositions(positions, mid, s.regulation)
+          : null;
+      return {
+        ...s,
+        positions,
+        plusMinusSteps: undefined,
+        midPositions: mid,
+        pitch: (row?.pitch ?? s.pitch ?? 10) as 10 | 12 | 14 | 16 | 18,
+      };
+    });
   };
 
   const applyMid = (raw: string) => {
@@ -406,20 +459,34 @@ export function SelectorApp() {
     });
   };
 
+  const capacityThroughA = (): number | null => {
+    if (!(transformerMva > 0) || !(windingRatedKv > 0)) return null;
+    const rated = throughCurrentFromRated(
+      transformerMva,
+      windingRatedKv,
+      input.connection,
+    );
+    if (!Number.isFinite(rated) || rated <= 0) return null;
+    if (!tapRange || !(tapRange.minus > 0)) return rated;
+    const pct =
+      tapRange.stepPercent ??
+      stepPercentFromUst(
+        input.stepVoltageV,
+        windingRatedKv,
+        input.connection,
+      );
+    if (!Number.isFinite(pct) || !(pct > 0)) return rated;
+    return maxThroughCurrent(rated, tapRange.minus, pct);
+  };
+
   const dutyForSelect = ():
     | SelectInput
     | { error: true; msgKey: string } => {
     if (currentMode === "capacity") {
       if (!(transformerMva > 0)) return { error: true, msgKey: "needMva" };
       if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
-      const i = throughCurrentFromRated(
-        transformerMva,
-        windingRatedKv,
-        input.connection,
-      );
-      if (!Number.isFinite(i) || i <= 0) {
-        return { error: true, msgKey: "needMva" };
-      }
+      const i = capacityThroughA();
+      if (i == null) return { error: true, msgKey: "needMva" };
       return {
         ...input,
         throughCurrentA: i,
@@ -544,13 +611,17 @@ export function SelectorApp() {
         setWindingRatedKv(prev.windingRatedKv);
         setCurrentMode(prev.currentMode);
         setTransformerMva(prev.transformerMva);
+        setCustomPosRaw(prev.customPosRaw);
+        setTapRange(prev.tapRange);
       } else {
         setInput(defaultInput);
         setPm("8");
         setVoltageMode("winding");
         setWindingRatedKv(DEFAULT_WINDING_RATED_KV);
-        setCurrentMode("current");
+        setCurrentMode("capacity");
         setTransformerMva(0);
+        setCustomPosRaw("");
+        setTapRange(null);
       }
       setActiveExample(null);
       clearResult();
@@ -564,6 +635,8 @@ export function SelectorApp() {
         windingRatedKv,
         currentMode,
         transformerMva,
+        customPosRaw,
+        tapRange,
       };
     }
     const f = FIXTURES[ex.key];
@@ -583,6 +656,8 @@ export function SelectorApp() {
     setVoltageMode("winding");
     setCurrentMode("current");
     setTransformerMva(0);
+    setCustomPosRaw("");
+    setTapRange(null);
     setInput({
       ...next,
       umKv: 0,
@@ -606,16 +681,12 @@ export function SelectorApp() {
       : input.plusMinusSteps && input.plusMinusSteps > 0
         ? input.plusMinusSteps
         : null;
-  const midCtrl = midControl(pmN, input.regulation, input.positions);
+  const midCtrl =
+    tapRange && tapRange.plus !== tapRange.minus
+      ? { show: false, options: [] as Array<1 | 3> }
+      : midControl(pmN, input.regulation, input.positions);
   const midOpts = midCtrl.options;
-  const derivedA =
-    currentMode === "capacity" && transformerMva > 0 && windingRatedKv > 0
-      ? throughCurrentFromRated(
-          transformerMva,
-          windingRatedKv,
-          input.connection,
-        )
-      : null;
+  const derivedA = currentMode === "capacity" ? capacityThroughA() : null;
   const derivedOk =
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
 
@@ -713,11 +784,6 @@ export function SelectorApp() {
                   onChange={setCurrentEntry}
                 />
               }
-              tip={
-                currentMode === "capacity" && derivedOk && derivedA != null
-                  ? t(lang, "derivedCurrent", { a: formatAmps(derivedA) })
-                  : undefined
-              }
             >
               {currentMode === "capacity" ? (
                 <div className="relative">
@@ -726,7 +792,7 @@ export function SelectorApp() {
                     inputMode="decimal"
                     min={0}
                     step={0.1}
-                    className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                    className={`${controlClass} pr-[4.75rem] [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
                     value={transformerMva > 0 ? String(transformerMva) : ""}
                     placeholder={t(lang, "mvaPlaceholder")}
                     onChange={(e) => {
@@ -742,8 +808,10 @@ export function SelectorApp() {
                       touch();
                     }}
                   />
-                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.8125rem] text-[var(--color-muted)]">
-                    MVA
+                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] tabular-nums text-[var(--color-muted)]">
+                    {derivedOk && derivedA != null
+                      ? `${formatAmps(derivedA)} A`
+                      : "MVA"}
                   </span>
                 </div>
               ) : (
@@ -864,7 +932,7 @@ export function SelectorApp() {
               <Field
                 label={t(lang, "pmSteps")}
                 action={
-                  posHint ? (
+                  posHint && pm ? (
                     <span className="font-mono font-medium tabular-nums text-[var(--color-muted)]">
                       {posHint}
                     </span>
@@ -890,40 +958,23 @@ export function SelectorApp() {
             )}
 
             {!isLinear && !pm ? (
-              <Field label={t(lang, "positions")}>
-                <select
+              <Field
+                label={t(lang, "positions")}
+                action={
+                  input.positions != null ? (
+                    <span className="font-mono font-medium tabular-nums text-[var(--color-muted)]">
+                      {t(lang, "posHint", { n: input.positions })}
+                    </span>
+                  ) : undefined
+                }
+              >
+                <input
                   className={controlClass}
-                  value={input.positions ?? 19}
-                  onChange={(e) => {
-                    touch();
-                    const positions = Number(e.target.value);
-                    setInput((s) => {
-                      const mid = defaultMid(positions, s.regulation);
-                      const row =
-                        mid === 1 || mid === 3
-                          ? lookupByPositions(positions, mid, s.regulation)
-                          : null;
-                      return {
-                        ...s,
-                        positions,
-                        plusMinusSteps: undefined,
-                        midPositions: mid,
-                        pitch: (row?.pitch ?? s.pitch ?? 10) as
-                          | 10
-                          | 12
-                          | 14
-                          | 16
-                          | 18,
-                      };
-                    });
-                  }}
-                >
-                  {POSITION_OPTIONS.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
+                  value={customPosRaw}
+                  placeholder={t(lang, "customPosPlaceholder")}
+                  spellCheck={false}
+                  onChange={(e) => applyCustomPos(e.target.value)}
+                />
               </Field>
             ) : null}
 

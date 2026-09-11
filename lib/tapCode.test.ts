@@ -2,9 +2,37 @@ import { describe, expect, it } from "vitest";
 import {
   midControl,
   midOptionsFor,
+  parseTapRange,
   preferredMid,
   resolveTapFields,
 } from "./tapCode";
+
+describe("parseTapRange +4/−2", () => {
+  it("reads RFQ ±4/2×2.5% as 7 positions", () => {
+    expect(parseTapRange("±4/2×2.5%")).toEqual({
+      plus: 4,
+      minus: 2,
+      positions: 7,
+      stepPercent: 0.025,
+    });
+    expect(parseTapRange("+4-2")).toEqual({
+      plus: 4,
+      minus: 2,
+      positions: 7,
+      stepPercent: null,
+    });
+    expect(parseTapRange("+4/-2x2.5%")).toMatchObject({
+      plus: 4,
+      minus: 2,
+      stepPercent: 0.025,
+    });
+  });
+
+  it("does not treat a position count as a range", () => {
+    expect(parseTapRange("19")).toBeNull();
+    expect(parseTapRange("7")).toBeNull();
+  });
+});
 
 describe("中间位 control across ±N changes", () => {
   it("±8 W offers both mids; lower ± still shows the control", () => {
