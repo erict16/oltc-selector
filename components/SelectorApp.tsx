@@ -42,7 +42,6 @@ import {
   lookupByPositions,
   lookupDiagram,
   midControl,
-  parseTapRange,
   pitchFromPlusMinus,
   pmStepOptionsFor,
   positionsFor,
@@ -89,6 +88,8 @@ function geometryForPm(
   };
 }
 
+const STEP_PERCENT_OPTIONS = [0.625, 1, 1.25, 1.5, 2, 2.5, 3, 5] as const;
+
 const defaultInput: SelectInput = {
   mounting: "in_tank",
   medium: "oil_vacuum",
@@ -134,6 +135,7 @@ const controlClass =
 function Field({
   label,
   tip,
+  meta,
   children,
   className,
   action,
@@ -141,6 +143,8 @@ function Field({
 }: {
   label: string;
   tip?: string;
+  /** Same-row note (e.g. 最大 251 A) — does not add a second line. */
+  meta?: string;
   children: React.ReactNode;
   className?: string;
   /** Right-side of the label row (e.g. →19位 next to ±级数) */
@@ -154,8 +158,7 @@ function Field({
       <span className="flex h-[1.625rem] flex-nowrap items-center gap-2 overflow-visible">
         <span
           className={cx(
-            "min-w-0 flex-1 whitespace-nowrap text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]",
-            action ? "truncate" : "overflow-visible",
+            "shrink-0 whitespace-nowrap text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]",
           )}
         >
           {label.split("ᵤ").map((part, i, arr) =>
@@ -169,6 +172,13 @@ function Field({
             ),
           )}
         </span>
+        {meta ? (
+          <span className="min-w-0 truncate text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]">
+            {meta}
+          </span>
+        ) : (
+          <span className="min-w-0 flex-1" />
+        )}
         {action ? (
           <span className="ml-auto shrink-0 whitespace-nowrap text-[0.75rem] leading-none">
             {action}
@@ -260,7 +270,9 @@ export function SelectorApp() {
     "capacity",
   );
   const [transformerMva, setTransformerMva] = useState(0);
-  const [customPosRaw, setCustomPosRaw] = useState("");
+  const [tapPlus, setTapPlus] = useState(8);
+  const [tapMinus, setTapMinus] = useState(8);
+  const [stepPercentPct, setStepPercentPct] = useState(1.25);
   const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -276,7 +288,9 @@ export function SelectorApp() {
     windingRatedKv: number;
     currentMode: "current" | "capacity";
     transformerMva: number;
-    customPosRaw: string;
+    tapPlus: number;
+    tapMinus: number;
+    stepPercentPct: number;
     tapRange: ParsedTapRange | null;
   } | null>(null);
 
@@ -355,7 +369,6 @@ export function SelectorApp() {
     touch();
     if (reg === "linear") {
       setPm("");
-      setCustomPosRaw("");
       setTapRange(null);
       setInput((s) => ({
         ...s,
@@ -378,16 +391,47 @@ export function SelectorApp() {
     }));
   };
 
+  const commitTapRange = (
+    plus: number,
+    minus: number,
+    pct: number,
+  ) => {
+    if (!(plus > 0) || !(minus > 0)) {
+      setTapRange(null);
+      return;
+    }
+    const range: ParsedTapRange = {
+      plus,
+      minus,
+      positions: plus + minus + 1,
+      stepPercent: pct > 0 ? pct / 100 : null,
+    };
+    setTapRange(range);
+    setInput((s) => ({
+      ...s,
+      positions: range.positions,
+      plusMinusSteps: undefined,
+      midPositions: s.regulation === "linear" ? 0 : 1,
+      pitch: defaultPitch(range.positions, s.regulation) as
+        | 10
+        | 12
+        | 14
+        | 16
+        | 18,
+    }));
+  };
+
   const applyPm = (raw: string) => {
     setPm(raw);
     touch();
     if (!raw) {
-      setCustomPosRaw("");
-      setTapRange(null);
-      setInput((s) => ({ ...s, plusMinusSteps: undefined }));
+      const n = Number(pm) > 0 ? Number(pm) : 8;
+      setTapPlus(n);
+      setTapMinus(n);
+      setStepPercentPct(1.25);
+      commitTapRange(n, n, 1.25);
       return;
     }
-    setCustomPosRaw("");
     setTapRange(null);
     const n = Number(raw);
     if (!Number.isFinite(n) || n <= 0) return;
@@ -398,45 +442,6 @@ export function SelectorApp() {
       ...s,
       ...geometryForPm(n, s.regulation),
     }));
-  };
-
-  const applyCustomPos = (raw: string) => {
-    setCustomPosRaw(raw);
-    touch();
-    const range = parseTapRange(raw);
-    if (range) {
-      setTapRange(range);
-      setInput((s) => ({
-        ...s,
-        positions: range.positions,
-        plusMinusSteps: undefined,
-        midPositions: s.regulation === "linear" ? 0 : 1,
-        pitch: defaultPitch(range.positions, s.regulation) as
-          | 10
-          | 12
-          | 14
-          | 16
-          | 18,
-      }));
-      return;
-    }
-    setTapRange(null);
-    const positions = Number(raw);
-    if (!Number.isInteger(positions) || positions <= 0) return;
-    setInput((s) => {
-      const mid = defaultMid(positions, s.regulation);
-      const row =
-        mid === 1 || mid === 3
-          ? lookupByPositions(positions, mid, s.regulation)
-          : null;
-      return {
-        ...s,
-        positions,
-        plusMinusSteps: undefined,
-        midPositions: mid,
-        pitch: (row?.pitch ?? s.pitch ?? 10) as 10 | 12 | 14 | 16 | 18,
-      };
-    });
   };
 
   const applyMid = (raw: string) => {
@@ -611,7 +616,9 @@ export function SelectorApp() {
         setWindingRatedKv(prev.windingRatedKv);
         setCurrentMode(prev.currentMode);
         setTransformerMva(prev.transformerMva);
-        setCustomPosRaw(prev.customPosRaw);
+        setTapPlus(prev.tapPlus);
+        setTapMinus(prev.tapMinus);
+        setStepPercentPct(prev.stepPercentPct);
         setTapRange(prev.tapRange);
       } else {
         setInput(defaultInput);
@@ -620,7 +627,9 @@ export function SelectorApp() {
         setWindingRatedKv(DEFAULT_WINDING_RATED_KV);
         setCurrentMode("capacity");
         setTransformerMva(0);
-        setCustomPosRaw("");
+        setTapPlus(8);
+        setTapMinus(8);
+        setStepPercentPct(1.25);
         setTapRange(null);
       }
       setActiveExample(null);
@@ -635,7 +644,9 @@ export function SelectorApp() {
         windingRatedKv,
         currentMode,
         transformerMva,
-        customPosRaw,
+        tapPlus,
+        tapMinus,
+        stepPercentPct,
         tapRange,
       };
     }
@@ -656,7 +667,9 @@ export function SelectorApp() {
     setVoltageMode("winding");
     setCurrentMode("current");
     setTransformerMva(0);
-    setCustomPosRaw("");
+    setTapPlus(8);
+    setTapMinus(8);
+    setStepPercentPct(1.25);
     setTapRange(null);
     setInput({
       ...next,
@@ -681,14 +694,19 @@ export function SelectorApp() {
       : input.plusMinusSteps && input.plusMinusSteps > 0
         ? input.plusMinusSteps
         : null;
-  const midCtrl =
-    tapRange && tapRange.plus !== tapRange.minus
-      ? { show: false, options: [] as Array<1 | 3> }
-      : midControl(pmN, input.regulation, input.positions);
+  const midCtrl = !pm
+    ? { show: false, options: [] as Array<1 | 3> }
+    : midControl(pmN, input.regulation, input.positions);
   const midOpts = midCtrl.options;
   const derivedA = currentMode === "capacity" ? capacityThroughA() : null;
   const derivedOk =
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
+  const derivedIsMax =
+    derivedOk &&
+    tapRange != null &&
+    tapRange.minus > 0 &&
+    tapRange.stepPercent != null &&
+    tapRange.stepPercent > 0;
 
   return (
     <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:px-6 md:gap-4 md:pt-6 md:pb-4">
@@ -773,6 +791,13 @@ export function SelectorApp() {
                   ? t(lang, "transformerMva")
                   : t(lang, "throughCurrent")
               }
+              meta={
+                currentMode === "capacity" && derivedOk && derivedA != null
+                  ? t(lang, derivedIsMax ? "currentMax" : "currentRated", {
+                      a: formatAmps(derivedA),
+                    })
+                  : undefined
+              }
               action={
                 <ModeSeg
                   ariaLabel={t(lang, "currentModeAria")}
@@ -792,7 +817,7 @@ export function SelectorApp() {
                     inputMode="decimal"
                     min={0}
                     step={0.1}
-                    className={`${controlClass} pr-[4.75rem] [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                    className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
                     value={transformerMva > 0 ? String(transformerMva) : ""}
                     placeholder={t(lang, "mvaPlaceholder")}
                     onChange={(e) => {
@@ -808,10 +833,8 @@ export function SelectorApp() {
                       touch();
                     }}
                   />
-                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] tabular-nums text-[var(--color-muted)]">
-                    {derivedOk && derivedA != null
-                      ? `${formatAmps(derivedA)} A`
-                      : "MVA"}
+                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] text-[var(--color-muted)]">
+                    MVA
                   </span>
                 </div>
               ) : (
@@ -958,24 +981,97 @@ export function SelectorApp() {
             )}
 
             {!isLinear && !pm ? (
-              <Field
-                label={t(lang, "positions")}
-                action={
-                  input.positions != null ? (
-                    <span className="font-medium tabular-nums text-[var(--color-muted)]">
-                      {t(lang, "posHint", { n: input.positions })}
-                    </span>
-                  ) : undefined
-                }
-              >
-                <input
-                  className={controlClass}
-                  value={customPosRaw}
-                  placeholder={t(lang, "customPosPlaceholder")}
-                  spellCheck={false}
-                  onChange={(e) => applyCustomPos(e.target.value)}
-                />
-              </Field>
+              <>
+                <Field label={t(lang, "stepPercent")}>
+                  <select
+                    className={controlClass}
+                    value={String(stepPercentPct)}
+                    onChange={(e) => {
+                      const pct = Number(e.target.value);
+                      setStepPercentPct(pct);
+                      touch();
+                      commitTapRange(tapPlus, tapMinus, pct);
+                    }}
+                  >
+                    {STEP_PERCENT_OPTIONS.map((p) => (
+                      <option key={p} value={String(p)}>
+                        {p}%
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field
+                  as="div"
+                  className="sm:col-span-2"
+                  label={t(lang, "positions")}
+                  action={
+                    input.positions != null ? (
+                      <span className="font-medium tabular-nums text-[var(--color-muted)]">
+                        {t(lang, "posHint", { n: input.positions })}
+                      </span>
+                    ) : undefined
+                  }
+                >
+                  <div
+                    className={cx(
+                      controlClass,
+                      "flex items-stretch gap-0 px-0",
+                    )}
+                  >
+                    <label className="flex min-w-0 flex-1 items-center pl-3">
+                      <span className="mr-1 shrink-0 text-[var(--color-muted)]">
+                        +
+                      </span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        max={30}
+                        className="h-full w-full min-w-0 border-0 bg-transparent px-0 text-[0.9rem] text-[var(--color-ink)] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        value={tapPlus > 0 ? String(tapPlus) : ""}
+                        onChange={(e) => {
+                          const n = Number(e.target.value);
+                          const plus =
+                            e.target.value === ""
+                              ? 0
+                              : Number.isInteger(n) && n > 0
+                                ? n
+                                : tapPlus;
+                          setTapPlus(plus);
+                          touch();
+                          commitTapRange(plus, tapMinus, stepPercentPct);
+                        }}
+                      />
+                    </label>
+                    <span className="my-2 w-px shrink-0 bg-[var(--color-rule)]" />
+                    <label className="flex min-w-0 flex-1 items-center pr-3">
+                      <span className="mr-1 shrink-0 text-[var(--color-muted)]">
+                        −
+                      </span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        max={30}
+                        className="h-full w-full min-w-0 border-0 bg-transparent px-0 text-[0.9rem] text-[var(--color-ink)] outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        value={tapMinus > 0 ? String(tapMinus) : ""}
+                        onChange={(e) => {
+                          const n = Number(e.target.value);
+                          const minus =
+                            e.target.value === ""
+                              ? 0
+                              : Number.isInteger(n) && n > 0
+                                ? n
+                                : tapMinus;
+                          setTapMinus(minus);
+                          touch();
+                          commitTapRange(tapPlus, minus, stepPercentPct);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </Field>
+              </>
             ) : null}
 
             {midCtrl.show ? (
