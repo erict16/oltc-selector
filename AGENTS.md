@@ -2,7 +2,7 @@
 
 ## Icons
 
-**Do not invent or hand-draw icons** (Unicode glyphs like `▾`/`→`, DIY SVGs, emoji decoys). They look wrong in this UI.
+**Do not invent or hand-draw icons** (Unicode glyphs like `▾`/`→`, DIY SVGs, emoji decoys, Imagine-drawn icons). They look wrong in this UI. **2026-09-11 Eric: 记死了. Match the app or use an open-source set already in the repo. Native `<select>` keeps the system arrow.**
 
 Use **[@heroicons/react](https://heroicons.com/)** (official Tailwind CSS icon set):
 
