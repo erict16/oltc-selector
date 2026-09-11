@@ -839,8 +839,8 @@ export function SelectorApp() {
                   ariaLabel={t(lang, "currentModeAria")}
                   value={currentMode}
                   options={[
-                    { id: "current", label: t(lang, "currentBtn") },
                     { id: "capacity", label: t(lang, "capacityBtn") },
+                    { id: "current", label: t(lang, "currentBtn") },
                   ]}
                   onChange={setCurrentEntry}
                 />
@@ -1004,16 +1004,11 @@ export function SelectorApp() {
                     {t(lang, "customPos")}
                   </option>
                 </select>
-                {ustV != null ? (
-                  <span className={fieldCaptionClass}>
-                    {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
-                  </span>
-                ) : null}
               </Field>
             )}
 
             {!isLinear ? (
-              <Field as="div" label={t(lang, "stepPercent")}>
+              <Field as="div" className="relative" label={t(lang, "stepPercent")}>
                 <PercentCombo
                   value={stepPercentPct}
                   options={STEP_PERCENT_OPTIONS}
@@ -1023,6 +1018,11 @@ export function SelectorApp() {
                     if (!pm) commitTapRange(tapPlus, tapMinus, pct);
                   }}
                 />
+                {ustV != null ? (
+                  <span className={fieldCaptionClass}>
+                    {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
+                  </span>
+                ) : null}
               </Field>
             ) : null}
 
