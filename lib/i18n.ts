@@ -167,7 +167,7 @@ const en: Dict = {
   dutyOctc: "OCTC",
   acrossLead:
     "Optional. Leave blank to size the selector from Um only. Fill when the transformer specifies across-tap insulation.",
-  acrossUnset: "— from Um only —",
+  acrossUnset: "Auto",
   acrossBil: "Lightning impulse (BIL)",
   acrossBilPh: "e.g. 285",
   acrossBilTip: "Raises B/C/D. Leave blank to use the Um default.",
@@ -330,7 +330,7 @@ const zh: Dict = {
   dutyOctc: "无载",
   acrossLead:
     "选填。空着则仅按 Um 定选择器等级；变压器给出调压绕组间绝缘时再填。",
-  acrossUnset: "— 仅按 Um —",
+  acrossUnset: "自动",
   acrossBil: "雷电冲击（BIL）",
   acrossBilPh: "如 285",
   acrossBilTip: "抬 B/C/D；空则按 Um",
@@ -491,7 +491,7 @@ const vi: Dict = {
   dutyOctc: "OCTC",
   acrossLead:
     "Tùy chọn. Để trống thì chỉ theo Um. Điền khi máy biến áp cho cách điện giữa cuộn điều áp.",
-  acrossUnset: "— chỉ theo Um —",
+  acrossUnset: "Auto",
   acrossBil: "Xung sét (BIL)",
   acrossBilPh: "vd. 285",
   acrossBilTip: "Nâng B/C/D. Để trống thì theo Um.",
@@ -654,7 +654,7 @@ const es: Dict = {
   dutyOctc: "OCTC",
   acrossLead:
     "Opcional. En blanco se dimensiona solo con Um. Rellene si el transformador da aislamiento entre tomas.",
-  acrossUnset: "— solo Um —",
+  acrossUnset: "Auto",
   acrossBil: "Impulso (BIL)",
   acrossBilPh: "p. ej. 285",
   acrossBilTip: "Sube B/C/D. Vacío = valor por Um.",
@@ -816,7 +816,7 @@ const tr: Dict = {
   dutyOctc: "OCTC",
   acrossLead:
     "İsteğe bağlı. Boşsa yalnızca Um’ye göre. Transformatör sargılar arası yalıtım veriyorsa doldurun.",
-  acrossUnset: "— yalnız Um —",
+  acrossUnset: "Auto",
   acrossBil: "Yıldırım darbesi (BIL)",
   acrossBilPh: "örn. 285",
   acrossBilTip: "B/C/D yükseltir. Boş bırakırsanız Um varsayılanı.",
@@ -978,7 +978,7 @@ const ru: Dict = {
   dutyOctc: "ПБВ",
   acrossLead:
     "Необязательно. Пусто — класс селектора только по Um. Заполните, если задана изоляция по обмотке РПН.",
-  acrossUnset: "— только Um —",
+  acrossUnset: "Авто",
   acrossBil: "Грозовой импульс (BIL)",
   acrossBilPh: "напр. 285",
   acrossBilTip: "Повышает B/C/D. Пусто — по Um.",

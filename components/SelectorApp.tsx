@@ -137,7 +137,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 const fieldCaptionClass =
-  "pointer-events-none absolute bottom-0 right-0 text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-muted)]";
+  "pointer-events-none absolute top-full right-0 mt-0.5 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]";
 
 /** Comfortable control — one hover signal (border), shared height */
 const controlClass =
@@ -854,10 +854,6 @@ export function SelectorApp() {
           <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <Field
               as="div"
-              className={cx(
-                "relative",
-                currentMode === "capacity" && derivedOk && "pb-3.5",
-              )}
               label={
                 currentMode === "capacity"
                   ? t(lang, "transformerMva")
@@ -902,18 +898,18 @@ export function SelectorApp() {
                     <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[0.75rem] text-[var(--color-muted)]">
                       MVA
                     </span>
+                    {ratedA != null &&
+                    Number.isFinite(ratedA) &&
+                    ratedA > 0 &&
+                    derivedOk &&
+                    derivedA != null ? (
+                      <span className={fieldCaptionClass}>
+                        {t(lang, "currentRated", { a: formatAmps(ratedA) })}
+                        <span className="inline-block w-2.5" />
+                        {t(lang, "currentMax", { a: formatAmps(derivedA) })}
+                      </span>
+                    ) : null}
                   </div>
-                  {ratedA != null &&
-                  Number.isFinite(ratedA) &&
-                  ratedA > 0 &&
-                  derivedOk &&
-                  derivedA != null ? (
-                    <span className={fieldCaptionClass}>
-                      {t(lang, "currentRated", { a: formatAmps(ratedA) })}
-                      <span className="inline-block w-2.5" />
-                      {t(lang, "currentMax", { a: formatAmps(derivedA) })}
-                    </span>
-                  ) : null}
                 </>
               ) : (
                 <select
@@ -932,28 +928,26 @@ export function SelectorApp() {
               )}
             </Field>
 
-            <Field
-              as="div"
-              className={cx("relative", umKvShow != null && "pb-3.5")}
-              label={t(lang, "umWinding")}
-            >
-              <select
-                className={controlClass}
-                value={windingRatedKv ? String(windingRatedKv) : ""}
-                onChange={(e) => setVoltageKv(Number(e.target.value))}
-              >
-                <option value="">{t(lang, "pickVoltage")}</option>
-                {WINDING_RATED_KV.map((v) => (
-                  <option key={v} value={v}>
-                    {v} kV
-                  </option>
-                ))}
-              </select>
-              {umKvShow != null ? (
-                <span className={fieldCaptionClass}>
-                  {t(lang, "umCaption", { um: String(umKvShow) })}
-                </span>
-              ) : null}
+            <Field as="div" label={t(lang, "umWinding")}>
+              <div className="relative">
+                <select
+                  className={controlClass}
+                  value={windingRatedKv ? String(windingRatedKv) : ""}
+                  onChange={(e) => setVoltageKv(Number(e.target.value))}
+                >
+                  <option value="">{t(lang, "pickVoltage")}</option>
+                  {WINDING_RATED_KV.map((v) => (
+                    <option key={v} value={v}>
+                      {v} kV
+                    </option>
+                  ))}
+                </select>
+                {umKvShow != null ? (
+                  <span className={fieldCaptionClass}>
+                    {t(lang, "umCaption", { um: String(umKvShow) })}
+                  </span>
+                ) : null}
+              </div>
             </Field>
 
             <Field
@@ -1022,27 +1016,25 @@ export function SelectorApp() {
               </Field>
             )}
 
-            <Field
-              as="div"
-              className={cx("relative", ustV != null && "pb-3.5")}
-              label={t(lang, "stepPercent")}
-            >
-              <PercentCombo
-                value={stepPercentPct}
-                options={STEP_PERCENT_OPTIONS}
-                onChange={(pct) => {
-                  setStepPercentPct(pct);
-                  touch();
-                  if (isLinear || !pm) {
-                    commitTapRange(tapPlus, tapMinus, pct);
-                  }
-                }}
-              />
-              {ustV != null ? (
-                <span className={fieldCaptionClass}>
-                  {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
-                </span>
-              ) : null}
+            <Field as="div" label={t(lang, "stepPercent")}>
+              <div className="relative">
+                <PercentCombo
+                  value={stepPercentPct}
+                  options={STEP_PERCENT_OPTIONS}
+                  onChange={(pct) => {
+                    setStepPercentPct(pct);
+                    touch();
+                    if (isLinear || !pm) {
+                      commitTapRange(tapPlus, tapMinus, pct);
+                    }
+                  }}
+                />
+                {ustV != null ? (
+                  <span className={fieldCaptionClass}>
+                    {t(lang, "ustCaption", { v: String(Math.round(ustV)) })}
+                  </span>
+                ) : null}
+              </div>
             </Field>
 
             {isLinear || !pm ? (
