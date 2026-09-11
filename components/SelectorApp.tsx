@@ -141,7 +141,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 const fieldCaptionClass =
-  "pointer-events-none absolute top-full right-0 mt-px text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]";
+  "pointer-events-none absolute top-full right-3 mt-1 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]";
 
 function CaptionSub({
   name,
@@ -948,14 +948,14 @@ export function SelectorApp() {
                           touch();
                         }}
                       >
+                        <option value="__custom__">
+                          {t(lang, "custom")}
+                        </option>
                         {MVA_OPTIONS.map((n) => (
                           <option key={n} value={String(n)}>
                             {n} MVA
                           </option>
                         ))}
-                        <option value="__custom__">
-                          {t(lang, "custom")}
-                        </option>
                       </select>
                     )}
                     {mvaCustom ||
