@@ -61,7 +61,12 @@ import {
   t,
   type Lang,
 } from "@/lib/i18n";
-import type { ModelResult, SelectInput, SelectOutput } from "@/lib/types";
+import {
+  OCTC_SERIES_ROMANS,
+  type ModelResult,
+  type SelectInput,
+  type SelectOutput,
+} from "@/lib/types";
 
 /** Apply brochure (±N, mid) geometry onto a SelectInput patch. */
 function mediumFor(
@@ -357,7 +362,8 @@ export function SelectorApp() {
     getServerAdmin,
   );
 
-  const isLinear = input.regulation === "linear";
+  const isOctc = (input.dutyKind ?? "oltc") === "octc";
+  const isLinear = isOctc || input.regulation === "linear";
   const selectorVisible = showSelectorSize(input);
 
   const touch = () => {
@@ -571,6 +577,15 @@ export function SelectorApp() {
     return Number.isFinite(v) && v > 0 ? v : null;
   };
 
+  const withOctcSeries = (duty: SelectInput): SelectInput => {
+    if ((duty.dutyKind ?? "oltc") !== "octc") return duty;
+    const series =
+      duty.octcSeries && duty.octcSeries !== "auto"
+        ? duty.octcSeries
+        : "IV";
+    return { ...duty, octcSeries: series };
+  };
+
   const dutyForSelect = ():
     | SelectInput
     | { error: true; msgKey: string } => {
@@ -580,24 +595,24 @@ export function SelectorApp() {
       const i = capacityThroughA();
       if (i == null) return { error: true, msgKey: "needMva" };
       const ust = computedStepVoltage();
-      return {
+      return withOctcSeries({
         ...input,
         throughCurrentA: i,
         umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
         ...(ust != null ? { stepVoltageV: ust } : {}),
-      };
+      });
     }
     if (voltageMode === "winding") {
       if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
       const ust = computedStepVoltage();
-      return {
+      return withOctcSeries({
         ...input,
         umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
         ...(ust != null ? { stepVoltageV: ust } : {}),
-      };
+      });
     }
     if (!(input.umKv > 0)) return { error: true, msgKey: "needUm" };
-    return { ...input, umKv: input.umKv };
+    return withOctcSeries({ ...input, umKv: input.umKv });
   };
 
   const runSelect = () => {
@@ -1095,21 +1110,44 @@ export function SelectorApp() {
               </select>
             </Field>
 
-            <Field
-              label={t(lang, "regulation")}
-            >
-              <select
-                className={controlClass}
-                value={input.regulation}
-                onChange={(e) =>
-                  setRegulation(e.target.value as SelectInput["regulation"])
-                }
-              >
-                <option value="reversing">{t(lang, "regW")}</option>
-                <option value="coarse_fine">{t(lang, "regG")}</option>
-                <option value="linear">{t(lang, "regLinear")}</option>
-              </select>
-            </Field>
+            {isOctc ? (
+              <Field label={t(lang, "octcSeries")}>
+                <select
+                  className={controlClass}
+                  value={
+                    input.octcSeries && input.octcSeries !== "auto"
+                      ? input.octcSeries
+                      : "IV"
+                  }
+                  onChange={(e) =>
+                    patch(
+                      "octcSeries",
+                      e.target.value as SelectInput["octcSeries"],
+                    )
+                  }
+                >
+                  {OCTC_SERIES_ROMANS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            ) : (
+              <Field label={t(lang, "regulation")}>
+                <select
+                  className={controlClass}
+                  value={input.regulation}
+                  onChange={(e) =>
+                    setRegulation(e.target.value as SelectInput["regulation"])
+                  }
+                >
+                  <option value="reversing">{t(lang, "regW")}</option>
+                  <option value="coarse_fine">{t(lang, "regG")}</option>
+                  <option value="linear">{t(lang, "regLinear")}</option>
+                </select>
+              </Field>
+            )}
 
             {isLinear ? null : (
               <Field
@@ -1415,7 +1453,21 @@ export function SelectorApp() {
                             key={k}
                             type="button"
                             aria-pressed={on}
-                            onClick={() => patch("dutyKind", k)}
+                            onClick={() => {
+                              if (k === "octc") {
+                                setInput((s) => ({
+                                  ...s,
+                                  dutyKind: "octc",
+                                  octcSeries:
+                                    s.octcSeries && s.octcSeries !== "auto"
+                                      ? s.octcSeries
+                                      : "IV",
+                                }));
+                                touch();
+                                return;
+                              }
+                              patch("dutyKind", k);
+                            }}
                             className={cx(
                               "inline-flex h-10 items-center justify-center rounded-[var(--radius-sm)] border text-[0.8125rem] transition-colors duration-150",
                               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",

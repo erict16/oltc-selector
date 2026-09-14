@@ -13,6 +13,8 @@ import { resolveTapFields } from "./tapCode";
 import type {
   Connection,
   ModelResult,
+  OctcSeriesChoice,
+  OctcSeriesRoman,
   PhaseCode,
   SelectInput,
   SelectOutput,
@@ -80,12 +82,15 @@ export function octcSizeLetter(
 
 /**
  * Product series roman, not phase.
- * 5x2 → VIII, 3x2 → VI, 5x4 → V; else Y→IV / D→II (Anthony).
+ * Explicit octcSeries wins. Else 5x2 → VIII, 3x2 → VI, 5x4 → V;
+ * else Y→IV / D→II.
  */
 export function octcRoman(
   connection: Connection,
   contact?: string,
-): "VIII" | "VII" | "VI" | "V" | "IV" | "II" {
+  series?: OctcSeriesChoice,
+): OctcSeriesRoman {
+  if (series && series !== "auto") return series;
   const c = (contact ?? "").toLowerCase();
   if (c === "5x2" || c === "12x2") return "VIII";
   if (c === "3x2" || c === "6x2") return "VI";
@@ -147,6 +152,7 @@ function buildModelString(
   umToken: string,
   tapCode: string,
   unitCount: number,
+  octcSeries?: OctcSeriesChoice,
 ): string {
   // Commercial style:
   //   SHZVIII-600Y/126C-10193W
@@ -164,7 +170,11 @@ function buildModelString(
   if (isOctcSeries(series)) {
     // tapCode already includes contact + size (6x5B). Roman is the product series, not phase.
     const yd: "Y" | "D" = conn === "D" ? "D" : "Y";
-    const roman = octcRoman(yd, tapCode.replace(/[A-E]$/i, ""));
+    const roman = octcRoman(
+      yd,
+      tapCode.replace(/[A-E]$/i, ""),
+      octcSeries,
+    );
     core = `${series.code}${roman}-${current}${yd}/${umToken}-${tapCode}`;
   } else if (series.code === "HWDK") {
     core = `${series.code}${phases}-${current}/${umToken}`;
@@ -574,6 +584,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           umToken,
           modelTap,
           att.unitCount,
+          input.octcSeries,
         );
         if (att.phases === "I") {
           finalModel = finalModel.replace(
@@ -627,11 +638,12 @@ export function selectOltc(input: SelectInput): SelectOutput {
         }
 
         if (octc) {
+          const roman = octcRoman(conn, contact, input.octcSeries);
           reasonsEn.push(
-            `OCTC contact ${contact}${selectorSize} (WSL${octcRoman(conn)}).`,
+            `OCTC contact ${contact}${selectorSize} (${s.code}${roman}).`,
           );
           reasonsZh.push(
-            `无载触头 ${contact}${selectorSize}（WSL${octcRoman(conn)}）。`,
+            `无载触头 ${contact}${selectorSize}（${s.code}${roman}）。`,
           );
         } else {
           reasonsEn.push(
