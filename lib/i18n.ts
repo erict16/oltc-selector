@@ -165,6 +165,7 @@ const en: Dict = {
   dutyKind: "On-load / off-circuit",
   dutyOltc: "OLTC",
   dutyOctc: "OCTC",
+  octcSeries: "Wiring",
   acrossLead:
     "Optional. Leave blank to size the selector from Um only. Fill when the transformer specifies across-tap insulation.",
   acrossUnset: "Auto",
@@ -328,6 +329,7 @@ const zh: Dict = {
   dutyKind: "有载 / 无载",
   dutyOltc: "有载",
   dutyOctc: "无载",
+  octcSeries: "接线方式",
   acrossLead:
     "选填。空着则仅按 Um 定选择器等级；变压器给出调压绕组间绝缘时再填。",
   acrossUnset: "自动",
@@ -489,6 +491,7 @@ const vi: Dict = {
   dutyKind: "Có tải / không tải",
   dutyOltc: "OLTC",
   dutyOctc: "OCTC",
+  octcSeries: "Sơ đồ đấu",
   acrossLead:
     "Tùy chọn. Để trống thì chỉ theo Um. Điền khi máy biến áp cho cách điện giữa cuộn điều áp.",
   acrossUnset: "Auto",
@@ -652,6 +655,7 @@ const es: Dict = {
   dutyKind: "En carga / sin tensión",
   dutyOltc: "OLTC",
   dutyOctc: "OCTC",
+  octcSeries: "Esquema",
   acrossLead:
     "Opcional. En blanco se dimensiona solo con Um. Rellene si el transformador da aislamiento entre tomas.",
   acrossUnset: "Auto",
@@ -814,6 +818,7 @@ const tr: Dict = {
   dutyKind: "Yükte / yüksüz",
   dutyOltc: "OLTC",
   dutyOctc: "OCTC",
+  octcSeries: "Bağlantı şeması",
   acrossLead:
     "İsteğe bağlı. Boşsa yalnızca Um’ye göre. Transformatör sargılar arası yalıtım veriyorsa doldurun.",
   acrossUnset: "Auto",
@@ -976,6 +981,7 @@ const ru: Dict = {
   dutyKind: "Под нагрузкой / без напряжения",
   dutyOltc: "РПН",
   dutyOctc: "ПБВ",
+  octcSeries: "Схема",
   acrossLead:
     "Необязательно. Пусто — класс селектора только по Um. Заполните, если задана изоляция по обмотке РПН.",
   acrossUnset: "Авто",

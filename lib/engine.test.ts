@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { selectOltc, stepUpOf, pickOtherOptions, FIXTURES } from "./engine";
+import {
+  selectOltc,
+  stepUpOf,
+  pickOtherOptions,
+  FIXTURES,
+  octcRoman,
+} from "./engine";
 import { maxThroughCurrent, throughCurrentFromRated } from "./deriveUm";
 import { parseTypeString } from "./orderReplay";
 import {
@@ -919,6 +925,74 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
     });
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toBe("WSLVIII-800D/72.5-5x2A");
+  });
+
+  it("octcRoman: explicit series is independent of Y/D and contact", () => {
+    expect(octcRoman("D", "6x5")).toBe("II");
+    expect(octcRoman("Y", "6x5")).toBe("IV");
+    expect(octcRoman("D", "6x5", "V")).toBe("V");
+    expect(octcRoman("Y", "5x2", "IV")).toBe("IV");
+    expect(octcRoman("D", "6x5", "VII")).toBe("VII");
+  });
+
+  it("explicit V on D 6x5 is WSLV, not WSLII", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      octcSeries: "V",
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 800,
+      umKv: 72.5,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 6,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLV-800D/72.5-6x5A");
+  });
+
+  it("explicit IV on D stays WSLIV", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      octcSeries: "IV",
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 800,
+      umKv: 72.5,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 6,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLIV-800D/72.5-6x5A");
+  });
+
+  it("explicit II on Y stays WSLII", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      octcSeries: "II",
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 600,
+      umKv: 72.5,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 6,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLII-600Y/72.5-6x5A");
   });
 });
 

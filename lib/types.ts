@@ -22,6 +22,17 @@ export type Regulation = "linear" | "reversing" | "coarse_fine";
 export type ChangeOver = "0" | "W" | "G"; // linear / reversing / coarse-fine
 export type SelectorSize = "A" | "B" | "C" | "D" | "DE" | "E" | "";
 export type DutyKind = "oltc" | "octc";
+/** WSL/WSG product series roman. Not phase. I and III are not in the 2025 list. */
+export type OctcSeriesRoman = "II" | "IV" | "V" | "VI" | "VII" | "VIII";
+export type OctcSeriesChoice = "auto" | OctcSeriesRoman;
+export const OCTC_SERIES_ROMANS: readonly OctcSeriesRoman[] = [
+  "II",
+  "IV",
+  "V",
+  "VI",
+  "VII",
+  "VIII",
+];
 
 export interface SelectInput {
   mounting: Mounting;
@@ -49,6 +60,12 @@ export interface SelectInput {
   midPositions?: 0 | 1 | 3;
   /** OCTC contact from OS/QS when known (`6x5`, `12x11`, `5x2`). */
   octcContact?: string;
+  /**
+   * WSL/WSG wiring (product series roman). Independent of Y/D.
+   * Unset / `auto` keeps the old heuristic (Y→IV, D→II, special contacts).
+   * The form always sends an explicit roman when dutyKind=octc.
+   */
+  octcSeries?: OctcSeriesChoice;
   pitch?: 10 | 12 | 14 | 16 | 18;
   /**
    * Required internal insulation class (tap selector size).
