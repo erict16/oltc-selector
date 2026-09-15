@@ -462,16 +462,17 @@ describe("training cases (选型案例-答案)", () => {
     expect(out.results[0].currentA).toBe(600);
   });
 
-  it("case 7 → SHZVIII-1000D (not 3×CM2I) when I≈626 A", () => {
-    const out = selectOltc(FIXTURES.case7Shzv1000.input);
+  it("case 7 → 3xCM2I-800 (not SHZVIII-1000D) when I≈626 A Δ", () => {
+    const out = selectOltc(FIXTURES.case7Cm2I800.input);
     expect(out.ok).toBe(true);
-    expect(out.results[0].model).toContain(FIXTURES.case7Shzv1000.expectContains);
-    expect(out.results[0].unitCount).toBe(1);
-    expect(out.results[0].seriesCode).toBe("SHZV");
+    expect(out.results[0].model).toBe(FIXTURES.case7Cm2I800.expectModel);
+    expect(out.results[0].unitCount).toBe(3);
+    expect(out.results[0].seriesCode).toBe("CM2");
     expect(out.results[0].selectorSize).toBe("C");
-    // 3×CM2 may be listed as alt, not primary
-    const multi = out.results.find((r) => r.unitCount > 1);
-    if (multi) expect(out.results[0].adequacyScore).toBeGreaterThan(multi.adequacyScore);
+    expect(out.results[0].model).not.toMatch(/SHZVIII-\d+D\//);
+    expect(out.results.every((r) => !/(?:CM2|CM|CMD|SHZV|SHZVG)III-\d+D\//.test(r.model))).toBe(
+      true,
+    );
   });
 
   it("case 3-style: 697 A / 170 → one SHZV-1000, not 3×", () => {
@@ -521,6 +522,8 @@ describe("CV2 step voltage vs contacts (pitch)", () => {
     expect(out.ok).toBe(true);
     expect(out.results[0].seriesCode).not.toBe("CV2");
     expect(out.results.every((r) => r.seriesCode !== "CV2")).toBe(true);
+    expect(out.results[0].model).toBe("3xCM2I-500/170D-12233W");
+    expect(out.results[0].unitCount).toBe(3);
   });
 
   it("allows CV2 when Ust 1500 V with 12 contacts", () => {
@@ -561,6 +564,93 @@ describe("CV2 step voltage vs contacts (pitch)", () => {
     });
     expect(out.ok).toBe(true);
     expect(out.results.some((r) => r.seriesCode === "CV2")).toBe(true);
+  });
+});
+
+describe("combined in-tank III is star-point only", () => {
+  const combinedIiiD = /(?:CM2|CM|CMD|SHZV|SHZVG)III-\d+D\//;
+
+  it("346 A / 145 Δ / Ust 1650 → 3xCM2I-500/170D, never CM2III-…D", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 346.3,
+      umKv: 145,
+      stepVoltageV: 1650,
+      regulation: "reversing",
+      plusMinusSteps: 10,
+      midPositions: 3,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("3xCM2I-500/170D-12233W");
+    expect(out.results[0].unitCount).toBe(3);
+    expect(out.results.every((r) => !combinedIiiD.test(r.model))).toBe(true);
+    expect(out.results[0].reasonsZh.some((s) => s.includes("星点"))).toBe(
+      true,
+    );
+  });
+
+  it("star-point still emits CM2III-…Y", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 346.3,
+      umKv: 72.5,
+      stepVoltageV: 1650,
+      regulation: "reversing",
+      plusMinusSteps: 10,
+      midPositions: 3,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toMatch(/^CM2III-500Y\/72\.5B-12233W$/);
+    expect(out.results[0].unitCount).toBe(1);
+  });
+
+  it("oil combined Δ is 3× I, never CMIII-…D / CMDIII-…D", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 346.3,
+      umKv: 72.5,
+      stepVoltageV: 1650,
+      regulation: "reversing",
+      plusMinusSteps: 10,
+      midPositions: 3,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].unitCount).toBe(3);
+    expect(out.results[0].model).toMatch(/^3xCMI-500\/72\.5B-12233W$/);
+    expect(out.results.every((r) => !combinedIiiD.test(r.model))).toBe(true);
+  });
+
+  it("on-tank HWV III D stays legal", () => {
+    const out = selectOltc({
+      mounting: "on_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 400,
+      umKv: 72.5,
+      stepVoltageV: 1000,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("HWVIII-400D/72.5-10193W");
   });
 });
 
@@ -1256,10 +1346,12 @@ describe("2026 OS — other options + list axes", () => {
     expect(out.results[0].model).toContain("CV2III-600D/72.5");
   });
 
-  it("626 A still steps to SHZV-1000 (case 7; 1% is not 4%)", () => {
-    const out = selectOltc(FIXTURES.case7Shzv1000.input);
-    expect(out.results[0].seriesCode).toBe("SHZV");
-    expect(out.results[0].currentA).toBe(1000);
+  it("626 A Δ uses 3×CM2I-800, not an invented SHZVIII-1000D", () => {
+    const out = selectOltc(FIXTURES.case7Cm2I800.input);
+    expect(out.results[0].seriesCode).toBe("CM2");
+    expect(out.results[0].currentA).toBe(800);
+    expect(out.results[0].unitCount).toBe(3);
+    expect(out.results[0].model).toBe("3xCM2I-800/72.5C-10191W");
   });
 
   it("126 kV 180 A 27-pos G → CM2-500/126C not SHZV (2026 OS SHZV-600/126D volume)", () => {

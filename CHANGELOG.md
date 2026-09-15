@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Combined in-tank III (CM / CM2 / CMD / SHZV / SHZVG) is star-point only. Delta / line-end selects `3xCM2I-…`, not `CM2III-…D`. Compound CV/CV2/SV and on-tank HWV III still allow D.
 - Result card shows construction (combined / compound / cage / drum) instead of repeating positions already in the tap code.
 - Off-circuit wiring options show the brochure name (II reversing, IV linear, V single bridge, VI Y-D, VII double bridge, VIII series-parallel).
 - Capacity menu is 14 steps (6.3–500 MVA). Custom still covers the rest.

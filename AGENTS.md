@@ -22,3 +22,7 @@ Result card **开关结构** (not 工作位置): CV/CV2/SV/CVT/CZ → 复合式;
 ## Tap codes
 
 Brochure Fig. 3-3: `P = 2 × (±N) + mid`. See `lib/tapCode.ts`. Never invent non-catalogue codes; mid and ±N are paired connection diagrams.
+
+## Combined III connection
+
+In-tank combined (CM / CM2 / CMD / SHZV / SHZVG): three-phase is **star-point Y only**. Delta / line-end → `3xCM2I-…` / `3xSHZVI-…` (no Y/D after current). Do not emit `CM2III-500D`. Compound CV/CV2/SV and on-tank HWV III still allow D.
