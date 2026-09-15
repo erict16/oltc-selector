@@ -1,4 +1,4 @@
-import { parseTypeString } from "./orderReplay";
+import { parseTypeString } from "./parseType";
 
 /**
  * Country coefficients for admin list × market.

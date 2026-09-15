@@ -1,5 +1,5 @@
 import data from "./basePrices.data.json";
-import { parseTypeString } from "./orderReplay";
+import { parseTypeString } from "./parseType";
 
 export type BasePriceRow = {
   family: string;

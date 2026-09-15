@@ -14,7 +14,7 @@ Early scaffold put **CV2 currents = 350 / 500 / 600**.
 
 | Family | III currents (catalogue) | Notes |
 |--------|--------------------------|--------|
-| **CV2** | **350, 600 only** | Um 40.5 / 72.5 / 126 / 145; positions 12 / 23; step 2000 V (10 ct) / 1500 V (12 ct); step capacity 700 / 800 kVA |
+| **CV2** | **350, 600 only** | Um 40.5 / 72.5 / 126 / 145; **III and I only** (no CV2II). positions 12 / 23; step 2000 V (10 ct) / 1500 V (12 ct); step capacity 700 / 800 kVA |
 | CV | 350 (I also 700) | Um 40.5 / 72.5 |
 | **SV** | **500** | Oil compound 500 A — not CV/CV2 |
 | CM / CM2 | III/II **500, 600**; I 500/600/800/1200/1500 | Um 72.5 / 126 / 170 / 252 |
@@ -50,7 +50,7 @@ Minimum adequate — see `选型案例-答案.docx` in `docs/training/`:
 
 Compound fails when across-tap LI ≳ 200 kV (CV2 internal a). Then combined + grade letter.
 
-**Type existence:** emit only brochure types. CM / CM2 / CMD / SHZV / SHZVG III is star-point Y — there is no `CM2III-…D`. Covering that duty with `3xCM2I-…` is because the I type exists. Compound CV/CV2/SV and on-tank HWV III D are real types.
+**Type existence:** emit only brochure types. CM / CM2 / CMD / SHZV / SHZVG III is star-point Y — there is no `CM2III-…D`. Covering that duty with `3xCM2I-…` is because the I type exists. Compound CV/CV2/SV and on-tank HWV III D are real types. **SHZVG has no extract in `docs/brochure-extracts/`; III-Y-only is assumed from the in-repo catalogue notes (same family as SHZV), not from a brochure PDF.** CM2/CM/CMD II list rows omit Y/D after current (`CM2II-500/72.5B`). OCTC rows must exist on the 2025 list (no `7x6E` @ 72.5, no `WSLIV-2000D/126`). Price-list Y/D same RMB is not a type.
 
 ## Do not
 

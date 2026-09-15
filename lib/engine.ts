@@ -3,13 +3,18 @@ import {
   FAMILY_MIN_RANK,
   INTERNAL_INSULATION,
   SERIES,
-  iiiTypeAllowsConnection,
   coveringUms,
   nearestCurrent,
   nearestUm,
   phaseToken,
   pickSelectorSize,
 } from "./catalog";
+import {
+  commercialTypeExists,
+  connectionLetterOnPhase,
+  phaseConnectionLegal,
+  resolveOctcListModel,
+} from "./typeExists";
 import { resolveTapFields } from "./tapCode";
 import type {
   Connection,
@@ -328,13 +333,15 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
 
   const list = s.currents[input.phases];
   const maxPhase = list?.length ? Math.max(...list) : null;
-  const iiiMissing =
-    input.phases === "III" &&
-    !iiiTypeAllowsConnection(s, input.phases, input.connection);
+  const connIllegal = !phaseConnectionLegal(
+    s,
+    input.phases,
+    input.connection,
+  );
 
-  // Primary phase as requested when a brochure III type exists for this connection.
+  // Primary phase as requested when a brochure type exists for this connection.
   if (
-    !iiiMissing &&
+    !connIllegal &&
     maxPhase != null &&
     ratingCoversDuty(input.throughCurrentA, maxPhase)
   ) {
@@ -357,7 +364,10 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
   // eligible. Ranking still puts any legal single III first.
   // Extra Um is only for single-unit alts (the 126 twin), not 3×.
   if (isOctcSeries(s)) return out;
-  if (input.phases === "III" && s.currents.I?.length) {
+  if (
+    s.currents.I?.length &&
+    (input.phases === "III" || connIllegal)
+  ) {
     const curI = nearestCurrent(input.throughCurrentA, s.currents.I);
     if (curI != null) {
       out.push({
@@ -366,7 +376,7 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
         current: curI,
         um: um0,
         unitCount: 3,
-        deltaForced: iiiMissing,
+        deltaForced: connIllegal,
       });
     }
   }
@@ -590,9 +600,12 @@ export function selectOltc(input: SelectInput): SelectOutput {
           mduStr = s.defaultMdu;
         }
 
-        // Single-phase commercial strings omit Y/D (e.g. 3xCM2I-800/72.5B-…,
-        // 3xSHZVI-1000/170D-…). D after Um is selector size, not connection.
-        const modelConn: Connection = att.phases === "I" && !octc ? "any" : conn;
+        // I (and CM2/CM/CMD II) omit Y/D after current. D after Um is size.
+        const modelConn: Connection = connectionLetterOnPhase(
+          s,
+          att.phases,
+          conn,
+        );
 
         let finalModel = buildModelString(
           s,
@@ -609,6 +622,19 @@ export function selectOltc(input: SelectInput): SelectOutput {
             new RegExp(`(${s.code}I-\\d+)[YD]/`),
             "$1/",
           );
+        } else if (att.phases === "II" && modelConn === "any") {
+          finalModel = finalModel.replace(
+            new RegExp(`(${s.code}II-\\d+)[YD]/`),
+            "$1/",
+          );
+        }
+
+        if (octc) {
+          const listed = resolveOctcListModel(finalModel);
+          if (!listed) continue;
+          finalModel = listed;
+        } else if (!commercialTypeExists(finalModel, s)) {
+          continue;
         }
 
         if (seen.has(finalModel)) continue;

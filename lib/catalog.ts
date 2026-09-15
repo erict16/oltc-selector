@@ -409,7 +409,6 @@ export const SERIES: SeriesDef[] = [
     vacuum: true,
     currents: {
       I: [350, 600],
-      II: [350, 600],
       III: [350, 600],
     },
     umKv: [40.5, 72.5, 126, 145],

@@ -952,8 +952,8 @@ export const ANTHONY_REPLAY: ReplayCase[] = [
   {
     id: "QS260183",
     source: "Anthony/2026-02-10__UID1728__QS-260183R2_GE-WSL IV-800Y170-6x5B_PLTGU GRATI-Manual Drive_FINAL PRICE.pdf | GE (UTR) / OCTC PLTGU GRATI 153.75MVA",
-    tag: "customer-specified",
-    note: "OCTC. Printed I=800 A, 5 pos linear Y / 170. Min-adequate size at 170 is 6x5B; buyer locked 6x5A.",
+    tag: "min-adequate",
+    note: "OCTC. Printed I=800 A, 5 pos linear Y / 170. 2025 list has 6x5B not buyer-locked 6x5A.",
     input: {
       mounting: "in_tank",
       medium: "oil",
@@ -969,13 +969,13 @@ export const ANTHONY_REPLAY: ReplayCase[] = [
       selectorSize: "A",
       mdu: "none",
     },
-    expectPrimary: "WSLIV-800Y/170-6x5A",
+    expectPrimary: "WSLIV-800Y/170-6x5B",
   },
   {
     id: "QS2603117",
     source: "Anthony/2026-03-06__UID2200__QS-2603117R0_MEE-WSLIV-600Y-72.5-76E_Lower Piah HES prjt.pdf | MEE / OCTC | (TBC)",
-    tag: "customer-specified",
-    note: "OCTC. Printed I=600 A. Model 7×6E (pos 7). Min-adequate size is 7x6B; buyer locked E.",
+    tag: "min-adequate",
+    note: "OCTC. Printed I=600 A. 7×6E is not a 2025-list row; list cover is 7x6B.",
     input: {
       mounting: "in_tank",
       medium: "oil",
@@ -991,7 +991,7 @@ export const ANTHONY_REPLAY: ReplayCase[] = [
       selectorSize: "E",
       mdu: "none",
     },
-    expectPrimary: "WSLIV-600Y/72.5-7x6E",
+    expectPrimary: "WSLIV-600Y/72.5-7x6B",
   },
   {
     id: "QS2603120",
@@ -1014,27 +1014,7 @@ export const ANTHONY_REPLAY: ReplayCase[] = [
     },
     expectPrimary: "WSLII-600D/72.5-6x5A",
   },
-  {
-    id: "QS2603121",
-    source: "Anthony/2026-03-17__UID2522__QS-2603121-R1- WSLIV2000D-126-6x5B -Thu Duc Trafo Replacement -HLG.pdf | HLG / OCTC replacement for Thu Duc Transformer Company",
-    tag: "min-adequate",
-    note: "OCTC. Printed I=2000 A D / 126. Quoted roman IV on D — engine-correct is WSLII.",
-    input: {
-      mounting: "in_tank",
-      medium: "oil",
-      preferVacuum: false,
-      dutyKind: "octc",
-      phases: "III",
-      connection: "D",
-      throughCurrentA: 2000,
-      umKv: 126,
-      stepVoltageV: 0,
-      regulation: "linear",
-      positions: 5,
-      mdu: "none",
-    },
-    expectPrimary: "WSLII-2000D/126-6x5B",
-  },
+
   {
     id: "QS2603122",
     source: "Anthony/2026-03-16__UID2485__QS-2603122R0_EEMC-WSLII-800D-72.5-6x5.pdf | EEMC / EEMC PO26-631. EED2603_12 | TBA",
@@ -1143,8 +1123,8 @@ export const ANTHONY_REPLAY: ReplayCase[] = [
   {
     id: "QS2605154",
     source: "Anthony/2026-06-16__UID5189__QS2605154-R1_Sanaky-WSLII-600D-72.5-12x11D_dtd 28 May 26-edit 16.06.26.pdf | Sanaky / DETC 11 pos 66kV | 18.5MVA, 67kV, +5/-5x2.5%",
-    tag: "customer-specified",
-    note: "OCTC. 18.5 MVA / 67 kV Δ → I=159.4 A, 11 pos → 12x11. Min-adequate size is B; buyer locked D.",
+    tag: "min-adequate",
+    note: "OCTC. 18.5 MVA / 67 kV Δ → I=159.4 A, 11 pos → 12x11. 2025 list is 12x11B not buyer-locked D.",
     input: {
       mounting: "in_tank",
       medium: "oil",
@@ -1160,7 +1140,7 @@ export const ANTHONY_REPLAY: ReplayCase[] = [
       selectorSize: "D",
       mdu: "none",
     },
-    expectPrimary: "WSLII-600D/72.5-12x11D",
+    expectPrimary: "WSLII-600D/72.5-12x11B",
   },
   {
     id: "QS2607193",
@@ -1216,6 +1196,11 @@ export const ANTHONY_REPLAY_SKIPPED: Array<{
     id: "QS260193",
     source: "Anthony CMA7 replacement",
     reason: "MDU-only. Selector does not pick drives.",
+  },
+  {
+    id: "QS2603121",
+    source: "Anthony WSLIV-2000D/126-6x5B Thu Duc",
+    reason: "2025 list has no WSLII-2000D/126-6x5 row (catalog: do not invent). WSLV-2000D/126 exists but roman V was not the duty.",
   },
   {
     id: "QS260196",
