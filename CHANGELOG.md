@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Off-circuit wiring options show the brochure name (II reversing, IV linear, V single bridge, VI Y-D, VII double bridge, VIII series-parallel).
+- Capacity menu is 14 steps (6.3–500 MVA). Custom still covers the rest.
+- Safety factor only appears when entering transformer MVA. Typing Imax is used as-is.
+- Current field is Imax / 最大通过电流, not Iᵤ.
 - Off-circuit: the tap-winding control becomes wiring II / IV / V / VI / VII / VIII. On-load puts reversing / coarse-fine / linear back. Y/D stays its own field.
 - Default voltage is tap-side rated kV (132 / 110 / 66…). Star 110–330 → switch Um 72.5; line-end keeps winding class. Switch Um stays as a toggle beside it.
 - WSL/WDL: 2025-list contacts (8x7/10x9/5x2/3x2…), series roman VIII/VI/V, Um 252/363. HWDK I / 40.5. CVT 9-position linear.

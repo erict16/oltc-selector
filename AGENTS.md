@@ -15,7 +15,7 @@ Prefer `24/outline` for chrome; keep stroke consistent with surrounding muted in
 
 ## OCTC wiring
 
-When `dutyKind=octc`, the form swaps **调压方式** (W/G/0) for **接线方式** (WSL/WSG roman II/IV/V/VI/VII/VIII). On-load puts 调压方式 back. Y/D is a separate field and does not pick the roman. Default roman is IV. I and III are not in the 2025 list — do not invent them.
+When `dutyKind=octc`, the form swaps **调压方式** (W/G/0) for **接线方式** (WSL/WSG roman II/IV/V/VI/VII/VIII). Option labels follow WSL brochure 表1: II 正反调, IV 线性调, V 单桥跨接, VI Y-D转换, VII 双桥跨接, VIII 串并联. On-load puts 调压方式 back. Y/D is a separate field and does not pick the roman. Default roman is IV. I and III are not in the 2025 list — do not invent them.
 
 ## Tap codes
 
