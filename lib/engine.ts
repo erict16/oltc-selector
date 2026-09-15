@@ -3,7 +3,7 @@ import {
   FAMILY_MIN_RANK,
   INTERNAL_INSULATION,
   SERIES,
-  combinedIiiIsStarOnly,
+  iiiTypeAllowsConnection,
   coveringUms,
   nearestCurrent,
   nearestUm,
@@ -221,11 +221,11 @@ function seriesMatchesMedium(s: SeriesDef, input: SelectInput): boolean {
  *
  * Commercial min-adequate (Base Price List 2025 + sales practice):
  *   1. Family: CV2 → CM2 → SHZV → SHZVG (never SHZV-400 over CV2/CM2 on exact I).
- *   2. **One brochure-legal III unit beats 3× singles** when both cover duty.
- *      Combined in-tank (CM/CM2/CMD/SHZV/SHZVG): III is star-point only.
- *      Delta / line-end → 3× I of that family (not CM2III-…D / SHZVIII-…D).
- *      Compound CV/CV2/SV and on-tank HWV III still allow D.
- *      Price proof on Y: SHZVIII-1000Y/72.5B-10…W ≈ ¥219k vs 3×CM2I-800 ≈ ¥522k.
+ *   2. **Only emit a type that exists in the brochure.**
+ *      CM2III-…D is not a type → do not emit it. CV2III-…D and HWVIII-…D exist.
+ *      3× I is used when that single-phase type exists and III does not cover
+ *      (missing III connection, or Iᵤ above III max).
+ *      One legal III still beats 3× when both exist (Y price: SHZV-1000 vs 3×CM2I-800).
  *   3. Mild tighter catalogue current / Um.
  */
 function adequacyScore(
@@ -328,15 +328,13 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
 
   const list = s.currents[input.phases];
   const maxPhase = list?.length ? Math.max(...list) : null;
-  const deltaForcesMulti =
+  const iiiMissing =
     input.phases === "III" &&
-    input.connection !== "Y" &&
-    combinedIiiIsStarOnly(s);
+    !iiiTypeAllowsConnection(s, input.phases, input.connection);
 
-  // Primary phase as requested when catalogue can cover current at all.
-  // Combined in-tank III is star-point only — do not emit CM2III-…D etc.
+  // Primary phase as requested when a brochure III type exists for this connection.
   if (
-    !deltaForcesMulti &&
+    !iiiMissing &&
     maxPhase != null &&
     ratingCoversDuty(input.throughCurrentA, maxPhase)
   ) {
@@ -368,7 +366,7 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
         current: curI,
         um: um0,
         unitCount: 3,
-        deltaForced: deltaForcesMulti,
+        deltaForced: iiiMissing,
       });
     }
   }
@@ -465,6 +463,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
       s.connections.includes("any")
     );
   });
+
+  const wantStruct = input.preferStructure;
+  if (wantStruct && wantStruct !== "auto") {
+    candidates = candidates.filter((s) => s.structure === wantStruct);
+  }
 
   if (!candidates.length) {
     return {
@@ -672,10 +675,10 @@ export function selectOltc(input: SelectInput): SelectOutput {
         if (att.unitCount > 1) {
           if (att.deltaForced) {
             reasonsEn.push(
-              `${att.unitCount}× single-phase — combined III is star-point only; delta / line-end uses single-phase units.`,
+              `${att.unitCount}× single-phase — no brochure III type for this connection (e.g. CM2III-…D does not exist).`,
             );
             reasonsZh.push(
-              `${att.unitCount} 台单相 — 组合式三相只用于星点；角接/线端用单相。`,
+              `${att.unitCount} 台单相 — 样本没有这个连接的三相型号（没有 CM2III-…D）。`,
             );
           } else {
             reasonsEn.push(
@@ -789,7 +792,6 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
   final.sort((a, b) => {
     // Hard rule: any brochure-legal single-unit outranks any multi.
-    // Combined in-tank III-D is not emitted, so D jobs correctly fall to 3×.
     if (a.unitCount !== b.unitCount) return a.unitCount - b.unitCount;
     if (b.adequacyScore !== a.adequacyScore)
       return b.adequacyScore - a.adequacyScore;
