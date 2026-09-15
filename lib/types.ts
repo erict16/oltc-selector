@@ -74,6 +74,11 @@ export interface SelectInput {
    * Leave empty to auto-pick smallest size that supports Um + across-tap stress.
    */
   selectorSize?: SelectorSize | "auto";
+  /**
+   * Family construction filter. `auto` = min-adequate across structures.
+   * OCTC form uses 接线方式 instead — leave auto.
+   */
+  preferStructure?: StructureKind | "auto";
   /** Optional transformer BIL (kV) to earth */
   bilKv?: number;
   /** Optional PF withstand to earth (kV) */
@@ -102,6 +107,11 @@ export interface SeriesDef {
   maxStepVoltageV: number;
   stepCapacityByCurrent?: Record<number, number>;
   connections: Connection[];
+  /**
+   * Connection letters that exist on the III commercial type string.
+   * Omit = same as `connections`. CM2 III is Y only (no CM2III-…D).
+   */
+  iiiConnections?: Connection[];
   maxPositionsLinear: number;
   maxPositionsWithChangeOver: number;
   defaultMdu: string;

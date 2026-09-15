@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- More options: 选择器绝缘等级 is now 开关结构 (auto / compound / combined). OCTC keeps 接线方式 only.
+- Safety factor on MVA duty defaults to ×1.0.
+- Field captions (Imax / Um / Ust) are one step larger.
 - Combined in-tank III (CM / CM2 / CMD / SHZV / SHZVG) is star-point only. Delta / line-end selects `3xCM2I-…`, not `CM2III-…D`. Compound CV/CV2/SV and on-tank HWV III still allow D.
 - Result card shows construction (combined / compound / cage / drum) instead of repeating positions already in the tap code.
 - Off-circuit wiring options show the brochure name (II reversing, IV linear, V single bridge, VI Y-D, VII double bridge, VIII series-parallel).

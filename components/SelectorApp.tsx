@@ -104,7 +104,7 @@ const TAP_SIDE_OPTIONS = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
 ] as const;
 const SAFETY_K_OPTIONS = [
-  1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.5, 1.6, 1.7, 1.8,
+  1, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.5, 1.6, 1.7, 1.8,
 ] as const;
 
 const defaultInput: SelectInput = {
@@ -123,6 +123,7 @@ const defaultInput: SelectInput = {
   pitch: 10,
   midPositions: 3,
   selectorSize: "auto",
+  preferStructure: "auto",
   mdu: "none",
   dutyKind: "oltc",
 };
@@ -146,7 +147,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 const fieldCaptionClass =
-  "pointer-events-none absolute top-full right-0 mt-1 text-right text-[0.625rem] leading-none tabular-nums text-[var(--color-caption)]";
+  "pointer-events-none absolute top-full right-0 mt-1 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]";
 
 function CaptionSub({
   name,
@@ -288,17 +289,6 @@ function formatAmps(a: number): string {
   return Number.isInteger(r) ? String(r) : r.toFixed(1);
 }
 
-function showSelectorSize(input: SelectInput) {
-  if (input.mounting === "dry_type" || input.mounting === "reactor") return false;
-  if (
-    input.mounting === "on_tank" ||
-    input.mounting === "external_compartment"
-  ) {
-    return false;
-  }
-  return true;
-}
-
 /** Ceiling tip from in-tank vacuum III axes only (not dry-type 160 A). */
 export function SelectorApp() {
   const lang = useAppLang();
@@ -322,7 +312,7 @@ export function SelectorApp() {
   const [tapMinus, setTapMinus] = useState(8);
   const [stepPercentPct, setStepPercentPct] = useState(1.25);
   const [stepPctCustom, setStepPctCustom] = useState(false);
-  const [safetyK, setSafetyK] = useState(1.2);
+  const [safetyK, setSafetyK] = useState(1);
   const [safetyKCustom, setSafetyKCustom] = useState(false);
   const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
   const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
@@ -364,7 +354,6 @@ export function SelectorApp() {
 
   const isOctc = (input.dutyKind ?? "oltc") === "octc";
   const isLinear = isOctc || input.regulation === "linear";
-  const selectorVisible = showSelectorSize(input);
 
   const touch = () => {
     if (hasRun) setStale(true);
@@ -737,7 +726,7 @@ export function SelectorApp() {
         setTapPlus(8);
         setTapMinus(8);
         setStepPercentPct(1.25);
-        setSafetyK(1.2);
+        setSafetyK(1);
         setTapRange(null);
       }
       setActiveExample(null);
@@ -779,7 +768,7 @@ export function SelectorApp() {
     setTapPlus(8);
     setTapMinus(8);
     setStepPercentPct(1.25);
-    setSafetyK(1.2);
+    setSafetyK(1);
     setTapRange(null);
     setInput({
       ...next,
@@ -1458,6 +1447,7 @@ export function SelectorApp() {
                                 setInput((s) => ({
                                   ...s,
                                   dutyKind: "octc",
+                                  preferStructure: "auto",
                                   octcSeries:
                                     s.octcSeries && s.octcSeries !== "auto"
                                       ? s.octcSeries
@@ -1466,7 +1456,12 @@ export function SelectorApp() {
                                 touch();
                                 return;
                               }
-                              patch("dutyKind", k);
+                              setInput((s) => ({
+                                ...s,
+                                dutyKind: "oltc",
+                                preferStructure: "auto",
+                              }));
+                              touch();
                             }}
                             className={cx(
                               "inline-flex h-10 items-center justify-center rounded-[var(--radius-sm)] border text-[0.8125rem] transition-colors duration-150",
@@ -1524,26 +1519,35 @@ export function SelectorApp() {
                       </div>
                     </Field>
                   ) : null}
-                  {selectorVisible ? (
-                    <Field label={t(lang, "selectorSize")}>
-                      <select
-                        className={controlClass}
-                        value={input.selectorSize ?? "auto"}
-                        onChange={(e) =>
-                          patch(
-                            "selectorSize",
-                            e.target.value as SelectInput["selectorSize"],
-                          )
-                        }
-                      >
-                        <option value="auto">{t(lang, "auto")}</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                        <option value="D">D</option>
-                        <option value="DE">DE</option>
-                      </select>
-                    </Field>
-                  ) : null}
+                  <Field label={t(lang, "specStructure")}>
+                    <select
+                      className={controlClass}
+                      value={input.preferStructure ?? "auto"}
+                      onChange={(e) =>
+                        patch(
+                          "preferStructure",
+                          e.target.value as SelectInput["preferStructure"],
+                        )
+                      }
+                    >
+                      <option value="auto">{t(lang, "auto")}</option>
+                      {isOctc ? (
+                        <>
+                          <option value="cage">{t(lang, "specCage")}</option>
+                          <option value="drum">{t(lang, "specDrum")}</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="compound">
+                            {t(lang, "specCompound")}
+                          </option>
+                          <option value="combined">
+                            {t(lang, "specCombined")}
+                          </option>
+                        </>
+                      )}
+                    </select>
+                  </Field>
 
                   <Field label={t(lang, "mounting")}>
                     <select
@@ -1682,7 +1686,7 @@ export function SelectorApp() {
                         ) : (
                           <select
                             className={controlClass}
-                            value={safetyK > 0 ? String(safetyK) : "1.2"}
+                            value={safetyK > 0 ? String(safetyK) : "1"}
                             onChange={(e) => {
                               if (e.target.value === "__custom__") {
                                 setSafetyKCustom(true);

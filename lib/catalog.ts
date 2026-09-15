@@ -1,4 +1,9 @@
-import type { PhaseCode, SeriesDef, SelectorSize } from "./types";
+import type {
+  Connection,
+  PhaseCode,
+  SeriesDef,
+  SelectorSize,
+} from "./types";
 
 /**
  * Catalogue axes grounded in:
@@ -148,20 +153,20 @@ export const INTERNAL_INSULATION: Record<
  * Training: CV2 before CM2 before SHZV when each is eligible.
  */
 /**
- * In-tank combined III is star-point only (CM / CM2 / CMD / SHZV / SHZVG
- * brochures). Delta / line-end uses 3× single-phase of the same family.
- * HWV III allows Y and D. Compound CV/CV2/SV III allows D.
+ * Does a brochure III type exist for this connection?
+ * CM2III-…D is not a type (III is star-point only) → false.
+ * CV2III-…D and HWVIII-…D exist → true.
+ * 3× I is a different type, decided separately when I ratings exist.
  */
-const COMBINED_III_STAR_ONLY = new Set([
-  "cm",
-  "cm2",
-  "cmd",
-  "shzv",
-  "shzvg",
-]);
-
-export function combinedIiiIsStarOnly(s: Pick<SeriesDef, "id">): boolean {
-  return COMBINED_III_STAR_ONLY.has(s.id);
+export function iiiTypeAllowsConnection(
+  s: Pick<SeriesDef, "connections" | "iiiConnections">,
+  phases: PhaseCode,
+  conn: Connection,
+): boolean {
+  if (phases !== "III") return true;
+  const allowed = s.iiiConnections ?? s.connections;
+  if (conn === "any") return true;
+  return allowed.includes(conn) || allowed.includes("any");
 }
 
 export const FAMILY_MIN_RANK: Record<string, number> = {
@@ -210,14 +215,15 @@ export const SERIES: SeriesDef[] = [
       1600: 4400,
       2400: 5600,
     },
-    connections: ["Y", "D"], // D via 3× I — III is star-point only
+    connections: ["Y", "D"],
+    iiiConnections: ["Y"],
     maxPositionsLinear: 18,
     maxPositionsWithChangeOver: 35,
     defaultMdu: "CMA7",
     notesEn:
-      "In-tank vacuum combined. III is star-point only; delta / line-end is 3× I. Use when compound / CM2 cannot cover. For Iᵤ≫1000 A III see SHZVG.",
+      "In-tank vacuum combined. Brochure III type is star-point only (no SHZVIII-…D). Use when compound / CM2 cannot cover. For Iᵤ≫1000 A III see SHZVG.",
     notesZh:
-      "箱内真空组合式。三相只用于星点；角接/线端用 3 台单相。当复合式/CM2 不够时用。三相电流显著大于 1000 A 见 SHZVG。",
+      "箱内真空组合式。样本三相型号只给星点（没有 SHZVIII-…D）。当复合式/CM2 不够时用。三相电流显著大于 1000 A 见 SHZVG。",
     rank: 40,
   },
   {
@@ -245,13 +251,14 @@ export const SERIES: SeriesDef[] = [
       3000: 5600,
     },
     connections: ["Y", "D"],
+    iiiConnections: ["Y"],
     maxPositionsLinear: 18,
     maxPositionsWithChangeOver: 35,
     defaultMdu: "CMA7",
     notesEn:
-      "High-current vacuum combined (2025 shipments). III is star-point only; delta is 3× I. Prefer when SHZV III max 1000 A is short.",
+      "High-current vacuum combined (2025 shipments). Brochure III type is star-point only (no SHZVGIII-…D). Prefer when SHZV III max 1000 A is short.",
     notesZh:
-      "大电流真空组合式（2025 出货有量）。三相只用于星点；角接用 3 台单相。仅当 SHZV 三相 1000 A 不够时选用。",
+      "大电流真空组合式（2025 出货有量）。样本三相型号只给星点（没有 SHZVGIII-…D）。仅当 SHZV 三相 1000 A 不够时选用。",
     rank: 45,
   },
   {
@@ -308,14 +315,15 @@ export const SERIES: SeriesDef[] = [
       1200: 3100,
       1500: 3500,
     },
-    connections: ["Y", "D"], // D via 3× I — III is star-point only
+    connections: ["Y", "D"],
+    iiiConnections: ["Y"],
     maxPositionsLinear: 18,
     maxPositionsWithChangeOver: 35,
     defaultMdu: "CMA7",
     notesEn:
-      "Vacuum combined. III is star-point only; delta / line-end is 3× I. Prefer over SHZV when III ≤600 A (or single-phase ratings) and Um/positions fit.",
+      "Vacuum combined. Brochure III type is star-point only (no CM2III-…D). Prefer over SHZV when III ≤600 A (or single-phase ratings) and Um/positions fit.",
     notesZh:
-      "真空组合式。三相只用于星点；角接/线端用 3 台单相。三相 ≤600 A 且 Um/档位满足时优先于 SHZV。",
+      "真空组合式。样本三相型号只给星点（没有 CM2III-…D）。三相 ≤600 A 且 Um/档位满足时优先于 SHZV。",
     rank: 25,
   },
   {
@@ -342,14 +350,15 @@ export const SERIES: SeriesDef[] = [
       1200: 3100,
       1500: 3500,
     },
-    connections: ["Y", "D"], // D via 3× I — III is star-point only
+    connections: ["Y", "D"],
+    iiiConnections: ["Y"],
     maxPositionsLinear: 18,
     maxPositionsWithChangeOver: 35,
     defaultMdu: "CMA7",
     notesEn:
-      "Oil combined. III is star-point only; delta / line-end is 3× I. Prefer vacuum when switching is frequent.",
+      "Oil combined. Brochure III type is star-point only (no CMIII-…D). Prefer vacuum when switching is frequent.",
     notesZh:
-      "油切换组合式。三相只用于星点；角接/线端用 3 台单相。切换频繁时优先真空。",
+      "油切换组合式。样本三相型号只给星点（没有 CMIII-…D）。切换频繁时优先真空。",
     rank: 50,
   },
   {
@@ -378,14 +387,15 @@ export const SERIES: SeriesDef[] = [
       1600: 4400,
       2400: 5600,
     },
-    connections: ["Y", "D"], // D via 3× I — III is star-point only
+    connections: ["Y", "D"],
+    iiiConnections: ["Y"],
     maxPositionsLinear: 14,
     maxPositionsWithChangeOver: 27,
     defaultMdu: "CMA7",
     notesEn:
-      "Higher through-current oil combined type. III is star-point only; delta / line-end is 3× I.",
+      "Higher through-current oil combined type. Brochure III type is star-point only (no CMDIII-…D).",
     notesZh:
-      "更大额定电流的油浸组合式。三相只用于星点；角接/线端用 3 台单相。",
+      "更大额定电流的油浸组合式。样本三相型号只给星点（没有 CMDIII-…D）。",
     rank: 55,
   },
   {

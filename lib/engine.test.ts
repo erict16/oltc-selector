@@ -23,6 +23,7 @@ import {
   coveringUms,
   pickSelectorSize,
   defaultSelectorSizeForUm,
+  iiiTypeAllowsConnection,
 } from "./catalog";
 import { t } from "./i18n";
 import {
@@ -567,7 +568,7 @@ describe("CV2 step voltage vs contacts (pitch)", () => {
   });
 });
 
-describe("combined in-tank III is star-point only", () => {
+describe("III type exists only when the brochure has it", () => {
   const combinedIiiD = /(?:CM2|CM|CMD|SHZV|SHZVG)III-\d+D\//;
 
   it("346 A / 145 Δ / Ust 1650 → 3xCM2I-500/170D, never CM2III-…D", () => {
@@ -589,9 +590,9 @@ describe("combined in-tank III is star-point only", () => {
     expect(out.results[0].model).toBe("3xCM2I-500/170D-12233W");
     expect(out.results[0].unitCount).toBe(3);
     expect(out.results.every((r) => !combinedIiiD.test(r.model))).toBe(true);
-    expect(out.results[0].reasonsZh.some((s) => s.includes("星点"))).toBe(
-      true,
-    );
+    expect(
+      out.results[0].reasonsZh.some((s) => s.includes("没有这个连接的三相型号")),
+    ).toBe(true);
   });
 
   it("star-point still emits CM2III-…Y", () => {
@@ -633,6 +634,62 @@ describe("combined in-tank III is star-point only", () => {
     expect(out.results[0].unitCount).toBe(3);
     expect(out.results[0].model).toMatch(/^3xCMI-500\/72\.5B-12233W$/);
     expect(out.results.every((r) => !combinedIiiD.test(r.model))).toBe(true);
+  });
+
+  it("brochure: CM2 III has no D type; CV2 and HWV III D exist", () => {
+    const cm2 = SERIES.find((s) => s.id === "cm2")!;
+    const cv2 = SERIES.find((s) => s.id === "cv2")!;
+    const hwv = SERIES.find((s) => s.id === "hwv")!;
+    expect(iiiTypeAllowsConnection(cm2, "III", "D")).toBe(false);
+    expect(iiiTypeAllowsConnection(cm2, "III", "Y")).toBe(true);
+    expect(iiiTypeAllowsConnection(cv2, "III", "D")).toBe(true);
+    expect(iiiTypeAllowsConnection(hwv, "III", "D")).toBe(true);
+  });
+
+  it("preferStructure cage on OCTC stays WSL, not WSG", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      preferStructure: "cage",
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 600,
+      umKv: 72.5,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 6,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results.every((r) => r.seriesCode !== "WSG")).toBe(true);
+    expect(out.results[0].model).toMatch(/^WSL/);
+  });
+
+  it("preferStructure combined skips CV2 even when compound would cover", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      preferStructure: "combined",
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 350,
+      umKv: 145,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      positions: 23,
+      midPositions: 3,
+      pitch: 12,
+      acrossTapBilKv: 200,
+      acrossTapPfKv: 50,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).not.toBe("CV2");
+    expect(out.results.every((r) => r.seriesCode !== "CV2")).toBe(true);
+    expect(out.results[0].model).toMatch(/^3xCM2I-/);
   });
 
   it("on-tank HWV III D stays legal", () => {

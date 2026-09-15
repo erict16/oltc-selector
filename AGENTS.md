@@ -23,6 +23,8 @@ Result card **开关结构** (not 工作位置): CV/CV2/SV/CVT/CZ → 复合式;
 
 Brochure Fig. 3-3: `P = 2 × (±N) + mid`. See `lib/tapCode.ts`. Never invent non-catalogue codes; mid and ±N are paired connection diagrams.
 
-## Combined III connection
+## Type existence (not “always 3×”)
 
-In-tank combined (CM / CM2 / CMD / SHZV / SHZVG): three-phase is **star-point Y only**. Delta / line-end → `3xCM2I-…` / `3xSHZVI-…` (no Y/D after current). Do not emit `CM2III-500D`. Compound CV/CV2/SV and on-tank HWV III still allow D.
+Emit only a commercial type that exists in the brochure. `CM2III-500D` is not a type (CM2 III is star-point Y). Covering delta with `3xCM2I-…` is because that single-phase type exists, not because every D job is 3×. `CV2III-…D` and `HWVIII-…D` exist — emit them. 3× I strings omit Y/D after current.
+
+Form **开关结构**: OLTC 自动 / 复合式 / 组合式; OCTC 自动 / 笼式 / 鼓式. **接线方式** (II/IV/V…) stays a separate OCTC field (winding scheme, not cage vs drum).

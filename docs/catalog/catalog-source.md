@@ -50,7 +50,7 @@ Minimum adequate — see `选型案例-答案.docx` in `docs/training/`:
 
 Compound fails when across-tap LI ≳ 200 kV (CV2 internal a). Then combined + grade letter.
 
-**Combined III is star-point only** (CM / CM2 / CMD / SHZV / SHZVG brochures). Delta / line-end of those families is **3× I** (`3xCM2I-500/170D-…` — D after Um is selector size). Do not emit `CM2III-500D` / `SHZVIII-1000D`. Compound CV/CV2/SV and on-tank HWV III still allow D.
+**Type existence:** emit only brochure types. CM / CM2 / CMD / SHZV / SHZVG III is star-point Y — there is no `CM2III-…D`. Covering that duty with `3xCM2I-…` is because the I type exists. Compound CV/CV2/SV and on-tank HWV III D are real types.
 
 ## Do not
 
