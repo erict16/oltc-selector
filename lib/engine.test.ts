@@ -120,14 +120,27 @@ describe("catalogue menu labels", () => {
   });
 
   it("Chinese field labels: switch current, equipment Um, step voltage", () => {
-    expect(t("zh", "throughCurrent")).toBe("开关最大通过电流 Iᵤ");
+    expect(t("zh", "throughCurrent")).toBe("最大通过电流");
+    expect(t("zh", "currentBtn")).toBe("电流");
     expect(t("zh", "um")).toBe("设备最高电压 Um");
     expect(t("zh", "umWinding")).toBe("调压侧额定电压");
     expect(t("zh", "ust")).toBe("级电压 Ust");
-    expect(t("en", "throughCurrent")).toBe("Max. through-current Iᵤ");
+    expect(t("en", "throughCurrent")).toBe("Max. through-current");
+    expect(t("en", "currentBtn")).toBe("Imax");
     expect(t("en", "um")).toBe("Equipment Um");
-    expect(t("en", "umWinding")).toBe("Tap-side voltage");
+    expect(t("en", "umWinding")).toBe("Tap voltage");
     expect(t("en", "ust")).toBe("Step voltage Ust");
+  });
+
+  it("OCTC wiring labels follow WSL brochure table 1", () => {
+    expect(t("zh", "octcII")).toBe("II · 正反调");
+    expect(t("zh", "octcIV")).toBe("IV · 线性调");
+    expect(t("zh", "octcV")).toBe("V · 单桥跨接");
+    expect(t("zh", "octcVI")).toBe("VI · Y-D转换");
+    expect(t("zh", "octcVII")).toBe("VII · 双桥跨接");
+    expect(t("zh", "octcVIII")).toBe("VIII · 串并联");
+    expect(t("en", "octcII")).toBe("II · reversing");
+    expect(t("en", "octcIV")).toBe("IV · linear");
   });
 });
 
