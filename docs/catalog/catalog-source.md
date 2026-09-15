@@ -46,9 +46,11 @@ Minimum adequate — see `选型案例-答案.docx` in `docs/training/`:
 | 10 MVA 33 kV Δ CF | `CV2III-350D/40.5-10193G` |
 | 103 MVA 138 kV Y W, across BIL 285 | `CM2III-600Y/72.5C-10193W` |
 | 120 MVA 132 kV Δ, Um 145 | `CV2III-600D/145-12233W` |
-| 220 MVA Δ, I≈626 > CM2 III | `3xCM2I-800/72.5B-…` |
+| 220 MVA Δ, I≈626 > CM2 III | `3xCM2I-800/72.5C-10191W` |
 
 Compound fails when across-tap LI ≳ 200 kV (CV2 internal a). Then combined + grade letter.
+
+**Combined III is star-point only** (CM / CM2 / CMD / SHZV / SHZVG brochures). Delta / line-end of those families is **3× I** (`3xCM2I-500/170D-…` — D after Um is selector size). Do not emit `CM2III-500D` / `SHZVIII-1000D`. Compound CV/CV2/SV and on-tank HWV III still allow D.
 
 ## Do not
 
@@ -56,3 +58,4 @@ Compound fails when across-tap LI ≳ 200 kV (CV2 internal a). Then combined + g
 - Put selector grade on CV/CV2.
 - Use CM III 800/1000 — three-phase CM/CM2 stop at 600 A; go SHZV/CMD or single-phase for higher I.
 - Default-rank SHZV when CV2/CM2 already meet the duty.
+- Invent combined III-D (`CM2III-…D/`, `SHZVIII-…D/`). Price-list Y/D alias is not a type.

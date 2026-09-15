@@ -3,6 +3,7 @@ import {
   FAMILY_MIN_RANK,
   INTERNAL_INSULATION,
   SERIES,
+  combinedIiiIsStarOnly,
   coveringUms,
   nearestCurrent,
   nearestUm,
@@ -220,9 +221,11 @@ function seriesMatchesMedium(s: SeriesDef, input: SelectInput): boolean {
  *
  * Commercial min-adequate (Base Price List 2025 + sales practice):
  *   1. Family: CV2 → CM2 → SHZV → SHZVG (never SHZV-400 over CV2/CM2 on exact I).
- *   2. **One III unit always beats 3× singles** when both cover duty.
- *      Price proof: SHZVIII-1000Y/72.5B-10…W ≈ ¥219k vs 3×CM2I-800 ≈ ¥522k.
- *      → 3×CM2I / 3×SHZVI only when no single III family covers Iᵤ/Um/Ust.
+ *   2. **One brochure-legal III unit beats 3× singles** when both cover duty.
+ *      Combined in-tank (CM/CM2/CMD/SHZV/SHZVG): III is star-point only.
+ *      Delta / line-end → 3× I of that family (not CM2III-…D / SHZVIII-…D).
+ *      Compound CV/CV2/SV and on-tank HWV III still allow D.
+ *      Price proof on Y: SHZVIII-1000Y/72.5B-10…W ≈ ¥219k vs 3×CM2I-800 ≈ ¥522k.
  *   3. Mild tighter catalogue current / Um.
  */
 function adequacyScore(
@@ -285,6 +288,8 @@ type Attempt = {
   current: number;
   um: number;
   unitCount: number;
+  /** 3× because combined III cannot sit on delta / line-end */
+  deltaForced?: boolean;
 };
 
 /** Catalogue I covers duty, with 1% commercial overcurrent (2026 OS: 603.75 on CV2-600). */
@@ -323,9 +328,18 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
 
   const list = s.currents[input.phases];
   const maxPhase = list?.length ? Math.max(...list) : null;
+  const deltaForcesMulti =
+    input.phases === "III" &&
+    input.connection !== "Y" &&
+    combinedIiiIsStarOnly(s);
 
-  // Primary phase as requested when catalogue can cover current at all
-  if (maxPhase != null && ratingCoversDuty(input.throughCurrentA, maxPhase)) {
+  // Primary phase as requested when catalogue can cover current at all.
+  // Combined in-tank III is star-point only — do not emit CM2III-…D etc.
+  if (
+    !deltaForcesMulti &&
+    maxPhase != null &&
+    ratingCoversDuty(input.throughCurrentA, maxPhase)
+  ) {
     const cur = nearestCurrent(input.throughCurrentA, list);
     if (cur != null) {
       for (const um of ums) {
@@ -342,7 +356,7 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
 
   // OCTC: never 3× singles.
   // 3× I-units: always emit a covering set so a customer-locked 3× stays
-  // eligible. Ranking still puts any single III first.
+  // eligible. Ranking still puts any legal single III first.
   // Extra Um is only for single-unit alts (the 126 twin), not 3×.
   if (isOctcSeries(s)) return out;
   if (input.phases === "III" && s.currents.I?.length) {
@@ -354,6 +368,7 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
         current: curI,
         um: um0,
         unitCount: 3,
+        deltaForced: deltaForcesMulti,
       });
     }
   }
@@ -655,12 +670,21 @@ export function selectOltc(input: SelectInput): SelectOutput {
         }
 
         if (att.unitCount > 1) {
-          reasonsEn.push(
-            `${att.unitCount}× single-phase — no single III unit covers this Iᵤ (prefer one SHZV/SHZVG when it fits; 3× costs more).`,
-          );
-          reasonsZh.push(
-            `${att.unitCount} 台单相 — 无三相整机可覆盖此电流（有 SHZV/SHZVG 整机时优先；3× 更贵）。`,
-          );
+          if (att.deltaForced) {
+            reasonsEn.push(
+              `${att.unitCount}× single-phase — combined III is star-point only; delta / line-end uses single-phase units.`,
+            );
+            reasonsZh.push(
+              `${att.unitCount} 台单相 — 组合式三相只用于星点；角接/线端用单相。`,
+            );
+          } else {
+            reasonsEn.push(
+              `${att.unitCount}× single-phase — no single III unit covers this Iᵤ (prefer one SHZV/SHZVG when it fits; 3× costs more).`,
+            );
+            reasonsZh.push(
+              `${att.unitCount} 台单相 — 无三相整机可覆盖此电流（有 SHZV/SHZVG 整机时优先；3× 更贵）。`,
+            );
+          }
         }
 
         const earth = EARTH_INSULATION[att.um];
@@ -764,8 +788,8 @@ export function selectOltc(input: SelectInput): SelectOutput {
   }
 
   final.sort((a, b) => {
-    // Hard rule: any single-unit option outranks any multi (price list).
-    // 3× only when every single III family fails the duty.
+    // Hard rule: any brochure-legal single-unit outranks any multi.
+    // Combined in-tank III-D is not emitted, so D jobs correctly fall to 3×.
     if (a.unitCount !== b.unitCount) return a.unitCount - b.unitCount;
     if (b.adequacyScore !== a.adequacyScore)
       return b.adequacyScore - a.adequacyScore;
@@ -1019,12 +1043,11 @@ export const FIXTURES = {
     expectModel: "CV2III-600D/145-12233W",
   },
   /**
-   * Training sheet once said 3×CM2I-800 for 626 A Δ.
-   * Base Price List 2025: 3×CM2I-800/72.5B-10…W ≈ ¥522k vs
-   * SHZVIII-1000D/72.5… ≈ ¥219k → one SHZV-1000 is correct primary.
-   * 3×CM2 only as alt when single III cannot cover.
+   * Training sheet: 220 MVA Δ, I≈626 → 3×CM2I-800.
+   * Combined III is star-point only — do not emit SHZVIII-1000D even
+   * though a 1000 A III would be cheaper on the Y price row.
    */
-  case7Shzv1000: {
+  case7Cm2I800: {
     input: {
       mounting: "in_tank" as const,
       medium: "oil_vacuum" as const,
@@ -1042,7 +1065,7 @@ export const FIXTURES = {
       acrossTapPfKv: 80,
       mdu: "none" as const,
     },
-    expectContains: "SHZVIII-1000D/72.5C",
+    expectModel: "3xCM2I-800/72.5C-10191W",
   },
   /**
    * 2025 shipment volume anchors (sales reference year=2025).
