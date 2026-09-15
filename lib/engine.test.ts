@@ -132,6 +132,18 @@ describe("catalogue menu labels", () => {
     expect(t("en", "ust")).toBe("Step voltage Ust");
   });
 
+  it("catalogue construction: OLTC combined/compound, OCTC cage/drum", () => {
+    expect(SERIES.find((s) => s.id === "cv2")?.structure).toBe("compound");
+    expect(SERIES.find((s) => s.id === "cm2")?.structure).toBe("combined");
+    expect(SERIES.find((s) => s.id === "wsl")?.structure).toBe("cage");
+    expect(SERIES.find((s) => s.id === "wsg")?.structure).toBe("drum");
+    expect(t("zh", "specStructure")).toBe("开关结构");
+    expect(t("zh", "specCompound")).toBe("复合式");
+    expect(t("zh", "specCombined")).toBe("组合式");
+    expect(t("zh", "specCage")).toBe("笼式");
+    expect(t("zh", "specDrum")).toBe("鼓式");
+  });
+
   it("OCTC wiring labels follow WSL brochure table 1", () => {
     expect(t("zh", "octcII")).toBe("II · 正反调");
     expect(t("zh", "octcIV")).toBe("IV · 线性调");

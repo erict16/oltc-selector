@@ -12,8 +12,10 @@ export type Mounting =
 export type SwitchingMedium = "oil" | "oil_vacuum" | "dry";
 
 export type StructureKind =
-  | "combined" // diverter + tap selector
-  | "compound"; // selector switch style (CV family)
+  | "combined" // diverter + tap selector (CM / SHZV)
+  | "compound" // selector switch (CV family)
+  | "cage" // WSL / WDL OCTC
+  | "drum"; // WSG / WG OCTC
 
 export type PhaseCode = "I" | "II" | "III";
 export type Connection = "Y" | "D" | "any";

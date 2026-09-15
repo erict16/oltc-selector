@@ -66,6 +66,7 @@ import {
   type ModelResult,
   type SelectInput,
   type SelectOutput,
+  type StructureKind,
 } from "@/lib/types";
 
 /** Apply brochure (±N, mid) geometry onto a SelectInput patch. */
@@ -2045,6 +2046,21 @@ function mountLabelKey(m: SelectInput["mounting"]): string {
   }
 }
 
+function structureLabelKey(structure: StructureKind | undefined): string {
+  switch (structure) {
+    case "combined":
+      return "specCombined";
+    case "compound":
+      return "specCompound";
+    case "cage":
+      return "specCage";
+    case "drum":
+      return "specDrum";
+    default:
+      return "specCompound";
+  }
+}
+
 function ModelSpec({
   lang,
   r,
@@ -2075,7 +2091,10 @@ function ModelSpec({
   if (r.stepCapacityKva != null) {
     items.push({ key: "specPsin", value: `${r.stepCapacityKva}${nb}kVA` });
   }
-  items.push({ key: "specPos", value: String(r.positions) });
+  items.push({
+    key: "specStructure",
+    value: t(lang, structureLabelKey(series?.structure)),
+  });
   if (r.earthPfKv != null && r.earthBilKv != null) {
     items.push({
       key: "specEarth",

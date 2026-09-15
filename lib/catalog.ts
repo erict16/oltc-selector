@@ -538,7 +538,7 @@ export const SERIES: SeriesDef[] = [
     nameZh: "WSL 箱内无载分接开关（OCTC）",
     mounting: ["in_tank"],
     medium: "oil",
-    structure: "compound",
+    structure: "cage",
     vacuum: false,
     dutyKind: "octc",
     // Regular WSL(WDL) 2025 blocks only — no one-off 350/400/3500 rows.
@@ -567,7 +567,7 @@ export const SERIES: SeriesDef[] = [
     nameZh: "WSG 无载分接开关（OCTC）",
     mounting: ["in_tank"],
     medium: "oil",
-    structure: "compound",
+    structure: "drum",
     vacuum: false,
     dutyKind: "octc",
     currents: {
@@ -583,9 +583,9 @@ export const SERIES: SeriesDef[] = [
     maxPositionsWithChangeOver: 12,
     defaultMdu: "CMA7",
     notesEn:
-      "WG sheet. dutyKind=octc only. Wiring roman follows octcSeries (form default IV). Auto D → WSGII (Anthony WSG II-800D/40.5-4x5A).",
+      "Drum OCTC (WG sheet). dutyKind=octc only. Wiring roman follows octcSeries (form default IV). Auto D → WSGII (Anthony WSG II-800D/40.5-4x5A).",
     notesZh:
-      "WG 价目表。仅 dutyKind=octc。接线方式跟 octcSeries（页面默认 IV）。未指定时 D → WSGII。",
+      "鼓式无载（WG 价目表）。仅 dutyKind=octc。接线方式跟 octcSeries（页面默认 IV）。未指定时 D → WSGII。",
     rank: 6,
   },
 ];
