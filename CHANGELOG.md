@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Engine drops commercial strings the brochure / 2025 list does not have (combined III-D, CV2-500, compound grade letters, WSL rows missing from the list). CV2/HWV/CV/SV III-D still emit.
+
 - More options: 选择器绝缘等级 is now 开关结构 (auto / compound / combined). OCTC keeps 接线方式 only.
 - Safety factor on MVA duty defaults to ×1.0.
 - Field captions (Imax / Um / Ust) are one step larger.

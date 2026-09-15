@@ -236,7 +236,7 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
     const reasons = ORDER_REPLAY_SKIPPED.map((s) => s.reason);
     for (const r of reasons) {
       const ok =
-        /MDU-only|CV2-500|below transformer duty|two |price list of several|2-unit set|catalogue max|WDLVIII/.test(
+        /MDU-only|CV2-500|below transformer duty|two |price list of several|2-unit set|catalogue max|WDLVIII|2025 list/.test(
           r,
         );
       expect(ok, r).toBe(true);

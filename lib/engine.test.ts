@@ -1059,7 +1059,7 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
     );
   });
 
-  it("OS 12x11 at 12 kV D uses that contact and size D", () => {
+  it("OS 12x11 at 12 kV D uses the 2025-list size B, not invented D", () => {
     const out = selectOltc({
       mounting: "in_tank",
       medium: "oil",
@@ -1076,10 +1076,10 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
       mdu: "none",
     });
     expect(out.ok).toBe(true);
-    expect(out.results[0].model).toBe("WSLII-600D/12-12x11D");
+    expect(out.results[0].model).toBe("WSLII-600D/12-12x11B");
   });
 
-  it("5x2 contact is WSLVIII", () => {
+  it("5x2 contact is WSLVIII (list omits Y/D)", () => {
     const out = selectOltc({
       mounting: "in_tank",
       medium: "oil",
@@ -1096,7 +1096,7 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
       mdu: "none",
     });
     expect(out.ok).toBe(true);
-    expect(out.results[0].model).toBe("WSLVIII-800D/72.5-5x2A");
+    expect(out.results[0].model).toBe("WSLVIII-800/72.5-5x2A");
   });
 
   it("octcRoman: explicit series is independent of Y/D and contact", () => {

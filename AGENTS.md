@@ -25,6 +25,6 @@ Brochure Fig. 3-3: `P = 2 × (±N) + mid`. See `lib/tapCode.ts`. Never invent no
 
 ## Type existence (not “always 3×”)
 
-Emit only a commercial type that exists in the brochure. `CM2III-500D` is not a type (CM2 III is star-point Y). Covering delta with `3xCM2I-…` is because that single-phase type exists, not because every D job is 3×. `CV2III-…D` and `HWVIII-…D` exist — emit them. 3× I strings omit Y/D after current.
+Emit only a commercial type that exists in the brochure / 2025 list. `CM2III-500D` is not a type (CM2 III is star-point Y). Covering delta with `3xCM2I-…` is because that single-phase type exists, not because every D job is 3×. `CV2III-…D` and `HWVIII-…D` exist — emit them. 3× I and CM2/CM/CMD II omit Y/D after current. CV2 has no II. WSL/WDL rows must exist on the 2025 list (gate in `lib/typeExists.ts`). SHZVG has no brochure extract; III-Y-only is assumed from catalogue notes.
 
 Form **开关结构**: OLTC 自动 / 复合式 / 组合式; OCTC 自动 / 笼式 / 鼓式. **接线方式** (II/IV/V…) stays a separate OCTC field (winding scheme, not cage vs drum).
