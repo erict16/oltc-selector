@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Result card shows construction (combined / compound / cage / drum) instead of repeating positions already in the tap code.
 - Off-circuit wiring options show the brochure name (II reversing, IV linear, V single bridge, VI Y-D, VII double bridge, VIII series-parallel).
 - Capacity menu is 14 steps (6.3–500 MVA). Custom still covers the rest.
 - Safety factor only appears when entering transformer MVA. Typing Imax is used as-is.
