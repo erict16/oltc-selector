@@ -9,6 +9,7 @@ import { t } from "@/lib/i18n";
 const STORAGE = "oltc-agent-dock-seen";
 const LEGACY_STORAGE = "oltc-agent-dock";
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const OPEN_DELAY_MS = 500;
 
 function brand(file: string) {
   return `${BASE}/brand/${file}`;
@@ -64,17 +65,21 @@ export function AgentDock() {
   const [hydrated, setHydrated] = useState(false);
   const [open, setOpen] = useState(false);
 
-  // Auto-open once, on the first visit only. Anyone who has seen it
-  // (or dismissed an earlier version) gets just the chip.
+  // Auto-open once, on the first visit only, after a short beat. Anyone
+  // who has seen it (or dismissed an earlier version) gets just the chip.
   useEffect(() => {
     setHydrated(true);
     if (seenBefore()) return;
     markSeen();
+    let raf1 = 0;
     let raf2 = 0;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => setOpen(true));
-    });
+    const timer = setTimeout(() => {
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => setOpen(true));
+      });
+    }, OPEN_DELAY_MS);
     return () => {
+      clearTimeout(timer);
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
     };
