@@ -11,6 +11,7 @@
     "lint": "next lint",
     "oltc": "npx vite-node scripts/oltc.ts",
     "pack:cli": "node scripts/pack-cli.mjs",
+    "pack:skill": "node scripts/pack-skill.mjs",
     "gen:list-index": "python scripts/gen-list-index.py",
     "os:excel": "python scripts/os-to-excel.py"
   },
