@@ -1,5 +1,5 @@
-import { lookupListPrice } from "./basePrices";
 import { iiiTypeAllowsConnection, SERIES } from "./catalog";
+import { listRowExists, resolveOctcListKey } from "./listIndex";
 import { parseTypeString } from "./parseType";
 import type { PhaseCode, SeriesDef } from "./types";
 
@@ -37,7 +37,7 @@ export function commercialTypeExists(
         i && s.umKv.some((u) => Math.abs(u - parsed.umKv) < 0.05),
       );
     }
-    return lookupListPrice(model).found === true;
+    return listRowExists(model);
   }
 
   const phase = parsed.phases as PhaseCode;
@@ -74,37 +74,12 @@ export function phaseConnectionLegal(
   return true;
 }
 
-const OCTC_SIZE_TRY = ["A", "B", "D", "E"] as const;
-
 /**
  * First 2025-list spelling of an OCTC model, or null.
  * Tries locked size → auto sizes, then the Y/D-stripped twin (WSLVIII omits Y/D).
  */
 export function resolveOctcListModel(model: string): string | null {
-  const parsed = parseTypeString(model);
-  if (!parsed) return null;
-  if (parsed.family === "WSG") return model;
-  const candidates = new Set<string>();
-  const add = (m: string) => {
-    if (m) candidates.add(m);
-  };
-  add(model);
-  const stripped = model.replace(/(\d+)[YD]\//, "$1/");
-  add(stripped);
-  const sizeNow = parsed.selectorSize;
-  for (const sz of OCTC_SIZE_TRY) {
-    if (!sizeNow) {
-      add(`${model}${sz}`);
-      add(`${stripped}${sz}`);
-    } else {
-      add(model.replace(new RegExp(`${sizeNow}$`), sz));
-      add(stripped.replace(new RegExp(`${sizeNow}$`), sz));
-    }
-  }
-  for (const c of candidates) {
-    if (lookupListPrice(c).found) return c;
-  }
-  return null;
+  return resolveOctcListKey(model);
 }
 
 export function connectionLetterOnPhase(
