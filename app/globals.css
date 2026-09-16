@@ -610,6 +610,18 @@ select:open {
   line-height: 1.6;
   color: var(--color-muted);
 }
+.guide-ex {
+  margin: 0.55rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+.guide-more .guide-quote + .guide-ex {
+  margin-top: 1.4rem;
+}
+.guide-ex + .guide-quote {
+  margin-top: 0.35rem;
+}
 .guide-more-body {
   margin: 0.55rem 0 0;
   font-size: 0.95rem;

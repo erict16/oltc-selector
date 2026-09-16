@@ -11,6 +11,8 @@ export type AgentGuideCopy = {
   install: string;
   run: string;
   say: string;
+  ex1: string;
+  ex2: string;
   sayBody: string;
   sayBody2: string;
   sayResult2: string;
@@ -31,6 +33,8 @@ const zh: AgentGuideCopy = {
   install: "安装",
   run: "有载例子",
   say: "然后就像聊天一样，把参数发给它",
+  ex1: "示例 1",
+  ex2: "示例 2",
   sayBody:
     "帮我选个有载开关：25 MVA，110±8×1.25%/10.5 kV，Dyn11，高压侧中性点调压，要真空。",
   sayBody2:
@@ -54,6 +58,8 @@ const en: AgentGuideCopy = {
   install: "Install",
   run: "On-load example",
   say: "Then pick a type by chatting",
+  ex1: "Example 1",
+  ex2: "Example 2",
   sayBody:
     "Pick an on-load tap-changer for me: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, taps at the HV neutral, vacuum.",
   sayBody2:
@@ -77,6 +83,8 @@ const vi: AgentGuideCopy = {
   install: "Cài đặt",
   run: "Ví dụ có tải",
   say: "Rồi chọn kiểu như chat bình thường",
+  ex1: "Ví dụ 1",
+  ex2: "Ví dụ 2",
   sayBody:
     "Chọn giúp tôi bộ chuyển nấc có tải: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, điều áp ở trung tính cao áp, chân không.",
   sayBody2:
@@ -100,6 +108,8 @@ const es: AgentGuideCopy = {
   install: "Instalar",
   run: "Ejemplo en carga",
   say: "Luego elija charlando",
+  ex1: "Ejemplo 1",
+  ex2: "Ejemplo 2",
   sayBody:
     "Elíjame un cambiador en carga: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, regulación en el neutro de AT, vacío.",
   sayBody2:
@@ -123,6 +133,8 @@ const tr: AgentGuideCopy = {
   install: "Kurulum",
   run: "Yük altında örnek",
   say: "Sonra sohbet eder gibi seçin",
+  ex1: "Örnek 1",
+  ex2: "Örnek 2",
   sayBody:
     "Bana yük altında kademe değiştirici seç: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, YG tarafı yıldız noktasından ayar, vakum.",
   sayBody2:
@@ -146,6 +158,8 @@ const ru: AgentGuideCopy = {
   install: "Установка",
   run: "Пример под нагрузкой",
   say: "Дальше просто пишите, как в чате",
+  ex1: "Пример 1",
+  ex2: "Пример 2",
   sayBody:
     "Подбери РПН: 25 МВА, 110±8×1.25%/10.5 кВ, Dyn11, регулирование в нейтрали ВН, вакуум.",
   sayBody2:

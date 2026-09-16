@@ -65,7 +65,9 @@ export function AgentsGuide() {
 
       <section className="guide-more">
         <h2 className="guide-k">{c.say}</h2>
+        <p className="guide-ex">{c.ex1}</p>
         <blockquote className="guide-quote">{c.sayBody}</blockquote>
+        <p className="guide-ex">{c.ex2}</p>
         <blockquote className="guide-quote">{c.sayBody2}</blockquote>
         <p className="guide-result">{c.sayResult2}</p>
         <h2 className="guide-k">{c.cli}</h2>
