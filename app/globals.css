@@ -490,9 +490,6 @@ select:open {
   letter-spacing: 0;
 }
 .guide[lang="zh"] .guide-lead,
-.guide[lang="zh"] .guide-quote {
-  line-height: 1.8;
-}
 
 .guide-how {
   margin: 1.1rem 0 0;
@@ -601,41 +598,70 @@ select:open {
   font-weight: 500;
   color: var(--color-muted);
 }
-.guide-more .guide-result + .guide-k {
+.guide-more .guide-chat + .guide-k {
   margin-top: 2rem;
 }
-.guide-result {
-  margin: 0.45rem 0 0;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: var(--color-muted);
+.guide-chat {
+  margin-top: 0.9rem;
+  padding: 0.85rem 1rem 0.95rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 14px;
+  background: #fff;
 }
 .guide-ex {
-  margin: 0.55rem 0 0;
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-caption);
+}
+.guide-q {
+  margin: 0.4rem 0 0;
+  font-size: 1.02rem;
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--color-ink);
+}
+.guide[lang="zh"] .guide-q {
+  line-height: 1.8;
+}
+.guide-a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--color-rule-2);
+}
+.guide-a-label {
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--color-muted);
 }
-.guide-more .guide-quote + .guide-ex {
-  margin-top: 1.4rem;
+.guide-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid color-mix(in oklch, var(--color-accent) 30%, #fff);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--color-accent) 7%, #fff);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
 }
-.guide-ex + .guide-quote {
-  margin-top: 0.35rem;
+.guide-tag {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--color-muted);
 }
 .guide-more-body {
   margin: 0.55rem 0 0;
   font-size: 0.95rem;
   line-height: 1.7;
   color: var(--color-ink-2);
-}
-.guide-quote {
-  margin: 0.7rem 0 0;
-  padding: 0;
-  border: 0;
-  font-size: 1.05rem;
-  font-weight: 500;
-  line-height: 1.7;
-  color: var(--color-ink);
 }
 
 .guide-dl {

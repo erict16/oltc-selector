@@ -12,6 +12,9 @@ import { agentGuide } from "@/lib/i18nAgents";
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const INSTALL = "npm i -g oltc-selector";
 const RUN = "oltc --iu 350 --um 40.5 --conn D --reg W --pm 8";
+const TYPE_EX1 = "CV2III-350Y/72.5-10193W";
+const TYPE_EX2_OLTC = "CV2III-350Y/72.5-10193W";
+const TYPE_EX2_OCTC = "WSLIV-600Y/72.5-6x5A";
 
 export function AgentsGuide() {
   const lang = useAppLang();
@@ -65,11 +68,29 @@ export function AgentsGuide() {
 
       <section className="guide-more">
         <h2 className="guide-k">{c.say}</h2>
-        <p className="guide-ex">{c.ex1}</p>
-        <blockquote className="guide-quote">{c.sayBody}</blockquote>
-        <p className="guide-ex">{c.ex2}</p>
-        <blockquote className="guide-quote">{c.sayBody2}</blockquote>
-        <p className="guide-result">{c.sayResult2}</p>
+        <div className="guide-chat">
+          <p className="guide-ex">{c.ex1}</p>
+          <p className="guide-q">{c.sayBody}</p>
+          <div className="guide-a">
+            <span className="guide-a-label">{c.result}</span>
+            <code className="guide-type">{TYPE_EX1}</code>
+          </div>
+        </div>
+        <div className="guide-chat">
+          <p className="guide-ex">{c.ex2}</p>
+          <p className="guide-q">{c.sayBody2}</p>
+          <div className="guide-a">
+            <span className="guide-a-label">{c.result}</span>
+            <code className="guide-type">
+              {TYPE_EX2_OLTC}
+              <span className="guide-tag">{c.tagOltc}</span>
+            </code>
+            <code className="guide-type">
+              {TYPE_EX2_OCTC}
+              <span className="guide-tag">{c.tagOctc}</span>
+            </code>
+          </div>
+        </div>
         <h2 className="guide-k">{c.cli}</h2>
         <p className="guide-more-body">{c.cliBody}</p>
         <div className="guide-term">
