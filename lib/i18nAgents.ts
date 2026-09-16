@@ -15,6 +15,8 @@ export type AgentGuideCopy = {
   ex2: string;
   sayBody: string;
   sayBody2: string;
+  how1: string;
+  how2: string;
   result: string;
   tagOltc: string;
   tagOctc: string;
@@ -41,6 +43,8 @@ const zh: AgentGuideCopy = {
     "帮我选个有载开关：25 MVA，110±8×1.25%/10.5 kV，Dyn11，高压侧中性点调压，要真空。",
   sayBody2:
     "帮我选个一拖二的：110 kV，有载 ±8×1.25%，无载 5 档，350 A，高压侧中性点调压。",
+  how1: "它自己跑 oltc 命令：先算出 Imax，再挑样本册里最低够用的系列。",
+  how2: "有载、无载各跑一次 oltc，两个型号分开选，都对照样本册检查。",
   result: "选出型号",
   tagOltc: "有载",
   tagOctc: "无载",
@@ -67,6 +71,8 @@ const en: AgentGuideCopy = {
     "Pick an on-load tap-changer for me: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, taps at the HV neutral, vacuum.",
   sayBody2:
     "Pick one for a transformer with both on-load and off-circuit taps: 110 kV, on-load ±8×1.25%, off-circuit 5 positions, 350 A, taps at the HV neutral.",
+  how1: "It runs the oltc command itself: computes Imax, then picks the lowest catalogue family that fits.",
+  how2: "It runs oltc twice, once on-load and once off-circuit, and checks both types against the brochure.",
   result: "Result",
   tagOltc: "on-load",
   tagOctc: "off-circuit",
@@ -93,6 +99,8 @@ const vi: AgentGuideCopy = {
     "Chọn giúp tôi bộ chuyển nấc có tải: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, điều áp ở trung tính cao áp, chân không.",
   sayBody2:
     "Chọn giúp tôi cho máy biến áp vừa có tải vừa không tải: 110 kV, có tải ±8×1.25%, không tải 5 nấc, 350 A, điều áp ở trung tính cao áp.",
+  how1: "Nó tự chạy lệnh oltc: tính Imax, rồi chọn dòng thấp nhất đủ dùng trong catalogue.",
+  how2: "Nó chạy oltc hai lần, một có tải một không tải, và đối catalogue cả hai kiểu.",
   result: "Kết quả",
   tagOltc: "có tải",
   tagOctc: "không tải",
@@ -119,6 +127,8 @@ const es: AgentGuideCopy = {
     "Elíjame un cambiador en carga: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, regulación en el neutro de AT, vacío.",
   sayBody2:
     "Elíjame uno para un transformador con regulación en carga y sin carga: 110 kV, en carga ±8×1.25%, sin carga 5 posiciones, 350 A, regulación en el neutro de AT.",
+  how1: "Ejecuta el comando oltc por sí solo: calcula Imax y elige la familia más baja del catálogo que cubre el régimen.",
+  how2: "Ejecuta oltc dos veces, una en carga y una sin carga, y comprueba ambos tipos en el folleto.",
   result: "Resultado",
   tagOltc: "en carga",
   tagOctc: "sin carga",
@@ -145,6 +155,8 @@ const tr: AgentGuideCopy = {
     "Bana yük altında kademe değiştirici seç: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, YG tarafı yıldız noktasından ayar, vakum.",
   sayBody2:
     "Hem yük altında hem yüksüz kademeli bir trafo için seç: 110 kV, yük altında ±8×1.25%, yüksüz 5 kademe, 350 A, YG yıldız noktasından ayar.",
+  how1: "oltc komutunu kendisi çalıştırır: Imax'i hesaplar, katalogda işi gören en düşük seriyi seçer.",
+  how2: "oltc'yi iki kez çalıştırır, biri yük altında biri yüksüz, iki tipi de katalogla kontrol eder.",
   result: "Sonuç",
   tagOltc: "yük altında",
   tagOctc: "yüksüz",
@@ -171,6 +183,8 @@ const ru: AgentGuideCopy = {
     "Подбери РПН: 25 МВА, 110±8×1.25%/10.5 кВ, Dyn11, регулирование в нейтрали ВН, вакуум.",
   sayBody2:
     "Подбери для трансформатора с РПН и ПБВ: 110 кВ, под нагрузкой ±8×1.25%, без нагрузки 5 ступеней, 350 А, регулирование в нейтрали ВН.",
+  how1: "Он сам запускает команду oltc: считает Imax и выбирает минимально достаточную серию из каталога.",
+  how2: "Он запускает oltc дважды: под нагрузкой и без нагрузки, и сверяет оба типа с каталогом.",
   result: "Результат",
   tagOltc: "РПН",
   tagOctc: "ПБВ",

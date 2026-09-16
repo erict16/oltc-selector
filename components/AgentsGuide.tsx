@@ -71,6 +71,7 @@ export function AgentsGuide() {
         <div className="guide-chat">
           <p className="guide-ex">{c.ex1}</p>
           <p className="guide-q">{c.sayBody}</p>
+          <p className="guide-steps">{c.how1}</p>
           <div className="guide-a">
             <span className="guide-a-label">{c.result}</span>
             <code className="guide-type">{TYPE_EX1}</code>
@@ -79,6 +80,7 @@ export function AgentsGuide() {
         <div className="guide-chat">
           <p className="guide-ex">{c.ex2}</p>
           <p className="guide-q">{c.sayBody2}</p>
+          <p className="guide-steps">{c.how2}</p>
           <div className="guide-a">
             <span className="guide-a-label">{c.result}</span>
             <code className="guide-type">
