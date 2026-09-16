@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Home dock: hand selection to an AI assistant (scheme A). Closed state is WorkBuddy + 选型助手. Tutorial at `/agents/` with a downloadable WorkBuddy skill zip (CLI + brochure check, no prices).
 - CLI package `oltc-selector` (`npm i -g oltc-selector`), command `oltc`. Same `selectOltc` engine, no prices. `--octc`, `--structure`, `--series`.
 - WSL/WDL existence uses priceless 2025-list keys, not list RMB.
 - 2025 and 2026 OS Excel replay: emitted models must exist; legal sold types stay in the ranked list.
