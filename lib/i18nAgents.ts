@@ -12,6 +12,7 @@ export type AgentGuideCopy = {
   run: string;
   say: string;
   sayBody: string;
+  sayBody2: string;
   copy: string;
   copied: string;
   limit: string;
@@ -31,6 +32,8 @@ const zh: AgentGuideCopy = {
   say: "然后就像聊天一样，把参数发给它",
   sayBody:
     "帮我选个有载开关：25 MVA，110±8×1.25%/10.5 kV，Dyn11，高压侧中性点调压，要真空。",
+  sayBody2:
+    "帮我选个一拖二的：110 kV，有载 ±8×1.25%，无载 5 档，350 A，高压侧中性点调压。",
   copy: "复制",
   copied: "已复制",
   limit: "出 OS 或采购前，需要工程确认。",
@@ -50,6 +53,8 @@ const en: AgentGuideCopy = {
   say: "Then pick a type by chatting",
   sayBody:
     "Pick an on-load tap-changer for me: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, taps at the HV neutral, vacuum.",
+  sayBody2:
+    "Pick one for a transformer with both on-load and off-circuit taps: 110 kV, on-load ±8×1.25%, off-circuit 5 positions, 350 A, taps at the HV neutral.",
   copy: "Copy",
   copied: "Copied",
   limit: "Get engineering sign-off before an OS or a purchase.",
@@ -69,6 +74,8 @@ const vi: AgentGuideCopy = {
   say: "Rồi chọn kiểu như chat bình thường",
   sayBody:
     "Chọn giúp tôi bộ chuyển nấc có tải: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, điều áp ở trung tính cao áp, chân không.",
+  sayBody2:
+    "Chọn giúp tôi cho máy biến áp vừa có tải vừa không tải: 110 kV, có tải ±8×1.25%, không tải 5 nấc, 350 A, điều áp ở trung tính cao áp.",
   copy: "Chép",
   copied: "Đã chép",
   limit: "Trước OS hoặc mua hàng cần kỹ sư xác nhận.",
@@ -88,6 +95,8 @@ const es: AgentGuideCopy = {
   say: "Luego elija charlando",
   sayBody:
     "Elíjame un cambiador en carga: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, regulación en el neutro de AT, vacío.",
+  sayBody2:
+    "Elíjame uno para un transformador con regulación en carga y sin carga: 110 kV, en carga ±8×1.25%, sin carga 5 posiciones, 350 A, regulación en el neutro de AT.",
   copy: "Copiar",
   copied: "Copiado",
   limit: "Antes de un OS o una compra, confírmelo con ingeniería.",
@@ -107,6 +116,8 @@ const tr: AgentGuideCopy = {
   say: "Sonra sohbet eder gibi seçin",
   sayBody:
     "Bana yük altında kademe değiştirici seç: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, YG tarafı yıldız noktasından ayar, vakum.",
+  sayBody2:
+    "Hem yük altında hem yüksüz kademeli bir trafo için seç: 110 kV, yük altında ±8×1.25%, yüksüz 5 kademe, 350 A, YG yıldız noktasından ayar.",
   copy: "Kopyala",
   copied: "Kopyalandı",
   limit: "OS veya satın almadan önce mühendis onayı alın.",
@@ -126,6 +137,8 @@ const ru: AgentGuideCopy = {
   say: "Дальше просто пишите, как в чате",
   sayBody:
     "Подбери РПН: 25 МВА, 110±8×1.25%/10.5 кВ, Dyn11, регулирование в нейтрали ВН, вакуум.",
+  sayBody2:
+    "Подбери для трансформатора с РПН и ПБВ: 110 кВ, под нагрузкой ±8×1.25%, без нагрузки 5 ступеней, 350 А, регулирование в нейтрали ВН.",
   copy: "Копировать",
   copied: "Скопировано",
   limit: "Перед OS или закупкой нужно подтверждение инженера.",
