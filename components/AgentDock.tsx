@@ -1,6 +1,6 @@
 "use client";
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAppLang } from "@/components/LangProvider";
@@ -114,10 +114,11 @@ export function AgentDock() {
               </p>
               <Link
                 href="/agents/"
-                className="mt-2 inline-block text-[13px] font-medium text-[var(--color-accent)] hover:underline"
+                className="agent-cta"
                 tabIndex={open ? 0 : -1}
               >
                 {t(lang, "agentCta")}
+                <ArrowRightIcon className="h-3.5 w-3.5" aria-hidden />
               </Link>
             </div>
           </div>

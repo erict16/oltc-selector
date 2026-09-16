@@ -52,6 +52,23 @@ oltc --iu 600 --um 72.5 --conn Y --reg W --pm 8 --structure combined
 
 `--json` still has no prices.
 
+## Reading transformer data
+
+A pasted nameplate or spec line is enough. Map it like this:
+
+- `25 MVA 110±8×1.25%/10.5 kV` → `--mva 25 --kv 110 --pm 8 --step-pct 1.25 --reg W`. The `±N×x%` part is the tap range: N is `--pm`, x is `--step-pct`. A `±` range around a mid position is reversing (`--reg W`); a plain 0..N range is linear (`--reg 0 --positions`).
+- `--kv` is the **tap-side** rated voltage, the winding the switch sits on. In `110±8×1.25%/10.5`, the taps are on 110; ignore 10.5 unless the taps are on the LV side.
+- kVA → MVA: divide by 1000 (31500 kVA = 31.5 MVA).
+- Rated current given instead of MVA: Imax ≈ Irated ÷ (1 − N×x%). Prefer `--mva --kv` and let the CLI do this math.
+- **Dyn11 / YNd1 is the transformer vector group, not `--conn`.** `--conn Y` means the switch sits at the star point; `--conn D` means line-end delta duty. If the spec only shows the vector group and not where the taps sit, ask one short question instead of guessing.
+- Um: with `--mva --kv` the CLI derives it (35 → 40.5, 66 → 72.5, 110 Y → 72.5, 110 D → 126, 220 → 252). Pass `--um` only when the user states the equipment class directly.
+- `--iu` is the transformer max through-current at the lowest tap. Never add a safety factor to it. `--k` exists only on the capacity path.
+
+Missing one of current, voltage, or tap range? Ask for that one thing. Do not fill gaps from memory.
+
+> Spec line: `SFZ11-25000/110, 110±8×1.25%/10.5 kV, Dyn11, taps at HV neutral, vacuum`
+> → `oltc --mva 25 --kv 110 --conn Y --reg W --pm 8 --step-pct 1.25`
+
 ## Brochure check (after CLI)
 
 See `references/brochure-check.md`. Fail the type if any of these hit:

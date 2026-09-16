@@ -81,10 +81,10 @@ type Dict = Record<string, string>;
 const en: Dict = {
   title: "OLTC Selector",
   subtitle: "Enter the duty, then Select.",
-  agentTitle: "Try handing selection to AI assistants?",
+  agentTitle: "Let an AI assistant pick the type",
   agentBody:
-    "Let WorkBuddy, ChatGPT, or another agent pick the type quickly and accurately.",
-  agentCta: "See how →",
+    "Send it the transformer data. It runs oltc, checks the catalogue, and never invents a type.",
+  agentCta: "See how",
   agentClose: "Close",
   agentChip: "Selection assistant",
   agentOpen: "Open selection assistant",
@@ -263,10 +263,9 @@ const en: Dict = {
 const zh: Dict = {
   title: "有载开关选型",
   subtitle: "填工况，点选型。",
-  agentTitle: "试试把选型交给 AI 助手们？",
-  agentBody:
-    "让 WorkBuddy 或者 ChatGPT 等 Agent 帮助你快速准确地选出型号。",
-  agentCta: "看怎么交给它 →",
+  agentTitle: "把选型交给 AI 助手",
+  agentBody: "把变压器参数直接发给它。它跑 oltc 选型，对照样本册，不编型号。",
+  agentCta: "看看怎么用",
   agentClose: "关闭",
   agentChip: "选型助手",
   agentOpen: "打开选型助手",
@@ -443,10 +442,10 @@ const zh: Dict = {
 const vi: Dict = {
   title: "Chọn OLTC",
   subtitle: "Nhập thông số, bấm Chọn.",
-  agentTitle: "Giao việc chọn kiểu cho trợ lý AI?",
+  agentTitle: "Để trợ lý AI chọn kiểu",
   agentBody:
-    "Hãy để WorkBuddy, ChatGPT hoặc agent khác chọn kiểu nhanh và chính xác.",
-  agentCta: "Xem cách làm →",
+    "Gửi số liệu máy biến áp cho nó. Nó chạy oltc, đối catalogue, không bịa kiểu.",
+  agentCta: "Xem cách làm",
   agentClose: "Đóng",
   agentChip: "Trợ lý chọn kiểu",
   agentOpen: "Mở trợ lý chọn kiểu",
@@ -625,10 +624,10 @@ const vi: Dict = {
 const es: Dict = {
   title: "Selector OLTC",
   subtitle: "Introduzca el régimen y pulse Seleccionar.",
-  agentTitle: "¿Dejar la selección a los asistentes de IA?",
+  agentTitle: "Que un asistente de IA elija el tipo",
   agentBody:
-    "Deje que WorkBuddy, ChatGPT u otro agente elija el tipo con rapidez y precisión.",
-  agentCta: "Cómo hacerlo →",
+    "Envíele los datos del transformador. Ejecuta oltc, comprueba el catálogo y no inventa tipos.",
+  agentCta: "Cómo hacerlo",
   agentClose: "Cerrar",
   agentChip: "Asistente de selección",
   agentOpen: "Abrir asistente de selección",
@@ -806,10 +805,10 @@ const es: Dict = {
 const tr: Dict = {
   title: "OLTC Seçici",
   subtitle: "İşletme verilerini girin, Seç’e basın.",
-  agentTitle: "Seçimi AI asistanlara bırakmayı dener misiniz?",
+  agentTitle: "Seçimi bir AI asistana bırakın",
   agentBody:
-    "WorkBuddy, ChatGPT veya başka bir agent tipi hızlı ve doğru seçsin.",
-  agentCta: "Nasıl yapılır →",
+    "Trafo verilerini ona gönderin. oltc'yi çalıştırır, katalogu kontrol eder, tip uydurmaz.",
+  agentCta: "Nasıl yapılır",
   agentClose: "Kapat",
   agentChip: "Seçim asistanı",
   agentOpen: "Seçim asistanını aç",
@@ -986,10 +985,10 @@ const tr: Dict = {
 const ru: Dict = {
   title: "Подбор РПН",
   subtitle: "Введите режим и нажмите «Подобрать».",
-  agentTitle: "Поручить подбор ИИ-помощникам?",
+  agentTitle: "Поручите подбор ИИ-помощнику",
   agentBody:
-    "Пусть WorkBuddy, ChatGPT или другой агент быстро и точно выберет тип.",
-  agentCta: "Как это сделать →",
+    "Отправьте ему данные трансформатора. Он запустит oltc, сверит с каталогом и не выдумает тип.",
+  agentCta: "Как это работает",
   agentClose: "Закрыть",
   agentChip: "Помощник подбора",
   agentOpen: "Открыть помощник подбора",

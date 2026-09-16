@@ -21,8 +21,8 @@ export type AgentGuideCopy = {
 const zh: AgentGuideCopy = {
   back: "选型",
   title: "让 AI 助手帮你选型",
-  lead: "下载技能包，传给你在用的 AI 助手。你报工况，它选型号。",
-  how: "在助手里找上传技能的入口，WorkBuddy 里叫 Upload skill，别的助手也有类似的导入。把 zip 传进去就行。机器上要有 Node，技能会自己装好 oltc 命令，不用你动手。之后用大白话报工况，它选完会对照样本册：样本册里没有的型号出不来，包里也没有报价。",
+  lead: "下载技能包，传给你在用的 AI 助手。把变压器参数发给它，它选型号。",
+  how: "在助手里找上传技能的入口，WorkBuddy 里叫 Upload skill，别的助手也有类似的导入。把 zip 传进去就行。机器上要有 Node，技能会自己装好 oltc 命令，不用你动手。之后把变压器参数直接发给它，铭牌上那种写法它就看得懂，会自己算电流、对照样本册。样本册里没有的型号出不来，包里也没有报价。",
   dl: "下载技能包",
   cli: "想自己跑命令",
   cliBody:
@@ -31,9 +31,9 @@ const zh: AgentGuideCopy = {
   run: "有载例子",
   runNote:
     "无载加 --octc。组合式加 --structure combined。--iu 是最大通过电流 Imax，直接填，别再乘安全系数。",
-  say: "也可以直接对助手说",
+  say: "然后就像聊天一样，把参数发给它",
   sayBody:
-    "用 oltc 选型，不要自己编型号。工况：Imax 350 A，Um 40.5 kV，角接，正反调 ±8。选完对照样本册，用几句话说明为什么是这个型号。",
+    "帮我选个有载开关：25 MVA，110±8×1.25%/10.5 kV，Dyn11，高压侧中性点调压，要真空。",
   copy: "复制",
   copied: "已复制",
   limit: "出 OS 或采购前，要工程确认。这是私人辅助，不是厂家工具。",
@@ -42,8 +42,8 @@ const zh: AgentGuideCopy = {
 const en: AgentGuideCopy = {
   back: "Selector",
   title: "Let an AI assistant pick the type",
-  lead: "Download the skill pack and upload it to the AI assistant you already use. You describe the duty, it picks the type.",
-  how: "Find the skill upload entry in your assistant. In WorkBuddy it is called Upload skill; other assistants have a similar import. Send the zip in. Node needs to be on the machine, and the skill installs the oltc command by itself. Then describe the duty in plain words. It checks the brochure after picking: a type missing from the brochure does not come out, and the pack has no prices.",
+  lead: "Download the skill pack and upload it to the AI assistant you already use. Send it the transformer data, it picks the type.",
+  how: "Find the skill upload entry in your assistant. In WorkBuddy it is called Upload skill; other assistants have a similar import. Send the zip in. Node needs to be on the machine, and the skill installs the oltc command by itself. Then send the transformer data as written on the nameplate. It does the current math itself and checks the brochure: a type missing from the brochure does not come out, and the pack has no prices.",
   dl: "Download the skill pack",
   cli: "Want to run it yourself",
   cliBody:
@@ -52,9 +52,9 @@ const en: AgentGuideCopy = {
   run: "On-load example",
   runNote:
     "Off-circuit: add --octc. Combined: add --structure combined. --iu is the max through-current Imax. Enter it as is, no safety factor.",
-  say: "Or just tell the assistant",
+  say: "Then pick a type by chatting",
   sayBody:
-    "Pick an OLTC with oltc. Do not invent a type. Duty: Imax 350 A, Um 40.5 kV, delta, reversing ±8. Then check the catalogue and explain in a few sentences why the type fits.",
+    "Pick an on-load tap-changer for me: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, taps at the HV neutral, vacuum.",
   copy: "Copy",
   copied: "Copied",
   limit:
@@ -64,8 +64,8 @@ const en: AgentGuideCopy = {
 const vi: AgentGuideCopy = {
   back: "Chọn kiểu",
   title: "Để trợ lý AI chọn kiểu giúp bạn",
-  lead: "Tải gói skill, tải lên trợ lý AI bạn đang dùng. Bạn mô tả chế độ, nó chọn kiểu.",
-  how: "Tìm mục tải skill trong trợ lý: trong WorkBuddy là Upload skill, trợ lý khác có mục nhập tương tự. Gửi file zip vào. Máy phải có Node, skill tự cài lệnh oltc, bạn không cần làm gì. Sau đó cứ mô tả chế độ bằng lời thường. Nó chọn xong sẽ đối catalogue: kiểu không có trong catalogue thì không ra, gói không kèm giá.",
+  lead: "Tải gói skill, tải lên trợ lý AI bạn đang dùng. Gửi số liệu máy biến áp cho nó, nó chọn kiểu.",
+  how: "Tìm mục tải skill trong trợ lý: trong WorkBuddy là Upload skill, trợ lý khác có mục nhập tương tự. Gửi file zip vào. Máy phải có Node, skill tự cài lệnh oltc, bạn không cần làm gì. Sau đó cứ gửi số liệu máy biến áp như ghi trên nhãn máy. Nó tự tính dòng và đối catalogue: kiểu không có trong catalogue thì không ra, gói không kèm giá.",
   dl: "Tải gói skill",
   cli: "Muốn tự chạy lệnh",
   cliBody:
@@ -74,9 +74,9 @@ const vi: AgentGuideCopy = {
   run: "Ví dụ có tải",
   runNote:
     "Không tải: thêm --octc. Kiểu kết hợp: thêm --structure combined. --iu là dòng xuyên lớn nhất Imax, điền đúng số đó, đừng nhân hệ số an toàn.",
-  say: "Hoặc nói thẳng với trợ lý",
+  say: "Rồi chọn kiểu như chat bình thường",
   sayBody:
-    "Chọn OLTC bằng oltc. Đừng bịa kiểu. Chế độ: Imax 350 A, Um 40.5 kV, nối tam giác, đảo cực ±8. Xong thì đối catalogue, giải thích vài câu vì sao kiểu này đúng.",
+    "Chọn giúp tôi bộ chuyển nấc có tải: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, điều áp ở trung tính cao áp, chân không.",
   copy: "Chép",
   copied: "Đã chép",
   limit:
@@ -86,8 +86,8 @@ const vi: AgentGuideCopy = {
 const es: AgentGuideCopy = {
   back: "Selector",
   title: "Que un asistente de IA elija el tipo",
-  lead: "Descargue el skill y súbalo al asistente de IA que ya usa. Usted describe el régimen, él elige el tipo.",
-  how: "Busque la opción de subir skills en su asistente: en WorkBuddy se llama Upload skill; otros asistentes tienen una importación parecida. Envíe el zip. El equipo necesita Node y el skill instala el comando oltc por sí solo. Luego describa el régimen en palabras normales. Tras elegir, comprueba el catálogo: lo que no está en el catálogo no existe y el paquete no trae precios.",
+  lead: "Descargue el skill y súbalo al asistente de IA que ya usa. Envíele los datos del transformador y él elige el tipo.",
+  how: "Busque la opción de subir skills en su asistente: en WorkBuddy se llama Upload skill; otros asistentes tienen una importación parecida. Envíe el zip. El equipo necesita Node y el skill instala el comando oltc por sí solo. Luego envíe los datos del transformador tal como figuran en la placa. Él hace las cuentas de corriente y comprueba el catálogo: lo que no está en el catálogo no existe y el paquete no trae precios.",
   dl: "Descargar el skill",
   cli: "Si quiere ejecutarlo usted mismo",
   cliBody:
@@ -96,9 +96,9 @@ const es: AgentGuideCopy = {
   run: "Ejemplo en carga",
   runNote:
     "Sin carga: añada --octc. Combinado: añada --structure combined. --iu es la corriente máxima Imax. Escríbala tal cual, sin factor de seguridad.",
-  say: "O dígaselo directamente",
+  say: "Luego elija charlando",
   sayBody:
-    "Elija un OLTC con oltc. No invente el tipo. Régimen: Imax 350 A, Um 40.5 kV, delta, inversión ±8. Luego compruebe el catálogo y explique en unas frases por qué el tipo es el correcto.",
+    "Elíjame un cambiador en carga: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, regulación en el neutro de AT, vacío.",
   copy: "Copiar",
   copied: "Copiado",
   limit:
@@ -108,8 +108,8 @@ const es: AgentGuideCopy = {
 const tr: AgentGuideCopy = {
   back: "Seçici",
   title: "Tipi bir AI asistan seçsin",
-  lead: "Skill paketini indirip kullandığınız AI asistana yükleyin. Siz görevi söyleyin, o tipi seçsin.",
-  how: "Asistanınızda skill yükleme girişini bulun: WorkBuddy'de buna Upload skill denir, diğer asistanlarda benzer bir içe aktarma vardır. Zip'i gönderin. Makinede Node olmalı; skill oltc komutunu kendisi kurar, size iş düşmez. Sonra görevi günlük dille anlatın. Seçtikten sonra katalogla kontrol eder: katalogda olmayan tip çıkmaz, pakette fiyat yok.",
+  lead: "Skill paketini indirip kullandığınız AI asistana yükleyin. Trafo verilerini gönderin, o tipi seçsin.",
+  how: "Asistanınızda skill yükleme girişini bulun: WorkBuddy'de buna Upload skill denir, diğer asistanlarda benzer bir içe aktarma vardır. Zip'i gönderin. Makinede Node olmalı; skill oltc komutunu kendisi kurar, size iş düşmez. Sonra trafo verilerini etiketinde yazdığı gibi gönderin. Akım hesabını kendisi yapar, katalogla kontrol eder: katalogda olmayan tip çıkmaz, pakette fiyat yok.",
   dl: "Skill paketini indir",
   cli: "Kendiniz çalıştırmak isterseniz",
   cliBody:
@@ -118,9 +118,9 @@ const tr: AgentGuideCopy = {
   run: "Yük altında örnek",
   runNote:
     "Yüksüz: --octc ekleyin. Kombine: --structure combined ekleyin. --iu, maksimum geçiş akımı Imax'tir. Olduğu gibi girin, emniyet katsayısı eklemeyin.",
-  say: "Ya da asistana deyin",
+  say: "Sonra sohbet eder gibi seçin",
   sayBody:
-    "oltc ile OLTC seç. Tip uydurma. Görev: Imax 350 A, Um 40.5 kV, üçgen, tersinir ±8. Sonra katalogla kontrol et, birkaç cümleyle neden doğru olduğunu anlat.",
+    "Bana yük altında kademe değiştirici seç: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, YG tarafı yıldız noktasından ayar, vakum.",
   copy: "Kopyala",
   copied: "Kopyalandı",
   limit:
@@ -130,8 +130,8 @@ const tr: AgentGuideCopy = {
 const ru: AgentGuideCopy = {
   back: "Подбор",
   title: "Пусть ИИ-помощник подберёт тип",
-  lead: "Скачайте skill и загрузите его в ИИ-помощника, которым пользуетесь. Вы описываете режим, он выбирает тип.",
-  how: "Найдите в помощнике загрузку skill: в WorkBuddy это Upload skill, у других есть похожий импорт. Отправьте zip. На машине должен быть Node, команду oltc skill поставит сам. Дальше описывайте режим обычными словами. После подбора он сверяет с каталогом: типов вне каталога не будет, цен в пакете нет.",
+  lead: "Скачайте skill и загрузите его в ИИ-помощника, которым пользуетесь. Отправьте ему данные трансформатора, он выберет тип.",
+  how: "Найдите в помощнике загрузку skill: в WorkBuddy это Upload skill, у других есть похожий импорт. Отправьте zip. На машине должен быть Node, команду oltc skill поставит сам. Дальше просто отправьте данные трансформатора, как написано на шильдике. Ток он посчитает сам и сверит с каталогом: типов вне каталога не будет, цен в пакете нет.",
   dl: "Скачать skill",
   cli: "Если хотите запускать сами",
   cliBody:
@@ -140,9 +140,9 @@ const ru: AgentGuideCopy = {
   run: "Пример под нагрузкой",
   runNote:
     "Без нагрузки: добавьте --octc. Комбинированный: добавьте --structure combined. --iu это максимальный сквозной ток Imax. Вводите как есть, без коэффициента запаса.",
-  say: "Или скажите помощнику",
+  say: "Дальше просто пишите, как в чате",
   sayBody:
-    "Подберите РПН через oltc. Не выдумывайте тип. Режим: Imax 350 А, Um 40.5 кВ, треугольник, реверс ±8. Затем сверьте с каталогом и объясните парой фраз, почему тип подходит.",
+    "Подбери РПН: 25 МВА, 110±8×1.25%/10.5 кВ, Dyn11, регулирование в нейтрали ВН, вакуум.",
   copy: "Копировать",
   copied: "Скопировано",
   limit:
