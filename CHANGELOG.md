@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Skill pack prepped for marketplace upload: MIT license, `manifest.yaml` in the zip, Huaming-branded display name (华明分接开关选型) with vendor scope stated up front.
-- /agents guide shows a 一拖二 (OLTC + OCTC) chat example next to the on-load one, with the two selected type strings.
+- /agents guide examples are chat cards: 示例 1 on-load and 示例 2 一拖二, each with the selected type strings as chips (有载/无载 tagged).
 - Skill pack covers 一拖二 (无载带有载) duties: split into an on-load run and an `--octc` run, brochure-check both type strings. Zip is rebuilt with `npm run pack:skill` and a test keeps it in sync with the source.
 - Home dock: hand selection to an AI assistant (scheme A). Closed state is WorkBuddy + 选型助手. Tutorial at `/agents/` with a downloadable WorkBuddy skill zip (CLI + brochure check, no prices).
 - CLI package `oltc-selector` (`npm i -g oltc-selector`), command `oltc`. Same `selectOltc` engine, no prices. `--octc`, `--structure`, `--series`.
