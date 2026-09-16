@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { AgentsGuide } from "@/components/AgentsGuide";
 
 export const metadata: Metadata = {
-  title: "Hand selection to an assistant · OLTC Selector",
+  title: "Let an AI assistant pick the type · OLTC Selector",
   description:
-    "Download the WorkBuddy skill pack. It installs oltc and picks a type from the catalogue.",
+    "Download the skill pack and upload it to your AI assistant. It installs oltc and picks a type from the catalogue.",
 };
 
 export default function AgentsPage() {
