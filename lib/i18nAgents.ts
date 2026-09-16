@@ -33,7 +33,7 @@ const zh: AgentGuideCopy = {
     "帮我选个有载开关：25 MVA，110±8×1.25%/10.5 kV，Dyn11，高压侧中性点调压，要真空。",
   copy: "复制",
   copied: "已复制",
-  limit: "出 OS 或采购前，需要工程确认。这是私人辅助，不是厂家工具。",
+  limit: "出 OS 或采购前，需要工程确认。",
 };
 
 const en: AgentGuideCopy = {
@@ -52,8 +52,7 @@ const en: AgentGuideCopy = {
     "Pick an on-load tap-changer for me: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, taps at the HV neutral, vacuum.",
   copy: "Copy",
   copied: "Copied",
-  limit:
-    "Get engineering sign-off before an OS or a purchase. This is a private helper, not a factory tool.",
+  limit: "Get engineering sign-off before an OS or a purchase.",
 };
 
 const vi: AgentGuideCopy = {
@@ -72,8 +71,7 @@ const vi: AgentGuideCopy = {
     "Chọn giúp tôi bộ chuyển nấc có tải: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, điều áp ở trung tính cao áp, chân không.",
   copy: "Chép",
   copied: "Đã chép",
-  limit:
-    "Trước OS hoặc mua hàng cần kỹ sư xác nhận. Đây là trợ lý cá nhân, không phải công cụ của hãng.",
+  limit: "Trước OS hoặc mua hàng cần kỹ sư xác nhận.",
 };
 
 const es: AgentGuideCopy = {
@@ -92,8 +90,7 @@ const es: AgentGuideCopy = {
     "Elíjame un cambiador en carga: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, regulación en el neutro de AT, vacío.",
   copy: "Copiar",
   copied: "Copiado",
-  limit:
-    "Antes de un OS o una compra, confírmelo con ingeniería. Es una ayuda privada, no una herramienta de fábrica.",
+  limit: "Antes de un OS o una compra, confírmelo con ingeniería.",
 };
 
 const tr: AgentGuideCopy = {
@@ -112,8 +109,7 @@ const tr: AgentGuideCopy = {
     "Bana yük altında kademe değiştirici seç: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, YG tarafı yıldız noktasından ayar, vakum.",
   copy: "Kopyala",
   copied: "Kopyalandı",
-  limit:
-    "OS veya satın almadan önce mühendis onayı alın. Bu özel bir yardımcı, fabrika aracı değil.",
+  limit: "OS veya satın almadan önce mühendis onayı alın.",
 };
 
 const ru: AgentGuideCopy = {
@@ -132,8 +128,7 @@ const ru: AgentGuideCopy = {
     "Подбери РПН: 25 МВА, 110±8×1.25%/10.5 кВ, Dyn11, регулирование в нейтрали ВН, вакуум.",
   copy: "Копировать",
   copied: "Скопировано",
-  limit:
-    "Перед OS или закупкой нужно подтверждение инженера. Это частный помощник, не инструмент завода.",
+  limit: "Перед OS или закупкой нужно подтверждение инженера.",
 };
 
 const ALL: Record<Lang, AgentGuideCopy> = { zh, en, vi, es, tr, ru };
