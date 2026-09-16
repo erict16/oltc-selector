@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- CLI `@erict16/oltc` (`oltc`): same `selectOltc` engine, no prices. `--octc`, `--structure`, `--series`.
+- WSL/WDL existence uses priceless 2025-list keys, not list RMB.
+- 2025 and 2026 OS Excel replay: emitted models must exist; legal sold types stay in the ranked list.
 - Engine drops commercial strings the brochure / 2025 list does not have (combined III-D, CV2-500, compound grade letters, WSL rows missing from the list). CV2/HWV/CV/SV III-D still emit.
 
 - More options: 选择器绝缘等级 is now 开关结构 (auto / compound / combined). OCTC keeps 接线方式 only.

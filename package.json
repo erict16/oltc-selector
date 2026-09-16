@@ -8,7 +8,11 @@
     "build:gh": "GH_PAGES=true next build",
     "start": "npx serve out -l 3000",
     "test": "vitest run",
-    "lint": "next lint"
+    "lint": "next lint",
+    "oltc": "npx vite-node scripts/oltc.ts",
+    "pack:cli": "node scripts/pack-cli.mjs",
+    "gen:list-index": "python scripts/gen-list-index.py",
+    "os:excel": "python scripts/os-to-excel.py"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

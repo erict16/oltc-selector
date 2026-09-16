@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { lookupListPrice } from "./basePrices";
+import { listRowExists } from "./listIndex";
 import { SERIES } from "./catalog";
 import { selectOltc } from "./engine";
 import type { SelectInput } from "./types";
@@ -133,6 +134,7 @@ describe("selectOltc never emits a non-brochure type", () => {
       true,
     );
     for (const r of missing.results) {
+      expect(listRowExists(r.model), r.model).toBe(true);
       expect(lookupListPrice(r.model).found, r.model).toBe(true);
     }
 
@@ -154,6 +156,7 @@ describe("selectOltc never emits a non-brochure type", () => {
     });
     expect(eSize.results.every((r) => !r.model.includes("7x6E"))).toBe(true);
     for (const r of eSize.results) {
+      expect(listRowExists(r.model), r.model).toBe(true);
       expect(lookupListPrice(r.model).found, r.model).toBe(true);
     }
   });

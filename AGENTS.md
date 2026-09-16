@@ -19,6 +19,10 @@ When `dutyKind=octc`, the form swaps **调压方式** (W/G/0) for **接线方式
 
 Result card **开关结构** (not 工作位置): CV/CV2/SV/CVT/CZ → 复合式; CM/CM2/SHZV/CMD/HWV → 组合式; WSL/WDL → 笼式; WSG → 鼓式. Positions stay in the type string (`10193W` = 19 mech / 17 transformer steps).
 
+## CLI
+
+`oltc` (`npm i -g @erict16/oltc` or `npm run oltc -- …`) is the same engine. No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only).
+
 ## Tap codes
 
 Brochure Fig. 3-3: `P = 2 × (±N) + mid`. See `lib/tapCode.ts`. Never invent non-catalogue codes; mid and ±N are paired connection diagrams.
