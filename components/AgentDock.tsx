@@ -2,20 +2,12 @@
 
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppLang } from "@/components/LangProvider";
-import {
-  MORPH_MS,
-  applyMorph,
-  easeOutCubic,
-  morphIntent,
-  rectFlip,
-  type Flip,
-  type MorphPhase,
-} from "@/lib/agentMorph";
 import { t } from "@/lib/i18n";
 
-const STORAGE = "oltc-agent-dock";
+const STORAGE = "oltc-agent-dock-seen";
+const LEGACY_STORAGE = "oltc-agent-dock";
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 function brand(file: string) {
@@ -48,221 +40,67 @@ function Orbit() {
   );
 }
 
-function reduced() {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
+function seenBefore() {
+  try {
+    return (
+      localStorage.getItem(STORAGE) === "1" ||
+      localStorage.getItem(LEGACY_STORAGE) === "closed"
+    );
+  } catch {
+    return false;
+  }
 }
 
-function clearInline(el: HTMLElement | null) {
-  if (!el) return;
-  el.style.transform = "";
-  el.style.opacity = "";
-  el.style.borderRadius = "";
-  el.style.transformOrigin = "";
+function markSeen() {
+  try {
+    localStorage.setItem(STORAGE, "1");
+  } catch {
+    /* ignore */
+  }
 }
-
-type Driver = {
-  raf: number;
-  k: number;
-  k0: number;
-  target: 0 | 1;
-  t0: number;
-  g: Flip;
-};
 
 export function AgentDock() {
   const lang = useAppLang();
-  const [open, setOpen] = useState(true);
   const [hydrated, setHydrated] = useState(false);
-  const [morphing, setMorphing] = useState(false);
-  const bubbleRef = useRef<HTMLElement>(null);
-  const chipRef = useRef<HTMLButtonElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const xRef = useRef<HTMLButtonElement>(null);
-  const phase = useRef<MorphPhase>("open");
-  const playOpen = useRef(false);
-  const drv = useRef<Driver>({
-    raf: 0,
-    k: 0,
-    k0: 0,
-    target: 0,
-    t0: 0,
-    g: { dx: 0, dy: 0, sx: 1, sy: 1 },
-  });
+  const [open, setOpen] = useState(false);
 
+  // Auto-open once, on the first visit only. Anyone who has seen it
+  // (or dismissed an earlier version) gets just the chip.
   useEffect(() => {
-    try {
-      if (localStorage.getItem(STORAGE) === "closed") {
-        setOpen(false);
-        phase.current = "closed";
-      }
-    } catch {
-      /* ignore */
-    }
     setHydrated(true);
-  }, []);
-
-  function persist(next: boolean) {
-    try {
-      localStorage.setItem(STORAGE, next ? "open" : "closed");
-    } catch {
-      /* ignore */
-    }
-  }
-
-  function paint(k: number) {
-    const bubble = bubbleRef.current;
-    if (!bubble) return;
-    applyMorph(bubble, innerRef.current, xRef.current, k, drv.current.g);
-  }
-
-  function stopRaf() {
-    if (drv.current.raf) cancelAnimationFrame(drv.current.raf);
-    drv.current.raf = 0;
-  }
-
-  function finish(next: "open" | "closed") {
-    stopRaf();
-    phase.current = next;
-    setMorphing(false);
-    if (next === "closed") setOpen(false);
-    requestAnimationFrame(() => {
-      clearInline(bubbleRef.current);
-      clearInline(innerRef.current);
-      clearInline(xRef.current);
+    if (seenBefore()) return;
+    markSeen();
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setOpen(true));
     });
-  }
-
-  function tick(now: number) {
-    const d = drv.current;
-    const p = easeOutCubic((now - d.t0) / MORPH_MS);
-    d.k = d.k0 + (d.target - d.k0) * p;
-    paint(d.k);
-    if (p < 1) {
-      d.raf = requestAnimationFrame(tick);
-      return;
-    }
-    d.k = d.target;
-    paint(d.k);
-    finish(d.target === 1 ? "closed" : "open");
-  }
-
-  function retarget(target: 0 | 1) {
-    const d = drv.current;
-    d.k0 = d.k;
-    d.target = target;
-    d.t0 = performance.now();
-    phase.current = target === 1 ? "toChip" : "toBubble";
-    if (!d.raf) d.raf = requestAnimationFrame(tick);
-  }
-
-  function measure(): Flip | null {
-    const bubble = bubbleRef.current;
-    const chip = chipRef.current;
-    if (!bubble || !chip) return null;
-    const a = bubble.getBoundingClientRect();
-    const b = chip.getBoundingClientRect();
-    if (a.width < 2 || b.width < 2) return null;
-    return rectFlip(a, b);
-  }
-
-  function close() {
-    const intent = morphIntent(phase.current, "close");
-    if (intent === "ignore") return;
-    persist(false);
-    if (reduced()) {
-      finish("closed");
-      return;
-    }
-    if (intent === "reverse") {
-      retarget(1);
-      return;
-    }
-    clearInline(bubbleRef.current);
-    clearInline(innerRef.current);
-    const g = measure();
-    if (!g) {
-      finish("closed");
-      return;
-    }
-    drv.current.g = g;
-    drv.current.k = 0;
-    setMorphing(true);
-    retarget(1);
-  }
-
-  function reopen() {
-    const intent = morphIntent(phase.current, "open");
-    if (intent === "ignore") return;
-    persist(true);
-    if (reduced()) {
-      setOpen(true);
-      phase.current = "open";
-      return;
-    }
-    if (intent === "reverse") {
-      retarget(0);
-      return;
-    }
-    playOpen.current = true;
-    phase.current = "toBubble";
-    setOpen(true);
-  }
-
-  useLayoutEffect(() => {
-    if (!hydrated || !open || !playOpen.current) return;
-    if (reduced()) {
-      playOpen.current = false;
-      phase.current = "open";
-      return;
-    }
-    playOpen.current = false;
-    clearInline(bubbleRef.current);
-    clearInline(innerRef.current);
-    const g = measure();
-    if (!g) {
-      phase.current = "open";
-      return;
-    }
-    drv.current.g = g;
-    drv.current.k = 1;
-    paint(1);
-    setMorphing(true);
-    retarget(0);
     return () => {
-      if (drv.current.k !== 0 && drv.current.target === 0) {
-        playOpen.current = true;
-        stopRaf();
-      }
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
     };
-  }, [hydrated, open]);
+  }, []);
 
   if (!hydrated) return null;
 
   return (
-    <div
-      className={`agent-dock${open ? " is-open" : ""}${morphing ? " is-morphing" : ""}`}
-    >
+    <div className={`agent-dock${open ? " is-open" : ""}`}>
       <aside
-        ref={bubbleRef}
         className="agent-bubble"
         role="dialog"
         aria-labelledby="agent-dock-title"
         aria-hidden={!open}
       >
         <button
-          ref={xRef}
           type="button"
           className="agent-x"
-          onClick={close}
+          onClick={() => setOpen(false)}
           aria-label={t(lang, "agentClose")}
+          tabIndex={open ? 0 : -1}
         >
           <XMarkIcon className="h-4 w-4" aria-hidden />
         </button>
         <div className="agent-clip">
-          <div ref={innerRef} className="agent-inner">
+          <div className="agent-inner">
             <Orbit />
             <div className="agent-copy min-w-0 flex-1">
               <h2
@@ -277,6 +115,7 @@ export function AgentDock() {
               <Link
                 href="/agents/"
                 className="mt-2 inline-block text-[13px] font-medium text-[var(--color-accent)] hover:underline"
+                tabIndex={open ? 0 : -1}
               >
                 {t(lang, "agentCta")}
               </Link>
@@ -285,12 +124,11 @@ export function AgentDock() {
         </div>
       </aside>
       <button
-        ref={chipRef}
         type="button"
         className="agent-chip"
-        onClick={reopen}
+        onClick={() => setOpen(true)}
         aria-label={t(lang, "agentOpen")}
-        tabIndex={open && !morphing ? -1 : 0}
+        tabIndex={open ? -1 : 0}
       >
         <span className="agent-chip-mark">
           <img src={brand("workbuddy.svg")} alt="" />
