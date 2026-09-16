@@ -94,7 +94,7 @@ h1 {
 .agent-bubble {
   position: absolute;
   right: 0;
-  bottom: 1rem;
+  bottom: 0.5rem;
   width: min(27.5rem, calc(100vw - 2rem));
   padding: 0;
   border: 1px solid var(--color-rule);
