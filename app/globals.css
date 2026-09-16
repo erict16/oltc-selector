@@ -82,47 +82,62 @@ h1 {
   text-decoration: underline;
 }
 
-/* Agent dock — scheme A, ~¾ of the first mock */
+/* Agent dock — scheme A. Chip stays in the corner; bubble sits higher. */
 .agent-dock {
   position: fixed;
   right: max(1rem, env(safe-area-inset-right));
   bottom: max(1.1rem, env(safe-area-inset-bottom));
   z-index: 40;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  width: 0;
+  height: 0;
 }
 .agent-bubble {
+  position: absolute;
+  right: 0;
+  bottom: 3.6rem;
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  width: min(20.5rem, calc(100vw - 2rem));
-  padding: 0.7rem 0.85rem 0.7rem 0.7rem;
-  position: relative;
+  gap: 0.85rem;
+  width: min(27.5rem, calc(100vw - 2rem));
+  padding: 0.85rem 1rem 0.85rem 0.85rem;
   border: 1px solid var(--color-rule);
-  border-radius: 14px;
+  border-radius: 16px;
   background: #fff;
-  box-shadow: 0 10px 32px oklch(24% 0.02 258 / 0.12);
-  animation: agent-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+  box-shadow: 0 12px 40px oklch(24% 0.02 258 / 0.12);
+  will-change: transform, opacity;
+}
+.agent-bubble[hidden] {
+  display: none;
 }
 .agent-chip {
+  position: absolute;
+  right: 0;
+  bottom: 0;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  height: 2.25rem;
-  padding: 0 0.8rem 0 0.28rem;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding: 0 0.9rem 0 0.35rem;
   border: 1px solid var(--color-rule);
   border-radius: 999px;
   background: #fff;
   color: var(--color-ink);
-  font: 500 0.78rem/1 var(--font-sans);
+  font: 500 0.8125rem/1 var(--font-sans);
   box-shadow: 0 8px 24px oklch(24% 0.02 258 / 0.1);
   cursor: pointer;
-  animation: agent-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  white-space: nowrap;
+}
+.agent-chip[hidden] {
+  display: none;
+}
+.agent-chip.is-measuring {
+  display: inline-flex !important;
+  visibility: hidden;
+  pointer-events: none;
 }
 .agent-chip img {
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: 999px;
   display: block;
 }
@@ -131,12 +146,12 @@ h1 {
 }
 .agent-x {
   position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
+  top: 0.5rem;
+  right: 0.5rem;
   display: grid;
   place-items: center;
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border: 0;
   border-radius: 6px;
   background: transparent;
@@ -150,8 +165,8 @@ h1 {
 .agent-orbit {
   position: relative;
   flex-shrink: 0;
-  width: 3.4rem;
-  height: 3.4rem;
+  width: 4.5rem;
+  height: 4.5rem;
 }
 .agent-p {
   position: absolute;
@@ -163,13 +178,13 @@ h1 {
   background: #fff;
   overflow: hidden;
   box-shadow:
-    0 0 0 1.5px #fff,
+    0 0 0 2px #fff,
     0 1px 2px oklch(24% 0.02 258 / 0.14);
 }
 .agent-hub {
-  width: 1.35rem;
-  height: 1.35rem;
-  margin: -0.675rem 0 0 -0.675rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin: -0.875rem 0 0 -0.875rem;
   z-index: 6;
 }
 .agent-hub img {
@@ -179,9 +194,9 @@ h1 {
   display: block;
 }
 .agent-sat {
-  width: 0.85rem;
-  height: 0.85rem;
-  margin: -0.425rem 0 0 -0.425rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: -0.5625rem 0 0 -0.5625rem;
   z-index: 2;
   transform: translate(var(--x), var(--y));
   animation: agent-pop 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -199,42 +214,32 @@ h1 {
 }
 .agent-sat.s1 {
   --x: 0px;
-  --y: -19px;
+  --y: -26px;
   animation-delay: 0ms;
 }
 .agent-sat.s2 {
-  --x: 18px;
-  --y: -6px;
+  --x: 25px;
+  --y: -8px;
   animation-delay: 60ms;
 }
 .agent-sat.s3 {
-  --x: 11px;
-  --y: 15px;
+  --x: 15px;
+  --y: 21px;
   animation-delay: 120ms;
 }
 .agent-sat.s4 {
-  --x: -11px;
-  --y: 15px;
+  --x: -15px;
+  --y: 21px;
   animation-delay: 180ms;
 }
 .agent-sat.s5 {
-  --x: -18px;
-  --y: -6px;
+  --x: -25px;
+  --y: -8px;
   animation-delay: 240ms;
 }
 .agent-sat:hover {
   z-index: 8;
   transform: translate(var(--x), var(--y)) scale(1.28);
-}
-@keyframes agent-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 @keyframes agent-pop {
   from {
@@ -247,12 +252,8 @@ h1 {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .agent-bubble,
-  .agent-chip,
   .agent-sat {
     animation: none;
-  }
-  .agent-sat {
     transform: translate(var(--x), var(--y));
   }
 }
