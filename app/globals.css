@@ -94,7 +94,7 @@ h1 {
 .agent-bubble {
   position: absolute;
   right: 0;
-  bottom: 3.6rem;
+  bottom: 1.85rem;
   display: flex;
   align-items: center;
   gap: 0.85rem;
@@ -106,8 +106,9 @@ h1 {
   box-shadow: 0 12px 40px oklch(24% 0.02 258 / 0.12);
   will-change: transform, opacity;
 }
-.agent-bubble[hidden] {
-  display: none;
+.agent-dock:not(.is-open) .agent-bubble {
+  visibility: hidden;
+  pointer-events: none;
 }
 .agent-chip {
   position: absolute;
@@ -127,22 +128,35 @@ h1 {
   cursor: pointer;
   white-space: nowrap;
 }
-.agent-chip[hidden] {
-  display: none;
-}
-.agent-chip.is-measuring {
-  display: inline-flex !important;
-  visibility: hidden;
+.agent-dock.is-open .agent-chip {
+  opacity: 0;
   pointer-events: none;
 }
-.agent-chip img {
+.agent-chip-mark {
   width: 1.75rem;
   height: 1.75rem;
   border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.agent-chip-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.18);
   display: block;
 }
 .agent-chip:hover {
   border-color: color-mix(in oklch, var(--color-accent) 40%, var(--color-rule));
+}
+.agent-chip:focus {
+  outline: none;
+}
+.agent-chip:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-paper),
+    0 0 0 3.5px var(--color-accent);
 }
 .agent-x {
   position: absolute;

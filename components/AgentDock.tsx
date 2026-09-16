@@ -9,7 +9,7 @@ import { t } from "@/lib/i18n";
 const STORAGE = "oltc-agent-dock";
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const EASE = "cubic-bezier(0.32, 0.72, 0.28, 1)";
-const MS = 560;
+const MS = 520;
 
 function brand(file: string) {
   return `${BASE}/brand/${file}`;
@@ -74,15 +74,19 @@ export function AgentDock() {
     }
   }
 
-  function morph(from: HTMLElement, to: HTMLElement, hideFrom: () => void) {
-    if (prefersReducedMotion()) {
-      hideFrom();
+  function close() {
+    if (busy.current) return;
+    const bubble = bubbleRef.current;
+    const chip = chipRef.current;
+    persist(false);
+    if (!bubble || !chip || prefersReducedMotion()) {
+      setOpen(false);
       return;
     }
-    const a = from.getBoundingClientRect();
-    const b = to.getBoundingClientRect();
+    const a = bubble.getBoundingClientRect();
+    const b = chip.getBoundingClientRect();
     if (a.width < 2 || b.width < 2) {
-      hideFrom();
+      setOpen(false);
       return;
     }
     busy.current = true;
@@ -90,43 +94,26 @@ export function AgentDock() {
     const dy = b.top - a.top;
     const sx = b.width / a.width;
     const sy = b.height / a.height;
-    from.style.transformOrigin = "top left";
-    from.style.transition = "none";
-    from.style.transform = "none";
-    void from.offsetWidth;
-    from.style.transition = `transform ${MS}ms ${EASE}, opacity ${MS}ms ease`;
-    from.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
-    from.style.opacity = "0";
+    bubble.style.transformOrigin = "top left";
+    bubble.style.transition = "none";
+    bubble.style.transform = "none";
+    void bubble.offsetWidth;
+    bubble.style.transition = `transform ${MS}ms ${EASE}, opacity ${MS}ms ease`;
+    bubble.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+    bubble.style.opacity = "0";
     let finished = false;
     const done = () => {
       if (finished) return;
       finished = true;
-      from.removeEventListener("transitionend", done);
-      from.style.transition = "";
-      from.style.transform = "";
-      from.style.opacity = "";
-      hideFrom();
+      bubble.removeEventListener("transitionend", done);
+      bubble.style.transition = "";
+      bubble.style.transform = "";
+      bubble.style.opacity = "";
+      setOpen(false);
       busy.current = false;
     };
-    from.addEventListener("transitionend", done);
+    bubble.addEventListener("transitionend", done);
     window.setTimeout(done, MS + 80);
-  }
-
-  function close() {
-    if (busy.current) return;
-    const bubble = bubbleRef.current;
-    const chip = chipRef.current;
-    persist(false);
-    if (!bubble || !chip) {
-      setOpen(false);
-      return;
-    }
-    chip.classList.add("is-measuring");
-    void chip.offsetWidth;
-    morph(bubble, chip, () => {
-      chip.classList.remove("is-measuring");
-      setOpen(false);
-    });
   }
 
   function reopen() {
@@ -144,20 +131,18 @@ export function AgentDock() {
     const bubble = bubbleRef.current;
     const chip = chipRef.current;
     if (!bubble || !chip || prefersReducedMotion()) return;
-    chip.classList.add("is-measuring");
-    const b = bubble.getBoundingClientRect();
-    const c = chip.getBoundingClientRect();
-    chip.classList.remove("is-measuring");
-    if (b.width < 2 || c.width < 2) return;
-    const dx = c.left - b.left;
-    const dy = c.top - b.top;
-    const sx = c.width / b.width;
-    const sy = c.height / b.height;
+    const a = bubble.getBoundingClientRect();
+    const b = chip.getBoundingClientRect();
+    if (a.width < 2 || b.width < 2) return;
+    const dx = b.left - a.left;
+    const dy = b.top - a.top;
+    const sx = b.width / a.width;
+    const sy = b.height / a.height;
     busy.current = true;
     bubble.style.transformOrigin = "top left";
     bubble.style.transition = "none";
     bubble.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
-    bubble.style.opacity = "0.35";
+    bubble.style.opacity = "0.4";
     void bubble.offsetWidth;
     bubble.style.transition = `transform ${MS}ms ${EASE}, opacity ${MS}ms ease`;
     bubble.style.transform = "none";
@@ -179,13 +164,13 @@ export function AgentDock() {
   if (!hydrated) return null;
 
   return (
-    <div className="agent-dock">
+    <div className={`agent-dock${open ? " is-open" : ""}`}>
       <aside
         ref={bubbleRef}
         className="agent-bubble"
-        hidden={!open}
         role="dialog"
         aria-labelledby="agent-dock-title"
+        aria-hidden={!open}
       >
         <button
           type="button"
@@ -218,11 +203,13 @@ export function AgentDock() {
         ref={chipRef}
         type="button"
         className="agent-chip"
-        hidden={open}
         onClick={reopen}
         aria-label={t(lang, "agentOpen")}
+        tabIndex={open ? -1 : 0}
       >
-        <img src={brand("workbuddy.svg")} alt="" />
+        <span className="agent-chip-mark">
+          <img src={brand("workbuddy.svg")} alt="" />
+        </span>
         {t(lang, "agentChip")}
       </button>
     </div>
