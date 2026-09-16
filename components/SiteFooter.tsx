@@ -9,7 +9,7 @@ export function SiteFooter() {
   const pathname = usePathname();
   const lang = useAppLang();
 
-  if (/\/(privacy|terms|login)\/?$/.test(pathname)) {
+  if (/\/(privacy|terms|login|agents)\/?$/.test(pathname)) {
     return null;
   }
 

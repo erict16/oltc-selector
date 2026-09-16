@@ -81,6 +81,181 @@ h1 {
 .prose-legal a:hover {
   text-decoration: underline;
 }
+
+/* Agent dock — scheme A, ~¾ of the first mock */
+.agent-dock {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1.1rem, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.agent-bubble {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: min(20.5rem, calc(100vw - 2rem));
+  padding: 0.7rem 0.85rem 0.7rem 0.7rem;
+  position: relative;
+  border: 1px solid var(--color-rule);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 10px 32px oklch(24% 0.02 258 / 0.12);
+  animation: agent-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.agent-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2.25rem;
+  padding: 0 0.8rem 0 0.28rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-ink);
+  font: 500 0.78rem/1 var(--font-sans);
+  box-shadow: 0 8px 24px oklch(24% 0.02 258 / 0.1);
+  cursor: pointer;
+  animation: agent-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.agent-chip img {
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  display: block;
+}
+.agent-chip:hover {
+  border-color: color-mix(in oklch, var(--color-accent) 40%, var(--color-rule));
+}
+.agent-x {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-caption);
+  cursor: pointer;
+}
+.agent-x:hover {
+  background: var(--color-soft);
+  color: var(--color-ink);
+}
+.agent-orbit {
+  position: relative;
+  flex-shrink: 0;
+  width: 3.4rem;
+  height: 3.4rem;
+}
+.agent-p {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1.5px #fff,
+    0 1px 2px oklch(24% 0.02 258 / 0.14);
+}
+.agent-hub {
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: -0.675rem 0 0 -0.675rem;
+  z-index: 6;
+}
+.agent-hub img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.agent-sat {
+  width: 0.85rem;
+  height: 0.85rem;
+  margin: -0.425rem 0 0 -0.425rem;
+  z-index: 2;
+  transform: translate(var(--x), var(--y));
+  animation: agent-pop 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.agent-sat img {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+  display: block;
+}
+.agent-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.agent-sat.s1 {
+  --x: 0px;
+  --y: -19px;
+  animation-delay: 0ms;
+}
+.agent-sat.s2 {
+  --x: 18px;
+  --y: -6px;
+  animation-delay: 60ms;
+}
+.agent-sat.s3 {
+  --x: 11px;
+  --y: 15px;
+  animation-delay: 120ms;
+}
+.agent-sat.s4 {
+  --x: -11px;
+  --y: 15px;
+  animation-delay: 180ms;
+}
+.agent-sat.s5 {
+  --x: -18px;
+  --y: -6px;
+  animation-delay: 240ms;
+}
+.agent-sat:hover {
+  z-index: 8;
+  transform: translate(var(--x), var(--y)) scale(1.28);
+}
+@keyframes agent-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes agent-pop {
+  from {
+    transform: translate(0, 0) scale(0.2);
+    opacity: 0;
+  }
+  to {
+    transform: translate(var(--x), var(--y)) scale(1);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-bubble,
+  .agent-chip,
+  .agent-sat {
+    animation: none;
+  }
+  .agent-sat {
+    transform: translate(var(--x), var(--y));
+  }
+}
 .prose-legal strong {
   color: var(--color-ink);
   font-weight: 600;

@@ -81,6 +81,13 @@ type Dict = Record<string, string>;
 const en: Dict = {
   title: "OLTC Selector",
   subtitle: "Enter the duty, then Select.",
+  agentTitle: "Try handing selection to AI assistants?",
+  agentBody:
+    "Let WorkBuddy, ChatGPT, or another agent pick the type quickly and accurately.",
+  agentCta: "See how →",
+  agentClose: "Close",
+  agentChip: "Selection assistant",
+  agentOpen: "Open selection assistant",
   footerNote: "Reference only",
   duty: "Duty parameters",
   presets: "Presets",
@@ -256,6 +263,13 @@ const en: Dict = {
 const zh: Dict = {
   title: "有载开关选型",
   subtitle: "填工况，点选型。",
+  agentTitle: "试试把选型交给 AI 助手们？",
+  agentBody:
+    "让 WorkBuddy 或者 ChatGPT 等 Agent 帮助你快速准确地选出型号。",
+  agentCta: "看怎么交给它 →",
+  agentClose: "关闭",
+  agentChip: "选型助手",
+  agentOpen: "打开选型助手",
   footerNote: "仅供参考",
   duty: "工况",
   presets: "预选",
@@ -429,6 +443,13 @@ const zh: Dict = {
 const vi: Dict = {
   title: "Chọn OLTC",
   subtitle: "Nhập thông số, bấm Chọn.",
+  agentTitle: "Giao việc chọn kiểu cho trợ lý AI?",
+  agentBody:
+    "Hãy để WorkBuddy, ChatGPT hoặc agent khác chọn kiểu nhanh và chính xác.",
+  agentCta: "Xem cách làm →",
+  agentClose: "Đóng",
+  agentChip: "Trợ lý chọn kiểu",
+  agentOpen: "Mở trợ lý chọn kiểu",
   footerNote: "Chỉ tham khảo",
   duty: "Thông số làm việc",
   presets: "Chọn sẵn",
@@ -604,6 +625,13 @@ const vi: Dict = {
 const es: Dict = {
   title: "Selector OLTC",
   subtitle: "Introduzca el régimen y pulse Seleccionar.",
+  agentTitle: "¿Dejar la selección a los asistentes de IA?",
+  agentBody:
+    "Deje que WorkBuddy, ChatGPT u otro agente elija el tipo con rapidez y precisión.",
+  agentCta: "Cómo hacerlo →",
+  agentClose: "Cerrar",
+  agentChip: "Asistente de selección",
+  agentOpen: "Abrir asistente de selección",
   footerNote: "Solo referencia",
   duty: "Parámetros",
   presets: "Preselección",
@@ -778,6 +806,13 @@ const es: Dict = {
 const tr: Dict = {
   title: "OLTC Seçici",
   subtitle: "İşletme verilerini girin, Seç’e basın.",
+  agentTitle: "Seçimi AI asistanlara bırakmayı dener misiniz?",
+  agentBody:
+    "WorkBuddy, ChatGPT veya başka bir agent tipi hızlı ve doğru seçsin.",
+  agentCta: "Nasıl yapılır →",
+  agentClose: "Kapat",
+  agentChip: "Seçim asistanı",
+  agentOpen: "Seçim asistanını aç",
   footerNote: "Yalnızca referans",
   duty: "İşletme parametreleri",
   presets: "Ön seçim",
@@ -951,6 +986,13 @@ const tr: Dict = {
 const ru: Dict = {
   title: "Подбор РПН",
   subtitle: "Введите режим и нажмите «Подобрать».",
+  agentTitle: "Поручить подбор ИИ-помощникам?",
+  agentBody:
+    "Пусть WorkBuddy, ChatGPT или другой агент быстро и точно выберет тип.",
+  agentCta: "Как это сделать →",
+  agentClose: "Закрыть",
+  agentChip: "Помощник подбора",
+  agentOpen: "Открыть помощник подбора",
   footerNote: "Только для справки",
   duty: "Параметры режима",
   presets: "Предвыбор",

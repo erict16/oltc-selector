@@ -23,6 +23,8 @@ Result card **开关结构** (not 工作位置): CV/CV2/SV/CVT/CZ → 复合式;
 
 Install `npm i -g oltc-selector`, run `oltc`. Same engine as the web app. No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only).
 
+Agent dock on `/` (scheme A). Tutorial `/agents/`. Downloadable skill `skills/oltc-selector/` → `public/skills/oltc-selector.zip`. Selection only; after `oltc`, check brochure existence and explain why the type is correct.
+
 ## Tap codes
 
 Brochure Fig. 3-3: `P = 2 × (±N) + mid`. See `lib/tapCode.ts`. Never invent non-catalogue codes; mid and ±N are paired connection diagrams.
