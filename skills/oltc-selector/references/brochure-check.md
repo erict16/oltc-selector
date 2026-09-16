@@ -28,3 +28,7 @@ Use after `oltc` prints a model. If any row fails, do not treat the string as or
 ## Drive
 
 3× single-phase poles: **1× CMA7** unless the RFQ asks for three MDUs.
+
+## 一拖二
+
+One transformer with both OLTC and OCTC (无载带有载) → two type strings. Run this check on **both**; the pair is orderable only if each passes.
