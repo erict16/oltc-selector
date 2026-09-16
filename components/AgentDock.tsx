@@ -4,14 +4,19 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useAppLang } from "@/components/LangProvider";
+import {
+  MORPH_MS,
+  applyMorph,
+  easeOutCubic,
+  morphIntent,
+  rectFlip,
+  type Flip,
+  type MorphPhase,
+} from "@/lib/agentMorph";
 import { t } from "@/lib/i18n";
 
 const STORAGE = "oltc-agent-dock";
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
-/** Shared-element morph of a ~27rem card into a 2.5rem chip. Over 300ms so it reads as one object. */
-const SHELL_MS = 420;
-const FADE_MS = 90;
 
 function brand(file: string) {
   return `${BASE}/brand/${file}`;
@@ -50,53 +55,49 @@ function reduced() {
   );
 }
 
-function rectFlip(from: DOMRect, to: DOMRect) {
-  return {
-    dx: to.left - from.left,
-    dy: to.top - from.top,
-    sx: to.width / from.width,
-    sy: to.height / from.height,
-  };
-}
-
-function clearMorph(el: HTMLElement) {
-  el.style.transition = "";
+function clearInline(el: HTMLElement | null) {
+  if (!el) return;
   el.style.transform = "";
   el.style.opacity = "";
   el.style.borderRadius = "";
   el.style.transformOrigin = "";
-  el.style.willChange = "";
-  el.style.pointerEvents = "";
 }
 
-function onTransformEnd(el: HTMLElement, ms: number, fn: () => void) {
-  let done = false;
-  const finish = (e?: TransitionEvent) => {
-    if (done) return;
-    if (e && e.target !== el) return;
-    if (e && e.propertyName && e.propertyName !== "transform") return;
-    done = true;
-    el.removeEventListener("transitionend", finish as EventListener);
-    fn();
-  };
-  el.addEventListener("transitionend", finish as EventListener);
-  window.setTimeout(() => finish(), ms + 80);
-}
+type Driver = {
+  raf: number;
+  k: number;
+  k0: number;
+  target: 0 | 1;
+  t0: number;
+  g: Flip;
+};
 
 export function AgentDock() {
   const lang = useAppLang();
   const [open, setOpen] = useState(true);
   const [hydrated, setHydrated] = useState(false);
+  const [morphing, setMorphing] = useState(false);
   const bubbleRef = useRef<HTMLElement>(null);
   const chipRef = useRef<HTMLButtonElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const xRef = useRef<HTMLButtonElement>(null);
-  const busy = useRef(false);
-  const skipFirstOpen = useRef(true);
+  const phase = useRef<MorphPhase>("open");
+  const playOpen = useRef(false);
+  const drv = useRef<Driver>({
+    raf: 0,
+    k: 0,
+    k0: 0,
+    target: 0,
+    t0: 0,
+    g: { dx: 0, dy: 0, sx: 1, sy: 1 },
+  });
 
   useEffect(() => {
     try {
-      if (localStorage.getItem(STORAGE) === "closed") setOpen(false);
+      if (localStorage.getItem(STORAGE) === "closed") {
+        setOpen(false);
+        phase.current = "closed";
+      }
     } catch {
       /* ignore */
     }
@@ -111,120 +112,139 @@ export function AgentDock() {
     }
   }
 
-  function close() {
-    if (busy.current) return;
+  function paint(k: number) {
     const bubble = bubbleRef.current;
-    const chip = chipRef.current;
-    const inner = innerRef.current;
-    const x = xRef.current;
-    persist(false);
-    if (!bubble || !chip || reduced()) {
-      setOpen(false);
-      return;
-    }
-    const a = bubble.getBoundingClientRect();
-    const b = chip.getBoundingClientRect();
-    if (a.width < 2 || b.width < 2) {
-      setOpen(false);
-      return;
-    }
-    busy.current = true;
-    const { dx, dy, sx, sy } = rectFlip(a, b);
-    bubble.style.pointerEvents = "none";
-    bubble.style.transformOrigin = "top left";
-    bubble.style.willChange = "transform";
-    if (x) {
-      x.style.transition = `opacity ${FADE_MS}ms ease-out`;
-      x.style.opacity = "0";
-    }
-    if (inner) {
-      inner.style.transformOrigin = "top left";
-      inner.style.willChange = "transform, opacity";
-      inner.style.transition = `transform ${SHELL_MS}ms ${EASE}, opacity 120ms ease-out ${SHELL_MS - 120}ms`;
-      inner.style.opacity = "0";
-      inner.style.transform = `scale(${1 / sx}, ${1 / sy})`;
-    }
-    void bubble.offsetWidth;
-    bubble.style.transition = `transform ${SHELL_MS}ms ${EASE}, border-radius ${SHELL_MS}ms ${EASE}`;
-    bubble.style.borderRadius = "999px";
-    bubble.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
-    onTransformEnd(bubble, SHELL_MS, () => {
-      clearMorph(bubble);
-      if (inner) clearMorph(inner);
-      if (x) clearMorph(x);
-      setOpen(false);
-      busy.current = false;
+    if (!bubble) return;
+    applyMorph(bubble, innerRef.current, xRef.current, k, drv.current.g);
+  }
+
+  function stopRaf() {
+    if (drv.current.raf) cancelAnimationFrame(drv.current.raf);
+    drv.current.raf = 0;
+  }
+
+  function finish(next: "open" | "closed") {
+    stopRaf();
+    phase.current = next;
+    setMorphing(false);
+    if (next === "closed") setOpen(false);
+    requestAnimationFrame(() => {
+      clearInline(bubbleRef.current);
+      clearInline(innerRef.current);
+      clearInline(xRef.current);
     });
   }
 
+  function tick(now: number) {
+    const d = drv.current;
+    const p = easeOutCubic((now - d.t0) / MORPH_MS);
+    d.k = d.k0 + (d.target - d.k0) * p;
+    paint(d.k);
+    if (p < 1) {
+      d.raf = requestAnimationFrame(tick);
+      return;
+    }
+    d.k = d.target;
+    paint(d.k);
+    finish(d.target === 1 ? "closed" : "open");
+  }
+
+  function retarget(target: 0 | 1) {
+    const d = drv.current;
+    d.k0 = d.k;
+    d.target = target;
+    d.t0 = performance.now();
+    phase.current = target === 1 ? "toChip" : "toBubble";
+    if (!d.raf) d.raf = requestAnimationFrame(tick);
+  }
+
+  function measure(): Flip | null {
+    const bubble = bubbleRef.current;
+    const chip = chipRef.current;
+    if (!bubble || !chip) return null;
+    const a = bubble.getBoundingClientRect();
+    const b = chip.getBoundingClientRect();
+    if (a.width < 2 || b.width < 2) return null;
+    return rectFlip(a, b);
+  }
+
+  function close() {
+    const intent = morphIntent(phase.current, "close");
+    if (intent === "ignore") return;
+    persist(false);
+    if (reduced()) {
+      finish("closed");
+      return;
+    }
+    if (intent === "reverse") {
+      retarget(1);
+      return;
+    }
+    clearInline(bubbleRef.current);
+    clearInline(innerRef.current);
+    const g = measure();
+    if (!g) {
+      finish("closed");
+      return;
+    }
+    drv.current.g = g;
+    drv.current.k = 0;
+    setMorphing(true);
+    retarget(1);
+  }
+
   function reopen() {
-    if (busy.current) return;
+    const intent = morphIntent(phase.current, "open");
+    if (intent === "ignore") return;
     persist(true);
+    if (reduced()) {
+      setOpen(true);
+      phase.current = "open";
+      return;
+    }
+    if (intent === "reverse") {
+      retarget(0);
+      return;
+    }
+    playOpen.current = true;
+    phase.current = "toBubble";
     setOpen(true);
   }
 
   useLayoutEffect(() => {
-    if (!hydrated) return;
-    if (skipFirstOpen.current) {
-      skipFirstOpen.current = false;
-      if (open) return;
+    if (!hydrated || !open || !playOpen.current) return;
+    if (reduced()) {
+      playOpen.current = false;
+      phase.current = "open";
+      return;
     }
-    if (!open) return;
-    const bubble = bubbleRef.current;
-    const chip = chipRef.current;
-    const inner = innerRef.current;
-    const x = xRef.current;
-    if (!bubble || !chip || reduced()) return;
-    const a = bubble.getBoundingClientRect();
-    const b = chip.getBoundingClientRect();
-    if (a.width < 2 || b.width < 2) return;
-    const { dx, dy, sx, sy } = rectFlip(a, b);
-    busy.current = true;
-    bubble.style.pointerEvents = "none";
-    bubble.style.transition = "none";
-    bubble.style.transformOrigin = "top left";
-    bubble.style.willChange = "transform";
-    bubble.style.borderRadius = "999px";
-    bubble.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
-    if (x) {
-      x.style.transition = "none";
-      x.style.opacity = "0";
+    playOpen.current = false;
+    clearInline(bubbleRef.current);
+    clearInline(innerRef.current);
+    const g = measure();
+    if (!g) {
+      phase.current = "open";
+      return;
     }
-    if (inner) {
-      inner.style.transition = "none";
-      inner.style.transformOrigin = "top left";
-      inner.style.transform = `scale(${1 / sx}, ${1 / sy})`;
-      inner.style.opacity = "1";
-    }
-    const play = () => {
-      bubble.style.transition = `transform ${SHELL_MS}ms ${EASE}, border-radius ${SHELL_MS}ms ${EASE}`;
-      bubble.style.transform = "none";
-      bubble.style.borderRadius = "16px";
-      if (inner) {
-        inner.style.transition = `transform ${SHELL_MS}ms ${EASE}`;
-        inner.style.transform = "none";
-      }
-      if (x) {
-        x.style.transition = `opacity 180ms ease-out 140ms`;
-        x.style.opacity = "1";
+    drv.current.g = g;
+    drv.current.k = 1;
+    paint(1);
+    setMorphing(true);
+    retarget(0);
+    return () => {
+      if (drv.current.k !== 0 && drv.current.target === 0) {
+        playOpen.current = true;
+        stopRaf();
       }
     };
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(play);
-    });
-    onTransformEnd(bubble, SHELL_MS, () => {
-      clearMorph(bubble);
-      if (inner) clearMorph(inner);
-      if (x) clearMorph(x);
-      busy.current = false;
-    });
-    return () => cancelAnimationFrame(raf);
   }, [hydrated, open]);
 
   if (!hydrated) return null;
 
   return (
-    <div className={`agent-dock${open ? " is-open" : ""}`}>
+    <div
+      className={`agent-dock${open ? " is-open" : ""}${morphing ? " is-morphing" : ""}`}
+    >
       <aside
         ref={bubbleRef}
         className="agent-bubble"
@@ -270,7 +290,7 @@ export function AgentDock() {
         className="agent-chip"
         onClick={reopen}
         aria-label={t(lang, "agentOpen")}
-        tabIndex={open ? -1 : 0}
+        tabIndex={open && !morphing ? -1 : 0}
       >
         <span className="agent-chip-mark">
           <img src={brand("workbuddy.svg")} alt="" />

@@ -146,6 +146,12 @@ h1 {
   opacity: 0;
   pointer-events: none;
 }
+.agent-dock.is-morphing .agent-chip {
+  pointer-events: auto;
+}
+.agent-dock.is-morphing .agent-chip:active {
+  transform: none;
+}
 .agent-chip-mark {
   width: 1.75rem;
   height: 1.75rem;
