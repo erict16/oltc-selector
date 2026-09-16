@@ -249,7 +249,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
   return out;
 }
 
-export const CLI_HELP = `oltc — Huaming OLTC/OCTC type selection (no prices)
+export const CLI_HELP = `oltc-selector — Huaming OLTC/OCTC type selection (no prices)
 
 Usage:
   oltc --iu 400 --um 72.5 --conn Y --reg W --pm 8

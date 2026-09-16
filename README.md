@@ -2,7 +2,7 @@
 
 填工况，给出 2025 目录里**最低满足**的型号。网页和 `oltc` CLI 共用同一份 `selectOltc` 引擎。
 
-**CLI（无报价）：** `npm i -g @erict16/oltc`  
+**CLI（无报价）：** `npm i -g @erict16/oltc-selector`  
 **网页：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) · [GitHub Pages](https://erict16.github.io/oltc-selector/)
 
 私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。
@@ -14,7 +14,7 @@
 不需要 clone 本仓库。不输出人民币、系数、报价。
 
 ```bash
-npm i -g @erict16/oltc
+npm i -g @erict16/oltc-selector
 
 oltc --iu 350 --um 40.5 --conn D --reg W --pm 8
 # CV2III-350D/40.5-10193W

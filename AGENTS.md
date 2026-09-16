@@ -21,7 +21,7 @@ Result card **开关结构** (not 工作位置): CV/CV2/SV/CVT/CZ → 复合式;
 
 ## CLI
 
-`oltc` (`npm i -g @erict16/oltc` or `npm run oltc -- …`) is the same engine. No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only).
+`oltc` / `oltc-selector` (`npm i -g @erict16/oltc-selector` or `npm run oltc -- …`) is the same engine. No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only).
 
 ## Tap codes
 

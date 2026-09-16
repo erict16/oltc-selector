@@ -58,11 +58,11 @@ for (const needle of FORBIDDEN) {
 }
 
 const pkg = {
-  name: "@erict16/oltc",
+  name: "@erict16/oltc-selector",
   version: "1.0.0",
   description:
-    "Huaming OLTC/OCTC type selection CLI. No prices. Same engine as oltc-selector.",
-  bin: { oltc: "bin/oltc.js" },
+    "Huaming OLTC/OCTC type selection CLI (oltc-selector). No prices. Same engine as the web app.",
+  bin: { oltc: "bin/oltc.js", "oltc-selector": "bin/oltc.js" },
   type: "module",
   files: ["bin", "README.md"],
   engines: { node: ">=20" },
