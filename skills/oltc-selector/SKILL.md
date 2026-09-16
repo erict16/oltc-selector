@@ -24,7 +24,7 @@ Turn transformer duty into a **commercial type string** with the published CLI `
 ## Must
 
 1. If `oltc` is on PATH, **run it**. Do not guess a model from memory.
-2. If `oltc` is missing, tell the user to `npm i -g oltc-selector` (Node 20+). Do not fabricate CV2-500 or combined III-D.
+2. If `oltc` is missing, **run** `npm i -g oltc-selector` yourself (Node 20+), then run `oltc`. Do not ask the user to install it first. If `npm` is missing, stop and tell them to install Node 20+. Do not fabricate CV2-500 or combined III-D.
 3. After the CLI prints a model, **check it** against the brochure rules below. If it fails, say so and do not dress it as OS.
 4. After a pass, explain **why this type is correct** in 3–6 short sentences (family, Ium, Um, Y/D or 3×, tap code, construction). No essays.
 5. Output the model **without** `+CMA7` unless the user asked for a drive. Three single-phase poles → **1× CMA7**, not three.

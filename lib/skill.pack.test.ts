@@ -14,6 +14,7 @@ describe("downloadable oltc-selector skill", () => {
   it("tells the agent to run oltc and forbids invented types", () => {
     const text = readFileSync(md, "utf8");
     expect(text).toContain("npm i -g oltc-selector");
+    expect(text).toContain("Do not ask the user to install it first");
     expect(text).toContain("oltc --iu");
     expect(text).toContain("CV2-500");
     expect(text).toContain("CM2III");
