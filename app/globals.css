@@ -138,25 +138,24 @@ h1 {
   border-radius: 999px;
   overflow: hidden;
   flex-shrink: 0;
+  background: #01c886;
 }
 .agent-chip-mark img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.18);
+  transform: scale(1.34);
+  transform-origin: center;
   display: block;
 }
 .agent-chip:hover {
-  border-color: color-mix(in oklch, var(--color-accent) 40%, var(--color-rule));
+  border-color: color-mix(in oklch, var(--color-ink) 22%, var(--color-rule));
 }
-.agent-chip:focus {
+.agent-dock .agent-chip:focus,
+.agent-dock .agent-chip:focus-visible {
   outline: none;
-}
-.agent-chip:focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 2px var(--color-paper),
-    0 0 0 3.5px var(--color-accent);
+  box-shadow: 0 8px 24px oklch(24% 0.02 258 / 0.1);
+  border-color: var(--color-ink-2);
 }
 .agent-x {
   position: absolute;
