@@ -5,6 +5,7 @@ import { commercialTypeExists } from "./typeExists";
 import {
   loadOsSales,
   replayOsRow,
+  soldTypeInResults,
   type OsSalesRow,
 } from "./osReplay";
 
@@ -48,6 +49,28 @@ function replayYear(year: 2025 | 2026) {
 }
 
 describe("OS Excel-backed replay (shipped selectOltc)", () => {
+  it("does not treat a weaker selector grade as the sold type", () => {
+    expect(
+      soldTypeInResults("CMIII-600Y/72.5C-10193G", [
+        "CMIII-600Y/72.5B-10193G",
+      ]),
+    ).toBe(false);
+    expect(
+      soldTypeInResults("CMIII-600Y/72.5C-10193G", [
+        "CMIII-600Y/72.5C-10193G",
+      ]),
+    ).toBe(true);
+  });
+
+  it("passes sold selector C through so E-M250012-015 is in results", () => {
+    const row = loadYear(2025).find((r) => r.serial === "E-M250012-015");
+    expect(row).toBeTruthy();
+    const r = replayOsRow(row!);
+    expect(r.skip, r.skip).toBeUndefined();
+    expect(r.soldCovered).toBe(true);
+    expect(r.models.some((m) => m.includes("/72.5C-"))).toBe(true);
+  });
+
   it("2025 OS: every emitted model exists; legal sold types stay in results", () => {
     const s = replayYear(2025);
     expect(s.rows).toBeGreaterThan(1);

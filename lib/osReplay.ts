@@ -2,7 +2,7 @@
  * OS (order spec) replay against shipped selectOltc.
  * Duty from transformer I / Ust / steps + sold Um / Y-D / phases.
  */
-import { SERIES } from "./catalog";
+import { SERIES, SIZE_ORDER, defaultSelectorSizeForUm } from "./catalog";
 import { selectOltc } from "./engine";
 import { commercialMatch, parseTypeString } from "./orderReplay";
 import { commercialTypeExists } from "./typeExists";
@@ -12,6 +12,7 @@ import type {
   PhaseCode,
   Regulation,
   SelectInput,
+  SelectorSize,
   SwitchingMedium,
 } from "./types";
 
@@ -215,7 +216,7 @@ export function buildOsSelectInput(
     stepVoltageV: ust,
     regulation: shortLinear ? "linear" : tm.regulation,
     mdu: "none",
-    selectorSize: "auto",
+    selectorSize: soldSelectorSize(parsed.selectorSize),
   };
 
   if (duty.dutyKind === "octc") {
@@ -259,21 +260,19 @@ export function loadOsSales(raw: unknown): OsSalesRow[] {
   throw new Error("unrecognised OS JSON shape");
 }
 
-function unitsCompatible(
-  a: NonNullable<ReturnType<typeof parseTypeString>>,
-  e: NonNullable<ReturnType<typeof parseTypeString>>,
-): boolean {
-  if (a.unitCount === e.unitCount) return true;
-  // OS often writes 3× of the same commercial type (set of tanks).
-  if (a.family === e.family && a.phases === e.phases) {
-    if (
-      (e.unitCount === 3 && a.unitCount === 1) ||
-      (a.unitCount === 3 && e.unitCount === 1)
-    ) {
-      return true;
-    }
+function soldSelectorSize(raw: string): SelectorSize | "auto" {
+  const sz = (raw || "").toUpperCase();
+  if (
+    sz === "A" ||
+    sz === "B" ||
+    sz === "C" ||
+    sz === "D" ||
+    sz === "DE" ||
+    sz === "E"
+  ) {
+    return sz;
   }
-  return false;
+  return "auto";
 }
 
 function oltcTapCatalogue(tap: string): boolean {
@@ -306,6 +305,13 @@ function soldCoversDuty(
   const s = SERIES.find((row) => row.code === parsed.family);
   if (!s) return false;
   if (parsed.currentA + 0.5 < input.throughCurrentA) return false;
+  if (s.usesSelectorSize && parsed.selectorSize) {
+    const min = defaultSelectorSizeForUm(parsed.umKv);
+    const soldIdx = SIZE_ORDER.indexOf(parsed.selectorSize as SelectorSize);
+    const minIdx = SIZE_ORDER.indexOf(min);
+    if (soldIdx >= 0 && minIdx >= 0 && soldIdx < minIdx) return false;
+    if (soldIdx < 0 && minIdx >= 0) return false;
+  }
   const tap = parsed.tapCode || "";
   if (s.dutyKind !== "octc" && !oltcTapCatalogue(tap) && !/^\d+x\d+/i.test(tap)) {
     return false;
@@ -324,21 +330,18 @@ function soldCoversDuty(
   return true;
 }
 
+function withoutUnitPrefix(model: string): string {
+  return model.replace(/^\d+x/i, "");
+}
+
 export function soldTypeInResults(sold: string, models: string[]): boolean {
-  if (models.some((m) => commercialMatch(m, sold, "full"))) return true;
-  if (models.some((m) => commercialMatch(m, sold, "family-i-um"))) return true;
-  const e = parseTypeString(sold);
-  if (!e) return false;
+  const want = withoutUnitPrefix(sold);
   return models.some((m) => {
-    const a = parseTypeString(m);
-    if (!a) return false;
-    if (a.family !== e.family && !((a.family === "SHZVG" && e.family === "SHZV") || (a.family === "SHZV" && e.family === "SHZVG") || (a.family === "WSL" && e.family === "WDL") || (a.family === "WDL" && e.family === "WSL"))) {
-      return false;
-    }
-    if (a.phases !== e.phases) return false;
-    if (a.currentA !== e.currentA) return false;
-    if (a.umKv !== e.umKv) return false;
-    return unitsCompatible(a, e);
+    const got = withoutUnitPrefix(m);
+    return (
+      commercialMatch(got, want, "full") ||
+      commercialMatch(got, want, "family-i-um")
+    );
   });
 }
 
