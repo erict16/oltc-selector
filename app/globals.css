@@ -601,8 +601,14 @@ select:open {
   font-weight: 500;
   color: var(--color-muted);
 }
-.guide-more .guide-quote + .guide-k {
+.guide-more .guide-result + .guide-k {
   margin-top: 2rem;
+}
+.guide-result {
+  margin: 0.45rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-muted);
 }
 .guide-more-body {
   margin: 0.55rem 0 0;

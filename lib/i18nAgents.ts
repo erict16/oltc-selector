@@ -13,6 +13,7 @@ export type AgentGuideCopy = {
   say: string;
   sayBody: string;
   sayBody2: string;
+  sayResult2: string;
   copy: string;
   copied: string;
   limit: string;
@@ -34,6 +35,8 @@ const zh: AgentGuideCopy = {
     "帮我选个有载开关：25 MVA，110±8×1.25%/10.5 kV，Dyn11，高压侧中性点调压，要真空。",
   sayBody2:
     "帮我选个一拖二的：110 kV，有载 ±8×1.25%，无载 5 档，350 A，高压侧中性点调压。",
+  sayResult2:
+    "它会给你两个型号：CV2III-350Y/72.5-10193W（有载）和 WSLIV-600Y/72.5-6x5A（无载）。",
   copy: "复制",
   copied: "已复制",
   limit: "出 OS 或采购前，需要工程确认。",
@@ -55,6 +58,8 @@ const en: AgentGuideCopy = {
     "Pick an on-load tap-changer for me: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, taps at the HV neutral, vacuum.",
   sayBody2:
     "Pick one for a transformer with both on-load and off-circuit taps: 110 kV, on-load ±8×1.25%, off-circuit 5 positions, 350 A, taps at the HV neutral.",
+  sayResult2:
+    "It answers with two types: CV2III-350Y/72.5-10193W (on-load) and WSLIV-600Y/72.5-6x5A (off-circuit).",
   copy: "Copy",
   copied: "Copied",
   limit: "Get engineering sign-off before an OS or a purchase.",
@@ -76,6 +81,8 @@ const vi: AgentGuideCopy = {
     "Chọn giúp tôi bộ chuyển nấc có tải: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, điều áp ở trung tính cao áp, chân không.",
   sayBody2:
     "Chọn giúp tôi cho máy biến áp vừa có tải vừa không tải: 110 kV, có tải ±8×1.25%, không tải 5 nấc, 350 A, điều áp ở trung tính cao áp.",
+  sayResult2:
+    "Nó trả về hai kiểu: CV2III-350Y/72.5-10193W (có tải) và WSLIV-600Y/72.5-6x5A (không tải).",
   copy: "Chép",
   copied: "Đã chép",
   limit: "Trước OS hoặc mua hàng cần kỹ sư xác nhận.",
@@ -97,6 +104,8 @@ const es: AgentGuideCopy = {
     "Elíjame un cambiador en carga: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, regulación en el neutro de AT, vacío.",
   sayBody2:
     "Elíjame uno para un transformador con regulación en carga y sin carga: 110 kV, en carga ±8×1.25%, sin carga 5 posiciones, 350 A, regulación en el neutro de AT.",
+  sayResult2:
+    "Responde con dos tipos: CV2III-350Y/72.5-10193W (en carga) y WSLIV-600Y/72.5-6x5A (sin carga).",
   copy: "Copiar",
   copied: "Copiado",
   limit: "Antes de un OS o una compra, confírmelo con ingeniería.",
@@ -118,6 +127,8 @@ const tr: AgentGuideCopy = {
     "Bana yük altında kademe değiştirici seç: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, YG tarafı yıldız noktasından ayar, vakum.",
   sayBody2:
     "Hem yük altında hem yüksüz kademeli bir trafo için seç: 110 kV, yük altında ±8×1.25%, yüksüz 5 kademe, 350 A, YG yıldız noktasından ayar.",
+  sayResult2:
+    "İki tip verir: CV2III-350Y/72.5-10193W (yük altında) ve WSLIV-600Y/72.5-6x5A (yüksüz).",
   copy: "Kopyala",
   copied: "Kopyalandı",
   limit: "OS veya satın almadan önce mühendis onayı alın.",
@@ -139,6 +150,8 @@ const ru: AgentGuideCopy = {
     "Подбери РПН: 25 МВА, 110±8×1.25%/10.5 кВ, Dyn11, регулирование в нейтрали ВН, вакуум.",
   sayBody2:
     "Подбери для трансформатора с РПН и ПБВ: 110 кВ, под нагрузкой ±8×1.25%, без нагрузки 5 ступеней, 350 А, регулирование в нейтрали ВН.",
+  sayResult2:
+    "Получается два типа: CV2III-350Y/72.5-10193W (РПН) и WSLIV-600Y/72.5-6x5A (ПБВ).",
   copy: "Копировать",
   copied: "Скопировано",
   limit: "Перед OS или закупкой нужно подтверждение инженера.",
