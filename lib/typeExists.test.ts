@@ -71,6 +71,28 @@ describe("selectOltc never emits a non-brochure type", () => {
     expect(out.results.some((r) => STAR_ONLY_III_D.test(r.model))).toBe(false);
   });
 
+  it("500 A Imax never invents CV2-500; next legal Ium is 600", () => {
+    const out = selectOltc(
+      vacDelta({ throughCurrentA: 500, umKv: 40.5, stepVoltageV: 1000 }),
+    );
+    expect(out.ok).toBe(true);
+    const models = out.results.map((r) => r.model);
+    expect(models.some((m) => /CV2III-500/.test(m))).toBe(false);
+    expect(out.results[0].model).toBe("CV2III-600D/40.5-10193W");
+    expect(out.results[0].currentA).toBe(600);
+    assertLegal(models);
+  });
+
+  it("10193W is 19 mechanical positions; three mids share one voltage → 17 transformer steps", () => {
+    const out = selectOltc(vacDelta({ umKv: 40.5, throughCurrentA: 350 }));
+    expect(out.results[0].tapCode).toBe("10193W");
+    expect(out.results[0].positions).toBe(19);
+    const n = 8;
+    const mid = 3;
+    expect(2 * n + mid).toBe(19);
+    expect(2 * n + 1).toBe(17);
+  });
+
   it("compound Δ still returns CV2/CV/SV III-D when those families cover", () => {
     const cv2 = selectOltc(vacDelta({ umKv: 40.5, throughCurrentA: 350 }));
     expect(cv2.results[0].model).toMatch(/^CV2III-\d+D\//);

@@ -86,4 +86,53 @@ describe("oltc CLI", () => {
     expect(input.throughCurrentA).toBeGreaterThan(130);
     expect(input.umKv).toBe(72.5);
   });
+
+  it("--iu is Imax: --k does not multiply through-current", () => {
+    const iu = cliToSelectInput(
+      parseCliArgs([
+        "--iu",
+        "350",
+        "--k",
+        "2",
+        "--um",
+        "40.5",
+        "--conn",
+        "D",
+        "--reg",
+        "W",
+        "--pm",
+        "8",
+      ]),
+    );
+    expect(iu.throughCurrentA).toBe(350);
+    const withK = capture([
+      "--iu",
+      "350",
+      "--k",
+      "2",
+      "--um",
+      "40.5",
+      "--conn",
+      "D",
+      "--reg",
+      "W",
+      "--pm",
+      "8",
+    ]);
+    const bare = capture([
+      "--iu",
+      "350",
+      "--um",
+      "40.5",
+      "--conn",
+      "D",
+      "--reg",
+      "W",
+      "--pm",
+      "8",
+    ]);
+    expect(withK.code).toBe(0);
+    expect(withK.out).toBe(bare.out);
+    expect(withK.out.trim().split(/\r?\n/)[0]).toBe("CV2III-350D/40.5-10193W");
+  });
 });

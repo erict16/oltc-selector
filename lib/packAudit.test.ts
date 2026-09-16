@@ -22,8 +22,10 @@ describe("selection-only pack", () => {
     expect(packedPkg.bin).toEqual({ oltc: "bin/oltc.js" });
     const js = readFileSync(bin, "utf8");
     expect(js.includes("listRmb")).toBe(false);
+    expect(js.includes('"listRmb"')).toBe(false);
     expect(js.includes("basePrices.data.json")).toBe(false);
     expect(js.includes("anthonyQs")).toBe(false);
+    expect(js).not.toMatch(/coeff|CNY|USD/);
 
     const argv = ["--iu", "350", "--um", "40.5", "--conn", "D", "--reg", "W", "--pm", "8"];
     const once = spawnSync(process.execPath, [bin, ...argv], {
