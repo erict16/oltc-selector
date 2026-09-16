@@ -88,9 +88,6 @@ export function AgentsGuide() {
             onCopy={onCopy}
           />
         </div>
-        <p className="guide-note mt-2.5 text-[0.85rem] leading-relaxed text-[var(--color-muted)]">
-          {c.runNote}
-        </p>
       </section>
 
       <p className="guide-limit">{c.limit}</p>

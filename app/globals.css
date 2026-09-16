@@ -601,7 +601,7 @@ select:open {
   font-weight: 500;
   color: var(--color-muted);
 }
-.guide-more .guide-note + .guide-k {
+.guide-more .guide-quote + .guide-k {
   margin-top: 2rem;
 }
 .guide-more-body {
