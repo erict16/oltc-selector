@@ -1,9 +1,9 @@
 name: oltc-selector
 version: 1.1.0
-display_name: OLTC Selector
-display_name_en: OLTC Selector
-description_zh: 用 oltc 命令选型，并对照样本册检查型号是否存在、说明为何正确。
-description_en: Run oltc to pick a tap-changer type, then check the brochure and explain why.
+display_name: 华明分接开关选型
+display_name_en: Huaming Tap-Changer Selector
+description_zh: 用 oltc 命令选华明分接开关型号，对照样本册检查是否存在、说明为何正确。
+description_en: Run oltc to pick a Huaming tap-changer type, then check the brochure and explain why.
 author: Eric Tan
 license: MIT
 category: engineering

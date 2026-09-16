@@ -1,25 +1,26 @@
 ---
 name: oltc-selector
-display_name: OLTC Selector
-display_name_en: OLTC Selector
+display_name: 华明分接开关选型
+display_name_en: Huaming Tap-Changer Selector
 description: >
   Select an on-load or off-circuit tap-changer type with the oltc CLI.
-  TRIGGER when the user asks for 选型, OLTC, OCTC, type designation, CV2, CM2,
-  SHZV, HWV, WSL, Imax, Um, 一拖二 (无载带有载), or to check whether a model exists.
+  TRIGGER when the user asks for 选型, 分接开关, 有载开关, 无载开关, 华明,
+  OLTC, OCTC, type designation, CV2, CM2, SHZV, HWV, WSL, Imax, Um,
+  一拖二 (无载带有载), or to check whether a model exists.
   DO NOT TRIGGER for quotation, price, OS commercial terms, or shipping docs.
-description_zh: 用 oltc 命令选型，并对照样本册检查型号是否存在、说明为何正确。
-description_en: Run oltc to pick a tap-changer type, then check the brochure and explain why.
+description_zh: 用 oltc 命令选华明分接开关型号，对照样本册检查是否存在、说明为何正确。
+description_en: Run oltc to pick a Huaming tap-changer type, then check the brochure and explain why.
 version: 1.1.0
 author: Eric Tan
 license: MIT
 category: engineering
 ---
 
-# OLTC Selector (CLI)
+# 华明分接开关选型 (oltc CLI)
 
-Turn transformer duty into a **commercial type string** with the published CLI `oltc` (`npm i -g oltc-selector`). Same engine as https://oltc-selector.vercel.app/
+Turn transformer duty into a **Huaming (华明) commercial type string** with the published CLI `oltc` (`npm i -g oltc-selector`). Same engine as https://oltc-selector.vercel.app/
 
-**No prices. No quotation. No inventing types.**
+**Huaming catalogue only — other vendors are out of scope. No prices. No quotation. No inventing types.**
 
 ## Must
 
