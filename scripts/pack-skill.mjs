@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = path.join(root, "skills", "oltc-selector");
 const OUT = path.join(root, "public", "skills", "oltc-selector.zip");
-const FILES = ["SKILL.md", "references/brochure-check.md"];
+const FILES = ["SKILL.md", "manifest.yaml", "references/brochure-check.md"];
 
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256);

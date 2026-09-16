@@ -11,7 +11,7 @@ description_zh: 用 oltc 命令选型，并对照样本册检查型号是否存�
 description_en: Run oltc to pick a tap-changer type, then check the brochure and explain why.
 version: 1.1.0
 author: Eric Tan
-license: UNLICENSED
+license: MIT
 category: engineering
 ---
 
