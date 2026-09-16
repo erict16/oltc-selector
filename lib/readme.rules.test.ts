@@ -10,7 +10,7 @@ describe("README selection rules", () => {
     expect(md).toContain("combined III-D");
     expect(md).toMatch(/WSL\s*\/\s*WDL existence is 2025-list row keys/);
     expect(md).toContain("Minimum-adequate");
-    expect(md).toContain("@erict16/oltc-selector");
+    expect(md).toContain("npm i -g oltc-selector");
     expect(md).toContain("--octc");
     expect(md).toContain("--structure");
     expect(md).toContain("--series");

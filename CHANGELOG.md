@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- CLI `@erict16/oltc-selector` (commands `oltc` / `oltc-selector`): same `selectOltc` engine, no prices. `--octc`, `--structure`, `--series`.
+- CLI package `oltc-selector` (`npm i -g oltc-selector`), command `oltc`. Same `selectOltc` engine, no prices. `--octc`, `--structure`, `--series`.
 - WSL/WDL existence uses priceless 2025-list keys, not list RMB.
 - 2025 and 2026 OS Excel replay: emitted models must exist; legal sold types stay in the ranked list.
 - Engine drops commercial strings the brochure / 2025 list does not have (combined III-D, CV2-500, compound grade letters, WSL rows missing from the list). CV2/HWV/CV/SV III-D still emit.

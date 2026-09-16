@@ -18,7 +18,8 @@ describe("selection-only pack", () => {
     const packedPkg = JSON.parse(
       readFileSync(path.join(root, "pack", "package.json"), "utf8"),
     );
-    expect(packedPkg.name).toBe("@erict16/oltc-selector");
+    expect(packedPkg.name).toBe("oltc-selector");
+    expect(packedPkg.bin).toEqual({ oltc: "bin/oltc.js" });
     const js = readFileSync(bin, "utf8");
     expect(js.includes("listRmb")).toBe(false);
     expect(js.includes("basePrices.data.json")).toBe(false);
