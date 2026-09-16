@@ -22,7 +22,7 @@ const zh: AgentGuideCopy = {
   back: "选型",
   title: "让 AI 助手帮你选型",
   lead: "下载技能包，传给你在用的 AI 助手。把变压器参数发给它，它选型号。",
-  how: "在助手里找上传技能的入口，WorkBuddy 里叫 Upload skill，别的助手也有类似的导入。把 zip 传进去就行。机器上要有 Node，技能会自己装好 oltc 命令，不用你动手。之后把变压器参数直接发给它，铭牌上那种写法它就看得懂，会自己算电流、对照样本册。样本册里没有的型号出不来，包里也没有报价。",
+  how: "在助手里找上传技能的入口，WorkBuddy 里叫 Upload skill，别的助手也有类似的导入。把 zip 传进去就行。之后把变压器参数直接发给它，铭牌上那种写法它就看得懂，会自己算电流、对照样本册。",
   dl: "下载技能包",
   cli: "想自己跑命令",
   cliBody:
@@ -43,7 +43,7 @@ const en: AgentGuideCopy = {
   back: "Selector",
   title: "Let an AI assistant pick the type",
   lead: "Download the skill pack and upload it to the AI assistant you already use. Send it the transformer data, it picks the type.",
-  how: "Find the skill upload entry in your assistant. In WorkBuddy it is called Upload skill; other assistants have a similar import. Send the zip in. Node needs to be on the machine, and the skill installs the oltc command by itself. Then send the transformer data as written on the nameplate. It does the current math itself and checks the brochure: a type missing from the brochure does not come out, and the pack has no prices.",
+  how: "Find the skill upload entry in your assistant. In WorkBuddy it is called Upload skill; other assistants have a similar import. Send the zip in. Then send the transformer data as written on the nameplate. It does the current math itself and checks the brochure.",
   dl: "Download the skill pack",
   cli: "Want to run it yourself",
   cliBody:
@@ -65,7 +65,7 @@ const vi: AgentGuideCopy = {
   back: "Chọn kiểu",
   title: "Để trợ lý AI chọn kiểu giúp bạn",
   lead: "Tải gói skill, tải lên trợ lý AI bạn đang dùng. Gửi số liệu máy biến áp cho nó, nó chọn kiểu.",
-  how: "Tìm mục tải skill trong trợ lý: trong WorkBuddy là Upload skill, trợ lý khác có mục nhập tương tự. Gửi file zip vào. Máy phải có Node, skill tự cài lệnh oltc, bạn không cần làm gì. Sau đó cứ gửi số liệu máy biến áp như ghi trên nhãn máy. Nó tự tính dòng và đối catalogue: kiểu không có trong catalogue thì không ra, gói không kèm giá.",
+  how: "Tìm mục tải skill trong trợ lý: trong WorkBuddy là Upload skill, trợ lý khác có mục nhập tương tự. Gửi file zip vào. Sau đó cứ gửi số liệu máy biến áp như ghi trên nhãn máy. Nó tự tính dòng và đối catalogue.",
   dl: "Tải gói skill",
   cli: "Muốn tự chạy lệnh",
   cliBody:
@@ -87,7 +87,7 @@ const es: AgentGuideCopy = {
   back: "Selector",
   title: "Que un asistente de IA elija el tipo",
   lead: "Descargue el skill y súbalo al asistente de IA que ya usa. Envíele los datos del transformador y él elige el tipo.",
-  how: "Busque la opción de subir skills en su asistente: en WorkBuddy se llama Upload skill; otros asistentes tienen una importación parecida. Envíe el zip. El equipo necesita Node y el skill instala el comando oltc por sí solo. Luego envíe los datos del transformador tal como figuran en la placa. Él hace las cuentas de corriente y comprueba el catálogo: lo que no está en el catálogo no existe y el paquete no trae precios.",
+  how: "Busque la opción de subir skills en su asistente: en WorkBuddy se llama Upload skill; otros asistentes tienen una importación parecida. Envíe el zip. Luego envíe los datos del transformador tal como figuran en la placa. Él hace las cuentas de corriente y comprueba el catálogo.",
   dl: "Descargar el skill",
   cli: "Si quiere ejecutarlo usted mismo",
   cliBody:
@@ -109,7 +109,7 @@ const tr: AgentGuideCopy = {
   back: "Seçici",
   title: "Tipi bir AI asistan seçsin",
   lead: "Skill paketini indirip kullandığınız AI asistana yükleyin. Trafo verilerini gönderin, o tipi seçsin.",
-  how: "Asistanınızda skill yükleme girişini bulun: WorkBuddy'de buna Upload skill denir, diğer asistanlarda benzer bir içe aktarma vardır. Zip'i gönderin. Makinede Node olmalı; skill oltc komutunu kendisi kurar, size iş düşmez. Sonra trafo verilerini etiketinde yazdığı gibi gönderin. Akım hesabını kendisi yapar, katalogla kontrol eder: katalogda olmayan tip çıkmaz, pakette fiyat yok.",
+  how: "Asistanınızda skill yükleme girişini bulun: WorkBuddy'de buna Upload skill denir, diğer asistanlarda benzer bir içe aktarma vardır. Zip'i gönderin. Sonra trafo verilerini etiketinde yazdığı gibi gönderin. Akım hesabını kendisi yapar, katalogla kontrol eder.",
   dl: "Skill paketini indir",
   cli: "Kendiniz çalıştırmak isterseniz",
   cliBody:
@@ -131,7 +131,7 @@ const ru: AgentGuideCopy = {
   back: "Подбор",
   title: "Пусть ИИ-помощник подберёт тип",
   lead: "Скачайте skill и загрузите его в ИИ-помощника, которым пользуетесь. Отправьте ему данные трансформатора, он выберет тип.",
-  how: "Найдите в помощнике загрузку skill: в WorkBuddy это Upload skill, у других есть похожий импорт. Отправьте zip. На машине должен быть Node, команду oltc skill поставит сам. Дальше просто отправьте данные трансформатора, как написано на шильдике. Ток он посчитает сам и сверит с каталогом: типов вне каталога не будет, цен в пакете нет.",
+  how: "Найдите в помощнике загрузку skill: в WorkBuddy это Upload skill, у других есть похожий импорт. Отправьте zip. Дальше просто отправьте данные трансформатора, как написано на шильдике. Ток он посчитает сам и сверит с каталогом.",
   dl: "Скачать skill",
   cli: "Если хотите запускать сами",
   cliBody:
