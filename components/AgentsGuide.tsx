@@ -64,6 +64,8 @@ export function AgentsGuide() {
       <p className="guide-how">{c.how}</p>
 
       <section className="guide-more">
+        <h2 className="guide-k">{c.say}</h2>
+        <blockquote className="guide-quote">{c.sayBody}</blockquote>
         <h2 className="guide-k">{c.cli}</h2>
         <p className="guide-more-body">{c.cliBody}</p>
         <div className="guide-term">
@@ -89,8 +91,6 @@ export function AgentsGuide() {
         <p className="guide-note mt-2.5 text-[0.85rem] leading-relaxed text-[var(--color-muted)]">
           {c.runNote}
         </p>
-        <h2 className="guide-k">{c.say}</h2>
-        <blockquote className="guide-quote">{c.sayBody}</blockquote>
       </section>
 
       <p className="guide-limit">{c.limit}</p>
