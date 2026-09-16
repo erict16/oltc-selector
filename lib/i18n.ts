@@ -82,8 +82,7 @@ const en: Dict = {
   title: "OLTC Selector",
   subtitle: "Enter the duty, then Select.",
   agentTitle: "Let an AI assistant pick the type",
-  agentBody:
-    "Send it the transformer data. It runs oltc, checks the catalogue, and never invents a type.",
+  agentBody: "Send it the transformer data, it picks the type.",
   agentCta: "See how",
   agentClose: "Close",
   agentChip: "Selection assistant",
@@ -264,7 +263,7 @@ const zh: Dict = {
   title: "有载开关选型",
   subtitle: "填工况，点选型。",
   agentTitle: "把选型交给 AI 助手",
-  agentBody: "把变压器参数直接发给它。它跑 oltc 选型，对照样本册，不编型号。",
+  agentBody: "把变压器参数发给它，它选型号。",
   agentCta: "看看怎么用",
   agentClose: "关闭",
   agentChip: "选型助手",
@@ -443,8 +442,7 @@ const vi: Dict = {
   title: "Chọn OLTC",
   subtitle: "Nhập thông số, bấm Chọn.",
   agentTitle: "Để trợ lý AI chọn kiểu",
-  agentBody:
-    "Gửi số liệu máy biến áp cho nó. Nó chạy oltc, đối catalogue, không bịa kiểu.",
+  agentBody: "Gửi số liệu máy biến áp cho nó, nó chọn kiểu.",
   agentCta: "Xem cách làm",
   agentClose: "Đóng",
   agentChip: "Trợ lý chọn kiểu",
@@ -625,8 +623,7 @@ const es: Dict = {
   title: "Selector OLTC",
   subtitle: "Introduzca el régimen y pulse Seleccionar.",
   agentTitle: "Que un asistente de IA elija el tipo",
-  agentBody:
-    "Envíele los datos del transformador. Ejecuta oltc, comprueba el catálogo y no inventa tipos.",
+  agentBody: "Envíele los datos del transformador y él elige el tipo.",
   agentCta: "Cómo hacerlo",
   agentClose: "Cerrar",
   agentChip: "Asistente de selección",
@@ -806,8 +803,7 @@ const tr: Dict = {
   title: "OLTC Seçici",
   subtitle: "İşletme verilerini girin, Seç’e basın.",
   agentTitle: "Seçimi bir AI asistana bırakın",
-  agentBody:
-    "Trafo verilerini ona gönderin. oltc'yi çalıştırır, katalogu kontrol eder, tip uydurmaz.",
+  agentBody: "Trafo verilerini gönderin, o tipi seçsin.",
   agentCta: "Nasıl yapılır",
   agentClose: "Kapat",
   agentChip: "Seçim asistanı",
@@ -986,8 +982,7 @@ const ru: Dict = {
   title: "Подбор РПН",
   subtitle: "Введите режим и нажмите «Подобрать».",
   agentTitle: "Поручите подбор ИИ-помощнику",
-  agentBody:
-    "Отправьте ему данные трансформатора. Он запустит oltc, сверит с каталогом и не выдумает тип.",
+  agentBody: "Отправьте ему данные трансформатора, он выберет тип.",
   agentCta: "Как это работает",
   agentClose: "Закрыть",
   agentChip: "Помощник подбора",
