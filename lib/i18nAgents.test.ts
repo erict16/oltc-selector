@@ -24,14 +24,17 @@ describe("agent guide copy", () => {
     }
   });
 
-  it("step 1 splits WorkBuddy and other assistants, with a local install prompt", () => {
+  it("step 1: WorkBuddy block is Chinese-only, prompt is localized", () => {
     const zh = agentGuide("zh");
+    expect(zh.s1b).toContain("WorkBuddy");
+    expect(zh.s1b).toContain("技能");
     expect(zh.s1wb).toBe("WorkBuddy");
-    expect(zh.s1wbBody).toContain("华明");
-    expect(zh.s1other).toContain("ChatGPT");
+    expect(zh.s1other).toContain("ChatGPT Work");
     expect(zh.s1prompt).toContain("请根据");
     expect(zh.wbShot).toContain("WorkBuddy");
+    expect(agentGuide("en").s1wb).toBeUndefined();
     expect(agentGuide("en").wbShot).toBeUndefined();
+    expect(agentGuide("en").s1other).toBeUndefined();
     expect(agentGuide("en").s1prompt).toMatch(/^Follow /);
     expect(zh.s1prompt).not.toBe(agentGuide("en").s1prompt);
     expect(zh.s2q).toContain("一拖二");
@@ -40,14 +43,14 @@ describe("agent guide copy", () => {
       const c = agentGuide(id);
       expect(c.s1prompt).toContain("skillhub.cn/install/skillhub.md");
       expect(c.s1prompt).toContain("@indiv-erict16/huaming-oltc-selector");
-      expect(c.s1wb.length).toBeGreaterThan(2);
-      expect(c.s1other.length).toBeGreaterThan(4);
+      if (id !== "zh") expect(c.s1wb).toBeUndefined();
     }
     const blob = LANG_OPTIONS.map(({ id }) =>
       Object.values(agentGuide(id)).join("\n"),
     ).join("\n");
     expect(blob).not.toMatch(/它自己跑 oltc/);
     expect(blob).not.toMatch(/有载、无载各跑一次/);
+    expect(blob).not.toMatch(/两条路/);
   });
 
   it("extra cases cover dry CZ and 3xSHZV, with no customer names", () => {

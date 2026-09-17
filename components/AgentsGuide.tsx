@@ -43,6 +43,20 @@ export function AgentsGuide() {
     copiedTimer.current = setTimeout(() => setCopied(null), 2000);
   };
 
+  const promptBox = (
+    <div className="guide-prompt">
+      <p className="guide-prompt-text">{c.s1prompt}</p>
+      <CopyBtn
+        id="install-prompt"
+        text={c.s1prompt}
+        copied={copied}
+        copyLabel={c.copy}
+        copiedLabel={c.copied}
+        onCopy={onCopy}
+      />
+    </div>
+  );
+
   return (
     <article
       lang={lang}
@@ -71,36 +85,34 @@ export function AgentsGuide() {
           </span>
           <div className="guide-step-body">
             <h2>{c.s1t}</h2>
-            <p>{c.s1b}</p>
-            <div className="guide-way">
-              <p className="guide-way-k">{c.s1wb}</p>
-              <p>{c.s1wbBody}</p>
-              {c.wbShot ? (
-                <figure className="guide-shot">
-                  <img
-                    src={`${BASE}/agents/workbuddy-skillhub.jpg`}
-                    alt={c.wbShotAlt ?? c.wbShot}
-                    width={1936}
-                    height={1243}
-                  />
-                </figure>
-              ) : null}
-            </div>
-            <div className="guide-way">
-              <p className="guide-way-k">{c.s1other}</p>
-              <p>{c.s1otherBody}</p>
-              <div className="guide-prompt">
-                <p className="guide-prompt-text">{c.s1prompt}</p>
-                <CopyBtn
-                  id="install-prompt"
-                  text={c.s1prompt}
-                  copied={copied}
-                  copyLabel={c.copy}
-                  copiedLabel={c.copied}
-                  onCopy={onCopy}
-                />
+            {c.s1wb ? (
+              <div className="guide-way">
+                <p className="guide-way-k">{c.s1wb}</p>
+                <p>{c.s1b}</p>
+                {c.s1wbBody ? <p>{c.s1wbBody}</p> : null}
+                {c.wbShot ? (
+                  <figure className="guide-shot">
+                    <img
+                      src={`${BASE}/agents/workbuddy-skillhub.jpg`}
+                      alt={c.wbShotAlt ?? c.wbShot}
+                      width={1936}
+                      height={1243}
+                    />
+                  </figure>
+                ) : null}
               </div>
-            </div>
+            ) : (
+              <p>{c.s1b}</p>
+            )}
+            {c.s1other ? (
+              <div className="guide-way">
+                <p>{c.s1other}</p>
+                {c.s1otherBody ? <p>{c.s1otherBody}</p> : null}
+                {promptBox}
+              </div>
+            ) : (
+              promptBox
+            )}
             <p className="guide-alt">
               {c.s1alt}{" "}
               <a href={ZIP} download="huaming-oltc-selector.zip">
