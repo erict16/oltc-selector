@@ -3,10 +3,10 @@
  * Bundle selection-only CLI into pack/ for npm publish.
  * Must not include list RMB, coefficients, or quote fixtures.
  */
-import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildSync } from "esbuild";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const packDir = path.join(root, "pack");
@@ -21,30 +21,21 @@ const FORBIDDEN = [
   "vietnam\": 1.1",
 ];
 
-function run(cmd, args, cwd = root) {
-  const r = spawnSync(cmd, args, { cwd, encoding: "utf8", shell: false });
-  if (r.status !== 0) {
-    throw new Error(
-      `${cmd} ${args.join(" ")}\n${r.stdout || ""}\n${r.stderr || ""}`,
-    );
-  }
-  return r.stdout || "";
-}
-
 rmSync(packDir, { recursive: true, force: true });
 mkdirSync(binDir, { recursive: true });
 
-const esbuild = path.join(root, "node_modules", "esbuild", "bin", "esbuild");
+// JS API, not the bin shim: on Unix the postinstall replaces
+// node_modules/esbuild/bin/esbuild with the native binary, so
+// `node .../bin/esbuild` crashes there (ELF is not JS).
 const outFile = path.join(binDir, "oltc.js");
-run(process.execPath, [
-  esbuild,
-  path.join(root, "scripts", "oltc.ts"),
-  "--bundle",
-  "--platform=node",
-  "--format=esm",
-  "--target=node20",
-  `--outfile=${outFile}`,
-]);
+buildSync({
+  entryPoints: [path.join(root, "scripts", "oltc.ts")],
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  target: "node20",
+  outfile: outFile,
+});
 
 let bundled = readFileSync(outFile, "utf8");
 if (!bundled.startsWith("#!")) {
