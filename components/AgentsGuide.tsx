@@ -132,25 +132,28 @@ export function AgentsGuide() {
 
       <details className="guide-cli">
         <summary>{c.cli}</summary>
-        <div className="guide-term">
-          <Cmd
-            id="install"
-            label={c.install}
-            command={INSTALL}
-            copied={copied}
-            copyLabel={c.copy}
-            copiedLabel={c.copied}
-            onCopy={onCopy}
-          />
-          <Cmd
-            id="run"
-            label={c.run}
-            command={RUN}
-            copied={copied}
-            copyLabel={c.copy}
-            copiedLabel={c.copied}
-            onCopy={onCopy}
-          />
+        <div className="guide-cli-wrap">
+          <p className="guide-cli-body">{c.cliBody}</p>
+          <div className="guide-term">
+            <Cmd
+              id="install"
+              label={c.install}
+              command={INSTALL}
+              copied={copied}
+              copyLabel={c.copy}
+              copiedLabel={c.copied}
+              onCopy={onCopy}
+            />
+            <Cmd
+              id="run"
+              label={c.run}
+              command={RUN}
+              copied={copied}
+              copyLabel={c.copy}
+              copiedLabel={c.copied}
+              onCopy={onCopy}
+            />
+          </div>
         </div>
       </details>
 

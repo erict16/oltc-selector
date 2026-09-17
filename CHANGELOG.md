@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- /agents polish: 50rem container, copy affordance is a bordered pill with icon, step-1 names ChatGPT, dual-duty example reads as a full sentence. CLI disclosure renamed 想自己跑 CLI？ with an engine-sharing note (same engine as the web app, the skill runs the oltc CLI) and a 240ms reveal animation. Mobile 375px verified.
 - /agents rebuilt as a three-step rail (装 → 发 → 拿型号). Step 1 is assistant-agnostic: the SkillHub install prompt works for WorkBuddy, Claude Code, Cursor alike; zip upload stays as the fallback. The embedded example is now the 一拖二 dual-duty case with both type chips. CLI lives behind a disclosure. Dead guide CSS removed.
 - /agents page widened (38rem → 46rem) and gains a WorkBuddy card: copy the one-line install prompt (SkillHub 对话安装 path, no zip needed) plus a link to the SkillHub detail page. Zip download stays as the any-assistant fallback. Six locales. No workbuddy:// deep link exists; the prompt is the supported one-tap path.
 - Skill ships the Huaming logo as `assets/icon.png` in both variants. pack-skill only LF-normalizes text files now; binary entries stay byte-identical (a PNG through utf8 read would corrupt). Published as `global/huaming-oltc-selector@1.2.3`.

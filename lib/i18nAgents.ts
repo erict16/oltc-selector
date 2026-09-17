@@ -19,6 +19,7 @@ export type AgentGuideCopy = {
   tagOltc: string;
   tagOctc: string;
   cli: string;
+  cliBody: string;
   install: string;
   run: string;
   copy: string;
@@ -44,7 +45,8 @@ const zh: AgentGuideCopy = {
   s3note: "两台都过了样本册检查，可以拿去询价。",
   tagOltc: "有载",
   tagOctc: "无载",
-  cli: "想自己跑命令",
+  cli: "想自己跑 CLI？",
+  cliBody: "技能和网页版共用同一套选型引擎，两边结果一致。区别在入口：技能是助手帮你跑命令行工具 oltc，这里是你自己在终端跑。",
   install: "安装",
   run: "有载例子",
   copy: "复制",
@@ -70,7 +72,8 @@ const en: AgentGuideCopy = {
   s3note: "Both passed the brochure check and are ready for pricing.",
   tagOltc: "on-load",
   tagOctc: "off-circuit",
-  cli: "Want to run it yourself",
+  cli: "Prefer to run the CLI yourself?",
+  cliBody: "The skill and the web app share the same selection engine, so results match. The difference is the entry point: with the skill, your assistant runs the oltc CLI for you; here you run it in your own terminal.",
   install: "Install",
   run: "On-load example",
   copy: "Copy",
@@ -96,7 +99,8 @@ const vi: AgentGuideCopy = {
   s3note: "Cả hai đều qua kiểm tra catalogue, có thể đem đi báo giá.",
   tagOltc: "có tải",
   tagOctc: "không tải",
-  cli: "Muốn tự chạy lệnh",
+  cli: "Muốn tự chạy CLI?",
+  cliBody: "Skill và bản web dùng chung một engine chọn kiểu, kết quả giống nhau. Khác ở điểm vào: skill để trợ lý chạy lệnh oltc giúp bạn, còn đây bạn tự chạy trong terminal.",
   install: "Cài đặt",
   run: "Ví dụ có tải",
   copy: "Chép",
@@ -122,7 +126,8 @@ const es: AgentGuideCopy = {
   s3note: "Ambos pasaron la revisión del catálogo y sirven para pedir precio.",
   tagOltc: "en carga",
   tagOctc: "sin carga",
-  cli: "Si quiere ejecutarlo usted mismo",
+  cli: "¿Prefieres ejecutar la CLI tú mismo?",
+  cliBody: "El skill y la web comparten el mismo motor de selección, los resultados coinciden. La diferencia es la entrada: con el skill tu asistente ejecuta la CLI oltc por ti; aquí la ejecutas tú en tu terminal.",
   install: "Instalar",
   run: "Ejemplo en carga",
   copy: "Copiar",
@@ -148,7 +153,8 @@ const tr: AgentGuideCopy = {
   s3note: "İkisi de katalog kontrolünden geçti, fiyat istemeye hazır.",
   tagOltc: "yük altında",
   tagOctc: "yüksüz",
-  cli: "Kendiniz çalıştırmak isterseniz",
+  cli: "CLI'yi kendiniz mi çalıştırırsınız?",
+  cliBody: "Skill ve web sürümü aynı seçim motorunu paylaşır, sonuçlar aynıdır. Fark giriş noktasında: skill'de asistanınız oltc CLI'sini sizin için çalıştırır, burada kendi terminalinizde kendiniz çalıştırırsınız.",
   install: "Kurulum",
   run: "Yük altında örnek",
   copy: "Kopyala",
@@ -174,7 +180,8 @@ const ru: AgentGuideCopy = {
   s3note: "Оба прошли проверку по каталогу, можно запрашивать цену.",
   tagOltc: "РПН",
   tagOctc: "ПБВ",
-  cli: "Если хотите запускать сами",
+  cli: "Хотите запускать CLI сами?",
+  cliBody: "Skill и веб-версия используют один и тот же движок подбора, результаты совпадают. Разница в точке входа: в skill помощник запускает CLI oltc за вас, а здесь вы запускаете его сами в своём терминале.",
   install: "Установка",
   run: "Пример под нагрузкой",
   copy: "Копировать",

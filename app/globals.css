@@ -602,6 +602,34 @@ select:open {
 .guide-cli .guide-term {
   margin-top: 0.7rem;
 }
+.guide-cli-body {
+  margin: 0.6rem 0 0;
+  max-width: 40rem;
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--color-ink-2);
+}
+.guide[lang="zh"] .guide-cli-body {
+  line-height: 1.8;
+}
+.guide-cli[open] .guide-cli-wrap {
+  animation: guide-cli-reveal 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes guide-cli-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .guide-cli[open] .guide-cli-wrap {
+    animation: none;
+  }
+}
 .guide[lang="zh"] .guide-lead {
   line-height: 1.8;
 }

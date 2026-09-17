@@ -12,6 +12,8 @@ describe("agent guide copy", () => {
       expect(c.s2q.length).toBeGreaterThan(10);
       expect(c.s3note.length).toBeGreaterThan(4);
       expect(c.dl.length).toBeGreaterThan(2);
+      expect(c.cli.length).toBeGreaterThan(2);
+      expect(c.cliBody.length).toBeGreaterThan(10);
     }
   });
 
