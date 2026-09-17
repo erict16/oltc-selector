@@ -8,6 +8,8 @@ describe("agent guide copy", () => {
       const c = agentGuide(id);
       expect(c.title.length).toBeGreaterThan(4);
       expect(c.dl.length).toBeGreaterThan(2);
+      expect(c.wbTitle.length).toBeGreaterThan(2);
+      expect(c.wbBody.length).toBeGreaterThan(10);
     }
   });
 

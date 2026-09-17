@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- /agents page widened (38rem → 46rem) and gains a WorkBuddy card: copy the one-line install prompt (SkillHub 对话安装 path, no zip needed) plus a link to the SkillHub detail page. Zip download stays as the any-assistant fallback. Six locales. No workbuddy:// deep link exists; the prompt is the supported one-tap path.
 - Skill ships the Huaming logo as `assets/icon.png` in both variants. pack-skill only LF-normalizes text files now; binary entries stay byte-identical (a PNG through utf8 read would corrupt). Published as `global/huaming-oltc-selector@1.2.3`.
 - Skill SKILL.md rewritten for two audiences: human-readable top (pitch, one in/out example, how to use) above a divider, agent instructions below. Frontmatter trimmed to name/description/allowed-tools/version so the SkillHub page stops rendering metadata as prose. Zero em/en dashes, passes the write-skill punctuation gate (zh + en). /agents guide drops 示例 4. Published as `global/huaming-oltc-selector@1.2.2`.
 - Skill docs now cover the full CLI input surface: `--ust` (step voltage in volts, wins over `--step-pct`), `--mount` (in-tank/on-tank/dry, dry changes the family to CVT), `--oil`/`--vacuum`, `--phases`, with a detailed "optional inputs" section; defaults stated as the web first paint. Published as `global/huaming-oltc-selector@1.2.1`.

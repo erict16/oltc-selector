@@ -16,6 +16,9 @@ const TYPE_EX1 = "CV2III-350Y/72.5-10193W";
 const TYPE_EX2_OLTC = "CV2III-350Y/72.5-10193W";
 const TYPE_EX2_OCTC = "WSLIV-600Y/72.5-6x5A";
 const TYPE_EX3 = "3xSHZVI-2400/72.5B-12233W";
+const WB_PROMPT =
+  "请根据 https://skillhub.cn/install/skillhub.md，安装 global/huaming-oltc-selector";
+const WB_PAGE = "https://skill.xfyun.cn/space/global/huaming-oltc-selector";
 
 export function AgentsGuide() {
   const lang = useAppLang();
@@ -40,7 +43,7 @@ export function AgentsGuide() {
   return (
     <article
       lang={lang}
-      className="guide mx-auto w-full max-w-[38rem] px-4 pt-10 pb-16 sm:px-6 sm:pt-14 sm:pb-20"
+      className="guide mx-auto w-full max-w-[46rem] px-4 pt-10 pb-16 sm:px-6 sm:pt-14 sm:pb-20"
     >
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <Link href="/" className="guide-back">
@@ -56,6 +59,31 @@ export function AgentsGuide() {
       <p className="guide-lead mt-3 text-[1.02rem] leading-[1.7] text-[var(--color-ink-2)]">
         {c.lead}
       </p>
+
+      <section className="guide-wb">
+        <h2 className="guide-k">{c.wbTitle}</h2>
+        <p className="guide-wb-body">{c.wbBody}</p>
+        <div className="guide-term">
+          <Cmd
+            id="wb-install"
+            label={c.wbCopy}
+            command={WB_PROMPT}
+            copied={copied}
+            copyLabel={c.copy}
+            copiedLabel={c.copied}
+            onCopy={onCopy}
+            bare
+          />
+        </div>
+        <a
+          className="guide-wb-open"
+          href={WB_PAGE}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {c.wbOpen}
+        </a>
+      </section>
 
       <a
         href={`${BASE}/skills/huaming-oltc-selector.zip`}
@@ -137,6 +165,7 @@ function Cmd({
   copyLabel,
   copiedLabel,
   onCopy,
+  bare,
 }: {
   id: string;
   label: string;
@@ -145,12 +174,13 @@ function Cmd({
   copyLabel: string;
   copiedLabel: string;
   onCopy: (id: string, text: string) => void;
+  bare?: boolean;
 }) {
   const is = copied === id;
   return (
     <button
       type="button"
-      className={`guide-cmd${is ? " is-copied" : ""}`}
+      className={`guide-cmd${is ? " is-copied" : ""}${bare ? " guide-cmd-bare" : ""}`}
       onClick={() => onCopy(id, command)}
       aria-label={`${copyLabel}: ${command}`}
     >
@@ -161,9 +191,11 @@ function Cmd({
         </span>
       </span>
       <span className="guide-cmd-line">
-        <span className="guide-cmd-prompt" aria-hidden>
-          $
-        </span>
+        {bare ? null : (
+          <span className="guide-cmd-prompt" aria-hidden>
+            $
+          </span>
+        )}
         <code>{command}</code>
       </span>
     </button>

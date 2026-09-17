@@ -5,6 +5,10 @@ export type AgentGuideCopy = {
   title: string;
   lead: string;
   how: string;
+  wbTitle: string;
+  wbBody: string;
+  wbCopy: string;
+  wbOpen: string;
   dl: string;
   cli: string;
   cliBody: string;
@@ -30,6 +34,10 @@ const zh: AgentGuideCopy = {
   title: "让 AI 助手帮你选型",
   lead: "下载技能包，传给你的 AI 助手。把变压器参数发给它，它选型号。",
   how: "在助手里找上传技能的入口，把 zip 传进去就行。之后把变压器参数发给它就行，有什么参数不确定，它会来问你。",
+  wbTitle: "装了 WorkBuddy？",
+  wbBody: "不用下载 zip。把这句话发给 WorkBuddy，它自己从 SkillHub 装好这个技能。",
+  wbCopy: "发给 WorkBuddy 的话",
+  wbOpen: "在 SkillHub 上查看",
   dl: "下载技能包",
   cli: "想自己跑命令",
   cliBody:
@@ -59,6 +67,10 @@ const en: AgentGuideCopy = {
   title: "Let an AI assistant pick the type",
   lead: "Download the skill pack and upload it to the AI assistant you already use. Send it the transformer data, it picks the type.",
   how: "Find the skill upload entry in your assistant and send the zip in. Then just send it the transformer data. If a parameter is unclear, it will ask.",
+  wbTitle: "Already on WorkBuddy?",
+  wbBody: "No zip needed. Send this line to WorkBuddy and it installs the skill from SkillHub itself.",
+  wbCopy: "Line to send WorkBuddy",
+  wbOpen: "View on SkillHub",
   dl: "Download the skill pack",
   cli: "Want to run it yourself",
   cliBody:
@@ -88,6 +100,10 @@ const vi: AgentGuideCopy = {
   title: "Để trợ lý AI chọn kiểu giúp bạn",
   lead: "Tải gói skill, tải lên trợ lý AI bạn đang dùng. Gửi số liệu máy biến áp cho nó, nó chọn kiểu.",
   how: "Tìm mục tải skill trong trợ lý, gửi file zip vào. Sau đó cứ gửi số liệu máy biến áp cho nó. Có thông số nào không rõ, nó sẽ hỏi lại bạn.",
+  wbTitle: "Đã cài WorkBuddy?",
+  wbBody: "Không cần tải zip. Gửi câu này cho WorkBuddy, nó tự cài skill từ SkillHub.",
+  wbCopy: "Câu gửi WorkBuddy",
+  wbOpen: "Xem trên SkillHub",
   dl: "Tải gói skill",
   cli: "Muốn tự chạy lệnh",
   cliBody:
@@ -117,6 +133,10 @@ const es: AgentGuideCopy = {
   title: "Que un asistente de IA elija el tipo",
   lead: "Descargue el skill y súbalo al asistente de IA que ya usa. Envíele los datos del transformador y él elige el tipo.",
   how: "Busque la opción de subir skills en su asistente y envíe el zip. Luego envíele los datos del transformador. Si algún parámetro no está claro, se lo preguntará.",
+  wbTitle: "¿Ya tienes WorkBuddy?",
+  wbBody: "Sin zip. Envía esta línea a WorkBuddy y él instala el skill desde SkillHub.",
+  wbCopy: "Línea para WorkBuddy",
+  wbOpen: "Ver en SkillHub",
   dl: "Descargar el skill",
   cli: "Si quiere ejecutarlo usted mismo",
   cliBody:
@@ -146,6 +166,10 @@ const tr: AgentGuideCopy = {
   title: "Tipi bir AI asistan seçsin",
   lead: "Skill paketini indirip kullandığınız AI asistana yükleyin. Trafo verilerini gönderin, o tipi seçsin.",
   how: "Asistanınızda skill yükleme girişini bulun ve zip'i gönderin. Sonra trafo verilerini göndermeniz yeterli. Emin olmadığı bir parametre olursa size sorar.",
+  wbTitle: "WorkBuddy yüklü mü?",
+  wbBody: "Zip gerekmez. Bu satırı WorkBuddy'ye gönderin, skill'i SkillHub'dan kendisi kursun.",
+  wbCopy: "WorkBuddy'ye gönderilecek satır",
+  wbOpen: "SkillHub'da görüntüle",
   dl: "Skill paketini indir",
   cli: "Kendiniz çalıştırmak isterseniz",
   cliBody:
@@ -175,6 +199,10 @@ const ru: AgentGuideCopy = {
   title: "Пусть ИИ-помощник подберёт тип",
   lead: "Скачайте skill и загрузите его в ИИ-помощника, которым пользуетесь. Отправьте ему данные трансформатора, он выберет тип.",
   how: "Найдите в помощнике загрузку skill и отправьте zip. Дальше просто отправьте данные трансформатора. Если какой-то параметр непонятен, он спросит.",
+  wbTitle: "Уже установлен WorkBuddy?",
+  wbBody: "Zip не нужен. Отправьте эту строку в WorkBuddy, он сам установит skill из SkillHub.",
+  wbCopy: "Строка для WorkBuddy",
+  wbOpen: "Открыть в SkillHub",
   dl: "Скачать skill",
   cli: "Если хотите запускать сами",
   cliBody:
