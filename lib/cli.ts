@@ -388,6 +388,9 @@ const MOUNT_ZH: Record<Mounting, string> = {
   in_tank: "箱内",
   on_tank: "箱顶",
   dry_type: "干式",
+  // CLI 不会接收这两种，列上只为 Record 完整性
+  external_compartment: "外置隔室",
+  reactor: "电抗器",
 };
 
 /**
