@@ -59,8 +59,8 @@ export function AgentsGuide() {
       </p>
 
       <a
-        href={`${BASE}/skills/oltc-selector.zip`}
-        download="oltc-selector.zip"
+        href={`${BASE}/skills/huaming-oltc-selector.zip`}
+        download="huaming-oltc-selector.zip"
         className="guide-dl"
       >
         <ArrowDownTrayIcon className="h-5 w-5 shrink-0" aria-hidden />

@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Skill splits into two upload variants: `skills/oltc-selector` (WorkBuddy SkillHub, Chinese-first) and `skills/oltc-selector-international` (English-first, OpenSkills/ClawHub-compatible). `npm run pack:skill` builds both zips LF-normalized; tests pin frontmatter, manifest `description`, table sync, and zip freshness. CI runs `npm test` before the Pages build.
+- Skill renamed to `huaming-oltc-selector` (slug freezes at first publish; renamed while still in review). Published to SkillHub as `global/huaming-oltc-selector@1.2.0` (public, pending review). Description rewritten around the real trigger vocabulary: nameplate-in → catalogue-true type out, 一拖二, WSG/CMD, 星点/线端, regulation modes; negative triggers for pricing/docs. WorkBuddy body and brochure-check reference are fully Chinese; international variant mirrors in English.
+- Skill splits into two upload variants: `skills/huaming-oltc-selector` (WorkBuddy SkillHub, Chinese-first) and `skills/huaming-oltc-selector-international` (English-first, OpenSkills/ClawHub-compatible). `npm run pack:skill` builds both zips LF-normalized; tests pin frontmatter, manifest `description`, table sync, and zip freshness. CI runs `npm test` before the Pages build.
 - Skill install path is npx-first (`npx -y oltc-selector@latest`), global `npm i -g` optional; notes the same-name package.json shadowing pitfall. Frontmatter declares `allowed-tools: Bash, Read`; manifest adds the plain `description` WorkBuddy requires.
 - npm CLI published as `oltc-selector@1.1.0` under MIT (was 1.0.0 UNLICENSED), matching repo and skill versions.
 - /agents guide: drop the how-the-CLI-picks lines. Add 示例 3 (350 MVA 132 kV star-point → `3xSHZVI-2400/72.5B-12233W`) and 示例 4 (38 off 33 kV station → `CV2III-350D/40.5-10091W`).

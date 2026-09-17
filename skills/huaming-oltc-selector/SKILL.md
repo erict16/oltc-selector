@@ -1,16 +1,18 @@
 ---
-name: oltc-selector
+name: huaming-oltc-selector
 display_name: 华明分接开关选型
 display_name_en: Huaming Tap-Changer Selector
 description: >
-  用 oltc 命令选择华明有载（OLTC）/ 无载（OCTC）分接开关型号，对照样本册校验型号是否存在并说明理由。
-  触发：选型、分接开关、有载开关、无载开关、华明、OLTC、OCTC、type designation、
-  CV2、CM2、SHZV、HWV、WSL、Imax、Um、一拖二（无载带有载），或检查某个型号是否存在。
+  华明分接开关选型：贴变压器铭牌或给参数（容量、电压、电流、调压方式、分接范围），
+  用 oltc 命令算出样本册里真实存在的有载（OLTC）/ 无载（OCTC）开关型号，并说明选型理由。
+  触发：选型、分接开关、有载开关、无载开关、华明、Huaming、OLTC、OCTC、tap changer、
+  型号、CV2、CM2、SHZV、HWV、WSL、WSG、CMD、星点、线端、正反调、粗细调、线性调、
+  Imax、Um、一拖二（无载带有载）、检查型号是否存在、解读型号含义。
   不触发：报价、价格、OS 商务条款、运输单据。
-description_zh: 用 oltc 命令选华明分接开关型号，对照样本册检查是否存在、说明为何正确。
+description_zh: 贴铭牌或给参数，用 oltc 选华明分接开关型号；只出样本册里存在的型号，并说明理由。
 description_en: Run oltc to pick a Huaming tap-changer type, then check the brochure and explain why.
 allowed-tools: Bash, Read
-version: 1.1.2
+version: 1.2.0
 author: Eric Tan
 license: MIT
 category: engineering

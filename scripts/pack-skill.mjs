@@ -6,7 +6,7 @@
 //
 //   node scripts/pack-skill.mjs           write the zips
 //   node scripts/pack-skill.mjs --check   exit 1 when a committed zip is stale
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -15,14 +15,19 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const VARIANTS = [
   {
     id: "workbuddy",
-    src: path.join(root, "skills", "oltc-selector"),
-    out: path.join(root, "public", "skills", "oltc-selector.zip"),
+    src: path.join(root, "skills", "huaming-oltc-selector"),
+    out: path.join(root, "public", "skills", "huaming-oltc-selector.zip"),
     files: ["SKILL.md", "manifest.yaml", "references/brochure-check.md"],
   },
   {
     id: "international",
-    src: path.join(root, "skills", "oltc-selector-international"),
-    out: path.join(root, "public", "skills", "oltc-selector-international.zip"),
+    src: path.join(root, "skills", "huaming-oltc-selector-international"),
+    out: path.join(
+      root,
+      "public",
+      "skills",
+      "huaming-oltc-selector-international.zip",
+    ),
     files: ["SKILL.md", "manifest.yaml", "references/brochure-check.md"],
   },
 ];
@@ -122,6 +127,7 @@ if (isMain) {
         console.log(`${rel} is in sync with ${path.relative(root, variant.src)}/`);
       }
     } else {
+      mkdirSync(path.dirname(variant.out), { recursive: true });
       writeFileSync(variant.out, zip);
       console.log(`wrote ${rel} (${zip.length} bytes)`);
     }

@@ -6,15 +6,16 @@ import { VARIANTS, buildEntries } from "../scripts/pack-skill.mjs";
 
 const read = (...p: string[]) => readFileSync(path.join(process.cwd(), ...p), "utf8");
 
-const workbuddyMd = () => read("skills", "oltc-selector", "SKILL.md");
-const intlMd = () => read("skills", "oltc-selector-international", "SKILL.md");
+const workbuddyMd = () => read("skills", "huaming-oltc-selector", "SKILL.md");
+const intlMd = () =>
+  read("skills", "huaming-oltc-selector-international", "SKILL.md");
 
 describe("skill frontmatter and manifest (both variants)", () => {
   it.each(VARIANTS.map((v) => [v.id, v] as const))(
     "%s: SKILL.md has name, description, allowed-tools",
     (_id, v) => {
       const fm = readFileSync(path.join(v.src, "SKILL.md"), "utf8").split("---")[1];
-      expect(fm).toMatch(/^name: oltc-selector$/m);
+      expect(fm).toMatch(/^name: huaming-oltc-selector$/m);
       expect(fm).toMatch(/^description:/m);
       expect(fm).toMatch(/^allowed-tools:/m);
     },
@@ -24,7 +25,7 @@ describe("skill frontmatter and manifest (both variants)", () => {
     "%s: manifest.yaml has the WorkBuddy-required plain description",
     (_id, v) => {
       const m = readFileSync(path.join(v.src, "manifest.yaml"), "utf8");
-      expect(m).toMatch(/^name: oltc-selector$/m);
+      expect(m).toMatch(/^name: huaming-oltc-selector$/m);
       expect(m).toMatch(/^version: /m);
       expect(m).toMatch(/^description: \S/m);
       expect(m).toMatch(/^category: /m);
@@ -33,7 +34,7 @@ describe("skill frontmatter and manifest (both variants)", () => {
   );
 });
 
-describe("workbuddy skill (skills/oltc-selector)", () => {
+describe("workbuddy skill (skills/huaming-oltc-selector)", () => {
   it("runs oltc via npx first and forbids invented types", () => {
     const text = workbuddyMd();
     expect(text).toContain("npx -y oltc-selector@latest");
@@ -55,6 +56,13 @@ describe("workbuddy skill (skills/oltc-selector)", () => {
     expect(text).not.toContain("## How to run");
   });
 
+  it("description covers the real trigger vocabulary", () => {
+    const fm = workbuddyMd().split("---")[1];
+    for (const kw of ["华明", "选型", "铭牌", "OLTC", "OCTC", "一拖二", "WSG", "CMD", "不触发"]) {
+      expect(fm).toContain(kw);
+    }
+  });
+
   it("teaches 一拖二 duties as two brochure-checked runs", () => {
     const text = workbuddyMd();
     expect(text).toContain("一拖二");
@@ -62,7 +70,7 @@ describe("workbuddy skill (skills/oltc-selector)", () => {
   });
 });
 
-describe("international skill (skills/oltc-selector-international)", () => {
+describe("international skill (skills/huaming-oltc-selector-international)", () => {
   it("is English-first with the same engine rules", () => {
     const text = intlMd();
     expect(text).toContain("npx -y oltc-selector@latest");
@@ -77,10 +85,15 @@ describe("international skill (skills/oltc-selector-international)", () => {
   });
 
   it("keeps the brochure-check tables in sync with the workbuddy variant", () => {
-    const zh = read("skills", "oltc-selector", "references", "brochure-check.md");
+    const zh = read(
+      "skills",
+      "huaming-oltc-selector",
+      "references",
+      "brochure-check.md",
+    );
     const en = read(
       "skills",
-      "oltc-selector-international",
+      "huaming-oltc-selector-international",
       "references",
       "brochure-check.md",
     );

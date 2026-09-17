@@ -1,19 +1,20 @@
 ---
-name: oltc-selector
+name: huaming-oltc-selector
 display_name: Huaming Tap-Changer Selector
 display_name_zh: 华明分接开关选型
 description: >
-  Selects a Huaming on-load (OLTC) or off-circuit (OCTC) tap-changer type
-  from transformer duty using the oltc CLI, then verifies the type against
-  catalogue rules. Use when the user asks for tap-changer selection, 选型,
-  type designation, CV2, CM2, SHZV, HWV, WSL, WSG, Um, Imax, 有载开关,
-  无载开关, 一拖二 (one transformer with both OLTC and OCTC), or to check
-  whether a Huaming model exists. Do not use for quotation, pricing, or
-  shipping documents.
-description_en: Run oltc to pick a Huaming tap-changer type, then check the brochure and explain why.
-description_zh: 用 oltc 命令选华明分接开关型号，对照样本册检查是否存在、说明为何正确。
+  Huaming tap-changer selection: paste a transformer nameplate or give duty
+  parameters (MVA, kV, current, regulation, tap range) and get a commercial
+  OLTC/OCTC type string that really exists in the Huaming catalogue, with a
+  short why. Use for tap-changer selection, 选型, type designation, OLTC,
+  OCTC, CV2, CM2, SHZV, HWV, WSL, WSG, CMD, star-point vs line-end duty,
+  reversing / coarse-fine / linear regulation, Imax, Um, 一拖二 (OLTC + OCTC
+  on one transformer), checking whether a Huaming model exists, or decoding
+  a type string. Do not use for quotation, pricing, or shipping documents.
+description_en: Paste a nameplate or give duty parameters; get a Huaming tap-changer type that exists in the catalogue, with the reasoning.
+description_zh: 贴铭牌或给参数，用 oltc 选华明分接开关型号；只出样本册里存在的型号，并说明理由。
 allowed-tools: Bash, Read
-version: 1.1.0
+version: 1.2.0
 author: Eric Tan
 license: MIT
 category: engineering
