@@ -14,8 +14,8 @@ const ZIP = "https://github.com/erict16/huaming-oltc-selector/archive/refs/heads
 const INSTALL = "npx -y oltc-selector@1.2.6";
 const RUN = "npx -y oltc-selector@1.2.6 --iu 350 --um 40.5 --conn D --reg W --pm 8";
 const WB_PROMPT =
-  "请根据 https://skillhub.cn/install/skillhub.md，安装 @user_d55f79b8/huaming-oltc-selector";
-const WB_PAGE = "https://skillhub.cn/skills/huaming-oltc-selector";
+  "请根据 https://skill.xfyun.cn/registry/skill.md，安装 global/huaming-oltc-selector";
+const WB_PAGE = "https://skill.xfyun.cn/space/global/huaming-oltc-selector";
 const TYPE_OLTC = "CV2III-350Y/72.5-10193W";
 const TYPE_OCTC = "WSLIV-600Y/72.5-6x5A";
 
