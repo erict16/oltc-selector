@@ -661,8 +661,18 @@ select:open {
 .guide-cmd-k {
   letter-spacing: 0.02em;
 }
+.guide-cmd-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.6rem;
+  border: 1px solid oklch(100% 0 0 / 0.28);
+  border-radius: 999px;
+  color: oklch(86% 0.02 250);
+}
 .guide-cmd.is-copied .guide-cmd-hint {
-  color: oklch(86% 0.06 250);
+  color: oklch(90% 0.06 250);
+  border-color: oklch(100% 0 0 / 0.45);
 }
 
 .guide-cmd-line {

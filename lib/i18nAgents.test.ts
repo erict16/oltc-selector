@@ -25,7 +25,7 @@ describe("agent guide copy", () => {
   it("step 1 tells every assistant can install, and the example is 一拖二", () => {
     const zh = agentGuide("zh");
     expect(zh.s1b).toContain("WorkBuddy");
-    expect(zh.s1b).toContain("Cursor");
+    expect(zh.s1b).toContain("ChatGPT");
     expect(zh.s2q).toContain("一拖二");
     expect(zh.s2q).toMatch(/无载 5 档/);
     const blob = LANG_OPTIONS.map(({ id }) =>

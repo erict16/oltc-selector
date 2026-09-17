@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, Square2StackIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { LangSwitcher } from "@/components/LangSwitcher";
@@ -42,7 +42,7 @@ export function AgentsGuide() {
   return (
     <article
       lang={lang}
-      className="guide mx-auto w-full max-w-[46rem] px-4 pt-10 pb-16 sm:px-6 sm:pt-14 sm:pb-20"
+      className="guide mx-auto w-full max-w-[50rem] px-4 pt-10 pb-16 sm:px-6 sm:pt-14 sm:pb-20"
     >
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <Link href="/" className="guide-back">
@@ -189,6 +189,7 @@ function Cmd({
       <span className="guide-cmd-meta">
         <span className="guide-cmd-k">{label}</span>
         <span className="guide-cmd-hint" aria-live="polite">
+          <Square2StackIcon className="h-3.5 w-3.5" aria-hidden />
           {is ? copiedLabel : copyLabel}
         </span>
       </span>
