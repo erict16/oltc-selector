@@ -17,7 +17,12 @@ export const VARIANTS = [
     id: "workbuddy",
     src: path.join(root, "skills", "huaming-oltc-selector"),
     out: path.join(root, "public", "skills", "huaming-oltc-selector.zip"),
-    files: ["SKILL.md", "manifest.yaml", "references/brochure-check.md"],
+    files: [
+      "SKILL.md",
+      "manifest.yaml",
+      "references/brochure-check.md",
+      "assets/icon.png",
+    ],
   },
   {
     id: "international",
@@ -28,7 +33,12 @@ export const VARIANTS = [
       "skills",
       "huaming-oltc-selector-international.zip",
     ),
-    files: ["SKILL.md", "manifest.yaml", "references/brochure-check.md"],
+    files: [
+      "SKILL.md",
+      "manifest.yaml",
+      "references/brochure-check.md",
+      "assets/icon.png",
+    ],
   },
 ];
 
@@ -48,15 +58,17 @@ function crc32(buf) {
   return (c ^ 0xffffffff) >>> 0;
 }
 
-/** [{ name, data }] with LF-normalized contents, in packaging order. */
+const TEXT_FILE = /\.(md|txt|json|ya?ml|js|cjs|mjs|ts|py|sh|svg)$/i;
+
+/** [{ name, data }] in packaging order. Text is LF-normalized; binary stays untouched. */
 export function buildEntries(variant) {
-  return variant.files.map((name) => ({
-    name,
-    data: Buffer.from(
-      readFileSync(path.join(variant.src, name), "utf8").replace(/\r\n/g, "\n"),
-      "utf8",
-    ),
-  }));
+  return variant.files.map((name) => {
+    const raw = readFileSync(path.join(variant.src, name));
+    const data = TEXT_FILE.test(name)
+      ? Buffer.from(raw.toString("utf8").replace(/\r\n/g, "\n"), "utf8")
+      : raw;
+    return { name, data };
+  });
 }
 
 export function buildZip(entries) {

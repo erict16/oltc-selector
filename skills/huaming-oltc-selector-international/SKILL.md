@@ -10,7 +10,7 @@ description: >
   on one transformer), checking whether a Huaming model exists, or decoding
   a type string. Do not use for quotation, pricing, or shipping documents.
 allowed-tools: Bash, Read
-version: 1.2.2
+version: 1.2.3
 ---
 
 # Huaming Tap-Changer Selector

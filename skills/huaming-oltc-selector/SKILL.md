@@ -8,7 +8,7 @@ description: >
   Imax、Um、一拖二（无载带有载）、检查型号是否存在、解读型号含义。
   不触发：报价、价格、OS 商务条款、运输单据。
 allowed-tools: Bash, Read
-version: 1.2.2
+version: 1.2.3
 ---
 
 # 华明分接开关选型

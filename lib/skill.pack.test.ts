@@ -131,11 +131,24 @@ describe("zips for SkillHub upload", () => {
   });
 
   it.each(VARIANTS.map((v) => [v.id, v] as const))(
-    "%s: zip entries are LF-only (no CRLF to choke frontmatter parsers)",
+    "%s: text zip entries are LF-only (no CRLF to choke frontmatter parsers)",
     (_id, v) => {
       for (const entry of buildEntries(v)) {
-        expect(entry.data.includes("\r")).toBe(false);
+        if (/\.(md|ya?ml)$/i.test(entry.name)) {
+          expect(entry.data.includes("\r")).toBe(false);
+        }
       }
+    },
+  );
+
+  it.each(VARIANTS.map((v) => [v.id, v] as const))(
+    "%s: ships the Huaming icon and keeps it byte-identical",
+    (_id, v) => {
+      const icon = buildEntries(v).find((e) => e.name === "assets/icon.png");
+      expect(icon, "icon entry missing").toBeTruthy();
+      expect(icon!.data.length).toBeGreaterThan(1000);
+      // PNG magic bytes: binary must survive packaging untouched
+      expect([...icon!.data.slice(0, 4)]).toEqual([0x89, 0x50, 0x4e, 0x47]);
     },
   );
 });
