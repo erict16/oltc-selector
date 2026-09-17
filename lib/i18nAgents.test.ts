@@ -17,4 +17,17 @@ describe("agent guide copy", () => {
       expect(blob, id).not.toMatch(/[\u2013\u2014]/);
     }
   });
+
+  it("has four example cards and no CLI-how asides", () => {
+    const zh = agentGuide("zh");
+    expect(zh.ex3).toBe("示例 3");
+    expect(zh.ex4).toBe("示例 4");
+    expect(zh.sayBody3).toMatch(/350 MVA/);
+    expect(zh.sayBody4).toMatch(/33\/0\.4/);
+    const blob = LANG_OPTIONS.map(({ id }) =>
+      Object.values(agentGuide(id)).join("\n"),
+    ).join("\n");
+    expect(blob).not.toMatch(/它自己跑 oltc/);
+    expect(blob).not.toMatch(/有载、无载各跑一次/);
+  });
 });

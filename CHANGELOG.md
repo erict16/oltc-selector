@@ -2,8 +2,9 @@
 
 ## Unreleased
 
+- /agents guide: drop the how-the-CLI-picks lines. Add 示例 3 (350 MVA 132 kV star-point → `3xSHZVI-2400/72.5B-12233W`) and 示例 4 (38 off 33 kV station → `CV2III-350D/40.5-10091W`).
 - Skill pack prepped for marketplace upload: MIT license, `manifest.yaml` in the zip, Huaming-branded display name (华明分接开关选型) with vendor scope stated up front.
-- /agents guide examples are chat cards: 示例 1 on-load and 示例 2 一拖二, each with a one-line how-the-CLI-picks note and the selected type strings as chips (有载/无载 tagged).
+- /agents guide examples are chat cards: 示例 1 on-load and 示例 2 一拖二, with the selected type strings as chips (有载/无载 tagged).
 - Skill pack covers 一拖二 (无载带有载) duties: split into an on-load run and an `--octc` run, brochure-check both type strings. Zip is rebuilt with `npm run pack:skill` and a test keeps it in sync with the source.
 - Home dock: hand selection to an AI assistant (scheme A). Closed state is WorkBuddy + 选型助手. Tutorial at `/agents/` with a downloadable WorkBuddy skill zip (CLI + brochure check, no prices).
 - CLI package `oltc-selector` (`npm i -g oltc-selector`), command `oltc`. Same `selectOltc` engine, no prices. `--octc`, `--structure`, `--series`.

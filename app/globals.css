@@ -624,12 +624,6 @@ select:open {
 .guide[lang="zh"] .guide-q {
   line-height: 1.8;
 }
-.guide-steps {
-  margin: 0.45rem 0 0;
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: var(--color-muted);
-}
 .guide-a {
   display: flex;
   flex-wrap: wrap;

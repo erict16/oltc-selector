@@ -13,10 +13,12 @@ export type AgentGuideCopy = {
   say: string;
   ex1: string;
   ex2: string;
+  ex3: string;
+  ex4: string;
   sayBody: string;
   sayBody2: string;
-  how1: string;
-  how2: string;
+  sayBody3: string;
+  sayBody4: string;
   result: string;
   tagOltc: string;
   tagOctc: string;
@@ -39,12 +41,16 @@ const zh: AgentGuideCopy = {
   say: "然后就像聊天一样，把参数发给它",
   ex1: "示例 1",
   ex2: "示例 2",
+  ex3: "示例 3",
+  ex4: "示例 4",
   sayBody:
     "帮我选个有载开关：25 MVA，110±8×1.25%/10.5 kV，Dyn11，高压侧中性点调压，要真空。",
   sayBody2:
     "帮我选个一拖二的：110 kV，有载 ±8×1.25%，无载 5 档，350 A，高压侧中性点调压。",
-  how1: "它自己跑 oltc 命令：先算出 Imax，再挑样本册里最低够用的系列。",
-  how2: "有载、无载各跑一次 oltc，两个型号分开选，都对照样本册检查。",
+  sayBody3:
+    "帮我选个有载开关：350 MVA，132±10×1.25%/11-11 kV，YNd11d11，高压侧中性点调压，最大电流 1750 A，开关对地 350/140。",
+  sayBody4:
+    "帮我选个有载开关：38 台站用变 33/0.4 kV，真空电动有载，9 档 ±4×2.5%，带 AVR。",
   result: "选出型号",
   tagOltc: "有载",
   tagOctc: "无载",
@@ -67,12 +73,16 @@ const en: AgentGuideCopy = {
   say: "Then pick a type by chatting",
   ex1: "Example 1",
   ex2: "Example 2",
+  ex3: "Example 3",
+  ex4: "Example 4",
   sayBody:
     "Pick an on-load tap-changer for me: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, taps at the HV neutral, vacuum.",
   sayBody2:
     "Pick one for a transformer with both on-load and off-circuit taps: 110 kV, on-load ±8×1.25%, off-circuit 5 positions, 350 A, taps at the HV neutral.",
-  how1: "It runs the oltc command itself: computes Imax, then picks the lowest catalogue family that fits.",
-  how2: "It runs oltc twice, once on-load and once off-circuit, and checks both types against the brochure.",
+  sayBody3:
+    "Pick an on-load tap-changer for me: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, taps at the HV neutral, max 1750 A, OLTC earth 350/140.",
+  sayBody4:
+    "Pick 38 off OLTCs with AVR for me: station 33/0.4 kV, vacuum motorised, 9 positions ±4×2.5%.",
   result: "Result",
   tagOltc: "on-load",
   tagOctc: "off-circuit",
@@ -95,12 +105,16 @@ const vi: AgentGuideCopy = {
   say: "Rồi chọn kiểu như chat bình thường",
   ex1: "Ví dụ 1",
   ex2: "Ví dụ 2",
+  ex3: "Ví dụ 3",
+  ex4: "Ví dụ 4",
   sayBody:
     "Chọn giúp tôi bộ chuyển nấc có tải: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, điều áp ở trung tính cao áp, chân không.",
   sayBody2:
     "Chọn giúp tôi cho máy biến áp vừa có tải vừa không tải: 110 kV, có tải ±8×1.25%, không tải 5 nấc, 350 A, điều áp ở trung tính cao áp.",
-  how1: "Nó tự chạy lệnh oltc: tính Imax, rồi chọn dòng thấp nhất đủ dùng trong catalogue.",
-  how2: "Nó chạy oltc hai lần, một có tải một không tải, và đối catalogue cả hai kiểu.",
+  sayBody3:
+    "Chọn giúp tôi bộ chuyển nấc có tải: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, điều áp ở trung tính cao áp, dòng max 1750 A, cách điện OLTC 350/140.",
+  sayBody4:
+    "Chọn giúp tôi 38 bộ có tải kèm AVR: máy trạm 33/0.4 kV, chân không chạy điện, 9 nấc ±4×2.5%.",
   result: "Kết quả",
   tagOltc: "có tải",
   tagOctc: "không tải",
@@ -123,12 +137,16 @@ const es: AgentGuideCopy = {
   say: "Luego elija charlando",
   ex1: "Ejemplo 1",
   ex2: "Ejemplo 2",
+  ex3: "Ejemplo 3",
+  ex4: "Ejemplo 4",
   sayBody:
     "Elíjame un cambiador en carga: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, regulación en el neutro de AT, vacío.",
   sayBody2:
     "Elíjame uno para un transformador con regulación en carga y sin carga: 110 kV, en carga ±8×1.25%, sin carga 5 posiciones, 350 A, regulación en el neutro de AT.",
-  how1: "Ejecuta el comando oltc por sí solo: calcula Imax y elige la familia más baja del catálogo que cubre el régimen.",
-  how2: "Ejecuta oltc dos veces, una en carga y una sin carga, y comprueba ambos tipos en el folleto.",
+  sayBody3:
+    "Elíjame un cambiador en carga: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, regulación en el neutro de AT, 1750 A máx., aislamiento OLTC 350/140.",
+  sayBody4:
+    "Elíjame 38 cambiadores en carga con AVR: transformador de estación 33/0.4 kV, motorizado de vacío, 9 posiciones ±4×2.5%.",
   result: "Resultado",
   tagOltc: "en carga",
   tagOctc: "sin carga",
@@ -151,12 +169,16 @@ const tr: AgentGuideCopy = {
   say: "Sonra sohbet eder gibi seçin",
   ex1: "Örnek 1",
   ex2: "Örnek 2",
+  ex3: "Örnek 3",
+  ex4: "Örnek 4",
   sayBody:
     "Bana yük altında kademe değiştirici seç: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, YG tarafı yıldız noktasından ayar, vakum.",
   sayBody2:
     "Hem yük altında hem yüksüz kademeli bir trafo için seç: 110 kV, yük altında ±8×1.25%, yüksüz 5 kademe, 350 A, YG yıldız noktasından ayar.",
-  how1: "oltc komutunu kendisi çalıştırır: Imax'i hesaplar, katalogda işi gören en düşük seriyi seçer.",
-  how2: "oltc'yi iki kez çalıştırır, biri yük altında biri yüksüz, iki tipi de katalogla kontrol eder.",
+  sayBody3:
+    "Bana yük altında kademe değiştirici seç: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, YG yıldız noktasından ayar, max 1750 A, OLTC toprağı 350/140.",
+  sayBody4:
+    "Bana AVR'li 38 adet yük altında kademe değiştirici seç: 33/0.4 kV istasyon trafosu, vakum motorlu, 9 kademe ±4×2.5%.",
   result: "Sonuç",
   tagOltc: "yük altında",
   tagOctc: "yüksüz",
@@ -179,12 +201,16 @@ const ru: AgentGuideCopy = {
   say: "Дальше просто пишите, как в чате",
   ex1: "Пример 1",
   ex2: "Пример 2",
+  ex3: "Пример 3",
+  ex4: "Пример 4",
   sayBody:
     "Подбери РПН: 25 МВА, 110±8×1.25%/10.5 кВ, Dyn11, регулирование в нейтрали ВН, вакуум.",
   sayBody2:
     "Подбери для трансформатора с РПН и ПБВ: 110 кВ, под нагрузкой ±8×1.25%, без нагрузки 5 ступеней, 350 А, регулирование в нейтрали ВН.",
-  how1: "Он сам запускает команду oltc: считает Imax и выбирает минимально достаточную серию из каталога.",
-  how2: "Он запускает oltc дважды: под нагрузкой и без нагрузки, и сверяет оба типа с каталогом.",
+  sayBody3:
+    "Подбери РПН: 350 МВА, 132±10×1.25%/11-11 кВ, YNd11d11, регулирование в нейтрали ВН, макс. 1750 А, изоляция РПН 350/140.",
+  sayBody4:
+    "Подбери 38 РПН с АРН: станционный 33/0.4 кВ, вакуумный с приводом, 9 ступеней ±4×2.5%.",
   result: "Результат",
   tagOltc: "РПН",
   tagOctc: "ПБВ",
