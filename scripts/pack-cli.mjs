@@ -3,7 +3,7 @@
  * Bundle selection-only CLI into pack/ for npm publish.
  * Must not include list RMB, coefficients, or quote fixtures.
  */
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildSync } from "esbuild";
@@ -21,7 +21,8 @@ const FORBIDDEN = [
   "vietnam\": 1.1",
 ];
 
-rmSync(packDir, { recursive: true, force: true });
+// No rm of pack/: a stray shell sitting in it (CWD lock) makes the delete
+// fail with EPERM on Windows. The file set is fixed, so overwrite in place.
 mkdirSync(binDir, { recursive: true });
 
 // JS API, not the bin shim: on Unix the postinstall replaces
