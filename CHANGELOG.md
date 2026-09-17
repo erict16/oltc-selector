@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- /agents rebuilt as a three-step rail (装 → 发 → 拿型号). Step 1 is assistant-agnostic: the SkillHub install prompt works for WorkBuddy, Claude Code, Cursor alike; zip upload stays as the fallback. The embedded example is now the 一拖二 dual-duty case with both type chips. CLI lives behind a disclosure. Dead guide CSS removed.
 - /agents page widened (38rem → 46rem) and gains a WorkBuddy card: copy the one-line install prompt (SkillHub 对话安装 path, no zip needed) plus a link to the SkillHub detail page. Zip download stays as the any-assistant fallback. Six locales. No workbuddy:// deep link exists; the prompt is the supported one-tap path.
 - Skill ships the Huaming logo as `assets/icon.png` in both variants. pack-skill only LF-normalizes text files now; binary entries stay byte-identical (a PNG through utf8 read would corrupt). Published as `global/huaming-oltc-selector@1.2.3`.
 - Skill SKILL.md rewritten for two audiences: human-readable top (pitch, one in/out example, how to use) above a divider, agent instructions below. Frontmatter trimmed to name/description/allowed-tools/version so the SkillHub page stops rendering metadata as prose. Zero em/en dashes, passes the write-skill punctuation gate (zh + en). /agents guide drops 示例 4. Published as `global/huaming-oltc-selector@1.2.2`.

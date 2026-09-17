@@ -3,27 +3,31 @@ import { LANG_OPTIONS } from "./i18n";
 import { agentGuide } from "./i18nAgents";
 
 describe("agent guide copy", () => {
-  it("covers every UI language with a title and download label", () => {
+  it("covers every UI language with the stepper fields", () => {
     for (const { id } of LANG_OPTIONS) {
       const c = agentGuide(id);
       expect(c.title.length).toBeGreaterThan(4);
+      expect(c.s1t.length).toBeGreaterThan(1);
+      expect(c.s1b.length).toBeGreaterThan(10);
+      expect(c.s2q.length).toBeGreaterThan(10);
+      expect(c.s3note.length).toBeGreaterThan(4);
       expect(c.dl.length).toBeGreaterThan(2);
-      expect(c.wbTitle.length).toBeGreaterThan(2);
-      expect(c.wbBody.length).toBeGreaterThan(10);
     }
   });
 
   it("has no em dash or en dash in any locale", () => {
     for (const { id } of LANG_OPTIONS) {
       const blob = Object.values(agentGuide(id)).join("\n");
-      expect(blob, id).not.toMatch(/[\u2013\u2014]/);
+      expect(blob, id).not.toMatch(/[–—]/);
     }
   });
 
-  it("has three example cards and no CLI-how asides", () => {
+  it("step 1 tells every assistant can install, and the example is 一拖二", () => {
     const zh = agentGuide("zh");
-    expect(zh.ex3).toBe("示例 3");
-    expect(zh.sayBody3).toMatch(/350 MVA/);
+    expect(zh.s1b).toContain("WorkBuddy");
+    expect(zh.s1b).toContain("Cursor");
+    expect(zh.s2q).toContain("一拖二");
+    expect(zh.s2q).toMatch(/无载 5 档/);
     const blob = LANG_OPTIONS.map(({ id }) =>
       Object.values(agentGuide(id)).join("\n"),
     ).join("\n");

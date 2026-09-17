@@ -4,26 +4,23 @@ export type AgentGuideCopy = {
   back: string;
   title: string;
   lead: string;
-  how: string;
-  wbTitle: string;
-  wbBody: string;
-  wbCopy: string;
-  wbOpen: string;
+  s1t: string;
+  s1b: string;
+  s1copy: string;
+  s1alt: string;
   dl: string;
-  cli: string;
-  cliBody: string;
-  install: string;
-  run: string;
-  say: string;
-  ex1: string;
-  ex2: string;
-  ex3: string;
-  sayBody: string;
-  sayBody2: string;
-  sayBody3: string;
-  result: string;
+  hub: string;
+  s2t: string;
+  s2b: string;
+  s2q: string;
+  s3t: string;
+  s3b: string;
+  s3note: string;
   tagOltc: string;
   tagOctc: string;
+  cli: string;
+  install: string;
+  run: string;
   copy: string;
   copied: string;
   limit: string;
@@ -32,31 +29,24 @@ export type AgentGuideCopy = {
 const zh: AgentGuideCopy = {
   back: "选型",
   title: "让 AI 助手帮你选型",
-  lead: "下载技能包，传给你的 AI 助手。把变压器参数发给它，它选型号。",
-  how: "在助手里找上传技能的入口，把 zip 传进去就行。之后把变压器参数发给它就行，有什么参数不确定，它会来问你。",
-  wbTitle: "装了 WorkBuddy？",
-  wbBody: "不用下载 zip。把这句话发给 WorkBuddy，它自己从 SkillHub 装好这个技能。",
-  wbCopy: "发给 WorkBuddy 的话",
-  wbOpen: "在 SkillHub 上查看",
-  dl: "下载技能包",
-  cli: "想自己跑命令",
-  cliBody:
-    "技能背后是个命令行工具 oltc，和网页版同一套选型逻辑。它不编型号，样本册里没有的就是没有。",
-  install: "安装",
-  run: "有载例子",
-  say: "然后就像聊天一样，把参数发给它",
-  ex1: "示例 1",
-  ex2: "示例 2",
-  ex3: "示例 3",
-  sayBody:
-    "帮我选个有载开关：25 MVA，110±8×1.25%/10.5 kV，Dyn11，高压侧中性点调压，要真空。",
-  sayBody2:
-    "帮我选个一拖二的：110 kV，有载 ±8×1.25%，无载 5 档，350 A，高压侧中性点调压。",
-  sayBody3:
-    "帮我选个有载开关：350 MVA，132±10×1.25%/11-11 kV，YNd11d11，高压侧中性点调压，最大电流 1750 A，开关对地 350/140。",
-  result: "选出型号",
+  lead: "三步：装上技能，发参数，拿型号。",
+  s1t: "装上技能",
+  s1b: "把这句话发给你的 AI 助手，WorkBuddy、Claude Code、Cursor 都行，它自己从 SkillHub 装好。",
+  s1copy: "复制这句话",
+  s1alt: "其他装法：",
+  dl: "下载技能包 zip",
+  hub: "在 SkillHub 上查看",
+  s2t: "把参数发给它",
+  s2b: "像聊天一样，有什么发什么。参数不确定，它会来问你。",
+  s2q: "帮我选个一拖二的：110 kV，有载 ±8×1.25%，无载 5 档，350 A，高压侧中性点调压。",
+  s3t: "拿到型号和理由",
+  s3b: "型号都来自样本册，不编。一拖二会出有载、无载两个型号。",
+  s3note: "两台都过了样本册检查，可以拿去询价。",
   tagOltc: "有载",
   tagOctc: "无载",
+  cli: "想自己跑命令",
+  install: "安装",
+  run: "有载例子",
   copy: "复制",
   copied: "已复制",
   limit: "出 OS 或采购前，需要工程确认。",
@@ -65,31 +55,24 @@ const zh: AgentGuideCopy = {
 const en: AgentGuideCopy = {
   back: "Selector",
   title: "Let an AI assistant pick the type",
-  lead: "Download the skill pack and upload it to the AI assistant you already use. Send it the transformer data, it picks the type.",
-  how: "Find the skill upload entry in your assistant and send the zip in. Then just send it the transformer data. If a parameter is unclear, it will ask.",
-  wbTitle: "Already on WorkBuddy?",
-  wbBody: "No zip needed. Send this line to WorkBuddy and it installs the skill from SkillHub itself.",
-  wbCopy: "Line to send WorkBuddy",
-  wbOpen: "View on SkillHub",
-  dl: "Download the skill pack",
-  cli: "Want to run it yourself",
-  cliBody:
-    "Behind the skill is a small command line tool, oltc, with the same selection logic as the web app. It never invents a type. Not in the brochure means it does not exist.",
-  install: "Install",
-  run: "On-load example",
-  say: "Then pick a type by chatting",
-  ex1: "Example 1",
-  ex2: "Example 2",
-  ex3: "Example 3",
-  sayBody:
-    "Pick an on-load tap-changer for me: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, taps at the HV neutral, vacuum.",
-  sayBody2:
-    "Pick one for a transformer with both on-load and off-circuit taps: 110 kV, on-load ±8×1.25%, off-circuit 5 positions, 350 A, taps at the HV neutral.",
-  sayBody3:
-    "Pick an on-load tap-changer for me: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, taps at the HV neutral, max 1750 A, OLTC earth 350/140.",
-  result: "Result",
+  lead: "Three steps: install the skill, send the data, get the type.",
+  s1t: "Install the skill",
+  s1b: "Send this line to your AI assistant. WorkBuddy, Claude Code, Cursor all work; it installs the skill from SkillHub by itself.",
+  s1copy: "Copy the line",
+  s1alt: "Other ways:",
+  dl: "Download the skill zip",
+  hub: "View on SkillHub",
+  s2t: "Send the transformer data",
+  s2b: "Just chat. If a parameter is unclear, it asks.",
+  s2q: "Pick one for a transformer with both on-load and off-circuit taps: 110 kV, on-load ±8×1.25%, off-circuit 5 positions, 350 A, taps at the HV neutral.",
+  s3t: "Get the type and the why",
+  s3b: "Every type comes from the catalogue, none invented. Dual-duty gets two type strings.",
+  s3note: "Both passed the brochure check and are ready for pricing.",
   tagOltc: "on-load",
   tagOctc: "off-circuit",
+  cli: "Want to run it yourself",
+  install: "Install",
+  run: "On-load example",
   copy: "Copy",
   copied: "Copied",
   limit: "Get engineering sign-off before an OS or a purchase.",
@@ -98,31 +81,24 @@ const en: AgentGuideCopy = {
 const vi: AgentGuideCopy = {
   back: "Chọn kiểu",
   title: "Để trợ lý AI chọn kiểu giúp bạn",
-  lead: "Tải gói skill, tải lên trợ lý AI bạn đang dùng. Gửi số liệu máy biến áp cho nó, nó chọn kiểu.",
-  how: "Tìm mục tải skill trong trợ lý, gửi file zip vào. Sau đó cứ gửi số liệu máy biến áp cho nó. Có thông số nào không rõ, nó sẽ hỏi lại bạn.",
-  wbTitle: "Đã cài WorkBuddy?",
-  wbBody: "Không cần tải zip. Gửi câu này cho WorkBuddy, nó tự cài skill từ SkillHub.",
-  wbCopy: "Câu gửi WorkBuddy",
-  wbOpen: "Xem trên SkillHub",
-  dl: "Tải gói skill",
-  cli: "Muốn tự chạy lệnh",
-  cliBody:
-    "Phía sau skill là công cụ dòng lệnh oltc, cùng logic chọn với bản web. Nó không bịa kiểu. Không có trong catalogue nghĩa là không có.",
-  install: "Cài đặt",
-  run: "Ví dụ có tải",
-  say: "Rồi chọn kiểu như chat bình thường",
-  ex1: "Ví dụ 1",
-  ex2: "Ví dụ 2",
-  ex3: "Ví dụ 3",
-  sayBody:
-    "Chọn giúp tôi bộ chuyển nấc có tải: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, điều áp ở trung tính cao áp, chân không.",
-  sayBody2:
-    "Chọn giúp tôi cho máy biến áp vừa có tải vừa không tải: 110 kV, có tải ±8×1.25%, không tải 5 nấc, 350 A, điều áp ở trung tính cao áp.",
-  sayBody3:
-    "Chọn giúp tôi bộ chuyển nấc có tải: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, điều áp ở trung tính cao áp, dòng max 1750 A, cách điện OLTC 350/140.",
-  result: "Kết quả",
+  lead: "Ba bước: cài skill, gửi số liệu, nhận kiểu.",
+  s1t: "Cài skill",
+  s1b: "Gửi câu này cho trợ lý AI của bạn. WorkBuddy, Claude Code, Cursor đều được; nó tự cài từ SkillHub.",
+  s1copy: "Chép câu này",
+  s1alt: "Cách khác:",
+  dl: "Tải gói skill zip",
+  hub: "Xem trên SkillHub",
+  s2t: "Gửi số liệu máy biến áp",
+  s2b: "Cứ chat bình thường. Thông số nào không rõ, nó sẽ hỏi lại.",
+  s2q: "Chọn giúp tôi cho máy biến áp vừa có tải vừa không tải: 110 kV, có tải ±8×1.25%, không tải 5 nấc, 350 A, điều áp ở trung tính cao áp.",
+  s3t: "Nhận kiểu và lý do",
+  s3b: "Kiểu nào cũng từ catalogue, không bịa. Máy hai hệ thống sẽ ra hai mã kiểu.",
+  s3note: "Cả hai đều qua kiểm tra catalogue, có thể đem đi báo giá.",
   tagOltc: "có tải",
   tagOctc: "không tải",
+  cli: "Muốn tự chạy lệnh",
+  install: "Cài đặt",
+  run: "Ví dụ có tải",
   copy: "Chép",
   copied: "Đã chép",
   limit: "Trước OS hoặc mua hàng cần kỹ sư xác nhận.",
@@ -131,31 +107,24 @@ const vi: AgentGuideCopy = {
 const es: AgentGuideCopy = {
   back: "Selector",
   title: "Que un asistente de IA elija el tipo",
-  lead: "Descargue el skill y súbalo al asistente de IA que ya usa. Envíele los datos del transformador y él elige el tipo.",
-  how: "Busque la opción de subir skills en su asistente y envíe el zip. Luego envíele los datos del transformador. Si algún parámetro no está claro, se lo preguntará.",
-  wbTitle: "¿Ya tienes WorkBuddy?",
-  wbBody: "Sin zip. Envía esta línea a WorkBuddy y él instala el skill desde SkillHub.",
-  wbCopy: "Línea para WorkBuddy",
-  wbOpen: "Ver en SkillHub",
-  dl: "Descargar el skill",
-  cli: "Si quiere ejecutarlo usted mismo",
-  cliBody:
-    "Detrás del skill hay una herramienta de línea de comandos, oltc, con la misma lógica de selección que la web. No inventa tipos. Si no está en el folleto, no existe.",
-  install: "Instalar",
-  run: "Ejemplo en carga",
-  say: "Luego elija charlando",
-  ex1: "Ejemplo 1",
-  ex2: "Ejemplo 2",
-  ex3: "Ejemplo 3",
-  sayBody:
-    "Elíjame un cambiador en carga: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, regulación en el neutro de AT, vacío.",
-  sayBody2:
-    "Elíjame uno para un transformador con regulación en carga y sin carga: 110 kV, en carga ±8×1.25%, sin carga 5 posiciones, 350 A, regulación en el neutro de AT.",
-  sayBody3:
-    "Elíjame un cambiador en carga: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, regulación en el neutro de AT, 1750 A máx., aislamiento OLTC 350/140.",
-  result: "Resultado",
+  lead: "Tres pasos: instale el skill, envíe los datos, reciba el tipo.",
+  s1t: "Instale el skill",
+  s1b: "Envíe esta línea a su asistente de IA. WorkBuddy, Claude Code y Cursor sirven; él mismo lo instala desde SkillHub.",
+  s1copy: "Copiar la línea",
+  s1alt: "Otras formas:",
+  dl: "Descargar el skill zip",
+  hub: "Ver en SkillHub",
+  s2t: "Envíe los datos del transformador",
+  s2b: "Como un chat. Si un parámetro no está claro, se lo preguntará.",
+  s2q: "Elíjame uno para un transformador con regulación en carga y sin carga: 110 kV, en carga ±8×1.25%, sin carga 5 posiciones, 350 A, regulación en el neutro de AT.",
+  s3t: "Reciba el tipo y la razón",
+  s3b: "Todos los tipos vienen del catálogo, nada inventado. Un equipo doble recibe dos códigos.",
+  s3note: "Ambos pasaron la revisión del catálogo y sirven para pedir precio.",
   tagOltc: "en carga",
   tagOctc: "sin carga",
+  cli: "Si quiere ejecutarlo usted mismo",
+  install: "Instalar",
+  run: "Ejemplo en carga",
   copy: "Copiar",
   copied: "Copiado",
   limit: "Antes de un OS o una compra, confírmelo con ingeniería.",
@@ -164,31 +133,24 @@ const es: AgentGuideCopy = {
 const tr: AgentGuideCopy = {
   back: "Seçici",
   title: "Tipi bir AI asistan seçsin",
-  lead: "Skill paketini indirip kullandığınız AI asistana yükleyin. Trafo verilerini gönderin, o tipi seçsin.",
-  how: "Asistanınızda skill yükleme girişini bulun ve zip'i gönderin. Sonra trafo verilerini göndermeniz yeterli. Emin olmadığı bir parametre olursa size sorar.",
-  wbTitle: "WorkBuddy yüklü mü?",
-  wbBody: "Zip gerekmez. Bu satırı WorkBuddy'ye gönderin, skill'i SkillHub'dan kendisi kursun.",
-  wbCopy: "WorkBuddy'ye gönderilecek satır",
-  wbOpen: "SkillHub'da görüntüle",
-  dl: "Skill paketini indir",
-  cli: "Kendiniz çalıştırmak isterseniz",
-  cliBody:
-    "Skill'in arkasında web ile aynı seçim mantığına sahip bir komut satırı aracı var: oltc. Tip uydurmaz. Broşürde yoksa yoktur.",
-  install: "Kurulum",
-  run: "Yük altında örnek",
-  say: "Sonra sohbet eder gibi seçin",
-  ex1: "Örnek 1",
-  ex2: "Örnek 2",
-  ex3: "Örnek 3",
-  sayBody:
-    "Bana yük altında kademe değiştirici seç: 25 MVA, 110±8×1.25%/10.5 kV, Dyn11, YG tarafı yıldız noktasından ayar, vakum.",
-  sayBody2:
-    "Hem yük altında hem yüksüz kademeli bir trafo için seç: 110 kV, yük altında ±8×1.25%, yüksüz 5 kademe, 350 A, YG yıldız noktasından ayar.",
-  sayBody3:
-    "Bana yük altında kademe değiştirici seç: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, YG yıldız noktasından ayar, max 1750 A, OLTC toprağı 350/140.",
-  result: "Sonuç",
+  lead: "Üç adım: skill'i kurun, veriyi gönderin, tipi alın.",
+  s1t: "Skill'i kurun",
+  s1b: "Bu satırı AI asistanınıza gönderin. WorkBuddy, Claude Code, Cursor hepsi olur; SkillHub'dan kendisi kurar.",
+  s1copy: "Satırı kopyala",
+  s1alt: "Başka yollar:",
+  dl: "Skill zip'ini indir",
+  hub: "SkillHub'da görüntüle",
+  s2t: "Trafo verilerini gönderin",
+  s2b: "Sohbet gibi yazın. Emin olmadığı parametre olursa size sorar.",
+  s2q: "Hem yük altında hem yüksüz kademeli bir trafo için seç: 110 kV, yük altında ±8×1.25%, yüksüz 5 kademe, 350 A, YG yıldız noktasından ayar.",
+  s3t: "Tipi ve gerekçesini alın",
+  s3b: "Tüm tipler katalogdan, uydurma yok. Çift görevli trafoda iki tip kodu çıkar.",
+  s3note: "İkisi de katalog kontrolünden geçti, fiyat istemeye hazır.",
   tagOltc: "yük altında",
   tagOctc: "yüksüz",
+  cli: "Kendiniz çalıştırmak isterseniz",
+  install: "Kurulum",
+  run: "Yük altında örnek",
   copy: "Kopyala",
   copied: "Kopyalandı",
   limit: "OS veya satın almadan önce mühendis onayı alın.",
@@ -197,31 +159,24 @@ const tr: AgentGuideCopy = {
 const ru: AgentGuideCopy = {
   back: "Подбор",
   title: "Пусть ИИ-помощник подберёт тип",
-  lead: "Скачайте skill и загрузите его в ИИ-помощника, которым пользуетесь. Отправьте ему данные трансформатора, он выберет тип.",
-  how: "Найдите в помощнике загрузку skill и отправьте zip. Дальше просто отправьте данные трансформатора. Если какой-то параметр непонятен, он спросит.",
-  wbTitle: "Уже установлен WorkBuddy?",
-  wbBody: "Zip не нужен. Отправьте эту строку в WorkBuddy, он сам установит skill из SkillHub.",
-  wbCopy: "Строка для WorkBuddy",
-  wbOpen: "Открыть в SkillHub",
-  dl: "Скачать skill",
-  cli: "Если хотите запускать сами",
-  cliBody:
-    "Внутри skill командная утилита oltc с той же логикой подбора, что и на сайте. Она не выдумывает типы. Нет в брошюре, значит нет.",
-  install: "Установка",
-  run: "Пример под нагрузкой",
-  say: "Дальше просто пишите, как в чате",
-  ex1: "Пример 1",
-  ex2: "Пример 2",
-  ex3: "Пример 3",
-  sayBody:
-    "Подбери РПН: 25 МВА, 110±8×1.25%/10.5 кВ, Dyn11, регулирование в нейтрали ВН, вакуум.",
-  sayBody2:
-    "Подбери для трансформатора с РПН и ПБВ: 110 кВ, под нагрузкой ±8×1.25%, без нагрузки 5 ступеней, 350 А, регулирование в нейтрали ВН.",
-  sayBody3:
-    "Подбери РПН: 350 МВА, 132±10×1.25%/11-11 кВ, YNd11d11, регулирование в нейтрали ВН, макс. 1750 А, изоляция РПН 350/140.",
-  result: "Результат",
+  lead: "Три шага: установите skill, отправьте данные, получите тип.",
+  s1t: "Установите skill",
+  s1b: "Отправьте эту строку своему ИИ-помощнику. WorkBuddy, Claude Code, Cursor, любой подойдёт; он сам установит skill из SkillHub.",
+  s1copy: "Копировать строку",
+  s1alt: "Другие способы:",
+  dl: "Скачать skill zip",
+  hub: "Открыть в SkillHub",
+  s2t: "Отправьте данные трансформатора",
+  s2b: "Просто пишите, как в чате. Если параметр непонятен, он спросит.",
+  s2q: "Подбери для трансформатора с РПН и ПБВ: 110 кВ, под нагрузкой ±8×1.25%, без нагрузки 5 ступеней, 350 А, регулирование в нейтрали ВН.",
+  s3t: "Получите тип и обоснование",
+  s3b: "Все типы из каталога, ничего не выдумано. Для двойного регулирования будет два кода.",
+  s3note: "Оба прошли проверку по каталогу, можно запрашивать цену.",
   tagOltc: "РПН",
   tagOctc: "ПБВ",
+  cli: "Если хотите запускать сами",
+  install: "Установка",
+  run: "Пример под нагрузкой",
   copy: "Копировать",
   copied: "Скопировано",
   limit: "Перед OS или закупкой нужно подтверждение инженера.",

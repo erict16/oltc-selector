@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownTrayIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { LangSwitcher } from "@/components/LangSwitcher";
@@ -10,15 +10,14 @@ import { setAppLang } from "@/lib/i18n";
 import { agentGuide } from "@/lib/i18nAgents";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const ZIP = `${BASE}/skills/huaming-oltc-selector.zip`;
 const INSTALL = "npm i -g oltc-selector";
 const RUN = "oltc --iu 350 --um 40.5 --conn D --reg W --pm 8";
-const TYPE_EX1 = "CV2III-350Y/72.5-10193W";
-const TYPE_EX2_OLTC = "CV2III-350Y/72.5-10193W";
-const TYPE_EX2_OCTC = "WSLIV-600Y/72.5-6x5A";
-const TYPE_EX3 = "3xSHZVI-2400/72.5B-12233W";
 const WB_PROMPT =
   "请根据 https://skillhub.cn/install/skillhub.md，安装 global/huaming-oltc-selector";
 const WB_PAGE = "https://skill.xfyun.cn/space/global/huaming-oltc-selector";
+const TYPE_OLTC = "CV2III-350Y/72.5-10193W";
+const TYPE_OCTC = "WSLIV-600Y/72.5-6x5A";
 
 export function AgentsGuide() {
   const lang = useAppLang();
@@ -60,76 +59,79 @@ export function AgentsGuide() {
         {c.lead}
       </p>
 
-      <section className="guide-wb">
-        <h2 className="guide-k">{c.wbTitle}</h2>
-        <p className="guide-wb-body">{c.wbBody}</p>
-        <div className="guide-term">
-          <Cmd
-            id="wb-install"
-            label={c.wbCopy}
-            command={WB_PROMPT}
-            copied={copied}
-            copyLabel={c.copy}
-            copiedLabel={c.copied}
-            onCopy={onCopy}
-            bare
-          />
-        </div>
-        <a
-          className="guide-wb-open"
-          href={WB_PAGE}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {c.wbOpen}
-        </a>
-      </section>
+      <ol className="guide-steps">
+        <li className="guide-step">
+          <span className="guide-rail" aria-hidden>
+            <span className="guide-n">1</span>
+            <span className="guide-rail-line" />
+          </span>
+          <div className="guide-step-body">
+            <h2>{c.s1t}</h2>
+            <p>{c.s1b}</p>
+            <div className="guide-term">
+              <Cmd
+                id="install-prompt"
+                label={c.s1copy}
+                command={WB_PROMPT}
+                copied={copied}
+                copyLabel={c.copy}
+                copiedLabel={c.copied}
+                onCopy={onCopy}
+                bare
+              />
+            </div>
+            <p className="guide-alt">
+              {c.s1alt}{" "}
+              <a href={ZIP} download="huaming-oltc-selector.zip">
+                {c.dl}
+              </a>{" "}
+              ·{" "}
+              <a href={WB_PAGE} target="_blank" rel="noreferrer">
+                {c.hub}
+              </a>
+            </p>
+          </div>
+        </li>
 
-      <a
-        href={`${BASE}/skills/huaming-oltc-selector.zip`}
-        download="huaming-oltc-selector.zip"
-        className="guide-dl"
-      >
-        <ArrowDownTrayIcon className="h-5 w-5 shrink-0" aria-hidden />
-        {c.dl}
-      </a>
-      <p className="guide-how">{c.how}</p>
+        <li className="guide-step">
+          <span className="guide-rail" aria-hidden>
+            <span className="guide-n">2</span>
+            <span className="guide-rail-line" />
+          </span>
+          <div className="guide-step-body">
+            <h2>{c.s2t}</h2>
+            <p>{c.s2b}</p>
+            <div className="guide-mini">
+              <p className="guide-q">{c.s2q}</p>
+            </div>
+          </div>
+        </li>
 
-      <section className="guide-more">
-        <h2 className="guide-k">{c.say}</h2>
-        <div className="guide-chat">
-          <p className="guide-ex">{c.ex1}</p>
-          <p className="guide-q">{c.sayBody}</p>
-          <div className="guide-a">
-            <span className="guide-a-label">{c.result}</span>
-            <code className="guide-type">{TYPE_EX1}</code>
+        <li className="guide-step">
+          <span className="guide-rail" aria-hidden>
+            <span className="guide-n">3</span>
+            <span className="guide-rail-line" />
+          </span>
+          <div className="guide-step-body">
+            <h2>{c.s3t}</h2>
+            <p>{c.s3b}</p>
+            <div className="guide-mini">
+              <code className="guide-type">
+                {TYPE_OLTC}
+                <span className="guide-tag">{c.tagOltc}</span>
+              </code>{" "}
+              <code className="guide-type">
+                {TYPE_OCTC}
+                <span className="guide-tag">{c.tagOctc}</span>
+              </code>
+              <p className="guide-note">{c.s3note}</p>
+            </div>
           </div>
-        </div>
-        <div className="guide-chat">
-          <p className="guide-ex">{c.ex2}</p>
-          <p className="guide-q">{c.sayBody2}</p>
-          <div className="guide-a">
-            <span className="guide-a-label">{c.result}</span>
-            <code className="guide-type">
-              {TYPE_EX2_OLTC}
-              <span className="guide-tag">{c.tagOltc}</span>
-            </code>
-            <code className="guide-type">
-              {TYPE_EX2_OCTC}
-              <span className="guide-tag">{c.tagOctc}</span>
-            </code>
-          </div>
-        </div>
-        <div className="guide-chat">
-          <p className="guide-ex">{c.ex3}</p>
-          <p className="guide-q">{c.sayBody3}</p>
-          <div className="guide-a">
-            <span className="guide-a-label">{c.result}</span>
-            <code className="guide-type">{TYPE_EX3}</code>
-          </div>
-        </div>
-        <h2 className="guide-k">{c.cli}</h2>
-        <p className="guide-more-body">{c.cliBody}</p>
+        </li>
+      </ol>
+
+      <details className="guide-cli">
+        <summary>{c.cli}</summary>
         <div className="guide-term">
           <Cmd
             id="install"
@@ -150,7 +152,7 @@ export function AgentsGuide() {
             onCopy={onCopy}
           />
         </div>
-      </section>
+      </details>
 
       <p className="guide-limit">{c.limit}</p>
     </article>
