@@ -20,7 +20,9 @@ const dir = path.join(out, "huaming-oltc-selector");
 cpSync(SRC, dir, { recursive: true });
 
 // skillhub.cn rejects png inside the package ("不允许的文件类型").
-// The icon is uploaded once via their web console instead.
+// Icon and category live in their web console. NOTE: a CLI publish wipes
+// both, so after every CLI update re-set them in 个人中心 → 我的 Skill:
+// icon = skills/huaming-oltc-selector/assets/icon.png, category = 行业专业.
 rmSync(path.join(dir, "assets"), { recursive: true, force: true });
 
 const skillPath = path.join(dir, "SKILL.md");
