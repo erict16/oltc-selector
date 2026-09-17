@@ -50,7 +50,7 @@ for (const needle of FORBIDDEN) {
 
 const pkg = {
   name: "oltc-selector",
-  version: "1.1.0",
+  version: "1.2.0",
   description:
     "Huaming OLTC/OCTC type selection CLI. No prices. Same engine as the web app.",
   bin: { oltc: "bin/oltc.js" },

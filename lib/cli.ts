@@ -40,6 +40,8 @@ export type CliArgs = {
   phases: PhaseCode;
   json: boolean;
   help: boolean;
+  /** flags the user actually passed; everything else is a silent default */
+  given: Set<string>;
 };
 
 export class CliError extends Error {
@@ -68,6 +70,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
     json: false,
     help: false,
     pm: 8,
+    given: new Set<string>(),
   };
 
   const take = (i: number, flag: string): [string, number] => {
@@ -89,62 +92,73 @@ export function parseCliArgs(argv: string[]): CliArgs {
       continue;
     }
     if (a === "--octc") {
+      out.given.add("octc");
       out.octc = true;
       continue;
     }
     if (a === "--oil") {
+      out.given.add("medium");
       out.oil = true;
       out.vacuum = false;
       continue;
     }
     if (a === "--vacuum") {
+      out.given.add("medium");
       out.vacuum = true;
       out.oil = false;
       continue;
     }
     if (a === "--iu" || a === "--imax") {
+      out.given.add("iu");
       const [v, n] = take(i, a);
       out.iu = num(v, a);
       i = n;
       continue;
     }
     if (a === "--mva") {
+      out.given.add("mva");
       const [v, n] = take(i, a);
       out.mva = num(v, a);
       i = n;
       continue;
     }
     if (a === "--kv") {
+      out.given.add("kv");
       const [v, n] = take(i, a);
       out.kv = num(v, a);
       i = n;
       continue;
     }
     if (a === "--um") {
+      out.given.add("um");
       const [v, n] = take(i, a);
       out.um = num(v, a);
       i = n;
       continue;
     }
     if (a === "--ust") {
+      out.given.add("ust");
       const [v, n] = take(i, a);
       out.ust = num(v, a);
       i = n;
       continue;
     }
     if (a === "--step-pct") {
+      out.given.add("stepPct");
       const [v, n] = take(i, a);
       out.stepPct = num(v, a);
       i = n;
       continue;
     }
     if (a === "--k") {
+      out.given.add("k");
       const [v, n] = take(i, a);
       out.k = num(v, a);
       i = n;
       continue;
     }
     if (a === "--conn" || a === "--connection") {
+      out.given.add("conn");
       const [v, n] = take(i, a);
       const c = v.toUpperCase();
       if (c !== "Y" && c !== "D") throw new CliError(`--conn must be Y or D`);
@@ -153,6 +167,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
       continue;
     }
     if (a === "--reg") {
+      out.given.add("reg");
       const [v, n] = take(i, a);
       const r = v.toUpperCase();
       if (r === "W" || r === "REVERSING") out.reg = "reversing";
@@ -164,18 +179,21 @@ export function parseCliArgs(argv: string[]): CliArgs {
       continue;
     }
     if (a === "--pm") {
+      out.given.add("pm");
       const [v, n] = take(i, a);
       out.pm = num(v, a);
       i = n;
       continue;
     }
     if (a === "--positions" || a === "--pos") {
+      out.given.add("positions");
       const [v, n] = take(i, a);
       out.positions = num(v, a);
       i = n;
       continue;
     }
     if (a === "--structure") {
+      out.given.add("structure");
       const [v, n] = take(i, a);
       const s = v.toLowerCase();
       const map: Record<string, StructureKind | "auto"> = {
@@ -199,6 +217,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
       continue;
     }
     if (a === "--series") {
+      out.given.add("series");
       const [v, n] = take(i, a);
       const r = v.toUpperCase();
       const ok = ["II", "IV", "V", "VI", "VII", "VIII", "AUTO"];
@@ -210,6 +229,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
       continue;
     }
     if (a === "--mount") {
+      out.given.add("mount");
       const [v, n] = take(i, a);
       const m = v.toLowerCase().replace("_", "-");
       if (m === "in-tank" || m === "intank") out.mount = "in_tank";
@@ -220,12 +240,14 @@ export function parseCliArgs(argv: string[]): CliArgs {
       continue;
     }
     if (a === "--contact") {
+      out.given.add("contact");
       const [v, n] = take(i, a);
       out.contact = v;
       i = n;
       continue;
     }
     if (a === "--phases") {
+      out.given.add("phases");
       const [v, n] = take(i, a);
       const p = v.toUpperCase();
       if (p !== "I" && p !== "II" && p !== "III") {
@@ -236,6 +258,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
       continue;
     }
     if (a === "--duty") {
+      out.given.add("octc");
       const [v, n] = take(i, a);
       const d = v.toLowerCase();
       if (d === "octc" || d === "off" || d === "detc") out.octc = true;
@@ -361,7 +384,69 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
   return input;
 }
 
-export function formatCliText(input: SelectInput): string {
+const MOUNT_ZH: Record<Mounting, string> = {
+  in_tank: "箱内",
+  on_tank: "箱顶",
+  dry_type: "干式",
+};
+
+/**
+ * High/medium-risk effective inputs, with （默认） on the ones left silent.
+ * The web form shows these as visible dropdowns; the CLI must echo them
+ * so a wrong assumption never hides inside a confident type string.
+ */
+export function assumptionsFromArgs(args: CliArgs): string[] {
+  const mark = (key: string) => (args.given.has(key) ? "" : "（默认）");
+  const items: string[] = [
+    `conn=${args.conn} ${args.conn === "Y" ? "星点" : "线端"}${mark("conn")}`,
+  ];
+  if (args.octc) {
+    const pos =
+      args.positions ??
+      (args.pm != null && args.pm > 0 ? Math.round(2 * args.pm + 1) : null);
+    items.push(pos != null ? `${pos} 档${mark("positions")}` : "档数未指定");
+    const s = args.series ?? "auto";
+    items.push(
+      s === "auto"
+        ? `接线=自动（${args.conn === "Y" ? "IV" : "II"}）${mark("series")}`
+        : `接线=${s}${mark("series")}`,
+    );
+    items.push(`${MOUNT_ZH[args.mount]}${mark("mount")}`);
+    return items;
+  }
+  items.push(
+    `reg=${
+      args.reg === "reversing"
+        ? "W 正反调"
+        : args.reg === "coarse_fine"
+          ? "G 粗细调"
+          : "0 线性调"
+    }${mark("reg")}`,
+  );
+  if (args.reg === "linear") {
+    items.push(
+      args.positions != null
+        ? `${args.positions} 档${mark("positions")}`
+        : "档数未指定",
+    );
+  } else {
+    items.push(`±${args.pm ?? 8} 档${mark("pm")}`);
+  }
+  items.push(`${args.oil || !args.vacuum ? "油浸" : "真空"}${mark("medium")}`);
+  items.push(`${MOUNT_ZH[args.mount]}${mark("mount")}`);
+  return items;
+}
+
+/** One-line 假定 block; null when every watched input was given explicitly. */
+export function assumptionsLine(args: CliArgs): string | null {
+  const items = assumptionsFromArgs(args);
+  if (items.every((i) => !i.includes("（默认）") && !i.includes("未指定"))) {
+    return null;
+  }
+  return `假定：${items.join(" · ")}`;
+}
+
+export function formatCliText(input: SelectInput, args?: CliArgs): string {
   const out = selectOltc(input);
   if (!out.ok || !out.results.length) {
     const err = [...out.errorsZh, ...out.errorsEn].join("\n") || "No type found.";
@@ -381,10 +466,17 @@ export function formatCliText(input: SelectInput): string {
     lines.push("其他");
     for (const a of alts) lines.push(a.model);
   }
+  if (args) {
+    const assumed = assumptionsLine(args);
+    if (assumed) {
+      lines.push("");
+      lines.push(assumed);
+    }
+  }
   return lines.join("\n") + "\n";
 }
 
-export function formatCliJson(input: SelectInput): string {
+export function formatCliJson(input: SelectInput, args?: CliArgs): string {
   const out = selectOltc(input);
   const primary = out.results[0] ?? null;
   const alts = pickOtherOptions(out.results, 3).map((r) => r.model);
@@ -393,6 +485,7 @@ export function formatCliJson(input: SelectInput): string {
     model: primary?.model ?? null,
     why: primary?.reasonsZh[0] ?? primary?.reasonsEn[0] ?? null,
     alts,
+    assumptions: args ? assumptionsFromArgs(args) : [],
     errors: out.errorsZh.length ? out.errorsZh : out.errorsEn,
   };
   return JSON.stringify(payload, null, 2) + "\n";
@@ -412,7 +505,7 @@ export function runCli(
       return 0;
     }
     const input = cliToSelectInput(args);
-    io.stdout(args.json ? formatCliJson(input) : formatCliText(input));
+    io.stdout(args.json ? formatCliJson(input, args) : formatCliText(input, args));
     return 0;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

@@ -10,7 +10,7 @@ description: >
   on one transformer), checking whether a Huaming model exists, or decoding
   a type string. Do not use for quotation, pricing, or shipping documents.
 allowed-tools: Bash, Read
-version: 1.2.3
+version: 1.2.4
 ---
 
 # Huaming Tap-Changer Selector
@@ -37,6 +37,7 @@ _The sections below are execution instructions for the AI assistant._
 4. After a pass, explain **why this type is correct** in 3 to 6 short sentences (family, Ium, Um, Y/D or 3×, tap code, construction). No essays.
 5. Output the model **without** `+CMA7` unless the user asked for a drive. Three single-phase poles → **1× CMA7**, not three.
 6. **一拖二 / 无载带有载** (one transformer with both an on-load and an off-circuit tap-changer) needs **two** selections: a plain run for the on-load part and an `--octc` run for the off-circuit part. Brochure-check **both** type strings and present them together. Never merge the two duties into one run.
+7. When the CLI ends with a **假定** assumptions block (`假定：conn=Y 星点（默认）· …`), relay it to the user verbatim and ask which assumption is wrong, then re-run with the corrected flag. No block means every watched input was given explicitly.
 
 ## How to run
 

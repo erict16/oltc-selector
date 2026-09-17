@@ -135,4 +135,55 @@ describe("oltc CLI", () => {
     expect(withK.out).toBe(bare.out);
     expect(withK.out.trim().split(/\r?\n/)[0]).toBe("CV2III-350D/40.5-10193W");
   });
+
+  it("echoes silent defaults so a wrong assumption cannot hide", () => {
+    // minimal input: everything high/medium-risk is defaulted
+    const a = capture(["--iu", "350", "--um", "40.5"]);
+    expect(a.code).toBe(0);
+    expect(a.out).toContain("假定：");
+    expect(a.out).toContain("conn=Y 星点（默认）");
+    expect(a.out).toContain("reg=W 正反调（默认）");
+    expect(a.out).toContain("±8 档（默认）");
+    expect(a.out).toContain("真空（默认）");
+    expect(a.out).toContain("箱内（默认）");
+    // first line stays the bare model
+    expect(a.out.trim().split(/\r?\n/)[0]).toBe("CV2III-350Y/40.5-10193W");
+  });
+
+  it("drops the （默认） mark for explicitly given flags", () => {
+    const a = capture([
+      "--iu", "350", "--um", "40.5",
+      "--conn", "D", "--reg", "W", "--pm", "8",
+    ]);
+    expect(a.out).toContain("conn=D 线端");
+    expect(a.out).not.toContain("conn=D 线端（默认）");
+    expect(a.out).not.toContain("reg=W 正反调（默认）");
+    // mount and medium still defaulted, so the block stays
+    expect(a.out).toContain("真空（默认）");
+  });
+
+  it("omits the 假定 block when every watched input is explicit", () => {
+    const a = capture([
+      "--iu", "350", "--um", "40.5",
+      "--conn", "D", "--reg", "W", "--pm", "8",
+      "--vacuum", "--mount", "in-tank",
+    ]);
+    expect(a.code).toBe(0);
+    expect(a.out).not.toContain("假定：");
+  });
+
+  it("--json carries the assumptions array", () => {
+    const a = capture(["--json", "--iu", "350", "--um", "40.5"]);
+    const j = JSON.parse(a.out);
+    expect(j.assumptions.join(" ")).toContain("conn=Y");
+    expect(j.assumptions.join(" ")).toContain("（默认）");
+  });
+
+  it("octc echo shows positions, wiring and mount, not reg", () => {
+    const a = capture(["--octc", "--iu", "800", "--um", "72.5", "--conn", "D", "--contact", "6x5"]);
+    expect(a.code).toBe(0);
+    expect(a.out).toContain("conn=D 线端");
+    expect(a.out).toContain("接线=自动（II）（默认）");
+    expect(a.out).not.toContain("reg=");
+  });
 });
