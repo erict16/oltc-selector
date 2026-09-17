@@ -8,6 +8,8 @@ export type AgentGuideCopy = {
   s1b: string;
   s1copy: string;
   s1alt: string;
+  wbShot?: string;
+  wbShotAlt?: string;
   dl: string;
   hub: string;
   s2t: string;
@@ -39,8 +41,10 @@ const zh: AgentGuideCopy = {
   title: "让 AI 助手帮你选型",
   lead: "三步：装上技能，发参数，拿型号。",
   s1t: "装上技能",
-  s1b: "把这句话发给你的 AI 助手，WorkBuddy、Claude Code、ChatGPT 都行，它自己从 SkillHub 装好。",
+  s1b: "用 WorkBuddy 的，打开「专家·技能·连接器」，搜「华明」，点 + 就能装。Claude Code、ChatGPT 把下面这句话发出去，它自己从 SkillHub 装好。",
   s1copy: "复制这句话",
+  wbShot: "WorkBuddy 里搜「华明」，点卡片右边的 +。",
+  wbShotAlt: "WorkBuddy 技能页搜华明，SkillHub 列出华明分接开关选型助手",
   s1alt: "其他装法：",
   dl: "下载技能包 zip",
   hub: "在 SkillHub 上查看",

@@ -70,6 +70,17 @@ export function AgentsGuide() {
           <div className="guide-step-body">
             <h2>{c.s1t}</h2>
             <p>{c.s1b}</p>
+            {c.wbShot ? (
+              <figure className="guide-shot">
+                <img
+                  src={`${BASE}/agents/workbuddy-skillhub.jpg`}
+                  alt={c.wbShotAlt ?? ""}
+                  width={1936}
+                  height={1243}
+                />
+                <figcaption>{c.wbShot}</figcaption>
+              </figure>
+            ) : null}
             <div className="guide-term">
               <Cmd
                 id="install-prompt"

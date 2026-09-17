@@ -28,6 +28,10 @@ describe("agent guide copy", () => {
     const zh = agentGuide("zh");
     expect(zh.s1b).toContain("WorkBuddy");
     expect(zh.s1b).toContain("ChatGPT");
+    expect(zh.s1b).toContain("华明");
+    expect(zh.wbShot).toContain("WorkBuddy");
+    expect(zh.wbShotAlt).toContain("华明");
+    expect(agentGuide("en").wbShot).toBeUndefined();
     expect(zh.s2q).toContain("一拖二");
     expect(zh.s2q).toMatch(/无载 5 档/);
     const blob = LANG_OPTIONS.map(({ id }) =>
