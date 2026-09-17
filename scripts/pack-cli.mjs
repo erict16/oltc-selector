@@ -59,14 +59,14 @@ for (const needle of FORBIDDEN) {
 
 const pkg = {
   name: "oltc-selector",
-  version: "1.0.0",
+  version: "1.1.0",
   description:
     "Huaming OLTC/OCTC type selection CLI. No prices. Same engine as the web app.",
   bin: { oltc: "bin/oltc.js" },
   type: "module",
   files: ["bin", "README.md"],
   engines: { node: ">=20" },
-  license: "UNLICENSED",
+  license: "MIT",
   repository: {
     type: "git",
     url: "git+https://github.com/erict16/oltc-selector.git",

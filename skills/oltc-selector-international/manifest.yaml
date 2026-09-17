@@ -1,0 +1,13 @@
+name: oltc-selector
+version: 1.1.0
+description: Select a Huaming OLTC/OCTC tap-changer type with the oltc CLI, verify it against the catalogue, and explain why it fits. No prices.
+display_name: Huaming Tap-Changer Selector
+display_name_zh: 华明分接开关选型
+description_en: Run oltc to pick a Huaming tap-changer type, then check the brochure and explain why.
+description_zh: 用 oltc 命令选华明分接开关型号，对照样本册检查是否存在、说明为何正确。
+author: Eric Tan
+license: MIT
+category: engineering
+requires:
+  node: ">=20"
+  npm_package: oltc-selector # run on demand: npx -y oltc-selector@latest

@@ -1,5 +1,6 @@
 name: oltc-selector
 version: 1.1.0
+description: 用 oltc 命令选华明分接开关型号，对照样本册检查型号是否存在、说明为何正确。不含报价。
 display_name: 华明分接开关选型
 display_name_en: Huaming Tap-Changer Selector
 description_zh: 用 oltc 命令选华明分接开关型号，对照样本册检查是否存在、说明为何正确。
@@ -9,4 +10,4 @@ license: MIT
 category: engineering
 requires:
   node: ">=20"
-  npm_package: oltc-selector # installed on demand: npm i -g oltc-selector
+  npm_package: oltc-selector # run on demand: npx -y oltc-selector@latest

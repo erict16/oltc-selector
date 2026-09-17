@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Skill splits into two upload variants: `skills/oltc-selector` (WorkBuddy SkillHub, Chinese-first) and `skills/oltc-selector-international` (English-first, OpenSkills/ClawHub-compatible). `npm run pack:skill` builds both zips LF-normalized; tests pin frontmatter, manifest `description`, table sync, and zip freshness. CI runs `npm test` before the Pages build.
+- Skill install path is npx-first (`npx -y oltc-selector@latest`), global `npm i -g` optional; notes the same-name package.json shadowing pitfall. Frontmatter declares `allowed-tools: Bash, Read`; manifest adds the plain `description` WorkBuddy requires.
+- npm CLI published as `oltc-selector@1.1.0` under MIT (was 1.0.0 UNLICENSED), matching repo and skill versions.
 - /agents guide: drop the how-the-CLI-picks lines. Add 示例 3 (350 MVA 132 kV star-point → `3xSHZVI-2400/72.5B-12233W`) and 示例 4 (38 off 33 kV station → `CV2III-350D/40.5-10091W`).
 - Skill pack prepped for marketplace upload: MIT license, `manifest.yaml` in the zip, Huaming-branded display name (华明分接开关选型) with vendor scope stated up front.
 - /agents guide examples are chat cards: 示例 1 on-load and 示例 2 一拖二, with the selected type strings as chips (有载/无载 tagged).

@@ -1,18 +1,31 @@
-#!/usr/bin/env node
-// Pack skills/oltc-selector/ into public/skills/oltc-selector.zip.
+// Pack the skill variants into public/skills/*.zip.
 // Store-only entries with fixed timestamps, so the bytes are deterministic
-// and the freshness check below can compare them against the committed zip.
+// and the freshness check below can compare them against the committed zips.
+// All text is normalized to LF: some skill loaders split frontmatter on "\n"
+// and choke on CRLF.
 //
-//   node scripts/pack-skill.mjs           write the zip
-//   node scripts/pack-skill.mjs --check   exit 1 when the committed zip is stale
+//   node scripts/pack-skill.mjs           write the zips
+//   node scripts/pack-skill.mjs --check   exit 1 when a committed zip is stale
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SRC = path.join(root, "skills", "oltc-selector");
-const OUT = path.join(root, "public", "skills", "oltc-selector.zip");
-const FILES = ["SKILL.md", "manifest.yaml", "references/brochure-check.md"];
+
+export const VARIANTS = [
+  {
+    id: "workbuddy",
+    src: path.join(root, "skills", "oltc-selector"),
+    out: path.join(root, "public", "skills", "oltc-selector.zip"),
+    files: ["SKILL.md", "manifest.yaml", "references/brochure-check.md"],
+  },
+  {
+    id: "international",
+    src: path.join(root, "skills", "oltc-selector-international"),
+    out: path.join(root, "public", "skills", "oltc-selector-international.zip"),
+    files: ["SKILL.md", "manifest.yaml", "references/brochure-check.md"],
+  },
+];
 
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256);
@@ -30,12 +43,22 @@ function crc32(buf) {
   return (c ^ 0xffffffff) >>> 0;
 }
 
-function buildZip() {
+/** [{ name, data }] with LF-normalized contents, in packaging order. */
+export function buildEntries(variant) {
+  return variant.files.map((name) => ({
+    name,
+    data: Buffer.from(
+      readFileSync(path.join(variant.src, name), "utf8").replace(/\r\n/g, "\n"),
+      "utf8",
+    ),
+  }));
+}
+
+export function buildZip(entries) {
   const chunks = [];
   const central = [];
   let offset = 0;
-  for (const name of FILES) {
-    const data = readFileSync(path.join(SRC, name));
+  for (const { name, data } of entries) {
     const nameBuf = Buffer.from(name, "utf8");
     const crc = crc32(data);
 
@@ -73,25 +96,35 @@ function buildZip() {
   const cdBuf = Buffer.concat(central);
   const end = Buffer.alloc(22);
   end.writeUInt32LE(0x06054b50, 0); // end of central directory
-  end.writeUInt16LE(FILES.length, 8);
-  end.writeUInt16LE(FILES.length, 10);
+  end.writeUInt16LE(entries.length, 8);
+  end.writeUInt16LE(entries.length, 10);
   end.writeUInt32LE(cdBuf.length, 12);
   end.writeUInt32LE(offset, 16);
   return Buffer.concat([...chunks, cdBuf, end]);
 }
 
-const zip = buildZip();
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
 
-if (process.argv.includes("--check")) {
-  const committed = existsSync(OUT) ? readFileSync(OUT) : null;
-  if (!committed || !committed.equals(zip)) {
-    console.error(
-      "public/skills/oltc-selector.zip is stale. Run: npm run pack:skill",
-    );
-    process.exit(1);
+if (isMain) {
+  const check = process.argv.includes("--check");
+  let stale = 0;
+  for (const variant of VARIANTS) {
+    const zip = buildZip(buildEntries(variant));
+    const rel = path.relative(root, variant.out);
+    if (check) {
+      const committed = existsSync(variant.out) ? readFileSync(variant.out) : null;
+      if (!committed || !committed.equals(zip)) {
+        console.error(`${rel} is stale. Run: npm run pack:skill`);
+        stale++;
+      } else {
+        console.log(`${rel} is in sync with ${path.relative(root, variant.src)}/`);
+      }
+    } else {
+      writeFileSync(variant.out, zip);
+      console.log(`wrote ${rel} (${zip.length} bytes)`);
+    }
   }
-  console.log("skill zip is in sync with skills/oltc-selector/");
-} else {
-  writeFileSync(OUT, zip);
-  console.log(`wrote ${path.relative(root, OUT)} (${zip.length} bytes)`);
+  if (stale) process.exit(1);
 }
