@@ -16,7 +16,6 @@ const TYPE_EX1 = "CV2III-350Y/72.5-10193W";
 const TYPE_EX2_OLTC = "CV2III-350Y/72.5-10193W";
 const TYPE_EX2_OCTC = "WSLIV-600Y/72.5-6x5A";
 const TYPE_EX3 = "3xSHZVI-2400/72.5B-12233W";
-const TYPE_EX4 = "CV2III-350D/40.5-10091W";
 
 export function AgentsGuide() {
   const lang = useAppLang();
@@ -99,14 +98,6 @@ export function AgentsGuide() {
           <div className="guide-a">
             <span className="guide-a-label">{c.result}</span>
             <code className="guide-type">{TYPE_EX3}</code>
-          </div>
-        </div>
-        <div className="guide-chat">
-          <p className="guide-ex">{c.ex4}</p>
-          <p className="guide-q">{c.sayBody4}</p>
-          <div className="guide-a">
-            <span className="guide-a-label">{c.result}</span>
-            <code className="guide-type">{TYPE_EX4}</code>
           </div>
         </div>
         <h2 className="guide-k">{c.cli}</h2>

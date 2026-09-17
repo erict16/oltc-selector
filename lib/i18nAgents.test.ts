@@ -18,12 +18,10 @@ describe("agent guide copy", () => {
     }
   });
 
-  it("has four example cards and no CLI-how asides", () => {
+  it("has three example cards and no CLI-how asides", () => {
     const zh = agentGuide("zh");
     expect(zh.ex3).toBe("示例 3");
-    expect(zh.ex4).toBe("示例 4");
     expect(zh.sayBody3).toMatch(/350 MVA/);
-    expect(zh.sayBody4).toMatch(/33\/0\.4/);
     const blob = LANG_OPTIONS.map(({ id }) =>
       Object.values(agentGuide(id)).join("\n"),
     ).join("\n");

@@ -1,7 +1,5 @@
 ---
 name: huaming-oltc-selector
-display_name: Huaming Tap-Changer Selector
-display_name_zh: 华明分接开关选型
 description: >
   Huaming tap-changer selection: paste a transformer nameplate or give duty
   parameters (MVA, kV, current, regulation, tap range) and get a commercial
@@ -11,27 +9,32 @@ description: >
   reversing / coarse-fine / linear regulation, Imax, Um, 一拖二 (OLTC + OCTC
   on one transformer), checking whether a Huaming model exists, or decoding
   a type string. Do not use for quotation, pricing, or shipping documents.
-description_en: Paste a nameplate or give duty parameters; get a Huaming tap-changer type that exists in the catalogue, with the reasoning.
-description_zh: 贴铭牌或给参数，用 oltc 选华明分接开关型号；只出样本册里存在的型号，并说明理由。
 allowed-tools: Bash, Read
-version: 1.2.1
-author: Eric Tan
-license: MIT
-category: engineering
+version: 1.2.2
 ---
 
-# Huaming Tap-Changer Selector (oltc CLI)
+# Huaming Tap-Changer Selector
 
-Turn transformer duty into a **Huaming (华明) commercial type string** with the published CLI `oltc` (`npx -y oltc-selector@latest`, or `npm i -g oltc-selector` for repeat use). Same engine as https://oltc-selector.vercel.app/
+Paste a transformer nameplate or duty parameters, get a Huaming OLTC/OCTC type string that really exists in the catalogue, with a short reason. For transformer designers, sales engineers, and distributors who need a type before asking for a quote. Huaming catalogue only, other vendors are out of scope. No prices, no quotations.
 
-**Huaming catalogue only — other vendors are out of scope. No prices. No quotation. No inventing types.**
+In:
+
+> SFZ11-25000/110, 110±8×1.25%/10.5 kV, Dyn11, taps at HV neutral, vacuum
+
+Out: `CV2III-350Y/72.5-10193W`, vacuum compound, Ium 350 A, Um 72.5 kV, ±8 mid-3 reversing.
+
+In your AI assistant, paste the duty and ask. To run it yourself: `npx -y oltc-selector@latest` (Node 20+, or `npm i -g oltc-selector` for repeat use). Same selection engine as https://oltc-selector.vercel.app/
+
+---
+
+_The sections below are execution instructions for the AI assistant._
 
 ## Must
 
 1. If `oltc` is on PATH, **run it**. Do not guess a model from memory.
 2. If `oltc` is missing, run it through npx yourself: `npx -y oltc-selector@latest <flags>` (Node 20+). Do not ask the user to install anything first. For repeat use you may `npm i -g oltc-selector` to put `oltc` on PATH. If `npm`/`npx` is missing, stop and tell them to install Node 20+. Do not fabricate CV2-500 or combined III-D.
 3. After the CLI prints a model, **check it** against the brochure rules below. If it fails, say so and do not dress it up as orderable.
-4. After a pass, explain **why this type is correct** in 3–6 short sentences (family, Ium, Um, Y/D or 3×, tap code, construction). No essays.
+4. After a pass, explain **why this type is correct** in 3 to 6 short sentences (family, Ium, Um, Y/D or 3×, tap code, construction). No essays.
 5. Output the model **without** `+CMA7` unless the user asked for a drive. Three single-phase poles → **1× CMA7**, not three.
 6. **一拖二 / 无载带有载** (one transformer with both an on-load and an off-circuit tap-changer) needs **two** selections: a plain run for the on-load part and an `--octc` run for the off-circuit part. Brochure-check **both** type strings and present them together. Never merge the two duties into one run.
 
@@ -68,8 +71,8 @@ oltc --iu 600 --um 72.5 --conn Y --reg W --pm 8 --structure combined
 
 Defaults match the web first paint: on-load, in-tank, vacuum, structure auto, ±8 mid-3 reversing. Add these only when the spec says so:
 
-- **Step voltage `--ust`**: when the spec states volts (e.g. "step voltage 2000 V"), pass `--ust 2000` — do not back-compute a percent. Give `--step-pct` or `--ust`; if both are present, `--ust` wins. Step voltage drives the across-tap insulation grade, so when unsure use `--step-pct` and let the CLI derive it.
-- **Mounting and medium `--mount` / `--oil`**: dry-type transformers need `--mount dry`; explicit oil-arc jobs (legacy CV oil designs) take `--oil`. A nameplate saying "vacuum" needs nothing — vacuum is the default. With `--octc`, skip the medium flags; the CLI treats off-circuit as oil.
+- Step voltage `--ust`: when the spec states volts (e.g. "step voltage 2000 V"), pass `--ust 2000`, do not back-compute a percent. Give `--step-pct` or `--ust`; if both are present, `--ust` wins. Step voltage drives the across-tap insulation grade, so when unsure use `--step-pct` and let the CLI derive it.
+- Mounting and medium `--mount` / `--oil`: dry-type transformers need `--mount dry`; explicit oil-arc jobs (legacy CV oil designs) take `--oil`. A nameplate saying "vacuum" needs nothing, vacuum is the default. With `--octc`, skip the medium flags; the CLI treats off-circuit as oil.
 
 ## Reading transformer data
 
@@ -106,12 +109,12 @@ A spec with both an on-load range and an off-circuit range (无载带有载, "on
 
 See `references/brochure-check.md`. Fail the type if any of these hit:
 
-- **CV2-500** — 2025 CV2 III is 350 and 600 only. 500 A oil compound is SV.
-- **Combined III-D** — no `CM2III-…D`, `CMIII-…D`, `SHZVIII-…D`. Cover with `3x…I-` when that I type exists. **CV2 / CV / SV / HWV III-D exist.**
-- **Compound grade letter** — no `CV2III-350Y/40.5B`. Combined in-tank may have B/C/D/DE.
-- **Missing WSL row** — cage types must exist as a 2025-list key, not a cartesian invention.
-- **Star-point Um** — Y jobs at winding ≥145 kV usually take switch **72.5**, not 145.
-- **10193W operating steps** — 19 is mechanical; transformer voltage steps = **17**.
+- **CV2-500**, 2025 CV2 III is 350 and 600 only. 500 A oil compound is SV.
+- **Combined III-D**, no `CM2III-…D`, `CMIII-…D`, `SHZVIII-…D`. Cover with `3x…I-` when that I type exists. **CV2 / CV / SV / HWV III-D exist.**
+- **Compound grade letter**, no `CV2III-350Y/40.5B`. Combined in-tank may have B/C/D/DE.
+- **Missing WSL row**, cage types must exist as a 2025-list key, not a cartesian invention.
+- **Star-point Um**, Y jobs at winding ≥145 kV usually take switch **72.5**, not 145.
+- **10193W operating steps**, 19 is mechanical; transformer voltage steps = **17**.
 
 ## Deep OLTC (use when explaining)
 
@@ -121,8 +124,8 @@ See `references/brochure-check.md`. Fail the type if any of these hit:
 - Selector grade floor by Um: ≤72.5 B, 126/145 C, 170/252 D, ≥300 DE. Across-tap BIL can only raise.
 - Tap code `P = 2×(±N)+mid`. Three mids share one voltage.
 
-## After a good pick — explain like this
+## After a good pick, explain like this
 
-> `CV2III-350D/40.5-10193W` — vacuum compound covers 350 A at 40.5 kV line-end. III-D exists for CV2. ±8 mid-3 reversing is 10193W. No selector letter on compound. Lowest catalogue family that fits.
+> `CV2III-350D/40.5-10193W`: vacuum compound covers 350 A at 40.5 kV line-end. III-D exists for CV2. ±8 mid-3 reversing is 10193W. No selector letter on compound. Lowest catalogue family that fits.
 
 Then stop. Engineering still confirms before ordering.

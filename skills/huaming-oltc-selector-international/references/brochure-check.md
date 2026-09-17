@@ -9,7 +9,7 @@ Use after `oltc` prints a model. If any row fails, do not treat the string as or
 | CV2 | 350, 600 only | yes | no |
 | CV | 350 | yes | no |
 | SV | 500 | yes | no |
-| CM / CM2 | 500, 600 | **no** — use 3× I | yes (in-tank) |
+| CM / CM2 | 500, 600 | **no**, use 3× I | yes (in-tank) |
 | SHZV | 400, 600, 1000 | **no** | yes |
 | SHZVG | 1300, 1500 | **no** | yes |
 | CMD | 400, 600, 1000 | **no** | yes |
