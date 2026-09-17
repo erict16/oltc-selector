@@ -10,9 +10,9 @@ import { setAppLang } from "@/lib/i18n";
 import { agentGuide } from "@/lib/i18nAgents";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-const ZIP = `${BASE}/skills/huaming-oltc-selector.zip`;
-const INSTALL = "npm i -g oltc-selector";
-const RUN = "oltc --iu 350 --um 40.5 --conn D --reg W --pm 8";
+const ZIP = "https://github.com/erict16/huaming-oltc-selector/archive/refs/heads/main.zip";
+const INSTALL = "npx -y oltc-selector@1.2.6";
+const RUN = "npx -y oltc-selector@1.2.6 --iu 350 --um 40.5 --conn D --reg W --pm 8";
 const WB_PROMPT =
   "请根据 https://skillhub.cn/install/skillhub.md，安装 @user_d55f79b8/huaming-oltc-selector";
 const WB_PAGE = "https://skillhub.cn/skills/huaming-oltc-selector";

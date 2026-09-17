@@ -2,7 +2,7 @@
 
 填工况，给出 2025 目录里**最低满足**的型号。网页和 `oltc` CLI 共用同一份 `selectOltc` 引擎。
 
-**CLI（无报价）：** `npm i -g oltc-selector`，命令是 `oltc`。Agent 技能包：`skills/huaming-oltc-selector/`（站点 `/agents/` 可下载 zip）。  
+**CLI（无报价）：** `npx -y oltc-selector@1.2.6`，命令是 `oltc`。Agent 技能包在独立仓库 [`erict16/huaming-oltc-selector`](https://github.com/erict16/huaming-oltc-selector)。  
 **网页：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) · [GitHub Pages](https://erict16.github.io/oltc-selector/)
 
 私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。

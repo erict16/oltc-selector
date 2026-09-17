@@ -49,16 +49,13 @@ for (const needle of FORBIDDEN) {
   }
 }
 
-// Single version source of truth: the skill manifest. npm CLI and skill
-// pack share one number so nobody has to guess which is newer.
-const skillVersion = readFileSync(
-  path.join(root, "skills", "huaming-oltc-selector", "manifest.yaml"),
-  "utf8",
-).match(/^version: (.+)$/m)[1].trim();
+// CLI version lives here. The agent skill is a separate repo
+// (erict16/huaming-oltc-selector) and must pin this same number.
+const VERSION = "1.2.6";
 
 const pkg = {
   name: "oltc-selector",
-  version: skillVersion,
+  version: VERSION,
   description:
     "Huaming OLTC/OCTC type selection CLI. No prices. Same engine as the web app.",
   bin: { oltc: "bin/oltc.js" },
