@@ -48,6 +48,13 @@ describe("workbuddy skill (skills/huaming-oltc-selector)", () => {
     expect(text.toLowerCase()).not.toContain("base price");
   });
 
+  it("documents the full CLI input surface", () => {
+    const text = workbuddyMd();
+    for (const flag of ["--ust", "--mount", "--oil", "--vacuum", "--phases", "--step-pct", "--contact"]) {
+      expect(text).toContain(flag);
+    }
+  });
+
   it("is Chinese-first (SkillHub listing renders the body)", () => {
     const text = workbuddyMd();
     expect(text).toContain("## 必须遵守");
@@ -75,6 +82,8 @@ describe("international skill (skills/huaming-oltc-selector-international)", () 
     const text = intlMd();
     expect(text).toContain("npx -y oltc-selector@latest");
     expect(text).toContain("oltc --iu");
+    expect(text).toContain("--ust");
+    expect(text).toContain("--mount");
     expect(text).toContain("CV2-500");
     expect(text).toContain("CM2III");
     expect(text).toContain("1× CMA7");

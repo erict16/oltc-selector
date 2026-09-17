@@ -14,7 +14,7 @@ description: >
 description_en: Paste a nameplate or give duty parameters; get a Huaming tap-changer type that exists in the catalogue, with the reasoning.
 description_zh: 贴铭牌或给参数，用 oltc 选华明分接开关型号；只出样本册里存在的型号，并说明理由。
 allowed-tools: Bash, Read
-version: 1.2.0
+version: 1.2.1
 author: Eric Tan
 license: MIT
 category: engineering
@@ -55,10 +55,21 @@ oltc --iu 600 --um 72.5 --conn Y --reg W --pm 8 --structure combined
 | `--octc` | Off-circuit (WSL/WSG cage/drum). |
 | `--structure` | `auto` / `combined` / `compound` / `cage` / `drum` |
 | `--series` | OCTC wiring II IV V VI VII VIII |
+| `--ust` | Step voltage (V). Pass when the spec states volts; derived on the capacity path. |
+| `--mount` | `in-tank` (default) / `on-tank` / `dry` |
+| `--oil` / `--vacuum` | Switching medium. On-load defaults to vacuum; OCTC is always oil. |
+| `--phases` | `I` / `II` / `III`, default III. Single-phase jobs: `--phases I`. |
 
 `--json` still has no prices.
 
 > npx answers "could not determine executable to run"? The working directory's own `package.json` is named `oltc-selector` and shadows the registry package. Run from another directory, or use the global install.
+
+## Optional inputs
+
+Defaults match the web first paint: on-load, in-tank, vacuum, structure auto, ±8 mid-3 reversing. Add these only when the spec says so:
+
+- **Step voltage `--ust`**: when the spec states volts (e.g. "step voltage 2000 V"), pass `--ust 2000` — do not back-compute a percent. Give `--step-pct` or `--ust`; if both are present, `--ust` wins. Step voltage drives the across-tap insulation grade, so when unsure use `--step-pct` and let the CLI derive it.
+- **Mounting and medium `--mount` / `--oil`**: dry-type transformers need `--mount dry`; explicit oil-arc jobs (legacy CV oil designs) take `--oil`. A nameplate saying "vacuum" needs nothing — vacuum is the default. With `--octc`, skip the medium flags; the CLI treats off-circuit as oil.
 
 ## Reading transformer data
 

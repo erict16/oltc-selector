@@ -12,7 +12,7 @@ description: >
 description_zh: 贴铭牌或给参数，用 oltc 选华明分接开关型号；只出样本册里存在的型号，并说明理由。
 description_en: Run oltc to pick a Huaming tap-changer type, then check the brochure and explain why.
 allowed-tools: Bash, Read
-version: 1.2.0
+version: 1.2.1
 author: Eric Tan
 license: MIT
 category: engineering
@@ -53,10 +53,21 @@ oltc --iu 600 --um 72.5 --conn Y --reg W --pm 8 --structure combined
 | `--octc` | 无载（WSL/WSG）。 |
 | `--structure` | `auto` / `combined` / `compound` / `cage` / `drum` |
 | `--series` | 无载接线方式 II IV V VI VII VIII |
+| `--ust` | 级电压（V）。规格直接给伏数时用；容量路径会自动算。 |
+| `--mount` | 安装方式：`in-tank` 箱内（默认）/ `on-tank` 箱顶 / `dry` 干式 |
+| `--oil` / `--vacuum` | 灭弧介质。有载默认真空；无载自动按油处理。 |
+| `--phases` | `I` / `II` / `III`，默认 III。单相选型用 `--phases I`。 |
 
 `--json` 同样没有价格。
 
 > npx 报 "could not determine executable to run"？说明当前目录自己的 `package.json` 就叫 `oltc-selector`，遮蔽了 registry 上的包。换个目录跑，或用全局安装。
+
+## 按需补充的输入
+
+默认值就是网页首屏：有载、箱内、真空、结构自动、±8 中间 3 档正反调。规格明确写到下面这些时才补：
+
+- **级电压 `--ust`**：规格直接给伏数（如「级电压 2000 V」「Ust 1375 V」）就传 `--ust 2000`，不要倒推百分比。`--step-pct` 和 `--ust` 给一个就够；两个都给时 `--ust` 优先。级电压决定相邻分接间绝缘档，拿不准就只给 `--step-pct`，让 CLI 算。
+- **安装与介质 `--mount` / `--oil`**：干式变压器必须 `--mount dry`；明确要求油中灭弧（老式 CV 油浸方案）用 `--oil`。铭牌写「真空」不用传——默认就是真空。无载（`--octc`）不用管介质，CLI 自动按油处理。
 
 ## 读取变压器数据
 

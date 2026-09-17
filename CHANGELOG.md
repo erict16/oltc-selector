@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Skill docs now cover the full CLI input surface: `--ust` (step voltage in volts, wins over `--step-pct`), `--mount` (in-tank/on-tank/dry — dry changes the family to CVT), `--oil`/`--vacuum`, `--phases`, with a detailed "optional inputs" section; defaults stated as the web first paint. Published as `global/huaming-oltc-selector@1.2.1`.
 - Skill renamed to `huaming-oltc-selector` (slug freezes at first publish; renamed while still in review). Published to SkillHub as `global/huaming-oltc-selector@1.2.0` (public, pending review). Description rewritten around the real trigger vocabulary: nameplate-in → catalogue-true type out, 一拖二, WSG/CMD, 星点/线端, regulation modes; negative triggers for pricing/docs. WorkBuddy body and brochure-check reference are fully Chinese; international variant mirrors in English.
 - Skill splits into two upload variants: `skills/huaming-oltc-selector` (WorkBuddy SkillHub, Chinese-first) and `skills/huaming-oltc-selector-international` (English-first, OpenSkills/ClawHub-compatible). `npm run pack:skill` builds both zips LF-normalized; tests pin frontmatter, manifest `description`, table sync, and zip freshness. CI runs `npm test` before the Pages build.
 - Skill install path is npx-first (`npx -y oltc-selector@latest`), global `npm i -g` optional; notes the same-name package.json shadowing pitfall. Frontmatter declares `allowed-tools: Bash, Read`; manifest adds the plain `description` WorkBuddy requires.
