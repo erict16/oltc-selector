@@ -172,7 +172,6 @@ export function AgentsGuide() {
                 <span className="guide-tag">{c.tagDry}</span>
               </code>
             </div>
-            <p className="guide-note">{c.noteDry}</p>
           </div>
           <div className="guide-mini">
             <p className="guide-ex">{c.exShzv}</p>
@@ -180,7 +179,6 @@ export function AgentsGuide() {
             <div className="guide-a">
               <code className="guide-type">{TYPE_SHZV}</code>
             </div>
-            <p className="guide-note">{c.noteShzv}</p>
           </div>
         </div>
       </details>

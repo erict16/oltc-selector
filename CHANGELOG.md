@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `/agents` extra cases drop the why lines under the type chips (CZIII / three-phase vacuum ceiling).
 - `/agents` second `+` disclosure (collapsed): 更多选型案例. Dry-type 33/0.4 kV → `3xCZI-500/40.5-9`; 350 MVA star-point → `3xSHZVI-2400/72.5B-12233W`. Transformer data only, no customer names.
 - `/agents` install prompt temporarily points at 讯飞 Astron SkillHub (`global/huaming-oltc-selector`) because skillhub.cn is still in review.
 - 1.2.6: agent skill leaves this repo. CLI version is `pack-cli.mjs` `VERSION` (1.2.6). Skill lives in `erict16/huaming-oltc-selector` and pins `npx -y oltc-selector@1.2.6` (no `@latest`, no Vercel link, no `npm i -g`) so SkillHub review can reproduce. `/agents` zip points at that GitHub repo.

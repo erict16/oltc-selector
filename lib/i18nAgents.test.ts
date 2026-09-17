@@ -43,8 +43,6 @@ describe("agent guide copy", () => {
       expect(c.more.length).toBeGreaterThan(2);
       expect(c.qDry.length).toBeGreaterThan(10);
       expect(c.qShzv.length).toBeGreaterThan(10);
-      expect(c.noteDry).toMatch(/3xCZI/);
-      expect(c.noteShzv.length).toBeGreaterThan(8);
     }
     const zh = agentGuide("zh");
     expect(zh.more).toBe("更多选型案例");
@@ -59,5 +57,6 @@ describe("agent guide copy", () => {
     expect(blob).not.toMatch(
       /悉尼|Sydney|Sídney|Sidney|铁路|railway|ferrocarril|demiryolu|железн|Wilson|周晓冬/i,
     );
+    expect(blob).not.toMatch(/CZIII|三相真空上限|vacuum ceiling/);
   });
 });
