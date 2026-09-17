@@ -38,13 +38,21 @@ describe("workbuddy skill (skills/oltc-selector)", () => {
     const text = workbuddyMd();
     expect(text).toContain("npx -y oltc-selector@latest");
     expect(text).toContain("npm i -g oltc-selector");
-    expect(text).toContain("Do not ask the user to install anything first");
+    expect(text).toContain("不要让用户先装任何东西");
     expect(text).toContain("oltc --iu");
     expect(text).toContain("CV2-500");
     expect(text).toContain("CM2III");
     expect(text).toContain("1× CMA7");
     expect(text.includes("listRmb")).toBe(false);
     expect(text.toLowerCase()).not.toContain("base price");
+  });
+
+  it("is Chinese-first (SkillHub listing renders the body)", () => {
+    const text = workbuddyMd();
+    expect(text).toContain("## 必须遵守");
+    expect(text).toContain("## 样本册检查");
+    expect(text).not.toContain("## Must");
+    expect(text).not.toContain("## How to run");
   });
 
   it("teaches 一拖二 duties as two brochure-checked runs", () => {
@@ -76,10 +84,14 @@ describe("international skill (skills/oltc-selector-international)", () => {
       "references",
       "brochure-check.md",
     );
-    for (const row of ["CV2 | 350, 600 only", "SHZVG | 1300, 1500", "72.5→140/350", "10193W"]) {
+    // pure-data rows are identical in both locales
+    for (const row of ["SHZVG | 1300, 1500", "72.5→140/350", "10193W"]) {
       expect(zh).toContain(row);
       expect(en).toContain(row);
     }
+    // prose cells differ by locale but carry the same fact
+    expect(zh).toContain("CV2 | 仅 350, 600");
+    expect(en).toContain("CV2 | 350, 600 only");
   });
 });
 

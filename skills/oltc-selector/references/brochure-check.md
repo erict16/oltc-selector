@@ -1,34 +1,34 @@
-# Brochure / catalogue check
+# 样本册 / 目录检查
 
-Use after `oltc` prints a model. If any row fails, do not treat the string as orderable.
+在 `oltc` 输出型号之后使用。任何一行不通过，都不要把这个型号串当作可下单。
 
-## Existence
+## 存在性
 
-| Family | III currents (A) | III-D? | Grade letter? |
-|--------|------------------|--------|----------------|
-| CV2 | 350, 600 only | yes | no |
-| CV | 350 | yes | no |
-| SV | 500 | yes | no |
-| CM / CM2 | 500, 600 | **no** — use 3× I | yes (in-tank) |
-| SHZV | 400, 600, 1000 | **no** | yes |
-| SHZVG | 1300, 1500 | **no** | yes |
-| CMD | 400, 600, 1000 | **no** | yes |
-| HWV | 400, 800, 1000 | yes | no |
-| WSL / WDL | 2025-list keys only | wiring roman | cage |
-| WSG | catalogue Um/I only | wiring roman | drum |
+| 系列 | III 电流 (A) | III-D？ | 等级字母？ |
+|------|-------------|---------|-----------|
+| CV2 | 仅 350, 600 | 有 | 无 |
+| CV | 350 | 有 | 无 |
+| SV | 500 | 有 | 无 |
+| CM / CM2 | 500, 600 | **无** —— 用 3× I | 有（箱内） |
+| SHZV | 400, 600, 1000 | **无** | 有 |
+| SHZVG | 1300, 1500 | **无** | 有 |
+| CMD | 400, 600, 1000 | **无** | 有 |
+| HWV | 400, 800, 1000 | 有 | 无 |
+| WSL / WDL | 仅限 2025 表的键 | 接线罗马字 | 笼式 |
+| WSG | 仅限样本册 Um/I | 接线罗马字 | 鼓式 |
 
-## Earth (Um → PF / LI)
+## 对地（Um → 工频 / 雷电冲击）
 
 12→35/75, 40.5→90/250, 72.5→140/350, 126→230/550, 145→275/650, 170→325/750, 252→460/1050.
 
-## Tap code vs transformer steps
+## 分接代码 vs 变压器级数
 
-`10193W` → 19 mechanical, **17** different voltages (mid 3). `12233W` → 23 mech, **21** voltages.
+`10193W` → 19 个机械位置，**17** 个不同电压（中间 3 档）。`12233W` → 23 机械，**21** 电压。
 
-## Drive
+## 电动机构
 
-3× single-phase poles: **1× CMA7** unless the RFQ asks for three MDUs.
+3× 单相：**1× CMA7**，除非询价单明确要求三台 MDU。
 
 ## 一拖二
 
-One transformer with both OLTC and OCTC (无载带有载) → two type strings. Run this check on **both**; the pair is orderable only if each passes.
+一台变压器同时装 OLTC 和 OCTC（无载带有载）→ 两个型号串。**两个**都要过本检查；都通过才可下单。
