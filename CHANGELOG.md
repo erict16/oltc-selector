@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `/agents` step 1 is two paths (WorkBuddy search vs send-a-line). Install prompt is localized. Copy control is a sliding pill, not a whole-block button.
 - `/agents` Chinese step 1 shows the WorkBuddy SkillHub search screenshot (搜「华明」点 +). Other locales stay prompt-only.
 - `/agents` install prompt points at skillhub.cn `@indiv-erict16/huaming-oltc-selector` (`https://skillhub.cn/install/skillhub.md`).
 - `/agents` extra cases drop the why lines under the type chips (CZIII / three-phase vacuum ceiling).

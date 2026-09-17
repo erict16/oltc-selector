@@ -8,7 +8,7 @@ describe("agent guide copy", () => {
       const c = agentGuide(id);
       expect(c.title.length).toBeGreaterThan(4);
       expect(c.s1t.length).toBeGreaterThan(1);
-      expect(c.s1b.length).toBeGreaterThan(10);
+      expect(c.s1b.length).toBeGreaterThan(4);
       expect(c.s2q.length).toBeGreaterThan(10);
       expect(c.s3note.length).toBeGreaterThan(4);
       expect(c.dl.length).toBeGreaterThan(2);
@@ -24,16 +24,25 @@ describe("agent guide copy", () => {
     }
   });
 
-  it("step 1 tells every assistant can install, and the example is 一拖二", () => {
+  it("step 1 splits WorkBuddy and other assistants, with a local install prompt", () => {
     const zh = agentGuide("zh");
-    expect(zh.s1b).toContain("WorkBuddy");
-    expect(zh.s1b).toContain("ChatGPT");
-    expect(zh.s1b).toContain("华明");
+    expect(zh.s1wb).toBe("WorkBuddy");
+    expect(zh.s1wbBody).toContain("华明");
+    expect(zh.s1other).toContain("ChatGPT");
+    expect(zh.s1prompt).toContain("请根据");
     expect(zh.wbShot).toContain("WorkBuddy");
-    expect(zh.wbShotAlt).toContain("华明");
     expect(agentGuide("en").wbShot).toBeUndefined();
+    expect(agentGuide("en").s1prompt).toMatch(/^Follow /);
+    expect(zh.s1prompt).not.toBe(agentGuide("en").s1prompt);
     expect(zh.s2q).toContain("一拖二");
     expect(zh.s2q).toMatch(/无载 5 档/);
+    for (const { id } of LANG_OPTIONS) {
+      const c = agentGuide(id);
+      expect(c.s1prompt).toContain("skillhub.cn/install/skillhub.md");
+      expect(c.s1prompt).toContain("@indiv-erict16/huaming-oltc-selector");
+      expect(c.s1wb.length).toBeGreaterThan(2);
+      expect(c.s1other.length).toBeGreaterThan(4);
+    }
     const blob = LANG_OPTIONS.map(({ id }) =>
       Object.values(agentGuide(id)).join("\n"),
     ).join("\n");

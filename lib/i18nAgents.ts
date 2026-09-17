@@ -6,10 +6,15 @@ export type AgentGuideCopy = {
   lead: string;
   s1t: string;
   s1b: string;
-  s1copy: string;
-  s1alt: string;
+  s1wb: string;
+  s1wbBody: string;
   wbShot?: string;
   wbShotAlt?: string;
+  s1other: string;
+  s1otherBody: string;
+  s1prompt: string;
+  s1copy: string;
+  s1alt: string;
   dl: string;
   hub: string;
   s2t: string;
@@ -41,10 +46,16 @@ const zh: AgentGuideCopy = {
   title: "让 AI 助手帮你选型",
   lead: "三步：装上技能，发参数，拿型号。",
   s1t: "装上技能",
-  s1b: "用 WorkBuddy 的，打开「专家·技能·连接器」，搜「华明」，点 + 就能装。Claude Code、ChatGPT 把下面这句话发出去，它自己从 SkillHub 装好。",
-  s1copy: "复制这句话",
-  wbShot: "WorkBuddy 里搜「华明」，点卡片右边的 +。",
+  s1b: "两条路，走一条就行。",
+  s1wb: "WorkBuddy",
+  s1wbBody: "打开「专家·技能·连接器」，搜「华明」，点卡片右边的 +。",
+  wbShot: "WorkBuddy 技能页搜华明，SkillHub 列出华明分接开关选型助手",
   wbShotAlt: "WorkBuddy 技能页搜华明，SkillHub 列出华明分接开关选型助手",
+  s1other: "Claude、ChatGPT 和其他助手",
+  s1otherBody: "把这句话发给它，它自己从 SkillHub 装好。",
+  s1prompt:
+    "请根据 https://skillhub.cn/install/skillhub.md，安装 @indiv-erict16/huaming-oltc-selector。",
+  s1copy: "复制这句话",
   s1alt: "其他装法：",
   dl: "下载技能包 zip",
   hub: "在 SkillHub 上查看",
@@ -77,7 +88,13 @@ const en: AgentGuideCopy = {
   title: "Let an AI assistant pick the type",
   lead: "Three steps: install the skill, send the data, get the type.",
   s1t: "Install the skill",
-  s1b: "Send this line to your AI assistant. WorkBuddy, Claude Code, ChatGPT all work; it installs the skill from SkillHub by itself.",
+  s1b: "Two ways. Pick one.",
+  s1wb: "WorkBuddy",
+  s1wbBody: "Open Experts, Skills, Connectors. Search Huaming and tap +.",
+  s1other: "Claude, ChatGPT, and others",
+  s1otherBody: "Send this line to the assistant. It installs the skill from SkillHub.",
+  s1prompt:
+    "Follow https://skillhub.cn/install/skillhub.md and install @indiv-erict16/huaming-oltc-selector.",
   s1copy: "Copy the line",
   s1alt: "Other ways:",
   dl: "Download the skill zip",
@@ -111,7 +128,13 @@ const vi: AgentGuideCopy = {
   title: "Để trợ lý AI chọn kiểu giúp bạn",
   lead: "Ba bước: cài skill, gửi số liệu, nhận kiểu.",
   s1t: "Cài skill",
-  s1b: "Gửi câu này cho trợ lý AI của bạn. WorkBuddy, Claude Code, ChatGPT đều được; nó tự cài từ SkillHub.",
+  s1b: "Hai cách, chọn một.",
+  s1wb: "WorkBuddy",
+  s1wbBody: "Mở Chuyên gia, Kỹ năng, Kết nối. Tìm Huaming rồi bấm +.",
+  s1other: "Claude, ChatGPT và trợ lý khác",
+  s1otherBody: "Gửi câu này cho trợ lý. Nó tự cài skill từ SkillHub.",
+  s1prompt:
+    "Làm theo https://skillhub.cn/install/skillhub.md, cài @indiv-erict16/huaming-oltc-selector.",
   s1copy: "Chép câu này",
   s1alt: "Cách khác:",
   dl: "Tải gói skill zip",
@@ -145,7 +168,13 @@ const es: AgentGuideCopy = {
   title: "Que un asistente de IA elija el tipo",
   lead: "Tres pasos: instale el skill, envíe los datos, reciba el tipo.",
   s1t: "Instale el skill",
-  s1b: "Envíe esta línea a su asistente de IA. WorkBuddy, Claude Code y ChatGPT sirven; él mismo lo instala desde SkillHub.",
+  s1b: "Dos caminos. Elija uno.",
+  s1wb: "WorkBuddy",
+  s1wbBody: "Abra Expertos, Skills, Conectores. Busque Huaming y pulse +.",
+  s1other: "Claude, ChatGPT y otros",
+  s1otherBody: "Envíe esta línea al asistente. Él instala el skill desde SkillHub.",
+  s1prompt:
+    "Siga https://skillhub.cn/install/skillhub.md e instale @indiv-erict16/huaming-oltc-selector.",
   s1copy: "Copiar la línea",
   s1alt: "Otras formas:",
   dl: "Descargar el skill zip",
@@ -179,7 +208,13 @@ const tr: AgentGuideCopy = {
   title: "Tipi bir AI asistan seçsin",
   lead: "Üç adım: skill'i kurun, veriyi gönderin, tipi alın.",
   s1t: "Skill'i kurun",
-  s1b: "Bu satırı AI asistanınıza gönderin. WorkBuddy, Claude Code, ChatGPT hepsi olur; SkillHub'dan kendisi kurar.",
+  s1b: "İki yol var. Birini seçin.",
+  s1wb: "WorkBuddy",
+  s1wbBody: "Uzmanlar, Beceriler, Bağlayıcılar'ı açın. Huaming arayıp + dokunun.",
+  s1other: "Claude, ChatGPT ve diğerleri",
+  s1otherBody: "Bu satırı asistanınıza gönderin. SkillHub'dan kendisi kurar.",
+  s1prompt:
+    "https://skillhub.cn/install/skillhub.md adresine göre @indiv-erict16/huaming-oltc-selector kurun.",
   s1copy: "Satırı kopyala",
   s1alt: "Başka yollar:",
   dl: "Skill zip'ini indir",
@@ -213,7 +248,13 @@ const ru: AgentGuideCopy = {
   title: "Пусть ИИ-помощник подберёт тип",
   lead: "Три шага: установите skill, отправьте данные, получите тип.",
   s1t: "Установите skill",
-  s1b: "Отправьте эту строку своему ИИ-помощнику. WorkBuddy, Claude Code, ChatGPT, любой подойдёт; он сам установит skill из SkillHub.",
+  s1b: "Два пути. Выберите один.",
+  s1wb: "WorkBuddy",
+  s1wbBody: "Откройте Эксперты, Навыки, Коннекторы. Найдите Huaming и нажмите +.",
+  s1other: "Claude, ChatGPT и другие",
+  s1otherBody: "Отправьте эту строку помощнику. Он сам поставит skill из SkillHub.",
+  s1prompt:
+    "По https://skillhub.cn/install/skillhub.md установите @indiv-erict16/huaming-oltc-selector.",
   s1copy: "Копировать строку",
   s1alt: "Другие способы:",
   dl: "Скачать skill zip",

@@ -1,6 +1,10 @@
 "use client";
 
-import { ArrowLeftIcon, Square2StackIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowLeftIcon,
+  CheckIcon,
+  Square2StackIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { LangSwitcher } from "@/components/LangSwitcher";
@@ -13,8 +17,6 @@ const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const ZIP = "https://github.com/erict16/huaming-oltc-selector/archive/refs/heads/main.zip";
 const INSTALL = "npx -y oltc-selector@1.2.6";
 const RUN = "npx -y oltc-selector@1.2.6 --iu 350 --um 40.5 --conn D --reg W --pm 8";
-const WB_PROMPT =
-  "请根据 https://skillhub.cn/install/skillhub.md，安装 @indiv-erict16/huaming-oltc-selector。";
 const WB_PAGE = "https://skillhub.cn/@indiv-erict16/huaming-oltc-selector";
 const TYPE_OLTC = "CV2III-350Y/72.5-10193W";
 const TYPE_OCTC = "WSLIV-600Y/72.5-6x5A";
@@ -70,28 +72,34 @@ export function AgentsGuide() {
           <div className="guide-step-body">
             <h2>{c.s1t}</h2>
             <p>{c.s1b}</p>
-            {c.wbShot ? (
-              <figure className="guide-shot">
-                <img
-                  src={`${BASE}/agents/workbuddy-skillhub.jpg`}
-                  alt={c.wbShotAlt ?? ""}
-                  width={1936}
-                  height={1243}
+            <div className="guide-way">
+              <p className="guide-way-k">{c.s1wb}</p>
+              <p>{c.s1wbBody}</p>
+              {c.wbShot ? (
+                <figure className="guide-shot">
+                  <img
+                    src={`${BASE}/agents/workbuddy-skillhub.jpg`}
+                    alt={c.wbShotAlt ?? c.wbShot}
+                    width={1936}
+                    height={1243}
+                  />
+                </figure>
+              ) : null}
+            </div>
+            <div className="guide-way">
+              <p className="guide-way-k">{c.s1other}</p>
+              <p>{c.s1otherBody}</p>
+              <div className="guide-prompt">
+                <p className="guide-prompt-text">{c.s1prompt}</p>
+                <CopyBtn
+                  id="install-prompt"
+                  text={c.s1prompt}
+                  copied={copied}
+                  copyLabel={c.copy}
+                  copiedLabel={c.copied}
+                  onCopy={onCopy}
                 />
-                <figcaption>{c.wbShot}</figcaption>
-              </figure>
-            ) : null}
-            <div className="guide-term">
-              <Cmd
-                id="install-prompt"
-                label={c.s1copy}
-                command={WB_PROMPT}
-                copied={copied}
-                copyLabel={c.copy}
-                copiedLabel={c.copied}
-                onCopy={onCopy}
-                bare
-              />
+              </div>
             </div>
             <p className="guide-alt">
               {c.s1alt}{" "}
@@ -196,6 +204,43 @@ export function AgentsGuide() {
 
       <p className="guide-limit">{c.limit}</p>
     </article>
+  );
+}
+
+function CopyBtn({
+  id,
+  text,
+  copied,
+  copyLabel,
+  copiedLabel,
+  onCopy,
+}: {
+  id: string;
+  text: string;
+  copied: string | null;
+  copyLabel: string;
+  copiedLabel: string;
+  onCopy: (id: string, text: string) => void;
+}) {
+  const is = copied === id;
+  return (
+    <button
+      type="button"
+      className={`guide-copy${is ? " is-copied" : ""}`}
+      onClick={() => onCopy(id, text)}
+      aria-label={`${is ? copiedLabel : copyLabel}: ${text}`}
+    >
+      <span className="guide-copy-track" aria-live="polite">
+        <span className="guide-copy-idle">
+          <Square2StackIcon className="guide-copy-ico" aria-hidden />
+          <span>{copyLabel}</span>
+        </span>
+        <span className="guide-copy-done">
+          <CheckIcon className="guide-copy-ico" aria-hidden />
+          <span>{copiedLabel}</span>
+        </span>
+      </span>
+    </button>
   );
 }
 
