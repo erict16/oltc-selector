@@ -16,6 +16,9 @@ Use after `oltc` prints a model. If any row fails, do not treat the string as or
 | HWV | 400, 800, 1000 | yes | no |
 | WSL / WDL | 2025-list keys only | wiring roman | cage |
 | WSG | catalogue Um/I only | wiring roman | drum |
+| CZ (dry) | 3× I only | none, never invent CZIII | no |
+
+Dry-type transformers need `--mount dry`; forgetting it selects oil-vacuum CV2 instead.
 
 ## Earth (Um → PF / LI)
 

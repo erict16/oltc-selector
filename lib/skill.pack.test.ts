@@ -32,6 +32,32 @@ describe("skill frontmatter and manifest (both variants)", () => {
       expect(m).toMatch(/^author: /m);
     },
   );
+
+  it.each(VARIANTS.map((v) => [v.id, v] as const))(
+    "%s: SKILL.md and manifest.yaml carry the same version",
+    (_id, v) => {
+      const md = readFileSync(path.join(v.src, "SKILL.md"), "utf8");
+      const m = readFileSync(path.join(v.src, "manifest.yaml"), "utf8");
+      const mdV = md.match(/^version: (.+)$/m)?.[1];
+      const mV = m.match(/^version: (.+)$/m)?.[1];
+      expect(mdV).toBeTruthy();
+      expect(mV).toBe(mdV);
+    },
+  );
+
+  it.each(VARIANTS.map((v) => [v.id, v] as const))(
+    "%s: teaches the assumptions block and the CZ dry-type rule",
+    (_id, v) => {
+      const md = readFileSync(path.join(v.src, "SKILL.md"), "utf8");
+      expect(md).toContain("假定");
+      const ref = readFileSync(
+        path.join(v.src, "references", "brochure-check.md"),
+        "utf8",
+      );
+      expect(ref).toContain("CZ");
+      expect(ref).toContain("CZIII");
+    },
+  );
 });
 
 describe("workbuddy skill (skills/huaming-oltc-selector)", () => {

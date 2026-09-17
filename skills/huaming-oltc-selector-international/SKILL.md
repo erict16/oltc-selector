@@ -10,7 +10,7 @@ description: >
   on one transformer), checking whether a Huaming model exists, or decoding
   a type string. Do not use for quotation, pricing, or shipping documents.
 allowed-tools: Bash, Read
-version: 1.2.4
+version: 1.2.5
 ---
 
 # Huaming Tap-Changer Selector
@@ -37,7 +37,7 @@ _The sections below are execution instructions for the AI assistant._
 4. After a pass, explain **why this type is correct** in 3 to 6 short sentences (family, Ium, Um, Y/D or 3×, tap code, construction). No essays.
 5. Output the model **without** `+CMA7` unless the user asked for a drive. Three single-phase poles → **1× CMA7**, not three.
 6. **一拖二 / 无载带有载** (one transformer with both an on-load and an off-circuit tap-changer) needs **two** selections: a plain run for the on-load part and an `--octc` run for the off-circuit part. Brochure-check **both** type strings and present them together. Never merge the two duties into one run.
-7. When the CLI ends with a **假定** assumptions block (`假定：conn=Y 星点（默认）· …`), relay it to the user verbatim and ask which assumption is wrong, then re-run with the corrected flag. No block means every watched input was given explicitly.
+7. When the CLI ends with a **假定** assumptions block (`假定：conn=Y 星点（默认）· …`), relay it to the user verbatim and ask which assumption is wrong, then re-run with the corrected flag. No block only means the watched inputs (conn, regulation, steps, medium, mount, phases, and k/step on the capacity path) were all explicit; it does not confirm anything the block does not list, like structure.
 
 ## How to run
 
@@ -51,7 +51,7 @@ oltc --iu 600 --um 72.5 --conn Y --reg W --pm 8 --structure combined
 | Flag | Meaning |
 |------|---------|
 | `--iu` | Imax (lowest-tap through-current). **No** safety factor. |
-| `--mva` `--kv` | Capacity path. Safety `--k` (default 1.2) only here. |
+| `--mva` `--kv` | Capacity path. Safety `--k` (default 1.0, same as the web app) only here. |
 | `--um` | Equipment Um (kV), catalogue step. |
 | `--conn Y\|D` | OLTC application: star-point vs line-end. **Not** transformer Dyn11. |
 | `--reg W\|G\|0` | Reversing / coarse-fine / linear. |
@@ -83,11 +83,11 @@ A pasted nameplate or spec line is enough. Map it like this:
 - `--kv` is the **tap-side** rated voltage, the winding the switch sits on. In `110±8×1.25%/10.5`, the taps are on 110; ignore 10.5 unless the taps are on the LV side.
 - kVA → MVA: divide by 1000 (31500 kVA = 31.5 MVA).
 - Rated current given instead of MVA: Imax ≈ Irated ÷ (1 − N×x%). Prefer `--mva --kv` and let the CLI do this math.
-- **Dyn11 / YNd1 is the transformer vector group, not `--conn`.** `--conn Y` means the switch sits at the star point; `--conn D` means line-end delta duty. If the spec only shows the vector group and not where the taps sit, ask one short question instead of guessing.
+- **Dyn11 / YNd1 is the transformer vector group, not `--conn`.** `--conn Y` means the switch sits at the star point; `--conn D` means line-end delta duty. If the spec only shows the vector group and not where the taps sit, you may run with the star-point default, but the assumptions block will mark it and you must relay that and ask.
 - Um: with `--mva --kv` the CLI derives it (35 → 40.5, 66 → 72.5, 110 Y → 72.5, 110 D → 126, 220 → 252). Pass `--um` only when the user states the equipment class directly.
 - `--iu` is the transformer max through-current at the lowest tap. Never add a safety factor to it. `--k` exists only on the capacity path.
 
-Missing one of current, voltage, or tap range? Ask for that one thing. Do not fill gaps from memory.
+Missing current or voltage? Ask first, do not run. Missing tap range, star-point vs line-end, medium, or mounting? You may run; the CLI fills defaults and marks them in the assumptions block, which you relay with one short question.
 
 > Spec line: `SFZ11-25000/110, 110±8×1.25%/10.5 kV, Dyn11, taps at HV neutral, vacuum`
 > → `oltc --mva 25 --kv 110 --conn Y --reg W --pm 8 --step-pct 1.25`
@@ -128,5 +128,6 @@ See `references/brochure-check.md`. Fail the type if any of these hit:
 ## After a good pick, explain like this
 
 > `CV2III-350D/40.5-10193W`: vacuum compound covers 350 A at 40.5 kV line-end. III-D exists for CV2. ±8 mid-3 reversing is 10193W. No selector letter on compound. Lowest catalogue family that fits.
+> Assumed: conn=D line-end, W reversing, ±8 steps, vacuum (default), in-tank (default), three-phase (default). I defaulted vacuum and in-tank, is that right?
 
-Then stop. Engineering still confirms before ordering.
+With an assumptions block, follow the model and short why with the assumptions and one question. Only without a block may you stop right away. Engineering still confirms before ordering.

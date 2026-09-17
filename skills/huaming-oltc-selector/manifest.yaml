@@ -1,5 +1,5 @@
 name: huaming-oltc-selector
-version: 1.2.1
+version: 1.2.5
 description: 贴变压器铭牌或给参数，用 oltc 命令选华明有载/无载分接开关型号；只出样本册里真实存在的型号，并说明选型理由。不含报价。
 display_name: 华明分接开关选型助手
 display_name_en: Huaming Tap-Changer Selector

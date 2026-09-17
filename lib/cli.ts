@@ -286,7 +286,7 @@ Flags:
   --um kV            Equipment Um (OLTC). With --mva/--kv, derived if omitted.
   --ust V            Step voltage. With --mva/--kv/--step-pct, derived if omitted.
   --step-pct %       Step as percent (1.25 means 1.25%). Capacity path only.
-  --k n              Safety factor on capacity path only (default 1.2).
+  --k n              Safety factor on capacity path only (default 1.0, same as the web app).
   --conn Y|D         Switch connection (star / delta). Default Y.
   --reg W|G|0        Reversing / coarse-fine / linear. Default W.
   --pm N             ± steps. Default 8.
@@ -330,7 +330,8 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
       args.stepPct != null && args.stepPct > 0 ? args.stepPct / 100 : 0.0125;
     const minus = args.pm != null && args.pm > 0 ? args.pm : 8;
     const iMax = maxThroughCurrent(rated, minus, pct);
-    const k = args.k != null && args.k > 0 ? args.k : 1.2;
+    // 与网页版首屏一致：容量路径默认不额外加安全系数
+    const k = args.k != null && args.k > 0 ? args.k : 1.0;
     iu = iMax * k;
     if (um == null || !(um > 0)) {
       um = oltcUmFromRatedKv(args.kv, args.conn);
@@ -368,7 +369,8 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     input.octcSeries = args.series ?? "auto";
     if (args.contact) input.octcContact = args.contact;
     if (args.positions != null) input.positions = args.positions;
-    else if (args.pm != null && args.pm > 0) {
+    else if (args.given.has("pm") && args.pm != null && args.pm > 0) {
+      // 只从显式给的 --pm 推档数；pm 的解析默认值 8 是有载的概念，不能偷渡
       input.positions = Math.round(2 * args.pm + 1);
     }
   } else if (args.reg === "linear") {
@@ -403,11 +405,23 @@ export function assumptionsFromArgs(args: CliArgs): string[] {
   const items: string[] = [
     `conn=${args.conn} ${args.conn === "Y" ? "星点" : "线端"}${mark("conn")}`,
   ];
+  // 容量路径上 k 和 step-pct 也会静默生效，必须喊出来
+  if (args.mva != null) {
+    items.push(args.given.has("k") ? `k=${args.k}` : "k=1.0（默认）");
+    items.push(
+      args.given.has("stepPct") ? `step=${args.stepPct}%` : "step=1.25%（默认）",
+    );
+  }
+  const phases = `相数=${args.phases}${mark("phases")}`;
   if (args.octc) {
-    const pos =
-      args.positions ??
-      (args.pm != null && args.pm > 0 ? Math.round(2 * args.pm + 1) : null);
-    items.push(pos != null ? `${pos} 档${mark("positions")}` : "档数未指定");
+    if (args.positions != null) {
+      items.push(`${args.positions} 档`);
+    } else if (args.given.has("pm") && args.pm != null && args.pm > 0) {
+      items.push(`${Math.round(2 * args.pm + 1)} 档（由 ±${args.pm} 推）`);
+    } else if (!args.given.has("contact")) {
+      // 有 --contact 时档数由触头规格决定，不从有载的 ±8 偷
+      items.push("档数未指定");
+    }
     const s = args.series ?? "auto";
     items.push(
       s === "auto"
@@ -415,6 +429,7 @@ export function assumptionsFromArgs(args: CliArgs): string[] {
         : `接线=${s}${mark("series")}`,
     );
     items.push(`${MOUNT_ZH[args.mount]}${mark("mount")}`);
+    items.push(phases);
     return items;
   }
   items.push(
@@ -437,6 +452,7 @@ export function assumptionsFromArgs(args: CliArgs): string[] {
   }
   items.push(`${args.oil || !args.vacuum ? "油浸" : "真空"}${mark("medium")}`);
   items.push(`${MOUNT_ZH[args.mount]}${mark("mount")}`);
+  items.push(phases);
   return items;
 }
 

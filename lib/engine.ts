@@ -648,11 +648,16 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const warningsEn: string[] = [];
         const warningsZh: string[] = [];
 
+        // 需求电流取整展示：174.954… 这种长小数没有工程意义
+        const dutyA =
+          input.throughCurrentA >= 100
+            ? String(Math.round(input.throughCurrentA))
+            : String(Math.round(input.throughCurrentA * 10) / 10);
         reasonsEn.push(
-          `Minimum-adequate path: ${s.nameEn}, Ium ${current} A ≥ ${input.throughCurrentA} A, Um ${att.um} kV.`,
+          `Minimum-adequate path: ${s.nameEn}, Ium ${current} A ≥ ${dutyA} A, Um ${att.um} kV.`,
         );
         reasonsZh.push(
-          `最低满足路径：${s.nameZh}，Ium ${current} A ≥ 需求 ${input.throughCurrentA} A，Um ${att.um} kV。`,
+          `最低满足路径：${s.nameZh}，Ium ${current} A ≥ 需求 ${dutyA} A，Um ${att.um} kV。`,
         );
 
         if (s.structure === "compound" && !octc) {

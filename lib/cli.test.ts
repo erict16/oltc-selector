@@ -146,8 +146,36 @@ describe("oltc CLI", () => {
     expect(a.out).toContain("±8 档（默认）");
     expect(a.out).toContain("真空（默认）");
     expect(a.out).toContain("箱内（默认）");
+    expect(a.out).toContain("相数=III（默认）");
     // first line stays the bare model
     expect(a.out.trim().split(/\r?\n/)[0]).toBe("CV2III-350Y/40.5-10193W");
+  });
+
+  it("octc never borrows the oltc ±8 default for positions", () => {
+    // --contact given, no --positions: the contact spec defines the steps
+    const a = capture(["--octc", "--iu", "800", "--um", "72.5", "--conn", "D", "--series", "II", "--contact", "6x5"]);
+    expect(a.code).toBe(0);
+    expect(a.out).not.toContain("17 档");
+    // nothing given at all: positions stay honestly unspecified
+    const b = capture(["--octc", "--iu", "800", "--um", "72.5"]);
+    expect(b.out).toContain("档数未指定");
+    // explicit --pm still derives on purpose
+    const c = capture(["--octc", "--iu", "800", "--um", "72.5", "--pm", "2"]);
+    expect(c.out).toContain("5 档（由 ±2 推）");
+  });
+
+  it("capacity path defaults k to 1.0 like the web app and says so", () => {
+    const a = capture(["--mva", "60", "--kv", "110", "--conn", "Y", "--reg", "W", "--pm", "8", "--step-pct", "1.25"]);
+    expect(a.code).toBe(0);
+    // k=1.0: 60 MVA 110 kV Y ≈ 350 A duty → CV2-350, not CV2-600
+    expect(a.out.trim().split(/\r?\n/)[0]).toBe("CV2III-350Y/72.5-10193W");
+    expect(a.out).toContain("k=1.0（默认）");
+    // step-pct was given here, so no default mark on it
+    expect(a.out).toContain("step=1.25%");
+    expect(a.out).not.toContain("step=1.25%（默认）");
+    // silent step-pct gets marked
+    const b = capture(["--mva", "60", "--kv", "110", "--conn", "Y", "--reg", "W", "--pm", "8"]);
+    expect(b.out).toContain("step=1.25%（默认）");
   });
 
   it("drops the （默认） mark for explicitly given flags", () => {
@@ -166,7 +194,7 @@ describe("oltc CLI", () => {
     const a = capture([
       "--iu", "350", "--um", "40.5",
       "--conn", "D", "--reg", "W", "--pm", "8",
-      "--vacuum", "--mount", "in-tank",
+      "--vacuum", "--mount", "in-tank", "--phases", "III",
     ]);
     expect(a.code).toBe(0);
     expect(a.out).not.toContain("假定：");
@@ -179,11 +207,12 @@ describe("oltc CLI", () => {
     expect(j.assumptions.join(" ")).toContain("（默认）");
   });
 
-  it("octc echo shows positions, wiring and mount, not reg", () => {
+  it("octc echo shows wiring and mount, not reg or phantom positions", () => {
     const a = capture(["--octc", "--iu", "800", "--um", "72.5", "--conn", "D", "--contact", "6x5"]);
     expect(a.code).toBe(0);
     expect(a.out).toContain("conn=D 线端");
     expect(a.out).toContain("接线=自动（II）（默认）");
     expect(a.out).not.toContain("reg=");
+    expect(a.out).not.toContain("17 档");
   });
 });
