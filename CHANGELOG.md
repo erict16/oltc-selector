@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `/agents` install prompt points at skillhub.cn `@indiv-erict16/huaming-oltc-selector` (`https://skillhub.cn/install/skillhub.md`).
 - `/agents` extra cases drop the why lines under the type chips (CZIII / three-phase vacuum ceiling).
 - `/agents` second `+` disclosure (collapsed): 更多选型案例. Dry-type 33/0.4 kV → `3xCZI-500/40.5-9`; 350 MVA star-point → `3xSHZVI-2400/72.5B-12233W`. Transformer data only, no customer names.
 - `/agents` install prompt temporarily points at 讯飞 Astron SkillHub (`global/huaming-oltc-selector`) because skillhub.cn is still in review.
