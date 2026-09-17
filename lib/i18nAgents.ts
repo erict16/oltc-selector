@@ -18,6 +18,15 @@ export type AgentGuideCopy = {
   s3note: string;
   tagOltc: string;
   tagOctc: string;
+  tagDry: string;
+  more: string;
+  moreLead: string;
+  exDry: string;
+  qDry: string;
+  noteDry: string;
+  exShzv: string;
+  qShzv: string;
+  noteShzv: string;
   cli: string;
   cliBody: string;
   install: string;
@@ -45,6 +54,15 @@ const zh: AgentGuideCopy = {
   s3note: "两台都过了样本册检查，可以拿去询价。",
   tagOltc: "有载",
   tagOctc: "无载",
+  tagDry: "干式",
+  more: "更多选型案例",
+  moreLead: "参数不一样，问法一样。",
+  exDry: "干式",
+  qDry: "帮我给这台干式变压器选个型：33/0.4 kV 站用变，干式，9 档线性 ±4×2.5%，真空电动有载。",
+  noteDry: "干式没有三相 CZIII，样本册只有 3xCZI。",
+  exShzv: "3xSHZV",
+  qShzv: "帮我选个有载开关：350 MVA，132±10×1.25%/11-11 kV，YNd11d11，高压侧中性点调压，最大电流 1750 A，开关对地 350/140。",
+  noteShzv: "1750 A 超过三相真空上限，所以是三台单相。",
   cli: "想自己跑 CLI？",
   cliBody: "技能和网页版共用同一套选型引擎，两边结果一致。区别在入口：技能是助手帮你跑命令行工具 oltc，这里是你自己在终端跑。",
   install: "安装",
@@ -72,6 +90,15 @@ const en: AgentGuideCopy = {
   s3note: "Both passed the brochure check and are ready for pricing.",
   tagOltc: "on-load",
   tagOctc: "off-circuit",
+  tagDry: "dry-type",
+  more: "More examples",
+  moreLead: "Same chat, different data.",
+  exDry: "Dry-type",
+  qDry: "Pick an OLTC for this dry-type transformer: 33/0.4 kV station, dry, 9 positions linear ±4×2.5%, vacuum motorised.",
+  noteDry: "No three-phase CZIII in the brochure. Dry-type is 3xCZI only.",
+  exShzv: "3xSHZV",
+  qShzv: "Pick an on-load tap-changer for me: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, taps at the HV neutral, max 1750 A, OLTC earth 350/140.",
+  noteShzv: "1750 A is above the three-phase vacuum ceiling, so it comes out as three single-phase units.",
   cli: "Prefer to run the CLI yourself?",
   cliBody: "The skill and the web app share the same selection engine, so results match. The difference is the entry point: with the skill, your assistant runs the oltc CLI for you; here you run it in your own terminal.",
   install: "Install",
@@ -99,6 +126,15 @@ const vi: AgentGuideCopy = {
   s3note: "Cả hai đều qua kiểm tra catalogue, có thể đem đi báo giá.",
   tagOltc: "có tải",
   tagOctc: "không tải",
+  tagDry: "khô",
+  more: "Thêm ví dụ chọn kiểu",
+  moreLead: "Chat như cũ, số liệu khác.",
+  exDry: "Máy khô",
+  qDry: "Chọn giúp tôi cho máy biến áp khô: 33/0.4 kV máy trạm, khô, 9 nấc tuyến tính ±4×2.5%, chân không chạy điện.",
+  noteDry: "Catalogue không có CZIII ba pha. Máy khô chỉ có 3xCZI.",
+  exShzv: "3xSHZV",
+  qShzv: "Chọn giúp tôi bộ chuyển nấc có tải: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, điều áp ở trung tính cao áp, dòng max 1750 A, cách điện OLTC 350/140.",
+  noteShzv: "1750 A vượt trần chân không ba pha, nên ra ba máy một pha.",
   cli: "Muốn tự chạy CLI?",
   cliBody: "Skill và bản web dùng chung một engine chọn kiểu, kết quả giống nhau. Khác ở điểm vào: skill để trợ lý chạy lệnh oltc giúp bạn, còn đây bạn tự chạy trong terminal.",
   install: "Cài đặt",
@@ -126,6 +162,15 @@ const es: AgentGuideCopy = {
   s3note: "Ambos pasaron la revisión del catálogo y sirven para pedir precio.",
   tagOltc: "en carga",
   tagOctc: "sin carga",
+  tagDry: "seco",
+  more: "Más ejemplos",
+  moreLead: "Mismo chat, otros datos.",
+  exDry: "Seco",
+  qDry: "Elíjame un cambiador para este transformador seco: estación 33/0.4 kV, seco, 9 posiciones lineales ±4×2.5%, motorizado de vacío.",
+  noteDry: "No hay CZIII trifásico en el catálogo. En seco solo existe 3xCZI.",
+  exShzv: "3xSHZV",
+  qShzv: "Elíjame un cambiador en carga: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, regulación en el neutro de AT, 1750 A máx., aislamiento OLTC 350/140.",
+  noteShzv: "1750 A supera el techo de vacío trifásico, así que salen tres unidades monofásicas.",
   cli: "¿Prefieres ejecutar la CLI tú mismo?",
   cliBody: "El skill y la web comparten el mismo motor de selección, los resultados coinciden. La diferencia es la entrada: con el skill tu asistente ejecuta la CLI oltc por ti; aquí la ejecutas tú en tu terminal.",
   install: "Instalar",
@@ -153,6 +198,15 @@ const tr: AgentGuideCopy = {
   s3note: "İkisi de katalog kontrolünden geçti, fiyat istemeye hazır.",
   tagOltc: "yük altında",
   tagOctc: "yüksüz",
+  tagDry: "kuru",
+  more: "Daha fazla örnek",
+  moreLead: "Aynı sohbet, farklı veri.",
+  exDry: "Kuru tip",
+  qDry: "Kuru tipi trafo için seç: 33/0.4 kV istasyon, kuru, 9 kademe lineer ±4×2.5%, vakum motorlu.",
+  noteDry: "Katalogda üç fazlı CZIII yok. Kuru tip yalnızca 3xCZI.",
+  exShzv: "3xSHZV",
+  qShzv: "Bana yük altında kademe değiştirici seç: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, YG yıldız noktasından ayar, max 1750 A, OLTC toprağı 350/140.",
+  noteShzv: "1750 A üç fazlı vakum tavanının üstünde, bu yüzden üç tek faz çıkar.",
   cli: "CLI'yi kendiniz mi çalıştırırsınız?",
   cliBody: "Skill ve web sürümü aynı seçim motorunu paylaşır, sonuçlar aynıdır. Fark giriş noktasında: skill'de asistanınız oltc CLI'sini sizin için çalıştırır, burada kendi terminalinizde kendiniz çalıştırırsınız.",
   install: "Kurulum",
@@ -180,6 +234,15 @@ const ru: AgentGuideCopy = {
   s3note: "Оба прошли проверку по каталогу, можно запрашивать цену.",
   tagOltc: "РПН",
   tagOctc: "ПБВ",
+  tagDry: "сухой",
+  more: "Ещё примеры",
+  moreLead: "Тот же чат, другие данные.",
+  exDry: "Сухой",
+  qDry: "Подбери РПН для сухого трансформатора: станционный 33/0.4 кВ, сухой, 9 ступеней линейно ±4×2.5%, вакуумный с электроприводом.",
+  noteDry: "В каталоге нет трёхфазного CZIII. Для сухого только 3xCZI.",
+  exShzv: "3xSHZV",
+  qShzv: "Подбери РПН: 350 МВА, 132±10×1.25%/11-11 кВ, YNd11d11, регулирование в нейтрали ВН, макс. 1750 А, изоляция OLTC 350/140.",
+  noteShzv: "1750 А выше потолка трёхфазного вакуума, поэтому три однофазных.",
   cli: "Хотите запускать CLI сами?",
   cliBody: "Skill и веб-версия используют один и тот же движок подбора, результаты совпадают. Разница в точке входа: в skill помощник запускает CLI oltc за вас, а здесь вы запускаете его сами в своём терминале.",
   install: "Установка",

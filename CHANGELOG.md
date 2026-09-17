@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `/agents` second `+` disclosure (collapsed): 更多选型案例. Dry-type 33/0.4 kV → `3xCZI-500/40.5-9`; 350 MVA star-point → `3xSHZVI-2400/72.5B-12233W`. Transformer data only, no customer names.
 - `/agents` install prompt temporarily points at 讯飞 Astron SkillHub (`global/huaming-oltc-selector`) because skillhub.cn is still in review.
 - 1.2.6: agent skill leaves this repo. CLI version is `pack-cli.mjs` `VERSION` (1.2.6). Skill lives in `erict16/huaming-oltc-selector` and pins `npx -y oltc-selector@1.2.6` (no `@latest`, no Vercel link, no `npm i -g`) so SkillHub review can reproduce. `/agents` zip points at that GitHub repo.
 - 1.2.5 fixes: octc no longer derives 17 positions from the oltc ±8 parser default when --contact defines the steps (only explicit --pm derives). CLI --k default is now 1.0, matching the web first paint (was 1.2), and the capacity path echoes k/step-pct when silent. Assumptions echo also covers phases. Skill rule 7 reworded: no 假定 block only means watched inputs were explicit, not that everything is confirmed; missing current/voltage still asks before running, other gaps may run but must be relayed. brochure-check adds CZ (3× I only, never CZIII). Reason strings round the duty current (no more 174.954…). pack-cli reads the version from the skill manifest so npm and skill share one number. Synced to grok-skills, ~/.grok, Desktop, and the standalone huaming-oltc-selector repo.

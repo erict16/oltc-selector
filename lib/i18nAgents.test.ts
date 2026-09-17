@@ -36,4 +36,28 @@ describe("agent guide copy", () => {
     expect(blob).not.toMatch(/它自己跑 oltc/);
     expect(blob).not.toMatch(/有载、无载各跑一次/);
   });
+
+  it("extra cases cover dry CZ and 3xSHZV, with no customer names", () => {
+    for (const { id } of LANG_OPTIONS) {
+      const c = agentGuide(id);
+      expect(c.more.length).toBeGreaterThan(2);
+      expect(c.qDry.length).toBeGreaterThan(10);
+      expect(c.qShzv.length).toBeGreaterThan(10);
+      expect(c.noteDry).toMatch(/3xCZI/);
+      expect(c.noteShzv.length).toBeGreaterThan(8);
+    }
+    const zh = agentGuide("zh");
+    expect(zh.more).toBe("更多选型案例");
+    expect(zh.qDry).toContain("干式");
+    expect(zh.qDry).toMatch(/33\/0\.4/);
+    expect(zh.qShzv).toContain("350 MVA");
+    expect(zh.qShzv).toContain("1750 A");
+    expect(zh.qShzv).toContain("YNd11d11");
+    const blob = LANG_OPTIONS.map(({ id }) =>
+      Object.values(agentGuide(id)).join("\n"),
+    ).join("\n");
+    expect(blob).not.toMatch(
+      /悉尼|Sydney|Sídney|Sidney|铁路|railway|ferrocarril|demiryolu|железн|Wilson|周晓冬/i,
+    );
+  });
 });

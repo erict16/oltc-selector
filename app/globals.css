@@ -574,9 +574,26 @@ select:open {
   line-height: 1.7;
   color: var(--color-ink-2);
 }
-
+.guide-ex {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-caption);
+}
+.guide-a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--color-rule-2);
+}
 .guide-cli {
   margin-top: 0.5rem;
+}
+.guide-cli + .guide-cli {
+  margin-top: 0.45rem;
 }
 .guide-cli summary {
   cursor: pointer;

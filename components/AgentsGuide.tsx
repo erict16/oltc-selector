@@ -18,6 +18,8 @@ const WB_PROMPT =
 const WB_PAGE = "https://skill.xfyun.cn/space/global/huaming-oltc-selector";
 const TYPE_OLTC = "CV2III-350Y/72.5-10193W";
 const TYPE_OCTC = "WSLIV-600Y/72.5-6x5A";
+const TYPE_DRY = "3xCZI-500/40.5-9";
+const TYPE_SHZV = "3xSHZVI-2400/72.5B-12233W";
 
 export function AgentsGuide() {
   const lang = useAppLang();
@@ -153,6 +155,32 @@ export function AgentsGuide() {
               copiedLabel={c.copied}
               onCopy={onCopy}
             />
+          </div>
+        </div>
+      </details>
+
+      <details className="guide-cli">
+        <summary>{c.more}</summary>
+        <div className="guide-cli-wrap">
+          <p className="guide-cli-body">{c.moreLead}</p>
+          <div className="guide-mini">
+            <p className="guide-ex">{c.exDry}</p>
+            <p className="guide-q">{c.qDry}</p>
+            <div className="guide-a">
+              <code className="guide-type">
+                {TYPE_DRY}
+                <span className="guide-tag">{c.tagDry}</span>
+              </code>
+            </div>
+            <p className="guide-note">{c.noteDry}</p>
+          </div>
+          <div className="guide-mini">
+            <p className="guide-ex">{c.exShzv}</p>
+            <p className="guide-q">{c.qShzv}</p>
+            <div className="guide-a">
+              <code className="guide-type">{TYPE_SHZV}</code>
+            </div>
+            <p className="guide-note">{c.noteShzv}</p>
           </div>
         </div>
       </details>
