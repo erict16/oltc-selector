@@ -12,18 +12,27 @@ import { RELEASE_NOTES } from "@/lib/releaseNotes";
 export function SiteFooter() {
   const pathname = usePathname();
   const lang = useAppLang();
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const notes = RELEASE_NOTES[lang];
 
+  const show = () => {
+    setMounted(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setOpen(true));
+    });
+  };
+  const hide = () => setOpen(false);
+
   useEffect(() => {
-    if (!open) return;
+    if (!mounted) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") hide();
     };
     const onPtr = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+      if (!rootRef.current?.contains(e.target as Node)) hide();
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onPtr);
@@ -31,27 +40,36 @@ export function SiteFooter() {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("mousedown", onPtr);
     };
-  }, [open]);
+  }, [mounted]);
 
   if (/\/(privacy|terms|login|agents)\/?$/.test(pathname)) {
     return null;
   }
 
+  const chrome =
+    "text-[0.75rem] leading-none tracking-[0.02em] text-[var(--color-muted)] transition-[color,transform] duration-150 [@media(hover:hover)]:hover:text-[var(--color-ink-2)]";
+
   return (
     <footer className="shrink-0 bg-[var(--color-paper)] pt-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom,0px))]">
       <div className="relative mx-auto flex w-full max-w-[1100px] flex-wrap items-baseline justify-between gap-x-6 gap-y-1.5 px-4 sm:px-6">
         <div ref={rootRef} className="relative">
-          {open ? (
+          {mounted ? (
             <div
               id={panelId}
               role="dialog"
               aria-labelledby={`${panelId}-title`}
-              className="absolute bottom-[calc(100%+0.55rem)] left-0 z-30 w-[min(22.5rem,calc(100vw-2rem))] rounded-[var(--radius-md)] border border-[var(--color-rule-2)] bg-white px-3.5 pt-3.5 pb-3 shadow-[0_10px_28px_oklch(24%_0.02_258_/_0.08)]"
+              className={`changelog-pop absolute bottom-[calc(100%+0.55rem)] left-0 z-30 w-[min(22.5rem,calc(100vw-2rem))] rounded-[var(--radius-md)] border border-[var(--color-rule-2)] bg-white px-3.5 pt-3.5 pb-3 shadow-[0_10px_28px_oklch(24%_0.02_258_/_0.08)] ${
+                open ? "is-open" : "is-closing"
+              }`}
+              onTransitionEnd={(e) => {
+                if (e.propertyName !== "opacity") return;
+                if (!open) setMounted(false);
+              }}
             >
               <button
                 type="button"
                 className="agent-x"
-                onClick={() => setOpen(false)}
+                onClick={hide}
                 aria-label={t(lang, "agentClose")}
               >
                 <XMarkIcon className="h-4 w-4" aria-hidden />
@@ -89,29 +107,23 @@ export function SiteFooter() {
           ) : null}
           <button
             type="button"
-            className="inline-flex min-h-10 items-center text-[0.75rem] leading-none tracking-[0.02em] text-[var(--color-ink)] underline-offset-4 transition-[color,transform] duration-150 hover:underline active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            className={`inline-flex min-h-10 items-center active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] ${chrome}`}
             aria-expanded={open}
-            aria-controls={open ? panelId : undefined}
+            aria-controls={mounted ? panelId : undefined}
             aria-haspopup="dialog"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => (open ? hide() : show())}
           >
             v{APP_VERSION}
           </button>
         </div>
         <nav
-          className="flex items-baseline gap-3 text-[0.75rem] leading-none tracking-[0.02em] text-[var(--color-ink-2)]"
+          className="flex items-baseline gap-3 text-[0.75rem] leading-none tracking-[0.02em]"
           aria-label="Legal"
         >
-          <Link
-            href="/privacy/"
-            className="transition-colors hover:text-[var(--color-ink)]"
-          >
+          <Link href="/privacy/" className={chrome}>
             Privacy
           </Link>
-          <Link
-            href="/terms/"
-            className="transition-colors hover:text-[var(--color-ink)]"
-          >
+          <Link href="/terms/" className={chrome}>
             Terms
           </Link>
         </nav>
