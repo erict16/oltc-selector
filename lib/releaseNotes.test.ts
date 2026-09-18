@@ -1,20 +1,40 @@
 import { describe, expect, it } from "vitest";
+import { APP_VERSION } from "./appVersion";
 import { LANG_OPTIONS } from "./i18n";
-import { RELEASE_NOTES } from "./releaseNotes";
+import { RELEASES } from "./releaseNotes";
 
 describe("release notes", () => {
-  it("keeps the same number of complete sentences in every language", () => {
-    const zh = RELEASE_NOTES.zh;
-    expect(zh.current.length).toBeGreaterThan(0);
-    expect(zh.earlier.length).toBeGreaterThan(0);
-    for (const line of [...zh.current, ...zh.earlier]) {
-      expect(line.endsWith("。")).toBe(true);
-      expect(line.length).toBeGreaterThan(10);
+  it("starts with the app version and keeps zh items as full sentences", () => {
+    const zh = RELEASES.zh;
+    expect(zh.length).toBeGreaterThanOrEqual(2);
+    expect(zh[0].version).toBe(APP_VERSION);
+    for (const rel of zh) {
+      expect(rel.groups.length).toBeGreaterThan(0);
+      for (const g of rel.groups) {
+        for (const line of g.items) {
+          expect(line.endsWith("。")).toBe(true);
+          expect(line.length).toBeGreaterThan(10);
+        }
+      }
     }
-    expect(zh.earlierLabel).toBe("上个版本");
+  });
+
+  it("keeps the same versions, groups, and item counts in every language", () => {
+    const zh = RELEASES.zh;
     for (const { id } of LANG_OPTIONS) {
-      expect(RELEASE_NOTES[id].current).toHaveLength(zh.current.length);
-      expect(RELEASE_NOTES[id].earlier).toHaveLength(zh.earlier.length);
+      const other = RELEASES[id];
+      expect(other.map((r) => r.version)).toEqual(zh.map((r) => r.version));
+      expect(other.map((r) => r.date)).toEqual(zh.map((r) => r.date));
+      for (let i = 0; i < zh.length; i++) {
+        expect(other[i].groups.map((g) => g.kind)).toEqual(
+          zh[i].groups.map((g) => g.kind),
+        );
+        for (let j = 0; j < zh[i].groups.length; j++) {
+          expect(other[i].groups[j].items).toHaveLength(
+            zh[i].groups[j].items.length,
+          );
+        }
+      }
     }
   });
 });

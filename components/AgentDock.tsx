@@ -2,7 +2,7 @@
 
 import { ArrowRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppLang } from "@/components/LangProvider";
 import { t } from "@/lib/i18n";
 
@@ -64,6 +64,7 @@ export function AgentDock() {
   const lang = useAppLang();
   const [hydrated, setHydrated] = useState(false);
   const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   // Auto-open once, on the first visit only, after a short beat. Anyone
   // who has seen it (or dismissed an earlier version) gets just the chip.
@@ -85,10 +86,28 @@ export function AgentDock() {
     };
   }, []);
 
+  // Same dismissal contract as the footer version popover: Escape or a
+  // pointer-down anywhere outside the dock closes the bubble.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onPtr = (e: MouseEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onPtr);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onPtr);
+    };
+  }, [open]);
+
   if (!hydrated) return null;
 
   return (
-    <div className={`agent-dock${open ? " is-open" : ""}`}>
+    <div ref={rootRef} className={`agent-dock${open ? " is-open" : ""}`}>
       <aside
         className="agent-bubble"
         role="dialog"
