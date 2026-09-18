@@ -34,6 +34,12 @@ describe("lang persist", () => {
     expect(isLang(null)).toBe(false);
   });
 
+  it("has a current-version chip in every UI language", () => {
+    for (const { id } of LANG_OPTIONS) {
+      expect(t(id, "changelogNow")).not.toBe("changelogNow");
+    }
+  });
+
   it("names Imax safety factor in every UI language", () => {
     for (const { id } of LANG_OPTIONS) {
       expect(t(id, "safetyK")).not.toBe("safetyK");

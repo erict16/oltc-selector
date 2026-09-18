@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Footer shows `v1.2.9` instead of 仅供参考. Click opens a small changelog popover (scheme A).
 - Safety factor stays visible in More options on the current path (disabled). Imax k labels are explicit in EN / VI / ES / TR / RU.
 
 ## 1.2.9

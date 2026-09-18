@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>选型页脚 · 更新记录方案</title>
+  <style>
+    :root {
+      --paper: oklch(98.5% 0.004 250);
+      --ink: oklch(24% 0.02 258);
+      --ink-2: oklch(34% 0.018 257);
+      --muted: oklch(52% 0.02 257);
+      --caption: oklch(62% 0.012 257);
+      --rule: oklch(90% 0.01 250);
+      --rule-2: oklch(84% 0.015 250);
+      --soft: oklch(96.5% 0.008 250);
+      --accent: oklch(58% 0.2 256);
+      --accent-ink: oklch(99% 0.01 250);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", ui-sans-serif, system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--paper);
+      color: var(--ink-2);
+      font-family: var(--sans);
+    }
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      gap: 4px;
+      padding: 10px 16px;
+      background: color-mix(in oklch, var(--paper) 92%, white);
+      border-bottom: 1px solid var(--rule);
+      overflow-x: auto;
+    }
+    .tabs button {
+      flex: 0 0 auto;
+      height: 32px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font: 600 13px/1 var(--sans);
+      cursor: pointer;
+    }
+    .tabs button[aria-selected="true"] {
+      background: var(--ink);
+      color: var(--accent-ink);
+    }
+    .tabs button:active { transform: scale(0.96); }
+    .note {
+      margin: 0;
+      padding: 12px 16px 0;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--muted);
+      max-width: 72ch;
+    }
+    .stage { padding: 16px; }
+    .panel { display: none; }
+    .panel.is-on { display: block; }
+    .workbench {
+      max-width: 1100px;
+      margin: 0 auto;
+      border: 1px solid var(--rule-2);
+      border-radius: var(--radius-md);
+      background: white;
+      overflow: hidden;
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+    }
+    .ghost {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 20px 20px 8px;
+      color: var(--caption);
+      font-size: 12px;
+    }
+    .ghost .box {
+      border: 1px dashed var(--rule-2);
+      border-radius: var(--radius-sm);
+      min-height: 220px;
+      padding: 12px;
+    }
+    footer.mock {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      padding: 10px 20px 14px;
+      background: var(--paper);
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      color: var(--ink-2);
+    }
+    footer.mock a { color: inherit; text-decoration: none; }
+    footer.mock a:hover { color: var(--ink); }
+    .ver {
+      appearance: none;
+      border: 0;
+      background: none;
+      padding: 8px 2px;
+      margin: -8px 0;
+      font: inherit;
+      letter-spacing: inherit;
+      color: var(--ink);
+      cursor: pointer;
+      text-underline-offset: 3px;
+    }
+    .ver:hover { text-decoration: underline; }
+    .ver:active { transform: scale(0.96); }
+    .ver:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .ver[disabled] { color: var(--ink-2); cursor: default; text-decoration: none; }
+    .log h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .log .now {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-left: 8px;
+    }
+    .log ol, .log ul { margin: 0; padding: 0 0 0 1.15em; }
+    .log li { margin: 0 0 6px; font-size: 13px; line-height: 1.55; color: var(--ink-2); }
+    .log .block { margin: 0 0 14px; }
+    .log .v { font-size: 12px; font-weight: 650; color: var(--ink); margin: 0 0 4px; }
+    .close {
+      appearance: none;
+      border: 0;
+      background: none;
+      padding: 8px 0;
+      font: 600 12px/1 var(--sans);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .close:hover { color: var(--ink); }
+    .close:active { transform: scale(0.96); }
+    .pop {
+      position: absolute;
+      left: 20px;
+      bottom: 42px;
+      width: min(360px, calc(100% - 40px));
+      background: white;
+      border: 1px solid var(--rule-2);
+      border-radius: var(--radius-md);
+      padding: 14px 14px 10px;
+      box-shadow: 0 10px 28px oklch(24% 0.02 258 / 0.08);
+    }
+    .sheet {
+      border-top: 1px solid var(--rule);
+      background: white;
+      padding: 14px 20px 16px;
+    }
+    .dialog-back {
+      position: absolute;
+      inset: 0;
+      background: oklch(24% 0.02 258 / 0.28);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .dialog {
+      width: min(440px, 100%);
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 18px 18px 12px;
+      border: 1px solid var(--rule-2);
+    }
+    .inline {
+      border-top: 1px solid var(--rule);
+      padding: 12px 20px 16px;
+      background: var(--soft);
+    }
+    .drawer-wrap { position: relative; }
+    .drawer {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      bottom: 12px;
+      width: min(300px, 42%);
+      background: white;
+      border: 1px solid var(--rule-2);
+      border-radius: var(--radius-md);
+      padding: 14px 14px 10px;
+      overflow: auto;
+    }
+    .head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 700px) {
+      .ghost { grid-template-columns: 1fr; }
+      .drawer { width: min(280px, 70%); }
+    }
+  </style>
+</head>
+<body>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" aria-selected="true" data-tab="now">现状</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="a">A 脚注小面板</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="b">B 底栏抽拉</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="c">C 居中对话框</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="d">D 就地展开</button>
+    <button type="button" role="tab" aria-selected="false" data-tab="e">E 右侧窄栏</button>
+  </div>
+
+  <p class="note" id="blurb">左下现在是「仅供参考」，点不了。下面五档都把这里换成 v1.2.9，点开看更新。文案一样：不写谁提的，不写一拖二。</p>
+
+  <div class="stage">
+    <section class="panel is-on" id="now" data-blurb="现状：左下「仅供参考」，不能点。Privacy / Terms 还在右边。">
+      <div class="workbench">
+        <div class="ghost"><div class="box">表单</div><div class="box">结果</div></div>
+        <footer class="mock">
+          <span>仅供参考</span>
+          <nav><a href="#">Privacy</a> · <a href="#">Terms</a></nav>
+        </footer>
+      </div>
+    </section>
+
+    <section class="panel" id="a" data-blurb="A（推荐）：点 v1.2.9，在脚注上方弹出小面板。不挡选型，手机也能看完。">
+      <div class="workbench">
+        <div class="ghost"><div class="box">表单</div><div class="box">结果</div></div>
+        <footer class="mock">
+          <div class="pop log" id="pop-a">
+            <div class="head">
+              <h3>v1.2.9 <span class="now">当前</span></h3>
+              <button type="button" class="close">关闭</button>
+            </div>
+            <div class="block">
+              <p class="v">这一版</p>
+              <ul>
+                <li>箱外选真空、现有真空型号盖不住时，不再拿油浸电抗开关顶上。</li>
+                <li>选油灭弧时，不会再出真空型号。</li>
+                <li>能选双断口真空 SDZV，级电压到 6000 V。</li>
+              </ul>
+            </div>
+            <div class="block">
+              <p class="v">此前</p>
+              <ul>
+                <li>可按变压器容量自动算最大通过电流。</li>
+                <li>能选 CMD。</li>
+                <li>不再出样本里没有的型号，例如三相 D 接的 CM2。</li>
+                <li>有载可选复合式 / 组合式，无载可选笼式 / 鼓式。</li>
+              </ul>
+            </div>
+          </div>
+          <button type="button" class="ver" aria-expanded="true">v1.2.9</button>
+          <nav><a href="#">Privacy</a> · <a href="#">Terms</a></nav>
+        </footer>
+      </div>
+    </section>
+
+    <section class="panel" id="b" data-blurb="B：点版本号，整条底栏向上抽出记录。适合写长，会挤一点结果区。">
+      <div class="workbench">
+        <div class="ghost"><div class="box">表单</div><div class="box">结果</div></div>
+        <div class="sheet log">
+          <div class="head">
+            <h3>更新记录</h3>
+            <button type="button" class="close">收起</button>
+          </div>
+          <div class="block">
+            <p class="v">v1.2.9 当前</p>
+            <ul>
+              <li>箱外选真空、现有真空型号盖不住时，不再拿油浸电抗开关顶上。</li>
+              <li>选油灭弧时，不会再出真空型号。</li>
+              <li>能选双断口真空 SDZV，级电压到 6000 V。</li>
+            </ul>
+          </div>
+          <div class="block">
+            <p class="v">此前</p>
+            <ul>
+              <li>可按变压器容量自动算最大通过电流。</li>
+              <li>能选 CMD。</li>
+              <li>不再出样本里没有的型号，例如三相 D 接的 CM2。</li>
+              <li>有载可选复合式 / 组合式，无载可选笼式 / 鼓式。</li>
+            </ul>
+          </div>
+        </div>
+        <footer class="mock">
+          <button type="button" class="ver" aria-expanded="true">v1.2.9</button>
+          <nav><a href="#">Privacy</a> · <a href="#">Terms</a></nav>
+        </footer>
+      </div>
+    </section>
+
+    <section class="panel" id="c" data-blurb="C：居中对话框。最像「公告」，会挡住表单，日常翻记录偏重。">
+      <div class="workbench" style="position:relative">
+        <div class="ghost"><div class="box">表单</div><div class="box">结果</div></div>
+        <footer class="mock">
+          <button type="button" class="ver">v1.2.9</button>
+          <nav><a href="#">Privacy</a> · <a href="#">Terms</a></nav>
+        </footer>
+        <div class="dialog-back">
+          <div class="dialog log" role="dialog" aria-labelledby="dlg-title">
+            <div class="head">
+              <h3 id="dlg-title">v1.2.9 <span class="now">当前</span></h3>
+              <button type="button" class="close">关闭</button>
+            </div>
+            <div class="block">
+              <p class="v">这一版</p>
+              <ul>
+                <li>箱外选真空、现有真空型号盖不住时，不再拿油浸电抗开关顶上。</li>
+                <li>选油灭弧时，不会再出真空型号。</li>
+                <li>能选双断口真空 SDZV，级电压到 6000 V。</li>
+              </ul>
+            </div>
+            <div class="block">
+              <p class="v">此前</p>
+              <ul>
+                <li>可按变压器容量自动算最大通过电流。</li>
+                <li>能选 CMD。</li>
+                <li>不再出样本里没有的型号，例如三相 D 接的 CM2。</li>
+                <li>有载可选复合式 / 组合式，无载可选笼式 / 鼓式。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="d" data-blurb="D：不弹层。点 v1.2.9，脚注变高，记录写在版本号下面。最轻，长了要滚页。">
+      <div class="workbench">
+        <div class="ghost"><div class="box">表单</div><div class="box">结果</div></div>
+        <footer class="mock" style="flex-wrap:wrap">
+          <div style="flex:1 1 100%">
+            <button type="button" class="ver" aria-expanded="true">v1.2.9</button>
+          </div>
+          <div class="inline log" style="flex:1 1 100%; margin: 4px -20px -14px;">
+            <ul>
+              <li>箱外选真空、盖不住时不再拿油浸电抗开关顶上。</li>
+              <li>选油灭弧时，不会再出真空型号。</li>
+              <li>能选双断口真空 SDZV。</li>
+              <li>可按容量算最大通过电流；能选 CMD；不再出假型号；可指定组合 / 复合、笼式 / 鼓式。</li>
+            </ul>
+          </div>
+          <nav style="margin-left:auto"><a href="#">Privacy</a> · <a href="#">Terms</a></nav>
+        </footer>
+      </div>
+    </section>
+
+    <section class="panel" id="e" data-blurb="E：点版本号，右边出一列，像多了一张结果卡。桌面清楚，手机要盖住结果。">
+      <div class="workbench drawer-wrap">
+        <div class="ghost"><div class="box">表单</div><div class="box">结果</div></div>
+        <aside class="drawer log">
+          <div class="head">
+            <h3>v1.2.9</h3>
+            <button type="button" class="close">关闭</button>
+          </div>
+          <div class="block">
+            <p class="v">这一版</p>
+            <ul>
+              <li>箱外选真空、盖不住时不再拿油浸电抗开关顶上。</li>
+              <li>选油灭弧时，不会再出真空型号。</li>
+              <li>能选双断口真空 SDZV。</li>
+            </ul>
+          </div>
+          <div class="block">
+            <p class="v">此前</p>
+            <ul>
+              <li>可按变压器容量自动算最大通过电流。</li>
+              <li>能选 CMD。</li>
+              <li>不再出样本里没有的型号。</li>
+              <li>有载可选复合式 / 组合式，无载可选笼式 / 鼓式。</li>
+            </ul>
+          </div>
+        </aside>
+        <footer class="mock">
+          <button type="button" class="ver" aria-expanded="true">v1.2.9</button>
+          <nav><a href="#">Privacy</a> · <a href="#">Terms</a></nav>
+        </footer>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const blurb = document.getElementById("blurb");
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+    const panels = [...document.querySelectorAll(".panel")];
+    function show(id) {
+      tabs.forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === id)));
+      panels.forEach((p) => p.classList.toggle("is-on", p.id === id));
+      const on = document.getElementById(id);
+      blurb.textContent = on?.dataset.blurb || "";
+    }
+    tabs.forEach((b) => b.addEventListener("click", () => show(b.dataset.tab)));
+  </script>
+</body>
+</html>

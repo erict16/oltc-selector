@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { APP_VERSION } from "./appVersion";
 import { commercialTypeExists } from "./typeExists";
 
 const root = process.cwd();
@@ -19,7 +20,7 @@ describe("selection-only pack", () => {
       readFileSync(path.join(root, "pack", "package.json"), "utf8"),
     );
     expect(packedPkg.name).toBe("oltc-selector");
-    expect(packedPkg.version).toBe("1.2.9");
+    expect(packedPkg.version).toBe(APP_VERSION);
     expect(packedPkg.bin).toEqual({ oltc: "bin/oltc.js" });
     const js = readFileSync(bin, "utf8");
     expect(js.includes("listRmb")).toBe(false);
