@@ -35,6 +35,7 @@ import {
 } from "@/lib/deriveUm";
 
 import { pickOtherOptions, selectOltc } from "@/lib/engine";
+import { safetyKKeepsCapacity } from "@/lib/safetyK";
 import {
   defaultMid,
   defaultPitch,
@@ -358,6 +359,22 @@ export function SelectorApp() {
   const touch = () => {
     if (hasRun) setStale(true);
     setActiveExample(null);
+  };
+
+  const commitSafetyK = (n: number) => {
+    setSafetyK(n);
+    const nextMode = safetyKKeepsCapacity({
+      currentMode,
+      transformerMva,
+      windingRatedKv,
+    });
+    if (nextMode !== currentMode) {
+      setCurrentMode(nextMode);
+      if (nextMode === "capacity" && voltageMode !== "winding") {
+        setVoltageMode("winding");
+      }
+    }
+    touch();
   };
 
   const patch = <K extends keyof SelectInput>(k: K, v: SelectInput[K]) => {
@@ -1628,12 +1645,11 @@ export function SelectorApp() {
                   </Field>
                   <Field as="div" label={t(lang, "safetyK")}>
                     <div className="relative">
-                      {currentMode === "capacity" &&
-                      (safetyKCustom ||
-                        (safetyK > 0 &&
-                          !(SAFETY_K_OPTIONS as readonly number[]).includes(
-                            safetyK,
-                          ))) ? (
+                      {safetyKCustom ||
+                      (safetyK > 0 &&
+                        !(SAFETY_K_OPTIONS as readonly number[]).includes(
+                          safetyK,
+                        )) ? (
                         <input
                           inputMode="decimal"
                           className={`${controlClass} pl-7 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
@@ -1642,14 +1658,12 @@ export function SelectorApp() {
                             const v = e.target.value.replace(/，/g, ".");
                             if (v !== "" && !/^\d*\.?\d*$/.test(v)) return;
                             if (v === "" || v === ".") {
-                              setSafetyK(0);
-                              touch();
+                              commitSafetyK(0);
                               return;
                             }
                             const n = Number(v);
                             if (!Number.isFinite(n) || n < 0) return;
-                            setSafetyK(n);
-                            touch();
+                            commitSafetyK(n);
                           }}
                           onBlur={() => {
                             if (
@@ -1663,21 +1677,15 @@ export function SelectorApp() {
                         />
                       ) : (
                         <select
-                          className={cx(
-                            controlClass,
-                            currentMode !== "capacity" &&
-                              "cursor-not-allowed opacity-50",
-                          )}
-                          disabled={currentMode !== "capacity"}
+                          className={controlClass}
                           value={safetyK > 0 ? String(safetyK) : "1"}
                           onChange={(e) => {
                             if (e.target.value === "__custom__") {
                               setSafetyKCustom(true);
                               return;
                             }
-                            setSafetyK(Number(e.target.value));
                             setSafetyKCustom(false);
-                            touch();
+                            commitSafetyK(Number(e.target.value));
                           }}
                         >
                           <option value="__custom__">
@@ -1690,12 +1698,11 @@ export function SelectorApp() {
                           ))}
                         </select>
                       )}
-                      {currentMode === "capacity" &&
-                      (safetyKCustom ||
-                        (safetyK > 0 &&
-                          !(SAFETY_K_OPTIONS as readonly number[]).includes(
-                            safetyK,
-                          ))) ? (
+                      {safetyKCustom ||
+                      (safetyK > 0 &&
+                        !(SAFETY_K_OPTIONS as readonly number[]).includes(
+                          safetyK,
+                        )) ? (
                         <span className="pointer-events-none absolute top-0 left-3 flex h-10 items-center text-[0.9rem] text-[var(--color-ink)]">
                           ×
                         </span>
