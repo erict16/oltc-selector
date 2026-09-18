@@ -1767,12 +1767,12 @@ export function SelectorApp() {
             <div
               key={resultKey}
               className={cx(
-                "result-enter flex h-full min-h-full flex-col rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)]",
+                "result-enter flex h-full min-h-full flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)]",
                 stale && "opacity-70",
               )}
             >
               {stale ? (
-                <div className="border-b border-[var(--color-rule)] bg-[oklch(96%_0.03_85)] px-4 py-1.5 text-center text-[0.75rem] text-[var(--color-warn)]">
+                <div className="border-b border-[var(--color-rule)] bg-[oklch(96%_0.03_85)] px-4 py-1.5 text-center text-[0.75rem] leading-snug text-[var(--color-warn)]">
                   {t(lang, "stale")}
                 </div>
               ) : null}
