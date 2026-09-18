@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.2.8
+
+- Oil arc (`preferVacuum=false`, medium oil) is a hard lock. Vacuum families (SHZV / SHZVG / SDZV / CM2 / CV2) no longer leak through when Iᵤ exceeds oil max (screenshot: 500 MVA 110 kV oil → was `3xSHZVGI-3000`). Out of catalogue instead.
+
 ## 1.2.7
 
 - Catalogue: **SDZV** dual-break in-tank vacuum (Ust 6000 V, step capacity 1.5× SHZV). III 400/600/1000 Y-only; I 400/600/1000/1600/2400; positions 14/27. Ranked after SHZV, before SHZVG — only when SHZV step voltage or step capacity is short. No III-D, no II, no I-1200/1500, no III-1300.

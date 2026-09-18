@@ -217,7 +217,10 @@ function seriesMatchesMedium(s: SeriesDef, input: SelectInput): boolean {
   if (input.mounting === "dry_type") return s.medium === "dry";
   if (input.preferVacuum) return true; // soft — oil filtered later if vacuum exists
   if (input.medium === "oil_vacuum") return s.vacuum || s.medium === "oil_vacuum";
-  if (input.medium === "oil") return s.medium === "oil" || s.medium === "oil_vacuum";
+  // 油灭弧 is a hard lock. oil_vacuum families (SHZV/SHZVG/SDZV/CM2/CV2)
+  // sit in transformer oil but switch in vacuum — they must not leak through
+  // when no oil type covers a high Iᵤ.
+  if (input.medium === "oil") return s.medium === "oil" && !s.vacuum;
   return true;
 }
 
@@ -808,7 +811,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
     }
 
   // Prefer vacuum set when requested and any vacuum exists.
-  // Oil interrupter: keep oil families when they cover (symmetric to vacuum).
+  // Oil interrupter is a hard lock: never fall back to vacuum SHZV/SHZVG/SDZV.
   let final = results;
   if (input.preferVacuum) {
     const vac = results.filter(
@@ -816,10 +819,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
     );
     if (vac.length) final = vac;
   } else if (input.medium === "oil") {
-    const oil = results.filter(
+    final = results.filter(
       (r) => SERIES.find((s) => s.id === r.seriesId)?.vacuum === false,
     );
-    if (oil.length) final = oil;
   }
 
   final.sort((a, b) => {

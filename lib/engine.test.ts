@@ -942,6 +942,28 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
     expect(out.results[0].seriesCode).not.toBe("CV2");
   });
 
+  it("oil arc never emits vacuum SHZV/SHZVG/SDZV/CM2/CV2, even when Iᵤ exceeds oil max", () => {
+    const vac = new Set(["SHZV", "SHZVG", "SDZV", "CM2", "CV2", "HWV", "CVT", "CZ"]);
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 2915.9,
+      umKv: 72.5,
+      stepVoltageV: 794,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      midPositions: 3,
+      mdu: "none",
+    });
+    expect(out.results.every((r) => !vac.has(r.seriesCode)), out.results[0]?.model).toBe(
+      true,
+    );
+    expect(out.ok).toBe(false);
+  });
+
   it("WSL is absent from the default OLTC ranking", () => {
     const out = selectOltc({
       mounting: "in_tank",
