@@ -23,32 +23,16 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-09",
       groups: [
         {
-          kind: "fix",
-          items: [
-            "真空灭弧也成为硬约束：开关装在油箱外、真空系列又盖不住工况时，会直接提示「超出样本」，不再悄悄换成油浸电抗式开关。",
-          ],
-        },
-      ],
-    },
-    {
-      version: "1.2.8",
-      date: "2026-09",
-      groups: [
-        {
-          kind: "fix",
-          items: ["油灭弧成为硬约束：选了油灭弧，结果里就不会再出现真空型号。"],
-        },
-      ],
-    },
-    {
-      version: "1.2.7",
-      date: "2026-09",
-      groups: [
-        {
           kind: "new",
           items: [
             "新增双断口真空系列 SDZV，级电压最高 6000 V、级容量约为 SHZV 的 1.5 倍。",
             "级电压菜单新增 4500、5000、6000 V 三档。",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "油灭弧、真空灭弧都成为硬约束：选油后结果不再出现真空型号；箱外真空盖不住工况时直接提示「超出样本」，不再改用油浸电抗式开关。",
           ],
         },
         {
@@ -187,34 +171,16 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-09",
       groups: [
         {
-          kind: "fix",
-          items: [
-            "Vacuum switching is now a hard limit too: if the tap changer is mounted on-tank and no vacuum type covers the duty, the tool says the duty is out of catalogue instead of quietly substituting an oil reactor type.",
-          ],
-        },
-      ],
-    },
-    {
-      version: "1.2.8",
-      date: "2026-09",
-      groups: [
-        {
-          kind: "fix",
-          items: [
-            "Oil switching is now a hard limit: when you choose oil, vacuum types no longer appear in the result.",
-          ],
-        },
-      ],
-    },
-    {
-      version: "1.2.7",
-      date: "2026-09",
-      groups: [
-        {
           kind: "new",
           items: [
             "The dual-break vacuum family SDZV is available, with step voltage up to 6000 V and about 1.5 times the step capacity of SHZV.",
             "The step voltage menu adds 4500, 5000, and 6000 V.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "Oil and vacuum switching are both hard limits now: choosing oil keeps vacuum types out of the result, and when an on-tank vacuum duty exceeds every vacuum type, the tool says out of catalogue instead of substituting an oil reactor type.",
           ],
         },
         {
@@ -357,34 +323,16 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-09",
       groups: [
         {
-          kind: "fix",
-          items: [
-            "Dập hồ quang chân không cũng trở thành giới hạn cứng: khi lắp ngoài thùng mà không có kiểu chân không phù hợp, công cụ báo ngoài catalogue thay vì lặng lẽ đổi sang máy dầu kiểu kháng.",
-          ],
-        },
-      ],
-    },
-    {
-      version: "1.2.8",
-      date: "2026-09",
-      groups: [
-        {
-          kind: "fix",
-          items: [
-            "Dập hồ quang dầu trở thành giới hạn cứng: khi chọn dầu, kết quả không còn hiện kiểu chân không.",
-          ],
-        },
-      ],
-    },
-    {
-      version: "1.2.7",
-      date: "2026-09",
-      groups: [
-        {
           kind: "new",
           items: [
             "Thêm họ chân không hai tiếp điểm SDZV: điện áp cấp tới 6000 V, dung lượng cấp khoảng 1,5 lần SHZV.",
             "Menu điện áp cấp thêm ba nấc 4500, 5000 và 6000 V.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "Dầu và chân không đều thành giới hạn cứng: chọn dầu thì kết quả không còn kiểu chân không; khi lắp ngoài thùng mà chân không không đáp ứng được, công cụ báo ngoài catalogue thay vì đổi sang máy dầu kiểu kháng.",
           ],
         },
         {
@@ -525,34 +473,16 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-09",
       groups: [
         {
-          kind: "fix",
-          items: [
-            "La conmutación en vacío también es un límite estricto: si el cambiador va sobre la cuba y ningún tipo de vacío cubre el régimen, la herramienta indica que está fuera de catálogo en lugar de sustituirlo por un tipo de reactor en aceite.",
-          ],
-        },
-      ],
-    },
-    {
-      version: "1.2.8",
-      date: "2026-09",
-      groups: [
-        {
-          kind: "fix",
-          items: [
-            "La conmutación en aceite es un límite estricto: al elegir aceite, los tipos de vacío ya no aparecen en el resultado.",
-          ],
-        },
-      ],
-    },
-    {
-      version: "1.2.7",
-      date: "2026-09",
-      groups: [
-        {
           kind: "new",
           items: [
             "Está disponible la familia de vacío de doble corte SDZV, con tensión de paso de hasta 6000 V y una capacidad de paso de aproximadamente 1,5 veces la de SHZV.",
             "El menú de tensión de paso añade 4500, 5000 y 6000 V.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "Aceite y vacío son ahora límites estrictos: al elegir aceite no aparecen tipos de vacío, y cuando un régimen en vacío sobre la cuba supera a todos los tipos de vacío, la herramienta indica fuera de catálogo en lugar de sustituir un reactor en aceite.",
           ],
         },
         {
@@ -695,32 +625,16 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-09",
       groups: [
         {
-          kind: "fix",
-          items: [
-            "Vakum da artık kesin bir sınır: kademe değiştirici tank üstündeyse ve hiçbir vakum tipi işletmeyi karşılamıyorsa, araç yağlı reaktör tipini sessizce koymak yerine katalog dışı olduğunu söyler.",
-          ],
-        },
-      ],
-    },
-    {
-      version: "1.2.8",
-      date: "2026-09",
-      groups: [
-        {
-          kind: "fix",
-          items: ["Yağda kesme kesin bir sınır oldu: yağ seçtiğinizde sonuçta vakum tipleri çıkmaz."],
-        },
-      ],
-    },
-    {
-      version: "1.2.7",
-      date: "2026-09",
-      groups: [
-        {
           kind: "new",
           items: [
             "Çift kesmeli vakum ailesi SDZV eklendi: kademe gerilimi 6000 V’e kadar, kademe kapasitesi SHZV’nin yaklaşık 1,5 katı.",
             "Kademe gerilimi menüsüne 4500, 5000 ve 6000 V kademeleri eklendi.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "Yağ ve vakum kesme artık kesin sınır: yağ seçildiğinde sonuçta vakum tipleri çıkmaz; tank üstü vakum işletmesi hiçbir vakum tipine sığmazsa araç, yağlı reaktör tipine dönmek yerine katalog dışı olduğunu söyler.",
           ],
         },
         {
@@ -861,34 +775,16 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-09",
       groups: [
         {
-          kind: "fix",
-          items: [
-            "Вакуум тоже стал жёстким ограничением: если переключатель стоит на баке и ни один вакуумный тип не закрывает режим, инструмент сообщает, что режим вне каталога, а не подставляет масляный реакторный тип.",
-          ],
-        },
-      ],
-    },
-    {
-      version: "1.2.8",
-      date: "2026-09",
-      groups: [
-        {
-          kind: "fix",
-          items: [
-            "Масляное гашение стало жёстким ограничением: при выборе масла вакуумные типы не появляются в результате.",
-          ],
-        },
-      ],
-    },
-    {
-      version: "1.2.7",
-      date: "2026-09",
-      groups: [
-        {
           kind: "new",
           items: [
             "Добавлено двухразрывное вакуумное семейство SDZV: ступенчатое напряжение до 6000 В, ступенчатая мощность примерно в 1,5 раза выше SHZV.",
             "В меню ступенчатого напряжения добавлены 4500, 5000 и 6000 В.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "Масло и вакуум стали жёсткими ограничениями: при выборе масла вакуумные типы не появляются, а если режим с вакуумом на баке не закрывает ни один вакуумный тип, инструмент сообщает о выходе за каталог, а не подставляет масляный реакторный тип.",
           ],
         },
         {

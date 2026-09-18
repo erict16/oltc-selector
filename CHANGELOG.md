@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Footer shows `v1.2.9` instead of 仅供参考. Click opens a small changelog popover (scheme A).
-- Changelog popover is a timeline with 修正/新增/改进 chips, plain-language copy, and a 全部更新记录 link to the new `/changelog/` page (timeline + sticky version sidebar; major-version tabs appear once a 2.x exists). Release history rebuilt from commits: 1.2.1–1.2.6 are the assistant/CLI line, SDZV correctly attributed to 1.2.7, hard locks to 1.2.8/1.2.9. `lib/releaseNotes.ts` is now `RELEASES` (versioned, kind-tagged, six languages).
+- Changelog popover is a timeline with 修正/新增/改进 chips, plain-language copy, and a 全部更新记录 link to the new `/changelog/` page (timeline + sticky version sidebar; major-version tabs appear once a 2.x exists). Release history rebuilt from commits: 1.2.1–1.2.6 are the assistant/CLI line; 1.2.7–1.2.9 were same-day internal numbers never shown publicly, so they merge into 1.2.9 (SDZV + Ust menu + oil/vacuum hard locks + three-step guide). `lib/releaseNotes.ts` is now `RELEASES` (versioned, kind-tagged, six languages).
 - Agent dock bubble closes on outside pointer-down and Escape, same contract as the footer popover.
 - Safety factor stays visible in More options on the current path (disabled). Imax k labels are explicit in EN / VI / ES / TR / RU.
 
