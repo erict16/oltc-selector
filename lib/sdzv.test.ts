@@ -113,14 +113,35 @@ describe("SDZV catalogue lock (2024-11-13 dual-break brochure)", () => {
   });
 });
 
-describe("SDZV pressure: every emitted model exists", () => {
-  const currents = [200, 350, 400, 600, 800, 1000, 1300];
-  const ums = [72.5, 126, 170];
-  const usts = [1500, 3300, 4000, 5000, 6000];
-  const conns = ["Y", "D"] as const;
-  const pms = [8, 12];
+const VAC_FAMILIES = new Set([
+  "SHZV",
+  "SHZVG",
+  "SDZV",
+  "CM2",
+  "CV2",
+  "HWV",
+  "CVT",
+  "CZ",
+]);
 
-  it("grid of I / Um / Ust / Y-D / ±N never invents a type", () => {
+function assertSdzvLegal(models: string[], bucket: string[]): void {
+  for (const m of models) {
+    if (!commercialTypeExists(m)) bucket.push(`missing ${m}`);
+    if (/SDZVIII-\d+D\//.test(m)) bucket.push(`III-D ${m}`);
+    if (/SDZVIII-1300/.test(m) || /SDZVIII-2400/.test(m)) bucket.push(`bad-III ${m}`);
+    if (/SDZVI-1200/.test(m) || /SDZVI-1500/.test(m)) bucket.push(`I-extra ${m}`);
+    if (/SDZVII-/.test(m)) bucket.push(`II ${m}`);
+  }
+}
+
+describe("SDZV pressure: every emitted model exists", () => {
+  const currents = [200, 350, 400, 600, 800, 1000, 1300, 2400, 2915.9];
+  const ums = [72.5, 126, 170];
+  const usts = [794, 1500, 3300, 4000, 5000, 6000];
+  const conns = ["Y", "D"] as const;
+  const pms = [8, 12, 16];
+
+  it("vacuum grid never invents SDZV types", () => {
     const illegal: string[] = [];
     for (const iu of currents) {
       for (const um of ums) {
@@ -136,20 +157,66 @@ describe("SDZV pressure: every emitted model exists", () => {
                   plusMinusSteps: pm,
                 }),
               );
-              for (const r of out.results) {
-                if (!commercialTypeExists(r.model)) illegal.push(r.model);
-                if (/SDZVIII-\d+D\//.test(r.model)) illegal.push(`III-D ${r.model}`);
-                if (/SDZVIII-1300/.test(r.model)) illegal.push(`1300 ${r.model}`);
-                if (/SDZVI-1200/.test(r.model) || /SDZVI-1500/.test(r.model)) {
-                  illegal.push(`I-extra ${r.model}`);
-                }
-                if (/SDZVII-/.test(r.model)) illegal.push(`II ${r.model}`);
-              }
+              assertSdzvLegal(
+                out.results.map((r) => r.model),
+                illegal,
+              );
             }
           }
         }
       }
     }
     expect(illegal, illegal.slice(0, 20).join(" | ")).toEqual([]);
+  });
+
+  it("oil arc never emits vacuum families including SDZV", () => {
+    const leaks: string[] = [];
+    for (const iu of currents) {
+      for (const um of ums) {
+        for (const ust of [794, 1500, 5000]) {
+          for (const conn of conns) {
+            const out = selectOltc(
+              vacY({
+                preferVacuum: false,
+                medium: "oil",
+                throughCurrentA: iu,
+                umKv: um,
+                stepVoltageV: ust,
+                connection: conn,
+              }),
+            );
+            for (const r of out.results) {
+              if (VAC_FAMILIES.has(r.seriesCode)) {
+                leaks.push(`${iu}A ${conn} ${r.model}`);
+              }
+            }
+          }
+        }
+      }
+    }
+    expect(leaks, leaks.slice(0, 15).join(" | ")).toEqual([]);
+  });
+
+  it("dry-type never emits in-tank SDZV/SHZV", () => {
+    const leaks: string[] = [];
+    const out = selectOltc({
+      mounting: "dry_type",
+      medium: "dry",
+      preferVacuum: true,
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 500,
+      umKv: 40.5,
+      stepVoltageV: 5000,
+      regulation: "linear",
+      positions: 9,
+      mdu: "none",
+    });
+    for (const r of out.results) {
+      if (["SDZV", "SHZV", "SHZVG", "CM2", "CV2"].includes(r.seriesCode)) {
+        leaks.push(r.model);
+      }
+    }
+    expect(leaks).toEqual([]);
   });
 });
