@@ -1648,77 +1648,90 @@ export function SelectorApp() {
                       </select>
                     </div>
                   </Field>
-                  {currentMode === "capacity" ? (
-                    <Field as="div" label={t(lang, "safetyK")}>
-                      <div className="relative">
-                        {safetyKCustom ||
+                  <Field
+                    as="div"
+                    label={t(lang, "safetyK")}
+                    tip={
+                      currentMode === "capacity"
+                        ? t(lang, "safetyKHintCapacity")
+                        : t(lang, "safetyKHintCurrent")
+                    }
+                  >
+                    <div className="relative">
+                      {currentMode === "capacity" &&
+                      (safetyKCustom ||
                         (safetyK > 0 &&
                           !(SAFETY_K_OPTIONS as readonly number[]).includes(
                             safetyK,
-                          )) ? (
-                          <input
-                            inputMode="decimal"
-                            className={`${controlClass} pl-7 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                            value={safetyK > 0 ? String(safetyK) : ""}
-                            onChange={(e) => {
-                              const v = e.target.value.replace(/，/g, ".");
-                              if (v !== "" && !/^\d*\.?\d*$/.test(v)) return;
-                              if (v === "" || v === ".") {
-                                setSafetyK(0);
-                                touch();
-                                return;
-                              }
-                              const n = Number(v);
-                              if (!Number.isFinite(n) || n < 0) return;
-                              setSafetyK(n);
+                          ))) ? (
+                        <input
+                          inputMode="decimal"
+                          className={`${controlClass} pl-7 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                          value={safetyK > 0 ? String(safetyK) : ""}
+                          onChange={(e) => {
+                            const v = e.target.value.replace(/，/g, ".");
+                            if (v !== "" && !/^\d*\.?\d*$/.test(v)) return;
+                            if (v === "" || v === ".") {
+                              setSafetyK(0);
                               touch();
-                            }}
-                            onBlur={() => {
-                              if (
-                                (SAFETY_K_OPTIONS as readonly number[]).includes(
-                                  safetyK,
-                                )
-                              ) {
-                                setSafetyKCustom(false);
-                              }
-                            }}
-                          />
-                        ) : (
-                          <select
-                            className={controlClass}
-                            value={safetyK > 0 ? String(safetyK) : "1"}
-                            onChange={(e) => {
-                              if (e.target.value === "__custom__") {
-                                setSafetyKCustom(true);
-                                return;
-                              }
-                              setSafetyK(Number(e.target.value));
+                              return;
+                            }
+                            const n = Number(v);
+                            if (!Number.isFinite(n) || n < 0) return;
+                            setSafetyK(n);
+                            touch();
+                          }}
+                          onBlur={() => {
+                            if (
+                              (SAFETY_K_OPTIONS as readonly number[]).includes(
+                                safetyK,
+                              )
+                            ) {
                               setSafetyKCustom(false);
-                              touch();
-                            }}
-                          >
-                            <option value="__custom__">
-                              {t(lang, "custom")}
+                            }
+                          }}
+                        />
+                      ) : (
+                        <select
+                          className={cx(
+                            controlClass,
+                            currentMode !== "capacity" &&
+                              "cursor-not-allowed opacity-50",
+                          )}
+                          disabled={currentMode !== "capacity"}
+                          value={safetyK > 0 ? String(safetyK) : "1"}
+                          onChange={(e) => {
+                            if (e.target.value === "__custom__") {
+                              setSafetyKCustom(true);
+                              return;
+                            }
+                            setSafetyK(Number(e.target.value));
+                            setSafetyKCustom(false);
+                            touch();
+                          }}
+                        >
+                          <option value="__custom__">
+                            {t(lang, "custom")}
+                          </option>
+                          {SAFETY_K_OPTIONS.map((n) => (
+                            <option key={n} value={String(n)}>
+                              ×{n}
                             </option>
-                            {SAFETY_K_OPTIONS.map((n) => (
-                              <option key={n} value={String(n)}>
-                                ×{n}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                        {safetyKCustom ||
+                          ))}
+                        </select>
+                      )}
+                      {currentMode === "capacity" &&
+                      (safetyKCustom ||
                         (safetyK > 0 &&
                           !(SAFETY_K_OPTIONS as readonly number[]).includes(
                             safetyK,
-                          )) ? (
-                          <span className="pointer-events-none absolute top-0 left-3 flex h-10 items-center text-[0.9rem] text-[var(--color-ink)]">
-                            ×
-                          </span>
-                        ) : null}
-                      </div>
-                    </Field>
-                  ) : null}
+                          ))) ? (
+                        <span className="pointer-events-none absolute top-0 left-3 flex h-10 items-center text-[0.9rem] text-[var(--color-ink)]">
+                          ×
+                        </span>
+                      ) : null}
+                    </div>
+                  </Field>
                 </div>
               </div>
             </div>

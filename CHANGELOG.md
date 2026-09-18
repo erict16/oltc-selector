@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Safety factor stays visible in More options on the current path (disabled, with a hint). Imax k copy is explicit in EN / VI / ES / TR / RU, not just Chinese.
+
 ## 1.2.9
 
 - Vacuum arc is a hard lock too. On-tank vacuum above HWV Ust no longer falls back to oil HWDK. Catalogue pressure grid covers all families (oil/vacuum, Y/D, dry, on-tank, OCTC).

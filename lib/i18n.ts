@@ -108,7 +108,11 @@ const en: Dict = {
   currentMax: "Imax = {a}A",
   umCaption: "OLTC Um = {um} kV",
   ustCaption: "Ust = {v}V",
-  safetyK: "Safety factor",
+  safetyK: "Imax safety factor",
+  safetyKHintCapacity:
+    "Multiplies Imax only when you enter transformer MVA. Default ×1, no extra margin.",
+  safetyKHintCurrent:
+    "The current you type is already Imax at the lowest tap. This factor is not applied. Switch to MVA to use it.",
   acrossInsul: "BIL / PF",
   stepPercent: "Step size",
   custom: "Custom",
@@ -289,6 +293,10 @@ const zh: Dict = {
   currentMax: "最大通过电流 {a}A",
   umCaption: "OLTC设备电压 {um} kV",
   safetyK: "最大通过电流安全系数",
+  safetyKHintCapacity:
+    "只乘在容量算出的 Imax 上。默认 ×1，不再额外放大。",
+  safetyKHintCurrent:
+    "手填电流已经是最低分接 Imax，不再乘这个系数。切到「容量」才用。",
   acrossInsul: "雷电冲击 / 工频耐压",
   ustCaption: "Ust = {v}V",
   stepPercent: "单次调节比例",
@@ -468,7 +476,11 @@ const vi: Dict = {
   currentMax: "Imax = {a}A",
   umCaption: "OLTC Um = {um} kV",
   ustCaption: "Ust = {v}V",
-  safetyK: "Hệ số k",
+  safetyK: "Hệ số an toàn Imax",
+  safetyKHintCapacity:
+    "Chỉ nhân với Imax khi nhập dung lượng MBA. Mặc định ×1, không cộng thêm.",
+  safetyKHintCurrent:
+    "Dòng bạn gõ đã là Imax ở nấc thấp nhất, không nhân hệ số này. Chuyển sang MVA mới dùng.",
   acrossInsul: "BIL / PF",
   stepPercent: "Bước %",
   custom: "Tùy chỉnh",
@@ -649,7 +661,11 @@ const es: Dict = {
   currentMax: "Imax = {a}A",
   umCaption: "OLTC Um = {um} kV",
   ustCaption: "Ust = {v}V",
-  safetyK: "Factor k",
+  safetyK: "Factor de seguridad Imax",
+  safetyKHintCapacity:
+    "Solo multiplica Imax si introduce la potencia en MVA. Por defecto ×1, sin margen extra.",
+  safetyKHintCurrent:
+    "La corriente que escribe ya es Imax en el tap más bajo. Este factor no se aplica. Pase a MVA para usarlo.",
   acrossInsul: "BIL / PF",
   stepPercent: "Paso",
   custom: "Manual",
@@ -829,7 +845,11 @@ const tr: Dict = {
   currentMax: "Imax = {a}A",
   umCaption: "OLTC Um = {um} kV",
   ustCaption: "Ust = {v}V",
-  safetyK: "Katsayı k",
+  safetyK: "Imax güvenlik katsayısı",
+  safetyKHintCapacity:
+    "Yalnızca transformatör gücünü (MVA) girince Imax ile çarpılır. Varsayılan ×1, ek pay yok.",
+  safetyKHintCurrent:
+    "Yazdığınız akım zaten en düşük kademedeki Imax. Bu katsayı uygulanmaz. Kullanmak için MVA’ya geçin.",
   acrossInsul: "BIL / PF",
   stepPercent: "Adım",
   custom: "Özel",
@@ -1008,7 +1028,11 @@ const ru: Dict = {
   currentMax: "Imax = {a}A",
   umCaption: "OLTC Um = {um} kV",
   ustCaption: "Ust = {v}V",
-  safetyK: "Коэф. k",
+  safetyK: "Коэффициент запаса Imax",
+  safetyKHintCapacity:
+    "Умножает Imax только если вы вводите мощность трансформатора (МВА). По умолчанию ×1, без запаса.",
+  safetyKHintCurrent:
+    "Введённый ток уже Imax на нижней отпайке. Коэффициент не применяется. Чтобы задать его, перейдите на МВА.",
   acrossInsul: "BIL / PF",
   stepPercent: "Ступень",
   custom: "Свой",

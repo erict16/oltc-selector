@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getAppLang, isLang, setAppLang } from "./i18n";
+import { getAppLang, isLang, LANG_OPTIONS, setAppLang, t } from "./i18n";
 
 const store = new Map<string, string>();
 
@@ -32,6 +32,17 @@ describe("lang persist", () => {
     expect(isLang("vi")).toBe(true);
     expect(isLang("xx")).toBe(false);
     expect(isLang(null)).toBe(false);
+  });
+
+  it("explains Imax safety factor in every UI language", () => {
+    for (const { id } of LANG_OPTIONS) {
+      expect(t(id, "safetyK")).not.toBe("safetyK");
+      expect(t(id, "safetyK").toLowerCase()).not.toBe("factor k");
+      expect(t(id, "safetyKHintCapacity")).not.toBe("safetyKHintCapacity");
+      expect(t(id, "safetyKHintCurrent")).not.toBe("safetyKHintCurrent");
+      expect(t(id, "safetyKHintCapacity").length).toBeGreaterThan(20);
+      expect(t(id, "safetyKHintCurrent").length).toBeGreaterThan(20);
+    }
   });
 
   it("writes the choice to localStorage", () => {
