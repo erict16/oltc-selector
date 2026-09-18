@@ -65,7 +65,7 @@ export function SiteFooter() {
               id={panelId}
               role="dialog"
               aria-labelledby={`${panelId}-title`}
-              className={`changelog-pop absolute bottom-[calc(100%+0.55rem)] left-0 z-30 max-h-[70vh] w-[min(23rem,calc(100vw-2rem))] overflow-y-auto rounded-[var(--radius-md)] border border-[var(--color-rule-2)] bg-white px-3.5 pt-3 pb-2 shadow-[0_10px_28px_oklch(24%_0.02_258_/_0.08)] md:-left-2 ${
+              className={`changelog-pop absolute bottom-[calc(100%+0.55rem)] left-0 z-30 max-h-[70vh] w-[min(23rem,calc(100vw-2rem))] overflow-y-auto rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white px-3.5 pt-3 pb-2 shadow-[0_10px_28px_oklch(24%_0.02_258_/_0.08)] md:-left-4 ${
                 open ? "is-open" : "is-closing"
               }`}
               onTransitionEnd={(e) => {

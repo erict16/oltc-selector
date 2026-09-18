@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Desktop changelog popover sits 8px left of the form card so the two 1px borders no longer stack.
+- Desktop changelog popover sits 16px left of the form card, with the same light border as the cards.
 - Result card clips the stale banner to the 10px radius so the cream strip no longer pokes out at the corners.
 - Drop the false 1.2.9 note that a step-voltage menu gained 4500 / 5000 / 6000 V. First paint uses tap % and derives Ust; the volt picker is the Um-mode fallback only.
 - Footer shows `v1.2.9` instead of 仅供参考. Click opens a small changelog popover (scheme A).
