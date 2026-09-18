@@ -20,7 +20,7 @@ const SATS = [
   { src: "claude.svg", cls: "s2", cover: false },
   { src: "grok.svg", cls: "s3", cover: false },
   { src: "kimi.svg", cls: "s4", cover: false },
-  { src: "zhipu.png", cls: "s5", cover: true },
+  { src: "deepseek.svg", cls: "s5", cover: false },
 ] as const;
 
 function Orbit() {
