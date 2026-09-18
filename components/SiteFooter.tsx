@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { useAppLang } from "@/components/LangProvider";
-import { APP_VERSION } from "@/lib/appVersion";
+import { APP_VERSION, PREVIOUS_VERSION } from "@/lib/appVersion";
 import { t } from "@/lib/i18n";
 import { RELEASE_NOTES } from "@/lib/releaseNotes";
 
@@ -95,7 +95,7 @@ export function SiteFooter() {
               </section>
               <section className="mt-3">
                 <p className="text-[0.75rem] font-semibold text-[var(--color-ink)]">
-                  {notes.earlierLabel}
+                  {notes.earlierLabel} v{PREVIOUS_VERSION}
                 </p>
                 <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-[0.8125rem] leading-snug text-[var(--color-ink-2)]">
                   {notes.earlier.map((line) => (

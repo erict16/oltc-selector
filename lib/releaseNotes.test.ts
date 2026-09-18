@@ -11,6 +11,7 @@ describe("release notes", () => {
       expect(line.endsWith("。")).toBe(true);
       expect(line.length).toBeGreaterThan(10);
     }
+    expect(zh.earlierLabel).toBe("上个版本");
     for (const { id } of LANG_OPTIONS) {
       expect(RELEASE_NOTES[id].current).toHaveLength(zh.current.length);
       expect(RELEASE_NOTES[id].earlier).toHaveLength(zh.earlier.length);
