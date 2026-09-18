@@ -34,7 +34,7 @@ import {
   throughCurrentFromRated,
 } from "@/lib/deriveUm";
 
-import { FIXTURES, pickOtherOptions, selectOltc } from "@/lib/engine";
+import { pickOtherOptions, selectOltc } from "@/lib/engine";
 import {
   defaultMid,
   defaultPitch,
@@ -748,32 +748,10 @@ export function SelectorApp() {
         tapRange,
       };
     }
-    const f = FIXTURES[ex.key];
-    let next: SelectInput = { ...f.input, mdu: "none" };
-    if (ex.pm && Number(ex.pm) > 0) {
-      const n = Number(ex.pm);
-      setPm(ex.pm);
-      next = {
-        ...next,
-        ...geometryForPm(n, next.regulation),
-      };
-    } else {
-      setPm("");
-    }
     const rated = EXAMPLE_RATED_KV[ex.key];
     setWindingRatedKv(rated);
     setVoltageMode("winding");
-    setCurrentMode("current");
-    setTransformerMva(0);
-    setTapPlus(8);
-    setTapMinus(8);
-    setStepPercentPct(1.25);
-    setSafetyK(1);
-    setTapRange(null);
-    setInput({
-      ...next,
-      umKv: 0,
-    });
+    setInput((s) => ({ ...s, umKv: 0 }));
     setActiveExample(ex.key);
     clearResult();
   };
