@@ -21,7 +21,7 @@ Result card **开关结构** (not 工作位置): CV/CV2/SV/CVT/CZ → 复合式;
 
 ## CLI
 
-CLI: `npx -y oltc-selector@1.2.8`. Same engine as the web app. No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only).
+CLI: `npx -y oltc-selector@1.2.9`. Same engine as the web app. No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only).
 
 Agent dock on `/` (scheme A). Tutorial `/agents/`. Agent skill is the separate repo `erict16/huaming-oltc-selector` (not in this tree). Selection only; after `oltc`, check brochure existence and explain why the type is correct.
 

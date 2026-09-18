@@ -1191,6 +1191,24 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
 });
 
 describe("HWDK / CVT 2025 OS", () => {
+  it("on-tank vacuum above HWV Ust does not fall back to oil HWDK", () => {
+    const out = selectOltc({
+      mounting: "on_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 400,
+      umKv: 40.5,
+      stepVoltageV: 4000,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      mdu: "none",
+    });
+    expect(out.results.every((r) => r.seriesCode !== "HWDK")).toBe(true);
+    expect(out.ok).toBe(false);
+  });
+
   it("HWDK I 1500 A / 40.5 / 17 pos", () => {
     const out = selectOltc({
       mounting: "reactor",

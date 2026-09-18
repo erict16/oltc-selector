@@ -810,14 +810,13 @@ export function selectOltc(input: SelectInput): SelectOutput {
       }
     }
 
-  // Prefer vacuum set when requested and any vacuum exists.
-  // Oil interrupter is a hard lock: never fall back to vacuum SHZV/SHZVG/SDZV.
+  // Vacuum / oil are hard locks. Do not fall back across the arc mode
+  // (oil 2915 A used to leak 3xSHZVGI; on-tank vacuum used to leak HWDK).
   let final = results;
   if (input.preferVacuum) {
-    const vac = results.filter(
+    final = results.filter(
       (r) => SERIES.find((s) => s.id === r.seriesId)?.vacuum,
     );
-    if (vac.length) final = vac;
   } else if (input.medium === "oil") {
     final = results.filter(
       (r) => SERIES.find((s) => s.id === r.seriesId)?.vacuum === false,

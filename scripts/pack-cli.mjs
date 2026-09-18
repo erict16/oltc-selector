@@ -51,7 +51,7 @@ for (const needle of FORBIDDEN) {
 
 // CLI version lives here. The agent skill is a separate repo
 // (erict16/huaming-oltc-selector) and must pin this same number.
-const VERSION = "1.2.8";
+const VERSION = "1.2.9";
 
 const pkg = {
   name: "oltc-selector",

@@ -19,7 +19,7 @@ describe("selection-only pack", () => {
       readFileSync(path.join(root, "pack", "package.json"), "utf8"),
     );
     expect(packedPkg.name).toBe("oltc-selector");
-    expect(packedPkg.version).toBe("1.2.8");
+    expect(packedPkg.version).toBe("1.2.9");
     expect(packedPkg.bin).toEqual({ oltc: "bin/oltc.js" });
     const js = readFileSync(bin, "utf8");
     expect(js.includes("listRmb")).toBe(false);

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.2.9
+
+- Vacuum arc is a hard lock too. On-tank vacuum above HWV Ust no longer falls back to oil HWDK. Catalogue pressure grid covers all families (oil/vacuum, Y/D, dry, on-tank, OCTC).
+
 ## 1.2.8
 
 - Oil arc (`preferVacuum=false`, medium oil) is a hard lock. Vacuum families (SHZV / SHZVG / SDZV / CM2 / CV2) no longer leak through when Iᵤ exceeds oil max (screenshot: 500 MVA 110 kV oil → was `3xSHZVGI-3000`). Out of catalogue instead.
