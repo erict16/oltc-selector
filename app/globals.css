@@ -299,8 +299,6 @@ h1 {
   line-height: 1.4;
   border-radius: 4px;
   padding: 1.5px 7px;
-  /* Same start as the note body: 5px bullet + gap-2. */
-  margin-left: calc(5px + 0.5rem);
   color: var(--color-muted);
   background: var(--color-soft);
 }
