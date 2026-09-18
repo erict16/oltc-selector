@@ -69,7 +69,8 @@ export const CURRENT_MENU: CatalogueMenuItem[] = catalogueMenu(
   "A",
 );
 
-/** Common max step voltage (Ust) picks — from calc sheet / quotes / brochure ceilings */
+/** Um-mode fallback Ust picks (calc sheet / quotes / brochure ceilings).
+ *  Default form derives Ust from tap % × Un — this list is not first-paint. */
 export const STEP_VOLTAGE_OPTIONS_V = [
   500, 800, 1000, 1200, 1400, 1500, 1650, 1800, 2000, 2200, 2500, 3000, 3300,
   4000, 4500, 5000, 6000,

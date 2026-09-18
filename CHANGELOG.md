@@ -3,8 +3,9 @@
 ## Unreleased
 
 - Result card clips the stale banner to the 10px radius so the cream strip no longer pokes out at the corners.
+- Drop the false 1.2.9 note that a step-voltage menu gained 4500 / 5000 / 6000 V. First paint uses tap % and derives Ust; the volt picker is the Um-mode fallback only.
 - Footer shows `v1.2.9` instead of 仅供参考. Click opens a small changelog popover (scheme A).
-- Changelog popover is a timeline with 修正/新增/改进 chips, plain-language copy, and a 全部更新记录 link to the new `/changelog/` page (timeline + sticky version sidebar; major-version tabs appear once a 2.x exists). Release history rebuilt from commits: 1.2.1–1.2.6 are the assistant/CLI line; 1.2.7–1.2.9 were same-day internal numbers never shown publicly, so they merge into 1.2.9 (SDZV + Ust menu + oil/vacuum hard locks + three-step guide). `lib/releaseNotes.ts` is now `RELEASES` (versioned, kind-tagged, six languages).
+- Changelog popover is a timeline with 修正/新增/改进 chips, plain-language copy, and a 全部更新记录 link to the new `/changelog/` page (timeline + sticky version sidebar; major-version tabs appear once a 2.x exists). Release history rebuilt from commits: 1.2.1–1.2.6 are the assistant/CLI line; 1.2.7–1.2.9 were same-day internal numbers never shown publicly, so they merge into 1.2.9 (SDZV + oil/vacuum hard locks + three-step guide). `lib/releaseNotes.ts` is now `RELEASES` (versioned, kind-tagged, six languages).
 - Agent dock bubble closes on outside pointer-down and Escape, same contract as the footer popover.
 - Safety factor stays visible in More options on the current path (disabled). Imax k labels are explicit in EN / VI / ES / TR / RU.
 
@@ -19,7 +20,6 @@
 ## 1.2.7
 
 - Catalogue: **SDZV** dual-break in-tank vacuum (Ust 6000 V, step capacity 1.5× SHZV). III 400/600/1000 Y-only; I 400/600/1000/1600/2400; positions 14/27. Ranked after SHZV, before SHZVG — only when SHZV step voltage or step capacity is short. No III-D, no II, no I-1200/1500, no III-1300.
-- Ust menu adds 4500 / 5000 / 6000 V.
 - CLI / skill pin `oltc-selector@1.2.7`.
 
 - `/agents` WorkBuddy search block is Chinese-only. Other locales only get the send-a-line prompt.

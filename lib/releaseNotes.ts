@@ -26,7 +26,6 @@ export const RELEASES: Record<Lang, Release[]> = {
           kind: "new",
           items: [
             "新增双断口真空系列 SDZV，级电压最高 6000 V、级容量约为 SHZV 的 1.5 倍。",
-            "级电压菜单新增 4500、5000、6000 V 三档。",
           ],
         },
         {
@@ -174,7 +173,6 @@ export const RELEASES: Record<Lang, Release[]> = {
           kind: "new",
           items: [
             "The dual-break vacuum family SDZV is available, with step voltage up to 6000 V and about 1.5 times the step capacity of SHZV.",
-            "The step voltage menu adds 4500, 5000, and 6000 V.",
           ],
         },
         {
@@ -326,7 +324,6 @@ export const RELEASES: Record<Lang, Release[]> = {
           kind: "new",
           items: [
             "Thêm họ chân không hai tiếp điểm SDZV: điện áp cấp tới 6000 V, dung lượng cấp khoảng 1,5 lần SHZV.",
-            "Menu điện áp cấp thêm ba nấc 4500, 5000 và 6000 V.",
           ],
         },
         {
@@ -476,7 +473,6 @@ export const RELEASES: Record<Lang, Release[]> = {
           kind: "new",
           items: [
             "Está disponible la familia de vacío de doble corte SDZV, con tensión de paso de hasta 6000 V y una capacidad de paso de aproximadamente 1,5 veces la de SHZV.",
-            "El menú de tensión de paso añade 4500, 5000 y 6000 V.",
           ],
         },
         {
@@ -628,7 +624,6 @@ export const RELEASES: Record<Lang, Release[]> = {
           kind: "new",
           items: [
             "Çift kesmeli vakum ailesi SDZV eklendi: kademe gerilimi 6000 V’e kadar, kademe kapasitesi SHZV’nin yaklaşık 1,5 katı.",
-            "Kademe gerilimi menüsüne 4500, 5000 ve 6000 V kademeleri eklendi.",
           ],
         },
         {
@@ -778,7 +773,6 @@ export const RELEASES: Record<Lang, Release[]> = {
           kind: "new",
           items: [
             "Добавлено двухразрывное вакуумное семейство SDZV: ступенчатое напряжение до 6000 В, ступенчатая мощность примерно в 1,5 раза выше SHZV.",
-            "В меню ступенчатого напряжения добавлены 4500, 5000 и 6000 В.",
           ],
         },
         {

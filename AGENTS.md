@@ -34,3 +34,5 @@ Brochure Fig. 3-3: `P = 2 × (±N) + mid`. See `lib/tapCode.ts`. Never invent no
 Emit only a commercial type that exists in the brochure / 2025 list. `CM2III-500D` is not a type (CM2 III is star-point Y). Covering delta with `3xCM2I-…` is because that single-phase type exists, not because every D job is 3×. `CV2III-…D` and `HWVIII-…D` exist — emit them. 3× I and CM2/CM/CMD II omit Y/D after current. CV2 has no II. WSL/WDL rows must exist on the 2025 list (gate in `lib/typeExists.ts`). SHZVG has no brochure extract; III-Y-only is assumed from catalogue notes. SDZV is the dual-break vacuum family (Ust 6000 V, III 400/600/1000, I 400/600/1000/1600/2400, positions 14/27). No `SDZVIII-…D`, no II, no I-1200/1500, no III-1300.
 
 Form **开关结构**: OLTC 自动 / 复合式 / 组合式; OCTC 自动 / 笼式 / 鼓式. **接线方式** (II/IV/V…) stays a separate OCTC field (winding scheme, not cage vs drum).
+
+Default form: **单次调节比例** (tap %) plus rated kV → derived Ust caption. The volt dropdown is the Um-mode fallback only (`ustV == null`). Do not changelog `STEP_VOLTAGE_MENU` as a first-paint control.

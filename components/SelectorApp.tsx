@@ -1322,6 +1322,7 @@ export function SelectorApp() {
               </Field>
             ) : null}
 
+            {/* Volt picker only when tap % cannot derive Ust (Um mode, no rated kV). */}
             {ustV == null ? (
             <Field
               label={t(lang, "ust")}
