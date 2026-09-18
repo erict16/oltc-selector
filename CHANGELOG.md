@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Safety factor stays visible in More options on the current path (disabled, with a hint). Imax k copy is explicit in EN / VI / ES / TR / RU, not just Chinese.
+- Safety factor stays visible in More options on the current path (disabled). Imax k labels are explicit in EN / VI / ES / TR / RU.
 
 ## 1.2.9
 

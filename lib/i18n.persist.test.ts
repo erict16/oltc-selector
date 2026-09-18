@@ -34,14 +34,10 @@ describe("lang persist", () => {
     expect(isLang(null)).toBe(false);
   });
 
-  it("explains Imax safety factor in every UI language", () => {
+  it("names Imax safety factor in every UI language", () => {
     for (const { id } of LANG_OPTIONS) {
       expect(t(id, "safetyK")).not.toBe("safetyK");
       expect(t(id, "safetyK").toLowerCase()).not.toBe("factor k");
-      expect(t(id, "safetyKHintCapacity")).not.toBe("safetyKHintCapacity");
-      expect(t(id, "safetyKHintCurrent")).not.toBe("safetyKHintCurrent");
-      expect(t(id, "safetyKHintCapacity").length).toBeGreaterThan(20);
-      expect(t(id, "safetyKHintCurrent").length).toBeGreaterThan(20);
     }
   });
 

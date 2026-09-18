@@ -1648,15 +1648,7 @@ export function SelectorApp() {
                       </select>
                     </div>
                   </Field>
-                  <Field
-                    as="div"
-                    label={t(lang, "safetyK")}
-                    tip={
-                      currentMode === "capacity"
-                        ? t(lang, "safetyKHintCapacity")
-                        : t(lang, "safetyKHintCurrent")
-                    }
-                  >
+                  <Field as="div" label={t(lang, "safetyK")}>
                     <div className="relative">
                       {currentMode === "capacity" &&
                       (safetyKCustom ||
