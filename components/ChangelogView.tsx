@@ -165,10 +165,10 @@ export function ChangelogView() {
                   rel.version === APP_VERSION ? " cur" : ""
                 }`}
               >
-                <p className="flex flex-wrap items-baseline gap-2 text-[0.9375rem] font-bold text-[var(--color-ink)] [font-variant-numeric:tabular-nums]">
+                <p className="flex flex-wrap items-center gap-2 text-[0.9375rem] font-bold text-[var(--color-ink)] [font-variant-numeric:tabular-nums]">
                   v{rel.version}
                   {rel.version === APP_VERSION ? (
-                    <span className="rounded-full bg-[oklch(95%_0.03_256)] px-[7px] py-px text-[0.625rem] font-semibold text-[var(--color-accent)]">
+                    <span className="changelog-now rounded-full bg-[oklch(95%_0.03_256)] px-[7px] py-px text-[0.625rem] font-semibold leading-none text-[var(--color-accent)]">
                       {t(lang, "changelogNow")}
                     </span>
                   ) : null}

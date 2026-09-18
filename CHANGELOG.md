@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Changelog popover: 「当前」sits on the version midline; 新增/修正/改进 chips line up with the note body.
 - Agent dock satellite: DeepSeek whale in place of 智谱.
 - `/agents` SkillHub page and zip links both go to `https://skillhub.cn/skills/indiv-erict16/huaming-oltc-selector` (the old `@indiv-erict16` URL and GitHub zip were wrong).
 - Desktop changelog popover sits 16px left of the form card, with the same light border as the cards.

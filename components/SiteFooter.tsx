@@ -93,10 +93,10 @@ export function SiteFooter() {
                     key={rel.version}
                     className={`note-rel pb-3 last:pb-1${i === 0 ? " cur" : ""}`}
                   >
-                    <p className="flex items-baseline gap-2 text-[0.8125rem] font-semibold text-[var(--color-ink)] [font-variant-numeric:tabular-nums]">
+                    <p className="flex items-center gap-2 text-[0.8125rem] font-semibold text-[var(--color-ink)] [font-variant-numeric:tabular-nums]">
                       v{rel.version}
                       {i === 0 ? (
-                        <span className="rounded-full bg-[oklch(95%_0.03_256)] px-[7px] py-px text-[0.625rem] font-semibold text-[var(--color-accent)]">
+                        <span className="changelog-now rounded-full bg-[oklch(95%_0.03_256)] px-[7px] py-px text-[0.625rem] font-semibold leading-none text-[var(--color-accent)]">
                           {t(lang, "changelogNow")}
                         </span>
                       ) : null}
