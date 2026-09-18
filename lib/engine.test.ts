@@ -99,7 +99,7 @@ describe("catalogue menu labels", () => {
     expect(STEP_VOLTAGE_MENU.find((x) => x.value === 1500)?.labelEn).toBe(
       "1500 V",
     );
-    expect(STEP_VOLTAGE_MENU.at(-1)?.labelEn).toBe("4000 V");
+    expect(STEP_VOLTAGE_MENU.at(-1)?.labelEn).toBe("6000 V");
     expect(ACROSS_BIL_MENU.find((x) => x.value === 285)?.labelEn).toBe(
       "285 kV",
     );
@@ -471,7 +471,7 @@ describe("training cases (选型案例-答案)", () => {
     expect(out.results[0].seriesCode).toBe("CM2");
     expect(out.results[0].selectorSize).toBe("C");
     expect(out.results[0].model).not.toMatch(/SHZVIII-\d+D\//);
-    expect(out.results.every((r) => !/(?:CM2|CM|CMD|SHZV|SHZVG)III-\d+D\//.test(r.model))).toBe(
+    expect(out.results.every((r) => !/(?:CM2|CM|CMD|SHZV|SDZV|SHZVG)III-\d+D\//.test(r.model))).toBe(
       true,
     );
   });
@@ -569,7 +569,7 @@ describe("CV2 step voltage vs contacts (pitch)", () => {
 });
 
 describe("III type exists only when the brochure has it", () => {
-  const combinedIiiD = /(?:CM2|CM|CMD|SHZV|SHZVG)III-\d+D\//;
+  const combinedIiiD = /(?:CM2|CM|CMD|SHZV|SDZV|SHZVG)III-\d+D\//;
 
   it("346 A / 145 Δ / Ust 1650 → 3xCM2I-500/170D, never CM2III-…D", () => {
     const out = selectOltc({

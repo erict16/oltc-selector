@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.2.7
+
+- Catalogue: **SDZV** dual-break in-tank vacuum (Ust 6000 V, step capacity 1.5× SHZV). III 400/600/1000 Y-only; I 400/600/1000/1600/2400; positions 14/27. Ranked after SHZV, before SHZVG — only when SHZV step voltage or step capacity is short. No III-D, no II, no I-1200/1500, no III-1300.
+- Ust menu adds 4500 / 5000 / 6000 V.
+- CLI / skill pin `oltc-selector@1.2.7`.
+
 - `/agents` WorkBuddy search block is Chinese-only. Other locales only get the send-a-line prompt.
 - `/agents` step 1 is two paths (WorkBuddy search vs send-a-line). Install prompt is localized. Copy control is a sliding pill, not a whole-block button.
 - `/agents` Chinese step 1 shows the WorkBuddy SkillHub search screenshot (搜「华明」点 +). Other locales stay prompt-only.

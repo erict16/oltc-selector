@@ -2,7 +2,7 @@
 
 填工况，给出 2025 目录里**最低满足**的型号。网页和 `oltc` CLI 共用同一份 `selectOltc` 引擎。
 
-**CLI（无报价）：** `npx -y oltc-selector@1.2.6`，命令是 `oltc`。Agent 技能包在独立仓库 [`erict16/huaming-oltc-selector`](https://github.com/erict16/huaming-oltc-selector)。  
+**CLI（无报价）：** `npx -y oltc-selector@1.2.7`，命令是 `oltc`。Agent 技能包在独立仓库 [`erict16/huaming-oltc-selector`](https://github.com/erict16/huaming-oltc-selector)。  
 **网页：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) · [GitHub Pages](https://erict16.github.io/oltc-selector/)
 
 私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。
@@ -46,10 +46,10 @@ oltc --mva 25 --kv 110 --conn Y --reg W --pm 8
 
 ## Selection rules
 
-1. **Minimum-adequate, not SHZV-by-default.** Rank **CV2 → CM2 → SHZV → SHZVG**. Prefer one three-phase unit over `3×` singles when a brochure III type exists.
+1. **Minimum-adequate, not SHZV-by-default.** Rank **CV2 → CM2 → SHZV → SDZV → SHZVG**. SDZV (dual-break, Ust 6000 V) only when SHZV step voltage or step capacity is short. Prefer one three-phase unit over `3×` singles when a brochure III type exists.
 2. **OLTC existence comes from brochure / catalogue axes** (`lib/catalog.ts`), **not price-list Y/D twins**. A 2025 list row that prices `CM2III-…D` the same as Y does **not** make `CM2III-…D` a type.
 3. **No CV2-500.** CV2 III currents are 350 and 600 only.
-4. **No combined III-D.** CM / CM2 / CMD / SHZV / SHZVG three-phase strings are star-point Y. Cover delta with `3x…I-` when that I type exists. Compound **CV / CV2 / SV** and on-tank **HWV** III-D **do** exist.
+4. **No combined III-D.** CM / CM2 / CMD / SHZV / SDZV / SHZVG three-phase strings are star-point Y. Cover delta with `3x…I-` when that I type exists. Compound **CV / CV2 / SV** and on-tank **HWV** III-D **do** exist. No SDZV II, I-1200/1500, or III-1300.
 5. **Compound has no selector grade letter.** No `CV2III-350Y/40.5B-…`. Combined in-tank may have B/C/D/DE after Um.
 6. **WSL / WDL existence is 2025-list row keys without prices** (`lib/listIndex.data.json`). Missing rows (no `WSLIV-2000D/126`, no `7x6E` @ 72.5) are not emitted.
 7. **WSG** is catalogue axes only (no 2025 list sheet in the index).

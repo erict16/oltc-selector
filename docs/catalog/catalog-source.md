@@ -19,6 +19,7 @@ Early scaffold put **CV2 currents = 350 / 500 / 600**.
 | **SV** | **500** | Oil compound 500 A — not CV/CV2 |
 | CM / CM2 | III/II **500, 600**; I 500/600/800/1200/1500 | Um 72.5 / 126 / 170 / 252 |
 | SHZV | III/II 400/600/1000; I +1200/1500/1600/2400 | Um to 252 commercially; brochure also 300/363. SHZVG = 1300/1500 separate |
+| **SDZV** | III **400/600/1000**; I 400/600/1000/1600/2400 | Dual-break vacuum. **Ust 6000 V**. III-Y only. No II, no I-1200/1500, no III-1300. Positions 14 / 27. 2024-11-13 技术数据 + 样本 |
 | CMD | III 400/600/1000; I +1600/2400 | Positions 14 / 27 |
 | HWV | 400 / **800** / 1000 | No 600 A; Um 17.5 / 40.5 / 72.5 |
 | CVT | 160 / 200 | Um **12** only |
@@ -34,7 +35,7 @@ Commercial string: `WSLIV-800Y/170-6x5B` (family + roman series + Iᵤ + Y/D + U
 
 ## Compound vs combined
 
-- **Combined** (SHZV/CM/CM2/CMD/HWV): model may include selector grade `B|C|D|DE` after Um.
+- **Combined** (SHZV/SDZV/CM/CM2/CMD/HWV): model may include selector grade `B|C|D|DE` after Um.
 - **Compound** (CV/CV2/SV/CVT/CZ): **no** grade letter. Connection Y/D sits after current (`CV2III-350Y/40.5-…`).
 
 ## Ranking (training cases)
@@ -50,7 +51,7 @@ Minimum adequate — see `选型案例-答案.docx` in `docs/training/`:
 
 Compound fails when across-tap LI ≳ 200 kV (CV2 internal a). Then combined + grade letter.
 
-**Type existence:** emit only brochure types. CM / CM2 / CMD / SHZV / SHZVG III is star-point Y — there is no `CM2III-…D`. Covering that duty with `3xCM2I-…` is because the I type exists. Compound CV/CV2/SV and on-tank HWV III D are real types. **SHZVG has no extract in `docs/brochure-extracts/`; III-Y-only is assumed from the in-repo catalogue notes (same family as SHZV), not from a brochure PDF.** CM2/CM/CMD II list rows omit Y/D after current (`CM2II-500/72.5B`). OCTC rows must exist on the 2025 list (no `7x6E` @ 72.5, no `WSLIV-2000D/126`). Price-list Y/D same RMB is not a type.
+**Type existence:** emit only brochure types. CM / CM2 / CMD / SHZV / SDZV / SHZVG III is star-point Y — there is no `CM2III-…D` / `SDZVIII-…D`. Covering that duty with `3x…I-` is because the I type exists. Compound CV/CV2/SV and on-tank HWV III D are real types. **SHZVG has no extract in `docs/brochure-extracts/`; III-Y-only is assumed from the in-repo catalogue notes (same family as SHZV), not from a brochure PDF.** **SDZV axes come from `docs/brochure-extracts/SDZV_Dual_Break_Vacuum_OLTC-2024-11-13.txt` (技术数据 + 样本 11.13/2024). Do not copy the 2020 export booklet III-1300 / I-3000.** CM2/CM/CMD II list rows omit Y/D after current (`CM2II-500/72.5B`). OCTC rows must exist on the 2025 list (no `7x6E` @ 72.5, no `WSLIV-2000D/126`). Price-list Y/D same RMB is not a type.
 
 ## Do not
 
@@ -58,4 +59,5 @@ Compound fails when across-tap LI ≳ 200 kV (CV2 internal a). Then combined + g
 - Put selector grade on CV/CV2.
 - Use CM III 800/1000 — three-phase CM/CM2 stop at 600 A; go SHZV/CMD or single-phase for higher I.
 - Default-rank SHZV when CV2/CM2 already meet the duty.
-- Invent combined III-D (`CM2III-…D/`, `SHZVIII-…D/`). Price-list Y/D alias is not a type.
+- Invent combined III-D (`CM2III-…D/`, `SHZVIII-…D/`, `SDZVIII-…D/`). Price-list Y/D alias is not a type.
+- Invent SDZV II, I-1200/1500, III-1300, or 18-contact / 35-position SDZV (brochure drawings stop at 14273W).

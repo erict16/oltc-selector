@@ -1,0 +1,30 @@
+SDZV 型双断口真空有载分接开关
+Sources (2024-11-13):
+  样本 SDZV型双断口真空有载分接开关样本20241113.pdf
+  技术数据 SDZV型双断口真空有载分接开关技术数据20241113.pdf
+  说明书 HM 0.460.4461-11.13/2024
+
+Official name: 双断口真空有载分接开关 (combined).
+Replaces single-break vacuum bottles (SHZV) with series dual-break
+(V11/V12, V21/V22). Max rated step voltage 6000 V. III step capacity
+to 4500 kVA. Y-connection three-phase; single-phase any connection.
+
+Type example: SDZVIII-600Y/126C-10193W
+  family + phases + Ium + Y/D + Um + selector B/C/D/DE + tap code
+No extra dual-break letter in the type string.
+
+Table (样本 产品参数 / 技术数据 表1)
+
+          SDZV III              SDZV I
+Ium (A)   400  600  1000        400  600  1000  1600  2400
+Ust max   6000 V
+Psin kVA  2250 2400 4500        2250 2400 4500  6600  8400
+Conn      三相Y接中性点          单相任意连接
+Um kV     72.5 126 170 252 300 363
+Selector  B, C, D, DE
+Positions 常规: linear ≤14; with change-over ≤27
+          Ium ≤600 A may borrow CM selector ≤107 (special; not auto-selected)
+No II. No I 1200/1500. No III 1300 (2020 export / old type-test only).
+Drawings include 10193W, 12233W, 14273W. No 18353W drawing.
+
+Do not invent: SDZVIII-…D, SDZVII, SDZVI-1200, SDZVIII-1300.

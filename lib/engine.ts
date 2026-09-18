@@ -225,7 +225,8 @@ function seriesMatchesMedium(s: SeriesDef, input: SelectInput): boolean {
  * Higher score = better primary pick.
  *
  * Commercial min-adequate (Base Price List 2025 + sales practice):
- *   1. Family: CV2 → CM2 → SHZV → SHZVG (never SHZV-400 over CV2/CM2 on exact I).
+ *   1. Family: CV2 → CM2 → SHZV → SDZV → SHZVG
+ *      (never SHZV-400 over CV2/CM2 on exact I; SDZV only when SHZV Ust/capacity is short).
  *   2. **Only emit a type that exists in the brochure.**
  *      CM2III-…D is not a type → do not emit it. CV2III-…D and HWVIII-…D exist.
  *      3× I is used when that single-phase type exists and III does not cover

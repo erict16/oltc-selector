@@ -3,7 +3,7 @@ import { listRowExists, resolveOctcListKey } from "./listIndex";
 import { parseTypeString } from "./parseType";
 import type { PhaseCode, SeriesDef } from "./types";
 
-const STAR_ONLY_III = new Set(["cm", "cm2", "cmd", "shzv", "shzvg"]);
+const STAR_ONLY_III = new Set(["cm", "cm2", "cmd", "shzv", "sdzv", "shzvg"]);
 const II_OMITS_CONNECTION = new Set(["cm", "cm2", "cmd"]);
 const COMPOUND_NO_GRADE = new Set(["cv", "cv2", "sv", "cvt", "cz"]);
 

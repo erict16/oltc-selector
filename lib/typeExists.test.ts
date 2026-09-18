@@ -22,9 +22,9 @@ const vacDelta = (over: Partial<SelectInput> = {}): SelectInput => ({
   ...over,
 });
 
-const STAR_ONLY_III_D = /(?:CM2|CM|CMD|SHZV|SHZVG)III-\d+D\//;
+const STAR_ONLY_III_D = /(?:CM2|CM|CMD|SHZV|SDZV|SHZVG)III-\d+D\//;
 const COMPOUND_GRADE = /(?:CV2|CV|SV|CVT)III-\d+[YD]\/\d+(?:\.\d+)?[BCDE]/;
-const SINGLE_PHASE_YD = /(?:CM2|CM|CMD|SHZV|SHZVG)I-\d+[YD]\//;
+const SINGLE_PHASE_YD = /(?:CM2|CM|CMD|SHZV|SDZV|SHZVG)I-\d+[YD]\//;
 const CM2_II_YD = /(?:CM2|CM|CMD)II-\d+[YD]\//;
 
 describe("commercialTypeExists (brochure oracle, not price-list Y/D twin)", () => {
@@ -200,7 +200,7 @@ describe("catalogue axes vs extracts", () => {
   });
 
   it("star-only families declare iiiConnections Y", () => {
-    for (const id of ["cm", "cm2", "cmd", "shzv", "shzvg"]) {
+    for (const id of ["cm", "cm2", "cmd", "shzv", "sdzv", "shzvg"]) {
       const s = SERIES.find((row) => row.id === id)!;
       expect(s.iiiConnections, id).toEqual(["Y"]);
     }

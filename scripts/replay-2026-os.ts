@@ -86,7 +86,7 @@ type ReplayOut = {
   phases: string;
 };
 
-const VAC_COMBINED = new Set(["CM2", "SHZV", "SHZVG"]);
+const VAC_COMBINED = new Set(["CM2", "SHZV", "SDZV", "SHZVG"]);
 const VAC_COMPOUND = new Set(["CV2"]);
 const OIL_COMBINED = new Set(["CM", "CMD"]);
 const OIL_COMPOUND = new Set(["CV", "SV"]);

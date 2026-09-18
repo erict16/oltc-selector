@@ -24,7 +24,7 @@ import type {
 
 type RefRow = { year?: number; sold_type: string; qty?: number };
 
-const VAC = new Set(["CM2", "SHZV", "SHZVG", "CV2", "HWV", "HWDK", "CVT", "CZ"]);
+const VAC = new Set(["CM2", "SHZV", "SDZV", "SHZVG", "CV2", "HWV", "HWDK", "CVT", "CZ"]);
 const OIL = new Set(["CM", "CMD", "CV", "SV"]);
 const ON_TANK = new Set(["HWV", "HWDK"]);
 const DRY = new Set(["CVT", "CZ"]);

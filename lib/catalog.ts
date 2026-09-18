@@ -71,7 +71,8 @@ export const CURRENT_MENU: CatalogueMenuItem[] = catalogueMenu(
 
 /** Common max step voltage (Ust) picks — from calc sheet / quotes / brochure ceilings */
 export const STEP_VOLTAGE_OPTIONS_V = [
-  500, 800, 1000, 1200, 1400, 1500, 1650, 1800, 2000, 2200, 2500, 3000, 3300, 4000,
+  500, 800, 1000, 1200, 1400, 1500, 1650, 1800, 2000, 2200, 2500, 3000, 3300,
+  4000, 4500, 5000, 6000,
 ] as const;
 
 export const STEP_VOLTAGE_MENU: CatalogueMenuItem[] = catalogueMenu(
@@ -175,6 +176,7 @@ export const FAMILY_MIN_RANK: Record<string, number> = {
   sv: 19,
   cm2: 25,
   shzv: 40,
+  sdzv: 42, // dual-break vacuum; only when SHZV Ust / step capacity is short
   shzvg: 45, // high-current vacuum after standard SHZV
   cm: 50,
   cmd: 55,
@@ -225,6 +227,42 @@ export const SERIES: SeriesDef[] = [
     notesZh:
       "箱内真空组合式。样本三相型号只给星点（没有 SHZVIII-…D）。当复合式/CM2 不够时用。三相电流显著大于 1000 A 见 SHZVG。",
     rank: 40,
+  },
+  {
+    id: "sdzv",
+    code: "SDZV",
+    nameEn: "SDZV in-tank dual-break vacuum OLTC (combined)",
+    nameZh: "SDZV 箱内双断口真空有载开关（组合式）",
+    mounting: ["in_tank"],
+    medium: "oil_vacuum",
+    structure: "combined",
+    vacuum: true,
+    // 2024-11-13 技术数据 / 样本: III 400/600/1000; I 400/600/1000/1600/2400.
+    // No II, no I-1200/1500, no III-1300 (old type-test only).
+    currents: {
+      I: [400, 600, 1000, 1600, 2400],
+      III: [400, 600, 1000],
+    },
+    umKv: [72.5, 126, 170, 252, 300, 363],
+    usesSelectorSize: true,
+    maxStepVoltageV: 6000,
+    stepCapacityByCurrent: {
+      400: 2250,
+      600: 2400,
+      1000: 4500,
+      1600: 6600,
+      2400: 8400,
+    },
+    connections: ["Y", "D"],
+    iiiConnections: ["Y"],
+    maxPositionsLinear: 14,
+    maxPositionsWithChangeOver: 27,
+    defaultMdu: "CMA7",
+    notesEn:
+      "Dual-break vacuum combined (two interrupters in series). Brochure III is star-point only (no SDZVIII-…D). Use when SHZV 4000 V / step capacity is short. Standard positions 14 / 27; do not invent 18-contact or III-1300.",
+    notesZh:
+      "双断口真空组合式。样本三相只给星点（没有 SDZVIII-…D）。仅当 SHZV 级电压 4000 V 或级容量不够时选用。常规档位 14 / 27，不要编 18 触头或 III-1300。",
+    rank: 42,
   },
   {
     id: "shzvg",
