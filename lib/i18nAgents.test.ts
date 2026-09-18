@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { LANG_OPTIONS } from "./i18n";
 import { agentGuide } from "./i18nAgents";
@@ -74,5 +76,17 @@ describe("agent guide copy", () => {
       /悉尼|Sydney|Sídney|Sidney|铁路|railway|ferrocarril|demiryolu|железн|Wilson|周晓冬/i,
     );
     expect(blob).not.toMatch(/CZIII|三相真空上限|vacuum ceiling/);
+  });
+
+  it("step 1 zip and hub links go to the SkillHub skill page", () => {
+    const src = readFileSync(
+      resolve(__dirname, "../components/AgentsGuide.tsx"),
+      "utf8",
+    );
+    expect(src).toContain(
+      "https://skillhub.cn/skills/indiv-erict16/huaming-oltc-selector",
+    );
+    expect(src).not.toContain("skillhub.cn/@indiv");
+    expect(src).not.toContain("archive/refs/heads/main.zip");
   });
 });

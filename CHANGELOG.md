@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `/agents` SkillHub page and zip links both go to `https://skillhub.cn/skills/indiv-erict16/huaming-oltc-selector` (the old `@indiv-erict16` URL and GitHub zip were wrong).
 - Desktop changelog popover sits 16px left of the form card, with the same light border as the cards.
 - Result card clips the stale banner to the 10px radius so the cream strip no longer pokes out at the corners.
 - Drop the false 1.2.9 note that a step-voltage menu gained 4500 / 5000 / 6000 V. First paint uses tap % and derives Ust; the volt picker is the Um-mode fallback only.

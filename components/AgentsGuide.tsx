@@ -14,10 +14,10 @@ import { setAppLang } from "@/lib/i18n";
 import { agentGuide } from "@/lib/i18nAgents";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-const ZIP = "https://github.com/erict16/huaming-oltc-selector/archive/refs/heads/main.zip";
+const SKILL_PAGE =
+  "https://skillhub.cn/skills/indiv-erict16/huaming-oltc-selector";
 const INSTALL = "npx -y oltc-selector@1.2.9";
 const RUN = "npx -y oltc-selector@1.2.9 --iu 350 --um 40.5 --conn D --reg W --pm 8";
-const WB_PAGE = "https://skillhub.cn/@indiv-erict16/huaming-oltc-selector";
 const TYPE_OLTC = "CV2III-350Y/72.5-10193W";
 const TYPE_OCTC = "WSLIV-600Y/72.5-6x5A";
 const TYPE_DRY = "3xCZI-500/40.5-9";
@@ -115,11 +115,11 @@ export function AgentsGuide() {
             )}
             <p className="guide-alt">
               {c.s1alt}{" "}
-              <a href={ZIP} download="huaming-oltc-selector.zip">
+              <a href={SKILL_PAGE} target="_blank" rel="noreferrer">
                 {c.dl}
               </a>{" "}
               ·{" "}
-              <a href={WB_PAGE} target="_blank" rel="noreferrer">
+              <a href={SKILL_PAGE} target="_blank" rel="noreferrer">
                 {c.hub}
               </a>
             </p>
