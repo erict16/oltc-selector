@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { AdminEntry } from "@/components/AdminEntry";
 import { LangProvider } from "@/components/LangProvider";
 import { SiteFooter } from "@/components/SiteFooter";
 import "./globals.css";
@@ -61,7 +60,6 @@ export default function RootLayout({
             selector shell can flex-1 fill leftover height and center. */}
         <LangProvider initial="zh">
           <div className="flex min-h-dvh flex-col">
-            <AdminEntry />
             <main id="main" className="flex min-w-0 flex-1 flex-col">
               {children}
             </main>

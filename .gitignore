@@ -11,3 +11,5 @@ dist
 tsconfig.tsbuildinfo
 out
 pack
+lib/basePrices.data.json
+**/Base Price List*.xlsx

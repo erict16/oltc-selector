@@ -51,7 +51,7 @@ Minimum adequate — see `选型案例-答案.docx` in `docs/training/`:
 
 Compound fails when across-tap LI ≳ 200 kV (CV2 internal a). Then combined + grade letter.
 
-**Type existence:** emit only brochure types. CM / CM2 / CMD / SHZV / SDZV / SHZVG III is star-point Y — there is no `CM2III-…D` / `SDZVIII-…D`. Covering that duty with `3x…I-` is because the I type exists. Compound CV/CV2/SV and on-tank HWV III D are real types. **SHZVG has no extract in `docs/brochure-extracts/`; III-Y-only is assumed from the in-repo catalogue notes (same family as SHZV), not from a brochure PDF.** **SDZV axes come from `docs/brochure-extracts/SDZV_Dual_Break_Vacuum_OLTC-2024-11-13.txt` (技术数据 + 样本 11.13/2024). Do not copy the 2020 export booklet III-1300 / I-3000.** CM2/CM/CMD II list rows omit Y/D after current (`CM2II-500/72.5B`). OCTC rows must exist on the 2025 list (no `7x6E` @ 72.5, no `WSLIV-2000D/126`). Price-list Y/D same RMB is not a type.
+**Type existence:** emit only brochure types. CM / CM2 / CMD / SHZV / SDZV / SHZVG III is star-point Y — there is no `CM2III-…D` / `SDZVIII-…D`. Covering that duty with `3x…I-` is because the I type exists. Compound CV/CV2/SV and on-tank HWV III D are real types. **SHZVG has no extract in `docs/brochure-extracts/`; III-Y-only is assumed from the in-repo catalogue notes (same family as SHZV), not from a brochure PDF.** **SDZV axes come from `docs/brochure-extracts/SDZV_Dual_Break_Vacuum_OLTC-2024-11-13.txt` (技术数据 + 样本 11.13/2024). Do not copy the 2020 export booklet III-1300 / I-3000.** CM2/CM/CMD II list rows omit Y/D after current (`CM2II-500/72.5B`). OCTC rows must exist on the 2025 list (no `7x6E` @ 72.5, no `WSLIV-2000D/126`). A 2025 list Y/D alias is not a type.
 
 ## Do not
 

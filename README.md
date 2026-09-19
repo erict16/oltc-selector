@@ -68,13 +68,7 @@ npm run pack:cli
 
 GitHub Pages：`npm run build:gh`（`GH_PAGES=true`）。Vercel 根路径，不要设 `GH_PAGES`。
 
-内部看价仍在网页右上角「内部」（口令）。**CLI 包不含价表。** 本地 `.env.local`：
-
-```
-NEXT_PUBLIC_ADMIN_PASSWORD_SHA256=<sha256 hex of the password>
-```
-
-语言：中文、English、Tiếng Việt、Español、Türkçe、Русский。
+网页和 CLI 都不带价表。语言：中文、English、Tiếng Việt、Español、Türkçe、Русский。
 
 ## OS regression
 

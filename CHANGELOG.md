@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Drop list prices, market coefficients, FX conversion, and the internal login. The selector is type-only; no RMB in the repo.
 - Changelog popover: 「当前」sits on the version midline; kind chips line up with the version, not the note body.
 - Agent dock satellite: DeepSeek whale in place of 智谱.
 - `/agents` SkillHub page and zip links both go to `https://skillhub.cn/skills/indiv-erict16/huaming-oltc-selector` (the old `@indiv-erict16` URL and GitHub zip were wrong).
@@ -109,7 +110,7 @@ Workbench after 1.0.0: oil vs vacuum, estimated list prices, a spec plate, and t
 ### Price
 
 - Catalogue rows with no list price get a neighbour estimate (`~`). Still FOB Shanghai, no country coefficient.
-- Amounts read `RMB 160,800`, not 人民币.
+- Amounts used `RMB` plus grouped digits, not 人民币.
 
 ### Replay
 

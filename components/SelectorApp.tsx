@@ -5,7 +5,6 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 import {
   AdjustmentsHorizontalIcon,
@@ -49,12 +48,6 @@ import {
   type ParsedTapRange,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
-import { AltListAmount, ListPrice, useListFx } from "@/components/ListPrice";
-import {
-  getAdminSnapshot,
-  getServerAdmin,
-  subscribeAdmin,
-} from "@/lib/adminSession";
 import { useAppLang } from "@/components/LangProvider";
 import {
   currentLabel,
@@ -346,12 +339,6 @@ export function SelectorApp() {
   const resultPaneRef = useRef<HTMLElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const [paneMinH, setPaneMinH] = useState<number | undefined>(undefined);
-  const { currency, fx, setCurrency } = useListFx();
-  const admin = useSyncExternalStore(
-    subscribeAdmin,
-    getAdminSnapshot,
-    getServerAdmin,
-  );
 
   const isOctc = (input.dutyKind ?? "oltc") === "octc";
   const isLinear = isOctc || input.regulation === "linear";
@@ -1856,16 +1843,6 @@ export function SelectorApp() {
                     dutyMounting={input.mounting}
                   />
 
-                  {admin ? (
-                    <ListPrice
-                      model={primary.model}
-                      lang={lang}
-                      currency={currency}
-                      fx={fx}
-                      onCurrency={setCurrency}
-                    />
-                  ) : null}
-
                   {alts.length > 0 ? (
                     <div className="shrink-0 border-t border-[var(--color-rule)] px-4 py-2.5">
                       <button
@@ -1934,14 +1911,6 @@ export function SelectorApp() {
                                       </span>
                                     </button>
                                     <span className="flex shrink-0 items-center gap-1.5">
-                                      {admin ? (
-                                        <AltListAmount
-                                          model={r.model}
-                                          lang={lang}
-                                          currency={currency}
-                                          fx={fx}
-                                        />
-                                      ) : null}
                                       <button
                                         type="button"
                                         onClick={() => copyModel(r.model)}

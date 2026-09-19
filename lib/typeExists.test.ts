@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { lookupListPrice } from "./basePrices";
 import { listRowExists } from "./listIndex";
 import { SERIES } from "./catalog";
 import { selectOltc } from "./engine";
@@ -27,10 +26,9 @@ const COMPOUND_GRADE = /(?:CV2|CV|SV|CVT)III-\d+[YD]\/\d+(?:\.\d+)?[BCDE]/;
 const SINGLE_PHASE_YD = /(?:CM2|CM|CMD|SHZV|SDZV|SHZVG)I-\d+[YD]\//;
 const CM2_II_YD = /(?:CM2|CM|CMD)II-\d+[YD]\//;
 
-describe("commercialTypeExists (brochure oracle, not price-list Y/D twin)", () => {
-  it("rejects CM2III-…D even though the 2025 list aliases D to the Y price row", () => {
+describe("commercialTypeExists (brochure oracle, not list Y/D twin)", () => {
+  it("rejects CM2III-…D even if a 2025 list row aliases D to Y", () => {
     const fake = "CM2III-500D/170D-10193W";
-    expect(lookupListPrice(fake).found).toBe(true);
     expect(commercialTypeExists(fake)).toBe(false);
   });
 
@@ -157,7 +155,6 @@ describe("selectOltc never emits a non-brochure type", () => {
     );
     for (const r of missing.results) {
       expect(listRowExists(r.model), r.model).toBe(true);
-      expect(lookupListPrice(r.model).found, r.model).toBe(true);
     }
 
     const eSize = selectOltc({
@@ -179,7 +176,6 @@ describe("selectOltc never emits a non-brochure type", () => {
     expect(eSize.results.every((r) => !r.model.includes("7x6E"))).toBe(true);
     for (const r of eSize.results) {
       expect(listRowExists(r.model), r.model).toBe(true);
-      expect(lookupListPrice(r.model).found, r.model).toBe(true);
     }
   });
 

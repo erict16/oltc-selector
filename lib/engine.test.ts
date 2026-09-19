@@ -369,7 +369,7 @@ describe("selectOltc fixtures", () => {
     expect(out.results[0].model).not.toMatch(/I-\d+[YD]\//);
   });
 
-  it("one SHZV-1000 beats 3×CM2I when both cover (price list)", () => {
+  it("one SHZV-1000 beats 3×CM2I when both cover", () => {
     const out = selectOltc({
       mounting: "in_tank",
       medium: "oil_vacuum",

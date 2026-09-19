@@ -27,6 +27,9 @@ describe("selection-only pack", () => {
     expect(js.includes('"listRmb"')).toBe(false);
     expect(js.includes("basePrices.data.json")).toBe(false);
     expect(js.includes("anthonyQs")).toBe(false);
+    expect(existsSync(path.join(root, "lib", "basePrices.data.json"))).toBe(
+      false,
+    );
     expect(js).not.toMatch(/coeff|CNY|USD/);
 
     const argv = ["--iu", "350", "--um", "40.5", "--conn", "D", "--reg", "W", "--pm", "8"];

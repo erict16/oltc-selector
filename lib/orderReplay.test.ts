@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { selectOltc } from "./engine";
-import { lookupListPrice } from "./basePrices";
+import { listRowExists } from "./listIndex";
+import { commercialTypeExists } from "./typeExists";
 import {
   ORDER_REPLAY,
   ORDER_REPLAY_SKIPPED,
@@ -144,7 +145,7 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
     expect(s.skip).toBeGreaterThan(0);
   });
 
-  it("HWV / WSL replay rows exist; list lookup hits those types", () => {
+  it("HWV / WSL replay rows exist as commercial types", () => {
     const hwv = ORDER_REPLAY.filter((c) =>
       parseTypeString(c.expectPrimary)?.family === "HWV",
     );
@@ -163,23 +164,13 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
         /^WSLIV-800Y\/170-6x5[AB]$/.test(c.expectPrimary),
       ),
     ).toBe(true);
-    expect(lookupListPrice("HWVIII-400Y/72.5-10193W")).toMatchObject({
-      found: true,
-      listRmb: 225000,
-    });
-    expect(lookupListPrice("HWVIII-800D/40.5-10193W")).toMatchObject({
-      found: true,
-    });
-    expect(lookupListPrice("WSLIV-800Y/170-6x5B")).toMatchObject({
-      found: true,
-    });
-    expect(lookupListPrice("CV2III-350D/40.5-10193W")).toMatchObject({
-      found: true,
-      listRmb: 148700,
-    });
+    expect(commercialTypeExists("HWVIII-400Y/72.5-10193W")).toBe(true);
+    expect(commercialTypeExists("HWVIII-800D/40.5-10193W")).toBe(true);
+    expect(listRowExists("WSLIV-800Y/170-6x5B")).toBe(true);
+    expect(commercialTypeExists("CV2III-350D/40.5-10193W")).toBe(true);
   });
 
-  it("2026 OS-style #1 and other options have 2025 list rows", () => {
+  it("2026 OS-style #1 and other options are commercial types", () => {
     const duties = [
       {
         mounting: "in_tank" as const,
@@ -226,8 +217,7 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
       expect(out.ok).toBe(true);
       for (const r of out.results.slice(0, 4)) {
         if (r.unitCount > 1) continue;
-        const hit = lookupListPrice(r.model);
-        expect(hit.found, r.model).toBe(true);
+        expect(commercialTypeExists(r.model), r.model).toBe(true);
       }
     }
   });

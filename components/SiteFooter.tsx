@@ -49,7 +49,7 @@ export function SiteFooter() {
     };
   }, [mounted]);
 
-  if (/\/(privacy|terms|login|agents|changelog)\/?$/.test(pathname)) {
+  if (/\/(privacy|terms|agents|changelog)\/?$/.test(pathname)) {
     return null;
   }
 

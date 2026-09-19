@@ -227,14 +227,14 @@ function seriesMatchesMedium(s: SeriesDef, input: SelectInput): boolean {
 /**
  * Higher score = better primary pick.
  *
- * Commercial min-adequate (Base Price List 2025 + sales practice):
+ * Commercial min-adequate (2025 catalogue + sales practice):
  *   1. Family: CV2 → CM2 → SHZV → SDZV → SHZVG
  *      (never SHZV-400 over CV2/CM2 on exact I; SDZV only when SHZV Ust/capacity is short).
  *   2. **Only emit a type that exists in the brochure.**
  *      CM2III-…D is not a type → do not emit it. CV2III-…D and HWVIII-…D exist.
  *      3× I is used when that single-phase type exists and III does not cover
  *      (missing III connection, or Iᵤ above III max).
- *      One legal III still beats 3× when both exist (Y price: SHZV-1000 vs 3×CM2I-800).
+ *      One legal III still beats 3× when both exist (SHZV-1000 vs 3×CM2I-800).
  *   3. Mild tighter catalogue current / Um.
  */
 function adequacyScore(
@@ -1079,8 +1079,7 @@ export const FIXTURES = {
   },
   /**
    * Training sheet: 220 MVA Δ, I≈626 → 3×CM2I-800.
-   * Combined III is star-point only — do not emit SHZVIII-1000D even
-   * though a 1000 A III would be cheaper on the Y price row.
+   * Combined III is star-point only — do not emit SHZVIII-1000D.
    */
   case7Cm2I800: {
     input: {
