@@ -170,14 +170,17 @@ function CaptionSub({
 const controlClass =
   "h-10 w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
 
+const fieldCaptionClass =
+  "pointer-events-none absolute top-full right-0 mt-1 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]";
+
 function Field({
   label,
   tip,
   meta,
   children,
   className,
-  afterLabel,
   action,
+  actionKind = "caption",
   as = "label",
 }: {
   label: string;
@@ -186,10 +189,10 @@ function Field({
   meta?: string;
   children: React.ReactNode;
   className?: string;
-  /** Directly after the title (capacity / current pills). */
-  afterLabel?: React.ReactNode;
-  /** Far-right of the label row (Imax / Um / Ust / 19 位) */
+  /** Far-right of the label row */
   action?: React.ReactNode;
+  /** caption = Imax/Um/Ust; plain = capacity/current pills */
+  actionKind?: "caption" | "plain";
   /** Button groups must not use <label> — a click on the tip would fire the first button. */
   as?: "label" | "div";
 }) {
@@ -213,7 +216,6 @@ function Field({
             ),
           )}
         </span>
-        {afterLabel ? <span className="shrink-0">{afterLabel}</span> : null}
         {meta ? (
           <span className="min-w-0 truncate text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]">
             {meta}
@@ -222,7 +224,13 @@ function Field({
           <span className="min-w-0 flex-1" />
         )}
         {action ? (
-          <span className="ml-auto shrink-0 whitespace-nowrap text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]">
+          <span
+            className={cx(
+              "ml-auto shrink-0",
+              actionKind === "caption" &&
+                "whitespace-nowrap text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]",
+            )}
+          >
             {action}
           </span>
         ) : null}
@@ -872,7 +880,8 @@ export function SelectorApp() {
                   ? t(lang, "transformerMva")
                   : t(lang, "throughCurrent")
               }
-              afterLabel={
+              actionKind="plain"
+              action={
                 <ModeSeg
                   ariaLabel={t(lang, "currentModeAria")}
                   value={currentMode}
@@ -882,16 +891,6 @@ export function SelectorApp() {
                   ]}
                   onChange={setCurrentEntry}
                 />
-              }
-              action={
-                currentMode === "capacity" && derivedOk && derivedA != null ? (
-                  <CaptionSub
-                    name="I"
-                    sub="max"
-                    value={formatAmps(derivedA)}
-                    unit="A"
-                  />
-                ) : undefined
               }
             >
               {currentMode === "capacity" ? (
@@ -962,6 +961,16 @@ export function SelectorApp() {
                     )) ? (
                     <span className="pointer-events-none absolute top-0 right-3 flex h-10 items-center text-[0.75rem] text-[var(--color-muted)]">
                       MVA
+                    </span>
+                  ) : null}
+                  {derivedOk && derivedA != null ? (
+                    <span className={fieldCaptionClass}>
+                      <CaptionSub
+                        name="I"
+                        sub="max"
+                        value={formatAmps(derivedA)}
+                        unit="A"
+                      />
                     </span>
                   ) : null}
                 </div>
