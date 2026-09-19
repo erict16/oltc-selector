@@ -140,9 +140,6 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-const fieldCaptionClass =
-  "pointer-events-none absolute top-full right-0 mt-1 text-right text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]";
-
 function CaptionSub({
   name,
   sub,
@@ -188,7 +185,7 @@ function Field({
   meta?: string;
   children: React.ReactNode;
   className?: string;
-  /** Right-side of the label row (e.g. 容量 / 电流) */
+  /** Right-side of the label row (Imax / Um / Ust / 19 位) */
   action?: React.ReactNode;
   /** Button groups must not use <label> — a click on the tip would fire the first button. */
   as?: "label" | "div";
@@ -221,7 +218,7 @@ function Field({
           <span className="min-w-0 flex-1" />
         )}
         {action ? (
-          <span className="ml-auto shrink-0 whitespace-nowrap text-[0.75rem] leading-none">
+          <span className="ml-auto shrink-0 whitespace-nowrap text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]">
             {action}
           </span>
         ) : null}
@@ -872,19 +869,18 @@ export function SelectorApp() {
                   : t(lang, "throughCurrent")
               }
               action={
-                <ModeSeg
-                  ariaLabel={t(lang, "currentModeAria")}
-                  value={currentMode}
-                  options={[
-                    { id: "capacity", label: t(lang, "capacityBtn") },
-                    { id: "current", label: t(lang, "currentBtn") },
-                  ]}
-                  onChange={setCurrentEntry}
-                />
+                currentMode === "capacity" && derivedOk && derivedA != null ? (
+                  <CaptionSub
+                    name="I"
+                    sub="max"
+                    value={formatAmps(derivedA)}
+                    unit="A"
+                  />
+                ) : undefined
               }
             >
-              {currentMode === "capacity" ? (
-                <>
+              <div>
+                {currentMode === "capacity" ? (
                   <div className="relative">
                     {mvaCustom ||
                     (transformerMva > 0 &&
@@ -956,36 +952,50 @@ export function SelectorApp() {
                         MVA
                       </span>
                     ) : null}
-                    {derivedOk && derivedA != null ? (
-                      <span className={fieldCaptionClass}>
-                        <CaptionSub
-                          name="I"
-                          sub="max"
-                          value={formatAmps(derivedA)}
-                          unit="A"
-                        />
-                      </span>
-                    ) : null}
                   </div>
-                </>
-              ) : (
-                <select
-                  className={controlClass}
-                  value={String(input.throughCurrentA)}
-                  onChange={(e) =>
-                    patch("throughCurrentA", Number(e.target.value))
-                  }
-                >
-                  {CURRENT_MENU.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {currentLabel(lang, c.labelZh, c.labelEn)}
-                    </option>
-                  ))}
-                </select>
-              )}
+                ) : (
+                  <select
+                    className={controlClass}
+                    value={String(input.throughCurrentA)}
+                    onChange={(e) =>
+                      patch("throughCurrentA", Number(e.target.value))
+                    }
+                  >
+                    {CURRENT_MENU.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {currentLabel(lang, c.labelZh, c.labelEn)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                <div className="mt-1 flex justify-end">
+                  <ModeSeg
+                    ariaLabel={t(lang, "currentModeAria")}
+                    value={currentMode}
+                    options={[
+                      { id: "capacity", label: t(lang, "capacityBtn") },
+                      { id: "current", label: t(lang, "currentBtn") },
+                    ]}
+                    onChange={setCurrentEntry}
+                  />
+                </div>
+              </div>
             </Field>
 
-            <Field as="div" label={t(lang, "umWinding")}>
+            <Field
+              as="div"
+              label={t(lang, "umWinding")}
+              action={
+                umKvShow != null ? (
+                  <CaptionSub
+                    name="U"
+                    sub="m"
+                    value={String(umKvShow)}
+                    unit=" kV"
+                  />
+                ) : undefined
+              }
+            >
               <div className="relative">
                 {kvCustom ||
                 (windingRatedKv > 0 &&
@@ -1047,16 +1057,6 @@ export function SelectorApp() {
                   )) ? (
                   <span className="pointer-events-none absolute top-0 right-3 flex h-10 items-center text-[0.75rem] text-[var(--color-muted)]">
                     kV
-                  </span>
-                ) : null}
-                {umKvShow != null ? (
-                  <span className={fieldCaptionClass}>
-                    <CaptionSub
-                      name="U"
-                      sub="m"
-                      value={String(umKvShow)}
-                      unit=" kV"
-                    />
                   </span>
                 ) : null}
               </div>
@@ -1121,29 +1121,41 @@ export function SelectorApp() {
             )}
 
             {isLinear ? null : (
-              <Field as="div" label={t(lang, "pmSteps")}>
-                <div className="relative">
-                  <select
-                    className={controlClass}
-                    value={pm}
-                    onChange={(e) => applyPm(e.target.value)}
-                  >
-                    <option value="">{t(lang, "customPos")}</option>
-                    {pmOptions.map((n) => (
-                      <option key={n} value={String(n)}>
-                        ±{n}
-                        {lang === "zh" ? " 级" : lang === "ru" ? " ст." : ""}
-                      </option>
-                    ))}
-                  </select>
-                  {posHint && pm ? (
-                    <span className={fieldCaptionClass}>{posHint}</span>
-                  ) : null}
-                </div>
+              <Field
+                as="div"
+                label={t(lang, "pmSteps")}
+                action={posHint && pm ? posHint : undefined}
+              >
+                <select
+                  className={controlClass}
+                  value={pm}
+                  onChange={(e) => applyPm(e.target.value)}
+                >
+                  <option value="">{t(lang, "customPos")}</option>
+                  {pmOptions.map((n) => (
+                    <option key={n} value={String(n)}>
+                      ±{n}
+                      {lang === "zh" ? " 级" : lang === "ru" ? " ст." : ""}
+                    </option>
+                  ))}
+                </select>
               </Field>
             )}
 
-            <Field as="div" label={t(lang, "stepPercent")}>
+            <Field
+              as="div"
+              label={t(lang, "stepPercent")}
+              action={
+                ustV != null ? (
+                  <CaptionSub
+                    name="U"
+                    sub="st"
+                    value={String(Math.round(ustV))}
+                    unit="V"
+                  />
+                ) : undefined
+              }
+            >
               <div className="relative">
                 {stepPctCustom ||
                 (stepPercentPct > 0 &&
@@ -1215,24 +1227,21 @@ export function SelectorApp() {
                     %
                   </span>
                 ) : null}
-                {ustV != null ? (
-                  <span className={fieldCaptionClass}>
-                    <CaptionSub
-                      name="U"
-                      sub="st"
-                      value={String(Math.round(ustV))}
-                      unit="V"
-                    />
-                  </span>
-                ) : null}
               </div>
             </Field>
 
             {isLinear || !pm ? (
               <>
-                <Field as="div" label={t(lang, "positions")}>
-                  <div className="relative">
-                    <div className="grid grid-cols-2 gap-2">
+                <Field
+                  as="div"
+                  label={t(lang, "positions")}
+                  action={
+                    input.positions != null
+                      ? t(lang, "posHint", { n: input.positions })
+                      : undefined
+                  }
+                >
+                  <div className="grid grid-cols-2 gap-2">
                       <select
                         className={controlClass}
                         value={tapPlus > 0 ? String(tapPlus) : ""}
@@ -1268,12 +1277,6 @@ export function SelectorApp() {
                         ))}
                       </select>
                     </div>
-                    {input.positions != null ? (
-                      <span className={fieldCaptionClass}>
-                        {t(lang, "posHint", { n: input.positions })}
-                      </span>
-                    ) : null}
-                  </div>
                 </Field>
               </>
             ) : null}

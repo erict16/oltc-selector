@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- 「19 位」sits under the ± steps field, same caption as Imax / Um / Ust.
+- Imax / Um / Ust / 19 位 sit on the label row (top-right). Capacity/current pills sit under the input.
 - Drop list prices, market coefficients, FX conversion, and the internal login. The selector is type-only; no RMB in the repo.
 - Changelog popover: 「当前」sits on the version midline; kind chips line up with the version, not the note body.
 - Agent dock satellite: DeepSeek whale in place of 智谱.
