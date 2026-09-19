@@ -246,7 +246,7 @@ function ModeSeg<T extends string>({
 }) {
   return (
     <div
-      className="inline-flex h-7 box-border items-stretch overflow-hidden rounded-full bg-[var(--color-soft)] p-0.5"
+      className="inline-flex h-6 box-border items-stretch overflow-hidden rounded-full bg-[var(--color-soft)] p-px"
       role="group"
       aria-label={ariaLabel}
     >
@@ -259,7 +259,7 @@ function ModeSeg<T extends string>({
             aria-pressed={on}
             onClick={() => onChange(opt.id)}
             className={cx(
-              "inline-flex h-full items-center rounded-full px-2.5 text-[0.6875rem] leading-none whitespace-nowrap transition-colors duration-150",
+              "inline-flex h-full items-center rounded-full px-2 text-[0.625rem] leading-none whitespace-nowrap transition-colors duration-150",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
               on
                 ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
@@ -860,7 +860,7 @@ export function SelectorApp() {
             </div>
           </div>
 
-          <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
+          <div className="grid gap-x-4 gap-y-8 sm:grid-cols-2 sm:gap-y-0">
             <Field
               as="div"
               label={
@@ -879,9 +879,9 @@ export function SelectorApp() {
                 ) : undefined
               }
             >
-              <div>
+              <div className="relative">
                 {currentMode === "capacity" ? (
-                  <div className="relative">
+                  <>
                     {mvaCustom ||
                     (transformerMva > 0 &&
                       !(MVA_OPTIONS as readonly number[]).includes(
@@ -952,7 +952,7 @@ export function SelectorApp() {
                         MVA
                       </span>
                     ) : null}
-                  </div>
+                  </>
                 ) : (
                   <select
                     className={controlClass}
@@ -968,7 +968,7 @@ export function SelectorApp() {
                     ))}
                   </select>
                 )}
-                <div className="mt-1 flex justify-end">
+                <div className="absolute top-full right-0 z-10 mt-1">
                   <ModeSeg
                     ariaLabel={t(lang, "currentModeAria")}
                     value={currentMode}
@@ -1061,7 +1061,9 @@ export function SelectorApp() {
                 ) : null}
               </div>
             </Field>
+          </div>
 
+          <div className="mt-7 grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <Field
               label={t(lang, "connection")}
             >
