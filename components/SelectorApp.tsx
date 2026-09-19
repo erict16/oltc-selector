@@ -177,6 +177,7 @@ function Field({
   children,
   className,
   action,
+  actionKind = "caption",
   as = "label",
 }: {
   label: string;
@@ -185,8 +186,10 @@ function Field({
   meta?: string;
   children: React.ReactNode;
   className?: string;
-  /** Far-right of the label row (Imax / Um / Ust / 19 位) */
+  /** Far-right of the label row */
   action?: React.ReactNode;
+  /** caption = Imax/Um/Ust; plain = capacity/current pills */
+  actionKind?: "caption" | "plain";
   /** Button groups must not use <label> — a click on the tip would fire the first button. */
   as?: "label" | "div";
 }) {
@@ -218,7 +221,13 @@ function Field({
           <span className="min-w-0 flex-1" />
         )}
         {action ? (
-          <span className="ml-auto shrink-0 whitespace-nowrap text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]">
+          <span
+            className={cx(
+              "ml-auto shrink-0",
+              actionKind === "caption" &&
+                "whitespace-nowrap text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]",
+            )}
+          >
             {action}
           </span>
         ) : null}
@@ -828,20 +837,9 @@ export function SelectorApp() {
           }}
         >
           <div className="mb-4 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex shrink-0 items-center gap-2">
-              <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
-                {t(lang, "presets")}
-              </h2>
-              <ModeSeg
-                ariaLabel={t(lang, "currentModeAria")}
-                value={currentMode}
-                options={[
-                  { id: "capacity", label: t(lang, "capacityBtn") },
-                  { id: "current", label: t(lang, "currentBtn") },
-                ]}
-                onChange={setCurrentEntry}
-              />
-            </div>
+            <h2 className="shrink-0 font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
+              {t(lang, "presets")}
+            </h2>
             <div
               className="grid w-full grid-cols-3 gap-1.5 sm:w-[18.5rem] sm:shrink-0"
               role="group"
@@ -879,15 +877,17 @@ export function SelectorApp() {
                   ? t(lang, "transformerMva")
                   : t(lang, "throughCurrent")
               }
+              actionKind="plain"
               action={
-                currentMode === "capacity" && derivedOk && derivedA != null ? (
-                  <CaptionSub
-                    name="I"
-                    sub="max"
-                    value={formatAmps(derivedA)}
-                    unit="A"
-                  />
-                ) : undefined
+                <ModeSeg
+                  ariaLabel={t(lang, "currentModeAria")}
+                  value={currentMode}
+                  options={[
+                    { id: "capacity", label: t(lang, "capacityBtn") },
+                    { id: "current", label: t(lang, "currentBtn") },
+                  ]}
+                  onChange={setCurrentEntry}
+                />
               }
             >
               {currentMode === "capacity" ? (
@@ -1059,7 +1059,18 @@ export function SelectorApp() {
             </Field>
 
             <Field
+              as="div"
               label={t(lang, "connection")}
+              action={
+                currentMode === "capacity" && derivedOk && derivedA != null ? (
+                  <CaptionSub
+                    name="I"
+                    sub="max"
+                    value={formatAmps(derivedA)}
+                    unit="A"
+                  />
+                ) : undefined
+              }
             >
               <select
                 className={controlClass}
