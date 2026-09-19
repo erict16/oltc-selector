@@ -188,7 +188,7 @@ function Field({
   meta?: string;
   children: React.ReactNode;
   className?: string;
-  /** Right-side of the label row (e.g. →19位 next to ±级数) */
+  /** Right-side of the label row (e.g. 容量 / 电流) */
   action?: React.ReactNode;
   /** Button groups must not use <label> — a click on the tip would fire the first button. */
   as?: "label" | "div";
@@ -1121,33 +1121,25 @@ export function SelectorApp() {
             )}
 
             {isLinear ? null : (
-              <Field
-                as="div"
-                className="relative"
-                label={t(lang, "pmSteps")}
-                action={
-                  posHint && pm ? (
-                    <span className="font-medium tabular-nums text-[var(--color-muted)]">
-                      {posHint}
-                    </span>
-                  ) : undefined
-                }
-              >
-                <select
-                  className={controlClass}
-                  value={pm}
-                  onChange={(e) => applyPm(e.target.value)}
-                >
-                  <option value="">
-                    {t(lang, "customPos")}
-                  </option>
-                  {pmOptions.map((n) => (
-                    <option key={n} value={String(n)}>
-                      ±{n}
-                      {lang === "zh" ? " 级" : lang === "ru" ? " ст." : ""}
-                    </option>
-                  ))}
-                </select>
+              <Field as="div" label={t(lang, "pmSteps")}>
+                <div className="relative">
+                  <select
+                    className={controlClass}
+                    value={pm}
+                    onChange={(e) => applyPm(e.target.value)}
+                  >
+                    <option value="">{t(lang, "customPos")}</option>
+                    {pmOptions.map((n) => (
+                      <option key={n} value={String(n)}>
+                        ±{n}
+                        {lang === "zh" ? " 级" : lang === "ru" ? " ст." : ""}
+                      </option>
+                    ))}
+                  </select>
+                  {posHint && pm ? (
+                    <span className={fieldCaptionClass}>{posHint}</span>
+                  ) : null}
+                </div>
               </Field>
             )}
 
@@ -1238,52 +1230,49 @@ export function SelectorApp() {
 
             {isLinear || !pm ? (
               <>
-                <Field
-                  as="div"
-                  label={t(lang, "positions")}
-                  action={
-                    input.positions != null ? (
-                      <span className="font-medium tabular-nums text-[var(--color-muted)]">
+                <Field as="div" label={t(lang, "positions")}>
+                  <div className="relative">
+                    <div className="grid grid-cols-2 gap-2">
+                      <select
+                        className={controlClass}
+                        value={tapPlus > 0 ? String(tapPlus) : ""}
+                        onChange={(e) => {
+                          const plus = Number(e.target.value);
+                          setTapPlus(plus);
+                          touch();
+                          commitTapRange(plus, tapMinus, stepPercentPct);
+                        }}
+                        aria-label="+"
+                      >
+                        {TAP_SIDE_OPTIONS.map((n) => (
+                          <option key={`p${n}`} value={String(n)}>
+                            +{n}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        className={controlClass}
+                        value={tapMinus > 0 ? String(tapMinus) : ""}
+                        onChange={(e) => {
+                          const minus = Number(e.target.value);
+                          setTapMinus(minus);
+                          touch();
+                          commitTapRange(tapPlus, minus, stepPercentPct);
+                        }}
+                        aria-label="−"
+                      >
+                        {TAP_SIDE_OPTIONS.map((n) => (
+                          <option key={`m${n}`} value={String(n)}>
+                            −{n}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {input.positions != null ? (
+                      <span className={fieldCaptionClass}>
                         {t(lang, "posHint", { n: input.positions })}
                       </span>
-                    ) : undefined
-                  }
-                >
-                  <div className="grid grid-cols-2 gap-2">
-                    <select
-                      className={controlClass}
-                      value={tapPlus > 0 ? String(tapPlus) : ""}
-                      onChange={(e) => {
-                        const plus = Number(e.target.value);
-                        setTapPlus(plus);
-                        touch();
-                        commitTapRange(plus, tapMinus, stepPercentPct);
-                      }}
-                      aria-label="+"
-                    >
-                      {TAP_SIDE_OPTIONS.map((n) => (
-                        <option key={`p${n}`} value={String(n)}>
-                          +{n}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      className={controlClass}
-                      value={tapMinus > 0 ? String(tapMinus) : ""}
-                      onChange={(e) => {
-                        const minus = Number(e.target.value);
-                        setTapMinus(minus);
-                        touch();
-                        commitTapRange(tapPlus, minus, stepPercentPct);
-                      }}
-                      aria-label="−"
-                    >
-                      {TAP_SIDE_OPTIONS.map((n) => (
-                        <option key={`m${n}`} value={String(n)}>
-                          −{n}
-                        </option>
-                      ))}
-                    </select>
+                    ) : null}
                   </div>
                 </Field>
               </>
