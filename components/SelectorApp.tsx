@@ -246,7 +246,7 @@ function ModeSeg<T extends string>({
 }) {
   return (
     <div
-      className="inline-flex h-6 box-border items-stretch overflow-hidden rounded-full bg-[var(--color-soft)] p-px"
+      className="inline-flex h-7 box-border shrink-0 items-stretch overflow-hidden rounded-full bg-[var(--color-soft)] p-0.5"
       role="group"
       aria-label={ariaLabel}
     >
@@ -259,7 +259,7 @@ function ModeSeg<T extends string>({
             aria-pressed={on}
             onClick={() => onChange(opt.id)}
             className={cx(
-              "inline-flex h-full items-center rounded-full px-2 text-[0.625rem] leading-none whitespace-nowrap transition-colors duration-150",
+              "inline-flex h-full items-center rounded-full px-2.5 text-[0.6875rem] leading-none whitespace-nowrap transition-colors duration-150",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
               on
                 ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
@@ -860,7 +860,7 @@ export function SelectorApp() {
             </div>
           </div>
 
-          <div className="grid gap-x-4 gap-y-8 sm:grid-cols-2 sm:gap-y-0">
+          <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <Field
               as="div"
               label={
@@ -879,106 +879,108 @@ export function SelectorApp() {
                 ) : undefined
               }
             >
-              <div className="relative">
-                {currentMode === "capacity" ? (
-                  <>
-                    {mvaCustom ||
-                    (transformerMva > 0 &&
-                      !(MVA_OPTIONS as readonly number[]).includes(
-                        transformerMva,
-                      )) ? (
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        min={0}
-                        step={0.1}
-                        className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                        value={transformerMva > 0 ? String(transformerMva) : ""}
-                        placeholder={t(lang, "mvaPlaceholder")}
-                        onChange={(e) => {
-                          const raw = e.target.value;
-                          if (raw === "") {
-                            setTransformerMva(0);
+              <div className="flex items-center gap-2">
+                <div className="relative min-w-0 flex-1">
+                  {currentMode === "capacity" ? (
+                    <>
+                      {mvaCustom ||
+                      (transformerMva > 0 &&
+                        !(MVA_OPTIONS as readonly number[]).includes(
+                          transformerMva,
+                        )) ? (
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min={0}
+                          step={0.1}
+                          className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                          value={
+                            transformerMva > 0 ? String(transformerMva) : ""
+                          }
+                          placeholder={t(lang, "mvaPlaceholder")}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            if (raw === "") {
+                              setTransformerMva(0);
+                              touch();
+                              return;
+                            }
+                            const n = Number(raw);
+                            if (!Number.isFinite(n) || n < 0) return;
+                            setTransformerMva(n);
                             touch();
-                            return;
+                          }}
+                          onBlur={() => {
+                            if (
+                              (MVA_OPTIONS as readonly number[]).includes(
+                                transformerMva,
+                              )
+                            ) {
+                              setMvaCustom(false);
+                            }
+                          }}
+                        />
+                      ) : (
+                        <select
+                          className={controlClass}
+                          value={
+                            transformerMva > 0 ? String(transformerMva) : ""
                           }
-                          const n = Number(raw);
-                          if (!Number.isFinite(n) || n < 0) return;
-                          setTransformerMva(n);
-                          touch();
-                        }}
-                        onBlur={() => {
-                          if (
-                            (MVA_OPTIONS as readonly number[]).includes(
-                              transformerMva,
-                            )
-                          ) {
+                          onChange={(e) => {
+                            if (e.target.value === "__custom__") {
+                              setMvaCustom(true);
+                              return;
+                            }
+                            setTransformerMva(Number(e.target.value));
                             setMvaCustom(false);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <select
-                        className={controlClass}
-                        value={
-                          transformerMva > 0 ? String(transformerMva) : ""
-                        }
-                        onChange={(e) => {
-                          if (e.target.value === "__custom__") {
-                            setMvaCustom(true);
-                            return;
-                          }
-                          setTransformerMva(Number(e.target.value));
-                          setMvaCustom(false);
-                          touch();
-                        }}
-                      >
-                        <option value="__custom__">
-                          {t(lang, "custom")}
-                        </option>
-                        {MVA_OPTIONS.map((n) => (
-                          <option key={n} value={String(n)}>
-                            {n} MVA
+                            touch();
+                          }}
+                        >
+                          <option value="__custom__">
+                            {t(lang, "custom")}
                           </option>
-                        ))}
-                      </select>
-                    )}
-                    {mvaCustom ||
-                    (transformerMva > 0 &&
-                      !(MVA_OPTIONS as readonly number[]).includes(
-                        transformerMva,
-                      )) ? (
-                      <span className="pointer-events-none absolute top-0 right-3 flex h-10 items-center text-[0.75rem] text-[var(--color-muted)]">
-                        MVA
-                      </span>
-                    ) : null}
-                  </>
-                ) : (
-                  <select
-                    className={controlClass}
-                    value={String(input.throughCurrentA)}
-                    onChange={(e) =>
-                      patch("throughCurrentA", Number(e.target.value))
-                    }
-                  >
-                    {CURRENT_MENU.map((c) => (
-                      <option key={c.value} value={c.value}>
-                        {currentLabel(lang, c.labelZh, c.labelEn)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <div className="absolute top-full right-0 z-10 mt-1">
-                  <ModeSeg
-                    ariaLabel={t(lang, "currentModeAria")}
-                    value={currentMode}
-                    options={[
-                      { id: "capacity", label: t(lang, "capacityBtn") },
-                      { id: "current", label: t(lang, "currentBtn") },
-                    ]}
-                    onChange={setCurrentEntry}
-                  />
+                          {MVA_OPTIONS.map((n) => (
+                            <option key={n} value={String(n)}>
+                              {n} MVA
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      {mvaCustom ||
+                      (transformerMva > 0 &&
+                        !(MVA_OPTIONS as readonly number[]).includes(
+                          transformerMva,
+                        )) ? (
+                        <span className="pointer-events-none absolute top-0 right-3 flex h-10 items-center text-[0.75rem] text-[var(--color-muted)]">
+                          MVA
+                        </span>
+                      ) : null}
+                    </>
+                  ) : (
+                    <select
+                      className={controlClass}
+                      value={String(input.throughCurrentA)}
+                      onChange={(e) =>
+                        patch("throughCurrentA", Number(e.target.value))
+                      }
+                    >
+                      {CURRENT_MENU.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {currentLabel(lang, c.labelZh, c.labelEn)}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
+                <ModeSeg
+                  ariaLabel={t(lang, "currentModeAria")}
+                  value={currentMode}
+                  options={[
+                    { id: "capacity", label: t(lang, "capacityBtn") },
+                    { id: "current", label: t(lang, "currentBtn") },
+                  ]}
+                  onChange={setCurrentEntry}
+                />
               </div>
             </Field>
 
@@ -1061,9 +1063,7 @@ export function SelectorApp() {
                 ) : null}
               </div>
             </Field>
-          </div>
 
-          <div className="mt-7 grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <Field
               label={t(lang, "connection")}
             >
