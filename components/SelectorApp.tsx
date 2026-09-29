@@ -34,10 +34,10 @@ import {
 } from "@/lib/deriveUm";
 
 import {
-  pickOtherOptions,
-  ratingAlreadyLoose,
+  insuranceModel,
+  optionsWithInsurance,
+  primaryIsInsurance,
   selectOltc,
-  stepUpOf,
 } from "@/lib/engine";
 import { safetyKKeepsCapacity } from "@/lib/safetyK";
 import {
@@ -344,6 +344,7 @@ export function SelectorApp() {
   const [result, setResult] = useState<SelectOutput | null>(null);
   /** Through-current actually sent on the last successful sizing. */
   const [pickedDutyA, setPickedDutyA] = useState<number | null>(null);
+  const [pickedStepV, setPickedStepV] = useState(0);
   const [resultKey, setResultKey] = useState(0);
   const [hasRun, setHasRun] = useState(false);
   const [stale, setStale] = useState(false);
@@ -631,6 +632,7 @@ export function SelectorApp() {
       if ("error" in duty) {
         const msg = t(lang, duty.msgKey);
         setPickedDutyA(null);
+        setPickedStepV(0);
         setResult({
           ok: false,
           results: [],
@@ -644,6 +646,7 @@ export function SelectorApp() {
         return;
       }
       setPickedDutyA(duty.throughCurrentA);
+      setPickedStepV(duty.stepVoltageV > 0 ? duty.stepVoltageV : 0);
       const out = selectOltc(duty);
       setResult(out);
       setResultKey((k) => k + 1);
@@ -776,13 +779,18 @@ export function SelectorApp() {
   };
 
   const primary = result?.ok ? result.results[0] : null;
-  const stepUp =
-    primary && result?.ok ? stepUpOf(primary, result.results) : null;
   const loose =
     primary != null &&
     pickedDutyA != null &&
-    ratingAlreadyLoose(pickedDutyA, primary.currentA);
-  const alts = result?.ok ? pickOtherOptions(result.results, 3) : [];
+    primaryIsInsurance(primary, pickedDutyA, pickedStepV);
+  const alts =
+    result?.ok && pickedDutyA != null
+      ? optionsWithInsurance(result.results, pickedDutyA, pickedStepV, 3)
+      : [];
+  const insuranceAlt =
+    result?.ok && pickedDutyA != null
+      ? insuranceModel(result.results, pickedDutyA, pickedStepV)
+      : null;
   const idle = !hasRun || !result;
   const posHint =
     !isLinear && input.positions != null
@@ -1798,6 +1806,11 @@ export function SelectorApp() {
                         <p className="text-[0.75rem] font-medium text-[var(--color-accent)]">
                           {t(lang, loose ? "allRound" : "recommended")}
                         </p>
+                        {!loose ? (
+                          <p className="mt-0.5 text-[0.6875rem] leading-snug text-[var(--color-muted)]">
+                            {t(lang, "recommendedHint")}
+                          </p>
+                        ) : null}
                       </div>
                       <button
                         type="button"
@@ -1829,6 +1842,23 @@ export function SelectorApp() {
                     <p className="mt-2.5 min-w-0 font-mono text-[1.0625rem] leading-snug font-medium tracking-tight break-words text-[var(--color-ink)] sm:text-[1.1875rem]">
                       {primary.model}
                     </p>
+                    {voltageMode === "winding" ? (
+                      <p className="mt-1.5 text-[0.75rem] leading-snug text-[var(--color-muted)]">
+                        {t(
+                          lang,
+                          input.connection === "Y"
+                            ? "umResultStar"
+                            : "umResultLine",
+                          {
+                            rated: windingRatedKv,
+                            um: oltcUmFromRatedKv(
+                              windingRatedKv,
+                              input.connection,
+                            ),
+                          },
+                        )}
+                      </p>
+                    ) : null}
                   </div>
 
                   <ModelSpec
@@ -1897,8 +1927,9 @@ export function SelectorApp() {
                                         <span className="min-w-0 break-all font-mono text-[0.875rem] leading-snug text-[var(--color-ink)]">
                                           {r.model}
                                         </span>
-                                        {stepUp && r.model === stepUp.model && !loose ? (
-                                          <span className="shrink-0 rounded-full border border-[var(--color-rule-2)] px-1.5 py-0.5 text-[0.625rem] leading-none text-[var(--color-ink-2)]">
+                                        {insuranceAlt != null &&
+                                        r.model === insuranceAlt ? (
+                                          <span className="shrink-0 rounded-full border border-[var(--color-accent)] px-2 py-0.5 text-[0.6875rem] font-medium leading-none text-[var(--color-accent)]">
                                             {t(lang, "allRound")}
                                           </span>
                                         ) : null}
