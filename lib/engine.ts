@@ -853,20 +853,13 @@ export function selectOltc(input: SelectInput): SelectOutput {
 }
 
 /**
- * The minimum rating is already the insurance when its unused amps are at
- * least one catalogue step. `nextA` is the next current in the same family.
- * Display only: do not use this to pick a larger type.
+ * Display only. The smallest catalogue fit is already the insurance pick
+ * when the duty uses at most two thirds of that rating. Do not use this
+ * to choose a larger type.
  */
-export function ratingAlreadyLoose(
-  dutyA: number,
-  ratedA: number,
-  nextA: number | null,
-): boolean {
+export function ratingAlreadyLoose(dutyA: number, ratedA: number): boolean {
   if (!(dutyA > 0) || !(ratedA > dutyA)) return false;
-  const spare = ratedA - dutyA;
-  const step =
-    nextA != null && nextA > ratedA ? nextA - ratedA : ratedA / 2;
-  return spare + 1e-6 >= step;
+  return dutyA <= ratedA * (2 / 3) + 1e-6;
 }
 
 /** Same family / phase / unit count, next catalogue current above the primary. */

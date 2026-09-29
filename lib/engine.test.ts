@@ -34,13 +34,19 @@ import {
 } from "./tapCode";
 
 describe("ratingAlreadyLoose", () => {
-  it("keeps a fit inside one catalogue step as the minimum", () => {
-    expect(ratingAlreadyLoose(280, 350, 600)).toBe(false);
+  it("keeps a closer fit as the minimum", () => {
+    // 280 A is 80% of CV2 350. 250 A is 71%.
+    expect(ratingAlreadyLoose(280, 350)).toBe(false);
+    expect(ratingAlreadyLoose(250, 350)).toBe(false);
+    expect(ratingAlreadyLoose(350, 350)).toBe(false);
+    expect(ratingAlreadyLoose(0, 350)).toBe(false);
   });
 
-  it("calls the minimum the insurance once spare covers a whole step", () => {
-    expect(ratingAlreadyLoose(100, 350, 600)).toBe(true);
-    expect(ratingAlreadyLoose(0, 350, 600)).toBe(false);
+  it("calls the rating insurance once the duty is at most two thirds of it", () => {
+    // Two thirds of 350 A is 233.3 A. 200 A is 57%.
+    expect(ratingAlreadyLoose(200, 350)).toBe(true);
+    expect(ratingAlreadyLoose(100, 350)).toBe(true);
+    expect(ratingAlreadyLoose(350 * (2 / 3), 350)).toBe(true);
   });
 });
 

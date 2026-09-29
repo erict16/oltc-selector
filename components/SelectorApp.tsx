@@ -781,11 +781,7 @@ export function SelectorApp() {
   const loose =
     primary != null &&
     pickedDutyA != null &&
-    ratingAlreadyLoose(
-      pickedDutyA,
-      primary.currentA,
-      stepUp?.currentA ?? null,
-    );
+    ratingAlreadyLoose(pickedDutyA, primary.currentA);
   const alts = result?.ok ? pickOtherOptions(result.results, 3) : [];
   const idle = !hasRun || !result;
   const posHint =
