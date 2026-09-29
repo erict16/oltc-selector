@@ -924,10 +924,34 @@ export function primaryIsInsurance(
 }
 
 /**
+ * True when an eligible series still has a catalogue current strictly
+ * between the primary and the candidate, on the same phase. That candidate
+ * is then a later band, not the next step. Single-phase lists do not count
+ * against a three-phase primary.
+ */
+function catalogueCurrentBetween(
+  lowA: number,
+  highA: number,
+  phases: ModelResult["phases"],
+  seriesIds: Set<string>,
+): boolean {
+  for (const series of SERIES) {
+    if (!seriesIds.has(series.id)) continue;
+    const list = series.currents[phases];
+    if (!list) continue;
+    if (list.some((a) => a > lowA + 0.5 && a < highA - 0.5)) return true;
+  }
+  return false;
+}
+
+/**
  * Model that wears 综合保险方案 next to a true minimum.
  * Null when the primary itself is the insurance card.
- * Same-family next current first. Else the smallest higher current.
- * Same current at a higher Um is not insurance.
+ * Same-family next current first. Else the next current on the same phase
+ * and unit count, and only when no eligible series still lists a current
+ * in between. A higher-band floor (SHZVG 1300 over CV2 600) is not insurance.
+ * Same current at a higher Um is not insurance. Three single-phase units
+ * are not the insurance step for one three-phase switch.
  */
 export function insuranceModel(
   results: ModelResult[],
@@ -939,12 +963,30 @@ export function insuranceModel(
   if (primaryIsInsurance(primary, dutyA, stepVoltageV)) return null;
   const step = stepUpOf(primary, results);
   if (step) return step.model;
+  const seriesIds = new Set(results.map((r) => r.seriesId));
   const higher = results
     .filter(
-      (r) => r.model !== primary.model && r.currentA > primary.currentA + 0.5,
+      (r) =>
+        r.model !== primary.model &&
+        r.phases === primary.phases &&
+        r.unitCount === primary.unitCount &&
+        r.currentA > primary.currentA + 0.5,
     )
     .sort((a, b) => a.currentA - b.currentA || a.unitCount - b.unitCount);
-  return higher[0]?.model ?? null;
+  for (const cand of higher) {
+    if (
+      catalogueCurrentBetween(
+        primary.currentA,
+        cand.currentA,
+        primary.phases,
+        seriesIds,
+      )
+    ) {
+      continue;
+    }
+    return cand.model;
+  }
+  return null;
 }
 
 /** Other options, with the insurance step-up kept in the visible slots. */

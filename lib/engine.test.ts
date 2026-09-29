@@ -102,6 +102,27 @@ describe("insurance label", () => {
     const s = sized({ throughCurrentA: 120, umKv: 72.5, stepVoltageV: 1800 });
     expect(s.loose).toBe(false);
   });
+
+  it("does not tag a higher-band series as the insurance step", () => {
+    // 63 MVA / 110 kV Y / ±8 / 1.67% → 381.7 A, Ust ≈ 1061 V.
+    // CV2 stops at 600 A. SHZV 1000 A is the real next current, but each
+    // family only keeps its two smallest covering currents, so 1000 A is
+    // never emitted. SHZVG's floor is 1300 A. That is not one step up.
+    const s = sized({ throughCurrentA: 381.7, umKv: 72.5, stepVoltageV: 1061 });
+    expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
+    expect(s.loose).toBe(false);
+    expect(s.tag).toBeNull();
+    expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
+  });
+
+  it("tags SHZVG only once the primary is already the 1000 A step", () => {
+    const s = sized({ throughCurrentA: 900, umKv: 72.5, stepVoltageV: 1000 });
+    expect(s.primary.seriesCode).toBe("SHZV");
+    expect(s.primary.currentA).toBe(1000);
+    expect(s.loose).toBe(false);
+    expect(s.tag).toMatch(/^SHZVGIII-1300Y\//);
+    expect(s.shown.some((r) => r.model === s.tag)).toBe(true);
+  });
 });
 
 describe("tap / catalogue sanity", () => {

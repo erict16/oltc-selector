@@ -247,47 +247,6 @@ function Field({
   );
 }
 
-function ModeSeg<T extends string>({
-  ariaLabel,
-  value,
-  options,
-  onChange,
-}: {
-  ariaLabel: string;
-  value: T;
-  options: { id: T; label: string }[];
-  onChange: (id: T) => void;
-}) {
-  return (
-    <div
-      className="inline-flex h-7 box-border items-stretch overflow-hidden rounded-full bg-[var(--color-soft)] p-0.5"
-      role="group"
-      aria-label={ariaLabel}
-    >
-      {options.map((opt) => {
-        const on = value === opt.id;
-        return (
-          <button
-            key={opt.id}
-            type="button"
-            aria-pressed={on}
-            onClick={() => onChange(opt.id)}
-            className={cx(
-              "inline-flex h-full items-center rounded-full px-2.5 text-[0.6875rem] leading-none whitespace-nowrap transition-colors duration-150",
-              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-              on
-                ? "bg-white font-medium text-[var(--color-ink)] shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.08)]"
-                : "text-[var(--color-muted)] hover:text-[var(--color-ink-2)]",
-            )}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 function formatAmps(a: number): string {
   if (!Number.isFinite(a) || a <= 0) return "";
   const r = Math.round(a * 10) / 10;
@@ -900,17 +859,15 @@ export function SelectorApp() {
                   ? t(lang, "transformerMva")
                   : t(lang, "throughCurrent")
               }
-              actionKind="plain"
               action={
-                <ModeSeg
-                  ariaLabel={t(lang, "currentModeAria")}
-                  value={currentMode}
-                  options={[
-                    { id: "capacity", label: t(lang, "capacityBtn") },
-                    { id: "current", label: t(lang, "currentBtn") },
-                  ]}
-                  onChange={setCurrentEntry}
-                />
+                currentMode === "capacity" && derivedOk && derivedA != null ? (
+                  <CaptionSub
+                    name="I"
+                    sub="max"
+                    value={formatAmps(derivedA)}
+                    unit="A"
+                  />
+                ) : undefined
               }
             >
               {currentMode === "capacity" ? (
@@ -961,12 +918,19 @@ export function SelectorApp() {
                           setMvaCustom(true);
                           return;
                         }
+                        if (e.target.value === "__current__") {
+                          setCurrentEntry("current");
+                          return;
+                        }
                         setTransformerMva(Number(e.target.value));
                         setMvaCustom(false);
                         touch();
                       }}
                     >
                       <option value="__custom__">{t(lang, "custom")}</option>
+                      <option value="__current__">
+                        {t(lang, "switchToCurrent")}
+                      </option>
                       {MVA_OPTIONS.map((n) => (
                         <option key={n} value={String(n)}>
                           {n} MVA
@@ -988,10 +952,17 @@ export function SelectorApp() {
                 <select
                   className={controlClass}
                   value={String(input.throughCurrentA)}
-                  onChange={(e) =>
-                    patch("throughCurrentA", Number(e.target.value))
-                  }
+                  onChange={(e) => {
+                    if (e.target.value === "__capacity__") {
+                      setCurrentEntry("capacity");
+                      return;
+                    }
+                    patch("throughCurrentA", Number(e.target.value));
+                  }}
                 >
+                  <option value="__capacity__">
+                    {t(lang, "switchToCapacity")}
+                  </option>
                   {CURRENT_MENU.map((c) => (
                     <option key={c.value} value={c.value}>
                       {currentLabel(lang, c.labelZh, c.labelEn)}
@@ -1081,20 +1052,7 @@ export function SelectorApp() {
               </div>
             </Field>
 
-            <Field
-              as="div"
-              label={t(lang, "connection")}
-              action={
-                currentMode === "capacity" && derivedOk && derivedA != null ? (
-                  <CaptionSub
-                    name="I"
-                    sub="max"
-                    value={formatAmps(derivedA)}
-                    unit="A"
-                  />
-                ) : undefined
-              }
-            >
+            <Field as="div" label={t(lang, "connection")}>
               <select
                 className={controlClass}
                 value={input.connection}
@@ -1806,11 +1764,6 @@ export function SelectorApp() {
                         <p className="text-[0.75rem] font-medium text-[var(--color-accent)]">
                           {t(lang, loose ? "allRound" : "recommended")}
                         </p>
-                        {!loose ? (
-                          <p className="mt-0.5 text-[0.6875rem] leading-snug text-[var(--color-muted)]">
-                            {t(lang, "recommendedHint")}
-                          </p>
-                        ) : null}
                       </div>
                       <button
                         type="button"
@@ -1842,23 +1795,6 @@ export function SelectorApp() {
                     <p className="mt-2.5 min-w-0 font-mono text-[1.0625rem] leading-snug font-medium tracking-tight break-words text-[var(--color-ink)] sm:text-[1.1875rem]">
                       {primary.model}
                     </p>
-                    {voltageMode === "winding" ? (
-                      <p className="mt-1.5 text-[0.75rem] leading-snug text-[var(--color-muted)]">
-                        {t(
-                          lang,
-                          input.connection === "Y"
-                            ? "umResultStar"
-                            : "umResultLine",
-                          {
-                            rated: windingRatedKv,
-                            um: oltcUmFromRatedKv(
-                              windingRatedKv,
-                              input.connection,
-                            ),
-                          },
-                        )}
-                      </p>
-                    ) : null}
                   </div>
 
                   <ModelSpec
