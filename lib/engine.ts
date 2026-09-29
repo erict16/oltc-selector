@@ -898,6 +898,70 @@ export function pickOtherOptions(
   return [...preferred, ...overflow].slice(0, n);
 }
 
+/**
+ * Display only. The primary is 综合保险方案 when the duty uses at most half
+ * of the chosen rating's current, step voltage, and step capacity together.
+ * One axis over half means that axis forced this catalogue step, so the
+ * card stays 满足最低要求. Do not use this to pick a larger type.
+ */
+export function primaryIsInsurance(
+  primary: ModelResult,
+  dutyA: number,
+  stepVoltageV: number,
+): boolean {
+  if (!(dutyA > 0) || !(primary.currentA > dutyA)) return false;
+  const iUse = dutyA / primary.currentA;
+  const uUse =
+    stepVoltageV > 0 && primary.maxStepVoltageV && primary.maxStepVoltageV > 0
+      ? stepVoltageV / primary.maxStepVoltageV
+      : 0;
+  const needKva = stepVoltageV > 0 ? (dutyA * stepVoltageV) / 1000 : 0;
+  const pUse =
+    needKva > 0 && primary.stepCapacityKva && primary.stepCapacityKva > 0
+      ? needKva / primary.stepCapacityKva
+      : 0;
+  return Math.max(iUse, uUse, pUse) <= 0.5 + 1e-9;
+}
+
+/**
+ * Model that wears 综合保险方案 next to a true minimum.
+ * Null when the primary itself is the insurance card.
+ * Same-family next current first. Else the smallest higher current.
+ * Same current at a higher Um is not insurance.
+ */
+export function insuranceModel(
+  results: ModelResult[],
+  dutyA: number,
+  stepVoltageV: number,
+): string | null {
+  const primary = results[0];
+  if (!primary) return null;
+  if (primaryIsInsurance(primary, dutyA, stepVoltageV)) return null;
+  const step = stepUpOf(primary, results);
+  if (step) return step.model;
+  const higher = results
+    .filter(
+      (r) => r.model !== primary.model && r.currentA > primary.currentA + 0.5,
+    )
+    .sort((a, b) => a.currentA - b.currentA || a.unitCount - b.unitCount);
+  return higher[0]?.model ?? null;
+}
+
+/** Other options, with the insurance step-up kept in the visible slots. */
+export function optionsWithInsurance(
+  results: ModelResult[],
+  dutyA: number,
+  stepVoltageV: number,
+  n = 3,
+): ModelResult[] {
+  const alts = pickOtherOptions(results, n);
+  const id = insuranceModel(results, dutyA, stepVoltageV);
+  if (!id || alts.some((r) => r.model === id)) return alts;
+  const found = results.find((r) => r.model === id);
+  if (!found) return alts;
+  return [found, ...alts].slice(0, n);
+}
+
 /** Regression helpers + training-case fixtures */
 export const FIXTURES = {
   ueHwv: {

@@ -3,6 +3,9 @@ import {
   selectOltc,
   stepUpOf,
   pickOtherOptions,
+  primaryIsInsurance,
+  insuranceModel,
+  optionsWithInsurance,
   FIXTURES,
   octcRoman,
 } from "./engine";
@@ -31,6 +34,75 @@ import {
   resolveTapFields,
   midFromPlusMinus,
 } from "./tapCode";
+
+describe("insurance label", () => {
+  function sized(partial: {
+    throughCurrentA: number;
+    umKv: number;
+    stepVoltageV: number;
+  }) {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      midPositions: 3,
+      positions: 19,
+      pitch: 10,
+      mdu: "none",
+      ...partial,
+    });
+    expect(out.ok).toBe(true);
+    const primary = out.results[0]!;
+    return {
+      primary,
+      loose: primaryIsInsurance(
+        primary,
+        partial.throughCurrentA,
+        partial.stepVoltageV,
+      ),
+      tag: insuranceModel(
+        out.results,
+        partial.throughCurrentA,
+        partial.stepVoltageV,
+      ),
+      shown: optionsWithInsurance(
+        out.results,
+        partial.throughCurrentA,
+        partial.stepVoltageV,
+        3,
+      ),
+    };
+  }
+
+  it("keeps a snug CV2 current as the minimum and tags the next current", () => {
+    // 280 A is 80% of CV2 350. Ust 1000 V is half of 2000 V.
+    const s = sized({ throughCurrentA: 280, umKv: 72.5, stepVoltageV: 1000 });
+    expect(s.primary.seriesCode).toBe("CV2");
+    expect(s.primary.currentA).toBe(350);
+    expect(s.loose).toBe(false);
+    const tagged = s.shown.find((r) => r.model === s.tag);
+    expect(tagged).toBeTruthy();
+    expect(tagged!.currentA).toBeGreaterThan(350);
+    expect(tagged!.currentA).not.toBe(s.primary.currentA);
+  });
+
+  it("calls the first choice insurance when every limit is under half", () => {
+    // 100 A is 29% of 350 A. 800 V is 40% of CV2 2000 V.
+    const s = sized({ throughCurrentA: 100, umKv: 72.5, stepVoltageV: 800 });
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+  });
+
+  it("does not call a step-voltage-bound rating insurance", () => {
+    // 120 A is 34% of 350 A, but 1800 V is 90% of CV2 2000 V.
+    const s = sized({ throughCurrentA: 120, umKv: 72.5, stepVoltageV: 1800 });
+    expect(s.loose).toBe(false);
+  });
+});
 
 describe("tap / catalogue sanity", () => {
   it("CV2 has no 500 A", () => {
