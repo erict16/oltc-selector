@@ -1761,7 +1761,7 @@ export function SelectorApp() {
                 </div>
               ) : (
                 <>
-                  <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-rule)] px-4 py-3">
+                  <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-rule)] px-4 py-5">
                     <div className="flex min-w-0 flex-col items-start gap-1">
                       <span className={resultTagClass}>
                         {t(lang, loose ? "allRound" : "recommended")}
