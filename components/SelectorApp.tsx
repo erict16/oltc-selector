@@ -1761,11 +1761,11 @@ export function SelectorApp() {
                 </div>
               ) : (
                 <>
-                  <div className="shrink-0 border-b border-[var(--color-rule)] px-4 pt-3">
+                  <div className="shrink-0 border-b border-[var(--color-rule)] px-4 pt-4">
                     <span className={resultTagClass}>
                       {t(lang, loose ? "allRound" : "recommended")}
                     </span>
-                    <div className="mt-2.5 flex items-center justify-between gap-3 pb-2.5">
+                    <div className="mt-1.5 flex items-center justify-between gap-3 pb-4">
                       <p className="min-w-0 font-mono text-[1.0625rem] leading-snug font-medium tracking-tight break-words text-[var(--color-ink)] sm:text-[1.1875rem]">
                         {primary.model}
                       </p>
