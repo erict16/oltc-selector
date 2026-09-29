@@ -33,7 +33,12 @@ import {
   throughCurrentFromRated,
 } from "@/lib/deriveUm";
 
-import { pickOtherOptions, selectOltc } from "@/lib/engine";
+import {
+  pickOtherOptions,
+  ratingAlreadyLoose,
+  selectOltc,
+  stepUpOf,
+} from "@/lib/engine";
 import { safetyKKeepsCapacity } from "@/lib/safetyK";
 import {
   defaultMid,
@@ -337,6 +342,8 @@ export function SelectorApp() {
   } | null>(null);
 
   const [result, setResult] = useState<SelectOutput | null>(null);
+  /** Through-current actually sent on the last successful sizing. */
+  const [pickedDutyA, setPickedDutyA] = useState<number | null>(null);
   const [resultKey, setResultKey] = useState(0);
   const [hasRun, setHasRun] = useState(false);
   const [stale, setStale] = useState(false);
@@ -623,6 +630,7 @@ export function SelectorApp() {
       const duty = dutyForSelect();
       if ("error" in duty) {
         const msg = t(lang, duty.msgKey);
+        setPickedDutyA(null);
         setResult({
           ok: false,
           results: [],
@@ -635,6 +643,7 @@ export function SelectorApp() {
         setRunning(false);
         return;
       }
+      setPickedDutyA(duty.throughCurrentA);
       const out = selectOltc(duty);
       setResult(out);
       setResultKey((k) => k + 1);
@@ -767,6 +776,16 @@ export function SelectorApp() {
   };
 
   const primary = result?.ok ? result.results[0] : null;
+  const stepUp =
+    primary && result?.ok ? stepUpOf(primary, result.results) : null;
+  const loose =
+    primary != null &&
+    pickedDutyA != null &&
+    ratingAlreadyLoose(
+      pickedDutyA,
+      primary.currentA,
+      stepUp?.currentA ?? null,
+    );
   const alts = result?.ok ? pickOtherOptions(result.results, 3) : [];
   const idle = !hasRun || !result;
   const posHint =
@@ -1781,10 +1800,7 @@ export function SelectorApp() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-[0.75rem] font-medium text-[var(--color-accent)]">
-                          {t(lang, "recommended")}
-                        </p>
-                        <p className="mt-0.5 text-[0.6875rem] leading-snug text-[var(--color-muted)]">
-                          {t(lang, "recommendedHint")}
+                          {t(lang, loose ? "allRound" : "recommended")}
                         </p>
                       </div>
                       <button
@@ -1817,23 +1833,6 @@ export function SelectorApp() {
                     <p className="mt-2.5 min-w-0 font-mono text-[1.0625rem] leading-snug font-medium tracking-tight break-words text-[var(--color-ink)] sm:text-[1.1875rem]">
                       {primary.model}
                     </p>
-                    {voltageMode === "winding" ? (
-                      <p className="mt-1.5 text-[0.75rem] leading-snug text-[var(--color-muted)]">
-                        {t(
-                          lang,
-                          input.connection === "Y"
-                            ? "umResultStar"
-                            : "umResultLine",
-                          {
-                            rated: windingRatedKv,
-                            um: oltcUmFromRatedKv(
-                              windingRatedKv,
-                              input.connection,
-                            ),
-                          },
-                        )}
-                      </p>
-                    ) : null}
                   </div>
 
                   <ModelSpec
@@ -1871,7 +1870,7 @@ export function SelectorApp() {
                       >
                         <div className="min-h-0 overflow-hidden">
                           <ul className="space-y-2 pt-2.5 pb-0.5">
-                            {alts.map((r, i) => {
+                            {alts.map((r) => {
                               const open = openAlts.includes(r.model);
                               return (
                                 <li
@@ -1902,7 +1901,7 @@ export function SelectorApp() {
                                         <span className="min-w-0 break-all font-mono text-[0.875rem] leading-snug text-[var(--color-ink)]">
                                           {r.model}
                                         </span>
-                                        {i === 0 ? (
+                                        {stepUp && r.model === stepUp.model && !loose ? (
                                           <span className="shrink-0 rounded-full border border-[var(--color-rule-2)] px-1.5 py-0.5 text-[0.625rem] leading-none text-[var(--color-ink-2)]">
                                             {t(lang, "allRound")}
                                           </span>

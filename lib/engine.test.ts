@@ -3,6 +3,7 @@ import {
   selectOltc,
   stepUpOf,
   pickOtherOptions,
+  ratingAlreadyLoose,
   FIXTURES,
   octcRoman,
 } from "./engine";
@@ -31,6 +32,17 @@ import {
   resolveTapFields,
   midFromPlusMinus,
 } from "./tapCode";
+
+describe("ratingAlreadyLoose", () => {
+  it("keeps a fit inside one catalogue step as the minimum", () => {
+    expect(ratingAlreadyLoose(280, 350, 600)).toBe(false);
+  });
+
+  it("calls the minimum the insurance once spare covers a whole step", () => {
+    expect(ratingAlreadyLoose(100, 350, 600)).toBe(true);
+    expect(ratingAlreadyLoose(0, 350, 600)).toBe(false);
+  });
+});
 
 describe("tap / catalogue sanity", () => {
   it("CV2 has no 500 A", () => {
