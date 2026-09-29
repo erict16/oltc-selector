@@ -1761,15 +1761,16 @@ export function SelectorApp() {
                 </div>
               ) : (
                 <>
-                  <div className="shrink-0 border-b border-[var(--color-rule)] px-4 pt-4">
-                    <span className={resultTagClass}>
-                      {t(lang, loose ? "allRound" : "recommended")}
-                    </span>
-                    <div className="mt-1.5 flex items-center justify-between gap-3 pb-4">
+                  <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-rule)] px-4 py-3">
+                    <div className="flex min-w-0 flex-col items-start gap-1">
+                      <span className={resultTagClass}>
+                        {t(lang, loose ? "allRound" : "recommended")}
+                      </span>
                       <p className="min-w-0 font-mono text-[1.0625rem] leading-snug font-medium tracking-tight break-words text-[var(--color-ink)] sm:text-[1.1875rem]">
                         {primary.model}
                       </p>
-                      <button
+                    </div>
+                    <button
                         type="button"
                         onClick={() => copyModel(primary.model)}
                         className={cx(
@@ -1795,7 +1796,6 @@ export function SelectorApp() {
                             : t(lang, "copy")}
                         </span>
                       </button>
-                    </div>
                   </div>
 
                   <ModelSpec
