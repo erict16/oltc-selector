@@ -141,6 +141,9 @@ const EXAMPLE_RATED_KV: Record<ExampleKey, number> = {
   preset220: 220,
 };
 
+const resultTagClass =
+  "inline-flex h-5 shrink-0 items-center rounded-full border border-[var(--color-accent)] px-2 text-[0.6875rem] font-medium leading-none text-[var(--color-accent)]";
+
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -1758,13 +1761,14 @@ export function SelectorApp() {
                 </div>
               ) : (
                 <>
-                  <div className="shrink-0 border-b border-[var(--color-rule)] px-4 pt-3.5 pb-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-[0.75rem] font-medium text-[var(--color-accent)]">
-                          {t(lang, loose ? "allRound" : "recommended")}
-                        </p>
-                      </div>
+                  <div className="shrink-0 border-b border-[var(--color-rule)] px-4 pt-3">
+                    <span className={resultTagClass}>
+                      {t(lang, loose ? "allRound" : "recommended")}
+                    </span>
+                    <div className="mt-2.5 flex items-center justify-between gap-3 pb-2.5">
+                      <p className="min-w-0 font-mono text-[1.0625rem] leading-snug font-medium tracking-tight break-words text-[var(--color-ink)] sm:text-[1.1875rem]">
+                        {primary.model}
+                      </p>
                       <button
                         type="button"
                         onClick={() => copyModel(primary.model)}
@@ -1792,9 +1796,6 @@ export function SelectorApp() {
                         </span>
                       </button>
                     </div>
-                    <p className="mt-2.5 min-w-0 font-mono text-[1.0625rem] leading-snug font-medium tracking-tight break-words text-[var(--color-ink)] sm:text-[1.1875rem]">
-                      {primary.model}
-                    </p>
                   </div>
 
                   <ModelSpec
@@ -1865,7 +1866,7 @@ export function SelectorApp() {
                                         </span>
                                         {insuranceAlt != null &&
                                         r.model === insuranceAlt ? (
-                                          <span className="shrink-0 rounded-full border border-[var(--color-accent)] px-2 py-0.5 text-[0.6875rem] font-medium leading-none text-[var(--color-accent)]">
+                                          <span className={resultTagClass}>
                                             {t(lang, "allRound")}
                                           </span>
                                         ) : null}
