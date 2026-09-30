@@ -6,7 +6,7 @@ import "./globals.css";
 const basePath = process.env.GH_PAGES === "true" ? "/oltc-selector" : "";
 
 export const metadata: Metadata = {
-  title: "OLTC Selector · 华明有载开关选型",
+  title: "OLTC Selector · 有载开关选型",
   description:
     "Private OLTC type-designation helper. Indicative only — not an official manufacturer tool or OS.",
   metadataBase: new URL(

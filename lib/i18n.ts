@@ -242,7 +242,7 @@ const en: Dict = {
 };
 
 const zh: Dict = {
-  title: "华明有载开关选型",
+  title: "有载开关选型",
   subtitle: "填工况，点选型。",
   agentTitle: "把选型交给 AI 助手",
   agentBody: "把变压器参数发给它，它选型号。",

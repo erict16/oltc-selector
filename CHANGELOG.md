@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Selector uses the split workbench: navy result on the left, duty form on the right. Chinese title is 华明有载开关选型. The selection-assistant bubble is off the home page. The result pane has no version mark.
+- Selector uses the split workbench: navy result on the left, duty form on the right. Chinese title is 有载开关选型. The selection-assistant bubble is off the home page. The result pane has no version mark.
+- The page, the changelog notes, and the CLI help no longer name the manufacturer. The Chinese title is 有载开关选型.
 - A snug CV2-600 keeps SHZV-1000 in the other options and tags it 综合保险方案. SHZVG-1300 is still not that step.
 - Phone language chips match the desktop size. The model and the copy button stay on the same row.
 - Off-circuit has no vacuum type. Choosing 无载 locks 灭弧方式 on oil and greys the control.

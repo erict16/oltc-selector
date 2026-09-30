@@ -48,9 +48,7 @@ const zh: AgentGuideCopy = {
   s1t: "装上技能",
   s1b: "如果你用 WorkBuddy 的话，可以直接在「技能」里搜到。",
   s1wb: "WorkBuddy",
-  s1wbBody: "打开「专家·技能·连接器」，搜「华明」，点卡片右边的 +。",
-  wbShot: "WorkBuddy 技能页搜华明，SkillHub 列出华明分接开关选型助手",
-  wbShotAlt: "WorkBuddy 技能页搜华明，SkillHub 列出华明分接开关选型助手",
+  s1wbBody: "打开「专家·技能·连接器」，在技能里找到选型助手，点卡片右边的 +。",
   s1other: "Claude，ChatGPT Work和其他AI工作助手的方法也非常简单",
   s1otherBody: "把这句话发给它，它自己从 SkillHub 装好。",
   s1prompt:

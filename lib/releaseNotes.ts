@@ -87,7 +87,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       groups: [
         {
           kind: "imp",
-          items: ["助手带上华明图标，在 WorkBuddy 技能市场里一眼能认出来。"],
+          items: ["助手带上图标，在 WorkBuddy 技能市场里一眼能认出来。"],
         },
       ],
     },
@@ -237,7 +237,7 @@ export const RELEASES: Record<Lang, Release[]> = {
         {
           kind: "imp",
           items: [
-            "The assistant ships with the Huaming icon, so it is easy to recognise in the WorkBuddy skill marketplace.",
+            "The assistant ships with its icon, so it is easy to recognise in the WorkBuddy skill marketplace.",
           ],
         },
       ],
@@ -387,7 +387,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       groups: [
         {
           kind: "imp",
-          items: ["Trợ lý có biểu tượng Huaming, dễ nhận ra trong chợ kỹ năng WorkBuddy."],
+          items: ["Trợ lý có biểu tượng riêng, dễ nhận ra trong chợ kỹ năng WorkBuddy."],
         },
       ],
     },
@@ -537,7 +537,7 @@ export const RELEASES: Record<Lang, Release[]> = {
         {
           kind: "imp",
           items: [
-            "El asistente incluye el icono de Huaming, fácil de reconocer en el mercado de skills de WorkBuddy.",
+            "El asistente incluye su icono, fácil de reconocer en el mercado de skills de WorkBuddy.",
           ],
         },
       ],
@@ -687,7 +687,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       groups: [
         {
           kind: "imp",
-          items: ["Asistan Huaming simgesiyle geliyor; WorkBuddy beceri marketinde kolayca tanınır."],
+          items: ["Asistan kendi simgesiyle geliyor; WorkBuddy beceri marketinde kolayca tanınır."],
         },
       ],
     },
@@ -836,7 +836,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       groups: [
         {
           kind: "imp",
-          items: ["Ассистент получил значок Huaming, его легко узнать на маркете навыков WorkBuddy."],
+          items: ["Ассистент получил свой значок, его легко узнать на маркете навыков WorkBuddy."],
         },
       ],
     },
