@@ -1125,6 +1125,26 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
     expect(out.results.every((r) => r.seriesCode === "WSL")).toBe(true);
   });
 
+  it("vacuum preference cannot pull a vacuum OLTC into an OCTC duty", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      dutyKind: "octc",
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 600,
+      umKv: 72.5,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 6,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLIV-600Y/72.5-6x5A");
+    expect(out.results.every((r) => r.seriesCode === "WSL" || r.seriesCode === "WSG")).toBe(true);
+  });
+
   it("600 A / 72.5 Y → WSLIV-600Y/72.5-6x5A", () => {
     const out = selectOltc({
       mounting: "in_tank",

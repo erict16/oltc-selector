@@ -5,6 +5,7 @@
 - Selector uses the split workbench: navy result on the left, duty form on the right. Chinese title is 华明有载开关选型. The selection-assistant bubble is off the home page. The result pane has no version mark.
 - A snug CV2-600 keeps SHZV-1000 in the other options and tags it 综合保险方案. SHZVG-1300 is still not that step.
 - Phone language chips match the desktop size. The model and the copy button stay on the same row.
+- Off-circuit has no vacuum type. Choosing 无载 locks 灭弧方式 on oil and greys the control.
 - The rated-voltage field has no Um caption. Selection is unchanged: 110/132/150 kV star is 72.5, 220 kV star is 252. Un/√3 is not sent into the engine.
 - Capacity menu starts at 16 MVA. 6.3 and 10 stay available by typing a custom value. Switch to current from inside that menu. Imax stays on the capacity field; Um stays on the rated-voltage field; Ust stays on the step-percent field.
 - Drop list prices, market coefficients, FX conversion, and the internal login. The selector is type-only; no RMB in the repo.

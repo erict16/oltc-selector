@@ -214,6 +214,8 @@ function seriesMatchesMounting(s: SeriesDef, input: SelectInput): boolean {
 }
 
 function seriesMatchesMedium(s: SeriesDef, input: SelectInput): boolean {
+  // OCTC is oil-immersed cage/drum. The 2025 list has no vacuum row.
+  if (input.dutyKind === "octc") return s.medium === "oil" && !s.vacuum;
   if (input.mounting === "dry_type") return s.medium === "dry";
   if (input.preferVacuum) return true; // soft — oil filtered later if vacuum exists
   if (input.medium === "oil_vacuum") return s.vacuum || s.medium === "oil_vacuum";
@@ -828,8 +830,15 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
   // Vacuum / oil are hard locks. Do not fall back across the arc mode
   // (oil 2915 A used to leak 3xSHZVGI; on-tank vacuum used to leak HWDK).
+  // OCTC has no vacuum row. A leftover preferVacuum used to wipe the cage
+  // and report "out of catalogue" even though WSL was already admitted.
   let final = results;
-  if (input.preferVacuum) {
+  if (wantOctc) {
+    final = results.filter((r) => {
+      const s = SERIES.find((x) => x.id === r.seriesId);
+      return s != null && s.medium === "oil" && !s.vacuum;
+    });
+  } else if (input.preferVacuum) {
     final = results.filter(
       (r) => SERIES.find((s) => s.id === r.seriesId)?.vacuum,
     );

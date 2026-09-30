@@ -535,7 +535,12 @@ export function SelectorApp() {
       duty.octcSeries && duty.octcSeries !== "auto"
         ? duty.octcSeries
         : "IV";
-    return { ...duty, octcSeries: series };
+    return {
+      ...duty,
+      octcSeries: series,
+      preferVacuum: false,
+      medium: "oil",
+    };
   };
 
   const dutyForSelect = ():
@@ -1213,9 +1218,13 @@ export function SelectorApp() {
                   {input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
                     <Field label={t(lang, "arcMode")} as="div">
                       <div
-                        className="grid h-11 grid-cols-2 gap-2"
+                        className={cx(
+                          "grid h-11 grid-cols-2 gap-2",
+                          isOctc && "opacity-45",
+                        )}
                         role="group"
                         aria-label={t(lang, "arcMode")}
+                        aria-disabled={isOctc || undefined}
                       >
                         {(
                           [
@@ -1223,13 +1232,15 @@ export function SelectorApp() {
                             [false, "arcOil"],
                           ] as const
                         ).map(([vac, key]) => {
-                          const on = input.preferVacuum === vac;
+                          const on = isOctc ? !vac : input.preferVacuum === vac;
                           return (
                             <button
                               key={key}
                               type="button"
                               aria-pressed={on}
+                              disabled={isOctc}
                               onClick={() => {
+                                if (isOctc) return;
                                 setInput((s) => ({
                                   ...s,
                                   preferVacuum: vac,
@@ -1237,7 +1248,11 @@ export function SelectorApp() {
                                 }));
                                 touch();
                               }}
-                              className={segBtn(on)}
+                              className={cx(
+                                segBtn(on),
+                                isOctc &&
+                                  "cursor-not-allowed hover:border-[var(--color-rule-2)]",
+                              )}
                             >
                               {t(lang, key)}
                             </button>
