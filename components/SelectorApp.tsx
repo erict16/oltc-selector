@@ -20,6 +20,8 @@ import { copyText } from "@/lib/clipboard";
 import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
+  calculatedUm,
+  formatUmKv,
   maxThroughCurrent,
   oltcUmFromRatedKv,
   stepVoltageFromPercent,
@@ -47,7 +49,6 @@ import {
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { UpSelect } from "@/components/UpSelect";
-import { VersionMark } from "@/components/VersionMark";
 import { useAppLang } from "@/components/LangProvider";
 import {
   currentLabel,
@@ -537,6 +538,7 @@ export function SelectorApp() {
       return withOctcSeries({
         ...input,
         throughCurrentA: i,
+        // Caption is Un/√3. The engine gets the insulation class, not that number.
         umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
         ...(ust != null ? { stepVoltageV: ust } : {}),
       });
@@ -657,10 +659,14 @@ export function SelectorApp() {
   const derivedOk =
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
   const ustV = computedStepVoltage();
-  const umKvShow =
+  const umCalc =
     windingRatedKv > 0
-      ? oltcUmFromRatedKv(windingRatedKv, input.connection)
+      ? input.connection === "Y"
+        ? calculatedUm(windingRatedKv, "Y")
+        : windingRatedKv
       : null;
+  const umKvShow =
+    umCalc != null && Number.isFinite(umCalc) ? formatUmKv(umCalc) : null;
 
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col lg:grid lg:h-dvh lg:grid-cols-2 lg:overflow-hidden">
@@ -1675,11 +1681,10 @@ export function SelectorApp() {
           )}
             </div>
             </div>
-            <div className="flex shrink-0 items-center justify-between gap-3 pt-3">
+            <div className="flex shrink-0 items-center pt-3">
               <p className="min-w-0 text-[0.75rem] leading-snug text-[#8aa4bb]">
                 {t(lang, "disclaimer")}
               </p>
-              <VersionMark />
             </div>
           </aside>
         </div>

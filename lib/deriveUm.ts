@@ -59,6 +59,27 @@ export function windingUmFromRatedKv(ratedKv: number): number {
 }
 
 /**
+ * Calculated Um the form shows and sends. Catalogue snap is the engine.
+ * D (line end): the tap-side rated voltage as entered.
+ * Y (and any): that voltage / √3.
+ */
+export function calculatedUm(
+  ratedKv: number,
+  connection: SelectInput["connection"],
+): number {
+  if (!(ratedKv > 0)) return NaN;
+  if (connection === "D") return ratedKv;
+  return ratedKv / Math.sqrt(3);
+}
+
+/** One decimal. Whole numbers stay without a trailing .0. */
+export function formatUmKv(um: number): string {
+  if (!Number.isFinite(um) || !(um > 0)) return "";
+  const r = Math.round(um * 10) / 10;
+  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+}
+
+/**
  * OLTC Um from the tap-winding equipment class + where the switch sits.
  *
  * Y (star / neutral), graded insulation:

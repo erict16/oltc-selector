@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_WINDING_RATED_KV,
+  calculatedUm,
   deriveOltcUm,
+  formatUmKv,
   isTapSideRatedKv,
   maxThroughCurrent,
   oltcUmFromRatedKv,
@@ -55,6 +57,76 @@ describe("snap nameplate Un", () => {
     expect(snapRatedKv(10.5)).toBe(10.5);
     expect(snapRatedKv(400)).toBe(400);
     expect(snapRatedKv(725)).toBe(725);
+  });
+});
+
+describe("calculated Um on the form", () => {
+  it("D keeps the tap voltage, Y divides by √3", () => {
+    expect(calculatedUm(110, "D")).toBe(110);
+    expect(calculatedUm(110, "Y")).toBeCloseTo(110 / Math.sqrt(3), 6);
+    expect(calculatedUm(220, "Y")).toBeCloseTo(220 / Math.sqrt(3), 6);
+    expect(calculatedUm(132, "Y")).toBeCloseTo(132 / Math.sqrt(3), 6);
+    expect(formatUmKv(calculatedUm(110, "Y"))).toBe("63.5");
+    expect(formatUmKv(calculatedUm(110, "D"))).toBe("110");
+    expect(formatUmKv(calculatedUm(220, "Y"))).toBe("127");
+    expect(formatUmKv(calculatedUm(132, "Y"))).toBe("76.2");
+  });
+
+  function sized(connection: "Y" | "D", ratedKv: number) {
+    return selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection,
+      throughCurrentA: 200,
+      umKv: calculatedUm(ratedKv, connection),
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      midPositions: 3,
+      preferStructure: "auto",
+      mdu: "none",
+    });
+  }
+
+  it("round-up of Un/√3 misses the neutral class, so select must not send it", () => {
+    // 110/√3 = 63.5 still lands on 72.5. That coincidence is not the rule.
+    const star110 = sized("Y", 110);
+    expect(star110.ok).toBe(true);
+    expect(star110.results[0]!.model).toMatch(/\/72\.5/);
+
+    // 132/√3 = 76.2 is already above 72.5, so the next catalogue step is 126.
+    const over = sized("Y", 132);
+    expect(over.ok).toBe(true);
+    expect(over.results[0]!.model).toMatch(/\/126/);
+    const neutral = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 200,
+      umKv: oltcUmFromRatedKv(132, "Y"),
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      midPositions: 3,
+      preferStructure: "auto",
+      mdu: "none",
+    });
+    expect(neutral.ok).toBe(true);
+    expect(neutral.results[0]!.model).toMatch(/\/72\.5/);
+
+    // 66/√3 = 38.1 would pick 40.5. The winding class is 72.5.
+    const low = sized("Y", 66);
+    expect(low.results[0]!.model).toMatch(/\/40\.5/);
+    expect(oltcUmFromRatedKv(66, "Y")).toBe(72.5);
+
+    // 220/√3 = 127 would leave 252. Star-point 220 stays 252.
+    const high = sized("Y", 220);
+    expect(high.results[0]!.model).not.toMatch(/\/252/);
+    expect(oltcUmFromRatedKv(220, "Y")).toBe(252);
   });
 });
 
