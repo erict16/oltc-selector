@@ -68,7 +68,7 @@ npm run pack:cli
 
 GitHub Pages：`npm run build:gh`（`GH_PAGES=true`）。Vercel 根路径，不要设 `GH_PAGES`。
 
-网页和 CLI 都不带价表。语言：中文、English、Tiếng Việt、Español、Türkçe、Русский。
+语言：中文、English、Tiếng Việt、Español、Türkçe、Русский。
 
 ## OS regression
 
