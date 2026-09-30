@@ -240,6 +240,20 @@ function Field({
   );
 }
 
+/** Break a type string after "-" and "/", never in the middle of a token. */
+function modelNodes(model: string) {
+  return model.split(/([-/])/).map((part, i) =>
+    part === "-" || part === "/" ? (
+      <span key={i}>
+        {part}
+        <wbr />
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
+
 function formatAmps(a: number): string {
   if (!Number.isFinite(a) || a <= 0) return "";
   const r = Math.round(a * 10) / 10;
@@ -678,8 +692,8 @@ export function SelectorApp() {
           }}
         >
           <div className="mx-auto my-auto w-full">
-          <div className="mb-3 flex items-center justify-between gap-4">
-            <h2 className="font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold leading-none text-[var(--color-ink)]">
+          <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h2 className="shrink-0 whitespace-nowrap font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold leading-none text-[var(--color-ink)]">
               {t(lang, "duty")}
             </h2>
             <LangSwitcher
@@ -1524,14 +1538,14 @@ export function SelectorApp() {
                   <p className="text-[0.75rem] font-semibold tracking-[0.08em] text-[#8fd0e2]">
                     {t(lang, loose ? "allRound" : "recommended")}
                   </p>
-                  <div className="mt-3 flex items-center justify-between gap-4">
-                    <p className="min-w-0 flex-1 font-mono text-[clamp(1.375rem,2.4vw,2rem)] leading-[1.2] font-medium tracking-tight break-words text-white">
-                      {primary.model}
+                  <div className="mt-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <p className="min-w-0 font-mono text-[clamp(0.875rem,4.6vw,1.125rem)] leading-[1.2] font-medium tracking-tight break-words text-white sm:flex-1 sm:text-[clamp(1.375rem,2.4vw,2rem)]">
+                      {modelNodes(primary.model)}
                     </p>
                     <button
                       type="button"
                       onClick={() => copyModel(primary.model)}
-                      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border border-white px-3 text-[0.8125rem] font-semibold text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                      className="inline-flex h-9 shrink-0 items-center gap-1.5 self-end rounded-[var(--radius-sm)] border border-white px-3 text-[0.8125rem] font-semibold text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:self-auto"
                       aria-label={
                         copiedModel === primary.model
                           ? t(lang, "copied")
@@ -1594,25 +1608,25 @@ export function SelectorApp() {
                                   key={r.model}
                                   className="rounded-[var(--radius-sm)] border border-white/20"
                                 >
-                                  <div className="flex items-center gap-1.5 px-3 py-2">
+                                  <div className="flex flex-col gap-1 px-3 py-2 sm:flex-row sm:items-center sm:gap-1.5">
                                     <button
                                       type="button"
                                       aria-expanded={open}
                                       onClick={() =>
                                         setOpenAlts(open ? [] : [r.model])
                                       }
-                                      className="flex min-w-0 flex-1 items-center gap-2 rounded-[var(--radius-sm)] px-0.5 py-0.5 text-left text-white transition-colors hover:text-[#8fd0e2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                                      className="flex min-w-0 w-full flex-1 items-start gap-2 rounded-[var(--radius-sm)] px-0.5 py-0.5 text-left text-white transition-colors hover:text-[#8fd0e2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:items-center"
                                     >
                                       <ChevronDownIcon
                                         className={cx(
-                                          "h-4 w-4 shrink-0 text-[#9bb4c9] transition-transform duration-200",
+                                          "mt-0.5 h-4 w-4 shrink-0 text-[#9bb4c9] transition-transform duration-200 sm:mt-0",
                                           open && "rotate-180",
                                         )}
                                         aria-hidden
                                       />
-                                      <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
-                                        <span className="min-w-0 break-all font-mono text-[0.875rem] leading-snug text-white">
-                                          {r.model}
+                                      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-1">
+                                        <span className="min-w-0 basis-full break-words font-mono text-[0.8125rem] leading-snug text-white sm:basis-auto sm:text-[0.875rem]">
+                                          {modelNodes(r.model)}
                                         </span>
                                         {insuranceAlt != null &&
                                         r.model === insuranceAlt ? (
@@ -1622,7 +1636,7 @@ export function SelectorApp() {
                                         ) : null}
                                       </span>
                                     </button>
-                                    <span className="flex shrink-0 items-center gap-1.5">
+                                    <span className="flex shrink-0 items-center justify-end pl-6 sm:pl-0">
                                       <button
                                         type="button"
                                         onClick={() => copyModel(r.model)}

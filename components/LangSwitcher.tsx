@@ -17,7 +17,7 @@ export function LangSwitcher({
 }) {
   return (
     <div
-      className="flex w-auto max-w-full flex-wrap items-center justify-end gap-1"
+      className="ml-auto flex w-auto max-w-full shrink-0 flex-nowrap items-center justify-end gap-1"
       role="group"
       aria-label={ariaLabel}
     >
@@ -31,7 +31,7 @@ export function LangSwitcher({
             aria-pressed={on}
             onClick={() => onChange(opt.id)}
             className={cx(
-              "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-sm)] border text-[0.8125rem] font-medium leading-none transition-colors duration-150 lg:h-7 lg:w-[2.35rem] lg:text-[0.6875rem]",
+              "inline-flex h-7 w-[2.35rem] shrink-0 items-center justify-center rounded-[var(--radius-sm)] border text-[0.6875rem] font-medium leading-none transition-colors duration-150",
               opt.id === "zh" ? "tracking-normal" : "tracking-[0.14em]",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
               on
