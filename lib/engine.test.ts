@@ -105,14 +105,24 @@ describe("insurance label", () => {
 
   it("does not tag a higher-band series as the insurance step", () => {
     // 63 MVA / 110 kV Y / ±8 / 1.67% → 381.7 A, Ust ≈ 1061 V.
-    // CV2 stops at 600 A. SHZV 1000 A is the real next current, but each
-    // family only keeps its two smallest covering currents, so 1000 A is
-    // never emitted. SHZVG's floor is 1300 A. That is not one step up.
+    // CV2 stops at 600 A. The insurance step is SHZV 1000 A, not SHZVG 1300 A.
     const s = sized({ throughCurrentA: 381.7, umKv: 72.5, stepVoltageV: 1061 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
     expect(s.loose).toBe(false);
-    expect(s.tag).toBeNull();
+    expect(s.tag).toMatch(/^SHZVIII-1000Y\/72\.5/);
+    expect(s.shown.some((r) => r.model === s.tag)).toBe(true);
+    expect(s.tag).not.toMatch(/SHZVG/);
     expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
+  });
+
+  it("tags SHZV-1000 when 80 MVA at 150 kV star sits on CV2-600", () => {
+    // 80 MVA / 150 kV Y / ±8 / 1.25% → 342 A, Ust ≈ 1083 V.
+    // 342 A is inside the top 3% of CV2-350, so the minimum is CV2-600.
+    const s = sized({ throughCurrentA: 342.1, umKv: 72.5, stepVoltageV: 1083 });
+    expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
+    expect(s.loose).toBe(false);
+    expect(s.tag).toMatch(/^SHZVIII-1000Y\/72\.5/);
+    expect(s.shown[0]?.model).toBe(s.tag);
   });
 
   it("tags SHZVG only once the primary is already the 1000 A step", () => {

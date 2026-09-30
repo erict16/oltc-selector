@@ -563,7 +563,23 @@ export function selectOltc(input: SelectInput): SelectOutput {
           if (maxKeep.length) covering = [Math.max(...maxKeep)];
         }
         if (!covering.length) continue;
+        // Two covering ratings, plus the next catalogue step above them.
+        // A snug CV2-600 otherwise has no higher current in the list, so the
+        // 综合保险 tag has nowhere to sit. The step after that (SHZVG 1300)
+        // stays out: a later band is not the insurance step.
         const currentsToEmit = covering.slice(0, 2);
+        const topEmitted = Math.max(...currentsToEmit);
+        const stepUpCurrent = [...phaseCurrents]
+          .sort((a, b) => a - b)
+          .find(
+            (c) =>
+              c > topEmitted + 0.5 &&
+              ratingCoversDuty(input.throughCurrentA, c) &&
+              capacityOk(c),
+          );
+        if (stepUpCurrent != null && !currentsToEmit.includes(stepUpCurrent)) {
+          currentsToEmit.push(stepUpCurrent);
+        }
 
         for (const current of currentsToEmit) {
         const octc = isOctcSeries(s);
