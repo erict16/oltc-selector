@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Capacity/current pills sit on the capacity title (far right). Imax sits on 开关连接. Um / Ust / 19 位 stay on their labels.
+- Selector uses the split workbench: navy result on the left, duty form on the right. Chinese title is 华明有载开关选型. Version sits on the result pane, beside the disclaimer. The selection-assistant bubble is off the home page.
+- Capacity menu starts at 16 MVA. 6.3 and 10 stay available by typing a custom value. Switch to current from inside that menu. Imax stays on the capacity field; Um stays on the rated-voltage field; Ust stays on the step-percent field.
 - Drop list prices, market coefficients, FX conversion, and the internal login. The selector is type-only; no RMB in the repo.
 - Changelog popover: 「当前」sits on the version midline; kind chips line up with the version, not the note body.
 - Agent dock satellite: DeepSeek whale in place of 智谱.
@@ -13,7 +14,7 @@
 - Footer shows `v1.2.9` instead of 仅供参考. Click opens a small changelog popover (scheme A).
 - Changelog popover is a timeline with 修正/新增/改进 chips, plain-language copy, and a 全部更新记录 link to the new `/changelog/` page (timeline + sticky version sidebar; major-version tabs appear once a 2.x exists). Release history rebuilt from commits: 1.2.1–1.2.6 are the assistant/CLI line; 1.2.7–1.2.9 were same-day internal numbers never shown publicly, so they merge into 1.2.9 (SDZV + oil/vacuum hard locks + three-step guide). `lib/releaseNotes.ts` is now `RELEASES` (versioned, kind-tagged, six languages).
 - Agent dock bubble closes on outside pointer-down and Escape, same contract as the footer popover.
-- Safety factor stays visible in More options on the current path (disabled). Imax k labels are explicit in EN / VI / ES / TR / RU.
+- Safety factor, structure, mounting, and across-tap insulation sit on the duty form. Imax k labels are explicit in EN / VI / ES / TR / RU.
 
 ## 1.2.9
 

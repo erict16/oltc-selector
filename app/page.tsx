@@ -1,11 +1,5 @@
-import { AgentDock } from "@/components/AgentDock";
 import { SelectorApp } from "@/components/SelectorApp";
 
 export default function HomePage() {
-  return (
-    <>
-      <SelectorApp />
-      <AgentDock />
-    </>
-  );
+  return <SelectorApp />;
 }

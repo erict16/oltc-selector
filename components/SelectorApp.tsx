@@ -1,17 +1,10 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  AdjustmentsHorizontalIcon,
   CheckIcon,
   ChevronDownIcon,
   ClipboardDocumentIcon,
-  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import {
   ACROSS_BIL_MENU,
@@ -53,6 +46,8 @@ import {
   type ParsedTapRange,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
+import { UpSelect } from "@/components/UpSelect";
+import { VersionMark } from "@/components/VersionMark";
 import { useAppLang } from "@/components/LangProvider";
 import {
   currentLabel,
@@ -93,7 +88,7 @@ function geometryForPm(
 }
 
 const MVA_OPTIONS = [
-  6.3, 10, 16, 25, 31.5, 40, 50, 63, 80, 100, 160, 250, 400, 500,
+  16, 25, 31.5, 40, 50, 63, 80, 100, 160, 250, 400, 500,
 ] as const;
 const STEP_PERCENT_OPTIONS = [
   0.5, 0.625, 0.8, 1, 1.25, 1.5, 1.67, 2, 2.25, 2.5, 2.75, 3, 3.33, 4, 5, 6.25,
@@ -127,23 +122,6 @@ const defaultInput: SelectInput = {
   dutyKind: "oltc",
 };
 
-type ExampleKey = "preset66" | "preset110" | "preset220";
-
-const EXAMPLES: { key: ExampleKey; pm: string; labelKey: string; hintKey: string }[] = [
-  { key: "preset66", pm: "8", labelKey: "ex66", hintKey: "exHint66" },
-  { key: "preset110", pm: "8", labelKey: "ex110", hintKey: "exHint110" },
-  { key: "preset220", pm: "8", labelKey: "ex220", hintKey: "exHint220" },
-];
-
-const EXAMPLE_RATED_KV: Record<ExampleKey, number> = {
-  preset66: 66,
-  preset110: 110,
-  preset220: 220,
-};
-
-const resultTagClass =
-  "inline-flex h-5 shrink-0 items-center rounded-full border border-[var(--color-accent)] px-2 text-[0.6875rem] font-medium leading-none text-[var(--color-accent)]";
-
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
@@ -176,7 +154,18 @@ function CaptionSub({
 
 /** Comfortable control — one hover signal (border), shared height */
 const controlClass =
-  "h-10 w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
+  "h-11 w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
+
+/** Same white field as the menus. The accent border is the only selected mark. */
+function segBtn(on: boolean) {
+  return cx(
+    "inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] border bg-white text-[0.9rem] text-[var(--color-ink)] transition-colors duration-150",
+    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+    on
+      ? "border-[var(--color-accent)] font-medium"
+      : "border-[var(--color-rule-2)] hover:border-[var(--color-accent)]",
+  );
+}
 
 function Field({
   label,
@@ -203,7 +192,7 @@ function Field({
 }) {
   const Tag = as;
   return (
-    <Tag className={cx("flex min-w-0 flex-col gap-1.5 overflow-visible", className)}>
+    <Tag className={cx("flex min-w-0 flex-col gap-2 overflow-visible", className)}>
       <span className="flex h-[1.625rem] flex-nowrap items-center gap-2 overflow-visible">
         <span
           className={cx(
@@ -282,26 +271,10 @@ export function SelectorApp() {
   const [safetyK, setSafetyK] = useState(1);
   const [safetyKCustom, setSafetyKCustom] = useState(false);
   const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
-  const [activeExample, setActiveExample] = useState<ExampleKey | null>(null);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const [moreUnlocked, setMoreUnlocked] = useState(false);
   const [altsOpen, setAltsOpen] = useState(false);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const beforePreset = useRef<{
-    input: SelectInput;
-    pm: string;
-    voltageMode: "winding" | "equipment";
-    windingRatedKv: number;
-    currentMode: "current" | "capacity";
-    transformerMva: number;
-    tapPlus: number;
-    tapMinus: number;
-    stepPercentPct: number;
-    safetyK: number;
-    tapRange: ParsedTapRange | null;
-  } | null>(null);
 
   const [result, setResult] = useState<SelectOutput | null>(null);
   /** Through-current actually sent on the last successful sizing. */
@@ -313,15 +286,12 @@ export function SelectorApp() {
   const [running, setRunning] = useState(false);
   const runTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resultPaneRef = useRef<HTMLElement | null>(null);
-  const formRef = useRef<HTMLFormElement | null>(null);
-  const [paneMinH, setPaneMinH] = useState<number | undefined>(undefined);
 
   const isOctc = (input.dutyKind ?? "oltc") === "octc";
   const isLinear = isOctc || input.regulation === "linear";
 
   const touch = () => {
     if (hasRun) setStale(true);
-    setActiveExample(null);
   };
 
   const commitSafetyK = (n: number) => {
@@ -616,10 +586,10 @@ export function SelectorApp() {
       setStale(false);
       setRunning(false);
       setAltsOpen(out.ok && out.results.length > 1);
-      // Mobile: result sits below the form — scroll it into view after select
+      // Narrow screens stack the answer above the form — bring it back into view.
       if (
         typeof window !== "undefined" &&
-        window.matchMedia("(max-width: 767px)").matches
+        window.matchMedia("(max-width: 1023px)").matches
       ) {
         window.setTimeout(() => {
           resultPaneRef.current?.scrollIntoView({
@@ -646,98 +616,12 @@ export function SelectorApp() {
     setOpenAlts([]);
   }, [resultKey]);
 
-  useLayoutEffect(() => {
-    const form = formRef.current;
-    if (!form) return;
-    const sync = () => {
-      if (!moreOpen) setPaneMinH(form.offsetHeight);
-    };
-    sync();
-    const ro = new ResizeObserver(sync);
-    ro.observe(form);
-    return () => ro.disconnect();
-  }, [moreOpen]);
-
-  useEffect(() => {
-    if (!moreOpen) {
-      setMoreUnlocked(false);
-      return;
-    }
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setMoreUnlocked(true);
-    }
-  }, [moreOpen]);
-
   const copyModel = async (text: string) => {
     const ok = await copyText(text);
     if (!ok) return;
     setCopiedModel(text);
     if (copiedTimer.current) clearTimeout(copiedTimer.current);
     copiedTimer.current = setTimeout(() => setCopiedModel(null), 2000);
-  };
-
-  const clearResult = () => {
-    setResult(null);
-    setHasRun(false);
-    setStale(false);
-    setAltsOpen(false);
-    setOpenAlts([]);
-  };
-
-  const loadExample = (ex: (typeof EXAMPLES)[number]) => {
-    if (activeExample === ex.key) {
-      const prev = beforePreset.current;
-      beforePreset.current = null;
-      if (prev) {
-        setInput(prev.input);
-        setPm(prev.pm);
-        setVoltageMode(prev.voltageMode);
-        setWindingRatedKv(prev.windingRatedKv);
-        setCurrentMode(prev.currentMode);
-        setTransformerMva(prev.transformerMva);
-        setTapPlus(prev.tapPlus);
-        setTapMinus(prev.tapMinus);
-        setStepPercentPct(prev.stepPercentPct);
-        setSafetyK(prev.safetyK);
-        setTapRange(prev.tapRange);
-      } else {
-        setInput(defaultInput);
-        setPm("8");
-        setVoltageMode("winding");
-        setWindingRatedKv(DEFAULT_WINDING_RATED_KV);
-        setCurrentMode("capacity");
-        setTransformerMva(25);
-        setTapPlus(8);
-        setTapMinus(8);
-        setStepPercentPct(1.25);
-        setSafetyK(1);
-        setTapRange(null);
-      }
-      setActiveExample(null);
-      clearResult();
-      return;
-    }
-    if (activeExample == null) {
-      beforePreset.current = {
-        input,
-        pm,
-        voltageMode,
-        windingRatedKv,
-        currentMode,
-        transformerMva,
-        tapPlus,
-        tapMinus,
-        stepPercentPct,
-        safetyK,
-        tapRange,
-      };
-    }
-    const rated = EXAMPLE_RATED_KV[ex.key];
-    setWindingRatedKv(rated);
-    setVoltageMode("winding");
-    setInput((s) => ({ ...s, umKv: 0 }));
-    setActiveExample(ex.key);
-    clearResult();
   };
 
   const primary = result?.ok ? result.results[0] : null;
@@ -753,7 +637,6 @@ export function SelectorApp() {
     result?.ok && pickedDutyA != null
       ? insuranceModel(result.results, pickedDutyA, pickedStepV)
       : null;
-  const idle = !hasRun || !result;
   const posHint =
     !isLinear && input.positions != null
       ? t(lang, "posHint", { n: input.positions })
@@ -780,81 +663,27 @@ export function SelectorApp() {
       : null;
 
   return (
-    <div className="selector-shell mx-auto flex w-full min-w-0 max-w-[1100px] flex-col gap-5 px-4 pt-8 pb-8 sm:px-6 md:gap-4 md:pt-6 md:pb-4">
-      {/* Leftover viewport around the whole workbench (title + cards).
-          Bottom spacer grows more so the block sits slightly above true center.
-          Collapses when the page needs to scroll. */}
-      <div className="min-h-0 flex-1" aria-hidden />
-
-      {/* Stack on phone: title full width, langs row below — avoids squashed header */}
-      <header className="flex shrink-0 flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div className="min-w-0 flex-1 max-sm:pr-11">
-          <h1 className="font-[family-name:var(--font-display)] text-[1.45rem] font-semibold leading-tight tracking-[-0.03em] text-[var(--color-ink)] sm:text-[1.8rem]">
-            {t(lang, "title")}
-          </h1>
-          <p className="mt-1.5 max-w-[52rem] text-[0.875rem] leading-snug text-[var(--color-muted)] sm:text-[0.9rem]">
-            {t(lang, "subtitle")}
-          </p>
-        </div>
-        <div className="flex w-full max-w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end">
-          <LangSwitcher
-            lang={lang}
-            onChange={setLang}
-            ariaLabel={t(lang, "langAria")}
-          />
-        </div>
-      </header>
-
-      {/* Single column phone → two columns desktop; result below form on mobile */}
-      <div
-        className={cx(
-          "grid min-w-0 gap-4 sm:gap-5 md:grid-cols-2 md:gap-5",
-          moreOpen ? "md:items-start" : "md:items-stretch",
-        )}
-      >
-        {/* —— Form —— */}
+    <div className="flex w-full min-w-0 flex-1 flex-col lg:grid lg:h-dvh lg:grid-cols-2 lg:overflow-hidden">
         <form
-          ref={formRef}
-          className="min-w-0 rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white p-4 shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)] sm:p-5"
+          className="pane-in pane-in-late order-2 flex min-w-0 flex-col overflow-y-auto bg-[#f4f7fb] px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-7 sm:py-8 lg:col-start-2 lg:row-start-1 lg:h-dvh lg:min-h-0 lg:px-8 lg:py-6"
           onSubmit={(e) => {
             e.preventDefault();
             runSelect();
           }}
         >
-          <div className="mb-4 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="shrink-0 font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
-              {t(lang, "presets")}
+          <div className="mx-auto my-auto w-full">
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <h2 className="font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold leading-none text-[var(--color-ink)]">
+              {t(lang, "duty")}
             </h2>
-            <div
-              className="grid w-full grid-cols-3 gap-1.5 sm:w-[18.5rem] sm:shrink-0"
-              role="group"
-              aria-label={t(lang, "presets")}
-            >
-              {EXAMPLES.map((ex) => {
-                const on = activeExample === ex.key;
-                return (
-                  <button
-                    key={ex.key}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => loadExample(ex)}
-                    title={t(lang, ex.hintKey)}
-                    className={cx(
-                      "inline-flex h-8 w-full items-center justify-center whitespace-nowrap rounded-full border px-1.5 text-center text-[0.75rem] leading-none transition-colors duration-150 sm:h-7",
-                      "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-                      on
-                        ? "border-[var(--color-accent)] text-[var(--color-accent)]"
-                        : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
-                    )}
-                  >
-                    {t(lang, ex.labelKey)}
-                  </button>
-                );
-              })}
-            </div>
+            <LangSwitcher
+              lang={lang}
+              onChange={setLang}
+              ariaLabel={t(lang, "langAria")}
+            />
           </div>
 
-          <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
+          <div className="grid gap-x-5 gap-y-3 sm:grid-cols-2">
             <Field
               as="div"
               label={
@@ -946,7 +775,7 @@ export function SelectorApp() {
                     !(MVA_OPTIONS as readonly number[]).includes(
                       transformerMva,
                     )) ? (
-                    <span className="pointer-events-none absolute top-0 right-3 flex h-10 items-center text-[0.75rem] text-[var(--color-muted)]">
+                    <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.75rem] text-[var(--color-muted)]">
                       MVA
                     </span>
                   ) : null}
@@ -1048,7 +877,7 @@ export function SelectorApp() {
                   !(WINDING_RATED_KV as readonly number[]).includes(
                     windingRatedKv,
                   )) ? (
-                  <span className="pointer-events-none absolute top-0 right-3 flex h-10 items-center text-[0.75rem] text-[var(--color-muted)]">
+                  <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.75rem] text-[var(--color-muted)]">
                     kV
                   </span>
                 ) : null}
@@ -1214,7 +1043,7 @@ export function SelectorApp() {
                   !(STEP_PERCENT_OPTIONS as readonly number[]).includes(
                     stepPercentPct,
                   )) ? (
-                  <span className="pointer-events-none absolute top-0 right-3 flex h-10 items-center text-[0.9rem] text-[var(--color-ink)]">
+                  <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.9rem] text-[var(--color-ink)]">
                     %
                   </span>
                 ) : null}
@@ -1342,62 +1171,9 @@ export function SelectorApp() {
                 <option value="I">I</option>
               </select>
             </Field>
-          </div>
-
-          {/* More options — hairline + button; panel drops */}
-          <div className="mt-4 border-t border-[var(--color-rule)] pt-4">
-            <button
-              type="button"
-              onClick={() => setMoreOpen((o) => !o)}
-              className={cx(
-                "flex w-full min-h-11 items-center gap-2.5 rounded-[var(--radius-sm)] border bg-white px-3 py-2 text-left",
-                "transition-[border-color,background-color] duration-150",
-                "hover:border-[var(--color-accent)]",
-                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-                moreOpen
-                  ? "border-[var(--color-accent)] bg-[oklch(58%_0.2_256_/_0.04)]"
-                  : "border-[var(--color-rule-2)]",
-              )}
-              aria-expanded={moreOpen}
-            >
-              <AdjustmentsHorizontalIcon
-                className="h-4 w-4 shrink-0 text-[var(--color-muted)]"
-                aria-hidden
-              />
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-[0.875rem] font-semibold text-[var(--color-ink)]">
-                  {t(lang, "more")}
-                </span>
-                <span className="truncate text-[0.75rem] leading-snug text-[var(--color-muted)]">
-                  {t(lang, "moreLead")}
-                </span>
-              </span>
-              <ChevronDownIcon
-                className={cx(
-                  "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]",
-                  moreOpen && "rotate-180",
-                )}
-                aria-hidden
-              />
-            </button>
-
-            <div
-              className={cx("more-drop", moreOpen && "more-drop-open")}
-              onTransitionEnd={(e) => {
-                if (e.propertyName !== "grid-template-rows") return;
-                if (moreOpen) setMoreUnlocked(true);
-              }}
-            >
-              <div
-                className={cx(
-                  "min-h-0",
-                  moreUnlocked ? "overflow-visible" : "overflow-hidden",
-                )}
-              >
-                <div className="more-drop-inner grid gap-x-4 gap-y-3.5 pt-3 sm:grid-cols-2">
                   <Field label={t(lang, "dutyKind")} as="div">
                     <div
-                      className="grid h-10 grid-cols-2 gap-1"
+                      className="grid h-11 grid-cols-2 gap-2"
                       role="group"
                       aria-label={t(lang, "dutyKind")}
                     >
@@ -1429,13 +1205,7 @@ export function SelectorApp() {
                               }));
                               touch();
                             }}
-                            className={cx(
-                              "inline-flex h-10 items-center justify-center rounded-[var(--radius-sm)] border text-[0.8125rem] transition-colors duration-150",
-                              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-                              on
-                                ? "border-[var(--color-accent)] font-medium text-[var(--color-accent)]"
-                                : "border-[var(--color-rule-2)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",
-                            )}
+                            className={segBtn(on)}
                           >
                             {t(lang, k === "oltc" ? "dutyOltc" : "dutyOctc")}
                           </button>
@@ -1446,7 +1216,7 @@ export function SelectorApp() {
                   {input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
                     <Field label={t(lang, "arcMode")} as="div">
                       <div
-                        className="grid h-10 grid-cols-2 gap-1"
+                        className="grid h-11 grid-cols-2 gap-2"
                         role="group"
                         aria-label={t(lang, "arcMode")}
                       >
@@ -1470,13 +1240,7 @@ export function SelectorApp() {
                                 }));
                                 touch();
                               }}
-                              className={cx(
-                                "inline-flex h-10 items-center justify-center rounded-[var(--radius-sm)] border text-[0.8125rem] transition-colors duration-150",
-                                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-                                on
-                                  ? "border-[var(--color-accent)] font-medium text-[var(--color-accent)]"
-                                  : "border-[var(--color-rule-2)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",
-                              )}
+                              className={segBtn(on)}
                             >
                               {t(lang, key)}
                             </button>
@@ -1544,74 +1308,74 @@ export function SelectorApp() {
 
                   <Field as="div" label={t(lang, "acrossInsul")}>
                     <div className="grid grid-cols-2 gap-2">
-                      <select
-                        className={controlClass}
-                        aria-label={t(lang, "acrossBil")}
+                      <UpSelect
+                        label={t(lang, "acrossBil")}
                         value={
                           input.acrossTapBilKv != null &&
                           input.acrossTapBilKv > 0
                             ? String(input.acrossTapBilKv)
                             : ""
                         }
-                        onChange={(e) =>
+                        onChange={(raw) =>
                           patch(
                             "acrossTapBilKv",
-                            e.target.value === ""
-                              ? undefined
-                              : Number(e.target.value),
+                            raw === "" ? undefined : Number(raw),
                           )
                         }
-                      >
-                        <option value="">{t(lang, "acrossUnset")}</option>
-                        {input.acrossTapBilKv != null &&
-                        input.acrossTapBilKv > 0 &&
-                        !(ACROSS_BIL_OPTIONS_KV as readonly number[]).includes(
-                          input.acrossTapBilKv,
-                        ) ? (
-                          <option value={input.acrossTapBilKv}>
-                            {input.acrossTapBilKv} kV
-                          </option>
-                        ) : null}
-                        {ACROSS_BIL_MENU.map((item) => (
-                          <option key={item.value} value={item.value}>
-                            {currentLabel(lang, item.labelZh, item.labelEn)}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        className={controlClass}
-                        aria-label={t(lang, "acrossPf")}
+                        options={[
+                          { value: "", label: t(lang, "acrossUnset") },
+                          ...(input.acrossTapBilKv != null &&
+                          input.acrossTapBilKv > 0 &&
+                          !(ACROSS_BIL_OPTIONS_KV as readonly number[]).includes(
+                            input.acrossTapBilKv,
+                          )
+                            ? [
+                                {
+                                  value: String(input.acrossTapBilKv),
+                                  label: `${input.acrossTapBilKv} kV`,
+                                },
+                              ]
+                            : []),
+                          ...ACROSS_BIL_MENU.map((item) => ({
+                            value: String(item.value),
+                            label: currentLabel(lang, item.labelZh, item.labelEn),
+                          })),
+                        ]}
+                      />
+                      <UpSelect
+                        label={t(lang, "acrossPf")}
                         value={
                           input.acrossTapPfKv != null &&
                           input.acrossTapPfKv > 0
                             ? String(input.acrossTapPfKv)
                             : ""
                         }
-                        onChange={(e) =>
+                        onChange={(raw) =>
                           patch(
                             "acrossTapPfKv",
-                            e.target.value === ""
-                              ? undefined
-                              : Number(e.target.value),
+                            raw === "" ? undefined : Number(raw),
                           )
                         }
-                      >
-                        <option value="">{t(lang, "acrossUnset")}</option>
-                        {input.acrossTapPfKv != null &&
-                        input.acrossTapPfKv > 0 &&
-                        !(ACROSS_PF_OPTIONS_KV as readonly number[]).includes(
-                          input.acrossTapPfKv,
-                        ) ? (
-                          <option value={input.acrossTapPfKv}>
-                            {input.acrossTapPfKv} kV
-                          </option>
-                        ) : null}
-                        {ACROSS_PF_MENU.map((item) => (
-                          <option key={item.value} value={item.value}>
-                            {currentLabel(lang, item.labelZh, item.labelEn)}
-                          </option>
-                        ))}
-                      </select>
+                        options={[
+                          { value: "", label: t(lang, "acrossUnset") },
+                          ...(input.acrossTapPfKv != null &&
+                          input.acrossTapPfKv > 0 &&
+                          !(ACROSS_PF_OPTIONS_KV as readonly number[]).includes(
+                            input.acrossTapPfKv,
+                          )
+                            ? [
+                                {
+                                  value: String(input.acrossTapPfKv),
+                                  label: `${input.acrossTapPfKv} kV`,
+                                },
+                              ]
+                            : []),
+                          ...ACROSS_PF_MENU.map((item) => ({
+                            value: String(item.value),
+                            label: currentLabel(lang, item.labelZh, item.labelEn),
+                          })),
+                        ]}
+                      />
                     </div>
                   </Field>
                   <Field as="div" label={t(lang, "safetyK")}>
@@ -1647,45 +1411,40 @@ export function SelectorApp() {
                           }}
                         />
                       ) : (
-                        <select
-                          className={controlClass}
+                        <UpSelect
+                          label={t(lang, "safetyK")}
                           value={safetyK > 0 ? String(safetyK) : "1"}
-                          onChange={(e) => {
-                            if (e.target.value === "__custom__") {
+                          onChange={(raw) => {
+                            if (raw === "__custom__") {
                               setSafetyKCustom(true);
                               return;
                             }
                             setSafetyKCustom(false);
-                            commitSafetyK(Number(e.target.value));
+                            commitSafetyK(Number(raw));
                           }}
-                        >
-                          <option value="__custom__">
-                            {t(lang, "custom")}
-                          </option>
-                          {SAFETY_K_OPTIONS.map((n) => (
-                            <option key={n} value={String(n)}>
-                              ×{n}
-                            </option>
-                          ))}
-                        </select>
+                          options={[
+                            { value: "__custom__", label: t(lang, "custom") },
+                            ...SAFETY_K_OPTIONS.map((n) => ({
+                              value: String(n),
+                              label: `×${n}`,
+                            })),
+                          ]}
+                        />
                       )}
                       {safetyKCustom ||
                       (safetyK > 0 &&
                         !(SAFETY_K_OPTIONS as readonly number[]).includes(
                           safetyK,
                         )) ? (
-                        <span className="pointer-events-none absolute top-0 left-3 flex h-10 items-center text-[0.9rem] text-[var(--color-ink)]">
+                        <span className="pointer-events-none absolute top-0 left-3 flex h-11 items-center text-[0.9rem] text-[var(--color-ink)]">
                           ×
                         </span>
                       ) : null}
                     </div>
                   </Field>
-                </div>
-              </div>
-            </div>
           </div>
 
-          <div className="mt-5 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3">
+          <div className="mt-[30px] flex flex-col items-stretch gap-2">
             <button
               type="submit"
               disabled={
@@ -1695,9 +1454,8 @@ export function SelectorApp() {
                   : !input.throughCurrentA)
               }
               className={cx(
-                "inline-flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-accent-ink)] transition-[opacity,transform] duration-150",
-                "sm:h-11 sm:w-auto sm:min-w-[12.5rem] sm:shrink-0 sm:px-8",
-                "hover:opacity-90 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+                "inline-flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-accent-ink)] transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
+                "hover:opacity-90 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 running && "pointer-events-none",
               )}
@@ -1713,103 +1471,93 @@ export function SelectorApp() {
                 t(lang, "select")
               )}
             </button>
-            <p className="text-center text-[0.8125rem] leading-snug text-[var(--color-muted)] sm:max-w-[22rem] sm:text-left">
-              {t(lang, "reRunHint")}
-            </p>
+          </div>
           </div>
         </form>
 
-        {/* —— Result pane —— */}
-        <aside
-          ref={resultPaneRef}
-          className={cx(
-            "flex min-w-0 flex-col scroll-mt-16 md:h-full md:sticky md:top-4",
-            idle && !running && "max-md:hidden",
-          )}
-          style={
-            moreOpen && paneMinH
-              ? { minHeight: paneMinH }
-              : undefined
-          }
-        >
+        <div className="pane-in order-1 bg-[#0A386A] text-white lg:col-start-1 lg:row-start-1">
+          <aside
+            ref={resultPaneRef}
+            className="flex flex-col px-5 pt-5 pb-4 sm:px-8 lg:sticky lg:top-0 lg:h-dvh lg:min-h-0 lg:px-8 lg:pt-7 lg:pb-6"
+          >
+            <h1 className="shrink-0 text-[1.0625rem] font-semibold tracking-[0.08em] text-[#d7e4f0]">
+              {t(lang, "title")}
+            </h1>
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <div className="w-full py-4 lg:my-auto lg:py-8">
           {!hasRun || !result ? (
             <IdlePanel lang={lang} running={running} />
           ) : (
             <div
-              key={resultKey}
               className={cx(
-                "result-enter flex h-full min-h-full flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-rule)] bg-white shadow-[0_1px_2px_oklch(24%_0.02_258_/_0.04)]",
-                stale && "opacity-70",
+                "result-stage",
+                stale && !running && "is-stale",
+                running && "is-running",
               )}
             >
-              {stale ? (
-                <div className="border-b border-[var(--color-rule)] bg-[oklch(96%_0.03_85)] px-4 py-1.5 text-center text-[0.75rem] leading-snug text-[var(--color-warn)]">
+              {stale && !running ? (
+                <p className="mb-3 text-[0.8125rem] leading-snug text-[#f3d48a]">
                   {t(lang, "stale")}
-                </div>
+                </p>
               ) : null}
-
+              <div className="grid">
+                <div key={resultKey} className="result-pop col-start-1 row-start-1">
               {!result.ok || !primary ? (
-                <div className="p-5">
-                  <p className="font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold text-[var(--color-err)]">
+                <>
+                  <p className="text-[0.9375rem] font-semibold text-[#ffb4b4]">
                     {t(lang, "noMatch")}
                   </p>
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-[0.8125rem] text-[var(--color-ink-2)]">
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-[0.8125rem] leading-snug text-[#ffd0d0]">
                     {(lang === "zh" ? result.errorsZh : result.errorsEn).map((e) => (
                       <li key={e}>{e}</li>
                     ))}
                   </ul>
-                </div>
+                </>
               ) : (
                 <>
-                  <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-rule)] px-4 py-5">
-                    <div className="flex min-w-0 flex-col items-start gap-1">
-                      <span className={resultTagClass}>
-                        {t(lang, loose ? "allRound" : "recommended")}
-                      </span>
-                      <p className="min-w-0 font-mono text-[1.0625rem] leading-snug font-medium tracking-tight break-words text-[var(--color-ink)] sm:text-[1.1875rem]">
-                        {primary.model}
-                      </p>
-                    </div>
+                  <p className="text-[0.75rem] font-semibold tracking-[0.08em] text-[#8fd0e2]">
+                    {t(lang, loose ? "allRound" : "recommended")}
+                  </p>
+                  <div className="mt-3 flex items-center justify-between gap-4">
+                    <p className="min-w-0 flex-1 font-mono text-[clamp(1.375rem,2.4vw,2rem)] leading-[1.2] font-medium tracking-tight break-words text-white">
+                      {primary.model}
+                    </p>
                     <button
-                        type="button"
-                        onClick={() => copyModel(primary.model)}
-                        className={cx(
-                          "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border px-2.5 text-[0.75rem] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-                          copiedModel === primary.model
-                            ? "border-[var(--color-accent)] text-[var(--color-accent)]"
-                            : "border-[var(--color-rule)] text-[var(--color-ink-2)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
-                        )}
-                        aria-label={
-                          copiedModel === primary.model
-                            ? t(lang, "copied")
-                            : t(lang, "copyType")
-                        }
-                      >
-                        {copiedModel === primary.model ? (
-                          <CheckIcon className="h-4 w-4" aria-hidden />
-                        ) : (
-                          <ClipboardDocumentIcon className="h-4 w-4" aria-hidden />
-                        )}
-                        <span aria-live="polite">
-                          {copiedModel === primary.model
-                            ? t(lang, "copied")
-                            : t(lang, "copy")}
-                        </span>
-                      </button>
+                      type="button"
+                      onClick={() => copyModel(primary.model)}
+                      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border border-white px-3 text-[0.8125rem] font-semibold text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                      aria-label={
+                        copiedModel === primary.model
+                          ? t(lang, "copied")
+                          : t(lang, "copyType")
+                      }
+                    >
+                      {copiedModel === primary.model ? (
+                        <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+                      ) : (
+                        <ClipboardDocumentIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+                      )}
+                      <span aria-live="polite">
+                        {copiedModel === primary.model
+                          ? t(lang, "copied")
+                          : t(lang, "copy")}
+                      </span>
+                    </button>
                   </div>
 
                   <ModelSpec
                     lang={lang}
                     r={primary}
                     dutyMounting={input.mounting}
+                    inverse
                   />
 
                   {alts.length > 0 ? (
-                    <div className="shrink-0 border-t border-[var(--color-rule)] px-4 py-2.5">
+                    <div className="mt-7 border-t border-white/15 pt-4">
                       <button
                         type="button"
                         onClick={() => setAltsOpen((o) => !o)}
-                        className="flex w-full items-center justify-between text-left text-[0.75rem] font-medium text-[var(--color-ink-2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                        className="flex w-full items-center justify-between text-left text-[0.75rem] font-medium text-[#d5e2ef] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                         aria-expanded={altsOpen}
                       >
                         <span>
@@ -1817,7 +1565,7 @@ export function SelectorApp() {
                         </span>
                         <ChevronDownIcon
                           className={cx(
-                            "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
+                            "h-4 w-4 shrink-0 text-[#9bb4c9] transition-transform duration-200",
                             altsOpen && "rotate-180",
                           )}
                           aria-hidden
@@ -1838,35 +1586,31 @@ export function SelectorApp() {
                               return (
                                 <li
                                   key={r.model}
-                                  className="rounded-[var(--radius-sm)] border border-[var(--color-rule)]"
+                                  className="rounded-[var(--radius-sm)] border border-white/20"
                                 >
                                   <div className="flex items-center gap-1.5 px-3 py-2">
                                     <button
                                       type="button"
                                       aria-expanded={open}
                                       onClick={() =>
-                                        setOpenAlts((cur) =>
-                                          open
-                                            ? cur.filter((m) => m !== r.model)
-                                            : [...cur, r.model],
-                                        )
+                                        setOpenAlts(open ? [] : [r.model])
                                       }
-                                      className="flex min-w-0 flex-1 items-center gap-2 rounded-[var(--radius-sm)] px-0.5 py-0.5 text-left transition-colors hover:text-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                                      className="flex min-w-0 flex-1 items-center gap-2 rounded-[var(--radius-sm)] px-0.5 py-0.5 text-left text-white transition-colors hover:text-[#8fd0e2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                                     >
                                       <ChevronDownIcon
                                         className={cx(
-                                          "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
+                                          "h-4 w-4 shrink-0 text-[#9bb4c9] transition-transform duration-200",
                                           open && "rotate-180",
                                         )}
                                         aria-hidden
                                       />
                                       <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
-                                        <span className="min-w-0 break-all font-mono text-[0.875rem] leading-snug text-[var(--color-ink)]">
+                                        <span className="min-w-0 break-all font-mono text-[0.875rem] leading-snug text-white">
                                           {r.model}
                                         </span>
                                         {insuranceAlt != null &&
                                         r.model === insuranceAlt ? (
-                                          <span className={resultTagClass}>
+                                          <span className="shrink-0 rounded-full border border-[#8fd0e2]/55 bg-[#8fd0e2]/10 px-2 py-1 text-[0.75rem] font-semibold leading-none tracking-[0.04em] text-[#8fd0e2]">
                                             {t(lang, "allRound")}
                                           </span>
                                         ) : null}
@@ -1876,7 +1620,7 @@ export function SelectorApp() {
                                       <button
                                         type="button"
                                         onClick={() => copyModel(r.model)}
-                                        className="inline-flex h-8 shrink-0 items-center rounded-[var(--radius-sm)] px-2 text-[0.75rem] text-[var(--color-accent)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                                        className="inline-flex h-8 shrink-0 items-center rounded-[var(--radius-sm)] px-2 text-[0.75rem] font-semibold text-[#8fd0e2] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                                         aria-label={
                                           copiedModel === r.model
                                             ? t(lang, "copied")
@@ -1904,6 +1648,7 @@ export function SelectorApp() {
                                           r={r}
                                           dutyMounting={input.mounting}
                                           compact
+                                          inverse
                                         />
                                       </div>
                                     </div>
@@ -1918,41 +1663,47 @@ export function SelectorApp() {
                   ) : null}
                 </>
               )}
+                </div>
+                {running ? (
+                  <div className="result-work result-work-delay col-start-1 row-start-1 flex items-center gap-2.5 self-center text-[0.9375rem] text-[#d5e2ef]">
+                    <span className="h-[18px] w-[18px] shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    {t(lang, "selecting")}
+                  </div>
+                ) : null}
+              </div>
             </div>
           )}
-        </aside>
-      </div>
-      <div className="min-h-0 flex-[1.55]" aria-hidden />
+            </div>
+            </div>
+            <div className="flex shrink-0 items-center justify-between gap-3 pt-3">
+              <p className="min-w-0 text-[0.75rem] leading-snug text-[#8aa4bb]">
+                {t(lang, "disclaimer")}
+              </p>
+              <VersionMark />
+            </div>
+          </aside>
+        </div>
     </div>
   );
 }
 
 function IdlePanel({ lang, running }: { lang: Lang; running: boolean }) {
+  if (running) {
+    return (
+      <div className="flex items-center gap-2.5 text-[0.9375rem] text-[#d5e2ef]">
+        <span className="h-[18px] w-[18px] shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+        <p>{t(lang, "selecting")}</p>
+      </div>
+    );
+  }
   return (
-    <div
-      className={cx(
-        "flex h-full min-h-[22rem] flex-col items-center justify-center rounded-[var(--radius-md)] border border-dashed border-[var(--color-rule-2)] bg-[var(--color-soft)] px-5 py-8 text-center transition-opacity duration-200 sm:px-6 sm:py-10 md:min-h-0 md:py-8",
-        running && "opacity-70",
-      )}
-    >
-      {running ? (
-        <>
-          <span className="mb-3 h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-rule-2)] border-t-[var(--color-accent)]" />
-          <p className="text-sm text-[var(--color-ink-2)]">{t(lang, "selecting")}</p>
-        </>
-      ) : (
-        <>
-          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-rule)] bg-white text-[var(--color-muted)]">
-            <ClipboardDocumentListIcon className="h-5 w-5" aria-hidden />
-          </div>
-          <p className="font-[family-name:var(--font-display)] text-base font-semibold text-[var(--color-ink)]">
-            {t(lang, "idleTitle")}
-          </p>
-          <p className="mt-2 max-w-[28ch] text-[0.875rem] leading-relaxed text-[var(--color-muted)]">
-            {t(lang, "idleBody")}
-          </p>
-        </>
-      )}
+    <div>
+      <p className="font-[family-name:var(--font-display)] text-[1.875rem] font-semibold leading-[1.15] tracking-[-0.03em] text-white lg:text-[2.5rem]">
+        {t(lang, "idleTitle")}
+      </p>
+      <p className="mt-2 max-w-[22rem] text-base leading-snug text-[#d5e2ef] lg:mt-3 lg:text-[1.125rem]">
+        {t(lang, "idleBody")}
+      </p>
     </div>
   );
 }
@@ -1992,11 +1743,13 @@ function ModelSpec({
   r,
   dutyMounting,
   compact,
+  inverse,
 }: {
   lang: Lang;
   r: ModelResult;
   dutyMounting: SelectInput["mounting"];
   compact?: boolean;
+  inverse?: boolean;
 }) {
   const nb = "\u00a0";
   const series = SERIES.find((s) => s.id === r.seriesId);
@@ -2035,19 +1788,31 @@ function ModelSpec({
   return (
     <dl
       className={cx(
-        "grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-3",
+        "grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3",
         compact
-          ? "shrink-0 border-t border-[var(--color-rule)] px-3 py-2.5"
-          : "shrink-0 px-4 py-2.5 gap-x-5 gap-y-2",
+          ? inverse
+            ? "mt-3 border-t border-white/15 px-3 py-2.5"
+            : "shrink-0 border-t border-[var(--color-rule)] px-3 py-2.5"
+          : inverse
+            ? "mt-4 px-0 py-0"
+            : "shrink-0 gap-x-5 gap-y-2 px-4 py-2.5",
       )}
     >
       {items.map((item) => (
         <div key={item.key} className="min-w-0">
-          <dt className="text-[0.6875rem] leading-snug text-[var(--color-muted)]">
+          <dt
+            className={cx(
+              "text-[0.6875rem] leading-snug",
+              inverse ? "text-[#9bb4c9]" : "text-[var(--color-muted)]",
+            )}
+          >
             {t(lang, item.key)}
           </dt>
           <dd
-            className="mt-0.5 text-[0.875rem] leading-snug tabular-nums text-[var(--color-ink)]"
+            className={cx(
+              "mt-0.5 text-[0.875rem] leading-snug tabular-nums",
+              inverse ? "text-white" : "text-[var(--color-ink)]",
+            )}
             translate="no"
           >
             {item.value}

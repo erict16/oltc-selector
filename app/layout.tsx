@@ -1,13 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { LangProvider } from "@/components/LangProvider";
-import { SiteFooter } from "@/components/SiteFooter";
 import "./globals.css";
 
 /** Must match next.config basePath for GH Pages favicon URLs */
 const basePath = process.env.GH_PAGES === "true" ? "/oltc-selector" : "";
 
 export const metadata: Metadata = {
-  title: "OLTC Selector · 有载开关选型",
+  title: "OLTC Selector · 华明有载开关选型",
   description:
     "Private OLTC type-designation helper. Indicative only — not an official manufacturer tool or OS.",
   metadataBase: new URL(
@@ -56,14 +55,12 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        {/* Document scrolls; footer is not pinned. main is a column so the
-            selector shell can flex-1 fill leftover height and center. */}
+        {/* Document scrolls. main is a column so the selector can fill the viewport. */}
         <LangProvider initial="zh">
           <div className="flex min-h-dvh flex-col">
             <main id="main" className="flex min-w-0 flex-1 flex-col">
               {children}
             </main>
-            <SiteFooter />
           </div>
         </LangProvider>
       </body>

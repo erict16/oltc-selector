@@ -18,7 +18,7 @@
   --color-rule: oklch(90% 0.01 250);
   --color-rule-2: oklch(84% 0.015 250);
   --color-soft: oklch(96.5% 0.008 250);
-  --color-accent: oklch(58% 0.2 256);
+  --color-accent: oklch(48.2% 0.114 246.7);
   --color-accent-ink: oklch(99% 0.01 250);
   --color-graphite: oklch(22% 0.016 260);
   --color-warn: oklch(55% 0.14 55);
@@ -47,7 +47,7 @@ body {
    both-edges keeps the leftover even. overflow-x: clip does not coerce
    overflow-y to auto, so body is not a second scroller. */
 html {
-  scrollbar-gutter: stable both-edges;
+  scrollbar-gutter: auto;
 }
 
 body {
@@ -474,6 +474,66 @@ select:open {
   background-image: none;
 }
 
+/* First paint: navy pane, then the duty form. Opacity and rise only. */
+@keyframes pane-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pane-in {
+  animation: pane-in 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.pane-in-late {
+  animation-delay: 110ms;
+}
+
+@keyframes result-out {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+    filter: blur(4px);
+  }
+}
+
+.result-pop > * {
+  animation: result-in 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.result-pop > *:nth-child(1) { animation-delay: 0ms; }
+.result-pop > *:nth-child(2) { animation-delay: 100ms; }
+.result-pop > *:nth-child(3) { animation-delay: 200ms; }
+.result-pop > *:nth-child(4) { animation-delay: 300ms; }
+.result-pop > *:nth-child(5) { animation-delay: 400ms; }
+.result-pop > *:nth-child(6) { animation-delay: 500ms; }
+
+.result-stage.is-running .result-pop,
+.result-stage.is-running .result-pop > * {
+  animation: result-out 150ms ease-out forwards;
+}
+
+.result-stage.is-stale .result-pop,
+.result-stage.is-stale .result-pop > * {
+  animation: none;
+  opacity: 0.45;
+  filter: none;
+  transform: none;
+}
+
+.result-work-delay {
+  opacity: 0;
+  animation: result-work-in 150ms ease-out 150ms forwards;
+}
+
+@keyframes result-work-in {
+  to { opacity: 1; }
+}
+
 /* Result card enter — calm rise, no bounce */
 @keyframes result-in {
   from {
@@ -513,8 +573,23 @@ select:open {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .pane-in,
+  .pane-in-late,
   .result-enter {
     animation: none;
+  }
+  .result-pop > *,
+  .result-stage.is-running .result-pop,
+  .result-stage.is-running .result-pop > *,
+  .result-work-delay {
+    animation: none;
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+  .result-stage.is-stale .result-pop,
+  .result-stage.is-stale .result-pop > * {
+    opacity: 0.45;
   }
   .animate-spin {
     animation: none;

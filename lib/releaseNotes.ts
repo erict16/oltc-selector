@@ -10,7 +10,7 @@ export type Release = {
 };
 
 /**
- * Version history, newest first. The footer popover shows the first two
+ * Version history, newest first. The result-pane popover shows the first two
  * releases; /changelog shows all of them, with the sidebar collapsed to
  * minor lines (v1.2, v1.1, …). Versions, dates, group kinds, and item
  * counts must stay identical across languages — only the item text is
