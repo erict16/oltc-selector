@@ -970,10 +970,18 @@ export function pickOtherOptions(
 }
 
 /**
- * Display only. The primary is 综合保险方案 when the duty uses at most half
- * of the chosen rating's current, step voltage, and step capacity together.
- * One axis over half means that axis forced this catalogue step, so the
- * card stays 满足最低要求. Do not use this to pick a larger type.
+ * A catalogue step is only worth an upsell once the tightest axis has used
+ * three quarters of it. Below that the minimum already covers the duty,
+ * so the card is 综合保险方案 and 其他可选 stays empty.
+ * 194 A is 56% of 350 A — not a reason to offer 600 A.
+ * 342 A is 98% of 350 A — 600 A is still the margin step.
+ */
+const COMFORTABLE_USE = 0.75;
+
+/**
+ * Display only. The primary is 综合保险方案 when every axis stays inside
+ * COMFORTABLE_USE. One axis past that line forced this catalogue step, so
+ * the card stays 满足最低要求. Do not use this to pick a larger type.
  */
 export function primaryIsInsurance(
   primary: ModelResult,
@@ -991,7 +999,7 @@ export function primaryIsInsurance(
     needKva > 0 && primary.stepCapacityKva && primary.stepCapacityKva > 0
       ? needKva / primary.stepCapacityKva
       : 0;
-  return Math.max(iUse, uUse, pUse) <= 0.5 + 1e-9;
+  return Math.max(iUse, uUse, pUse) <= COMFORTABLE_USE + 1e-9;
 }
 
 function dutyUse(
@@ -1087,17 +1095,24 @@ export function showsMinimumLabel(
   return !loose && insuranceAlt != null;
 }
 
-/** Other options, with the insurance step-up kept in the visible slots. */
+/** Other options, with the insurance step-up kept in the visible slots.
+ * Empty when the minimum already covers the duty with room to spare. */
 export function optionsWithInsurance(
   results: ModelResult[],
   dutyA: number,
   stepVoltageV: number,
   n = 3,
 ): ModelResult[] {
+  const primary = results[0];
+  if (
+    primary &&
+    primaryIsInsurance(primary, dutyA, stepVoltageV)
+  ) {
+    return [];
+  }
   const alts = pickOtherOptions(results, n);
   const id = insuranceModel(results, dutyA, stepVoltageV);
   if (!id) return alts;
-  const primary = results[0];
   const step = primary ? stepUpOf(primary, results) : null;
   // Current step was skipped because it does not raise the tight limit.
   // Lead with the family that does, and keep the current step unbadged.

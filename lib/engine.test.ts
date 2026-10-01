@@ -95,6 +95,26 @@ describe("insurance label", () => {
     const s = sized({ throughCurrentA: 100, umKv: 72.5, stepVoltageV: 800 });
     expect(s.loose).toBe(true);
     expect(s.tag).toBeNull();
+    expect(s.shown).toEqual([]);
+  });
+
+  it("lists no other model when 146 A already sits well inside CV2-350", () => {
+    // 25 MVA / 110 kV Y / ±8×1.25% → 145.8 A, Ust 794 V.
+    const s = sized({ throughCurrentA: 145.8, umKv: 72.5, stepVoltageV: 794 });
+    expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown).toEqual([]);
+  });
+
+  it("does not recommend 600 A for a 194 A duty", () => {
+    // 40 MVA / 132 kV Y / ±8×1.25% → 194.4 A, Ust 953 V.
+    // 194 A is 56% of 350 A. 600 A is not a margin step.
+    const s = sized({ throughCurrentA: 194.4, umKv: 72.5, stepVoltageV: 953 });
+    expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown).toEqual([]);
   });
 
   it("does not call a step-voltage-bound rating insurance", () => {
@@ -103,10 +123,18 @@ describe("insurance label", () => {
     expect(s.loose).toBe(false);
   });
 
-  it("tags the next family when CV2 is already at 600 A", () => {
-    // 63 MVA / 110 kV Y / ±8 / 1.67% → 381.7 A, Ust ≈ 1061 V.
-    // CV2 stops at 600 A, so 综合保险 is the next family, CM2, not SHZV.
+  it("does not upsell when CV2-600 still has room", () => {
+    // 381.7 A is 64% of 600 A. Ust 1061 V is 53% of 2000 V.
     const s = sized({ throughCurrentA: 381.7, umKv: 72.5, stepVoltageV: 1061 });
+    expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown).toEqual([]);
+  });
+
+  it("tags the next family when CV2-600 is actually current-tight", () => {
+    // 520 A is 87% of 600 A. No higher CV2 current, so 综合保险 is CM2, not SHZV.
+    const s = sized({ throughCurrentA: 520, umKv: 72.5, stepVoltageV: 1061 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
     expect(s.loose).toBe(false);
     expect(s.tag).toMatch(/^CM2III-600Y\/72\.5/);

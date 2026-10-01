@@ -4,7 +4,7 @@ import {
   stepVoltageFromPercent,
   throughCurrentFromRated,
 } from "./deriveUm";
-import { pickOtherOptions, selectOltc } from "./engine";
+import { optionsWithInsurance, selectOltc } from "./engine";
 import { commercialTypeExists } from "./typeExists";
 import type {
   Connection,
@@ -475,7 +475,12 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
   if (!commercialTypeExists(primary.model)) {
     throw new CliError(`Engine emitted a non-catalogue type: ${primary.model}`);
   }
-  const alts = pickOtherOptions(out.results, 3);
+  const alts = optionsWithInsurance(
+    out.results,
+    input.throughCurrentA,
+    input.stepVoltageV,
+    3,
+  );
   const lines = [
     primary.model,
     primary.reasonsZh[0] || primary.reasonsEn[0] || "最低满足",
@@ -498,7 +503,12 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
 export function formatCliJson(input: SelectInput, args?: CliArgs): string {
   const out = selectOltc(input);
   const primary = out.results[0] ?? null;
-  const alts = pickOtherOptions(out.results, 3).map((r) => r.model);
+  const alts = optionsWithInsurance(
+    out.results,
+    input.throughCurrentA,
+    input.stepVoltageV,
+    3,
+  ).map((r) => r.model);
   const payload = {
     ok: out.ok,
     model: primary?.model ?? null,
