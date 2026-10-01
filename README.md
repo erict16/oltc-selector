@@ -2,7 +2,7 @@
 
 填工况，给出 2025 目录里**最低满足**的型号。网页和 `oltc` CLI 共用同一份 `selectOltc` 引擎。
 
-**CLI（无报价）：** `npx -y oltc-selector@1.2.9`，命令是 `oltc`。Agent 技能包另放，不在这个仓库里。  
+**CLI：** `npx -y oltc-selector@1.2.9`，命令是 `oltc`。Agent 技能包另放，不在这个仓库里。  
 **网页：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) · [GitHub Pages](https://erict16.github.io/oltc-selector/)
 
 私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。
@@ -11,7 +11,7 @@
 
 ## CLI
 
-不需要 clone 本仓库。不输出人民币、系数、报价。
+不需要 clone 本仓库。
 
 ```bash
 npm i -g oltc-selector
@@ -40,7 +40,7 @@ oltc --mva 25 --kv 110 --conn Y --reg W --pm 8
 | `--mount` | `in-tank` / `on-tank` / `dry` | in-tank |
 | `--oil` / `--vacuum` | Switching medium | vacuum (on-load) |
 | `--contact` | OCTC contact e.g. `6x5` | |
-| `--json` | Machine output, still no prices | |
+| `--json` | Machine output | |
 
 `--structure auto` and omitting `--octc` match the web first paint: on-load, in-tank vacuum, minimum-adequate ranking.
 
