@@ -309,7 +309,7 @@ const zh: Dict = {
   regLinear: "线性调",
   positions: "工作位置数",
   pmSteps: "± 级数",
-  posHint: "{n} 位",
+  posHint: "{n}个工作档位",
   customPos: "自定义位置…",
   customPosPlaceholder: "+4-2×2.5%",
   mid: "中间位",

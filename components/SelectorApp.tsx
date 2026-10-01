@@ -1495,7 +1495,7 @@ export function SelectorApp() {
             <h1 className="shrink-0 text-[1.0625rem] font-semibold tracking-[0.08em] text-[#d7e4f0]">
               {t(lang, "title")}
             </h1>
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-clip overflow-y-auto">
             <div className="w-full py-4 lg:my-auto lg:py-8">
           {!hasRun || !result ? (
             <IdlePanel lang={lang} running={running} />

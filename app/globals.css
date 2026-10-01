@@ -498,7 +498,6 @@ select:open {
   to {
     opacity: 0;
     transform: translateY(-12px);
-    filter: blur(4px);
   }
 }
 
@@ -512,6 +511,11 @@ select:open {
 .result-pop > *:nth-child(5) { animation-delay: 400ms; }
 .result-pop > *:nth-child(6) { animation-delay: 500ms; }
 
+.result-stage.is-running {
+  /* Blur used to inflate this pane's scrollWidth by a few pixels and
+     flash a horizontal bar for the whole 计算中 interval. */
+  overflow: clip;
+}
 .result-stage.is-running .result-pop,
 .result-stage.is-running .result-pop > * {
   animation: result-out 150ms ease-out forwards;
