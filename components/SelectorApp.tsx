@@ -20,6 +20,7 @@ import { copyText } from "@/lib/clipboard";
 import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
+  calculatedUm,
   formatUmKv,
   maxThroughCurrent,
   oltcUmFromRatedKv,
@@ -133,29 +134,19 @@ function CaptionSub({
   eq,
   value,
   unit,
-  raised = false,
 }: {
   name: string;
   sub: string;
   eq?: boolean;
   value: string;
   unit: string;
-  /** Um's m sits on the top of the letter. Imax and Ust stay calculated subscripts. */
-  raised?: boolean;
 }) {
-  const mark = raised ? (
-    <span className="ml-px align-top text-[0.62em] leading-none" data-caption={sub}>
-      {sub}
-    </span>
-  ) : (
-    <sub className="relative top-[0.22em] ml-px text-[0.62em] leading-none" data-caption={sub}>
-      {sub}
-    </sub>
-  );
   return (
     <>
       {name}
-      {mark}
+      <sub className="relative top-[0.22em] ml-px text-[0.62em] leading-none">
+        {sub}
+      </sub>
       {eq !== false ? " = " : " "}
       {value}
       {unit}
@@ -567,7 +558,7 @@ export function SelectorApp() {
       return withOctcSeries({
         ...input,
         throughCurrentA: i,
-        // Catalogue switch Um (same number the caption shows), not Un/√3.
+        // Catalogue class for the switch. The corner shows calculatedUm.
         umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
         ...(ust != null ? { stepVoltageV: ust } : {}),
       });
@@ -690,7 +681,7 @@ export function SelectorApp() {
   const ustV = computedStepVoltage();
   const um =
     voltageMode === "winding" && windingRatedKv > 0
-      ? oltcUmFromRatedKv(windingRatedKv, input.connection)
+      ? calculatedUm(windingRatedKv, input.connection)
       : NaN;
 
   return (
@@ -843,7 +834,6 @@ export function SelectorApp() {
                   <CaptionSub
                     name="U"
                     sub="m"
-                    raised
                     value={formatUmKv(um)}
                     unit="kV"
                   />

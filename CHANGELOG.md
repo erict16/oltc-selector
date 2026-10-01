@@ -5,7 +5,7 @@
 - Selector uses the split workbench: navy result on the left, duty form on the right. Chinese title is 有载开关选型. The selection-assistant bubble is off the home page. The result pane has no version mark.
 - The page, the changelog notes, and the CLI help no longer name the manufacturer. The Chinese title is 有载开关选型.
 - Other options walk one price step: same family next current or Um, then the next family only. A minimum card always has a 综合保险 step. CV2-600 tags CM2, not SHZV. CM2 does not offer SHZVG. With no adjacent step, the card itself is 综合保险.
-- The Um mark sits on the top of the U. Imax and Ust stay as subscripts.
+- The corner Um is calculated live: star and any are Un/√3, line-end is Un. The engine still gets the catalogue class.
 - Phone language chips match the desktop size. The model and the copy button stay on the same row.
 - Off-circuit has no vacuum type. Choosing 无载 locks 灭弧方式 on oil and greys the control.
 - The rated-voltage field has no Um caption. Selection is unchanged: 110/132/150 kV star is 72.5, 220 kV star is 252. Un/√3 is not sent into the engine.
