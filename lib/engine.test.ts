@@ -117,17 +117,16 @@ describe("insurance label", () => {
     expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
   });
 
-  it("80 MVA on CV2-600 offers CM2, not SHZV as insurance", () => {
+  it("342 A stays on CV2-350 and insures with CV2-600", () => {
     // 80 MVA / 150 kV Y / ±8 / 1.25% → 342 A, Ust ≈ 1083 V.
-    // 342 A is inside the top 3% of CV2-350, so the minimum is CV2-600.
+    // 350 already carries 342. 600 is the same-family insurance, not CM2.
     const s = sized({ throughCurrentA: 342.1, umKv: 72.5, stepVoltageV: 1083 });
-    expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
+    expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
     expect(s.loose).toBe(false);
-    expect(s.tag).toBe("CM2III-600Y/72.5B-10193W");
-    expect(s.shown.map((r) => r.model)).toEqual([
-      "CV2III-600Y/126-10193W",
-      "CM2III-600Y/72.5B-10193W",
-    ]);
+    expect(s.tag).toMatch(/^CV2III-600Y\/72\.5/);
+    expect(s.shown[0]?.model).toMatch(/^CV2III-600Y\/72\.5/);
+    expect(s.shown.some((r) => r.seriesCode === "SHZV")).toBe(false);
+    expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
   });
 
   it("does not offer SHZVG beside a covering SHZV-1000", () => {
@@ -553,23 +552,25 @@ describe("training cases (选型案例-答案)", () => {
     expect(out.results[0].earthBilKv).toBe(250);
   });
 
-  it("case 2 → CM2III-600Y/72.5C-10193W as #1 (not SHZV)", () => {
+  it("case 2 → CM2III-500Y/72.5C-10193W as #1 (600 is the insurance)", () => {
     const out = selectOltc(FIXTURES.case2Cm2.input);
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toBe(FIXTURES.case2Cm2.expectModel);
     expect(out.results[0].seriesCode).toBe("CM2");
     expect(out.results[0].selectorSize).toBe("C");
-    expect(out.results[0].currentA).toBe(600);
+    expect(out.results[0].currentA).toBe(500);
     expect(out.results[0].maxStepVoltageV).toBe(3300);
-    expect(out.results[0].stepCapacityKva).toBe(1500);
+    expect(out.results[0].stepCapacityKva).toBe(1400);
+    expect(stepUpOf(out.results[0], out.results)?.currentA).toBe(600);
   });
 
-  it("case 5 → CV2III-600D/145-12233W as #1", () => {
+  it("case 5 → CV2III-350D/145-12233W as #1 (600 is the insurance)", () => {
     const out = selectOltc(FIXTURES.case5Cv2_145.input);
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toBe(FIXTURES.case5Cv2_145.expectModel);
     expect(out.results[0].maxStepVoltageV).toBe(1500);
-    expect(out.results[0].currentA).toBe(600);
+    expect(out.results[0].currentA).toBe(350);
+    expect(stepUpOf(out.results[0], out.results)?.currentA).toBe(600);
   });
 
   it("case 7 → 3xCM2I-800 (not SHZVIII-1000D) when I≈626 A Δ", () => {

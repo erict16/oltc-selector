@@ -543,27 +543,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
           if (psin != null && need > psin + 0.5) return false;
           return true;
         };
-        let covering = phaseCurrents.filter((c) => {
-          if (!ratingCoversDuty(input.throughCurrentA, c)) return false;
-          // Headroom: if duty sits in the top ~3% of a rating, bump (case 2: 489.7 → 600).
-          // 480 A must still accept CM2-500 (2025 sales).
-          // ~1 A epsilon: 349.9 A is S/√3U rounding of 350, not a commercial bump to 600.
-          if (
-            input.throughCurrentA + 1 < c &&
-            input.throughCurrentA > c * 0.97
-          ) {
-            return false;
-          }
-          return capacityOk(c);
-        });
-        if (!covering.length) {
-          // Keep max rating when the 97% bump has no next step.
-          const maxKeep = phaseCurrents.filter(
-            (c) =>
-              ratingCoversDuty(input.throughCurrentA, c) && capacityOk(c),
-          );
-          if (maxKeep.length) covering = [Math.max(...maxKeep)];
-        }
+        // Nameplate current already includes short-time overload.
+        // 342 A stays on 350. The next current (600) is 综合保险, not the minimum.
+        const covering = phaseCurrents.filter(
+          (c) => ratingCoversDuty(input.throughCurrentA, c) && capacityOk(c),
+        );
         if (!covering.length) continue;
         // Two covering ratings, plus the next catalogue step in this family.
         // 综合保险 uses that same-family step only. A later family stays in
@@ -1185,7 +1169,7 @@ export const FIXTURES = {
     },
     expectModel: "CV2III-350D/40.5-10193G",
   },
-  /** Training case 2 — CM2-600 not SHZV; grade C from across-tap BIL 285 */
+  /** Training case 2 — 489.7 A stays on CM2-500; 600 is the insurance step. Grade C from across-tap BIL 285. */
   case2Cm2: {
     input: {
       mounting: "in_tank" as const,
@@ -1206,7 +1190,7 @@ export const FIXTURES = {
       acrossTapPfKv: 65,
       mdu: "none" as const,
     },
-    expectModel: "CM2III-600Y/72.5C-10193W",
+    expectModel: "CM2III-500Y/72.5C-10193W",
   },
   /** Training case 5 — CV2-600D/145 */
   /**
@@ -1231,7 +1215,7 @@ export const FIXTURES = {
       acrossTapPfKv: 50,
       mdu: "none" as const,
     },
-    expectModel: "CV2III-600D/145-12233W",
+    expectModel: "CV2III-350D/145-12233W",
   },
   /**
    * Training sheet: 220 MVA Δ, I≈626 → 3×CM2I-800.
