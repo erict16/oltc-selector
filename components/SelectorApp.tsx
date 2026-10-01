@@ -17,6 +17,7 @@ import {
   STEP_VOLTAGE_OPTIONS_V,
 } from "@/lib/catalog";
 import { copyText } from "@/lib/clipboard";
+import { displayModel } from "@/lib/domesticModel";
 import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
@@ -1557,25 +1558,25 @@ export function SelectorApp() {
                   </p>
                   <div className="mt-3 flex items-center justify-between gap-3">
                     <p className="min-w-0 flex-1 font-mono text-[1rem] leading-[1.2] font-medium tracking-tight break-words text-white sm:text-[clamp(1.375rem,2.4vw,2rem)]">
-                      {modelNodes(primary.model)}
+                      {modelNodes(displayModel(primary.model, lang))}
                     </p>
                     <button
                       type="button"
-                      onClick={() => copyModel(primary.model)}
+                      onClick={() => copyModel(displayModel(primary.model, lang))}
                       className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border border-white px-3 text-[0.8125rem] font-semibold text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                       aria-label={
-                        copiedModel === primary.model
+                        copiedModel === displayModel(primary.model, lang)
                           ? t(lang, "copied")
                           : t(lang, "copyType")
                       }
                     >
-                      {copiedModel === primary.model ? (
+                      {copiedModel === displayModel(primary.model, lang) ? (
                         <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
                       ) : (
                         <ClipboardDocumentIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
                       )}
                       <span aria-live="polite">
-                        {copiedModel === primary.model
+                        {copiedModel === displayModel(primary.model, lang)
                           ? t(lang, "copied")
                           : t(lang, "copy")}
                       </span>
@@ -1620,6 +1621,7 @@ export function SelectorApp() {
                           <ul className="space-y-2 pt-2.5 pb-0.5">
                             {alts.map((r) => {
                               const open = openAlts.includes(r.model);
+                              const shown = displayModel(r.model, lang);
                               return (
                                 <li
                                   key={r.model}
@@ -1643,7 +1645,7 @@ export function SelectorApp() {
                                       />
                                       <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-1">
                                         <span className="min-w-0 break-words font-mono text-[0.8125rem] leading-snug text-white sm:text-[0.875rem]">
-                                          {modelNodes(r.model)}
+                                          {modelNodes(shown)}
                                         </span>
                                         {insuranceAlt != null &&
                                         r.model === insuranceAlt ? (
@@ -1656,16 +1658,16 @@ export function SelectorApp() {
                                     <span className="flex shrink-0 items-center">
                                       <button
                                         type="button"
-                                        onClick={() => copyModel(r.model)}
+                                        onClick={() => copyModel(shown)}
                                         className="inline-flex h-8 shrink-0 items-center rounded-[var(--radius-sm)] px-2 text-[0.75rem] font-semibold text-[#8fd0e2] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                                         aria-label={
-                                          copiedModel === r.model
+                                          copiedModel === shown
                                             ? t(lang, "copied")
                                             : t(lang, "copy")
                                         }
                                       >
                                         <span aria-live="polite">
-                                          {copiedModel === r.model
+                                          {copiedModel === shown
                                             ? t(lang, "copied")
                                             : t(lang, "copy")}
                                         </span>
