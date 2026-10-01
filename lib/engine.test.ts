@@ -129,6 +129,20 @@ describe("insurance label", () => {
     expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
   });
 
+  it("insures with CM2 when CV2-600 does not raise the step voltage", () => {
+    // 40 MVA / 150 kV Y / ±8×2.25% → 187.8 A, Ust 1949 V.
+    // CV2 350 and 600 share the 2000 V ceiling. Current is half of 350.
+    // CM2 raises that ceiling to 3300 V, so it wears 综合保险 and leads the list.
+    const s = sized({ throughCurrentA: 187.8, umKv: 72.5, stepVoltageV: 1949 });
+    expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
+    expect(s.loose).toBe(false);
+    expect(s.tag).toMatch(/^CM2III-500Y\/72\.5/);
+    expect(s.shown[0]?.model).toBe(s.tag);
+    expect(s.shown.some((r) => /^CV2III-600Y\/72\.5/.test(r.model))).toBe(true);
+    expect(t("en", "allRound")).toBe("Conservative option");
+    expect(t("zh", "allRound")).toBe("综合保险方案");
+  });
+
   it("does not offer SHZVG beside a covering SHZV-1000", () => {
     const s = sized({ throughCurrentA: 900, umKv: 72.5, stepVoltageV: 1000 });
     expect(s.primary.seriesCode).toBe("SHZV");

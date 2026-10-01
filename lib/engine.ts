@@ -544,14 +544,15 @@ export function selectOltc(input: SelectInput): SelectOutput {
           return true;
         };
         // Nameplate current already includes short-time overload.
-        // 342 A stays on 350. The next current (600) is 综合保险, not the minimum.
+        // 342 A stays on 350. 600 is 综合保险 only when current is the tight
+        // axis. The same step-voltage ceiling does not insure a low current.
         const covering = phaseCurrents.filter(
           (c) => ratingCoversDuty(input.throughCurrentA, c) && capacityOk(c),
         );
         if (!covering.length) continue;
         // Two covering ratings, plus the next catalogue step in this family.
-        // 综合保险 uses that same-family step only. A later family stays in
-        // the full list for replay, and does not become the visible step.
+        // The later family stays in the full list for replay. 综合保险 picks
+        // it only when this current step does not raise the tight limit.
         const currentsToEmit = covering.slice(0, 2);
         const topEmitted = Math.max(...currentsToEmit);
         const stepUpCurrent = [...phaseCurrents]
@@ -993,9 +994,61 @@ export function primaryIsInsurance(
   return Math.max(iUse, uUse, pUse) <= 0.5 + 1e-9;
 }
 
+function dutyUse(
+  row: ModelResult,
+  dutyA: number,
+  stepVoltageV: number,
+): { iUse: number; uUse: number; pUse: number } {
+  const iUse = row.currentA > 0 ? dutyA / row.currentA : 1;
+  const uUse =
+    stepVoltageV > 0 && row.maxStepVoltageV && row.maxStepVoltageV > 0
+      ? stepVoltageV / row.maxStepVoltageV
+      : 0;
+  const needKva = stepVoltageV > 0 ? (dutyA * stepVoltageV) / 1000 : 0;
+  const pUse =
+    needKva > 0 && row.stepCapacityKva && row.stepCapacityKva > 0
+      ? needKva / row.stepCapacityKva
+      : 0;
+  return { iUse, uUse, pUse };
+}
+
+/**
+ * Same-series next current shares the step-voltage ceiling (CV2 350 and
+ * 600 are both 2000 V). It insures only when current is the tight axis.
+ * 342 A on 350 qualifies. 188 A at 1949 V does not — Ust is tighter.
+ */
+function currentStepInsures(
+  primary: ModelResult,
+  step: ModelResult,
+  dutyA: number,
+  stepVoltageV: number,
+): boolean {
+  const a = dutyUse(primary, dutyA, stepVoltageV);
+  if (a.uUse >= a.iUse - 1e-9 || a.pUse >= a.iUse - 1e-9) return false;
+  const b = dutyUse(step, dutyA, stepVoltageV);
+  return b.iUse < a.iUse - 1e-9;
+}
+
+/** Next family insures when it lowers the worst of current, Ust, capacity. */
+function familyInsures(
+  primary: ModelResult,
+  family: ModelResult,
+  dutyA: number,
+  stepVoltageV: number,
+): boolean {
+  const a = dutyUse(primary, dutyA, stepVoltageV);
+  const b = dutyUse(family, dutyA, stepVoltageV);
+  const peak = Math.max(a.iUse, a.uUse, a.pUse);
+  const next = Math.max(b.iUse, b.uUse, b.pUse);
+  return next < peak - 1e-9;
+}
+
 /**
  * Model that wears 综合保险方案 beside a true minimum.
- * Same family's next current, otherwise the next family only.
+ * Same-family next current when current is what is tight.
+ * When step voltage is tighter and that next current shares the ceiling,
+ * the next family wears it (CV2 2000 V → CM2 3300 V).
+ * No same-family current left: the next family, as before (CV2-600 → CM2).
  * Null when the primary is already loose, or nothing adjacent is left.
  * CV2-600 tags CM2, not SHZV. CM2 does not tag SHZVG.
  */
@@ -1008,8 +1061,19 @@ export function insuranceModel(
   if (!primary) return null;
   if (primaryIsInsurance(primary, dutyA, stepVoltageV)) return null;
   const step = stepUpOf(primary, results);
+  const family = nextFamilyOf(primary, results);
+  if (step && currentStepInsures(primary, step, dutyA, stepVoltageV)) {
+    return step.model;
+  }
+  if (
+    step &&
+    family &&
+    familyInsures(primary, family, dutyA, stepVoltageV)
+  ) {
+    return family.model;
+  }
   if (step) return step.model;
-  return nextFamilyOf(primary, results)?.model ?? null;
+  return family?.model ?? null;
 }
 
 /**
@@ -1032,7 +1096,18 @@ export function optionsWithInsurance(
 ): ModelResult[] {
   const alts = pickOtherOptions(results, n);
   const id = insuranceModel(results, dutyA, stepVoltageV);
-  if (!id || alts.some((r) => r.model === id)) return alts;
+  if (!id) return alts;
+  const primary = results[0];
+  const step = primary ? stepUpOf(primary, results) : null;
+  // Current step was skipped because it does not raise the tight limit.
+  // Lead with the family that does, and keep the current step unbadged.
+  if (step && step.model !== id) {
+    const found =
+      alts.find((r) => r.model === id) ?? results.find((r) => r.model === id);
+    if (!found) return alts;
+    return [found, ...alts.filter((r) => r.model !== id)].slice(0, n);
+  }
+  if (alts.some((r) => r.model === id)) return alts;
   const found = results.find((r) => r.model === id);
   if (!found) return alts;
   return [found, ...alts].slice(0, n);
