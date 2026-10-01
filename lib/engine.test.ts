@@ -103,13 +103,13 @@ describe("insurance label", () => {
     expect(s.loose).toBe(false);
   });
 
-  it("does not tag a dearer family when CV2 is already at 600 A", () => {
+  it("tags the next family when CV2 is already at 600 A", () => {
     // 63 MVA / 110 kV Y / ±8 / 1.67% → 381.7 A, Ust ≈ 1061 V.
-    // CV2 stops at 600 A. There is no same-family insurance step.
+    // CV2 stops at 600 A, so 综合保险 is the next family, CM2, not SHZV.
     const s = sized({ throughCurrentA: 381.7, umKv: 72.5, stepVoltageV: 1061 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
     expect(s.loose).toBe(false);
-    expect(s.tag).toBeNull();
+    expect(s.tag).toMatch(/^CM2III-600Y\/72\.5/);
     expect(s.shown.map((r) => r.seriesCode)).toEqual(["CV2", "CM2"]);
     expect(s.shown[0]?.model).toMatch(/^CV2III-600Y\/126/);
     expect(s.shown[1]?.currentA).toBeGreaterThanOrEqual(600);
@@ -123,7 +123,7 @@ describe("insurance label", () => {
     const s = sized({ throughCurrentA: 342.1, umKv: 72.5, stepVoltageV: 1083 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
     expect(s.loose).toBe(false);
-    expect(s.tag).toBeNull();
+    expect(s.tag).toBe("CM2III-600Y/72.5B-10193W");
     expect(s.shown.map((r) => r.model)).toEqual([
       "CV2III-600Y/126-10193W",
       "CM2III-600Y/72.5B-10193W",
@@ -1690,11 +1690,31 @@ describe("other options stay on the adjacent price step", () => {
     if (primary.seriesId === "shzv" || primary.seriesId === "sdzv") {
       expect(shown.some((r) => r.seriesId === "shzvg"), label).toBe(false);
     }
+    const loose = primaryIsInsurance(primary, dutyA, ust);
+    if (loose) expect(tag, label).toBeNull();
     if (tag) {
       const tagged = out.results.find((r) => r.model === tag);
-      expect(tagged?.seriesId, label).toBe(primary.seriesId);
-      expect(tagged && tagged.currentA > primary.currentA, label).toBe(true);
+      const adjacent = tagged?.seriesId === NEXT[primary.seriesId];
+      const sameStep =
+        tagged?.seriesId === primary.seriesId &&
+        tagged.currentA > primary.currentA;
+      expect(adjacent || sameStep, `${label} ${tag}`).toBe(true);
+      expect(tagged!.currentA + 0.5, label).toBeGreaterThanOrEqual(
+        primary.currentA,
+      );
       expect(tagged?.unitCount, label).toBe(primary.unitCount);
+    } else if (!loose) {
+      const nextId = NEXT[primary.seriesId];
+      const couldInsure = out.results.some(
+        (r) =>
+          r.unitCount === primary.unitCount &&
+          r.phases === primary.phases &&
+          r.currentA + 0.5 >= primary.currentA &&
+          r.umKv + 0.1 >= primary.umKv &&
+          ((r.seriesId === primary.seriesId && r.currentA > primary.currentA) ||
+            r.seriesId === nextId),
+      );
+      expect(couldInsure, `${label} minimum without 综合保险`).toBe(false);
     }
   }
 

@@ -1010,10 +1010,10 @@ export function primaryIsInsurance(
 }
 
 /**
- * Model that wears 综合保险方案 next to a true minimum.
- * Only the same family's next current. A dearer family is not insurance.
- * Null when the primary itself is already loose, or the family has no
- * bigger current.
+ * Model that wears 综合保险方案 beside a true minimum.
+ * Same family's next current, otherwise the next family only.
+ * Null when the primary is already loose, or nothing adjacent is left.
+ * CV2-600 tags CM2, not SHZV. CM2 does not tag SHZVG.
  */
 export function insuranceModel(
   results: ModelResult[],
@@ -1024,7 +1024,19 @@ export function insuranceModel(
   if (!primary) return null;
   if (primaryIsInsurance(primary, dutyA, stepVoltageV)) return null;
   const step = stepUpOf(primary, results);
-  return step ? step.model : null;
+  if (step) return step.model;
+  return nextFamilyOf(primary, results)?.model ?? null;
+}
+
+/**
+ * 满足最低要求 only when a 综合保险 model sits beside it.
+ * A loose primary, or a primary with no adjacent step, is 综合保险 on its own.
+ */
+export function showsMinimumLabel(
+  loose: boolean,
+  insuranceAlt: string | null,
+): boolean {
+  return !loose && insuranceAlt != null;
 }
 
 /** Other options, with the insurance step-up kept in the visible slots. */

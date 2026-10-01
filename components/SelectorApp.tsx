@@ -31,6 +31,7 @@ import {
   insuranceModel,
   optionsWithInsurance,
   primaryIsInsurance,
+  showsMinimumLabel,
   selectOltc,
 } from "@/lib/engine";
 import { safetyKKeepsCapacity } from "@/lib/safetyK";
@@ -132,19 +133,29 @@ function CaptionSub({
   eq,
   value,
   unit,
+  raised = false,
 }: {
   name: string;
   sub: string;
   eq?: boolean;
   value: string;
   unit: string;
+  /** Um's m sits on the top of the letter. Imax and Ust stay calculated subscripts. */
+  raised?: boolean;
 }) {
+  const mark = raised ? (
+    <span className="ml-px align-top text-[0.62em] leading-none" data-caption={sub}>
+      {sub}
+    </span>
+  ) : (
+    <sub className="relative top-[0.22em] ml-px text-[0.62em] leading-none" data-caption={sub}>
+      {sub}
+    </sub>
+  );
   return (
     <>
       {name}
-      <sub className="relative top-[0.22em] ml-px text-[0.62em] leading-none">
-        {sub}
-      </sub>
+      {mark}
       {eq !== false ? " = " : " "}
       {value}
       {unit}
@@ -832,6 +843,7 @@ export function SelectorApp() {
                   <CaptionSub
                     name="U"
                     sub="m"
+                    raised
                     value={formatUmKv(um)}
                     unit="kV"
                   />
@@ -1546,7 +1558,12 @@ export function SelectorApp() {
               ) : (
                 <>
                   <p className="text-[0.75rem] font-semibold tracking-[0.08em] text-[#8fd0e2]">
-                    {t(lang, loose ? "allRound" : "recommended")}
+                    {t(
+                      lang,
+                      showsMinimumLabel(loose, insuranceAlt)
+                        ? "recommended"
+                        : "allRound",
+                    )}
                   </p>
                   <div className="mt-3 flex items-center justify-between gap-3">
                     <p className="min-w-0 flex-1 font-mono text-[1rem] leading-[1.2] font-medium tracking-tight break-words text-white sm:text-[clamp(1.375rem,2.4vw,2rem)]">
