@@ -565,10 +565,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
           if (maxKeep.length) covering = [Math.max(...maxKeep)];
         }
         if (!covering.length) continue;
-        // Two covering ratings, plus the next catalogue step above them.
-        // A snug CV2-600 otherwise has no higher current in the list, so the
-        // 综合保险 tag has nowhere to sit. The step after that (SHZVG 1300)
-        // stays out: a later band is not the insurance step.
+        // Two covering ratings, plus the next catalogue step in this family.
+        // 综合保险 uses that same-family step only. A later family stays in
+        // the full list for replay, and does not become the visible step.
         const currentsToEmit = covering.slice(0, 2);
         const topEmitted = Math.max(...currentsToEmit);
         const stepUpCurrent = [...phaseCurrents]
@@ -891,14 +890,81 @@ export function stepUpOf(
       r.currentA > primary.currentA,
   );
   if (!same.length) return null;
-  same.sort((a, b) => a.currentA - b.currentA);
+  same.sort((a, b) => {
+    const aUm = Math.abs(a.umKv - primary.umKv) < 0.1 ? 0 : 1;
+    const bUm = Math.abs(b.umKv - primary.umKv) < 0.1 ? 0 : 1;
+    return aUm - bUm || a.currentA - b.currentA;
+  });
   return same[0];
 }
 
 /**
- * Visible “other options”: keep 3 slots. Same-family next I (step-up) and
- * a higher-Um twin stay; a second current of the same family at the same Um
- * yields to another family (oil: CM-600 out, CMD-400 in).
+ * One price step. 其他可选 may show this family after the primary.
+ * It does not jump CM2 → SHZVG, and it does not offer SDZV or SHZVG
+ * as a safety upsell of a switch that already covers the duty.
+ */
+const NEXT_FAMILY: Record<string, string> = {
+  cv2: "cm2",
+  cm2: "shzv",
+  cv: "sv",
+  sv: "cm",
+  cm: "cmd",
+};
+
+function sameMachine(a: ModelResult, b: ModelResult): boolean {
+  return a.unitCount === b.unitCount && a.phases === b.phases;
+}
+
+/** Same family, the next higher catalogue Um, current not below the primary. */
+function nextUmOf(
+  primary: ModelResult,
+  results: ModelResult[],
+): ModelResult | null {
+  const higher = results.filter(
+    (r) =>
+      r.model !== primary.model &&
+      r.seriesId === primary.seriesId &&
+      sameMachine(r, primary) &&
+      r.umKv > primary.umKv + 0.1 &&
+      r.currentA + 0.5 >= primary.currentA,
+  );
+  if (!higher.length) return null;
+  const minUm = Math.min(...higher.map((r) => r.umKv));
+  const at = higher.filter((r) => Math.abs(r.umKv - minUm) < 0.1);
+  at.sort((a, b) => {
+    const aSame = Math.abs(a.currentA - primary.currentA) < 0.5 ? 0 : 1;
+    const bSame = Math.abs(b.currentA - primary.currentA) < 0.5 ? 0 : 1;
+    return aSame - bSame || a.currentA - b.currentA;
+  });
+  return at[0] ?? null;
+}
+
+/** The adjacent family only, same number of units, current and Um not lower. */
+function nextFamilyOf(
+  primary: ModelResult,
+  results: ModelResult[],
+): ModelResult | null {
+  const nextId = NEXT_FAMILY[primary.seriesId];
+  if (!nextId) return null;
+  const cands = results.filter(
+    (r) =>
+      r.seriesId === nextId &&
+      sameMachine(r, primary) &&
+      r.currentA + 0.5 >= primary.currentA &&
+      r.umKv + 0.1 >= primary.umKv,
+  );
+  if (!cands.length) return null;
+  cands.sort((a, b) => {
+    const aUm = Math.abs(a.umKv - primary.umKv) < 0.1 ? 0 : 1;
+    const bUm = Math.abs(b.umKv - primary.umKv) < 0.1 ? 0 : 1;
+    return aUm - bUm || a.umKv - b.umKv || a.currentA - b.currentA;
+  });
+  return cands[0] ?? null;
+}
+
+/**
+ * Visible other options. Not padded to three.
+ * Same-family next current, then the next Um, then one family up the ladder.
  */
 export function pickOtherOptions(
   results: ModelResult[],
@@ -906,21 +972,16 @@ export function pickOtherOptions(
 ): ModelResult[] {
   if (results.length <= 1) return [];
   const primary = results[0];
-  const stepUp = stepUpOf(primary, results);
-  const preferred: ModelResult[] = [];
-  const overflow: ModelResult[] = [];
-  if (stepUp) preferred.push(stepUp);
-  for (const r of results.slice(1)) {
-    if (r.model === primary.model) continue;
-    if (preferred.some((x) => x.model === r.model)) continue;
-    const sameFamilyUm = preferred.some(
-      (x) =>
-        x.seriesCode === r.seriesCode && Math.abs(x.umKv - r.umKv) < 0.1,
-    );
-    if (sameFamilyUm) overflow.push(r);
-    else preferred.push(r);
-  }
-  return [...preferred, ...overflow].slice(0, n);
+  const picked: ModelResult[] = [];
+  const push = (row: ModelResult | null) => {
+    if (!row) return;
+    if (picked.some((x) => x.model === row.model)) return;
+    picked.push(row);
+  };
+  push(stepUpOf(primary, results));
+  push(nextUmOf(primary, results));
+  push(nextFamilyOf(primary, results));
+  return picked.slice(0, n);
 }
 
 /**
@@ -949,34 +1010,10 @@ export function primaryIsInsurance(
 }
 
 /**
- * True when an eligible series still has a catalogue current strictly
- * between the primary and the candidate, on the same phase. That candidate
- * is then a later band, not the next step. Single-phase lists do not count
- * against a three-phase primary.
- */
-function catalogueCurrentBetween(
-  lowA: number,
-  highA: number,
-  phases: ModelResult["phases"],
-  seriesIds: Set<string>,
-): boolean {
-  for (const series of SERIES) {
-    if (!seriesIds.has(series.id)) continue;
-    const list = series.currents[phases];
-    if (!list) continue;
-    if (list.some((a) => a > lowA + 0.5 && a < highA - 0.5)) return true;
-  }
-  return false;
-}
-
-/**
  * Model that wears 综合保险方案 next to a true minimum.
- * Null when the primary itself is the insurance card.
- * Same-family next current first. Else the next current on the same phase
- * and unit count, and only when no eligible series still lists a current
- * in between. A higher-band floor (SHZVG 1300 over CV2 600) is not insurance.
- * Same current at a higher Um is not insurance. Three single-phase units
- * are not the insurance step for one three-phase switch.
+ * Only the same family's next current. A dearer family is not insurance.
+ * Null when the primary itself is already loose, or the family has no
+ * bigger current.
  */
 export function insuranceModel(
   results: ModelResult[],
@@ -987,31 +1024,7 @@ export function insuranceModel(
   if (!primary) return null;
   if (primaryIsInsurance(primary, dutyA, stepVoltageV)) return null;
   const step = stepUpOf(primary, results);
-  if (step) return step.model;
-  const seriesIds = new Set(results.map((r) => r.seriesId));
-  const higher = results
-    .filter(
-      (r) =>
-        r.model !== primary.model &&
-        r.phases === primary.phases &&
-        r.unitCount === primary.unitCount &&
-        r.currentA > primary.currentA + 0.5,
-    )
-    .sort((a, b) => a.currentA - b.currentA || a.unitCount - b.unitCount);
-  for (const cand of higher) {
-    if (
-      catalogueCurrentBetween(
-        primary.currentA,
-        cand.currentA,
-        primary.phases,
-        seriesIds,
-      )
-    ) {
-      continue;
-    }
-    return cand.model;
-  }
-  return null;
+  return step ? step.model : null;
 }
 
 /** Other options, with the insurance step-up kept in the visible slots. */

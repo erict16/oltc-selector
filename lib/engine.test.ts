@@ -103,35 +103,41 @@ describe("insurance label", () => {
     expect(s.loose).toBe(false);
   });
 
-  it("does not tag a higher-band series as the insurance step", () => {
+  it("does not tag a dearer family when CV2 is already at 600 A", () => {
     // 63 MVA / 110 kV Y / ±8 / 1.67% → 381.7 A, Ust ≈ 1061 V.
-    // CV2 stops at 600 A. The insurance step is SHZV 1000 A, not SHZVG 1300 A.
+    // CV2 stops at 600 A. There is no same-family insurance step.
     const s = sized({ throughCurrentA: 381.7, umKv: 72.5, stepVoltageV: 1061 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
     expect(s.loose).toBe(false);
-    expect(s.tag).toMatch(/^SHZVIII-1000Y\/72\.5/);
-    expect(s.shown.some((r) => r.model === s.tag)).toBe(true);
-    expect(s.tag).not.toMatch(/SHZVG/);
+    expect(s.tag).toBeNull();
+    expect(s.shown.map((r) => r.seriesCode)).toEqual(["CV2", "CM2"]);
+    expect(s.shown[0]?.model).toMatch(/^CV2III-600Y\/126/);
+    expect(s.shown[1]?.currentA).toBeGreaterThanOrEqual(600);
+    expect(s.shown.some((r) => r.seriesCode === "SHZV")).toBe(false);
     expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
   });
 
-  it("tags SHZV-1000 when 80 MVA at 150 kV star sits on CV2-600", () => {
+  it("80 MVA on CV2-600 offers CM2, not SHZV as insurance", () => {
     // 80 MVA / 150 kV Y / ±8 / 1.25% → 342 A, Ust ≈ 1083 V.
     // 342 A is inside the top 3% of CV2-350, so the minimum is CV2-600.
     const s = sized({ throughCurrentA: 342.1, umKv: 72.5, stepVoltageV: 1083 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
     expect(s.loose).toBe(false);
-    expect(s.tag).toMatch(/^SHZVIII-1000Y\/72\.5/);
-    expect(s.shown[0]?.model).toBe(s.tag);
+    expect(s.tag).toBeNull();
+    expect(s.shown.map((r) => r.model)).toEqual([
+      "CV2III-600Y/126-10193W",
+      "CM2III-600Y/72.5B-10193W",
+    ]);
   });
 
-  it("tags SHZVG only once the primary is already the 1000 A step", () => {
+  it("does not offer SHZVG beside a covering SHZV-1000", () => {
     const s = sized({ throughCurrentA: 900, umKv: 72.5, stepVoltageV: 1000 });
     expect(s.primary.seriesCode).toBe("SHZV");
     expect(s.primary.currentA).toBe(1000);
     expect(s.loose).toBe(false);
-    expect(s.tag).toMatch(/^SHZVGIII-1300Y\//);
-    expect(s.shown.some((r) => r.model === s.tag)).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
+    expect(s.shown.some((r) => r.seriesCode === "SDZV")).toBe(false);
   });
 });
 
@@ -1477,7 +1483,7 @@ describe("2026 OS — other options + list axes", () => {
     expect(coveringUms(40.5, [40.5, 72.5, 126, 145])).toEqual([40.5, 72.5]);
   });
 
-  it("400 A / 72.5 other options include 126 before SHZV", () => {
+  it("400 A / 72.5 other options are the 126 twin and CM2, not SHZV", () => {
     const out = selectOltc({
       ...vacY,
       throughCurrentA: 400,
@@ -1485,12 +1491,10 @@ describe("2026 OS — other options + list axes", () => {
     });
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toBe("CV2III-600Y/72.5-10193W");
-    const alts = out.results.slice(1, 4);
-    expect(alts.some((r) => /\/126/.test(r.model))).toBe(true);
-    const i126 = alts.findIndex((r) => /\/126/.test(r.model));
-    const iShzv = alts.findIndex((r) => r.seriesCode === "SHZV");
-    expect(i126).toBeGreaterThanOrEqual(0);
-    if (iShzv >= 0) expect(i126).toBeLessThan(iShzv);
+    const alts = pickOtherOptions(out.results, 3);
+    expect(alts.map((r) => r.seriesCode)).toEqual(["CV2", "CM2"]);
+    expect(alts[0]?.model).toMatch(/\/126/);
+    expect(alts.some((r) => r.seriesCode === "SHZV")).toBe(false);
   });
 
   it("SHZV does not occupy other-options when a 126 twin exists", () => {
@@ -1501,14 +1505,15 @@ describe("2026 OS — other options + list axes", () => {
     });
     expect(out.ok).toBe(true);
     expect(out.results[0].seriesCode).toBe("CV2");
-    const alts = out.results.slice(1, 4);
+    const alts = pickOtherOptions(out.results, 3);
     expect(alts.some((r) => r.seriesCode === "CV2" && /\/126/.test(r.model))).toBe(
       true,
     );
-    expect(alts[0].seriesCode).not.toBe("SHZV");
+    expect(alts.some((r) => r.seriesCode === "SHZV")).toBe(false);
+    expect(alts.every((r) => r.unitCount === 1)).toBe(true);
   });
 
-  it("oil 350 A / 1400 V other options: SV, CM, CMD (not two CM)", () => {
+  it("oil 350 A / 1400 V other options stay on SV", () => {
     const out = selectOltc({
       mounting: "in_tank",
       medium: "oil",
@@ -1527,12 +1532,8 @@ describe("2026 OS — other options + list axes", () => {
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toBe("CVIII-350Y/72.5-10193W");
     const alts = pickOtherOptions(out.results, 3);
-    expect(alts.map((r) => r.seriesCode)).toEqual(["SV", "CM", "CMD"]);
-    expect(alts.map((r) => r.model)).toEqual([
-      "SVIII-500Y/72.5-10193W",
-      "CMIII-500Y/72.5B-10193W",
-      "CMDIII-400Y/72.5B-10193W",
-    ]);
+    expect(alts.map((r) => r.seriesCode)).toEqual(["SV"]);
+    expect(alts.map((r) => r.model)).toEqual(["SVIII-500Y/72.5-10193W"]);
   });
 
   it("vacuum 350 A / 72.5 still keeps the 126 twin in three alts", () => {
@@ -1593,12 +1594,10 @@ describe("2026 OS — other options + list axes", () => {
     const out = selectOltc(FIXTURES.case5Cv2_145.input);
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toContain("/145");
-    expect(
-      out.results
-        .slice(1, 4)
-        .every((r) => r.umKv + 0.1 >= 145 || r.seriesCode === "CV2"),
-    ).toBe(true);
-    expect(out.results.slice(1, 4).every((r) => r.umKv !== 126)).toBe(true);
+    const alts = pickOtherOptions(out.results, 3);
+    expect(alts.every((r) => r.umKv + 0.1 >= 145)).toBe(true);
+    expect(alts.every((r) => r.umKv !== 126)).toBe(true);
+    expect(alts.some((r) => r.unitCount > 1)).toBe(false);
   });
 
   it("CM2 / SHZV commercial Ums stay on the 2025 list", () => {
@@ -1610,5 +1609,167 @@ describe("2026 OS — other options + list axes", () => {
     ]);
     expect(SERIES.find((s) => s.id === "cv2")!.umKv).toContain(126);
     expect(SERIES.find((s) => s.id === "shzvg")!.currents.I).toContain(2000);
+  });
+
+  it("CM2 does not offer SHZVG or SDZV", () => {
+    const out = selectOltc({
+      ...vacY,
+      throughCurrentA: 400,
+      umKv: 72.5,
+      stepVoltageV: 2500,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].seriesCode).toBe("CM2");
+    const alts = optionsWithInsurance(out.results, 400, 2500, 3);
+    expect(alts.every((r) => r.seriesCode === "CM2" || r.seriesCode === "SHZV")).toBe(
+      true,
+    );
+    expect(alts.some((r) => r.seriesCode === "SHZVG" || r.seriesCode === "SDZV")).toBe(
+      false,
+    );
+    expect(alts.every((r) => r.unitCount === 1)).toBe(true);
+    expect(alts.every((r) => r.currentA + 0.5 >= out.results[0].currentA)).toBe(
+      true,
+    );
+  });
+
+  it("line-end CV2 does not list 3× in other options", () => {
+    const out = selectOltc({
+      ...vacY,
+      connection: "D",
+      throughCurrentA: 200,
+      umKv: 72.5,
+      stepVoltageV: 1000,
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toMatch(/^CV2III-/);
+    const alts = pickOtherOptions(out.results, 3);
+    expect(alts.every((r) => r.unitCount === 1 && r.seriesCode === "CV2")).toBe(
+      true,
+    );
+  });
+});
+
+describe("other options stay on the adjacent price step", () => {
+  const NEXT: Record<string, string | undefined> = {
+    cv2: "cm2",
+    cm2: "shzv",
+    cv: "sv",
+    sv: "cm",
+    cm: "cmd",
+  };
+
+  function assertAdjacent(
+    label: string,
+    out: ReturnType<typeof selectOltc>,
+    dutyA: number,
+    ust: number,
+  ) {
+    expect(out.ok, label).toBe(true);
+    const primary = out.results[0];
+    if (!primary) throw new Error(label);
+    const shown = optionsWithInsurance(out.results, dutyA, ust, 3);
+    const tag = insuranceModel(out.results, dutyA, ust);
+    const allowed = new Set(
+      [primary.seriesId, NEXT[primary.seriesId]].filter((id): id is string => !!id),
+    );
+    expect(shown.length, label).toBeLessThanOrEqual(3);
+    for (const row of shown) {
+      expect(allowed.has(row.seriesId), `${label} ${row.model}`).toBe(true);
+      expect(row.unitCount, row.model).toBe(primary.unitCount);
+      expect(row.phases, row.model).toBe(primary.phases);
+      expect(row.currentA + 0.5, row.model).toBeGreaterThanOrEqual(primary.currentA);
+      expect(row.umKv + 0.1, row.model).toBeGreaterThanOrEqual(primary.umKv);
+    }
+    if (primary.seriesId === "cv2" || primary.seriesId === "cm2") {
+      expect(
+        shown.some((r) => r.seriesId === "shzvg" || r.seriesId === "sdzv"),
+        label,
+      ).toBe(false);
+    }
+    if (primary.seriesId === "shzv" || primary.seriesId === "sdzv") {
+      expect(shown.some((r) => r.seriesId === "shzvg"), label).toBe(false);
+    }
+    if (tag) {
+      const tagged = out.results.find((r) => r.model === tag);
+      expect(tagged?.seriesId, label).toBe(primary.seriesId);
+      expect(tagged && tagged.currentA > primary.currentA, label).toBe(true);
+      expect(tagged?.unitCount, label).toBe(primary.unitCount);
+    }
+  }
+
+  it("vacuum grid never jumps a price step", () => {
+    const currents = [80, 150, 250, 330, 400, 480, 550, 620, 750, 900, 1100, 1400];
+    const ums = [40.5, 72.5, 126, 145, 170, 252];
+    const usts = [800, 1200, 1800, 2500, 3500];
+    let checked = 0;
+    for (const connection of ["Y", "D"] as const) {
+      for (const throughCurrentA of currents) {
+        for (const umKv of ums) {
+          for (const stepVoltageV of usts) {
+            const out = selectOltc({
+              mounting: "in_tank",
+              medium: "oil_vacuum",
+              preferVacuum: true,
+              phases: "III",
+              connection,
+              throughCurrentA,
+              umKv,
+              stepVoltageV,
+              regulation: "reversing",
+              plusMinusSteps: 8,
+              positions: 19,
+              midPositions: 3,
+              mdu: "none",
+            });
+            if (!out.ok) continue;
+            checked += 1;
+            assertAdjacent(
+              `${connection} ${throughCurrentA}A ${umKv}kV ${stepVoltageV}V`,
+              out,
+              throughCurrentA,
+              stepVoltageV,
+            );
+          }
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(400);
+  });
+
+  it("oil grid stays on the oil ladder", () => {
+    let checked = 0;
+    for (const connection of ["Y", "D"] as const) {
+      for (const throughCurrentA of [120, 300, 480, 700, 900]) {
+        for (const umKv of [40.5, 72.5, 126, 170]) {
+          for (const stepVoltageV of [600, 1200, 2000]) {
+            const out = selectOltc({
+              mounting: "in_tank",
+              medium: "oil",
+              preferVacuum: false,
+              phases: "III",
+              connection,
+              throughCurrentA,
+              umKv,
+              stepVoltageV,
+              regulation: "reversing",
+              plusMinusSteps: 8,
+              positions: 19,
+              midPositions: 3,
+              mdu: "none",
+            });
+            if (!out.ok) continue;
+            checked += 1;
+            assertAdjacent(
+              `oil ${connection} ${throughCurrentA}A ${umKv}kV`,
+              out,
+              throughCurrentA,
+              stepVoltageV,
+            );
+          }
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(40);
   });
 });
