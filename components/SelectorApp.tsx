@@ -20,6 +20,7 @@ import { copyText } from "@/lib/clipboard";
 import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
+  formatUmKv,
   maxThroughCurrent,
   oltcUmFromRatedKv,
   stepVoltageFromPercent,
@@ -555,7 +556,7 @@ export function SelectorApp() {
       return withOctcSeries({
         ...input,
         throughCurrentA: i,
-        // Caption is Un/√3. The engine gets the insulation class, not that number.
+        // Catalogue switch Um (same number the caption shows), not Un/√3.
         umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
         ...(ust != null ? { stepVoltageV: ust } : {}),
       });
@@ -676,6 +677,10 @@ export function SelectorApp() {
   const derivedOk =
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
   const ustV = computedStepVoltage();
+  const um =
+    voltageMode === "winding" && windingRatedKv > 0
+      ? oltcUmFromRatedKv(windingRatedKv, input.connection)
+      : NaN;
 
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col lg:grid lg:h-dvh lg:grid-cols-2 lg:overflow-hidden">
@@ -819,7 +824,20 @@ export function SelectorApp() {
               )}
             </Field>
 
-            <Field as="div" label={t(lang, "umWinding")}>
+            <Field
+              as="div"
+              label={t(lang, "umWinding")}
+              action={
+                Number.isFinite(um) && um > 0 ? (
+                  <CaptionSub
+                    name="U"
+                    sub="m"
+                    value={formatUmKv(um)}
+                    unit="kV"
+                  />
+                ) : undefined
+              }
+            >
               <div className="relative">
                 {kvCustom ||
                 (windingRatedKv > 0 &&
