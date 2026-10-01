@@ -139,7 +139,7 @@ describe("insurance label", () => {
     expect(s.tag).toMatch(/^CM2III-500Y\/72\.5/);
     expect(s.shown[0]?.model).toBe(s.tag);
     expect(s.shown.some((r) => /^CV2III-600Y\/72\.5/.test(r.model))).toBe(true);
-    expect(t("en", "allRound")).toBe("Conservative option");
+    expect(t("en", "allRound")).toBe("Safety-margin option");
     expect(t("zh", "allRound")).toBe("综合保险方案");
   });
 

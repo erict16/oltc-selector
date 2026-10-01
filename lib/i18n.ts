@@ -209,7 +209,7 @@ const en: Dict = {
   noMatch: "No matching type",
   recommended: "Minimum-requirement option",
   recommendedHint: "Smallest catalogue rating that covers this duty.",
-  allRound: "Conservative option",
+  allRound: "Safety-margin option",
   stepUp: "One step up",
   copyType: "Copy type",
   copied: "Copied",
