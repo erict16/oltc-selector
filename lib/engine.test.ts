@@ -141,11 +141,22 @@ describe("insurance label", () => {
     const s = sized({ throughCurrentA: 684.3, umKv: 72.5, stepVoltageV: 1083 });
     expect(s.primary.model).toMatch(/^SHZVIII-1000Y\/72\.5B/);
     expect(s.loose).toBe(false);
-    expect(s.tag).toBeNull();
+    expect(s.tag).toBe("SHZVGIII-1300Y/72.5B-10193W");
     expect(showsMinimumLabel(s.loose)).toBe(true);
     expect(s.shown.map((r) => r.model)).toEqual([
       "SHZVGIII-1300Y/72.5B-10193W",
     ]);
+    expect(s.shown[0]?.model).toBe(s.tag);
+  });
+
+  it("tags VCM when 486 A forces VCV-600", () => {
+    // 100 MVA / 132 kV Y / ±8×1.25% → 486 A, Ust 953 V. 81% of 600 A.
+    // VCV-350 cannot cover it, so the card stays 满足最低要求 and VCM wears 综合保险.
+    const s = sized({ throughCurrentA: 486, umKv: 72.5, stepVoltageV: 953 });
+    expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
+    expect(s.loose).toBe(false);
+    expect(s.tag).toMatch(/^CM2III-600Y\/72\.5/);
+    expect(s.shown.some((r) => r.model === s.tag)).toBe(true);
   });
 
   it("tags the next family when CV2-600 is actually current-tight", () => {
@@ -187,12 +198,12 @@ describe("insurance label", () => {
     expect(t("zh", "allRound")).toBe("综合保险方案");
   });
 
-  it("lists SHZVG beside SHZV-1000 with no badge", () => {
+  it("tags SHZVG beside SHZV-1000 as the insurance row", () => {
     const s = sized({ throughCurrentA: 900, umKv: 72.5, stepVoltageV: 1000 });
     expect(s.primary.seriesCode).toBe("SHZV");
     expect(s.primary.currentA).toBe(1000);
     expect(s.loose).toBe(false);
-    expect(s.tag).toBeNull();
+    expect(s.tag).toMatch(/^SHZVGIII-1300Y\/72\.5/);
     expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(true);
     expect(s.shown.some((r) => r.seriesCode === "SDZV")).toBe(false);
     expect(s.shown.every((r) => r.unitCount === 1)).toBe(true);
@@ -1764,7 +1775,11 @@ describe("other options stay on the adjacent price step", () => {
       const sameStep =
         tagged?.seriesId === primary.seriesId &&
         tagged.currentA > primary.currentA;
-      expect(adjacent || sameStep, `${label} ${tag}`).toBe(true);
+      const shzvCeiling =
+        primary.seriesId === "shzv" &&
+        primary.currentA + 0.5 >= 1000 &&
+        tagged?.seriesId === "shzvg";
+      expect(adjacent || sameStep || shzvCeiling, `${label} ${tag}`).toBe(true);
       expect(tagged!.currentA + 0.5, label).toBeGreaterThanOrEqual(
         primary.currentA,
       );

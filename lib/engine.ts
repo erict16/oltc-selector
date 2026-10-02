@@ -967,7 +967,7 @@ export function pickOtherOptions(
   push(nextUmOf(primary, results));
   push(nextFamilyOf(primary, results));
   // SHZV-1000 has no bigger III current and no 126 row in the list.
-  // Still show the next single III. No badge — the page does not label it.
+  // Still show the next single III. The page labels that row 综合保险.
   if (!picked.length) push(nextSingleIii(primary, results));
   return picked.slice(0, n);
 }
@@ -1099,7 +1099,9 @@ export function insuranceModel(
     return family.model;
   }
   if (step) return step.model;
-  return family?.model ?? null;
+  if (family) return family.model;
+  // No same-family current and no ladder family (SHZV-1000 → SHZVG-1300).
+  return nextSingleIii(primary, results)?.model ?? null;
 }
 
 /**
@@ -1111,7 +1113,7 @@ export function showsMinimumLabel(loose: boolean): boolean {
   return !loose;
 }
 
-/** Other options stay visible. The page does not badge them. */
+/** Other options stay visible. The insurance row is the one insuranceModel names. */
 export function optionsWithInsurance(
   results: ModelResult[],
   dutyA: number,

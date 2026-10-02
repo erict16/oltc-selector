@@ -70,4 +70,13 @@ describe("release notes", () => {
     expect(src).toContain('label={t(lang, "stepPercent")}');
     expect(src).toMatch(/ustV == null \?[\s\S]{0,80}label=\{t\(lang, "ust"\)\}/);
   });
+
+  it("prints 综合保险 on the insurance row, not only on the primary card", () => {
+    const src = readFileSync(
+      resolve(__dirname, "../components/SelectorApp.tsx"),
+      "utf8",
+    );
+    expect(src).toContain("insuranceModel");
+    expect(src).toMatch(/insuranceId === r\.model[\s\S]{0,240}allRound/);
+  });
 });
