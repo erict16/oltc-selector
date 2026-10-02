@@ -480,6 +480,10 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
     input.throughCurrentA,
     input.stepVoltageV,
     3,
+    {
+      acrossTapBilKv: input.acrossTapBilKv,
+      acrossTapPfKv: input.acrossTapPfKv,
+    },
   );
   const lines = [
     primary.model,
@@ -508,6 +512,10 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
     input.throughCurrentA,
     input.stepVoltageV,
     3,
+    {
+      acrossTapBilKv: input.acrossTapBilKv,
+      acrossTapPfKv: input.acrossTapPfKv,
+    },
   ).map((r) => r.model);
   const payload = {
     ok: out.ok,

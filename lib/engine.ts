@@ -990,41 +990,80 @@ function nextSingleIii(
 }
 
 /**
- * The primary card is 综合保险方案 only when every axis stays inside half
- * the rating. 684 A does not fit SHZV-600, so SHZV-1000 is 满足最低要求
- * even though 684/1000 is under three quarters. Do not hide 其他可选.
+ * Label lines only. They do not change which model is the primary.
+ * Past the line (`>`, so sitting on it still counts as 综合保险):
+ * current 95%, step voltage 90% (orders leave a lower Ust ceiling by 0.91),
+ * step capacity 95%, across-tap lightning / power frequency 95% when a
+ * number was typed. Blank 自动 does not count.
  */
-const COMFORTABLE_USE = 0.5;
+const CURRENT_LINE = 0.95;
+const STEP_VOLTAGE_LINE = 0.9;
+const STEP_CAPACITY_LINE = 0.95;
+const INSULATION_LINE = 0.95;
+const LINE_EPS = 1e-9;
+
+export type MarginNeed = {
+  acrossTapBilKv?: number;
+  acrossTapPfKv?: number;
+};
+
+type DutyUse = { iUse: number; uUse: number; pUse: number; nUse: number };
+
+function pastLine(use: number, line: number): boolean {
+  return use > line + LINE_EPS;
+}
+
+/** Across-tap fill against this model's own withstand. No number → 0. */
+function insulationUse(row: ModelResult, need?: MarginNeed): number {
+  const bil = need?.acrossTapBilKv ?? 0;
+  const pf = need?.acrossTapPfKv ?? 0;
+  if (bil <= 0 && pf <= 0) return 0;
+  const series = SERIES.find((s) => s.id === row.seriesId);
+  let aLi = 0;
+  let aPf = 0;
+  if (series?.structure === "compound") {
+    // Same fixed a-distance as compoundCoversAcrossTap.
+    aLi = 200;
+    aPf = 50;
+  } else if (row.selectorSize) {
+    const ins = INTERNAL_INSULATION[row.selectorSize];
+    aLi = ins?.a_li ?? 0;
+    aPf = ins?.a_pf ?? 0;
+  }
+  let peak = 0;
+  if (bil > 0 && aLi > 0) peak = Math.max(peak, bil / aLi);
+  if (pf > 0 && aPf > 0) peak = Math.max(peak, pf / aPf);
+  return peak;
+}
 
 /**
- * Display only. Does not choose a larger type, and does not clear the
- * other-options list. One axis past half means this catalogue step was
- * forced, so the card stays 满足最低要求.
+ * Display only. Does not choose a larger type.
+ * True when current, Ust, step capacity, and a typed across-tap stress
+ * all stay on or under their lines. 486 A on CV2-600 (81%) is still this
+ * card. 342 A on CV2-350 (97%) is not.
  */
 export function primaryIsInsurance(
   primary: ModelResult,
   dutyA: number,
   stepVoltageV: number,
+  need?: MarginNeed,
 ): boolean {
   if (!(dutyA > 0) || !(primary.currentA > dutyA)) return false;
-  const iUse = dutyA / primary.currentA;
-  const uUse =
-    stepVoltageV > 0 && primary.maxStepVoltageV && primary.maxStepVoltageV > 0
-      ? stepVoltageV / primary.maxStepVoltageV
-      : 0;
-  const needKva = stepVoltageV > 0 ? (dutyA * stepVoltageV) / 1000 : 0;
-  const pUse =
-    needKva > 0 && primary.stepCapacityKva && primary.stepCapacityKva > 0
-      ? needKva / primary.stepCapacityKva
-      : 0;
-  return Math.max(iUse, uUse, pUse) <= COMFORTABLE_USE + 1e-9;
+  const u = dutyUse(primary, dutyA, stepVoltageV, need);
+  return (
+    !pastLine(u.iUse, CURRENT_LINE) &&
+    !pastLine(u.uUse, STEP_VOLTAGE_LINE) &&
+    !pastLine(u.pUse, STEP_CAPACITY_LINE) &&
+    !pastLine(u.nUse, INSULATION_LINE)
+  );
 }
 
 function dutyUse(
   row: ModelResult,
   dutyA: number,
   stepVoltageV: number,
-): { iUse: number; uUse: number; pUse: number } {
+  need?: MarginNeed,
+): DutyUse {
   const iUse = row.currentA > 0 ? dutyA / row.currentA : 1;
   const uUse =
     stepVoltageV > 0 && row.maxStepVoltageV && row.maxStepVoltageV > 0
@@ -1035,37 +1074,42 @@ function dutyUse(
     needKva > 0 && row.stepCapacityKva && row.stepCapacityKva > 0
       ? needKva / row.stepCapacityKva
       : 0;
-  return { iUse, uUse, pUse };
+  return { iUse, uUse, pUse, nUse: insulationUse(row, need) };
 }
 
 /**
  * Same-series next current shares the step-voltage ceiling (CV2 350 and
- * 600 are both 2000 V). It insures only when current is the tight axis.
- * 342 A on 350 qualifies. 188 A at 1949 V does not — Ust is tighter.
+ * 600 are both 2000 V) and the compound across-tap limit. It insures only
+ * when current is the tight axis. 342 A on 350 qualifies. 188 A at 1949 V
+ * does not — Ust is tighter.
  */
 function currentStepInsures(
   primary: ModelResult,
   step: ModelResult,
   dutyA: number,
   stepVoltageV: number,
+  need?: MarginNeed,
 ): boolean {
-  const a = dutyUse(primary, dutyA, stepVoltageV);
-  if (a.uUse >= a.iUse - 1e-9 || a.pUse >= a.iUse - 1e-9) return false;
-  const b = dutyUse(step, dutyA, stepVoltageV);
+  const a = dutyUse(primary, dutyA, stepVoltageV, need);
+  if (a.uUse >= a.iUse - 1e-9) return false;
+  if (a.pUse >= a.iUse - 1e-9) return false;
+  if (a.nUse >= a.iUse - 1e-9) return false;
+  const b = dutyUse(step, dutyA, stepVoltageV, need);
   return b.iUse < a.iUse - 1e-9;
 }
 
-/** Next family insures when it lowers the worst of current, Ust, capacity. */
+/** Next family insures when it lowers the worst axis, including across-tap. */
 function familyInsures(
   primary: ModelResult,
   family: ModelResult,
   dutyA: number,
   stepVoltageV: number,
+  need?: MarginNeed,
 ): boolean {
-  const a = dutyUse(primary, dutyA, stepVoltageV);
-  const b = dutyUse(family, dutyA, stepVoltageV);
-  const peak = Math.max(a.iUse, a.uUse, a.pUse);
-  const next = Math.max(b.iUse, b.uUse, b.pUse);
+  const a = dutyUse(primary, dutyA, stepVoltageV, need);
+  const b = dutyUse(family, dutyA, stepVoltageV, need);
+  const peak = Math.max(a.iUse, a.uUse, a.pUse, a.nUse);
+  const next = Math.max(b.iUse, b.uUse, b.pUse, b.nUse);
   return next < peak - 1e-9;
 }
 
@@ -1074,69 +1118,71 @@ function familyInsures(
  * Same-family next current when current is what is tight.
  * When step voltage is tighter and that next current shares the ceiling,
  * the next family wears it (CV2 2000 V → CM2 3300 V).
- * No same-family current left: the next family, as before (CV2-600 → CM2).
- * Null when the primary is already loose, or nothing adjacent is left.
- * CV2-600 tags CM2, not SHZV. CM2 does not tag SHZVG.
+ * No same-family current left: the next family (CV2-600 past 95% → CM2).
+ * Null when the primary is already inside every line.
+ * CV2-600 tags CM2, not SHZV. SHZV-1000 tags SHZVG, not a skipped family.
  */
 export function insuranceModel(
   results: ModelResult[],
   dutyA: number,
   stepVoltageV: number,
+  need?: MarginNeed,
 ): string | null {
   const primary = results[0];
   if (!primary) return null;
-  if (primaryIsInsurance(primary, dutyA, stepVoltageV)) return null;
+  if (primaryIsInsurance(primary, dutyA, stepVoltageV, need)) return null;
   const step = stepUpOf(primary, results);
   const family = nextFamilyOf(primary, results);
-  if (step && currentStepInsures(primary, step, dutyA, stepVoltageV)) {
+  if (step && currentStepInsures(primary, step, dutyA, stepVoltageV, need)) {
     return step.model;
   }
   if (
-    step &&
     family &&
-    familyInsures(primary, family, dutyA, stepVoltageV)
+    familyInsures(primary, family, dutyA, stepVoltageV, need)
   ) {
     return family.model;
   }
+  const single = nextSingleIii(primary, results);
+  if (single && familyInsures(primary, single, dutyA, stepVoltageV, need)) {
+    return single.model;
+  }
+  // 575 A on CV2-600 is the same 600 A on CM2, so the ratio does not drop,
+  // but that next family is still the margin row.
   if (step) return step.model;
   if (family) return family.model;
-  // No same-family current and no ladder family (SHZV-1000 → SHZVG-1300).
-  return nextSingleIii(primary, results)?.model ?? null;
+  return single?.model ?? null;
 }
 
 /**
- * 满足最低要求 when any axis is past half the rating.
- * No bigger catalogue step does not rename that minimum to 综合保险.
- * 684 A on SHZV-1000 has no 1200 A sibling and is still the minimum.
+ * 满足最低要求 when any axis is past its line.
+ * No bigger catalogue step does not rename a snug rating to 综合保险.
+ * 684 A on SHZV-1000 is under 95%, so the card itself stays 综合保险.
  */
 export function showsMinimumLabel(loose: boolean): boolean {
   return !loose;
 }
 
-/** Other options stay visible. The insurance row is the one insuranceModel names. */
+/**
+ * One other row. Inside every line: the same-family next current only
+ * (300 A → CV2-600, not CM2), and the page does not tag it.
+ * Past a line: only the model insuranceModel names. No next Um.
+ */
 export function optionsWithInsurance(
   results: ModelResult[],
   dutyA: number,
   stepVoltageV: number,
   n = 3,
+  need?: MarginNeed,
 ): ModelResult[] {
   const primary = results[0];
-  const alts = pickOtherOptions(results, n);
-  const id = insuranceModel(results, dutyA, stepVoltageV);
-  if (!id) return alts;
-  const step = primary ? stepUpOf(primary, results) : null;
-  // Current step was skipped because it does not raise the tight limit.
-  // Lead with the family that does, and keep the current step unbadged.
-  if (step && step.model !== id) {
-    const found =
-      alts.find((r) => r.model === id) ?? results.find((r) => r.model === id);
-    if (!found) return alts;
-    return [found, ...alts.filter((r) => r.model !== id)].slice(0, n);
+  if (!primary) return [];
+  const id = insuranceModel(results, dutyA, stepVoltageV, need);
+  if (id) {
+    const found = results.find((r) => r.model === id);
+    return found ? [found].slice(0, n) : [];
   }
-  if (alts.some((r) => r.model === id)) return alts;
-  const found = results.find((r) => r.model === id);
-  if (!found) return alts;
-  return [found, ...alts].slice(0, n);
+  const step = stepUpOf(primary, results);
+  return step ? [step].slice(0, n) : [];
 }
 
 /** Regression helpers + training-case fixtures */

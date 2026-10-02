@@ -648,17 +648,27 @@ export function SelectorApp() {
   };
 
   const primary = result?.ok ? result.results[0] : null;
+  const marginNeed = {
+    acrossTapBilKv: input.acrossTapBilKv,
+    acrossTapPfKv: input.acrossTapPfKv,
+  };
   const loose =
     primary != null &&
     pickedDutyA != null &&
-    primaryIsInsurance(primary, pickedDutyA, pickedStepV);
+    primaryIsInsurance(primary, pickedDutyA, pickedStepV, marginNeed);
   const alts =
     result?.ok && pickedDutyA != null
-      ? optionsWithInsurance(result.results, pickedDutyA, pickedStepV, 3)
+      ? optionsWithInsurance(
+          result.results,
+          pickedDutyA,
+          pickedStepV,
+          3,
+          marginNeed,
+        )
       : [];
   const insuranceId =
     !loose && result?.ok && pickedDutyA != null
-      ? insuranceModel(result.results, pickedDutyA, pickedStepV)
+      ? insuranceModel(result.results, pickedDutyA, pickedStepV, marginNeed)
       : null;
   const posHint =
     !isLinear && input.positions != null

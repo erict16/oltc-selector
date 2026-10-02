@@ -41,7 +41,13 @@ describe("insurance label", () => {
     throughCurrentA: number;
     umKv: number;
     stepVoltageV: number;
+    acrossTapBilKv?: number;
+    acrossTapPfKv?: number;
   }) {
+    const need = {
+      acrossTapBilKv: partial.acrossTapBilKv,
+      acrossTapPfKv: partial.acrossTapPfKv,
+    };
     const out = selectOltc({
       mounting: "in_tank",
       medium: "oil_vacuum",
@@ -64,149 +70,214 @@ describe("insurance label", () => {
         primary,
         partial.throughCurrentA,
         partial.stepVoltageV,
+        need,
       ),
       tag: insuranceModel(
         out.results,
         partial.throughCurrentA,
         partial.stepVoltageV,
+        need,
       ),
       shown: optionsWithInsurance(
         out.results,
         partial.throughCurrentA,
         partial.stepVoltageV,
         3,
+        need,
       ),
     };
   }
 
-  it("keeps a snug CV2 current as the minimum and tags the next current", () => {
-    // 280 A is 80% of CV2 350. Ust 1000 V is half of 2000 V.
+  it("keeps 280 A inside CV2-350 and lists only the next CV2", () => {
+    // 280 A is 80% of 350. Ust 1000 V is half of 2000 V. Both under the line.
     const s = sized({ throughCurrentA: 280, umKv: 72.5, stepVoltageV: 1000 });
     expect(s.primary.seriesCode).toBe("CV2");
     expect(s.primary.currentA).toBe(350);
-    expect(s.loose).toBe(false);
-    const tagged = s.shown.find((r) => r.model === s.tag);
-    expect(tagged).toBeTruthy();
-    expect(tagged!.currentA).toBeGreaterThan(350);
-    expect(tagged!.currentA).not.toBe(s.primary.currentA);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown.map((r) => r.model)).toEqual(["CV2III-600Y/72.5-10193W"]);
   });
 
-  it("calls the first choice insurance when every limit is under half", () => {
+  it("calls the first choice insurance when every limit is well under the line", () => {
     // 100 A is 29% of 350 A. 800 V is 40% of CV2 2000 V.
-    // The card is the margin pick. Other models stay listed, unlabeled.
     const s = sized({ throughCurrentA: 100, umKv: 72.5, stepVoltageV: 800 });
     expect(s.loose).toBe(true);
     expect(s.tag).toBeNull();
-    expect(s.shown.length).toBeGreaterThan(0);
+    expect(s.shown.map((r) => r.seriesCode)).toEqual(["CV2"]);
     expect(showsMinimumLabel(s.loose)).toBe(false);
   });
 
-  it("keeps other models when 146 A already sits inside CV2-350", () => {
+  it("lists one CV2 step for 300 A and does not offer CM2", () => {
+    // 300/350 ≈ 86%. Same-family 600 A is the other row. CM2 is not.
+    const s = sized({ throughCurrentA: 300, umKv: 72.5, stepVoltageV: 1000 });
+    expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown.map((r) => r.seriesCode)).toEqual(["CV2"]);
+    expect(s.shown[0]?.currentA).toBe(600);
+    expect(s.shown.some((r) => r.seriesCode === "CM2")).toBe(false);
+  });
+
+  it("keeps 146 A on CV2-350 as the margin card with one CV2 step", () => {
     // 25 MVA / 110 kV Y / ±8×1.25% → 145.8 A, Ust 794 V.
     const s = sized({ throughCurrentA: 145.8, umKv: 72.5, stepVoltageV: 794 });
     expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
     expect(s.loose).toBe(true);
     expect(s.tag).toBeNull();
-    expect(s.shown.length).toBeGreaterThan(0);
+    expect(s.shown.map((r) => r.seriesCode)).toEqual(["CV2"]);
     expect(showsMinimumLabel(s.loose)).toBe(false);
   });
 
-  it("lists 600 A for a 194 A duty without calling 350 the safety card", () => {
+  it("lists 600 A for a 194 A duty and calls 350 the margin card", () => {
     // 40 MVA / 132 kV Y / ±8×1.25% → 194.4 A, Ust 953 V. 56% of 350 A.
     const s = sized({ throughCurrentA: 194.4, umKv: 72.5, stepVoltageV: 953 });
     expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
-    expect(s.loose).toBe(false);
-    expect(showsMinimumLabel(s.loose)).toBe(true);
-    expect(s.shown.some((r) => /^CV2III-600Y\/72\.5/.test(r.model))).toBe(true);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(showsMinimumLabel(s.loose)).toBe(false);
+    expect(s.shown.map((r) => r.model)).toEqual(["CV2III-600Y/72.5-10193W"]);
   });
 
-  it("does not call a step-voltage-bound rating insurance", () => {
-    // 120 A is 34% of 350 A, but 1800 V is 90% of CV2 2000 V.
+  it("stays insurance when step voltage sits on 90 percent of the ceiling", () => {
+    // 120 A is 34% of 350 A. 1800 V is exactly 90% of CV2 2000 V. 没过.
     const s = sized({ throughCurrentA: 120, umKv: 72.5, stepVoltageV: 1800 });
-    expect(s.loose).toBe(false);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown.map((r) => r.seriesCode)).toEqual(["CV2"]);
   });
 
-  it("keeps CV2-600 a minimum when 382 A does not fit CV2-350", () => {
-    // 381.7 A is 64% of 600 A and does not fit 350 A. Still 满足最低要求.
+  it("tags CM2 when step voltage is past 90 percent of the CV2 ceiling", () => {
+    // 1850/2000 = 92.5%. CV2-600 does not raise that ceiling.
+    const s = sized({ throughCurrentA: 120, umKv: 72.5, stepVoltageV: 1850 });
+    expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
+    expect(s.loose).toBe(false);
+    expect(s.tag).toMatch(/^CM2III-500Y\/72\.5/);
+    expect(s.shown.map((r) => r.model)).toEqual([s.tag]);
+  });
+
+  it("calls CV2-600 the margin card when 382 A does not fit CV2-350", () => {
+    // 381.7 A is 64% of 600 A. Under 95%, and there is no higher CV2 current.
     const s = sized({ throughCurrentA: 381.7, umKv: 72.5, stepVoltageV: 1061 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
-    expect(s.loose).toBe(false);
-    expect(showsMinimumLabel(s.loose)).toBe(true);
-    expect(s.shown.length).toBeGreaterThan(0);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown).toEqual([]);
+    expect(showsMinimumLabel(s.loose)).toBe(false);
   });
 
-  it("calls 684 A on SHZV-1000 the minimum, and still lists other models", () => {
-    // 160 MVA / 150 kV Y / ±8×1.25% → 684.3 A, Ust 1083 V.
-    // 600 A does not cover 684 A. No 1200 A sibling. Not a safety-margin card.
+  it("calls 684 A on SHZV-1000 the margin card", () => {
+    // 684.3/1000 = 68%. Under 95%. No CHVT row.
     const s = sized({ throughCurrentA: 684.3, umKv: 72.5, stepVoltageV: 1083 });
     expect(s.primary.model).toMatch(/^SHZVIII-1000Y\/72\.5B/);
-    expect(s.loose).toBe(false);
-    expect(s.tag).toBe("SHZVGIII-1300Y/72.5B-10193W");
-    expect(showsMinimumLabel(s.loose)).toBe(true);
-    expect(s.shown.map((r) => r.model)).toEqual([
-      "SHZVGIII-1300Y/72.5B-10193W",
-    ]);
-    expect(s.shown[0]?.model).toBe(s.tag);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown).toEqual([]);
+    expect(showsMinimumLabel(s.loose)).toBe(false);
   });
 
-  it("tags VCM when 486 A forces VCV-600", () => {
+  it("calls 486 A on CV2-600 the margin card and does not list CM2", () => {
     // 100 MVA / 132 kV Y / ±8×1.25% → 486 A, Ust 953 V. 81% of 600 A.
-    // VCV-350 cannot cover it, so the card stays 满足最低要求 and VCM wears 综合保险.
     const s = sized({ throughCurrentA: 486, umKv: 72.5, stepVoltageV: 953 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
-    expect(s.loose).toBe(false);
-    expect(s.tag).toMatch(/^CM2III-600Y\/72\.5/);
-    expect(s.shown.some((r) => r.model === s.tag)).toBe(true);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown).toEqual([]);
+    expect(s.shown.some((r) => r.seriesCode === "CM2")).toBe(false);
   });
 
-  it("tags the next family when CV2-600 is actually current-tight", () => {
-    // 520 A is 87% of 600 A. No higher CV2 current, so 综合保险 is CM2, not SHZV.
+  it("does not tag CM2 when 520 A is still under 95 percent of CV2-600", () => {
+    // 520/600 = 87%.
     const s = sized({ throughCurrentA: 520, umKv: 72.5, stepVoltageV: 1061 });
+    expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown).toEqual([]);
+  });
+
+  it("tags CM2 when CV2-600 is past 95 percent", () => {
+    // 575/600 = 95.8%. No higher CV2 current.
+    const s = sized({ throughCurrentA: 575, umKv: 72.5, stepVoltageV: 1000 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
     expect(s.loose).toBe(false);
     expect(s.tag).toMatch(/^CM2III-600Y\/72\.5/);
-    expect(s.shown.map((r) => r.seriesCode)).toEqual(["CV2", "CM2"]);
-    expect(s.shown[0]?.model).toMatch(/^CV2III-600Y\/126/);
-    expect(s.shown[1]?.currentA).toBeGreaterThanOrEqual(600);
+    expect(s.shown.map((r) => r.model)).toEqual([s.tag]);
     expect(s.shown.some((r) => r.seriesCode === "SHZV")).toBe(false);
     expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
   });
 
-  it("342 A stays on CV2-350 and insures with CV2-600", () => {
+  it("342 A stays on CV2-350 and insures with CV2-600 only", () => {
     // 80 MVA / 150 kV Y / ±8 / 1.25% → 342 A, Ust ≈ 1083 V.
-    // 350 already carries 342. 600 is the same-family insurance, not CM2.
+    // 342/350 = 97.7%. 600 is the same-family insurance, not CM2.
     const s = sized({ throughCurrentA: 342.1, umKv: 72.5, stepVoltageV: 1083 });
     expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
     expect(s.loose).toBe(false);
     expect(s.tag).toMatch(/^CV2III-600Y\/72\.5/);
-    expect(s.shown[0]?.model).toMatch(/^CV2III-600Y\/72\.5/);
-    expect(s.shown.some((r) => r.seriesCode === "SHZV")).toBe(false);
-    expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
+    expect(s.shown.map((r) => r.model)).toEqual([s.tag]);
+    expect(s.shown.some((r) => r.seriesCode === "CM2")).toBe(false);
   });
 
   it("insures with CM2 when CV2-600 does not raise the step voltage", () => {
     // 40 MVA / 150 kV Y / ±8×2.25% → 187.8 A, Ust 1949 V.
-    // CV2 350 and 600 share the 2000 V ceiling. Current is half of 350.
-    // CM2 raises that ceiling to 3300 V, so it wears 综合保险 and leads the list.
+    // 1949/2000 = 97.5%. CV2 350 and 600 share the 2000 V ceiling.
     const s = sized({ throughCurrentA: 187.8, umKv: 72.5, stepVoltageV: 1949 });
     expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
     expect(s.loose).toBe(false);
     expect(s.tag).toMatch(/^CM2III-500Y\/72\.5/);
-    expect(s.shown[0]?.model).toBe(s.tag);
-    expect(s.shown.some((r) => /^CV2III-600Y\/72\.5/.test(r.model))).toBe(true);
+    expect(s.shown.map((r) => r.model)).toEqual([s.tag]);
     expect(t("en", "allRound")).toBe("Safety-margin option");
     expect(t("zh", "allRound")).toBe("综合保险方案");
   });
 
-  it("tags SHZVG beside SHZV-1000 as the insurance row", () => {
+  it("keeps 900 A on SHZV-1000 as the margin card", () => {
+    // 900/1000 = 90%. Under 95%.
     const s = sized({ throughCurrentA: 900, umKv: 72.5, stepVoltageV: 1000 });
     expect(s.primary.seriesCode).toBe("SHZV");
     expect(s.primary.currentA).toBe(1000);
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+    expect(s.shown).toEqual([]);
+  });
+
+  it("tags SHZVG when SHZV-1000 is past 95 percent", () => {
+    const s = sized({ throughCurrentA: 960, umKv: 72.5, stepVoltageV: 1000 });
+    expect(s.primary.model).toMatch(/^SHZVIII-1000Y\/72\.5B/);
     expect(s.loose).toBe(false);
     expect(s.tag).toMatch(/^SHZVGIII-1300Y\/72\.5/);
-    expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(true);
-    expect(s.shown.some((r) => r.seriesCode === "SDZV")).toBe(false);
+    expect(s.shown.map((r) => r.model)).toEqual([s.tag]);
     expect(s.shown.every((r) => r.unitCount === 1)).toBe(true);
+  });
+
+  it("ignores blank across-tap insulation", () => {
+    const s = sized({ throughCurrentA: 300, umKv: 72.5, stepVoltageV: 1000 });
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+  });
+
+  it("stays a margin card at 95 percent of the compound lightning limit", () => {
+    // 190/200 = 0.95. 没过.
+    const s = sized({
+      throughCurrentA: 120,
+      umKv: 72.5,
+      stepVoltageV: 800,
+      acrossTapBilKv: 190,
+    });
+    expect(s.primary.seriesCode).toBe("CV2");
+    expect(s.loose).toBe(true);
+    expect(s.tag).toBeNull();
+  });
+
+  it("tags CM2 when lightning is past 95 percent of the compound limit", () => {
+    // 196/200 = 0.98. CV2-600 shares the 200 kV limit. CM2 grade B is 265 kV.
+    const s = sized({
+      throughCurrentA: 120,
+      umKv: 72.5,
+      stepVoltageV: 800,
+      acrossTapBilKv: 196,
+    });
+    expect(s.primary.seriesCode).toBe("CV2");
+    expect(s.loose).toBe(false);
+    expect(s.tag).toMatch(/^CM2III-/);
+    expect(s.shown.map((r) => r.model)).toEqual([s.tag]);
   });
 });
 
