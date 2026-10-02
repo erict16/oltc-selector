@@ -6,6 +6,7 @@ import {
   primaryIsInsurance,
   insuranceModel,
   optionsWithInsurance,
+  showsMinimumLabel,
   FIXTURES,
   octcRoman,
 } from "./engine";
@@ -92,29 +93,31 @@ describe("insurance label", () => {
 
   it("calls the first choice insurance when every limit is under half", () => {
     // 100 A is 29% of 350 A. 800 V is 40% of CV2 2000 V.
+    // The card is the margin pick. Other models stay listed, unlabeled.
     const s = sized({ throughCurrentA: 100, umKv: 72.5, stepVoltageV: 800 });
     expect(s.loose).toBe(true);
     expect(s.tag).toBeNull();
-    expect(s.shown).toEqual([]);
+    expect(s.shown.length).toBeGreaterThan(0);
+    expect(showsMinimumLabel(s.loose)).toBe(false);
   });
 
-  it("lists no other model when 146 A already sits well inside CV2-350", () => {
+  it("keeps other models when 146 A already sits inside CV2-350", () => {
     // 25 MVA / 110 kV Y / ±8×1.25% → 145.8 A, Ust 794 V.
     const s = sized({ throughCurrentA: 145.8, umKv: 72.5, stepVoltageV: 794 });
     expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
     expect(s.loose).toBe(true);
     expect(s.tag).toBeNull();
-    expect(s.shown).toEqual([]);
+    expect(s.shown.length).toBeGreaterThan(0);
+    expect(showsMinimumLabel(s.loose)).toBe(false);
   });
 
-  it("does not recommend 600 A for a 194 A duty", () => {
-    // 40 MVA / 132 kV Y / ±8×1.25% → 194.4 A, Ust 953 V.
-    // 194 A is 56% of 350 A. 600 A is not a margin step.
+  it("lists 600 A for a 194 A duty without calling 350 the safety card", () => {
+    // 40 MVA / 132 kV Y / ±8×1.25% → 194.4 A, Ust 953 V. 56% of 350 A.
     const s = sized({ throughCurrentA: 194.4, umKv: 72.5, stepVoltageV: 953 });
     expect(s.primary.model).toMatch(/^CV2III-350Y\/72\.5/);
-    expect(s.loose).toBe(true);
-    expect(s.tag).toBeNull();
-    expect(s.shown).toEqual([]);
+    expect(s.loose).toBe(false);
+    expect(showsMinimumLabel(s.loose)).toBe(true);
+    expect(s.shown.some((r) => /^CV2III-600Y\/72\.5/.test(r.model))).toBe(true);
   });
 
   it("does not call a step-voltage-bound rating insurance", () => {
@@ -123,13 +126,26 @@ describe("insurance label", () => {
     expect(s.loose).toBe(false);
   });
 
-  it("does not upsell when CV2-600 still has room", () => {
-    // 381.7 A is 64% of 600 A. Ust 1061 V is 53% of 2000 V.
+  it("keeps CV2-600 a minimum when 382 A does not fit CV2-350", () => {
+    // 381.7 A is 64% of 600 A and does not fit 350 A. Still 满足最低要求.
     const s = sized({ throughCurrentA: 381.7, umKv: 72.5, stepVoltageV: 1061 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
-    expect(s.loose).toBe(true);
+    expect(s.loose).toBe(false);
+    expect(showsMinimumLabel(s.loose)).toBe(true);
+    expect(s.shown.length).toBeGreaterThan(0);
+  });
+
+  it("calls 684 A on SHZV-1000 the minimum, and still lists other models", () => {
+    // 160 MVA / 150 kV Y / ±8×1.25% → 684.3 A, Ust 1083 V.
+    // 600 A does not cover 684 A. No 1200 A sibling. Not a safety-margin card.
+    const s = sized({ throughCurrentA: 684.3, umKv: 72.5, stepVoltageV: 1083 });
+    expect(s.primary.model).toMatch(/^SHZVIII-1000Y\/72\.5B/);
+    expect(s.loose).toBe(false);
     expect(s.tag).toBeNull();
-    expect(s.shown).toEqual([]);
+    expect(showsMinimumLabel(s.loose)).toBe(true);
+    expect(s.shown.map((r) => r.model)).toEqual([
+      "SHZVGIII-1300Y/72.5B-10193W",
+    ]);
   });
 
   it("tags the next family when CV2-600 is actually current-tight", () => {
@@ -171,14 +187,15 @@ describe("insurance label", () => {
     expect(t("zh", "allRound")).toBe("综合保险方案");
   });
 
-  it("does not offer SHZVG beside a covering SHZV-1000", () => {
+  it("lists SHZVG beside SHZV-1000 with no badge", () => {
     const s = sized({ throughCurrentA: 900, umKv: 72.5, stepVoltageV: 1000 });
     expect(s.primary.seriesCode).toBe("SHZV");
     expect(s.primary.currentA).toBe(1000);
     expect(s.loose).toBe(false);
     expect(s.tag).toBeNull();
-    expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
+    expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(true);
     expect(s.shown.some((r) => r.seriesCode === "SDZV")).toBe(false);
+    expect(s.shown.every((r) => r.unitCount === 1)).toBe(true);
   });
 });
 
@@ -1716,6 +1733,9 @@ describe("other options stay on the adjacent price step", () => {
     const allowed = new Set(
       [primary.seriesId, NEXT[primary.seriesId]].filter((id): id is string => !!id),
     );
+    if (primary.seriesId === "shzv" && primary.currentA + 0.5 >= 1000) {
+      allowed.add("shzvg");
+    }
     expect(shown.length, label).toBeLessThanOrEqual(3);
     for (const row of shown) {
       expect(allowed.has(row.seriesId), `${label} ${row.model}`).toBe(true);
@@ -1730,7 +1750,10 @@ describe("other options stay on the adjacent price step", () => {
         label,
       ).toBe(false);
     }
-    if (primary.seriesId === "shzv" || primary.seriesId === "sdzv") {
+    if (primary.seriesId === "shzv" && primary.currentA + 0.5 < 1000) {
+      expect(shown.some((r) => r.seriesId === "shzvg"), label).toBe(false);
+    }
+    if (primary.seriesId === "sdzv") {
       expect(shown.some((r) => r.seriesId === "shzvg"), label).toBe(false);
     }
     const loose = primaryIsInsurance(primary, dutyA, ust);

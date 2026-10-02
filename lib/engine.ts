@@ -966,22 +966,40 @@ export function pickOtherOptions(
   push(stepUpOf(primary, results));
   push(nextUmOf(primary, results));
   push(nextFamilyOf(primary, results));
+  // SHZV-1000 has no bigger III current and no 126 row in the list.
+  // Still show the next single III. No badge — the page does not label it.
+  if (!picked.length) push(nextSingleIii(primary, results));
   return picked.slice(0, n);
 }
 
-/**
- * A catalogue step is only worth an upsell once the tightest axis has used
- * three quarters of it. Below that the minimum already covers the duty,
- * so the card is 综合保险方案 and 其他可选 stays empty.
- * 194 A is 56% of 350 A — not a reason to offer 600 A.
- * 342 A is 98% of 350 A — 600 A is still the margin step.
- */
-const COMFORTABLE_USE = 0.75;
+/** Next single III above a family that has no same-series step left. */
+function nextSingleIii(
+  primary: ModelResult,
+  results: ModelResult[],
+): ModelResult | null {
+  if (primary.seriesId !== "shzv" || primary.currentA + 0.5 < 1000) return null;
+  const later = results.filter(
+    (r) =>
+      r.seriesId === "shzvg" &&
+      sameMachine(r, primary) &&
+      r.currentA + 0.5 >= primary.currentA &&
+      r.umKv + 0.1 >= primary.umKv,
+  );
+  later.sort((a, b) => a.currentA - b.currentA || a.umKv - b.umKv);
+  return later[0] ?? null;
+}
 
 /**
- * Display only. The primary is 综合保险方案 when every axis stays inside
- * COMFORTABLE_USE. One axis past that line forced this catalogue step, so
- * the card stays 满足最低要求. Do not use this to pick a larger type.
+ * The primary card is 综合保险方案 only when every axis stays inside half
+ * the rating. 684 A does not fit SHZV-600, so SHZV-1000 is 满足最低要求
+ * even though 684/1000 is under three quarters. Do not hide 其他可选.
+ */
+const COMFORTABLE_USE = 0.5;
+
+/**
+ * Display only. Does not choose a larger type, and does not clear the
+ * other-options list. One axis past half means this catalogue step was
+ * forced, so the card stays 满足最低要求.
  */
 export function primaryIsInsurance(
   primary: ModelResult,
@@ -1085,18 +1103,15 @@ export function insuranceModel(
 }
 
 /**
- * 满足最低要求 only when a 综合保险 model sits beside it.
- * A loose primary, or a primary with no adjacent step, is 综合保险 on its own.
+ * 满足最低要求 when any axis is past half the rating.
+ * No bigger catalogue step does not rename that minimum to 综合保险.
+ * 684 A on SHZV-1000 has no 1200 A sibling and is still the minimum.
  */
-export function showsMinimumLabel(
-  loose: boolean,
-  insuranceAlt: string | null,
-): boolean {
-  return !loose && insuranceAlt != null;
+export function showsMinimumLabel(loose: boolean): boolean {
+  return !loose;
 }
 
-/** Other options, with the insurance step-up kept in the visible slots.
- * Empty when the minimum already covers the duty with room to spare. */
+/** Other options stay visible. The page does not badge them. */
 export function optionsWithInsurance(
   results: ModelResult[],
   dutyA: number,
@@ -1104,12 +1119,6 @@ export function optionsWithInsurance(
   n = 3,
 ): ModelResult[] {
   const primary = results[0];
-  if (
-    primary &&
-    primaryIsInsurance(primary, dutyA, stepVoltageV)
-  ) {
-    return [];
-  }
   const alts = pickOtherOptions(results, n);
   const id = insuranceModel(results, dutyA, stepVoltageV);
   if (!id) return alts;

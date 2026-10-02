@@ -30,7 +30,6 @@ import {
 } from "@/lib/deriveUm";
 
 import {
-  insuranceModel,
   optionsWithInsurance,
   primaryIsInsurance,
   showsMinimumLabel,
@@ -656,10 +655,6 @@ export function SelectorApp() {
     result?.ok && pickedDutyA != null
       ? optionsWithInsurance(result.results, pickedDutyA, pickedStepV, 3)
       : [];
-  const insuranceAlt =
-    result?.ok && pickedDutyA != null
-      ? insuranceModel(result.results, pickedDutyA, pickedStepV)
-      : null;
   const posHint =
     !isLinear && input.positions != null
       ? t(lang, "posHint", { n: input.positions })
@@ -1551,7 +1546,7 @@ export function SelectorApp() {
                   <p className="text-[0.75rem] font-semibold tracking-[0.08em] text-[#8fd0e2]">
                     {t(
                       lang,
-                      showsMinimumLabel(loose, insuranceAlt)
+                      showsMinimumLabel(loose)
                         ? "recommended"
                         : "allRound",
                     )}
@@ -1647,12 +1642,6 @@ export function SelectorApp() {
                                         <span className="min-w-0 break-words font-mono text-[0.8125rem] leading-snug text-white sm:text-[0.875rem]">
                                           {modelNodes(shown)}
                                         </span>
-                                        {insuranceAlt != null &&
-                                        r.model === insuranceAlt ? (
-                                          <span className="shrink-0 rounded-full border border-[#8fd0e2]/55 bg-[#8fd0e2]/10 px-2 py-1 text-[0.75rem] font-semibold leading-none tracking-[0.04em] text-[#8fd0e2]">
-                                            {t(lang, "allRound")}
-                                          </span>
-                                        ) : null}
                                       </span>
                                     </button>
                                     <span className="flex shrink-0 items-center">
