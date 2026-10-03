@@ -1658,7 +1658,7 @@ export function SelectorApp() {
                                           {modelNodes(shown)}
                                         </span>
                                         {insuranceId === r.model ? (
-                                          <span className="shrink-0 text-[0.75rem] font-semibold tracking-[0.04em] text-[#8fd0e2]">
+                                          <span className="shrink-0 rounded-full border border-[#8fd0e2]/55 bg-[#8fd0e2]/10 px-2 py-1 text-[0.75rem] font-semibold leading-none tracking-[0.04em] text-[#8fd0e2]">
                                             {t(lang, "allRound")}
                                           </span>
                                         ) : null}

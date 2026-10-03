@@ -77,6 +77,6 @@ describe("release notes", () => {
       "utf8",
     );
     expect(src).toContain("insuranceModel");
-    expect(src).toMatch(/insuranceId === r\.model[\s\S]{0,240}allRound/);
+    expect(src).toMatch(/insuranceId === r\.model[\s\S]{0,320}allRound/);
   });
 });
