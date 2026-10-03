@@ -1174,7 +1174,8 @@ export function insuranceModel(
   let seriesId: string | undefined = primary.seriesId;
   while (seriesId && !seen.has(seriesId)) {
     seen.add(seriesId);
-    const nextId = NEXT_FAMILY[seriesId];
+    // Explicit type: assigning this back onto seriesId is TS7022, and next build fails on it.
+    const nextId: string | undefined = NEXT_FAMILY[seriesId];
     if (!nextId) break;
     const hit = insuringOnFamily(
       nextId,
