@@ -1561,13 +1561,13 @@ export function SelectorApp() {
                     )}
                   </p>
                   <div className="result-model mt-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                    <p className="min-w-0 font-mono text-[1.3125rem] leading-[1.2] font-medium tracking-tight break-words text-white sm:flex-1 sm:text-[clamp(1.375rem,2.4vw,2rem)]">
+                    <p className="min-w-0 font-mono text-[1.5rem] leading-[1.2] font-medium tracking-tight break-words text-white sm:flex-1 sm:text-[clamp(1.375rem,2.4vw,2rem)]">
                       {modelNodes(displayModel(primary.model, lang))}
                     </p>
                     <button
                       type="button"
                       onClick={() => copyModel(displayModel(primary.model, lang))}
-                      className="inline-flex h-9 shrink-0 self-end items-center gap-1.5 rounded-[var(--radius-sm)] border border-white px-3 text-[0.8125rem] font-semibold text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:self-auto"
+                      className="inline-flex h-9 shrink-0 self-start items-center gap-1.5 rounded-[var(--radius-sm)] border border-white px-3 text-[0.8125rem] font-semibold text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:self-auto"
                       aria-label={
                         copiedModel === displayModel(primary.model, lang)
                           ? t(lang, "copied")
