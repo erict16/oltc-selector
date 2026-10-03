@@ -8,7 +8,7 @@
 - Other options walk the price ladder only as far as a row that lowers the tight axis. A same-amp neighbour is not 综合保险: CV2-600 past 95% current tags SHZV-1000, not CM2-600. CM2 still wears the tag when step voltage, step capacity, or across-tap is what is tight. CM2 does not offer SHZVG. With no relieving row, the card itself is 综合保险.
 - The corner Um is calculated live: star and any are Un/√3, line-end is Un. The engine still gets the catalogue class.
 - A current inside the nameplate stays on that rating. 342 A is CV2-350, and CV2-600 is the 综合保险 step. The old top-3% bump to the next current is gone.
-- Phone language chips match the desktop size. The model and the copy button stay on the same row.
+- Phone language chips match the desktop size. On a phone the type sits on its own row at 21px, and Copy sits under it on the right so long labels (Kopyala / Копировать) no longer squeeze the model. Duty title wraps beside the chips instead of shoving them onto a second row. Field labels wrap instead of overflowing.
 - Off-circuit has no vacuum type. Choosing 无载 locks 灭弧方式 on oil and greys the control.
 - The rated-voltage field has no Um caption. Selection is unchanged: 110/132/150 kV star is 72.5, 220 kV star is 252. Un/√3 is not sent into the engine.
 - Capacity menu starts at 16 MVA. 6.3 and 10 stay available by typing a custom value. Switch to current from inside that menu. Imax stays on the capacity field; Um stays on the rated-voltage field; Ust stays on the step-percent field.
