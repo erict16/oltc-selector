@@ -49,15 +49,16 @@ for (const needle of FORBIDDEN) {
   }
 }
 
-// CLI version lives here. The agent skill is a separate repo
-// (erict16/huaming-oltc-selector) and must pin this same number.
-const VERSION = "1.2.9";
+// CLI version lives here. The agent skill pins this same number.
+// Package name is oltc-selector-npm so a local repo named oltc-selector
+// does not shadow `npx`. The web app version stays in lib/appVersion.ts.
+const VERSION = "1.3.0";
 
 const pkg = {
-  name: "oltc-selector",
+  name: "oltc-selector-npm",
   version: VERSION,
   description:
-    "Huaming OLTC/OCTC type selection CLI. No prices. Same engine as the web app.",
+    "OLTC/OCTC type selection CLI. No prices. Same engine as the web app.",
   bin: { oltc: "bin/oltc.js" },
   type: "module",
   files: ["bin", "README.md"],
@@ -67,7 +68,7 @@ const pkg = {
     type: "git",
     url: "git+https://github.com/erict16/oltc-selector.git",
   },
-  keywords: ["OLTC", "OCTC", "tap-changer", "Huaming"],
+  keywords: ["OLTC", "OCTC", "tap-changer"],
 };
 
 writeFileSync(

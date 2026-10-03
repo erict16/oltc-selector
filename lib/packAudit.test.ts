@@ -2,7 +2,6 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { APP_VERSION } from "./appVersion";
 import { commercialTypeExists } from "./typeExists";
 
 const root = process.cwd();
@@ -19,8 +18,8 @@ describe("selection-only pack", () => {
     const packedPkg = JSON.parse(
       readFileSync(path.join(root, "pack", "package.json"), "utf8"),
     );
-    expect(packedPkg.name).toBe("oltc-selector");
-    expect(packedPkg.version).toBe(APP_VERSION);
+    expect(packedPkg.name).toBe("oltc-selector-npm");
+    expect(packedPkg.version).toBe("1.3.0");
     expect(packedPkg.bin).toEqual({ oltc: "bin/oltc.js" });
     const js = readFileSync(bin, "utf8");
     expect(js.includes("listRmb")).toBe(false);
@@ -59,5 +58,18 @@ describe("selection-only pack", () => {
       true,
     );
     expect(commercialTypeExists(octcPrimary)).toBe(true);
+
+    // 583.2 A is past 95% of 600 A. CM2 III is also 600 A, so the other row
+    // is SHZV-1000. This is the current engine, not the old same-amp step.
+    const snug = spawnSync(
+      process.execPath,
+      [bin, "--iu", "583.2", "--um", "72.5", "--conn", "Y", "--reg", "W", "--pm", "8", "--ust", "794"],
+      { cwd: path.join(root, "pack"), encoding: "utf8" },
+    );
+    expect(snug.status, snug.stderr).toBe(0);
+    const snugLines = snug.stdout.trim().split(/\r?\n/);
+    expect(snugLines[0]).toMatch(/^CV2III-600Y\/72\.5/);
+    expect(snug.stdout).toContain("SHZVIII-1000Y/72.5");
+    expect(snug.stdout).not.toContain("CM2III-600");
   });
 });

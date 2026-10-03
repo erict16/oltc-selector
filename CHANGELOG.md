@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- CLI package is `oltc-selector-npm@1.3.0` (`npx -y oltc-selector-npm@1.3.0`). The old npm name `oltc-selector` stays at 1.2.9. Command is still `oltc`.
 - Chinese shows the domestic type prefix: CV2→VCV, CM2→VCM, SHZVG→CHVT. Copy uses that string. English and the other languages stay on the export code. The engine and the CLI do not change. SHZV stays SHZV.
 - Selector uses the split workbench: navy result on the left, duty form on the right. Chinese title is 有载开关选型. The selection-assistant bubble is off the home page. The result pane has no version mark.
 - The page, the changelog notes, and the CLI help no longer name the manufacturer. The Chinese title is 有载开关选型.

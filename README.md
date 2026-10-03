@@ -2,7 +2,7 @@
 
 填工况，给出 2025 目录里**最低满足**的型号。网页和 `oltc` CLI 共用同一份 `selectOltc` 引擎。
 
-**CLI：** `npx -y oltc-selector@1.2.9`，命令是 `oltc`。Agent 技能包另放，不在这个仓库里。  
+**CLI：** `npx -y oltc-selector-npm@1.3.0`，命令是 `oltc`。Agent 技能包另放，不在这个仓库里。  
 **网页：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) · [GitHub Pages](https://erict16.github.io/oltc-selector/)
 
 私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。
@@ -14,7 +14,7 @@
 不需要 clone 本仓库。
 
 ```bash
-npm i -g oltc-selector
+npm i -g oltc-selector-npm
 
 oltc --iu 350 --um 40.5 --conn D --reg W --pm 8
 # CV2III-350D/40.5-10193W
@@ -28,7 +28,7 @@ oltc --mva 25 --kv 110 --conn Y --reg W --pm 8
 |------|---------|---------|
 | `--iu` / `--imax` | Max through-current Imax (A). **No** safety factor. | required unless `--mva` |
 | `--mva` `--kv` | Transformer MVA + tap-side kV → Imax (min tap + `--k`) | |
-| `--k` | Safety factor, **capacity path only** | 1.2 |
+| `--k` | Safety factor, **capacity path only** | 1.0 |
 | `--um` | Equipment Um (kV) | derived from `--kv` on MVA path |
 | `--ust` | Step voltage (V) | 0, or derived on MVA path |
 | `--conn Y\|D` | Switch star / delta (not Dyn11) | Y |
