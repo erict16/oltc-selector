@@ -1118,13 +1118,44 @@ function familyInsures(
 }
 
 /**
+ * Smallest row on `seriesId` that actually lowers the primary's peak.
+ * Same Um first, then the lowest current. A same-amp CM2-600 does not
+ * qualify when current is what is tight.
+ */
+function insuringOnFamily(
+  seriesId: string,
+  primary: ModelResult,
+  results: ModelResult[],
+  dutyA: number,
+  stepVoltageV: number,
+  need?: MarginNeed,
+): ModelResult | null {
+  const cands = results.filter(
+    (r) =>
+      r.seriesId === seriesId &&
+      sameMachine(r, primary) &&
+      r.currentA + 0.5 >= primary.currentA &&
+      r.umKv + 0.1 >= primary.umKv &&
+      familyInsures(primary, r, dutyA, stepVoltageV, need),
+  );
+  if (!cands.length) return null;
+  cands.sort((a, b) => {
+    const aUm = Math.abs(a.umKv - primary.umKv) < 0.1 ? 0 : 1;
+    const bUm = Math.abs(b.umKv - primary.umKv) < 0.1 ? 0 : 1;
+    return aUm - bUm || a.umKv - b.umKv || a.currentA - b.currentA;
+  });
+  return cands[0] ?? null;
+}
+
+/**
  * Model that wears 综合保险方案 beside a true minimum.
- * Same-family next current when current is what is tight.
- * When step voltage is tighter and that next current shares the ceiling,
- * the next family wears it (CV2 2000 V → CM2 3300 V).
- * No same-family current left: the next family (CV2-600 past 95% → CM2).
- * Null when the primary is already inside every line.
- * CV2-600 tags CM2, not SHZV. SHZV-1000 tags SHZVG, not a skipped family.
+ * Same-family next current when that current is what is tight.
+ * Otherwise the first later family that lowers the peak. A same-amp
+ * neighbour does not count: CV2-600 and CM2-600 are both 600 A, so a
+ * current past 95% continues to SHZV-1000. CM2 still wears the tag when
+ * it is the axis that is tight (step voltage, step capacity, across-tap).
+ * SHZV-1000 tags SHZVG. Null when the primary is already inside every line,
+ * or when no later row lowers the peak.
  */
 export function insuranceModel(
   results: ModelResult[],
@@ -1136,25 +1167,31 @@ export function insuranceModel(
   if (!primary) return null;
   if (primaryIsInsurance(primary, dutyA, stepVoltageV, need)) return null;
   const step = stepUpOf(primary, results);
-  const family = nextFamilyOf(primary, results);
   if (step && currentStepInsures(primary, step, dutyA, stepVoltageV, need)) {
     return step.model;
   }
-  if (
-    family &&
-    familyInsures(primary, family, dutyA, stepVoltageV, need)
-  ) {
-    return family.model;
+  const seen = new Set<string>();
+  let seriesId: string | undefined = primary.seriesId;
+  while (seriesId && !seen.has(seriesId)) {
+    seen.add(seriesId);
+    const nextId = NEXT_FAMILY[seriesId];
+    if (!nextId) break;
+    const hit = insuringOnFamily(
+      nextId,
+      primary,
+      results,
+      dutyA,
+      stepVoltageV,
+      need,
+    );
+    if (hit) return hit.model;
+    seriesId = nextId;
   }
   const single = nextSingleIii(primary, results);
   if (single && familyInsures(primary, single, dutyA, stepVoltageV, need)) {
     return single.model;
   }
-  // 575 A on CV2-600 is the same 600 A on CM2, so the ratio does not drop,
-  // but that next family is still the margin row.
-  if (step) return step.model;
-  if (family) return family.model;
-  return single?.model ?? null;
+  return null;
 }
 
 /**

@@ -194,15 +194,26 @@ describe("insurance label", () => {
     expect(s.shown).toEqual([]);
   });
 
-  it("tags CM2 when CV2-600 is past 95 percent", () => {
-    // 575/600 = 95.8%. No higher CV2 current.
+  it("tags SHZV-1000 when CV2-600 is past 95 percent", () => {
+    // 575/600 = 95.8%. CV2 and CM2 III both stop at 600 A, so CM2 does not
+    // lower the current. The first row that does is SHZV-1000.
     const s = sized({ throughCurrentA: 575, umKv: 72.5, stepVoltageV: 1000 });
     expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
     expect(s.loose).toBe(false);
-    expect(s.tag).toMatch(/^CM2III-600Y\/72\.5/);
+    expect(s.tag).toMatch(/^SHZVIII-1000Y\/72\.5/);
     expect(s.shown.map((r) => r.model)).toEqual([s.tag]);
-    expect(s.shown.some((r) => r.seriesCode === "SHZV")).toBe(false);
+    expect(s.shown.some((r) => r.seriesCode === "CM2")).toBe(false);
     expect(s.shown.some((r) => r.seriesCode === "SHZVG")).toBe(false);
+  });
+
+  it("tags SHZV-1000 for 100 MVA 110 kV at 1.25 percent", () => {
+    // 583.2 A is 97% of 600 A. Ust 794 V is 40% of the CV2 ceiling.
+    const s = sized({ throughCurrentA: 583.2, umKv: 72.5, stepVoltageV: 794 });
+    expect(s.primary.model).toMatch(/^CV2III-600Y\/72\.5/);
+    expect(s.loose).toBe(false);
+    expect(s.tag).toMatch(/^SHZVIII-1000Y\/72\.5B-10193W$/);
+    expect(s.shown.map((r) => r.seriesCode)).toEqual(["SHZV"]);
+    expect(s.shown.some((r) => r.currentA === 600)).toBe(false);
   });
 
   it("342 A stays on CV2-350 and insures with CV2-600 only", () => {
@@ -1854,9 +1865,12 @@ describe("other options stay on the adjacent price step", () => {
     if (!primary) throw new Error(label);
     const shown = optionsWithInsurance(out.results, dutyA, ust, 3);
     const tag = insuranceModel(out.results, dutyA, ust);
-    const allowed = new Set(
-      [primary.seriesId, NEXT[primary.seriesId]].filter((id): id is string => !!id),
-    );
+    const allowed = new Set<string>([primary.seriesId]);
+    let hop: string | undefined = primary.seriesId;
+    while (hop && NEXT[hop] && !allowed.has(NEXT[hop])) {
+      hop = NEXT[hop];
+      allowed.add(hop);
+    }
     if (primary.seriesId === "shzv" && primary.currentA + 0.5 >= 1000) {
       allowed.add("shzvg");
     }
@@ -1884,31 +1898,15 @@ describe("other options stay on the adjacent price step", () => {
     if (loose) expect(tag, label).toBeNull();
     if (tag) {
       const tagged = out.results.find((r) => r.model === tag);
-      const adjacent = tagged?.seriesId === NEXT[primary.seriesId];
-      const sameStep =
-        tagged?.seriesId === primary.seriesId &&
-        tagged.currentA > primary.currentA;
-      const shzvCeiling =
-        primary.seriesId === "shzv" &&
-        primary.currentA + 0.5 >= 1000 &&
-        tagged?.seriesId === "shzvg";
-      expect(adjacent || sameStep || shzvCeiling, `${label} ${tag}`).toBe(true);
+      expect(allowed.has(tagged?.seriesId ?? ""), `${label} ${tag}`).toBe(true);
       expect(tagged!.currentA + 0.5, label).toBeGreaterThanOrEqual(
         primary.currentA,
       );
       expect(tagged?.unitCount, label).toBe(primary.unitCount);
     } else if (!loose) {
-      const nextId = NEXT[primary.seriesId];
-      const couldInsure = out.results.some(
-        (r) =>
-          r.unitCount === primary.unitCount &&
-          r.phases === primary.phases &&
-          r.currentA + 0.5 >= primary.currentA &&
-          r.umKv + 0.1 >= primary.umKv &&
-          ((r.seriesId === primary.seriesId && r.currentA > primary.currentA) ||
-            r.seriesId === nextId),
+      expect(shown.every((r) => r.seriesId === primary.seriesId), label).toBe(
+        true,
       );
-      expect(couldInsure, `${label} minimum without 综合保险`).toBe(false);
     }
   }
 

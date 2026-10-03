@@ -5,7 +5,7 @@
 - Chinese shows the domestic type prefix: CV2→VCV, CM2→VCM, SHZVG→CHVT. Copy uses that string. English and the other languages stay on the export code. The engine and the CLI do not change. SHZV stays SHZV.
 - Selector uses the split workbench: navy result on the left, duty form on the right. Chinese title is 有载开关选型. The selection-assistant bubble is off the home page. The result pane has no version mark.
 - The page, the changelog notes, and the CLI help no longer name the manufacturer. The Chinese title is 有载开关选型.
-- Other options walk one price step: same family next current or Um, then the next family only. A minimum card always has a 综合保险 step. CV2-600 tags CM2, not SHZV. CM2 does not offer SHZVG. With no adjacent step, the card itself is 综合保险.
+- Other options walk the price ladder only as far as a row that lowers the tight axis. A same-amp neighbour is not 综合保险: CV2-600 past 95% current tags SHZV-1000, not CM2-600. CM2 still wears the tag when step voltage, step capacity, or across-tap is what is tight. CM2 does not offer SHZVG. With no relieving row, the card itself is 综合保险.
 - The corner Um is calculated live: star and any are Un/√3, line-end is Un. The engine still gets the catalogue class.
 - A current inside the nameplate stays on that rating. 342 A is CV2-350, and CV2-600 is the 综合保险 step. The old top-3% bump to the next current is gone.
 - Phone language chips match the desktop size. The model and the copy button stay on the same row.
