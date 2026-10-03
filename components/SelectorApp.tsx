@@ -196,12 +196,8 @@ function Field({
   const Tag = as;
   return (
     <Tag className={cx("flex min-w-0 flex-col gap-2 overflow-visible", className)}>
-      <span className="flex h-[1.625rem] flex-nowrap items-center gap-2 overflow-visible">
-        <span
-          className={cx(
-            "shrink-0 whitespace-nowrap text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]",
-          )}
-        >
+      <span className="flex min-h-[1.625rem] flex-nowrap items-center gap-2 overflow-visible">
+        <span className="min-w-0 flex-1 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
           {label.split("ᵤ").map((part, i, arr) =>
             i < arr.length - 1 ? (
               <span key={i}>
@@ -217,13 +213,11 @@ function Field({
           <span className="min-w-0 truncate text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]">
             {meta}
           </span>
-        ) : (
-          <span className="min-w-0 flex-1" />
-        )}
+        ) : null}
         {action ? (
           <span
             className={cx(
-              "ml-auto shrink-0",
+              "shrink-0",
               actionKind === "caption" &&
                 "whitespace-nowrap text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]",
             )}
@@ -705,8 +699,8 @@ export function SelectorApp() {
           }}
         >
           <div className="mx-auto my-auto w-full">
-          <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-            <h2 className="shrink-0 whitespace-nowrap font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold leading-none text-[var(--color-ink)]">
+          <div className="mb-3 flex items-start gap-x-3">
+            <h2 className="min-w-0 flex-1 font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold leading-snug text-[var(--color-ink)]">
               {t(lang, "duty")}
             </h2>
             <LangSwitcher
@@ -1558,7 +1552,7 @@ export function SelectorApp() {
                 </>
               ) : (
                 <>
-                  <p className="text-[0.75rem] font-semibold tracking-[0.08em] text-[#8fd0e2]">
+                  <p className="text-[0.75rem] font-semibold leading-snug tracking-[0.08em] text-[#8fd0e2]">
                     {t(
                       lang,
                       showsMinimumLabel(loose)
@@ -1566,14 +1560,14 @@ export function SelectorApp() {
                         : "allRound",
                     )}
                   </p>
-                  <div className="mt-3 flex items-center justify-between gap-3">
-                    <p className="min-w-0 flex-1 font-mono text-[1rem] leading-[1.2] font-medium tracking-tight break-words text-white sm:text-[clamp(1.375rem,2.4vw,2rem)]">
+                  <div className="result-model mt-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    <p className="min-w-0 font-mono text-[1.3125rem] leading-[1.2] font-medium tracking-tight break-words text-white sm:flex-1 sm:text-[clamp(1.375rem,2.4vw,2rem)]">
                       {modelNodes(displayModel(primary.model, lang))}
                     </p>
                     <button
                       type="button"
                       onClick={() => copyModel(displayModel(primary.model, lang))}
-                      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border border-white px-3 text-[0.8125rem] font-semibold text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                      className="inline-flex h-9 shrink-0 self-end items-center gap-1.5 rounded-[var(--radius-sm)] border border-white px-3 text-[0.8125rem] font-semibold text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:self-auto"
                       aria-label={
                         copiedModel === displayModel(primary.model, lang)
                           ? t(lang, "copied")
@@ -1849,7 +1843,7 @@ function ModelSpec({
         <div key={item.key} className="min-w-0">
           <dt
             className={cx(
-              "text-[0.6875rem] leading-snug",
+              "text-[0.6875rem] leading-snug break-words",
               inverse ? "text-[#9bb4c9]" : "text-[var(--color-muted)]",
             )}
           >
