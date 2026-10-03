@@ -1312,7 +1312,7 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
     expect(out.results[0].model).toBe("WSLIV-600Y/72.5-6x5A");
   });
 
-  it("800 A / 72.5 D → WSLII-800D/72.5-6x5A", () => {
+  it("800 A / 72.5 D with no wiring → WSLIV-800D/72.5-6x5A", () => {
     const out = selectOltc({
       mounting: "in_tank",
       medium: "oil",
@@ -1328,7 +1328,7 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
       mdu: "none",
     });
     expect(out.ok).toBe(true);
-    expect(out.results[0].model).toBe("WSLII-800D/72.5-6x5A");
+    expect(out.results[0].model).toBe("WSLIV-800D/72.5-6x5A");
   });
 
   it("WSG 800 A D 40.5 pos 5 is eligible; WSL still #1 at 6x5", () => {
@@ -1352,12 +1352,33 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
     );
   });
 
-  it("OS 12x11 at 12 kV D uses the 2025-list size B, not invented D", () => {
+  it("OS 12x11 at 12 kV D linear IV keeps list size D", () => {
     const out = selectOltc({
       mounting: "in_tank",
       medium: "oil",
       preferVacuum: false,
       dutyKind: "octc",
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 577,
+      umKv: 12,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 12,
+      octcContact: "12x11",
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLIV-600D/12-12x11D");
+  });
+
+  it("explicit II at 12x11 uses list size B", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      octcSeries: "II",
       phases: "III",
       connection: "D",
       throughCurrentA: 577,
@@ -1393,8 +1414,9 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
   });
 
   it("octcRoman: explicit series is independent of Y/D and contact", () => {
-    expect(octcRoman("D", "6x5")).toBe("II");
+    expect(octcRoman("D", "6x5")).toBe("IV");
     expect(octcRoman("Y", "6x5")).toBe("IV");
+    expect(octcRoman("D", "6x5", "auto", "WSG")).toBe("II");
     expect(octcRoman("D", "6x5", "V")).toBe("V");
     expect(octcRoman("Y", "5x2", "IV")).toBe("IV");
     expect(octcRoman("D", "6x5", "VII")).toBe("VII");
@@ -1438,6 +1460,26 @@ describe("OCTC / WSL (dutyKind=octc)", () => {
     });
     expect(out.ok).toBe(true);
     expect(out.results[0].model).toBe("WSLIV-800D/72.5-6x5A");
+  });
+
+  it("explicit II on D stays WSLII", () => {
+    const out = selectOltc({
+      mounting: "in_tank",
+      medium: "oil",
+      preferVacuum: false,
+      dutyKind: "octc",
+      octcSeries: "II",
+      phases: "III",
+      connection: "D",
+      throughCurrentA: 800,
+      umKv: 72.5,
+      stepVoltageV: 0,
+      regulation: "linear",
+      positions: 6,
+      mdu: "none",
+    });
+    expect(out.ok).toBe(true);
+    expect(out.results[0].model).toBe("WSLII-800D/72.5-6x5A");
   });
 
   it("explicit II on Y stays WSLII", () => {

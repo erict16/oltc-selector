@@ -4,7 +4,7 @@ import {
   stepVoltageFromPercent,
   throughCurrentFromRated,
 } from "./deriveUm";
-import { optionsWithInsurance, selectOltc } from "./engine";
+import { octcRoman, optionsWithInsurance, selectOltc } from "./engine";
 import { commercialTypeExists } from "./typeExists";
 import type {
   Connection,
@@ -293,7 +293,7 @@ Flags:
   --pos, --positions Linear / OCTC positions.
   --octc             Off-circuit (无载). Default on-load.
   --structure        auto|combined|compound|cage|drum  (组合式/复合式/笼式/鼓式)
-  --series           II|IV|V|VI|VII|VIII  OCTC wiring. Default auto (Y→IV, D→II).
+  --series           II|IV|V|VI|VII|VIII  OCTC wiring. Default auto is linear IV (Y and D).
   --mount            in-tank|on-tank|dry. Default in-tank.
   --oil / --vacuum   Switching medium. Default vacuum (on-load).
   --contact          OCTC contact e.g. 6x5.
@@ -425,7 +425,7 @@ export function assumptionsFromArgs(args: CliArgs): string[] {
     const s = args.series ?? "auto";
     items.push(
       s === "auto"
-        ? `接线=自动（${args.conn === "Y" ? "IV" : "II"}）${mark("series")}`
+        ? `接线=自动（${octcRoman(args.conn, args.contact)}）${mark("series")}`
         : `接线=${s}${mark("series")}`,
     );
     items.push(`${MOUNT_ZH[args.mount]}${mark("mount")}`);

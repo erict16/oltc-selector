@@ -624,9 +624,9 @@ export const SERIES: SeriesDef[] = [
     maxPositionsWithChangeOver: 18,
     defaultMdu: "CMA7",
     notesEn:
-      "Cage OCTC. Eligible only when dutyKind=octc. Wiring roman II/IV/V/VI/VII/VIII is a form field, independent of Y/D. Unset auto: Y→WSLIV, D→WSLII; 5x2→VIII, 3x2→VI, 5x4→V. Contact from P or OS. WDL aliases the same list.",
+      "Cage OCTC. Eligible only when dutyKind=octc. Wiring roman II/IV/V/VI/VII/VIII is a form field, independent of Y/D. Unset auto is linear IV for Y and D; 5x2→VIII, 3x2→VI, 5x4→V, 12x12→VII. Reversing II only when asked. Contact from P or OS. WDL aliases the same list.",
     notesZh:
-      "笼式无载开关。仅 dutyKind=octc 时入选。接线方式 II/IV/V/VI/VII/VIII 与 Y/D 分开选。未指定时：Y→WSLIV，D→WSLII。档位映射触头 6x5/7x6/12x11/18x17。WDL 走同一价目表。",
+      "笼式无载开关。仅 dutyKind=octc 时入选。接线方式 II/IV/V/VI/VII/VIII 与 Y/D 分开选。未指定时星接和角接都是线性 IV；5x2→VIII，3x2→VI，5x4→V，12x12→VII。正反调 II 要单独指定。档位映射触头 6x5/7x6/12x11/18x17。WDL 走同一价目表。",
     rank: 5,
   },
   {

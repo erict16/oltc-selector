@@ -64,7 +64,8 @@ export interface SelectInput {
   octcContact?: string;
   /**
    * WSL/WSG wiring (product series roman). Independent of Y/D.
-   * Unset / `auto` keeps the old heuristic (Y→IV, D→II, special contacts).
+   * Unset / `auto` is linear IV (Y and D). Special contacts still pick V/VI/VII/VIII.
+   * WSG auto on D stays II. Ask for II when the quote is reversing.
    * The form always sends an explicit roman when dutyKind=octc.
    */
   octcSeries?: OctcSeriesChoice;

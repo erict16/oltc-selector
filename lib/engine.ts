@@ -88,13 +88,15 @@ export function octcSizeLetter(
 
 /**
  * Product series roman, not phase.
- * Explicit octcSeries wins. Else 5x2 → VIII, 3x2 → VI, 5x4 → V;
- * else Y→IV / D→II.
+ * Explicit octcSeries wins. Else 5x2 → VIII, 3x2 → VI, 5x4 → V, 12x12 → VII.
+ * Otherwise linear IV for both Y and D. Delta is not reversing.
+ * WSG auto on D stays II: that drum row is the quoted type, and WSG is not list-gated.
  */
 export function octcRoman(
   connection: Connection,
   contact?: string,
   series?: OctcSeriesChoice,
+  familyCode?: string,
 ): OctcSeriesRoman {
   if (series && series !== "auto") return series;
   const c = (contact ?? "").toLowerCase();
@@ -102,7 +104,8 @@ export function octcRoman(
   if (c === "3x2" || c === "6x2") return "VI";
   if (c === "5x4" || c === "4x3") return "V";
   if (c === "12x12") return "VII";
-  return connection === "D" ? "II" : "IV";
+  if (familyCode === "WSG" && connection === "D") return "II";
+  return "IV";
 }
 
 function isOctcSeries(s: SeriesDef): boolean {
@@ -180,6 +183,7 @@ function buildModelString(
       yd,
       tapCode.replace(/[A-E]$/i, ""),
       octcSeries,
+      series.code,
     );
     core = `${series.code}${roman}-${current}${yd}/${umToken}-${tapCode}`;
   } else if (series.code === "HWDK") {
@@ -693,7 +697,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
         }
 
         if (octc) {
-          const roman = octcRoman(conn, contact, input.octcSeries);
+          const roman = octcRoman(conn, contact, input.octcSeries, s.code);
           reasonsEn.push(
             `OCTC contact ${contact}${selectorSize} (${s.code}${roman}).`,
           );

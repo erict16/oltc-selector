@@ -256,6 +256,20 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
     mdu: "none",
   };
 
+  if (duty.dutyKind === "octc") {
+    const roman = parsed.phases;
+    if (
+      roman === "II" ||
+      roman === "IV" ||
+      roman === "V" ||
+      roman === "VI" ||
+      roman === "VII" ||
+      roman === "VIII"
+    ) {
+      input.octcSeries = roman;
+    }
+  }
+
   if (duty.dutyKind === "octc" && nxm) {
     input.regulation = "linear";
     input.positions = Number(nxm[1]);

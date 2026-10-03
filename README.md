@@ -36,7 +36,7 @@ oltc --mva 25 --kv 110 --conn Y --reg W --pm 8
 | `--pm` | ± steps | 8 |
 | `--octc` | Off-circuit 无载 (WSL/WSG) | on-load |
 | `--structure` | `auto` / `combined` 组合式 / `compound` 复合式 / `cage` 笼式 / `drum` 鼓式 | `auto` |
-| `--series` | OCTC wiring II IV V VI VII VIII | auto (Y→IV, D→II) |
+| `--series` | OCTC wiring II IV V VI VII VIII | auto is linear IV for Y and D |
 | `--mount` | `in-tank` / `on-tank` / `dry` | in-tank |
 | `--oil` / `--vacuum` | Switching medium | vacuum (on-load) |
 | `--contact` | OCTC contact e.g. `6x5` | |

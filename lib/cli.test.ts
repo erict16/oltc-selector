@@ -211,7 +211,8 @@ describe("oltc CLI", () => {
     const a = capture(["--octc", "--iu", "800", "--um", "72.5", "--conn", "D", "--contact", "6x5"]);
     expect(a.code).toBe(0);
     expect(a.out).toContain("conn=D 线端");
-    expect(a.out).toContain("接线=自动（II）（默认）");
+    expect(a.out).toContain("接线=自动（IV）（默认）");
+    expect(a.out.trim().split(/\r?\n/)[0]).toBe("WSLIV-800D/72.5-6x5A");
     expect(a.out).not.toContain("reg=");
     expect(a.out).not.toContain("17 档");
   });
