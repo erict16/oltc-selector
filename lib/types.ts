@@ -155,6 +155,12 @@ export interface ModelResult {
   reasonsZh: string[];
   warningsEn: string[];
   warningsZh: string[];
+  /**
+   * Must-read lines shown on the card and printed by the CLI: duty above the
+   * rating, Ust not checked, a raised grade, a tap code outside Fig. 3-3.
+   */
+  cautionsEn: string[];
+  cautionsZh: string[];
   confidence: number;
   /** Sort key components for debugging */
   adequacyScore: number;

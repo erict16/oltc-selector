@@ -7,7 +7,8 @@ import {
   nearestCurrent,
   nearestUm,
   phaseToken,
-  pickSelectorSize,
+  resolveSelectorSize,
+  umForEarthInsulation,
 } from "./catalog";
 import {
   commercialTypeExists,
@@ -322,8 +323,11 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
   const um0 = covering[0];
   // 126 twin only on the min-adequate families (CV2/CM2/…). SHZV extra Ums
   // crowd the ranked list and hide customer-locked oil CM rows (QS2607197).
+  // OCTC never takes the twin: WSL @72.5 used to beat WSG @40.5 by 4 points.
   const ums =
-    (FAMILY_MIN_RANK[s.id] ?? s.rank) < 40 ? covering : [um0];
+    !isOctcSeries(s) && (FAMILY_MIN_RANK[s.id] ?? s.rank) < 40
+      ? covering
+      : [um0];
 
   // CZ dry: 2025 list + 2026 OS are 3×CZI only (no CZIII / CZI row).
   // Do not emit a single-unit CZIII — ranking would put it first.
@@ -445,21 +449,41 @@ export function selectOltc(input: SelectInput): SelectOutput {
   const errorsEn: string[] = [];
   const errorsZh: string[] = [];
 
-  if (!input.throughCurrentA || input.throughCurrentA <= 0) {
+  if (!(Number.isFinite(input.throughCurrentA) && input.throughCurrentA > 0)) {
     errorsEn.push("Enter rated through-current (A).");
     errorsZh.push("请填写额定通过电流（A）。");
   }
-  if (!input.umKv || input.umKv <= 0) {
+  if (!(Number.isFinite(input.umKv) && input.umKv > 0)) {
     errorsEn.push("Enter highest voltage for equipment Um (kV).");
     errorsZh.push("请填写设备最高电压 Um（kV）。");
   }
-  if (input.stepVoltageV < 0) {
-    errorsEn.push("Step voltage cannot be negative.");
-    errorsZh.push("级电压不能为负。");
+  // NaN / undefined used to pass and skip the Ust and step-capacity checks.
+  // 0 is allowed: it means not given, and every card says so.
+  if (!Number.isFinite(input.stepVoltageV) || input.stepVoltageV < 0) {
+    errorsEn.push("Step voltage must be a number ≥ 0 (0 = not given).");
+    errorsZh.push("级电压须为 ≥ 0 的数字（0 表示未给）。");
   }
 
   if (errorsEn.length) {
     return { ok: false, results: [], errorsEn, errorsZh };
+  }
+
+  // Earth BIL / PF above the Um class is a higher Um, not a stronger grade.
+  if ((input.bilKv ?? 0) > 0 || (input.pfKv ?? 0) > 0) {
+    const earthUm = umForEarthInsulation(input.umKv, input.bilKv, input.pfKv);
+    if (earthUm == null) {
+      return {
+        ok: false,
+        results: [],
+        errorsEn: [
+          `Earth insulation LI ${input.bilKv ?? "—"} / PF ${input.pfKv ?? "—"} kV is above every catalogue Um. Contact engineering.`,
+        ],
+        errorsZh: [
+          `对地绝缘 雷电 ${input.bilKv ?? "—"} / 工频 ${input.pfKv ?? "—"} kV 超出所有目录 Um。请联系工程。`,
+        ],
+      };
+    }
+    if (earthUm > input.umKv + 0.01) input = { ...input, umKv: earthUm };
   }
 
   const tap = resolveTapFields({
@@ -508,9 +532,14 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
   const results: ModelResult[] = [];
   const seen = new Set<string>();
+  /** A family fit on current/Um/Ust but no grade covered the across-tap stress. */
+  let acrossTapShort = false;
 
   for (const s of candidates) {
-      if (!compoundCoversAcrossTap(s, input)) continue;
+      if (!compoundCoversAcrossTap(s, input)) {
+        acrossTapShort = true;
+        continue;
+      }
 
       // Pitch-aware Ust limit (CV2 brochure: 2000 V @ 10 contacts, 1500 V @ 12).
       // Hard reject — do not keep the family by bumping current.
@@ -574,18 +603,23 @@ export function selectOltc(input: SelectInput): SelectOutput {
         for (const current of currentsToEmit) {
         const octc = isOctcSeries(s);
         const contact = octc ? octcContactCode(input, s.id) : "";
-        const selectorSize = octc
-          ? octcSizeLetter(att.um, contact, input.selectorSize ?? "auto")
-          : s.usesSelectorSize
-            ? pickSelectorSize(
+        const gradePick =
+          !octc && s.usesSelectorSize
+            ? resolveSelectorSize(
                 att.um,
                 input.selectorSize ?? "auto",
-                input.bilKv,
-                input.pfKv,
                 input.acrossTapBilKv,
                 input.acrossTapPfKv,
               )
-            : "";
+            : null;
+        if (gradePick && gradePick.size == null) {
+          // Above DE on this Um: do not hand back a grade that does not cover.
+          acrossTapShort = true;
+          continue;
+        }
+        const selectorSize: SelectorSize = octc
+          ? octcSizeLetter(att.um, contact, input.selectorSize ?? "auto")
+          : (gradePick?.size ?? "");
         const tapCode = octc ? contact : tap.tapCode;
         const modelTap = octc
           ? `${contact}${selectorSize}`
@@ -657,6 +691,53 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const reasonsZh: string[] = [];
         const warningsEn: string[] = [];
         const warningsZh: string[] = [];
+        const cautionsEn: string[] = [];
+        const cautionsZh: string[] = [];
+
+        if (input.throughCurrentA > current + 0.01) {
+          const pct = ((input.throughCurrentA / current - 1) * 100).toFixed(1);
+          cautionsEn.push(
+            `Duty ${input.throughCurrentA.toFixed(1)} A is ${pct}% above the ${current} A rating (1% commercial tolerance). Confirm with engineering.`,
+          );
+          cautionsZh.push(
+            `需求 ${input.throughCurrentA.toFixed(1)} A 超出额定 ${current} A 的 ${pct}%（按 1% 商务容差放行），须工程确认。`,
+          );
+        }
+        if (!octc && !(input.stepVoltageV > 0)) {
+          cautionsEn.push(
+            "Step voltage not given: step-voltage and step-capacity limits were not checked.",
+          );
+          cautionsZh.push("未给级电压：级电压和级容量都没有校验。");
+        }
+        if (!octc && !tap.standard) {
+          cautionsEn.push(
+            `Tap code ${tap.tapCode} is not a brochure Fig. 3-3 diagram. Engineering must confirm the connection.`,
+          );
+          cautionsZh.push(
+            `分接代码 ${tap.tapCode} 不在样本图 3-3 标准接线内，须工程确认接线。`,
+          );
+        }
+        if (gradePick?.raisedFrom) {
+          cautionsEn.push(
+            `Selector grade raised from ${gradePick.raisedFrom} to ${selectorSize} (Um ${att.um} kV / across-tap stress).`,
+          );
+          cautionsZh.push(
+            `选择器等级已由 ${gradePick.raisedFrom} 升为 ${selectorSize}（Um ${att.um} kV 或调压绕组间绝缘要求）。`,
+          );
+        }
+        if (
+          !octc &&
+          !s.usesSelectorSize &&
+          s.structure !== "compound" &&
+          ((input.acrossTapBilKv ?? 0) > 0 || (input.acrossTapPfKv ?? 0) > 0)
+        ) {
+          cautionsEn.push(
+            `${s.code} across-tap withstand is not in the catalogue data: across-tap stress not checked.`,
+          );
+          cautionsZh.push(
+            `${s.code} 调压绕组间耐受不在目录数据里：调压绕组间绝缘未校验。`,
+          );
+        }
 
         // 需求电流取整展示：174.954… 这种长小数没有工程意义
         const dutyA =
@@ -774,6 +855,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
         let confidence = 0.88;
         if (att.unitCount > 1) confidence -= 0.08;
+        confidence -= 0.05 * cautionsEn.length;
         if (warningsEn.length > 2) confidence -= 0.03;
         confidence = Math.max(0.45, Math.min(0.96, confidence));
 
@@ -809,6 +891,8 @@ export function selectOltc(input: SelectInput): SelectOutput {
           reasonsZh,
           warningsEn,
           warningsZh,
+          cautionsEn,
+          cautionsZh,
           confidence,
           adequacyScore: score,
         });
@@ -849,10 +933,14 @@ export function selectOltc(input: SelectInput): SelectOutput {
       ok: false,
       results: [],
       errorsEn: [
-        "Parameters out of catalogue range (current, Um, step voltage, or positions).",
+        acrossTapShort
+          ? "Across-tap insulation is above every selector grade that fits this duty. Contact engineering."
+          : "Parameters out of catalogue range (current, Um, step voltage, or positions).",
       ],
       errorsZh: [
-        "参数超出目录范围（电流、Um、级电压或档位数）。",
+        acrossTapShort
+          ? "调压绕组间绝缘超出满足此工况的所有选择器等级。请联系工程。"
+          : "参数超出目录范围（电流、Um、级电压或档位数）。",
       ],
     };
   }

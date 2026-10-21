@@ -1,3 +1,4 @@
+import { parseDecimal } from "./decimal";
 import {
   maxThroughCurrent,
   oltcUmFromRatedKv,
@@ -52,9 +53,15 @@ export class CliError extends Error {
 }
 
 function num(raw: string, flag: string): number {
-  const n = Number(String(raw).replace(",", "."));
-  if (!Number.isFinite(n)) throw new CliError(`Invalid number for ${flag}: ${raw}`);
-  return n;
+  const p = parseDecimal(raw);
+  if (p.ok) return p.value;
+  if (p.reason === "ambiguous") {
+    // 1,200 used to become 1.2 A.
+    throw new CliError(
+      `Ambiguous number for ${flag}: ${raw}. Write 1200 or 1.2 (no thousands separator).`,
+    );
+  }
+  throw new CliError(`Invalid number for ${flag}: ${raw}`);
 }
 
 export function parseCliArgs(argv: string[]): CliArgs {
@@ -207,7 +214,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
         笼式: "cage",
         鼓式: "drum",
       };
-      if (!(s in map) && !(v in map)) {
+      if (!Object.hasOwn(map, s) && !Object.hasOwn(map, v)) {
         throw new CliError(
           `--structure must be auto|combined|compound|cage|drum`,
         );
@@ -318,6 +325,20 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
   let um = args.um;
   let ust = args.ust ?? 0;
 
+  // Two current sources used to resolve silently in favour of --mva.
+  if (args.iu != null && args.mva != null) {
+    throw new CliError("Give --iu or --mva/--kv, not both");
+  }
+  if (args.k != null && args.mva == null) {
+    throw new CliError("--k applies only on the --mva path (--iu has no safety factor)");
+  }
+  if (args.k != null && args.k < 1) {
+    throw new CliError("--k must be ≥ 1");
+  }
+  if (args.stepPct != null && args.mva == null) {
+    throw new CliError("--step-pct needs --mva/--kv; give --ust on the --iu path");
+  }
+
   if (args.mva != null) {
     if (!(args.kv != null && args.kv > 0)) {
       throw new CliError("--mva requires --kv (tap-side rated voltage)");
@@ -400,7 +421,8 @@ const MOUNT_ZH: Record<Mounting, string> = {
  * The web form shows these as visible dropdowns; the CLI must echo them
  * so a wrong assumption never hides inside a confident type string.
  */
-export function assumptionsFromArgs(args: CliArgs): string[] {
+/** `family` is the primary's code, so auto wiring echoes what was emitted (WSG on D is II). */
+export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
   const mark = (key: string) => (args.given.has(key) ? "" : "（默认）");
   const items: string[] = [
     `conn=${args.conn} ${args.conn === "Y" ? "星点" : "线端"}${mark("conn")}`,
@@ -425,7 +447,7 @@ export function assumptionsFromArgs(args: CliArgs): string[] {
     const s = args.series ?? "auto";
     items.push(
       s === "auto"
-        ? `接线=自动（${octcRoman(args.conn, args.contact)}）${mark("series")}`
+        ? `接线=自动（${octcRoman(args.conn, args.contact, undefined, family)}）${mark("series")}`
         : `接线=${s}${mark("series")}`,
     );
     items.push(`${MOUNT_ZH[args.mount]}${mark("mount")}`);
@@ -450,6 +472,9 @@ export function assumptionsFromArgs(args: CliArgs): string[] {
   } else {
     items.push(`±${args.pm ?? 8} 档${mark("pm")}`);
   }
+  if (!args.given.has("ust") && args.mva == null) {
+    items.push("Ust 未指定（级电压、级容量未校验）");
+  }
   items.push(`${args.oil || !args.vacuum ? "油浸" : "真空"}${mark("medium")}`);
   items.push(`${MOUNT_ZH[args.mount]}${mark("mount")}`);
   items.push(phases);
@@ -457,8 +482,8 @@ export function assumptionsFromArgs(args: CliArgs): string[] {
 }
 
 /** One-line 假定 block; null when every watched input was given explicitly. */
-export function assumptionsLine(args: CliArgs): string | null {
-  const items = assumptionsFromArgs(args);
+export function assumptionsLine(args: CliArgs, family?: string): string | null {
+  const items = assumptionsFromArgs(args, family);
   if (items.every((i) => !i.includes("（默认）") && !i.includes("未指定"))) {
     return null;
   }
@@ -489,13 +514,14 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
     primary.model,
     primary.reasonsZh[0] || primary.reasonsEn[0] || "最低满足",
   ];
+  for (const c of primary.cautionsZh) lines.push(`注意：${c}`);
   if (alts.length) {
     lines.push("");
     lines.push("其他");
     for (const a of alts) lines.push(a.model);
   }
   if (args) {
-    const assumed = assumptionsLine(args);
+    const assumed = assumptionsLine(args, primary.seriesCode);
     if (assumed) {
       lines.push("");
       lines.push(assumed);
@@ -507,6 +533,10 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
 export function formatCliJson(input: SelectInput, args?: CliArgs): string {
   const out = selectOltc(input);
   const primary = out.results[0] ?? null;
+  // Same gate as the text output.
+  if (primary && !commercialTypeExists(primary.model)) {
+    throw new CliError(`Engine emitted a non-catalogue type: ${primary.model}`);
+  }
   const alts = optionsWithInsurance(
     out.results,
     input.throughCurrentA,
@@ -522,7 +552,8 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
     model: primary?.model ?? null,
     why: primary?.reasonsZh[0] ?? primary?.reasonsEn[0] ?? null,
     alts,
-    assumptions: args ? assumptionsFromArgs(args) : [],
+    cautions: primary?.cautionsZh ?? [],
+    assumptions: args ? assumptionsFromArgs(args, primary?.seriesCode) : [],
     errors: out.errorsZh.length ? out.errorsZh : out.errorsEn,
   };
   return JSON.stringify(payload, null, 2) + "\n";

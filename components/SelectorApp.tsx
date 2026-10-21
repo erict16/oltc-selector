@@ -5,6 +5,7 @@ import {
   CheckIcon,
   ChevronDownIcon,
   ClipboardDocumentIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import {
   ACROSS_BIL_MENU,
@@ -12,16 +13,17 @@ import {
   ACROSS_PF_MENU,
   ACROSS_PF_OPTIONS_KV,
   CURRENT_MENU,
+  EARTH_INSULATION,
   SERIES,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
 } from "@/lib/catalog";
 import { copyText } from "@/lib/clipboard";
+import { decimalDraft } from "@/lib/decimal";
 import { displayModel } from "@/lib/domesticModel";
 import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
-  calculatedUm,
   formatUmKv,
   maxThroughCurrent,
   oltcUmFromRatedKv,
@@ -152,6 +154,44 @@ function CaptionSub({
       {value}
       {unit}
     </>
+  );
+}
+
+/**
+ * Text field for a decimal the person types. Keeps the draft (`1.`, `0,`)
+ * so the dot is not eaten, and reads `,` as a decimal point.
+ * The form used to rebuild the text from the number: 1.43 % became 143 %.
+ */
+function DecimalInput({
+  value,
+  onValue,
+  onBlur,
+  className,
+}: {
+  value: number;
+  onValue: (n: number) => void;
+  onBlur?: () => void;
+  className: string;
+}) {
+  const [draft, setDraft] = useState(value > 0 ? String(value) : "");
+  useEffect(() => {
+    // Follow outside changes (preset picked) without clobbering `1.`.
+    const held = decimalDraft(draft).value ?? 0;
+    if (held !== value) setDraft(value > 0 ? String(value) : "");
+  }, [value]);
+  return (
+    <input
+      inputMode="decimal"
+      className={className}
+      value={draft}
+      onChange={(e) => {
+        const d = decimalDraft(e.target.value);
+        if (d.draft == null) return;
+        setDraft(d.draft);
+        onValue(d.value ?? 0);
+      }}
+      onBlur={onBlur}
+    />
   );
 }
 
@@ -483,8 +523,12 @@ export function SelectorApp() {
     });
   };
 
+  // The +/− range only drives the duty while its selects are on screen.
+  // A range left from OCTC or linear used to override the ±N preset and step %.
+  const rangeLive = isLinear || !pm;
+
   const stepFraction = (): number | null => {
-    if (tapRange?.stepPercent && tapRange.stepPercent > 0) {
+    if (rangeLive && tapRange?.stepPercent && tapRange.stepPercent > 0) {
       return tapRange.stepPercent;
     }
     if (stepPercentPct > 0) return stepPercentPct / 100;
@@ -492,7 +536,7 @@ export function SelectorApp() {
   };
 
   const minusSteps = (): number => {
-    if (tapRange && tapRange.minus > 0) return tapRange.minus;
+    if (rangeLive && tapRange && tapRange.minus > 0) return tapRange.minus;
     const n = pm && Number(pm) > 0 ? Number(pm) : input.plusMinusSteps;
     if (n != null && n > 0) return n;
     return 0;
@@ -545,6 +589,7 @@ export function SelectorApp() {
     | SelectInput
     | { error: true; msgKey: string } => {
     if (currentMode === "capacity") {
+      if (safetyK > 0 && safetyK < 1) return { error: true, msgKey: "kBelowOne" };
       if (!(transformerMva > 0)) return { error: true, msgKey: "needMva" };
       if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
       const i = capacityThroughA();
@@ -684,10 +729,13 @@ export function SelectorApp() {
   const derivedOk =
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
   const ustV = computedStepVoltage();
+  // The class the engine sends, not Un/√3 (110 kV star used to show 63.5).
+  // Star sits at the neutral: show its earth withstand. Delta: the Um.
   const um =
     voltageMode === "winding" && windingRatedKv > 0
-      ? calculatedUm(windingRatedKv, input.connection)
+      ? oltcUmFromRatedKv(windingRatedKv, input.connection)
       : NaN;
+  const umEarth = input.connection === "Y" ? EARTH_INSULATION[um] : undefined;
 
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col lg:grid lg:h-dvh lg:grid-cols-2 lg:overflow-hidden">
@@ -835,7 +883,9 @@ export function SelectorApp() {
               as="div"
               label={t(lang, "umWinding")}
               action={
-                Number.isFinite(um) && um > 0 ? (
+                umEarth ? (
+                  t(lang, "earthTag", { pf: umEarth.pf, li: umEarth.bil })
+                ) : Number.isFinite(um) && um > 0 ? (
                   <CaptionSub
                     name="U"
                     sub="m"
@@ -924,7 +974,6 @@ export function SelectorApp() {
               >
                 <option value="Y">{t(lang, "connY")}</option>
                 <option value="D">{t(lang, "connD")}</option>
-                <option value="any">{t(lang, "connAny")}</option>
               </select>
             </Field>
 
@@ -1009,20 +1058,10 @@ export function SelectorApp() {
                   !(STEP_PERCENT_OPTIONS as readonly number[]).includes(
                     stepPercentPct,
                   )) ? (
-                  <input
-                    inputMode="decimal"
-                    className={`${controlClass} pr-8 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                    value={stepPercentPct > 0 ? String(stepPercentPct) : ""}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/，/g, ".");
-                      if (v !== "" && !/^\d*\.?\d*$/.test(v)) return;
-                      if (v === "" || v === ".") {
-                        setStepPercentPct(0);
-                        touch();
-                        return;
-                      }
-                      const n = Number(v);
-                      if (!Number.isFinite(n) || n < 0) return;
+                  <DecimalInput
+                    className={`${controlClass} pr-8`}
+                    value={stepPercentPct}
+                    onValue={(n) => {
                       setStepPercentPct(n);
                       touch();
                       if (isLinear || !pm) commitTapRange(tapPlus, tapMinus, n);
@@ -1225,11 +1264,18 @@ export function SelectorApp() {
                                 touch();
                                 return;
                               }
-                              setInput((s) => ({
-                                ...s,
-                                dutyKind: "oltc",
-                                preferStructure: "auto",
-                              }));
+                              setInput((s) => {
+                                const n = Number(pm);
+                                // OCTC +/− edits rewrote positions; put the ±N preset back.
+                                return s.regulation !== "linear" && n > 0
+                                  ? {
+                                      ...s,
+                                      dutyKind: "oltc",
+                                      preferStructure: "auto",
+                                      ...geometryForPm(n, s.regulation),
+                                    }
+                                  : { ...s, dutyKind: "oltc", preferStructure: "auto" };
+                              });
                               touch();
                             }}
                             className={segBtn(on)}
@@ -1422,21 +1468,10 @@ export function SelectorApp() {
                         !(SAFETY_K_OPTIONS as readonly number[]).includes(
                           safetyK,
                         )) ? (
-                        <input
-                          inputMode="decimal"
-                          className={`${controlClass} pl-7 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                          value={safetyK > 0 ? String(safetyK) : ""}
-                          onChange={(e) => {
-                            const v = e.target.value.replace(/，/g, ".");
-                            if (v !== "" && !/^\d*\.?\d*$/.test(v)) return;
-                            if (v === "" || v === ".") {
-                              commitSafetyK(0);
-                              return;
-                            }
-                            const n = Number(v);
-                            if (!Number.isFinite(n) || n < 0) return;
-                            commitSafetyK(n);
-                          }}
+                        <DecimalInput
+                          className={`${controlClass} pl-7`}
+                          value={safetyK}
+                          onValue={commitSafetyK}
                           onBlur={() => {
                             if (
                               (SAFETY_K_OPTIONS as readonly number[]).includes(
@@ -1586,6 +1621,24 @@ export function SelectorApp() {
                       </span>
                     </button>
                   </div>
+
+                  {primary.cautionsEn.length > 0 ? (
+                    <ul className="mt-3 space-y-1.5">
+                      {(lang === "zh" ? primary.cautionsZh : primary.cautionsEn).map((c) => (
+                        <li
+                          key={c}
+                          className="flex gap-2 text-[0.8125rem] leading-snug text-[#f3d48a]"
+                        >
+                          <ExclamationTriangleIcon
+                            className="mt-px h-4 w-4 shrink-0"
+                            strokeWidth={2}
+                            aria-hidden
+                          />
+                          <span>{c}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
 
                   <ModelSpec
                     lang={lang}

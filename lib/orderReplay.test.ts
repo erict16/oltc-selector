@@ -95,7 +95,9 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
           ),
           `${c.id}: backup ${c.expectBackup} not in ${rest.map((r) => r.model).join(" | ")}`,
         ).toBe(true);
-      } else {
+      } else if (c.input.dutyKind !== "octc") {
+        // OCTC has no Um twin: a list row with no bigger current at this Um
+        // (WSLIV-800Y/170, WSGII-800D/40.5) leaves nothing else to offer.
         expect(rest.length, `${c.id}: no remaining eligible types`).toBeGreaterThan(
           0,
         );

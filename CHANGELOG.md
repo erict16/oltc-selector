@@ -2,11 +2,26 @@
 
 ## Unreleased
 
+## 1.3.0
+
+Stress review 2026-10-21 (40k random duties + replay). Each item has a regression in `lib/stressReview.test.ts`.
+
+- Across-tap stress above every grade on the Um row returns no type. It used to hand back DE (650 kV LI @252 → `…/252DE`).
+- Ust must be a number. NaN / undefined used to skip the step-voltage and step-capacity checks. 0 still means not given, and the card says so.
+- W/G tap codes outside Fig. 3-3 (`10113G`, `12193W`, `12211W`) still build for special OS, with a caution.
+- Duty inside the 1% commercial tolerance above a rating carries a caution with the percentage.
+- Earth BIL / PF above the Um class raises Um (750 @126 → 170), not the selector grade. A typed grade that is raised says so.
+- OCTC takes no Um twin: 800 A D @40.5 is `WSGII-800D/40.5-4x5A`, not `WSLIV-800D/72.5`.
+- HWV says across-tap was not checked when a value is typed.
+- Result cards and the CLI show these cautions (`注意：` lines, JSON `cautions`).
+- Form: custom step % and k keep the typed draft (1.43 % used to become 143 %) and read `0,5`. k below 1 is refused. A +/− range left from OCTC or linear no longer overrides the ±N preset; going back to on-load restores the preset geometry. The Any connection is gone (it under-counted delta Ust by √3).
+- Corner caption: star shows the earth withstand of the engine Um class (110 kV → 对地 140/350 kV); delta shows that Um (126). Un/√3 is gone.
+- CLI: `1,200` is refused as ambiguous (was 1.2 A). `--iu` with `--mva`, `--k` without `--mva`, `--k` < 1, and `--step-pct` without `--mva` are errors. Missing `--ust` is echoed. `--json` runs the existence gate. `--structure toString` is rejected.
+
 - Chinese shows the domestic type prefix: CV2→VCV, CM2→VCM, SHZVG→CHVT. Copy uses that string. English and the other languages stay on the export code. The engine and the CLI do not change. SHZV stays SHZV.
 - Selector uses the split workbench: navy result on the left, duty form on the right. Chinese title is 有载开关选型. The selection-assistant bubble is off the home page. The result pane has no version mark.
 - The page, the changelog notes, and the CLI help no longer name the manufacturer. The Chinese title is 有载开关选型.
 - Other options walk the price ladder only as far as a row that lowers the tight axis. A same-amp neighbour is not 综合保险: CV2-600 past 95% current tags SHZV-1000, not CM2-600. CM2 still wears the tag when step voltage, step capacity, or across-tap is what is tight. CM2 does not offer SHZVG. With no relieving row, the card itself is 综合保险.
-- The corner Um is calculated live: star and any are Un/√3, line-end is Un. The engine still gets the catalogue class.
 - A current inside the nameplate stays on that rating. 342 A is CV2-350, and CV2-600 is the 综合保险 step. The old top-3% bump to the next current is gone.
 - Phone language chips match the desktop size. On a phone the type sits on its own row at 24px, and Copy sits under it on the left so long labels (Kopyala / Копировать) no longer squeeze the model. Duty title wraps beside the chips instead of shoving them onto a second row. Field labels wrap instead of overflowing.
 - Off-circuit has no vacuum type. Choosing 无载 locks 灭弧方式 on oil and greys the control.

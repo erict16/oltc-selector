@@ -722,62 +722,86 @@ function firstAllowedAtOrAbove(
   return allowed[allowed.length - 1] ?? "B";
 }
 
+function coversAcrossTap(
+  size: SelectorSize,
+  needALi: number,
+  needAPf: number,
+): boolean {
+  const ins = INTERNAL_INSULATION[size];
+  return ins.a_li + 0.5 >= needALi && ins.a_pf + 0.5 >= needAPf;
+}
+
+export type SelectorSizePick = {
+  /** Null when no grade on this Um row covers the across-tap stress. */
+  size: SelectorSize | null;
+  /** The typed grade, when the engine had to raise it. */
+  raisedFrom?: SelectorSize;
+};
+
 /**
- * Smallest selector grade that covers Um commercial default + optional across-tap / earth stresses.
+ * Smallest selector grade that covers the Um commercial default and a typed
+ * across-tap stress. Earth insulation is the Um class, not the grade
+ * (see `umForEarthInsulation`).
+ * A typed grade stays when it is legal on this Um and covers the stress.
+ * Otherwise it is raised and `raisedFrom` says so.
+ * Stress above DE returns null. Never hand back a grade that does not cover.
  */
+export function resolveSelectorSize(
+  um: number,
+  requested: SelectorSize | "auto" | undefined,
+  acrossTapBilKv?: number,
+  acrossTapPfKv?: number,
+): SelectorSizePick {
+  const allowed = SELECTOR_SIZES_BY_UM[um] ?? ["B", "C", "D", "DE"];
+  const needALi = acrossTapBilKv ?? 0;
+  const needAPf = acrossTapPfKv ?? 0;
+  const typed = requested && requested !== "auto" ? requested : null;
+
+  // Floor = typed grade, else the commercial Um default
+  // (not always the weakest letter for that Um row).
+  const floor = firstAllowedAtOrAbove(
+    typed ?? defaultSelectorSizeForUm(um),
+    allowed,
+  );
+  for (let i = SIZE_ORDER.indexOf(floor); i < SIZE_ORDER.length; i++) {
+    const cand = SIZE_ORDER[i];
+    if (!allowed.includes(cand)) continue;
+    // Across-tap winding (a distance) — training case 2: BIL 285 → C
+    if (!coversAcrossTap(cand, needALi, needAPf)) continue;
+    return typed && cand !== typed ? { size: cand, raisedFrom: typed } : { size: cand };
+  }
+  return { size: null };
+}
+
+/** Grade only. Null when the across-tap stress is above every grade on this Um. */
 export function pickSelectorSize(
   um: number,
   requested: SelectorSize | "auto" | undefined,
-  bilKv?: number,
-  pfKv?: number,
   acrossTapBilKv?: number,
   acrossTapPfKv?: number,
-): SelectorSize {
-  const allowed = SELECTOR_SIZES_BY_UM[um] ?? ["B", "C", "D", "DE"];
-  if (requested && requested !== "auto") {
-    if (allowed.includes(requested)) return requested;
-    return firstAllowedAtOrAbove(requested, allowed);
-  }
+): SelectorSize | null {
+  return resolveSelectorSize(um, requested, acrossTapBilKv, acrossTapPfKv).size;
+}
 
-  // Floor = commercial Um default (not always the weakest letter for that Um row)
-  let floor = defaultSelectorSizeForUm(um);
-  floor = firstAllowedAtOrAbove(floor, allowed);
-
-  const earth = EARTH_INSULATION[um];
-  // Earth withstand above catalogue for this Um → bump one step
-  if (earth && bilKv && bilKv > earth.bil + 1) {
-    const i = SIZE_ORDER.indexOf(floor);
-    floor = firstAllowedAtOrAbove(
-      SIZE_ORDER[Math.min(SIZE_ORDER.length - 1, i + 1)] ?? "DE",
-      allowed,
-    );
+/**
+ * Lowest catalogue Um whose earth withstand covers a typed transformer
+ * BIL / PF to earth. A neutral or line end above the class is a higher Um,
+ * not a stronger selector grade. Null when nothing in the table covers it.
+ */
+export function umForEarthInsulation(
+  umKv: number,
+  bilKv?: number,
+  pfKv?: number,
+): number | null {
+  const needBil = bilKv ?? 0;
+  const needPf = pfKv ?? 0;
+  const classes = Object.keys(EARTH_INSULATION)
+    .map(Number)
+    .sort((a, b) => a - b);
+  for (const u of classes) {
+    if (u < umKv - 0.01) continue;
+    const e = EARTH_INSULATION[u]!;
+    if (e.bil + 0.5 >= needBil && e.pf + 0.5 >= needPf) return u;
   }
-  if (earth && pfKv && pfKv > earth.pf + 1) {
-    const i = SIZE_ORDER.indexOf(floor);
-    floor = firstAllowedAtOrAbove(
-      SIZE_ORDER[Math.min(SIZE_ORDER.length - 1, i + 1)] ?? "DE",
-      allowed,
-    );
-  }
-
-  // Across-tap winding (a distance) — training case 2: BIL 285 → C
-  const needALi = acrossTapBilKv ?? 0;
-  const needAPf = acrossTapPfKv ?? 0;
-  const floorIdx = SIZE_ORDER.indexOf(floor);
-
-  for (let i = floorIdx; i < SIZE_ORDER.length; i++) {
-    const cand = SIZE_ORDER[i];
-    if (!allowed.includes(cand)) continue;
-    const ins = INTERNAL_INSULATION[cand];
-    if (needALi <= 0 && needAPf <= 0) return cand;
-    if (ins.a_li + 0.5 >= needALi && ins.a_pf + 0.5 >= needAPf) return cand;
-  }
-
-  // Across-tap may force above Um floor
-  for (const cand of SIZE_ORDER) {
-    if (!allowed.includes(cand)) continue;
-    const ins = INTERNAL_INSULATION[cand];
-    if (ins.a_li + 0.5 >= needALi && ins.a_pf + 0.5 >= needAPf) return cand;
-  }
-  return allowed[allowed.length - 1];
+  return null;
 }
