@@ -299,7 +299,7 @@ describe("tap / catalogue sanity", () => {
   });
 
   it("across-tap BIL 285 → selector grade C", () => {
-    expect(pickSelectorSize(72.5, "auto", 350, 140, 285, 65)).toBe("C");
+    expect(pickSelectorSize(72.5, "auto", 285, 65)).toBe("C");
   });
 
   it("default selector size follows Um commercial ladder", () => {
@@ -320,14 +320,14 @@ describe("tap / catalogue sanity", () => {
   });
 
   it("across-tap can only raise the Um floor", () => {
-    expect(pickSelectorSize(72.5, "auto", undefined, undefined, 285, 65)).toBe(
+    expect(pickSelectorSize(72.5, "auto", 285, 65)).toBe(
       "C",
     );
-    expect(pickSelectorSize(170, "auto", undefined, undefined, 450, 100)).toBe(
+    expect(pickSelectorSize(170, "auto", 450, 100)).toBe(
       "D",
     );
     // 520 LI needs DE (D a_li = 460)
-    expect(pickSelectorSize(252, "auto", undefined, undefined, 520, 110)).toBe(
+    expect(pickSelectorSize(252, "auto", 520, 110)).toBe(
       "DE",
     );
   });
@@ -1867,9 +1867,11 @@ describe("other options stay on the adjacent price step", () => {
     const tag = insuranceModel(out.results, dutyA, ust);
     const allowed = new Set<string>([primary.seriesId]);
     let hop: string | undefined = primary.seriesId;
-    while (hop && NEXT[hop] && !allowed.has(NEXT[hop])) {
-      hop = NEXT[hop];
-      allowed.add(hop);
+    let next: string | undefined = hop ? NEXT[hop] : undefined;
+    while (next && !allowed.has(next)) {
+      hop = next;
+      allowed.add(next);
+      next = NEXT[next];
     }
     if (primary.seriesId === "shzv" && primary.currentA + 0.5 >= 1000) {
       allowed.add("shzvg");

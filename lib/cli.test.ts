@@ -87,53 +87,48 @@ describe("oltc CLI", () => {
     expect(input.umKv).toBe(72.5);
   });
 
-  it("--iu is Imax: --k does not multiply through-current", () => {
+  it("--iu is Imax: --k on the --iu path is refused, not silently dropped", () => {
+    expect(() =>
+      cliToSelectInput(
+        parseCliArgs(["--iu", "350", "--k", "2", "--um", "40.5", "--conn", "D"]),
+      ),
+    ).toThrow(/--k applies only on the --mva path/);
     const iu = cliToSelectInput(
-      parseCliArgs([
-        "--iu",
-        "350",
-        "--k",
-        "2",
-        "--um",
-        "40.5",
-        "--conn",
-        "D",
-        "--reg",
-        "W",
-        "--pm",
-        "8",
-      ]),
+      parseCliArgs(["--iu", "350", "--um", "40.5", "--conn", "D"]),
     );
     expect(iu.throughCurrentA).toBe(350);
-    const withK = capture([
-      "--iu",
-      "350",
-      "--k",
-      "2",
-      "--um",
-      "40.5",
-      "--conn",
-      "D",
-      "--reg",
-      "W",
-      "--pm",
-      "8",
-    ]);
-    const bare = capture([
-      "--iu",
-      "350",
-      "--um",
-      "40.5",
-      "--conn",
-      "D",
-      "--reg",
-      "W",
-      "--pm",
-      "8",
-    ]);
-    expect(withK.code).toBe(0);
-    expect(withK.out).toBe(bare.out);
-    expect(withK.out.trim().split(/\r?\n/)[0]).toBe("CV2III-350D/40.5-10193W");
+  });
+
+  it("refuses ambiguous thousands separators and conflicting current sources", () => {
+    // 1,200 used to parse as 1.2 A → CV2-350.
+    expect(() => parseCliArgs(["--iu", "1,200"])).toThrow(/Ambiguous/);
+    expect(parseCliArgs(["--iu", "1200"]).iu).toBe(1200);
+    expect(parseCliArgs(["--ust", "1500,5"]).ust).toBe(1500.5);
+    expect(() => parseCliArgs(["--iu", "0x400"])).toThrow(/Invalid number/);
+    expect(() =>
+      cliToSelectInput(
+        parseCliArgs(["--iu", "1200", "--mva", "25", "--kv", "110"]),
+      ),
+    ).toThrow(/not both/);
+    expect(() =>
+      cliToSelectInput(parseCliArgs(["--mva", "25", "--kv", "110", "--k", "0.5"])),
+    ).toThrow(/≥ 1/);
+    expect(() => parseCliArgs(["--structure", "toString"])).toThrow(/--structure/);
+  });
+
+  it("echoes the wiring the emitted OCTC type actually carries", () => {
+    const a = capture(["--octc", "--iu", "800", "--um", "40.5", "--conn", "D", "--pm", "2"]);
+    expect(a.out.split(/\r?\n/)[0]).toBe("WSGII-800D/40.5-4x5A");
+    expect(a.out).toContain("接线=自动（II）");
+  });
+
+  it("says when Ust was not given, and prints the engine cautions", () => {
+    const a = capture(["--iu", "400", "--um", "72.5"]);
+    expect(a.code).toBe(0);
+    expect(a.out).toContain("Ust 未指定");
+    expect(a.out).toContain("注意：未给级电压");
+    const j = JSON.parse(capture(["--json", "--iu", "400", "--um", "72.5"]).out);
+    expect(j.cautions.join(" ")).toContain("未给级电压");
   });
 
   it("echoes silent defaults so a wrong assumption cannot hide", () => {
@@ -192,7 +187,7 @@ describe("oltc CLI", () => {
 
   it("omits the 假定 block when every watched input is explicit", () => {
     const a = capture([
-      "--iu", "350", "--um", "40.5",
+      "--iu", "350", "--um", "40.5", "--ust", "1000",
       "--conn", "D", "--reg", "W", "--pm", "8",
       "--vacuum", "--mount", "in-tank", "--phases", "III",
     ]);

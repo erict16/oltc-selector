@@ -385,8 +385,20 @@ export function resolveTapFields(input: {
   mid: 0 | 1 | 3;
   tapCode: string;
   changeOver: ChangeOver;
+  /**
+   * W/G: true only when (positions, mid, pitch) is a Fig. 3-3 row.
+   * Special OS codes (10181W, 10173G) still build, but the card must say
+   * the diagram needs engineering. Linear is always true.
+   */
+  standard: boolean;
 } {
   const reg = input.regulation;
+  const isStandard = (positions: number, mid: 0 | 1 | 3, pitch: number) => {
+    if (reg === "linear") return true;
+    if (mid !== 1 && mid !== 3) return false;
+    const row = lookupByPositions(positions, mid, reg);
+    return row != null && row.pitch === pitch;
+  };
 
   if (reg === "linear") {
     const positions = input.positions ?? 9;
@@ -398,6 +410,7 @@ export function resolveTapFields(input: {
       mid,
       tapCode: buildTapCode({ pitch, positions, mid, regulation: reg }),
       changeOver: "0",
+      standard: true,
     };
   }
 
@@ -428,6 +441,7 @@ export function resolveTapFields(input: {
       mid,
       tapCode: buildTapCode({ pitch, positions, mid, regulation: reg }),
       changeOver: changeOverOf(reg),
+      standard: row != null && isStandard(positions, mid, pitch),
     };
   }
 
@@ -457,6 +471,7 @@ export function resolveTapFields(input: {
     mid,
     tapCode: buildTapCode({ pitch, positions, mid, regulation: reg }),
     changeOver: changeOverOf(reg),
+    standard: isStandard(positions, mid, pitch),
   };
 }
 

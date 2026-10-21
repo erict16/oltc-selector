@@ -19,6 +19,26 @@ export type Release = {
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
     {
+      version: "1.3.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "fix",
+          items: [
+            "调压绕组间绝缘超出所有选择器等级时，不再给出 DE 型号，而是提示联系工程。",
+            "自定义调节比例和安全系数可以正常输入小数，也认 0,5 这种逗号写法；无载里改过的档位不再带进有载选型。",
+            "星接时电压角标显示对地绝缘，角接显示实际选用的 Um；去掉「不限」连接方式，避免级电压被少算。",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "结果卡会标出需要工程确认的情况：未给级电压、超出额定电流、非标准分接代码、选择器等级被上调。",
+          ],
+        },
+      ],
+    },
+    {
       version: "1.2.9",
       date: "2026-09",
       groups: [
@@ -165,6 +185,26 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "1.3.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "fix",
+          items: [
+            "When across-tap insulation is above every selector grade, the page no longer returns a DE type and asks you to contact engineering instead.",
+            "Custom step percent and safety factor accept decimals, including 0,5 with a comma; tap edits made in off-circuit mode no longer carry into on-load sizing.",
+            "For star the voltage caption shows the earth withstand, for delta the Um actually used; the Any connection is gone so step voltage is not under-counted.",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "The result card flags what engineering must confirm: no step voltage given, duty above the rating, a non-standard tap code, or a raised selector grade.",
+          ],
+        },
+      ],
+    },
     {
       version: "1.2.9",
       date: "2026-09",
@@ -317,6 +357,26 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "1.3.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "fix",
+          items: [
+            "Khi cách điện giữa các nấc vượt mọi cấp bộ chọn, trang không còn trả về mã DE mà yêu cầu liên hệ kỹ thuật.",
+            "Tỷ lệ mỗi nấc và hệ số an toàn tùy chỉnh nhận số thập phân, kể cả 0,5 với dấu phẩy; nấc chỉnh ở chế độ không tải không còn ảnh hưởng chọn có tải.",
+            "Nối sao hiển thị cách điện với đất, nối tam giác hiển thị Um thực dùng; bỏ lựa chọn Bất kỳ để điện áp nấc không bị tính thiếu.",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "Thẻ kết quả đánh dấu các điểm cần kỹ thuật xác nhận: chưa có điện áp nấc, vượt dòng định mức, mã nấc không tiêu chuẩn, hoặc cấp bộ chọn bị nâng.",
+          ],
+        },
+      ],
+    },
+    {
       version: "1.2.9",
       date: "2026-09",
       groups: [
@@ -465,6 +525,26 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "1.3.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "fix",
+          items: [
+            "Si el aislamiento entre tomas supera todos los grados del selector, ya no se devuelve un tipo DE y se pide contactar con ingeniería.",
+            "El porcentaje por toma y el factor de seguridad personalizados aceptan decimales, también 0,5 con coma; los cambios de tomas hechos en sin carga ya no afectan la selección en carga.",
+            "En estrella la etiqueta muestra el aislamiento a tierra y en triángulo la Um usada; se quita la conexión Cualquiera para no subestimar la tensión de escalón.",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "La tarjeta de resultado marca lo que ingeniería debe confirmar: tensión de escalón no indicada, corriente por encima del valor nominal, código de tomas no estándar o grado de selector elevado.",
+          ],
+        },
+      ],
+    },
     {
       version: "1.2.9",
       date: "2026-09",
@@ -617,6 +697,26 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "1.3.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "fix",
+          items: [
+            "Kademeler arası yalıtım tüm seçici sınıflarını aştığında sayfa artık DE tipi vermiyor ve mühendislikle iletişime geçmenizi istiyor.",
+            "Özel kademe yüzdesi ve güvenlik katsayısı ondalık kabul ediyor, virgüllü 0,5 dahil; yüksüz modda yapılan kademe değişiklikleri artık yük altı seçimi etkilemiyor.",
+            "Yıldızda gerilim etiketi toprağa yalıtımı, üçgende kullanılan Um değerini gösteriyor; kademe gerilimi eksik hesaplanmasın diye Herhangi bağlantısı kaldırıldı.",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "Sonuç kartı mühendislik onayı gereken durumları işaretliyor: kademe gerilimi verilmemiş, akım anma değerinin üstünde, standart dışı kademe kodu veya yükseltilmiş seçici sınıfı.",
+          ],
+        },
+      ],
+    },
+    {
       version: "1.2.9",
       date: "2026-09",
       groups: [
@@ -765,6 +865,26 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   ru: [
+    {
+      version: "1.3.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "fix",
+          items: [
+            "Если изоляция между ступенями выше всех классов избирателя, страница больше не выдаёт тип DE и просит обратиться к инженерам.",
+            "Свой процент ступени и коэффициент запаса принимают десятичные числа, в том числе 0,5 с запятой; изменения ступеней в режиме ПБВ больше не попадают в подбор РПН.",
+            "Для звезды подпись показывает изоляцию относительно земли, для треугольника — фактически выбранное Um; вариант «Любая» убран, чтобы не занижать напряжение ступени.",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "Карточка результата отмечает то, что должны подтвердить инженеры: не задано напряжение ступени, ток выше номинального, нестандартный код ступеней или повышенный класс избирателя.",
+          ],
+        },
+      ],
+    },
     {
       version: "1.2.9",
       date: "2026-09",

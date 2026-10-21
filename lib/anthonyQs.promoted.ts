@@ -60,8 +60,8 @@ export const ANTHONY_PROMOTED: ReplayCase[] = [
   {
     id: "QS2607203",
     source: "Anthony WSG II-800D/40.5-4x5A",
-    tag: "customer-specified",
-    note: "OCTC WSG lock. WSL 6x5 also covers; WSG must stay eligible.",
+    tag: "min-adequate",
+    note: "No WSL row at 40.5 for 800D. WSG at the duty Um is #1; WSL @72.5 is not a Um twin on OCTC.",
     input: {
       ...oil,
       dutyKind: "octc",

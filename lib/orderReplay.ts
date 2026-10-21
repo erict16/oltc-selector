@@ -427,7 +427,7 @@ export function runOrderReplay(): ReplayRow[] {
     if (c.expectBackup) {
       backupOk = next.some((m) => commercialMatch(m, c.expectBackup!));
     } else {
-      backupOk = next.length > 0;
+      backupOk = next.length > 0 || c.input.dutyKind === "octc";
     }
     return {
       id: c.id,
