@@ -740,7 +740,7 @@ export function SelectorApp() {
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col lg:grid lg:h-dvh lg:grid-cols-2 lg:overflow-hidden">
         <form
-          className="pane-in pane-in-late order-2 flex min-w-0 flex-col overflow-y-auto bg-[#f4f7fb] px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-7 sm:py-8 lg:col-start-2 lg:row-start-1 lg:h-dvh lg:min-h-0 lg:px-8 lg:py-6"
+          className="pane-in pane-in-late order-2 flex min-w-0 flex-col overflow-y-auto lg:relative bg-[#f4f7fb] px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-7 sm:py-8 lg:col-start-2 lg:row-start-1 lg:h-dvh lg:min-h-0 lg:px-8 lg:py-6"
           onSubmit={(e) => {
             e.preventDefault();
             runSelect();
@@ -751,11 +751,14 @@ export function SelectorApp() {
             <h2 className="min-w-0 flex-1 font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold leading-snug text-[var(--color-ink)]">
               {t(lang, "duty")}
             </h2>
-            <LangSwitcher
-              lang={lang}
-              onChange={setLang}
-              ariaLabel={t(lang, "langAria")}
-            />
+            {/* Desktop: pin to the pane top, level with the left title. */}
+            <div className="ml-auto lg:absolute lg:top-[27px] lg:right-8">
+              <LangSwitcher
+                lang={lang}
+                onChange={setLang}
+                ariaLabel={t(lang, "langAria")}
+              />
+            </div>
           </div>
 
           <div className="grid gap-x-5 gap-y-3 sm:grid-cols-2">
