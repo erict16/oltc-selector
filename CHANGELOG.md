@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- On wide screens the language chips sit at the top of the duty pane, level with the left title, instead of floating mid-page with the centred form. Phones are unchanged.
+
 ## 1.3.0
 
 Stress review 2026-10-21 (40k random duties + replay). Each item has a regression in `lib/stressReview.test.ts`.
