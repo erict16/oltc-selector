@@ -1,6 +1,6 @@
 /**
  * Plain decimal numbers typed by people in six languages.
- * `,` and `，` are decimal points (vi / es / ru / tr write 0,5).
+ * `,` and `，` are decimal points (vi / es / tr / id write 0,5).
  * `1,200` is ambiguous — 1.2 or 1200 — so it is refused, not guessed.
  * No hex, exponent, sign, or thousands separators.
  */

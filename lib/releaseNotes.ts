@@ -864,7 +864,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       ],
     },
   ],
-  ru: [
+  id: [
     {
       version: "1.3.0",
       date: "2026-10",
@@ -872,15 +872,15 @@ export const RELEASES: Record<Lang, Release[]> = {
         {
           kind: "fix",
           items: [
-            "Если изоляция между ступенями выше всех классов избирателя, страница больше не выдаёт тип DE и просит обратиться к инженерам.",
-            "Свой процент ступени и коэффициент запаса принимают десятичные числа, в том числе 0,5 с запятой; изменения ступеней в режиме ПБВ больше не попадают в подбор РПН.",
-            "Для звезды подпись показывает изоляцию относительно земли, для треугольника — фактически выбранное Um; вариант «Любая» убран, чтобы не занижать напряжение ступени.",
+            "Bila isolasi antar-tap melebihi semua kelas selector, halaman tidak lagi memberi tipe DE dan meminta Anda menghubungi bagian engineering.",
+            "Persen per tap dan faktor keamanan kustom menerima desimal, termasuk 0,5 dengan koma; perubahan tap pada mode tanpa beban tidak lagi terbawa ke pemilihan berbeban.",
+            "Untuk hubungan bintang, keterangan tegangan menampilkan ketahanan isolasi ke tanah, untuk delta menampilkan Um yang benar-benar dipakai; pilihan hubungan Bebas dihapus agar tegangan per tap tidak terhitung terlalu kecil.",
           ],
         },
         {
           kind: "imp",
           items: [
-            "Карточка результата отмечает то, что должны подтвердить инженеры: не задано напряжение ступени, ток выше номинального, нестандартный код ступеней или повышенный класс избирателя.",
+            "Kartu hasil menandai hal yang harus dikonfirmasi engineering: tegangan per tap tidak diisi, kondisi kerja di atas rating, kode tap tidak standar, atau kelas selector yang dinaikkan.",
           ],
         },
       ],
@@ -892,18 +892,18 @@ export const RELEASES: Record<Lang, Release[]> = {
         {
           kind: "new",
           items: [
-            "Добавлено двухразрывное вакуумное семейство SDZV: ступенчатое напряжение до 6000 В, ступенчатая мощность примерно в 1,5 раза выше SHZV.",
+            "Keluarga vakum pemutusan ganda SDZV tersedia, dengan tegangan per tap hingga 6000 V dan kapasitas per tap sekitar 1,5 kali SHZV.",
           ],
         },
         {
           kind: "fix",
           items: [
-            "Масло и вакуум стали жёсткими ограничениями: при выборе масла вакуумные типы не появляются, а если режим с вакуумом на баке не закрывает ни один вакуумный тип, инструмент сообщает о выходе за каталог, а не подставляет масляный реакторный тип.",
+            "Pemutusan minyak dan vakum kini sama-sama batas mutlak: memilih minyak mengeluarkan tipe vakum dari hasil, dan bila kondisi kerja vakum di atas tangki melebihi semua tipe vakum, alat ini menyatakan di luar katalog alih-alih mengganti dengan tipe reaktor minyak.",
           ],
         },
         {
           kind: "imp",
-          items: ["Руководство по ассистенту теперь состоит из трёх шагов: установить, отправить, получить тип."],
+          items: ["Panduan asisten kini berupa tiga langkah: pasang, kirim, dapatkan tipenya."],
         },
       ],
     },
@@ -914,7 +914,7 @@ export const RELEASES: Record<Lang, Release[]> = {
         {
           kind: "imp",
           items: [
-            "Навык ассистента переехал в отдельный репозиторий, а страница руководства ссылается прямо на него, поэтому обновления выходят быстрее.",
+            "Skill asisten pindah ke repositori sendiri dan halaman tutorial langsung menautkannya, sehingga pembaruan lebih cepat sampai.",
           ],
         },
       ],
@@ -926,14 +926,14 @@ export const RELEASES: Record<Lang, Release[]> = {
         {
           kind: "fix",
           items: [
-            "ПБВ с заданным числом контактов больше не ошибочно считается 17-позиционным.",
-            "Коэффициент запаса в командной строке по умолчанию ×1.0, как на сайте.",
-            "Токи в пояснениях округляются, без длинных дробей.",
+            "OLTC tanpa beban dengan jumlah kontak tertentu tidak lagi terbaca sebagai 17 posisi.",
+            "Faktor keamanan di command line kini bawaannya ×1.0, sama dengan aplikasi web.",
+            "Arus kondisi kerja dalam teks alasan dibulatkan, tanpa desimal panjang.",
           ],
         },
         {
           kind: "imp",
-          items: ["Ассистент перечисляет допущения полнее, включая число фаз."],
+          items: ["Asisten menyampaikan daftar asumsi yang lebih lengkap, termasuk jumlah fasa."],
         },
       ],
     },
@@ -944,8 +944,8 @@ export const RELEASES: Record<Lang, Release[]> = {
         {
           kind: "new",
           items: [
-            "Ассистент и CLI сообщают, какие данные вы не указали и какие значения по умолчанию использованы, после каждого запуска.",
-            "Ассистент опубликован на обоих маркетах навыков: WorkBuddy SkillHub и skillhub.cn.",
+            "Asisten dan CLI memberi tahu input mana yang tidak diisi dan nilai bawaan mana yang dipakai, setiap kali dijalankan.",
+            "Asisten diterbitkan di dua marketplace skill: WorkBuddy SkillHub dan skillhub.cn.",
           ],
         },
       ],
@@ -956,7 +956,9 @@ export const RELEASES: Record<Lang, Release[]> = {
       groups: [
         {
           kind: "imp",
-          items: ["Ассистент получил свой значок, его легко узнать на маркете навыков WorkBuddy."],
+          items: [
+            "Asisten kini dilengkapi ikon, sehingga mudah dikenali di marketplace skill WorkBuddy.",
+          ],
         },
       ],
     },
@@ -966,7 +968,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       groups: [
         {
           kind: "imp",
-          items: ["Инструкция ассистента переписана: верхняя половина для людей, нижняя для ИИ."],
+          items: ["Manual asisten ditulis ulang: bagian atas untuk manusia, bagian bawah untuk AI."],
         },
       ],
     },
@@ -977,7 +979,7 @@ export const RELEASES: Record<Lang, Release[]> = {
         {
           kind: "imp",
           items: [
-            "Ассистент понимает больше параметров: ступенчатое напряжение, способ монтажа (в баке, на баке, сухой), среду гашения (масло или вакуум) и число фаз.",
+            "Asisten memahami lebih banyak input: tegangan per tap, pemasangan (di dalam tangki, di atas tangki, kering), media pemutus (minyak atau vakum), dan jumlah fasa.",
           ],
         },
       ],
@@ -989,18 +991,18 @@ export const RELEASES: Record<Lang, Release[]> = {
         {
           kind: "new",
           items: [
-            "Опубликована утилита командной строки oltc — тот же механизм подбора, что и на сайте.",
-            "Запущен ассистент подбора: отправьте данные трансформатора ИИ-ассистенту и получите тип.",
-            "Достаточно ввести мощность трансформатора — инструмент сам рассчитает наибольший сквозной ток.",
-            "Для ПБВ доступны схемы соединений из каталога: II реверсивная, IV линейная, V одиночный мост, VI Y-D, VII двойной мост, VIII последовательно-параллельная.",
-            "Карточка результата указывает конструкцию: совмещённая, комбинированная, клетка или барабан.",
+            "Alat command line oltc diterbitkan, memakai mesin pemilihan yang sama dengan aplikasi web.",
+            "Asisten pemilihan diluncurkan: kirim data trafo ke asisten AI dan dapatkan tipenya.",
+            "Pemilihan bisa dilakukan hanya dengan kapasitas trafo; alat ini menurunkan arus lewat maksimum.",
+            "OLTC tanpa beban menawarkan skema sambungan sesuai brosur: II pembalik, IV linear, V jembatan tunggal, VI Y-D, VII jembatan ganda, VIII seri-paralel.",
+            "Kartu hasil menyebutkan konstruksinya: majemuk, kombinasi, sangkar, atau drum.",
           ],
         },
         {
           kind: "fix",
           items: [
-            "Типы, которых нет в каталоге или списке 2025, больше не выдаются, например трёхфазный CM2 по схеме треугольника.",
-            "Комбинированные трёхфазные РПН — только для нейтрали; при треугольнике или на конце линии подбираются три однофазных аппарата.",
+            "Tipe yang tidak ada di brosur atau daftar 2025 tidak lagi muncul, misalnya CM2 tiga fasa delta.",
+            "OLTC berbeban kombinasi tiga fasa hanya untuk titik netral; kondisi kerja delta atau ujung saluran beralih ke tiga unit satu fasa.",
           ],
         },
       ],
@@ -1012,13 +1014,13 @@ export const RELEASES: Record<Lang, Release[]> = {
         {
           kind: "new",
           items: [
-            "Тип гашения можно выбрать: масло или вакуум.",
-            "Пресеты 66, 110 и 220 кВ заполняют типовой режим одним нажатием.",
+            "Pemutus busur bisa dipilih: minyak atau vakum.",
+            "Preset 66, 110, dan 220 kV mengisi kondisi kerja umum dengan satu klik.",
           ],
         },
         {
           kind: "imp",
-          items: ["Форма и результат рядом на одной высоте — на широком экране не нужно прокручивать, чтобы нажать «Подобрать»."],
+          items: ["Formulir dan hasil berdampingan dengan tinggi yang sama, sehingga di layar lebar tidak perlu menggulir untuk menekan Pilih."],
         },
       ],
     },
@@ -1028,7 +1030,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       groups: [
         {
           kind: "new",
-          items: ["Первый выпуск: введите данные трансформатора и получите тип, существующий в каталоге."],
+          items: ["Rilis pertama: masukkan data trafo dan dapatkan tipe yang ada di katalog."],
         },
       ],
     },

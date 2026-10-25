@@ -1035,7 +1035,7 @@ export function SelectorApp() {
                   {pmOptions.map((n) => (
                     <option key={n} value={String(n)}>
                       ±{n}
-                      {lang === "zh" ? " 级" : lang === "ru" ? " ст." : ""}
+                      {lang === "zh" ? " 级" : ""}
                     </option>
                   ))}
                 </select>

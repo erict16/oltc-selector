@@ -51,7 +51,7 @@ describe("displayModel", () => {
 
   it("keeps the export code in every other language", () => {
     const model = "CV2III-350Y/72.5-10193W";
-    for (const lang of ["en", "vi", "es", "tr", "ru"]) {
+    for (const lang of ["en", "vi", "es", "tr", "id"]) {
       expect(displayModel(model, lang)).toBe(model);
     }
   });
