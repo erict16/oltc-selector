@@ -13,7 +13,6 @@ import {
   ACROSS_PF_MENU,
   ACROSS_PF_OPTIONS_KV,
   CURRENT_MENU,
-  EARTH_INSULATION,
   SERIES,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
@@ -730,12 +729,12 @@ export function SelectorApp() {
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
   const ustV = computedStepVoltage();
   // The class the engine sends, not Un/√3 (110 kV star used to show 63.5).
-  // Star sits at the neutral: show its earth withstand. Delta: the Um.
+  // Star sits at the neutral: name it, so 72.5 next to 150 kV is not read as
+  // the line-end insulation. Delta: the Um alone.
   const um =
     voltageMode === "winding" && windingRatedKv > 0
       ? oltcUmFromRatedKv(windingRatedKv, input.connection)
       : NaN;
-  const umEarth = input.connection === "Y" ? EARTH_INSULATION[um] : undefined;
 
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col lg:grid lg:h-dvh lg:grid-cols-2 lg:overflow-hidden">
@@ -746,13 +745,13 @@ export function SelectorApp() {
             runSelect();
           }}
         >
-          <div className="mx-auto my-auto w-full">
-          <div className="mb-3 flex items-start gap-x-3">
+          {/* Desktop: the row sits at the pane top, level with the left title,
+              and the title centres on the chips. The fields centre below. */}
+          <div className="mb-3 flex items-center gap-x-3 lg:mt-[3px]">
             <h2 className="min-w-0 flex-1 font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold leading-snug text-[var(--color-ink)]">
               {t(lang, "duty")}
             </h2>
-            {/* Desktop: pin to the pane top, level with the left title. */}
-            <div className="ml-auto lg:absolute lg:top-[27px] lg:right-8">
+            <div className="ml-auto">
               <LangSwitcher
                 lang={lang}
                 onChange={setLang}
@@ -760,6 +759,7 @@ export function SelectorApp() {
               />
             </div>
           </div>
+          <div className="mx-auto my-auto w-full">
 
           <div className="grid gap-x-5 gap-y-3 sm:grid-cols-2">
             <Field
@@ -886,15 +886,16 @@ export function SelectorApp() {
               as="div"
               label={t(lang, "umWinding")}
               action={
-                umEarth ? (
-                  t(lang, "earthTag", { pf: umEarth.pf, li: umEarth.bil })
-                ) : Number.isFinite(um) && um > 0 ? (
-                  <CaptionSub
-                    name="U"
-                    sub="m"
-                    value={formatUmKv(um)}
-                    unit="kV"
-                  />
+                Number.isFinite(um) && um > 0 ? (
+                  <>
+                    {input.connection === "Y" && `${t(lang, "starTag")} · `}
+                    <CaptionSub
+                      name="U"
+                      sub="m"
+                      value={formatUmKv(um)}
+                      unit="kV"
+                    />
+                  </>
                 ) : undefined
               }
             >
