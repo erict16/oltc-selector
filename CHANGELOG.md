@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Bahasa Indonesia (ID) replaces Russian in the language chips, the selector, the release notes, and the assistant guide. A saved Russian choice falls back to Chinese.
-- Star voltage caption reads 星点 · Um = 72.5 kV instead of 对地 140/350 kV, so the neutral class is not read as the line-end insulation. Delta still shows Um alone.
+- Star voltage caption reads 中性点 · 开关 72.5 kV 级 instead of 对地 140/350 kV: the 72.5 is the switch's class at the neutral, not the winding's Um. Delta still shows Um alone.
 - On wide screens the duty title sits on the language-chip row and centres on the chips.
 - Chinese shows CV2 as VCV-G, the name on the Chinese catalogue and the sales order (VCV-GIII-600D/40.5-10193W). CV2 stays the export code everywhere else.
 - On wide screens the language chips sit at the top of the duty pane, level with the left title, instead of floating mid-page with the centred form. Phones are unchanged.

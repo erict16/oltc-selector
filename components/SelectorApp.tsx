@@ -729,8 +729,8 @@ export function SelectorApp() {
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
   const ustV = computedStepVoltage();
   // The class the engine sends, not Un/√3 (110 kV star used to show 63.5).
-  // Star sits at the neutral: name it, so 72.5 next to 150 kV is not read as
-  // the line-end insulation. Delta: the Um alone.
+  // Star: the switch sits at the neutral, so the caption names the switch's
+  // class (72.5 beside 150 kV), not a Um of the winding. Delta: the Um alone.
   const um =
     voltageMode === "winding" && windingRatedKv > 0
       ? oltcUmFromRatedKv(windingRatedKv, input.connection)
@@ -886,17 +886,16 @@ export function SelectorApp() {
               as="div"
               label={t(lang, "umWinding")}
               action={
-                Number.isFinite(um) && um > 0 ? (
-                  <>
-                    {input.connection === "Y" && `${t(lang, "starTag")} · `}
-                    <CaptionSub
-                      name="U"
-                      sub="m"
-                      value={formatUmKv(um)}
-                      unit="kV"
-                    />
-                  </>
-                ) : undefined
+                !(Number.isFinite(um) && um > 0) ? undefined : input.connection === "Y" ? (
+                  t(lang, "starClass", { um: formatUmKv(um) })
+                ) : (
+                  <CaptionSub
+                    name="U"
+                    sub="m"
+                    value={formatUmKv(um)}
+                    unit="kV"
+                  />
+                )
               }
             >
               <div className="relative">
