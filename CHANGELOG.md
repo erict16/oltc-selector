@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Chinese shows CV2 as VCV-G, the name on the Chinese catalogue and the sales order (VCV-GIII-600D/40.5-10193W). CV2 stays the export code everywhere else.
 - On wide screens the language chips sit at the top of the duty pane, level with the left title, instead of floating mid-page with the centred form. Phones are unchanged.
 
 ## 1.3.0

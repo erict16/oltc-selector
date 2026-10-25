@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { displayModel } from "./domesticModel";
 
 describe("displayModel", () => {
-  it("writes VCV for CV2 and keeps the rest of the string", () => {
+  it("writes VCV-G for CV2 and keeps the rest of the string", () => {
     expect(displayModel("CV2III-350Y/72.5-10193W", "zh")).toBe(
-      "VCVIII-350Y/72.5-10193W",
+      "VCV-GIII-350Y/72.5-10193W",
     );
     expect(displayModel("CV2III-600D/145-12233W", "zh")).toBe(
-      "VCVIII-600D/145-12233W",
+      "VCV-GIII-600D/145-12233W",
     );
   });
 

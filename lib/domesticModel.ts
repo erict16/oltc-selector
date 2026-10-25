@@ -1,11 +1,11 @@
 /**
  * Chinese screen only. The engine, the CLI, and replay stay on the export code.
- * Brochure prefixes: CV2→VCV, CM2→VCM, SHZVG→CHVT (the 1300 A class).
+ * Brochure prefixes: CV2→VCV-G, CM2→VCM, SHZVG→CHVT (the 1300 A class).
  * SHZV Chinese books still print SHZV. Do not rename that prefix to CHVT.
  */
 const ZH_FAMILY: ReadonlyArray<readonly [string, string]> = [
   ["SHZVG", "CHVT"],
-  ["CV2", "VCV"],
+  ["CV2", "VCV-G"],
   ["CM2", "VCM"],
 ];
 
