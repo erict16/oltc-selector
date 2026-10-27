@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Transformer kind: two-winding or autotransformer, with where the tap changer sits (neutral, line end, series–common junction, MV line lead). Current, step voltage and switch insulation come from that, not from a typed connection. An autotransformer takes the HV system's insulation (225 kV → class 252) and only combined types; the 27 Oct 2026 case gives 3×CM2I-500/252D-10193W, not CV2.
+- A neutral on a winding above 72.5 kV assumes Um 72.5 and says so; set the insulation to earth from the OS to override it.
+- New layout: one form sheet beside a rating plate that shows the live duty (Imax, Ust, Um, tap point) and, after Select, the type, cautions, ratings and the basis it was sized on. IBM Plex Sans; no gradients or glass.
+- CLI: `--kind two|auto`, `--tap neutral|line|junction|mv-line`, `--winding star|delta`, `--hv`, `--mv`, `--earth-um`. Text output adds a basis line; JSON adds `basis`.
 - Bahasa Indonesia (ID) replaces Russian in the language chips, the selector, the release notes, and the assistant guide. A saved Russian choice falls back to Chinese.
 - Delta voltage caption shows the actual IEC 60038 Um of the tap-side system (22 kV → 24, 110 kV → 123, 230 kV → 245), not the catalogue class the type string snaps to. Star shows no caption: the neutral's insulation does not follow from Un.
 - On wide screens the duty title sits on the language-chip row and centres on the chips.

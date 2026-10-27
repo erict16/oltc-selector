@@ -17,7 +17,7 @@ export function LangSwitcher({
 }) {
   return (
     <div
-      className="ml-auto flex w-auto max-w-full shrink-0 flex-nowrap items-center justify-end gap-1"
+      className="ml-auto flex w-auto max-w-full shrink-0 flex-nowrap items-center justify-end gap-0.5 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-[#e8ecf0] p-[2px]"
       role="group"
       aria-label={ariaLabel}
     >
@@ -31,12 +31,11 @@ export function LangSwitcher({
             aria-pressed={on}
             onClick={() => onChange(opt.id)}
             className={cx(
-              "inline-flex h-7 w-[2.35rem] shrink-0 items-center justify-center rounded-[var(--radius-sm)] border text-[0.6875rem] font-medium leading-none transition-colors duration-150",
-              opt.id === "zh" ? "tracking-normal" : "tracking-[0.14em]",
+              "inline-flex h-7 w-8 shrink-0 sm:w-9 items-center justify-center rounded-[4px] text-[0.75rem] font-medium leading-none transition-[background-color,color,box-shadow] duration-150",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
               on
-                ? "border-[var(--color-accent)] text-[var(--color-accent)]"
-                : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",
+                ? "bg-white font-semibold text-[var(--color-ink)] shadow-[0_1px_2px_rgb(21_33_46/0.12),0_0_0_1px_rgb(21_33_46/0.05)]"
+                : "text-[var(--color-muted)] hover:text-[var(--color-ink)]",
             )}
           >
             {opt.short}

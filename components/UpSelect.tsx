@@ -6,8 +6,7 @@ import { createPortal } from "react-dom";
 
 type Opt = { value: string; label: string };
 
-const controlClass =
-  "h-11 w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
+const controlClass = "ui-control";
 
 /**
  * Menu opens above the field. The insulation row sits at the bottom of the

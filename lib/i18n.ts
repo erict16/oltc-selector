@@ -1,3 +1,5 @@
+import { TRANSFORMER_STRINGS } from "./i18nTransformer";
+
 export type Lang = "zh" | "en" | "vi" | "es" | "tr" | "id";
 
 export const LANG_OPTIONS: { id: Lang; label: string; short: string }[] = [
@@ -1062,7 +1064,15 @@ const idn: Dict = {
   langAria: "Bahasa",
 };
 
-const TABLES: Record<Lang, Dict> = { en, zh, vi, es, tr, id: idn };
+const X = TRANSFORMER_STRINGS;
+const TABLES: Record<Lang, Dict> = {
+  en: { ...en, ...X.en },
+  zh: { ...zh, ...X.zh },
+  vi: { ...vi, ...X.vi },
+  es: { ...es, ...X.es },
+  tr: { ...tr, ...X.tr },
+  id: { ...idn, ...X.id },
+};
 
 export function t(
   lang: Lang,
@@ -1070,7 +1080,7 @@ export function t(
   vars?: Record<string, string | number>,
 ): string {
   const table = TABLES[lang] ?? en;
-  let s = table[key] ?? en[key] ?? key;
+  let s = table[key] ?? TABLES.en[key] ?? key;
   if (vars) {
     for (const [k, v] of Object.entries(vars)) {
       s = s.replaceAll(`{${k}}`, String(v));

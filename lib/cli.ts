@@ -1,11 +1,12 @@
 import { parseDecimal } from "./decimal";
-import {
-  maxThroughCurrent,
-  oltcUmFromRatedKv,
-  stepVoltageFromPercent,
-  throughCurrentFromRated,
-} from "./deriveUm";
 import { octcRoman, optionsWithInsurance, selectOltc } from "./engine";
+import {
+  deriveDuty,
+  type DutyBasis,
+  type TapPoint,
+  type TransformerKind,
+  type WindingConnection,
+} from "./transformer";
 import { commercialTypeExists } from "./typeExists";
 import type {
   Connection,
@@ -28,6 +29,14 @@ export type CliArgs = {
   stepPct?: number;
   k?: number;
   conn: Connection;
+  /** Transformer kind. Default two-winding. */
+  kind: TransformerKind;
+  tap?: TapPoint;
+  winding?: WindingConnection;
+  hv?: number;
+  mv?: number;
+  /** OLTC insulation to earth as a catalogue Um class (OS or maker). */
+  earthUm?: number;
   reg: Regulation;
   pm?: number;
   positions?: number;
@@ -67,6 +76,7 @@ function num(raw: string, flag: string): number {
 export function parseCliArgs(argv: string[]): CliArgs {
   const out: CliArgs = {
     conn: "Y",
+    kind: "two_winding",
     reg: "reversing",
     octc: false,
     structure: "auto",
@@ -170,6 +180,56 @@ export function parseCliArgs(argv: string[]): CliArgs {
       const c = v.toUpperCase();
       if (c !== "Y" && c !== "D") throw new CliError(`--conn must be Y or D`);
       out.conn = c;
+      i = n;
+      continue;
+    }
+    if (a === "--kind") {
+      out.given.add("kind");
+      const [v, n] = take(i, a);
+      const k = v.toLowerCase();
+      if (k === "auto" || k === "autotransformer" || k === "自耦") out.kind = "auto";
+      else if (k === "two" || k === "two-winding" || k === "双绕组") {
+        out.kind = "two_winding";
+      } else throw new CliError(`--kind must be two or auto`);
+      i = n;
+      continue;
+    }
+    if (a === "--auto") {
+      out.given.add("kind");
+      out.kind = "auto";
+      continue;
+    }
+    if (a === "--tap") {
+      out.given.add("tap");
+      const [v, n] = take(i, a);
+      const map: Record<string, TapPoint> = {
+        neutral: "neutral",
+        line: "line_end",
+        "line-end": "line_end",
+        junction: "auto_junction",
+        "mv-line": "auto_mv_line",
+      };
+      const t = map[v.toLowerCase()];
+      if (!t) throw new CliError(`--tap must be neutral|line|junction|mv-line`);
+      out.tap = t;
+      i = n;
+      continue;
+    }
+    if (a === "--winding") {
+      out.given.add("winding");
+      const [v, n] = take(i, a);
+      const w = v.toLowerCase();
+      if (w === "star" || w === "y") out.winding = "star";
+      else if (w === "delta" || w === "d") out.winding = "delta";
+      else throw new CliError(`--winding must be star or delta`);
+      i = n;
+      continue;
+    }
+    if (a === "--hv" || a === "--mv" || a === "--earth-um") {
+      const key = a === "--hv" ? "hv" : a === "--mv" ? "mv" : "earthUm";
+      out.given.add(key);
+      const [v, n] = take(i, a);
+      out[key] = num(v, a);
       i = n;
       continue;
     }
@@ -283,18 +343,31 @@ export const CLI_HELP = `oltc — OLTC/OCTC type selection (package: oltc-select
 
 Usage:
   oltc --iu 400 --um 72.5 --conn Y --reg W --pm 8
-  oltc --mva 25 --kv 110 --conn Y --reg W --pm 8
+  oltc --mva 25 --kv 110 --tap neutral --reg W --pm 8
+  oltc --mva 16 --kv 22 --tap line --winding star
+  oltc --mva 125 --kind auto --hv 225 --mv 115 --tap junction
   oltc --octc --iu 800 --um 72.5 --conn D --series II --contact 6x5
   oltc --iu 600 --um 72.5 --conn Y --reg W --pm 8 --structure combined
 
 Flags:
   --iu, --imax A     Max through-current (Imax). No safety factor.
   --mva MVA --kv kV  Capacity path: Imax from rated I, minus steps, --step-pct, --k
+  --kind two|auto    Transformer kind (--auto = --kind auto). Default two-winding.
+  --tap P            Where the OLTC sits: neutral|line (two-winding),
+                     junction|mv-line (autotransformer, series/common junction
+                     or MV line lead). Capacity path; replaces --conn there.
+  --winding star|delta  Tapped winding connection (two-winding). Sets the current
+                     formula: star I = S/(√3U), delta I = S/(3U).
+  --hv kV --mv kV    Autotransformer HV / MV rated voltage (with --kind auto).
+  --earth-um kV      OLTC insulation to earth from the OS or maker (catalogue
+                     class). Overrides the rule: line end = winding system,
+                     neutral ≤72.5 full else 72.5 assumed, autotransformer = HV.
   --um kV            Equipment Um (OLTC). With --mva/--kv, derived if omitted.
   --ust V            Step voltage. With --mva/--kv/--step-pct, derived if omitted.
   --step-pct %       Step as percent (1.25 means 1.25%). Capacity path only.
   --k n              Safety factor on capacity path only (default 1.0, same as the web app).
-  --conn Y|D         Switch connection (star / delta). Default Y.
+  --conn Y|D         Switch connection (star point / line end). Default Y.
+                     On the capacity path, legacy: Y = star neutral, D = delta line end.
   --reg W|G|0        Reversing / coarse-fine / linear. Default W.
   --pm N             ± steps. Default 8.
   --pos, --positions Linear / OCTC positions.
@@ -311,6 +384,46 @@ Flags:
 Defaults match the web first paint: on-load, in-tank vacuum, structure auto,
 ±8 mid-3 reversing. Omitting --octc and --structure auto is minimum-adequate.
 `;
+
+/** Capacity path: transformer → duty. Null on the --iu path. */
+export function cliDuty(args: CliArgs): DutyBasis | null {
+  if (args.mva == null) return null;
+  const auto = args.kind === "auto";
+  if (auto) {
+    if (!(args.hv != null && args.hv > 0 && args.mv != null && args.mv > 0)) {
+      throw new CliError("--kind auto with --mva needs --hv and --mv");
+    }
+  } else if (!(args.kv != null && args.kv > 0)) {
+    throw new CliError("--mva requires --kv (tap-side rated voltage)");
+  }
+  const tap: TapPoint =
+    args.tap ?? (auto ? "auto_junction" : args.conn === "D" ? "line_end" : "neutral");
+  // Legacy --conn D on the capacity path meant a delta winding (I = S/3U).
+  const winding: WindingConnection =
+    args.winding ?? (tap === "neutral" || args.conn === "Y" ? "star" : "delta");
+  const pct =
+    args.stepPct != null && args.stepPct > 0 ? args.stepPct / 100 : 0.0125;
+  const earth =
+    args.earthUm != null && args.earthUm > 0
+      ? args.earthUm
+      : args.um != null && args.um > 0
+        ? args.um
+        : undefined;
+  return deriveDuty({
+    kind: args.kind,
+    tapPoint: tap,
+    winding,
+    mva: args.mva,
+    tapKv: args.kv ?? 0,
+    hvKv: args.hv ?? 0,
+    mvKv: args.mv ?? 0,
+    minusSteps: args.pm != null && args.pm > 0 ? args.pm : 8,
+    stepFraction: pct,
+    // 与网页版首屏一致：容量路径默认不额外加安全系数
+    safetyK: args.k != null && args.k > 0 ? args.k : 1.0,
+    ...(earth != null ? { earthUmKv: earth } : {}),
+  });
+}
 
 export function cliToSelectInput(args: CliArgs): SelectInput {
   const dutyKind: DutyKind = args.octc ? "octc" : "oltc";
@@ -339,28 +452,16 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     throw new CliError("--step-pct needs --mva/--kv; give --ust on the --iu path");
   }
 
-  if (args.mva != null) {
-    if (!(args.kv != null && args.kv > 0)) {
-      throw new CliError("--mva requires --kv (tap-side rated voltage)");
-    }
-    const rated = throughCurrentFromRated(args.mva, args.kv, args.conn);
-    if (!Number.isFinite(rated) || rated <= 0) {
-      throw new CliError("Could not compute rated current from --mva/--kv");
-    }
-    const pct =
-      args.stepPct != null && args.stepPct > 0 ? args.stepPct / 100 : 0.0125;
-    const minus = args.pm != null && args.pm > 0 ? args.pm : 8;
-    const iMax = maxThroughCurrent(rated, minus, pct);
-    // 与网页版首屏一致：容量路径默认不额外加安全系数
-    const k = args.k != null && args.k > 0 ? args.k : 1.0;
-    iu = iMax * k;
-    if (um == null || !(um > 0)) {
-      um = oltcUmFromRatedKv(args.kv, args.conn);
-    }
-    if (!(ust > 0)) {
-      const v = stepVoltageFromPercent(args.kv, pct, args.conn);
-      if (Number.isFinite(v) && v > 0) ust = v;
-    }
+  const duty = cliDuty(args);
+  let conn = args.conn;
+  if (duty) {
+    if (!duty.ok) throw new CliError(duty.errorZh ?? duty.errorEn ?? "Bad transformer data");
+    iu = duty.dutyA;
+    if (um == null || !(um > 0)) um = duty.umKv;
+    if (!(ust > 0) && duty.stepV != null) ust = duty.stepV;
+    conn = duty.connection;
+  } else if (args.tap) {
+    conn = args.tap === "neutral" ? "Y" : "D";
   }
 
   if (iu == null || !(iu > 0)) {
@@ -376,7 +477,8 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     preferVacuum: !oil && dutyKind === "oltc",
     dutyKind,
     phases: args.phases,
-    connection: args.conn,
+    connection: conn,
+    ...(args.kind === "auto" ? { transformerKind: "auto" as const } : {}),
     throughCurrentA: iu,
     umKv: um,
     stepVoltageV: ust,
@@ -424,9 +526,31 @@ const MOUNT_ZH: Record<Mounting, string> = {
 /** `family` is the primary's code, so auto wiring echoes what was emitted (WSG on D is II). */
 export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
   const mark = (key: string) => (args.given.has(key) ? "" : "（默认）");
-  const items: string[] = [
-    `conn=${args.conn} ${args.conn === "Y" ? "星点" : "线端"}${mark("conn")}`,
-  ];
+  const items: string[] = [];
+  const tapZh: Record<TapPoint, string> = {
+    neutral: "中性点",
+    line_end: "线端",
+    auto_junction: "串联/公共绕组连接点",
+    auto_mv_line: "中压出线",
+  };
+  if (args.mva != null) {
+    const duty = cliDuty(args);
+    const tap: TapPoint =
+      args.tap ??
+      (args.kind === "auto" ? "auto_junction" : args.conn === "D" ? "line_end" : "neutral");
+    items.push(`${args.kind === "auto" ? "自耦变" : "双绕组"}${mark("kind")}`);
+    items.push(`开关在${tapZh[tap]}${args.given.has("tap") || args.given.has("conn") ? "" : "（默认）"}`);
+    if (args.kind !== "auto") {
+      const w = args.winding ?? (tap === "neutral" || args.conn === "Y" ? "star" : "delta");
+      items.push(`${w === "star" ? "星形" : "角形"}绕组${args.given.has("winding") ? "" : "（默认）"}`);
+    }
+    if (duty?.umAssumed) items.push(`对地 Um ${duty.umKv}（未指定）`);
+  } else {
+    items.push(
+      `conn=${args.conn} ${args.conn === "Y" ? "星点" : "线端"}${mark("conn")}`,
+    );
+    if (args.kind === "auto") items.push("自耦变");
+  }
   // 容量路径上 k 和 step-pct 也会静默生效，必须喊出来
   if (args.mva != null) {
     items.push(args.given.has("k") ? `k=${args.k}` : "k=1.0（默认）");
@@ -490,6 +614,21 @@ export function assumptionsLine(args: CliArgs, family?: string): string | null {
   return `假定：${items.join(" · ")}`;
 }
 
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/** One line: where the current, Ust and Um came from. */
+export function basisLineZh(d: DutyBasis): string {
+  const div = d.currentDivisor === "three" ? "3" : "√3";
+  const um =
+    d.umRule === "explicit"
+      ? `对地 Um ${d.umKv}（指定）`
+      : d.umRule === "neutral_assumed"
+        ? `中性点 Um ${d.umKv}（假定）`
+        : `${d.umSystemKv} kV 系统 Um ${d.actualUmKv} → ${d.umKv} 级`;
+  const ust = d.stepV == null ? "" : ` · Ust ${round1(d.stepV)} V`;
+  return `I = S/(${div}×${d.currentKv} kV) = ${round1(d.ratedA)} A，最低档 ${round1(d.maxA)} A${ust} · ${um}`;
+}
+
 export function formatCliText(input: SelectInput, args?: CliArgs): string {
   const out = selectOltc(input);
   if (!out.ok || !out.results.length) {
@@ -514,7 +653,10 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
     primary.model,
     primary.reasonsZh[0] || primary.reasonsEn[0] || "最低满足",
   ];
+  const duty = args ? cliDuty(args) : null;
+  if (duty?.ok) lines.push(`依据：${basisLineZh(duty)}`);
   for (const c of primary.cautionsZh) lines.push(`注意：${c}`);
+  for (const c of duty?.cautionsZh ?? []) lines.push(`注意：${c}`);
   if (alts.length) {
     lines.push("");
     lines.push("其他");
@@ -552,7 +694,26 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
     model: primary?.model ?? null,
     why: primary?.reasonsZh[0] ?? primary?.reasonsEn[0] ?? null,
     alts,
-    cautions: primary?.cautionsZh ?? [],
+    cautions: [
+      ...(primary?.cautionsZh ?? []),
+      ...((args ? cliDuty(args) : null)?.cautionsZh ?? []),
+    ],
+    basis: (() => {
+      const d = args ? cliDuty(args) : null;
+      return d?.ok
+        ? {
+            connection: d.connection,
+            ratedA: round1(d.ratedA),
+            maxA: round1(d.maxA),
+            stepV: d.stepV == null ? null : round1(d.stepV),
+            umSystemKv: d.umSystemKv,
+            actualUmKv: d.actualUmKv,
+            umKv: d.umKv,
+            umRule: d.umRule,
+            umAssumed: d.umAssumed,
+          }
+        : null;
+    })(),
     assumptions: args ? assumptionsFromArgs(args, primary?.seriesCode) : [],
     errors: out.errorsZh.length ? out.errorsZh : out.errorsEn,
   };

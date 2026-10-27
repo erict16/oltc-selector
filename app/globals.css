@@ -5,26 +5,31 @@
 @theme {
   /* Latin (incl. ±) from Noto Sans so the minus bar matches the plus;
      CJK from SC. Mono only for type strings. */
-  --font-display: "Noto Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+  --font-display: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Noto Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
+  --font-sans: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
-  --color-paper: oklch(98.5% 0.004 250);
-  --color-ink: oklch(24% 0.02 258);
-  --color-ink-2: oklch(34% 0.018 257);
-  --color-muted: oklch(52% 0.02 257);
-  --color-caption: oklch(62% 0.012 257);
-  --color-rule: oklch(90% 0.01 250);
-  --color-rule-2: oklch(84% 0.015 250);
+  --color-paper: #edf0f3;
+  --color-field: #f6f8fa;
+  --color-card-rule: #d9dfe5;
+  --color-ink: #15212e;
+  --color-ink-2: #2e3b49;
+  --color-muted: #5b6876;
+  --color-caption: #7a8692;
+  --color-rule: #dde3e9;
+  --color-rule-2: #c6cfd8;
   --color-soft: oklch(96.5% 0.008 250);
   --color-accent: oklch(48.2% 0.114 246.7);
   --color-accent-ink: oklch(99% 0.01 250);
   --color-graphite: oklch(22% 0.016 260);
-  --color-warn: oklch(55% 0.14 55);
+  --color-warn: #9a5a00;
+  --color-warn-bg: #fff5e1;
+  --color-danger: #b42318;
   --color-err: oklch(48% 0.16 25);
   --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
 }
 
 html,
@@ -487,7 +492,7 @@ select:open {
 }
 
 .pane-in {
-  animation: pane-in 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: none;
 }
 
 .pane-in-late {
@@ -1103,4 +1108,255 @@ select:open {
   .guide-cmd:active {
     transform: none;
   }
+}
+
+/* Transformer sketch: the OLTC chip slides to the picked tap point. */
+.oltc-chip {
+  transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes tap-pulse {
+  0% { transform: scale(0.7); opacity: 0.38; }
+  100% { transform: scale(1.75); opacity: 0; }
+}
+.tap-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tap-pulse 2.2s cubic-bezier(0.2, 0, 0, 1) infinite;
+}
+@keyframes impulse-flow {
+  to { stroke-dashoffset: -24; }
+}
+.impulse-flow {
+  animation: impulse-flow 1.1s linear infinite;
+}
+.tap-spot:hover .tap-spot-dot,
+.tap-spot:focus-visible .tap-spot-dot {
+  fill: color-mix(in oklch, var(--color-accent) 14%, white);
+  stroke-dasharray: none;
+}
+.tap-spot:focus-visible text {
+  text-decoration: underline;
+}
+@media (prefers-reduced-motion: reduce) {
+  .oltc-chip { transition: none; }
+  .tap-pulse,
+  .impulse-flow { animation: none; }
+}
+
+
+/* ── UI kit · one vocabulary for the whole app ────────────────────────── */
+
+::selection {
+  background: color-mix(in oklch, var(--color-accent) 22%, white);
+  color: var(--color-ink);
+}
+:focus-visible {
+  outline-color: var(--color-accent);
+}
+
+.ui-control {
+  height: 2.5rem;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--color-rule-2);
+  border-radius: var(--radius-sm);
+  background-color: #fff;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+select.ui-control,
+button.ui-control {
+  padding-right: 2rem;
+}
+.ui-control:hover {
+  border-color: #9fabb8;
+}
+.ui-control:focus,
+.ui-control:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-accent) 18%, transparent);
+}
+
+/* Segmented control: one track, the selected segment lifts. */
+.ui-track {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 2px;
+  height: 2.5rem;
+  padding: 2px;
+  border: 1px solid var(--color-rule-2);
+  border-radius: var(--radius-sm);
+  background: #e8ecf0;
+}
+.ui-seg {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 4px;
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+.ui-seg:hover {
+  color: var(--color-ink);
+}
+.ui-seg.is-on {
+  background: #fff;
+  color: var(--color-ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(21 33 46 / 0.12), 0 0 0 1px rgb(21 33 46 / 0.05);
+}
+.ui-seg:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+.ui-seg:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* The form is one sheet; sections are split by rules, not boxed. */
+.sheet {
+  border: 1px solid var(--color-card-rule);
+  border-radius: var(--radius-md);
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(21 33 46 / 0.05);
+}
+.sheet-section {
+  padding: 1.25rem 1.125rem;
+}
+.sheet-section + .sheet-section {
+  border-top: 1px solid var(--color-rule);
+}
+@media (min-width: 640px) {
+  .sheet-section {
+    padding: 1.5rem 1.75rem;
+  }
+}
+
+.ui-primary {
+  display: inline-flex;
+  height: 2.75rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: background-color 150ms ease, transform 120ms ease;
+  touch-action: manipulation;
+}
+.ui-primary:hover {
+  background: color-mix(in oklch, var(--color-accent) 88%, black);
+}
+.ui-primary:active {
+  transform: translateY(1px);
+}
+.ui-primary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.ui-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.submit-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  border-top: 1px solid var(--color-rule);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: rgb(255 255 255 / 0.94);
+  padding: 0.875rem 1.125rem max(0.875rem, env(safe-area-inset-bottom));
+  backdrop-filter: blur(6px);
+}
+@media (min-width: 640px) {
+  .submit-bar {
+    padding-inline: 1.75rem;
+  }
+}
+
+.topbar {
+  border-bottom: 1px solid var(--color-card-rule);
+  background: rgb(255 255 255 / 0.92);
+  backdrop-filter: blur(8px);
+}
+
+/* Rating plate: the result reads like the equipment's nameplate. */
+.plate {
+  border: 1px solid #b9c3cd;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #f8fafb 0%, #e9edf1 100%);
+  padding: 5px;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 1px 2px rgb(21 33 46 / 0.08),
+    0 10px 24px -18px rgb(21 33 46 / 0.45);
+}
+.plate-frame {
+  border: 1px solid #c9d2da;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.55);
+}
+.plate-rule {
+  border-top: 1px solid #d3dae1;
+}
+.plate.is-stale .plate-type {
+  opacity: 0.4;
+}
+.plate-type {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  transition: opacity 150ms ease;
+}
+@keyframes plate-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
+}
+.plate-in {
+  animation: plate-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sketch: drawing-sheet grid, no decoration. */
+.sketch-stage {
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background-color: #fafbfc;
+  background-image:
+    linear-gradient(#eef1f4 1px, transparent 1px),
+    linear-gradient(90deg, #eef1f4 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+.oltc-chip {
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tap-spot:hover .tap-spot-dot,
+.tap-spot:focus-visible .tap-spot-dot {
+  fill: color-mix(in oklch, var(--color-accent) 16%, white);
+}
+.tap-spot:focus-visible text {
+  text-decoration: underline;
+}
+@media (prefers-reduced-motion: reduce) {
+  .oltc-chip { transition: none; }
+  .plate-in { animation: none; }
 }

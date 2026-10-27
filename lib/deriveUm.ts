@@ -107,14 +107,37 @@ const IEC_UM = [
   362, 420, 550, 800,
 ] as const;
 
+/** Huaming catalogue Um classes (kV). */
+const CATALOGUE_UM = [12, 17.5, 40.5, 72.5, 126, 145, 170, 252, 300, 363] as const;
+
+/**
+ * Nameplate kV often sits above its system's nominal (121 on 110, 242 on
+ * 220, 38.5 on 35). Step down to that nominal when it is within 12%.
+ */
+function nominalSystemKv(ratedKv: number): number {
+  let best = ratedKv;
+  for (const u of SNAP_UN) {
+    if (u <= ratedKv && (ratedKv - u) / ratedKv <= 0.12) best = u;
+  }
+  return best;
+}
+
 /**
  * Actual Um of the system the tap side sits on, before any snap to a
- * Huaming catalogue class: the lowest IEC Um at least 4% above Un.
- * 22 → 24, 35 → 40.5, 110/115 → 123, 225/230 → 245, 345 → 362.
+ * Huaming catalogue class: the lowest IEC Um at least 4% above the
+ * system nominal. 22 → 24, 35 → 40.5, 110/115/121 → 123, 225/230/242 → 245.
  */
 export function iecUmFromRatedKv(ratedKv: number): number {
   if (!(ratedKv > 0)) return NaN;
-  return IEC_UM.find((u) => u >= ratedKv * 1.04) ?? NaN;
+  const un = nominalSystemKv(ratedKv);
+  return IEC_UM.find((u) => u >= un * 1.04) ?? NaN;
+}
+
+/** Lowest catalogue class covering the actual Um (22 kV → 40.5). */
+export function catalogueUmFromRatedKv(ratedKv: number): number {
+  const um = iecUmFromRatedKv(ratedKv);
+  if (!Number.isFinite(um)) return NaN;
+  return CATALOGUE_UM.find((c) => c >= um - 1e-9) ?? um;
 }
 
 export function oltcUmFromRatedKv(
