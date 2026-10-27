@@ -101,6 +101,22 @@ export function deriveOltcUm(
   return windingUmKv;
 }
 
+/** IEC 60038 highest voltages for equipment (kV). */
+const IEC_UM = [
+  3.6, 7.2, 12, 17.5, 24, 36, 40.5, 52, 72.5, 100, 123, 145, 170, 245, 300,
+  362, 420, 550, 800,
+] as const;
+
+/**
+ * Actual Um of the system the tap side sits on, before any snap to a
+ * Huaming catalogue class: the lowest IEC Um at least 4% above Un.
+ * 22 → 24, 35 → 40.5, 110/115 → 123, 225/230 → 245, 345 → 362.
+ */
+export function iecUmFromRatedKv(ratedKv: number): number {
+  if (!(ratedKv > 0)) return NaN;
+  return IEC_UM.find((u) => u >= ratedKv * 1.04) ?? NaN;
+}
+
 export function oltcUmFromRatedKv(
   ratedKv: number,
   connection: SelectInput["connection"],

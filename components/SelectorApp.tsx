@@ -24,6 +24,7 @@ import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
   formatUmKv,
+  iecUmFromRatedKv,
   maxThroughCurrent,
   oltcUmFromRatedKv,
   stepVoltageFromPercent,
@@ -728,12 +729,12 @@ export function SelectorApp() {
   const derivedOk =
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
   const ustV = computedStepVoltage();
-  // The class the engine sends, not Un/√3 (110 kV star used to show 63.5).
-  // Star: the switch sits at the neutral, so the caption names the switch's
-  // class (72.5 beside 150 kV), not a Um of the winding. Delta: the Um alone.
+  // Delta (line end): the actual IEC Um of the tap-side system (22 kV → 24),
+  // not the catalogue class the engine snaps to; the type string shows that.
+  // Star: no caption. The neutral's insulation is not a function of Un.
   const um =
-    voltageMode === "winding" && windingRatedKv > 0
-      ? oltcUmFromRatedKv(windingRatedKv, input.connection)
+    voltageMode === "winding" && windingRatedKv > 0 && input.connection === "D"
+      ? iecUmFromRatedKv(windingRatedKv)
       : NaN;
 
   return (
@@ -886,9 +887,7 @@ export function SelectorApp() {
               as="div"
               label={t(lang, "umWinding")}
               action={
-                !(Number.isFinite(um) && um > 0) ? undefined : input.connection === "Y" ? (
-                  t(lang, "starClass", { um: formatUmKv(um) })
-                ) : (
+                !(Number.isFinite(um) && um > 0) ? undefined : (
                   <CaptionSub
                     name="U"
                     sub="m"
