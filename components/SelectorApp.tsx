@@ -290,10 +290,10 @@ function Readout({
   return (
     <div className="min-w-0 px-4 py-2">
       <dt className="truncate text-[0.75rem] text-[var(--color-muted)]">{label}</dt>
-      <dd className="mt-1 flex items-baseline gap-1 truncate">
+      <dd className="mt-1 flex items-baseline gap-1 overflow-hidden py-px whitespace-nowrap">
         <span
           className={cx(
-            "text-[1.125rem] leading-none font-semibold text-[var(--color-ink)]",
+            "min-w-0 truncate text-[1.125rem] leading-[1.3] font-semibold text-[var(--color-ink)]",
             !text && "num",
           )}
         >
@@ -1108,7 +1108,7 @@ export function SelectorApp() {
                   {t(lang, "autoOctcNote")}
                 </p>
               ) : null}
-              <div className="mt-5 grid items-center gap-6 sm:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
+              <div className="mt-5 grid items-center gap-6 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
                 <div className="sketch-stage flex justify-center px-3 py-3 sm:py-4">
                   <TransformerSketch
                     lang={lang}

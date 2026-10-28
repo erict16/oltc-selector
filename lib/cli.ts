@@ -622,8 +622,8 @@ export function basisLineZh(d: DutyBasis): string {
   const um =
     d.umRule === "explicit"
       ? `对地 Um ${d.umKv}（指定）`
-      : d.umRule === "neutral_assumed"
-        ? `中性点 Um ${d.umKv}（假定）`
+      : d.umRule === "neutral_assumed" || d.umRule === "neutral_full"
+        ? `中性点 Um ${d.umKv}${d.umAssumed ? "（待 OS 核对）" : ""}`
         : `${d.umSystemKv} kV 系统 Um ${d.actualUmKv} → ${d.umKv} 级`;
   const ust = d.stepV == null ? "" : ` · Ust ${round1(d.stepV)} V`;
   return `I = S/(${div}×${d.currentKv} kV) = ${round1(d.ratedA)} A，最低档 ${round1(d.maxA)} A${ust} · ${um}`;

@@ -135,7 +135,7 @@ const vi: Dict = {
   kpiImax: "Imax",
   kpiUst: "Điện áp nấc",
   kpiUm: "Um bộ ĐAPT",
-  kpiTap: "Vị trí",
+  kpiTap: "Vị trí ĐAPT",
   kpiActual: "Um IEC {um}",
   tapShort_neutral: "Trung tính",
   tapShort_line_end: "Đầu dây",

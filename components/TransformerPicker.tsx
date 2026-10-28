@@ -437,7 +437,7 @@ export function TapList({
             disabled={off}
             onClick={() => onTap(p)}
             className={cx(
-              "flex h-11 w-full min-w-0 items-center gap-3 px-3 text-left text-[0.875rem] transition-colors duration-150",
+              "flex min-h-11 w-full min-w-0 items-center gap-3 px-3 py-2 text-left text-[0.875rem] leading-snug transition-colors duration-150",
               "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)]",
               on
                 ? "bg-[color-mix(in_oklch,var(--color-accent)_6%,white)] font-semibold text-[var(--color-ink)]"
@@ -452,7 +452,7 @@ export function TapList({
               )}
               aria-hidden
             />
-            <span className="min-w-0 truncate">{t(lang, `tap_${p}`)}</span>
+            <span className="min-w-0">{t(lang, `tap_${p}`)}</span>
           </button>
         );
       })}

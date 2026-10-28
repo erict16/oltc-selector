@@ -19,34 +19,34 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 
 | serial | customer | nameplate | tap point | I OS / derived | Um sold / derived | sold | engine #1 |
 |---|---|---|---|---|---|---|---|
-| E-M260021 | 俄罗斯HMR-SIEMENS | 18 MVA 33 kV Y | neutral/star | 314.9 / 314.9 | 72.5 / 40.5 | `CMIII-500Y/72.5B-10080` | `CVIII-350Y/40.5-10080` |
+| E-M260021 | 俄罗斯HMR-SIEMENS | 18 MVA 33 kV Y | neutral/star | 314.9 / 314.9 | 72.5 / 40.5* | `CMIII-500Y/72.5B-10080` | `CVIII-350Y/40.5-10080` |
 | E-M260032-033 | 俄罗斯HMR-TOGLIATTI | 200 MVA 115 kV Y | neutral/star | 1004 / 1004.1 | 170 / 72.5* | `3xCMI-1200Y/170C-14131W` | `CMI-1200/72.5C-14131W` |
 | E-M260034 | 俄罗斯HMR-UETM | 63 MVA 158 kV Y | neutral/star | 230.2 / 230.2 | 126 / 72.5* | `CMIII-500Y/126B-10193W` | `CVIII-350Y/72.5-10193W` |
-| E-M260093 | 土耳其HMT-Eren Transformer | 2.5 MVA 21 kV Y | neutral/star | 68.7 / 68.7 | 72.5 / 40.5 | `CMIII-600Y/72.5C-14271G` | `CVIII-350Y/40.5-14271G` |
+| E-M260093 | 土耳其HMT-Eren Transformer | 2.5 MVA 21 kV Y | neutral/star | 68.7 / 68.7 | 72.5 / 40.5* | `CMIII-600Y/72.5C-14271G` | `CVIII-350Y/40.5-14271G` |
 | E-M260099-101 | 俄罗斯HMR-UETM | 63 MVA 158 kV Y | neutral/star | 230.2 / 230.2 | 126 / 72.5* | `CMIII-500Y/126B-10193W` | `CVIII-350Y/72.5-10193W` |
 | E-M260102 | 委内瑞拉 VALECILLOS | 20 MVA 115 kV Y | neutral/star | 100.41 / 100.4 | 126 / 72.5* | `CMIII-500Y/126B-10091W` | `CMIII-500Y/72.5B-10091W` |
 | E-M260122 | 俄罗斯HMR-JSHC | 250 MVA 220 kV Y | neutral/star | 1193 / 656.1 | 126 / 72.5* | `3xCMI-1500Y/126B-14131W` | `CMI-1500/72.5B-14131W` |
 | E-M260143 | 印尼GE UNINDO | 75 MVA 220 kV Y | neutral/star | 197 / 196.8 | 126 / 72.5* | `CMIII-500Y/126DE-14273W` | `CMIII-500Y/72.5DE-14273W` |
-| E-M260167-168 | 土耳其HMT-ATS Trafo | 30 MVA 33 kV Y | neutral/star | 524.9 / 524.9 | 72.5 / 40.5 | `CMIII-600Y/72.5B-10173G` | `CMIII-600Y/72.5B-16151G` |
-| E-CMD260006 | 俄罗斯HMR-UETM | 40 MVA 36.75 kV Y | neutral/star | 628.4 / 628.4 | 72.5 / 40.5 | `CMDIII-1000Y/72.5B-10193W` | `CMDIII-1000Y/72.5B-10193W` |
+| E-M260167-168 | 土耳其HMT-ATS Trafo | 30 MVA 33 kV Y | neutral/star | 524.9 / 524.9 | 72.5 / 40.5* | `CMIII-600Y/72.5B-10173G` | `CMIII-600Y/72.5B-16151G` |
+| E-CMD260006 | 俄罗斯HMR-UETM | 40 MVA 36.75 kV Y | neutral/star | 628.4 / 628.4 | 72.5 / 40.5* | `CMDIII-1000Y/72.5B-10193W` | `CMDIII-1000Y/72.5B-10193W` |
 | E-CMD260007 | 俄罗斯HMR-Remenergo | 16 MVA 10.5 kV Y | neutral/star | 880 / 879.8 | 72.5 / 12 | `CMDIII-1000Y/72.5B-10193W` | `CMDIII-1000Y/72.5B-10193W` |
 | E-V260003 | 泰国 Tirathai | 2 MVA 6.93 kV D | line_end/star | 133.3 / 166.6 | 40.5 / 12 | `CVIII-350D/40.5-12233G` | `CVIII-350D/40.5-12233G` |
-| E-V260027-028 | 俄罗斯HMR-UETM | 25 MVA 36.75 kV Y | neutral/star | 393 / 392.8 | 72.5 / 40.5 | `SVIII-500Y/72.5-10193W` | `SVIII-500Y/40.5-10193W` |
+| E-V260027-028 | 俄罗斯HMR-UETM | 25 MVA 36.75 kV Y | neutral/star | 393 / 392.8 | 72.5 / 40.5* | `SVIII-500Y/72.5-10193W` | `SVIII-500Y/40.5-10193W` |
 | E-V260042 | 俄罗斯HMR-SVEL | 2.5 MVA 11 kV D | line_end/delta | 75.6 / 75.8 | 40.5 / 12 | `CVIII-350D/40.5-10191W` | `CVIII-350D/40.5-10191W` |
 | E-V260093-094 | 俄罗斯HMR-SVEL | 25 MVA 38.5 kV D | line_end/delta | 217 / 216.5 | 72.5 / 40.5 | `CVIII-350D/72.5-10193W` | `CVIII-350D/40.5-10193W` |
-| E-V260102-103 | 俄罗斯HMR-SVEL | 16 MVA 35 kV Y | neutral/star | 264 / 263.9 | 72.5 / 40.5 | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
-| E-V260134-135 | 俄罗斯HMR-SVEL | 10 MVA 35 kV Y | neutral/star | 165 / 165.0 | 72.5 / 40.5 | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
-| E-V260160-161 | 俄罗斯HMR-SVEL | 16 MVA 36.75 kV Y | neutral/star | 251 / 251.4 | 72.5 / 40.5 | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
-| E-V260180 | 土耳其HMT-SAMI TRAFO | 6.3 MVA 35 kV Y | neutral/star | 103.9 / 103.9 | 72.5 / 40.5 | `CVIII-350Y/72.5-10090` | `CVIII-350Y/40.5-10090` |
-| E-V260181 | 俄罗斯HMR-SVEL | 10 MVA 36.75 kV Y | neutral/star | 157 / 157.1 | 72.5 / 40.5 | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
-| E-V260207-208 | 俄罗斯HMR-SVEL | 10 MVA 36.75 kV Y | neutral/star | 157 / 157.1 | 72.5 / 40.5 | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
-| E-V260221-222 | 俄罗斯HMR-UETM | 16 MVA 22 kV Y | neutral/star | 419.9 / 419.9 | 72.5 / 40.5 | `SVIII-500Y/72.5-10193W` | `SVIII-500Y/40.5-10193W` |
+| E-V260102-103 | 俄罗斯HMR-SVEL | 16 MVA 35 kV Y | neutral/star | 264 / 263.9 | 72.5 / 40.5* | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
+| E-V260134-135 | 俄罗斯HMR-SVEL | 10 MVA 35 kV Y | neutral/star | 165 / 165.0 | 72.5 / 40.5* | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
+| E-V260160-161 | 俄罗斯HMR-SVEL | 16 MVA 36.75 kV Y | neutral/star | 251 / 251.4 | 72.5 / 40.5* | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
+| E-V260180 | 土耳其HMT-SAMI TRAFO | 6.3 MVA 35 kV Y | neutral/star | 103.9 / 103.9 | 72.5 / 40.5* | `CVIII-350Y/72.5-10090` | `CVIII-350Y/40.5-10090` |
+| E-V260181 | 俄罗斯HMR-SVEL | 10 MVA 36.75 kV Y | neutral/star | 157 / 157.1 | 72.5 / 40.5* | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
+| E-V260207-208 | 俄罗斯HMR-SVEL | 10 MVA 36.75 kV Y | neutral/star | 157 / 157.1 | 72.5 / 40.5* | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
+| E-V260221-222 | 俄罗斯HMR-UETM | 16 MVA 22 kV Y | neutral/star | 419.9 / 419.9 | 72.5 / 40.5* | `SVIII-500Y/72.5-10193W` | `SVIII-500Y/40.5-10193W` |
 | E-V260271 | 土耳其HMT-Green Transfo | 25 MVA 38 kV D | line_end/delta | 219 / 219.3 | 72.5 / 40.5 | `CVIII-350D/72.5-14271G` | `CVIII-350D/40.5-14271G` |
-| E-V260278 | 俄罗斯HMR-SVEL | 10 MVA 35 kV Y | neutral/star | 165 / 165.0 | 72.5 / 40.5 | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
-| E-V260286-289 | 俄罗斯HMR-SVEL | 16 MVA 36.75 kV Y | neutral/star | 251 / 251.4 | 72.5 / 40.5 | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
+| E-V260278 | 俄罗斯HMR-SVEL | 10 MVA 35 kV Y | neutral/star | 165 / 165.0 | 72.5 / 40.5* | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
+| E-V260286-289 | 俄罗斯HMR-SVEL | 16 MVA 36.75 kV Y | neutral/star | 251 / 251.4 | 72.5 / 40.5* | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |
 | E-HWV260002 | 意大利TMC-Intermagnetic | 5 MVA 11 kV Y | neutral/star | 350 / 262.4 | 40.5 / 12 | `HWVI-800Y/40.5-10193W` | `HWVI-800/17.5-10193W` |
 | E-SHZV260002 | 土耳其HMT-BEST | 180 MVA 330 kV Y | neutral/star | 314.9 / 314.9 | 170 / 72.5* | `SHZVIII-600Y/170D-14273G` | `CM2III-500Y/72.5D-14273G` |
-| E-SHZV260015-019 | 土耳其HMT-Astor | 45 MVA 33 kV Y | neutral/star | 787.3 / 787.3 | 72.5 / 40.5 | `SHZVIII-1000Y/72.5C-10193G` | `SHZVIII-1000Y/72.5C-10193G` |
+| E-SHZV260015-019 | 土耳其HMT-Astor | 45 MVA 33 kV Y | neutral/star | 787.3 / 787.3 | 72.5 / 40.5* | `SHZVIII-1000Y/72.5C-10193G` | `SHZVIII-1000Y/72.5C-10193G` |
 | E-SHZV260021-022 | 土耳其HMT-BEST | 125 MVA 400 kV Y | neutral/star | 180.4 / 180.4 | 126 / 72.5* | `SHZVIII-600Y/126D-14273G` | `CM2III-500Y/72.5D-14273G` |
 | E-SHZV260044-045 | 土耳其HMT-ASTOR | 125 MVA 400 kV Y | neutral/star | 180.4 / 180.4 | 126 / 72.5* | `SHZVIII-600Y/126D-14273G` | `CM2III-500Y/72.5D-14273G` |
 | E-SHZV260080 | 土耳其HMT-Green Transfo | 120 MVA 110 kV Y | neutral/star | 630 / 629.8 | 126 / 72.5* | `SHZVIII-1000Y/126C-14273G` | `SHZVIII-1000Y/72.5C-14273G` |
@@ -67,7 +67,7 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 | E-CM2260237 | 意大利TAMINI | 0.11 MVA 150 kV Y | neutral/star | 423.4 / 0.4 | 170 / 72.5* | `CM2III-500Y/170B-12233W` | `CV2III-600Y/72.5-12233W` |
 | E-CM2260238 | 意大利Trafoser | 33 MVA 132 kV Y | neutral/star | 144.3 / 144.3 | 170 / 72.5* | `CM2III-300Y/170B-12233W` | `CV2III-350Y/72.5-12233W` |
 | E-CM2260250-256 | 印度T&R | 6 MVA 33 kV D | line_end/star | 176 / 105.0 | 72.5 / 40.5 | `CM2I-500D/72.5B-14273W` | `CM2I-500/72.5B-14273W` |
-| E-CM2260257 | 土耳其HMT-BETA | 28 MVA 34.5 kV Y | neutral/star | 468.6 / 468.6 | 72.5 / 40.5 | `CM2III-600Y/72.5B-10193W` | `CV2III-600Y/40.5-10193W` |
+| E-CM2260257 | 土耳其HMT-BETA | 28 MVA 34.5 kV Y | neutral/star | 468.6 / 468.6 | 72.5 / 40.5* | `CM2III-600Y/72.5B-10193W` | `CV2III-600Y/40.5-10193W` |
 | E-CM2260260-261 | 土耳其HMT-Elsewedy | 80 MVA 220 kV Y | neutral/star | 209.9 / 209.9 | 170 / 72.5* | `CM2III-500Y/170C-10193W` | `CV2III-350Y/72.5-10193W` |
 | E-CM2260262 | 意大利GBE | 63 MVA 115 kV Y | neutral/star | 316.29 / 316.3 | 126 / 72.5* | `CM2III-500Y/126B-10191W` | `CV2III-350Y/72.5-10191W` |
 | E-CM2260264-265 | 意大利TAMINI | 0.11 MVA 150 kV Y | neutral/star | 423.4 / 0.4 | 170 / 72.5* | `CM2III-500Y/170B-12233W` | `CV2III-600Y/72.5-12233W` |
@@ -79,12 +79,12 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 | E-CV2260105-106 | 巴西TRAEL 以此为准 | 20 MVA 84 kV D | line_end/delta | 79.4 / 79.4 | 145 / 126 | `CV2III-350D/145-12231W` | `CV2III-350D/126-12231W` |
 | E-CV2260118-119 | 俄罗斯HMR-SIEMENS | 25 MVA 15.75 kV D | line_end/delta | 529 / 529.1 | 40.5 / 17.5 | `CV2III-600D/40.5-10193W` | `CV2III-600D/40.5-10193W` |
 | E-CV2260238-239 | 俄罗斯HMR-JSHC | 16 MVA 11 kV D | line_end/delta | 126 / 484.8 | 40.5 / 12 | `CV2III-350D/40.5-12233W` | `CV2III-350D/40.5-12233W` |
-| E-CV2260240-241 | 俄罗斯HMR-JSHC | 16 MVA 36.75 kV Y | neutral/star | 252 / 251.4 | 72.5 / 40.5 | `CV2III-350Y/72.5-10193W` | `CV2III-350Y/40.5-10193W` |
-| E-CV2260290-291 | 俄罗斯HMR-UETM | 32 MVA 36.75 kV Y | neutral/star | 503 / 502.7 | 72.5 / 40.5 | `CV2III-600Y/72.5-10193W` | `CV2III-600Y/40.5-10193W` |
+| E-CV2260240-241 | 俄罗斯HMR-JSHC | 16 MVA 36.75 kV Y | neutral/star | 252 / 251.4 | 72.5 / 40.5* | `CV2III-350Y/72.5-10193W` | `CV2III-350Y/40.5-10193W` |
+| E-CV2260290-291 | 俄罗斯HMR-UETM | 32 MVA 36.75 kV Y | neutral/star | 503 / 502.7 | 72.5 / 40.5* | `CV2III-600Y/72.5-10193W` | `CV2III-600Y/40.5-10193W` |
 | E-CV2260297 | 南非ACTOM | 80 MVA 132 kV D | line_end/star | 349.9 / 349.9 | 725 / 145 | `CV2III-600D/725-10193W` | `CV2III-600D/145-10193W` |
 | E-CV2260314 | 美国HMUS-C.E.M. | 10 MVA 13.8 kV D | line_end/delta | 241.6 / 241.5 | 40.5 / 17.5 | `CV2III-350D/40.5-10100` | `CV2III-350D/40.5-10100` |
 | E-CV2260335-336 | 巴西TRAEL | 33 MVA 84 kV D | line_end/star | 226.8 / 226.8 | 145 / 126 | `CV2III-350D/145-12231W` | `CV2III-350D/126-12231W` |
-| E-WG260031-032 | 俄罗斯HMR-JSHC | 16 MVA 38.5 kV Y | neutral/star | 239.9 / 239.9 | 72.5 / 40.5 | `CVIII-350Y/72.5-10191W` | `CVIII-350Y/40.5-10191W` |
+| E-WG260031-032 | 俄罗斯HMR-JSHC | 16 MVA 38.5 kV Y | neutral/star | 239.9 / 239.9 | 72.5 / 40.5* | `CVIII-350Y/72.5-10191W` | `CVIII-350Y/40.5-10191W` |
 
 ## Um derived above sold
 
@@ -104,7 +104,7 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 | E-M260122 | 俄罗斯HMR-JSHC | 250 MVA 220 kV Y | neutral/star | 1193 / 656.1 | 126 / 72.5* | `3xCMI-1500Y/126B-14131W` | `CMI-1500/72.5B-14131W` |
 | E-CMD260001 | 俄罗斯HMR-PMTT | 250 MVA 121 kV Y | neutral/star | 904.2 / 1192.9 | 72.5 / 72.5* | `CMDIII-1000Y/72.5C-10193W` | `CMDIII-1000Y/72.5C-10193W` |
 | E-V260003 | 泰国 Tirathai | 2 MVA 6.93 kV D | line_end/star | 133.3 / 166.6 | 40.5 / 12 | `CVIII-350D/40.5-12233G` | `CVIII-350D/40.5-12233G` |
-| E-V260012 | 南非-ATM | 12.5 MVA 24 kV Y | neutral/star | 328 / 300.7 | 40.5 / 40.5 | `SVIII-500Y/40.5-10193W` | `SVIII-500Y/40.5-10193W` |
+| E-V260012 | 南非-ATM | 12.5 MVA 24 kV Y | neutral/star | 328 / 300.7 | 40.5 / 40.5* | `SVIII-500Y/40.5-10193W` | `SVIII-500Y/40.5-10193W` |
 | E-HWV260001 | 印尼 Bambangdjaja | 1.4 MVA 13.8 kV Y | neutral/star | 117.14 / 58.6 | 17.5 / 17.5 | `HWVIII-400Y/17.5-18353W` | `HWVIII-400Y/17.5-18353W` |
 | E-HWV260002 | 意大利TMC-Intermagnetic | 5 MVA 11 kV Y | neutral/star | 350 / 262.4 | 40.5 / 12 | `HWVI-800Y/40.5-10193W` | `HWVI-800/17.5-10193W` |
 | E-HWV260006 | 印尼 Bambangdjaja | 1.4 MVA 13.8 kV Y | neutral/star | 117.14 / 58.6 | 17.5 / 17.5 | `HWVIII-400Y/17.5-18353W` | `HWVIII-400Y/17.5-18353W` |

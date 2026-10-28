@@ -166,6 +166,7 @@ ${head}
 ${iOff.map(row).join("\n")}
 `;
 
+if (process.env.REPLAY_JSON) writeFileSync(process.env.REPLAY_JSON, JSON.stringify(out));
 const file = path.join(process.cwd(), "docs", "replay", `${year}-nameplate-replay.md`);
 writeFileSync(file, md);
 console.log(
