@@ -252,7 +252,7 @@ export function TransformerSketch({
     const mvEnd = toGlobal("auto_mv_line", 0, SLOT).x;
     body = (
       <>
-        <Terminal x={X} y={12} label={`A ${fmtKv(hvKv)} kV`} lx={X + 12} ly={16} />
+        <Terminal x={X} y={12} label={`A ${fmtKv(hvKv)} kV`} lx={X - 12} ly={16} anchor="end" />
         <Wire d={`M${X} 16.5 V22`} />
         <Winding y={22} loops={6} />
         <Wire d={`M${X} 82 V92`} />
@@ -275,7 +275,7 @@ export function TransformerSketch({
         <Winding y={162} loops={5} />
         <Wire d={`M${X} 212 V222`} />
         <Node x={X} y={224} />
-        <text x={X + 10} y={228} className="fill-[var(--color-ink)] text-[11px] font-medium">
+        <text x={X - 10} y={228} textAnchor="end" className="fill-[var(--color-ink)] text-[11px] font-medium">
           N
         </text>
       </>
@@ -288,15 +288,10 @@ export function TransformerSketch({
     const delta = winding === "delta";
     body = (
       <>
-        <Terminal
-          x={X}
-          y={12}
-          label={`A ${fmtKv(tapKv)} kV`}
-          lx={X + 12}
-          ly={16}
-        />
+        {delta ? <Wire d={`M${X} 224 H196 V12 H${X}`} faint /> : null}
+        <Terminal x={X} y={12} label={`A ${fmtKv(tapKv)} kV`} lx={X - 12} ly={16} anchor="end" />
         {on("line_end") ? (
-          <Wire d={`M${X} 16.5 V20 H${pv.x} V${pv.y}`} />
+          <Wire d={`M${X + 4.5} 12 H${pv.x} V${pv.y}`} />
         ) : (
           <Wire d={`M${X} 16.5 V28`} />
         )}
@@ -308,8 +303,7 @@ export function TransformerSketch({
         {delta ? (
           <>
             <Wire d={`M${X} 200 V219.5`} />
-            <Terminal x={X} y={224} label="B" lx={X + 12} ly={228} />
-            <Wire d={`M${X + 4.5} 224 H196 V12 H${X + 4.5}`} faint />
+            <Terminal x={X} y={224} label="B" lx={X - 12} ly={228} anchor="end" />
           </>
         ) : (
           <>

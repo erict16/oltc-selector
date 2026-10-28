@@ -143,32 +143,6 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-function CaptionSub({
-  name,
-  sub,
-  eq,
-  value,
-  unit,
-}: {
-  name: string;
-  sub: string;
-  eq?: boolean;
-  value: string;
-  unit: string;
-}) {
-  return (
-    <>
-      {name}
-      <sub className="relative top-[0.22em] ml-px text-[0.62em] leading-none">
-        {sub}
-      </sub>
-      {eq !== false ? " = " : " "}
-      {value}
-      {unit}
-    </>
-  );
-}
-
 /**
  * Text field for a decimal the person types. Keeps the draft (`1.`, `0,`)
  * so the dot is not eaten, and reads `,` as a decimal point.
@@ -565,12 +539,6 @@ function modelNodes(model: string) {
       part
     ),
   );
-}
-
-function formatAmps(a: number): string {
-  if (!Number.isFinite(a) || a <= 0) return "";
-  const r = Math.round(a * 10) / 10;
-  return Number.isInteger(r) ? String(r) : r.toFixed(1);
 }
 
 /** Ceiling tip from in-tank vacuum III axes only (not dry-type 160 A). */
@@ -1023,10 +991,6 @@ export function SelectorApp() {
     !loose && result?.ok && pickedDutyA != null
       ? insuranceModel(result.results, pickedDutyA, pickedStepV, marginNeed)
       : null;
-  const posHint =
-    !isLinear && input.positions != null
-      ? t(lang, "posHint", { n: input.positions })
-      : null;
 
   const pmOptions = pmStepOptionsFor(input.regulation);
   const pmN =
@@ -1218,16 +1182,6 @@ export function SelectorApp() {
                   ? t(lang, "transformerMva")
                   : t(lang, "throughCurrent")
               }
-              action={
-                currentMode === "capacity" && derivedOk && derivedA != null ? (
-                  <CaptionSub
-                    name="I"
-                    sub="max"
-                    value={formatAmps(derivedA)}
-                    unit="A"
-                  />
-                ) : undefined
-              }
             >
               {currentMode === "capacity" ? (
                 <div className="relative">
@@ -1376,7 +1330,6 @@ export function SelectorApp() {
               <Field
                 as="div"
                 label={t(lang, "pmSteps")}
-                action={posHint && pm ? posHint : undefined}
               >
                 <select
                   className={controlClass}
@@ -1397,16 +1350,6 @@ export function SelectorApp() {
             <Field
               as="div"
               label={t(lang, "stepPercent")}
-              action={
-                ustV != null ? (
-                  <CaptionSub
-                    name="U"
-                    sub="st"
-                    value={String(Math.round(ustV))}
-                    unit="V"
-                  />
-                ) : undefined
-              }
             >
               <div className="relative">
                 {stepPctCustom ||
@@ -1477,11 +1420,6 @@ export function SelectorApp() {
                 <Field
                   as="div"
                   label={t(lang, "positions")}
-                  action={
-                    input.positions != null
-                      ? t(lang, "posHint", { n: input.positions })
-                      : undefined
-                  }
                 >
                   <div className="grid grid-cols-2 gap-2">
                       <select
