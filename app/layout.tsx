@@ -17,13 +17,9 @@ export const metadata: Metadata = {
         : "http://127.0.0.1:3000",
   ),
   icons: {
-    icon: [
-      { url: `${basePath}/favicon.ico`, sizes: "16x16 32x32" },
-      { url: `${basePath}/icon-192.png`, type: "image/png", sizes: "192x192" },
-    ],
-    apple: `${basePath}/apple-touch-icon.png`,
+    icon: [{ url: `${basePath}/favicon.svg`, type: "image/svg+xml" }],
+    shortcut: `${basePath}/favicon.svg`,
   },
-  manifest: `${basePath}/manifest.webmanifest`,
 };
 
 export const viewport: Viewport = {
@@ -39,6 +35,8 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
+        <link rel="icon" href={`${basePath}/favicon.svg`} type="image/svg+xml" />
+        <link rel="shortcut icon" href={`${basePath}/favicon.svg`} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

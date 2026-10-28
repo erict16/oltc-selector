@@ -1055,7 +1055,7 @@ export function SelectorApp() {
         <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/icon-64.png`}
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`}
             alt=""
             width={28}
             height={28}
