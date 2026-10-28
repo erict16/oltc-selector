@@ -217,8 +217,8 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   }
 
   if (umRule === "neutral_assumed") {
-    cautionsZh.push(`中性点绝缘未给，按 Um ${NEUTRAL_DEFAULT_UM} 假定，按 OS 核对。`);
-    cautionsEn.push(`Neutral insulation not given: Um ${NEUTRAL_DEFAULT_UM} assumed; check the OS.`);
+    cautionsZh.push(`中性点绝缘未给，先按 Um ${NEUTRAL_DEFAULT_UM} 选，以 OS 为准。`);
+    cautionsEn.push(`Neutral insulation not given: sized at Um ${NEUTRAL_DEFAULT_UM}; the OS decides.`);
   }
   if (auto) {
     if (spec.tapPoint === "auto_mv_line" && umRule === "auto_hv") {

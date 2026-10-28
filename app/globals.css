@@ -10,7 +10,7 @@
   --font-sans: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
-  --color-paper: #edf0f3;
+  --color-paper: #ffffff;
   --color-field: #f6f8fa;
   --color-card-rule: #d9dfe5;
   --color-ink: #15212e;
@@ -1225,23 +1225,18 @@ button.ui-control {
   opacity: 0.4;
 }
 
-/* The form is one sheet; sections are split by rules, not boxed. */
+/* The form is a plain column; sections are split by space and one hairline. */
 .sheet {
-  border: 1px solid var(--color-card-rule);
-  border-radius: var(--radius-md);
-  background: #fff;
-  box-shadow: 0 1px 2px rgb(21 33 46 / 0.05);
+  background: transparent;
 }
 .sheet-section {
-  padding: 1.25rem 1.125rem;
+  padding: 1.75rem 0;
+}
+.sheet-section:first-child {
+  padding-top: 0.5rem;
 }
 .sheet-section + .sheet-section {
   border-top: 1px solid var(--color-rule);
-}
-@media (min-width: 640px) {
-  .sheet-section {
-    padding: 1.5rem 1.75rem;
-  }
 }
 
 .ui-primary {
@@ -1278,15 +1273,9 @@ button.ui-control {
   bottom: 0;
   z-index: 5;
   border-top: 1px solid var(--color-rule);
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
-  background: rgb(255 255 255 / 0.94);
-  padding: 0.875rem 1.125rem max(0.875rem, env(safe-area-inset-bottom));
+  background: rgb(255 255 255 / 0.96);
+  padding: 0.875rem 0 max(0.875rem, env(safe-area-inset-bottom));
   backdrop-filter: blur(6px);
-}
-@media (min-width: 640px) {
-  .submit-bar {
-    padding-inline: 1.75rem;
-  }
 }
 
 .topbar {
@@ -1295,24 +1284,16 @@ button.ui-control {
   backdrop-filter: blur(8px);
 }
 
-/* Rating plate: the result reads like the equipment's nameplate. */
+/* Result panel: one tinted surface, rows split by hairlines. */
 .plate {
-  border: 1px solid #b9c3cd;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, #f8fafb 0%, #e9edf1 100%);
-  padding: 5px;
-  box-shadow:
-    inset 0 1px 0 #fff,
-    0 1px 2px rgb(21 33 46 / 0.08),
-    0 10px 24px -18px rgb(21 33 46 / 0.45);
+  border-radius: 12px;
+  background: #f4f6f8;
 }
 .plate-frame {
-  border: 1px solid #c9d2da;
-  border-radius: 6px;
-  background: rgb(255 255 255 / 0.55);
+  padding: 0.25rem 0;
 }
 .plate-rule {
-  border-top: 1px solid #d3dae1;
+  border-top: 1px solid #e1e6eb;
 }
 .plate.is-stale .plate-type {
   opacity: 0.4;
@@ -1336,15 +1317,8 @@ button.ui-control {
   font-variant-numeric: tabular-nums;
 }
 
-/* Sketch: drawing-sheet grid, no decoration. */
 .sketch-stage {
-  border: 1px solid var(--color-rule);
-  border-radius: var(--radius-sm);
-  background-color: #fafbfc;
-  background-image:
-    linear-gradient(#eef1f4 1px, transparent 1px),
-    linear-gradient(90deg, #eef1f4 1px, transparent 1px);
-  background-size: 16px 16px;
+  background: transparent;
 }
 .oltc-chip {
   transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);

@@ -314,7 +314,7 @@ function Readout({
   text?: boolean;
 }) {
   return (
-    <div className="min-w-0 px-3.5 py-3">
+    <div className="min-w-0 px-4 py-2">
       <dt className="truncate text-[0.75rem] text-[var(--color-muted)]">{label}</dt>
       <dd className="mt-1 flex items-baseline gap-1 truncate">
         <span
@@ -357,7 +357,7 @@ function DutyReadout({
   return (
     <dl
       aria-label={t(lang, "liveTitle")}
-      className="grid grid-cols-2 divide-[var(--color-rule)] [&>*:nth-child(n+3)]:border-t [&>*:nth-child(n+3)]:border-[var(--color-rule)] [&>*:nth-child(even)]:border-l [&>*:nth-child(even)]:border-[var(--color-rule)]"
+      className="grid grid-cols-2 gap-y-1 px-1 pt-2 pb-3"
     >
       <Readout
         label={t(lang, "kpiImax")}
@@ -377,7 +377,7 @@ function DutyReadout({
           !ok
             ? undefined
             : duty.umAssumed
-              ? t(lang, "assumed")
+              ? t(lang, "checkOs")
               : Number.isFinite(duty.actualUmKv) &&
                   duty.umRule !== "neutral_full" &&
                   duty.umRule !== "explicit"
@@ -444,8 +444,8 @@ function BasisPanel({ lang, b, dutyA }: { lang: Lang; b: PickedBasis; dutyA: num
     { k: t(lang, "basisInsul"), v: insul, flag: d.umAssumed },
   ];
   return (
-    <div className="px-4 py-3.5">
-      <h3 className="text-[0.75rem] font-semibold text-[var(--color-ink-2)]">
+    <div className="px-5 py-4">
+      <h3 className="text-[0.8125rem] font-semibold text-[var(--color-ink)]">
         {t(lang, "basisTitle")}
       </h3>
       <dl className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-[0.8125rem] leading-snug">
@@ -455,8 +455,8 @@ function BasisPanel({ lang, b, dutyA }: { lang: Lang; b: PickedBasis; dutyA: num
             <dd className="min-w-0 tabular-nums text-[var(--color-ink)]">
               {r.v}
               {r.flag ? (
-                <span className="ml-2 inline-block rounded-[4px] bg-[var(--color-warn-bg)] px-1.5 py-px text-[0.75rem] font-medium text-[var(--color-warn)]">
-                  {t(lang, "assumed")}
+                <span className="ml-2 text-[0.75rem] font-medium text-[var(--color-warn)]">
+                  {t(lang, "checkOs")}
                 </span>
               ) : null}
             </dd>
@@ -473,30 +473,17 @@ function KvField({
   label,
   kvValue,
   onKv,
-  capUm,
 }: {
   lang: Lang;
   label: string;
   kvValue: number;
   onKv: (kv: number) => void;
-  /** Actual Um caption; NaN hides it. */
-  capUm: number;
 }) {
   const [custom, setCustom] = useState(false);
   return (
             <Field
               as="div"
               label={label}
-              action={
-                !(Number.isFinite(capUm) && capUm > 0) ? undefined : (
-                  <CaptionSub
-                    name="U"
-                    sub="m"
-                    value={formatUmKv(capUm)}
-                    unit="kV"
-                  />
-                )
-              }
             >
               <div className="relative">
                 {custom ||
@@ -1059,16 +1046,10 @@ export function SelectorApp() {
   const duty = transformerDuty();
   const ruleDuty = deriveDuty({ ...transformerSpec(), earthUmKv: undefined });
   const kindEff: TransformerKind = isOctc ? "two_winding" : kind;
-  // Actual IEC Um of the system that sets the switch insulation. Hidden at a
-  // neutral: its insulation does not follow from the winding voltage.
-  const um =
-    duty.ok && duty.umRule !== "neutral_full" && duty.umRule !== "neutral_assumed"
-      ? duty.actualUmKv
-      : NaN;
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col">
       <header className="topbar sticky top-0 z-30">
-        <div className="mx-auto flex h-14 w-full max-w-[1400px] items-center gap-2.5 px-4 sm:gap-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`}
@@ -1096,7 +1077,7 @@ export function SelectorApp() {
           </div>
         </div>
       </header>
-      <div className="mx-auto grid w-full max-w-[1400px] flex-1 items-start gap-5 px-4 pt-5 pb-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] lg:gap-7 lg:px-8 lg:pt-7 xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
+      <div className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-8 px-4 pt-6 pb-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-12 lg:pt-8 xl:grid-cols-[minmax(0,1fr)_28rem] xl:gap-16">
         <form
           className="flex min-w-0 flex-col"
           onSubmit={(e) => {
@@ -1129,8 +1110,8 @@ export function SelectorApp() {
                   {t(lang, "autoOctcNote")}
                 </p>
               ) : null}
-              <div className="mt-3 grid items-center gap-4 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]">
-                <div className="sketch-stage flex justify-center px-2 py-3">
+              <div className="mt-5 grid items-center gap-6 sm:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
+                <div className="sketch-stage flex justify-center">
                   <TransformerSketch
                     lang={lang}
                     kind={kindEff}
@@ -1172,7 +1153,7 @@ export function SelectorApp() {
                   ) : null}
                 </div>
               </div>
-              <div className="mt-4 grid gap-x-4 gap-y-4 border-t border-[var(--color-rule)] pt-4 sm:grid-cols-2">
+              <div className="mt-6 grid gap-x-4 gap-y-5 sm:grid-cols-2">
                 {kindEff === "auto" ? (
                   <>
                     <KvField
@@ -1183,7 +1164,6 @@ export function SelectorApp() {
                         setHvKv(kv);
                         touch();
                       }}
-                      capUm={um}
                     />
                     <KvField
                       lang={lang}
@@ -1193,7 +1173,6 @@ export function SelectorApp() {
                         setMvKv(kv);
                         touch();
                       }}
-                      capUm={NaN}
                     />
                   </>
                 ) : (
@@ -1202,19 +1181,10 @@ export function SelectorApp() {
                     label={t(lang, "umWinding")}
                     kvValue={windingRatedKv}
                     onKv={setVoltageKv}
-                    capUm={um}
                   />
                 )}
                 <Field
                   label={t(lang, "earthUm")}
-                  action={
-                    earthUm === 0 && ruleDuty.ok && ruleDuty.umAssumed ? (
-                      <span className="rounded-full bg-[color-mix(in_oklch,var(--color-warn)_14%,white)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--color-warn)]">
-                        {t(lang, "assumed")}
-                      </span>
-                    ) : undefined
-                  }
-                  actionKind="plain"
                 >
                   <select
                     className={controlClass}
@@ -1933,7 +1903,7 @@ export function SelectorApp() {
 
         <aside
           ref={resultPaneRef}
-          className="flex min-w-0 scroll-mt-20 flex-col gap-3 lg:sticky lg:top-[4.5rem] lg:max-h-[calc(100dvh-5.5rem)] lg:overflow-y-auto lg:pb-2"
+          className="flex min-w-0 scroll-mt-20 flex-col gap-3 lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto lg:pb-2"
         >
           <section
             aria-label={t(lang, "resultAria")}
@@ -1946,7 +1916,7 @@ export function SelectorApp() {
                 dutyA={currentMode === "capacity" ? derivedA : input.throughCurrentA}
                 tap={isOctc && kind === "auto" ? "line_end" : tapPoint}
               />
-              <div className="plate-rule px-4 pt-4 pb-4" aria-live="polite">
+              <div className="plate-rule px-5 pt-4 pb-4" aria-live="polite">
                 {running ? (
                   <div className="flex h-[4.25rem] items-center gap-2.5 text-[0.9375rem] text-[var(--color-muted)]">
                     <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[var(--color-rule-2)] border-t-[var(--color-accent)]" />
@@ -1983,7 +1953,7 @@ export function SelectorApp() {
                       <button
                         type="button"
                         onClick={() => copyModel(displayModel(primary.model, lang))}
-                        className="-mr-1 inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.8125rem] font-medium text-[var(--color-ink-2)] transition-colors duration-150 hover:border-[#9fabb8] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.8125rem] font-medium text-[var(--color-ink-2)] transition-colors duration-150 hover:border-[#9fabb8] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                         aria-label={
                           copiedModel === displayModel(primary.model, lang)
                             ? t(lang, "copied")
@@ -2012,7 +1982,7 @@ export function SelectorApp() {
               {hasRun && result?.ok && primary && !running ? (
                 <div key={`d${resultKey}`} className="plate-in">
                   {primary.cautionsEn.length + (pickedBasis?.duty.cautionsEn.length ?? 0) > 0 ? (
-                    <ul className="plate-rule space-y-1.5 bg-[var(--color-warn-bg)] px-4 py-3">
+                    <ul className="space-y-1.5 px-5 pb-4">
                       {[
                         ...(lang === "zh" ? primary.cautionsZh : primary.cautionsEn),
                         ...(lang === "zh"
@@ -2021,7 +1991,7 @@ export function SelectorApp() {
                       ].map((c) => (
                         <li
                           key={c}
-                          className="flex gap-2 text-[0.8125rem] leading-snug text-[#5c3a00]"
+                          className="flex gap-2 text-[0.8125rem] leading-snug text-[var(--color-ink-2)]"
                         >
                           <ExclamationTriangleIcon
                             className="mt-px h-4 w-4 shrink-0 text-[var(--color-warn)]"
@@ -2049,7 +2019,7 @@ export function SelectorApp() {
                       <button
                         type="button"
                         onClick={() => setAltsOpen((o) => !o)}
-                        className="flex h-11 w-full items-center justify-between px-4 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                        className="flex h-11 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                         aria-expanded={altsOpen}
                       >
                         <span>{t(lang, "otherOpts", { n: alts.length })}</span>
@@ -2068,13 +2038,13 @@ export function SelectorApp() {
                         )}
                       >
                         <div className="min-h-0 overflow-hidden">
-                          <ul className="divide-y divide-[var(--color-rule)] border-t border-[var(--color-rule)]">
+                          <ul className="divide-y divide-[#e1e6eb] border-t border-[#e1e6eb]">
                             {alts.map((r) => {
                               const open = openAlts.includes(r.model);
                               const shown = displayModel(r.model, lang);
                               return (
                                 <li key={r.model}>
-                                  <div className="flex items-center gap-1 px-2">
+                                  <div className="flex items-center gap-1 pr-3 pl-3">
                                     <button
                                       type="button"
                                       aria-expanded={open}
@@ -2134,7 +2104,7 @@ export function SelectorApp() {
               ) : null}
             </div>
           </section>
-          <p className="px-1 text-[0.75rem] leading-snug text-[var(--color-caption)]">
+          <p className="px-5 text-[0.75rem] leading-snug text-[var(--color-caption)]">
             {t(lang, "disclaimer")}
           </p>
         </aside>
@@ -2222,7 +2192,7 @@ function ModelSpec({
     <dl
       className={cx(
         "grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3",
-        compact ? "px-4 pt-1 pb-3 pl-10" : "px-4 py-3.5",
+        compact ? "pt-1 pr-5 pb-3 pl-11" : "px-5 py-4",
       )}
     >
       {items.map((item) => (
