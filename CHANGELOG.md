@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Nameplate replay (`scripts/nameplateReplay.ts`, reports in `docs/replay/*-nameplate-replay.md`): the 2025/2026 OS rows run from MVA, kV and Y/D through the same path as the form. A 35 kV-class star neutral now reads 待 OS 核对 at Um 40.5, because most 2026 orders of that kind bought 72.5. A winding above Um 363 is refused instead of returning no class.
+- Security: Vercel sends CSP, frame, referrer and HSTS headers; Next.js and build tools patched within their majors. The site stays a static export with no server code.
 - Transformer kind: two-winding or autotransformer, with where the tap changer sits (neutral, line end, series–common junction, MV line lead). Current, step voltage and switch insulation come from that, not from a typed connection. An autotransformer takes the HV system's insulation (225 kV → class 252) and only combined types; the 27 Oct 2026 case gives 3×CM2I-500/252D-10193W, not CV2.
 - A neutral on a winding above 72.5 kV assumes Um 72.5 and says so; set the insulation to earth from the OS to override it.
 - New layout: one form sheet beside a rating plate that shows the live duty (Imax, Ust, Um, tap point) and, after Select, the type, cautions, ratings and the basis it was sized on. IBM Plex Sans; no gradients or glass.
