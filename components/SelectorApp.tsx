@@ -278,6 +278,7 @@ function Readout({
   note,
   warn,
   text,
+  sub,
 }: {
   label: string;
   value: string;
@@ -286,6 +287,8 @@ function Readout({
   warn?: boolean;
   /** A word, not a number: keep it in the sans face. */
   text?: boolean;
+  /** Where the value came from, one quiet line under it. */
+  sub?: string;
 }) {
   return (
     <div className="min-w-0 px-4 py-2">
@@ -311,6 +314,9 @@ function Readout({
           </span>
         ) : null}
       </dd>
+      {sub ? (
+        <dd className="mt-0.5 truncate text-[0.75rem] leading-snug text-[var(--color-caption)]">{sub}</dd>
+      ) : null}
     </div>
   );
 }
@@ -359,14 +365,25 @@ function DutyReadout({
   lang,
   duty,
   dutyA,
+  ratedA,
   tap,
+  transformerLine,
 }: {
   lang: Lang;
   duty: DutyBasis;
   dutyA: number | null;
+  /** Rated current when the form works from MVA; null when typed. */
+  ratedA: number | null;
   tap: TapPoint;
+  transformerLine: string;
 }) {
   const ok = duty.ok;
+  const showActual =
+    ok &&
+    Number.isFinite(duty.actualUmKv) &&
+    duty.umRule !== "neutral_full" &&
+    duty.umRule !== "neutral_assumed" &&
+    duty.umRule !== "explicit";
   return (
     <dl
       aria-label={t(lang, "liveTitle")}
@@ -376,6 +393,7 @@ function DutyReadout({
         label={t(lang, "kpiImax")}
         value={dutyA != null && dutyA > 0 ? round1(dutyA) : "—"}
         unit="A"
+        sub={ratedA != null && ratedA > 0 ? t(lang, "kpiRated", { a: round1(ratedA) }) : undefined}
       />
       <Readout
         label={t(lang, "kpiUst")}
@@ -386,20 +404,16 @@ function DutyReadout({
         label={t(lang, "kpiUm")}
         value={ok ? round1(duty.umKv) : "—"}
         unit="kV"
-        note={
-          !ok
-            ? undefined
-            : duty.umAssumed
-              ? t(lang, "checkOs")
-              : Number.isFinite(duty.actualUmKv) &&
-                  duty.umRule !== "neutral_full" &&
-                  duty.umRule !== "explicit"
-                ? t(lang, "kpiActual", { um: round1(duty.actualUmKv) })
-                : undefined
-        }
-        warn={ok && duty.umAssumed}
+        note={ok && duty.umAssumed ? t(lang, "checkOs") : undefined}
+        warn
+        sub={showActual ? t(lang, "kpiActual", { um: round1(duty.actualUmKv) }) : undefined}
       />
-      <Readout label={t(lang, "kpiTap")} value={t(lang, `tapShort_${tap}`)} text />
+      <Readout
+        label={t(lang, "kpiTap")}
+        value={t(lang, `tapShort_${tap}`)}
+        text
+        sub={transformerLine}
+      />
     </dl>
   );
 }
@@ -419,65 +433,6 @@ function round1(n: number): string {
   if (!Number.isFinite(n)) return "—";
   const r = Math.round(n * 10) / 10;
   return Number.isInteger(r) ? String(r) : r.toFixed(1);
-}
-
-/** Where the current, Ust and Um came from, on the result card. */
-function BasisPanel({ lang, b, dutyA }: { lang: Lang; b: PickedBasis; dutyA: number }) {
-  const d = b.duty;
-  const sep = lang === "zh" ? "，" : ", ";
-  const kindLine =
-    b.kind === "auto"
-      ? [t(lang, "kindAuto"), `${round1(b.hvKv)}/${round1(b.mvKv)} kV`].join(sep)
-      : [
-          t(lang, "kindTwo"),
-          t(lang, b.winding === "star" ? "windingStar" : "windingDelta"),
-          `${round1(b.tapKv)} kV`,
-        ].join(sep);
-  const insul = t(lang, `insul_${d.umRule}`, {
-    kv: round1(d.umSystemKv),
-    actual: round1(d.actualUmKv),
-    cls: round1(d.umKv),
-  });
-  const current =
-    b.capacity && Number.isFinite(d.ratedA)
-      ? t(lang, "currentFormula", {
-          div: d.currentDivisor === "three" ? "3" : "√3",
-          kv: round1(d.currentKv),
-          a: round1(d.ratedA),
-          max: round1(d.maxA),
-        })
-      : t(lang, "currentTyped", { a: round1(dutyA) });
-  const rows: Array<{ k: string; v: string; flag?: boolean }> = [
-    { k: t(lang, "basisTransformer"), v: kindLine },
-    { k: t(lang, "basisTap"), v: t(lang, `tap_${b.tapPoint}`) },
-    { k: t(lang, "basisCurrent"), v: current },
-    ...(d.stepV != null && d.stepV > 0
-      ? [{ k: t(lang, "basisStep"), v: `${round1(d.stepV)} V` }]
-      : []),
-    { k: t(lang, "basisInsul"), v: insul, flag: d.umAssumed },
-  ];
-  return (
-    <div className="px-5 py-4">
-      <h3 className="text-[0.8125rem] font-semibold text-[var(--color-ink-2)]">
-        {t(lang, "basisTitle")}
-      </h3>
-      <dl className="mt-2.5 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-2 leading-snug">
-        {rows.map((r) => (
-          <div key={r.k} className="contents">
-            <dt className="text-[0.75rem] text-[var(--color-muted)]">{r.k}</dt>
-            <dd className="min-w-0 text-[0.875rem] tabular-nums text-[var(--color-ink)]">
-              {r.v}
-              {r.flag ? (
-                <span className="ml-2 text-[0.75rem] font-medium text-[var(--color-warn)]">
-                  {t(lang, "checkOs")}
-                </span>
-              ) : null}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
 }
 
 /** Rated-voltage menu with a custom entry. */
@@ -1886,7 +1841,16 @@ export function SelectorApp() {
                 lang={lang}
                 duty={duty}
                 dutyA={currentMode === "capacity" ? derivedA : input.throughCurrentA}
+                ratedA={currentMode === "capacity" && duty.ok ? duty.ratedA : null}
                 tap={isOctc && kind === "auto" ? "line_end" : tapPoint}
+                transformerLine={(kindEff === "auto"
+                  ? [t(lang, "kindAuto"), `${round1(hvKv)}/${round1(mvKv)} kV`]
+                  : [
+                      t(lang, "kindTwo"),
+                      t(lang, winding === "star" ? "windingStar" : "windingDelta"),
+                      `${round1(windingRatedKv)} kV`,
+                    ]
+                ).join(lang === "zh" ? "，" : ", ")}
               />
               <div className="plate-rule px-5 pt-4 pb-4" aria-live="polite">
                 {running ? (
@@ -1963,12 +1927,6 @@ export function SelectorApp() {
                   <div className="plate-rule">
                     <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} />
                   </div>
-
-                  {pickedBasis && pickedDutyA != null ? (
-                    <div className="plate-rule">
-                      <BasisPanel lang={lang} b={pickedBasis} dutyA={pickedDutyA} />
-                    </div>
-                  ) : null}
 
                   {alts.length > 0 ? (
                     <div className="plate-rule">
