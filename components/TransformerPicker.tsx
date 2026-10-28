@@ -331,7 +331,7 @@ export function TransformerSketch({
       viewBox="0 0 240 236"
       role="radiogroup"
       aria-label={t(lang, "diagramAria")}
-      className="block h-auto w-full max-w-[240px] select-none sm:max-w-[272px]"
+      className="block h-auto w-full max-w-[200px] select-none sm:max-w-[272px]"
     >
       {body}
       {points.map((p) => {

@@ -1062,11 +1062,11 @@ export function SelectorApp() {
             className="h-6 w-6 shrink-0 rounded-[6px] sm:h-7 sm:w-7"
           />
           <div className="min-w-0 leading-tight">
-            <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-ink)]">
+            <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-white">
               {t(lang, "title")}
             </h1>
             {lang === "zh" ? (
-              <p className="hidden truncate text-[0.75rem] text-[var(--color-muted)] sm:block">
+              <p className="hidden truncate text-[0.75rem] text-white/55 sm:block">
                 OLTC Selector
               </p>
             ) : null}
@@ -1076,11 +1076,12 @@ export function SelectorApp() {
               lang={lang}
               onChange={setLang}
               ariaLabel={t(lang, "langAria")}
+              tone="dark"
             />
           </div>
         </div>
       </header>
-      <div className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-8 px-4 pt-6 pb-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-12 lg:pt-8 xl:grid-cols-[minmax(0,1fr)_28rem] xl:gap-16">
+      <div className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-3 pb-6 sm:gap-8 sm:px-8 sm:pt-6 sm:pb-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-12 lg:pt-8 xl:grid-cols-[minmax(0,1fr)_28rem] xl:gap-16">
         <form
           className="flex min-w-0 flex-col"
           onSubmit={(e) => {
@@ -1114,7 +1115,7 @@ export function SelectorApp() {
                 </p>
               ) : null}
               <div className="mt-5 grid items-center gap-6 sm:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
-                <div className="sketch-stage flex justify-center px-3 py-4">
+                <div className="sketch-stage flex justify-center px-3 py-3 sm:py-4">
                   <TransformerSketch
                     lang={lang}
                     kind={kindEff}
@@ -1156,7 +1157,7 @@ export function SelectorApp() {
                   ) : null}
                 </div>
               </div>
-              <div className="mt-6 grid gap-x-4 gap-y-5 sm:grid-cols-2">
+              <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
                 {kindEff === "auto" ? (
                   <>
                     <KvField
@@ -1213,7 +1214,7 @@ export function SelectorApp() {
             </section>
             <section aria-label={t(lang, "cardDuty")} className="sheet-section">
               <CardHead title={t(lang, "cardDuty")} />
-              <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
             <Field
               as="div"
               label={
@@ -1574,7 +1575,7 @@ export function SelectorApp() {
             </section>
             <section aria-label={t(lang, "cardSwitch")} className="sheet-section">
               <CardHead title={t(lang, "cardSwitch")} />
-              <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
                   <Field label={t(lang, "dutyKind")} as="div">
                     <div
                       className="ui-track"
@@ -1720,7 +1721,7 @@ export function SelectorApp() {
                     </select>
                   </Field>
 
-                  <Field as="div" label={t(lang, "acrossInsul")}>
+                  <Field as="div" label={t(lang, "acrossInsul")} className="col-span-2 sm:col-span-1">
                     <div className="grid grid-cols-2 gap-2">
                       <UpSelect
                         label={t(lang, "acrossBil")}
@@ -1927,7 +1928,7 @@ export function SelectorApp() {
                       )}
                     </p>
                     <div className="mt-1.5 flex items-center gap-2">
-                      <p translate="no" className="plate-type min-w-0 flex-1 text-[clamp(1.25rem,5.6vw,1.625rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.25rem,1.7vw,1.625rem)]">
+                      <p translate="no" className="plate-type min-w-0 flex-1 text-[clamp(1.0625rem,4.9vw,1.625rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.25rem,1.7vw,1.625rem)]">
                         {modelNodes(displayModel(primary.model, lang))}
                       </p>
                       <CopyButton
@@ -2061,7 +2062,7 @@ export function SelectorApp() {
               ) : null}
             </div>
           </section>
-          <p className="px-5 text-[0.75rem] leading-snug text-[var(--color-caption)]">
+          <p className="px-4 text-[0.75rem] leading-snug text-[var(--color-caption)] sm:px-5">
             {t(lang, "disclaimer")}
           </p>
         </aside>
