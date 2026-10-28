@@ -215,7 +215,7 @@ function Field({
   return (
     <Tag className={cx("flex min-w-0 flex-col gap-2 overflow-visible", className)}>
       <span className="flex min-h-[1.625rem] flex-nowrap items-center gap-2 overflow-visible">
-        <span className="min-w-0 flex-1 text-[0.78rem] leading-snug font-medium tracking-[0.01em] text-[var(--color-ink-2)]">
+        <span className="min-w-0 flex-1 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]">
           {label.split("ᵤ").map((part, i, arr) =>
             i < arr.length - 1 ? (
               <span key={i}>
@@ -458,14 +458,14 @@ function BasisPanel({ lang, b, dutyA }: { lang: Lang; b: PickedBasis; dutyA: num
   ];
   return (
     <div className="px-5 py-4">
-      <h3 className="text-[0.8125rem] font-semibold text-[var(--color-ink)]">
+      <h3 className="text-[0.8125rem] font-semibold text-[var(--color-ink-2)]">
         {t(lang, "basisTitle")}
       </h3>
-      <dl className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-[0.8125rem] leading-snug">
+      <dl className="mt-2.5 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-2 leading-snug">
         {rows.map((r) => (
           <div key={r.k} className="contents">
-            <dt className="text-[var(--color-muted)]">{r.k}</dt>
-            <dd className="min-w-0 tabular-nums text-[var(--color-ink)]">
+            <dt className="text-[0.75rem] text-[var(--color-muted)]">{r.k}</dt>
+            <dd className="min-w-0 text-[0.875rem] tabular-nums text-[var(--color-ink)]">
               {r.v}
               {r.flag ? (
                 <span className="ml-2 text-[0.75rem] font-medium text-[var(--color-warn)]">
@@ -1055,28 +1055,22 @@ export function SelectorApp() {
         <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`}
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/icon-64.png`}
             alt=""
             width={28}
             height={28}
             className="h-6 w-6 shrink-0 rounded-[6px] sm:h-7 sm:w-7"
           />
           <div className="min-w-0 leading-tight">
-            <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-white">
+            <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-ink)]">
               {t(lang, "title")}
             </h1>
-            {lang === "zh" ? (
-              <p className="hidden truncate text-[0.75rem] text-white/55 sm:block">
-                OLTC Selector
-              </p>
-            ) : null}
           </div>
           <div className="ml-auto">
             <LangSwitcher
               lang={lang}
               onChange={setLang}
               ariaLabel={t(lang, "langAria")}
-              tone="dark"
             />
           </div>
         </div>

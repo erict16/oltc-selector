@@ -1182,6 +1182,16 @@ button.ui-control {
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-accent) 18%, transparent);
 }
 
+.ui-control-sm {
+  height: 2rem;
+  padding-left: 0.625rem;
+  font-size: 0.8125rem;
+}
+select.ui-control-sm {
+  padding-right: 1.75rem;
+  background-position: right 0.55rem center;
+}
+
 /* Segmented control: one track, the selected segment lifts. */
 .ui-track {
   display: grid;
@@ -1193,6 +1203,12 @@ button.ui-control {
   border: 1px solid var(--color-rule-2);
   border-radius: var(--radius-sm);
   background: #e8ecf0;
+}
+.ui-track-sm {
+  height: 2rem;
+}
+.ui-track-sm .ui-seg {
+  font-size: 0.75rem;
 }
 .ui-seg {
   display: inline-flex;
@@ -1290,21 +1306,9 @@ button.ui-control {
 }
 
 .topbar {
-  background: #0f2740;
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04), 0 1px 3px rgb(15 39 64 / 0.25);
-}
-.lang-select {
-  background-position: right 0.55rem center;
-}
-.topbar .lang-select {
-  border-color: rgb(255 255 255 / 0.2);
-  background-color: rgb(255 255 255 / 0.1);
-  color: #fff;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' fill-opacity='.7' d='M3 4.5L6 8l3-3.5'/%3E%3C/svg%3E");
-}
-.topbar .lang-select option {
-  color: var(--color-ink);
-  background: #fff;
+  border-bottom: 1px solid var(--color-card-rule);
+  background: rgb(255 255 255 / 0.94);
+  backdrop-filter: blur(8px);
 }
 
 /* Result panel: the same card as the form, rows split by hairlines. */
@@ -1344,7 +1348,7 @@ button.ui-control {
 
 .sketch-stage {
   border: 1px solid var(--color-rule);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--color-field);
 }
 .oltc-chip {

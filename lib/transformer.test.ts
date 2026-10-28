@@ -162,9 +162,16 @@ describe("two-winding", () => {
     expect(d.umAssumed).toBe(false);
   });
 
-  it("35 kV neutral keeps the full 40.5 class without an assumption", () => {
+  it("35 kV neutral sizes at 40.5 but flags it: most 2026 orders bought 72.5", () => {
     const d = deriveDuty(spec({ mva: 10, tapKv: 35 }));
     expect(d.umKv).toBe(40.5);
+    expect(d.umAssumed).toBe(true);
+    expect(d.cautionsZh.join()).toContain("72.5");
+  });
+
+  it("66 kV neutral keeps the full 72.5 class without a flag", () => {
+    const d = deriveDuty(spec({ mva: 20, tapKv: 66 }));
+    expect(d.umKv).toBe(72.5);
     expect(d.umAssumed).toBe(false);
   });
 
@@ -177,6 +184,12 @@ describe("two-winding", () => {
 });
 
 describe("guards", () => {
+  it("a winding above the catalogue is refused, not left without Um", () => {
+    const d = deriveDuty(spec({ tapPoint: "line_end", tapKv: 500 }));
+    expect(d.ok).toBe(false);
+    expect(d.errorZh).toContain("363");
+  });
+
   it("autotransformer HV must be above MV", () => {
     expect(
       deriveDuty(spec({ kind: "auto", tapPoint: "auto_junction", hvKv: 115, mvKv: 225 })).ok,

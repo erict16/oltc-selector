@@ -200,6 +200,9 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     if (lineClass <= NEUTRAL_DEFAULT_UM) {
       umKv = lineClass;
       umRule = "neutral_full";
+      // 2026 OS: 36 of 45 star neutrals on 30–40.5 kV windings were sold at
+      // 72.5 (Russian and Turkish makers). Keep 40.5 but do not state it as settled.
+      if (lineClass === 40.5) umAssumed = true;
     } else {
       umKv = NEUTRAL_DEFAULT_UM;
       umRule = "neutral_assumed";
@@ -210,12 +213,22 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     umKv = catalogueUmFromRatedKv(spec.tapKv);
     umRule = "line";
   }
+  if (!Number.isFinite(umKv) || umKv > 363) {
+    return fail(
+      "电压超出目录：开关最高 Um 363 kV。",
+      "Voltage above the catalogue: the highest switch class is Um 363 kV.",
+    );
+  }
   if (spec.earthUmKv != null && spec.earthUmKv > 0) {
     umKv = spec.earthUmKv;
     umRule = "explicit";
     umAssumed = false;
   }
 
+  if (umRule === "neutral_full" && umAssumed) {
+    cautionsZh.push("35 kV 级中性点先按 Um 40.5 选；不少订单（俄罗斯、土耳其）按 72.5 买，以 OS 为准。");
+    cautionsEn.push("35 kV-class neutral sized at Um 40.5; many orders (Russia, Turkey) bought 72.5. The OS decides.");
+  }
   if (umRule === "neutral_assumed") {
     cautionsZh.push(`中性点绝缘未给，先按 Um ${NEUTRAL_DEFAULT_UM} 选，以 OS 为准。`);
     cautionsEn.push(`Neutral insulation not given: sized at Um ${NEUTRAL_DEFAULT_UM}; the OS decides.`);
