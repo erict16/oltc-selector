@@ -1349,3 +1349,12 @@ button.ui-control {
   .oltc-chip { transition: none; }
   .plate-in { animation: none; }
 }
+
+/* Result column scrolls with the wheel when it is taller than the window,
+   without drawing a second scrollbar beside the page's own. */
+.quiet-scroll {
+  scrollbar-width: none;
+}
+.quiet-scroll::-webkit-scrollbar {
+  display: none;
+}

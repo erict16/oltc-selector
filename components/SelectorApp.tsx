@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   CheckIcon,
   ChevronDownIcon,
-  ClipboardDocumentIcon,
+  Square2StackIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -312,6 +312,45 @@ function Readout({
         ) : null}
       </dd>
     </div>
+  );
+}
+
+/** Icon-only copy; says 已复制 for a moment after a click. */
+function CopyButton({
+  lang,
+  copied,
+  onCopy,
+  small,
+}: {
+  lang: Lang;
+  copied: boolean;
+  onCopy: () => void;
+  small?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onCopy}
+      title={t(lang, "copyType")}
+      aria-label={copied ? t(lang, "copied") : t(lang, "copyType")}
+      className={cx(
+        "inline-flex shrink-0 items-center justify-center gap-1 rounded-[6px] transition-colors duration-150",
+        "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-accent)]",
+        small ? "h-8 min-w-8" : "h-9 min-w-9",
+        copied
+          ? "px-2 text-[0.75rem] font-medium text-[var(--color-accent)]"
+          : "text-[var(--color-caption)] hover:bg-[var(--color-field)] hover:text-[var(--color-ink)]",
+      )}
+    >
+      {copied ? (
+        <>
+          <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+          <span aria-live="polite">{t(lang, "copied")}</span>
+        </>
+      ) : (
+        <Square2StackIcon className={small ? "h-4 w-4" : "h-[18px] w-[18px]"} strokeWidth={1.6} aria-hidden />
+      )}
+    </button>
   );
 }
 
@@ -1841,7 +1880,7 @@ export function SelectorApp() {
 
         <aside
           ref={resultPaneRef}
-          className="flex min-w-0 scroll-mt-20 flex-col gap-3 lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto lg:pb-2"
+          className="flex min-w-0 scroll-mt-20 flex-col gap-3 quiet-scroll lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto lg:pb-2"
         >
           <section
             aria-label={t(lang, "resultAria")}
@@ -1880,39 +1919,23 @@ export function SelectorApp() {
                   </div>
                 ) : (
                   <div key={resultKey} className="plate-in">
-                    <div className="flex min-h-9 items-center justify-between gap-3">
-                      <p className="plate-cap min-w-0 truncate text-[0.75rem] font-medium text-[var(--color-muted)]">
-                        {stale ? (
-                          <span className="text-[var(--color-warn)]">{t(lang, "stale")}</span>
-                        ) : (
-                          t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")
-                        )}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => copyModel(displayModel(primary.model, lang))}
-                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.8125rem] font-medium text-[var(--color-ink-2)] transition-colors duration-150 hover:border-[#9fabb8] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-                        aria-label={
-                          copiedModel === displayModel(primary.model, lang)
-                            ? t(lang, "copied")
-                            : t(lang, "copyType")
-                        }
-                      >
-                        {copiedModel === displayModel(primary.model, lang) ? (
-                          <CheckIcon className="h-4 w-4 text-[var(--color-accent)]" strokeWidth={2} aria-hidden />
-                        ) : (
-                          <ClipboardDocumentIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                        )}
-                        <span aria-live="polite">
-                          {copiedModel === displayModel(primary.model, lang)
-                            ? t(lang, "copied")
-                            : t(lang, "copy")}
-                        </span>
-                      </button>
-                    </div>
-                    <p translate="no" className="plate-type mt-1 text-[clamp(1.25rem,5.6vw,1.625rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.25rem,1.7vw,1.625rem)]">
-                      {modelNodes(displayModel(primary.model, lang))}
+                    <p className="plate-cap truncate text-[0.75rem] font-medium text-[var(--color-muted)]">
+                      {stale ? (
+                        <span className="text-[var(--color-warn)]">{t(lang, "stale")}</span>
+                      ) : (
+                        t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")
+                      )}
                     </p>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <p translate="no" className="plate-type min-w-0 flex-1 text-[clamp(1.25rem,5.6vw,1.625rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.25rem,1.7vw,1.625rem)]">
+                        {modelNodes(displayModel(primary.model, lang))}
+                      </p>
+                      <CopyButton
+                        lang={lang}
+                        copied={copiedModel === displayModel(primary.model, lang)}
+                        onCopy={() => copyModel(displayModel(primary.model, lang))}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -2007,16 +2030,12 @@ export function SelectorApp() {
                                         ) : null}
                                       </span>
                                     </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => copyModel(shown)}
-                                      className="inline-flex h-9 shrink-0 items-center rounded-[4px] px-2 text-[0.8125rem] font-medium text-[var(--color-accent)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
-                                      aria-label={copiedModel === shown ? t(lang, "copied") : t(lang, "copy")}
-                                    >
-                                      <span aria-live="polite">
-                                        {copiedModel === shown ? t(lang, "copied") : t(lang, "copy")}
-                                      </span>
-                                    </button>
+                                    <CopyButton
+                                      lang={lang}
+                                      small
+                                      copied={copiedModel === shown}
+                                      onCopy={() => copyModel(shown)}
+                                    />
                                   </div>
                                   <div className={cx("more-drop", open && "more-drop-open")}>
                                     <div className="min-h-0 overflow-hidden">

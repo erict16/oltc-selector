@@ -400,7 +400,7 @@ const zh: Dict = {
   specCage: "笼式",
   specDrum: "鼓式",
   specSel: "选择器",
-  specEarth: "对地 工频 / 雷电",
+  specEarth: "对地工频/雷电",
   specArc: "灭弧方式",
   specVac: "真空",
   specOil: "油灭弧",
