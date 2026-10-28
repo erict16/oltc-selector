@@ -19,7 +19,7 @@ export type Release = {
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
     {
-      version: "1.4.0",
+      version: "2.0.0",
       date: "2026-10",
       groups: [
         { kind: "new", items: ["可以选择变压器种类（双绕组或自耦变）和开关位置（中性点、线端、串联/公共绕组连接点、中压出线），电流、级电压和开关绝缘按位置计算。"] },
@@ -201,7 +201,7 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   en: [
     {
-      version: "1.4.0",
+      version: "2.0.0",
       date: "2026-10",
       groups: [
         { kind: "new", items: ["Pick the transformer kind (two-winding or autotransformer) and where the tap changer sits (neutral, line end, series–common junction, MV line lead); current, step voltage and switch insulation follow from that."] },
@@ -387,7 +387,7 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
-      version: "1.4.0",
+      version: "2.0.0",
       date: "2026-10",
       groups: [
         { kind: "new", items: ["Chọn loại máy biến áp (hai cuộn dây hoặc tự ngẫu) và vị trí bộ ĐAPT (trung tính, đầu dây, điểm nối nối tiếp – chung, đầu ra trung áp); dòng điện, điện áp nấc và cách điện được tính theo vị trí đó."] },
@@ -571,7 +571,7 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   es: [
     {
-      version: "1.4.0",
+      version: "2.0.0",
       date: "2026-10",
       groups: [
         { kind: "new", items: ["Elija el tipo de transformador (dos devanados o autotransformador) y dónde va el cambiador (neutro, extremo de línea, unión serie–común, salida de MT); la corriente, la tensión de escalón y el aislamiento salen de esa posición."] },
@@ -757,7 +757,7 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
-      version: "1.4.0",
+      version: "2.0.0",
       date: "2026-10",
       groups: [
         { kind: "new", items: ["Transformatör tipini (iki sargılı veya ototransformatör) ve kademe değiştiricinin yerini (nötr, hat ucu, seri–ortak bağlantı noktası, OG çıkışı) seçin; akım, kademe gerilimi ve yalıtım bu konumdan hesaplanır."] },
@@ -941,7 +941,7 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   id: [
     {
-      version: "1.4.0",
+      version: "2.0.0",
       date: "2026-10",
       groups: [
         { kind: "new", items: ["Pilih jenis transformator (dua belitan atau autotransformator) dan letak OLTC (netral, ujung saluran, sambungan seri – bersama, saluran TM); arus, tegangan tap dan isolasi dihitung dari letak itu."] },

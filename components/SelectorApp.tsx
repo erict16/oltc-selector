@@ -62,6 +62,7 @@ import {
   type WindingConnection,
 } from "@/lib/transformer";
 import { UpSelect } from "@/components/UpSelect";
+import { localizeNote, notesFor } from "@/lib/noteI18n";
 import { useAppLang } from "@/components/LangProvider";
 import {
   currentLabel,
@@ -864,7 +865,10 @@ export function SelectorApp() {
     }
     const d = transformerDuty();
     if (!d.ok) {
-      return { error: true, msg: lang === "zh" ? d.errorZh : d.errorEn };
+      return {
+        error: true,
+        msg: lang === "zh" ? d.errorZh : localizeNote(d.errorEn ?? "", lang),
+      };
     }
     const ust = d.stepV != null && d.stepV > 0 ? d.stepV : null;
     const sized: SelectInput = {
@@ -1871,7 +1875,7 @@ export function SelectorApp() {
                       {t(lang, "noMatch")}
                     </p>
                     <ul className="mt-2 list-disc space-y-1 pl-5 text-[0.8125rem] leading-snug text-[var(--color-ink-2)]">
-                      {(lang === "zh" ? result.errorsZh : result.errorsEn).map((e) => (
+                      {notesFor(lang, result.errorsZh, result.errorsEn).map((e) => (
                         <li key={e}>{e}</li>
                       ))}
                     </ul>
@@ -1904,10 +1908,12 @@ export function SelectorApp() {
                   {primary.cautionsEn.length + (pickedBasis?.duty.cautionsEn.length ?? 0) > 0 ? (
                     <ul className="space-y-1.5 px-5 pb-4">
                       {[
-                        ...(lang === "zh" ? primary.cautionsZh : primary.cautionsEn),
-                        ...(lang === "zh"
-                          ? pickedBasis?.duty.cautionsZh ?? []
-                          : pickedBasis?.duty.cautionsEn ?? []),
+                        ...notesFor(lang, primary.cautionsZh, primary.cautionsEn),
+                        ...notesFor(
+                          lang,
+                          pickedBasis?.duty.cautionsZh ?? [],
+                          pickedBasis?.duty.cautionsEn ?? [],
+                        ),
                       ].map((c) => (
                         <li
                           key={c}

@@ -1,3 +1,3 @@
 /** Result-pane version and CLI pack must stay on this number. */
-export const APP_VERSION = "1.4.0";
+export const APP_VERSION = "2.0.0";
 export const PREVIOUS_VERSION = "1.2.8";
