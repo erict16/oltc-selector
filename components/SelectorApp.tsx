@@ -1111,7 +1111,7 @@ export function SelectorApp() {
                 </p>
               ) : null}
               <div className="mt-5 grid items-center gap-6 sm:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
-                <div className="sketch-stage flex justify-center">
+                <div className="sketch-stage flex justify-center px-3 py-4">
                   <TransformerSketch
                     lang={lang}
                     kind={kindEff}
@@ -2038,7 +2038,7 @@ export function SelectorApp() {
                         )}
                       >
                         <div className="min-h-0 overflow-hidden">
-                          <ul className="divide-y divide-[#e1e6eb] border-t border-[#e1e6eb]">
+                          <ul className="divide-y divide-[var(--color-rule)] border-t border-[var(--color-rule)]">
                             {alts.map((r) => {
                               const open = openAlts.includes(r.model);
                               const shown = displayModel(r.model, lang);

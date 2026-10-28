@@ -10,7 +10,7 @@
   --font-sans: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
     ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
-  --color-paper: #ffffff;
+  --color-paper: #eef1f4;
   --color-field: #f6f8fa;
   --color-card-rule: #d9dfe5;
   --color-ink: #15212e;
@@ -1225,18 +1225,23 @@ button.ui-control {
   opacity: 0.4;
 }
 
-/* The form is a plain column; sections are split by space and one hairline. */
+/* The form is one card; sections inside it are split by a hairline. */
 .sheet {
-  background: transparent;
+  border: 1px solid var(--color-card-rule);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(21 33 46 / 0.04);
 }
 .sheet-section {
-  padding: 1.75rem 0;
-}
-.sheet-section:first-child {
-  padding-top: 0.5rem;
+  padding: 1.375rem 1.25rem;
 }
 .sheet-section + .sheet-section {
   border-top: 1px solid var(--color-rule);
+}
+@media (min-width: 640px) {
+  .sheet-section {
+    padding: 1.75rem 2rem;
+  }
 }
 
 .ui-primary {
@@ -1273,9 +1278,15 @@ button.ui-control {
   bottom: 0;
   z-index: 5;
   border-top: 1px solid var(--color-rule);
+  border-radius: 0 0 12px 12px;
   background: rgb(255 255 255 / 0.96);
-  padding: 0.875rem 0 max(0.875rem, env(safe-area-inset-bottom));
+  padding: 0.875rem 1.25rem max(0.875rem, env(safe-area-inset-bottom));
   backdrop-filter: blur(6px);
+}
+@media (min-width: 640px) {
+  .submit-bar {
+    padding-inline: 2rem;
+  }
 }
 
 .topbar {
@@ -1284,16 +1295,18 @@ button.ui-control {
   backdrop-filter: blur(8px);
 }
 
-/* Result panel: one tinted surface, rows split by hairlines. */
+/* Result panel: the same card as the form, rows split by hairlines. */
 .plate {
+  border: 1px solid var(--color-card-rule);
   border-radius: 12px;
-  background: #f4f6f8;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(21 33 46 / 0.04);
 }
 .plate-frame {
   padding: 0.25rem 0;
 }
 .plate-rule {
-  border-top: 1px solid #e1e6eb;
+  border-top: 1px solid var(--color-rule);
 }
 .plate.is-stale .plate-type {
   opacity: 0.4;
@@ -1318,7 +1331,9 @@ button.ui-control {
 }
 
 .sketch-stage {
-  background: transparent;
+  border: 1px solid var(--color-rule);
+  border-radius: 8px;
+  background: var(--color-field);
 }
 .oltc-chip {
   transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);

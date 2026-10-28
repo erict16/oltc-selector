@@ -426,7 +426,11 @@ export function TapList({
   onTap: (p: TapPoint) => void;
 }) {
   return (
-    <div role="radiogroup" aria-label={t(lang, "tapPoint")} className="-mx-2 flex flex-col">
+    <div
+      role="radiogroup"
+      aria-label={t(lang, "tapPoint")}
+      className="divide-y divide-[var(--color-rule)] overflow-hidden rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white"
+    >
       {TAP_POINTS_FOR[kind].map((p) => {
         const on = p === tapPoint;
         const off = kind === "two_winding" && winding === "delta" && p === "neutral";
@@ -439,10 +443,12 @@ export function TapList({
             disabled={off}
             onClick={() => onTap(p)}
             className={cx(
-              "flex h-10 w-full min-w-0 items-center gap-3 rounded-[6px] px-2 text-left text-[0.875rem] transition-colors duration-150",
-              "focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]",
-              on ? "font-semibold text-[var(--color-ink)]" : "text-[var(--color-ink-2)] hover:bg-[var(--color-field)]",
-              off && "cursor-not-allowed text-[var(--color-caption)] hover:bg-transparent",
+              "flex h-11 w-full min-w-0 items-center gap-3 px-3 text-left text-[0.875rem] transition-colors duration-150",
+              "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+              on
+                ? "bg-[color-mix(in_oklch,var(--color-accent)_6%,white)] font-semibold text-[var(--color-ink)]"
+                : "text-[var(--color-ink-2)] hover:bg-[var(--color-field)]",
+              off && "cursor-not-allowed text-[var(--color-caption)] hover:bg-white",
             )}
           >
             <span
