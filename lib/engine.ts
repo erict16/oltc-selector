@@ -509,6 +509,21 @@ export function selectOltc(input: SelectInput): SelectOutput {
   });
 
   const wantStruct = input.preferStructure;
+  if (input.transformerKind === "auto" && !wantOctc) {
+    if (wantStruct === "compound") {
+      return {
+        ok: false,
+        results: [],
+        errorsEn: [
+          "Autotransformers take combined types only: compound types (CV/CV2/SV) stop at 200 kV across the tap winding.",
+        ],
+        errorsZh: [
+          "自耦变只用组合式：复合式（CV/CV2/SV）跨调压绕组冲击上限 200 kV。",
+        ],
+      };
+    }
+    candidates = candidates.filter((s) => s.structure !== "compound");
+  }
   if (wantStruct && wantStruct !== "auto") {
     candidates = candidates.filter((s) => s.structure === wantStruct);
   }

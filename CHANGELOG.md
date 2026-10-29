@@ -2,8 +2,14 @@
 
 ## Unreleased
 
+- Nameplate replay (`scripts/nameplateReplay.ts`, reports in `docs/replay/*-nameplate-replay.md`): the 2025/2026 OS rows run from MVA, kV and Y/D through the same path as the form. A 35 kV-class star neutral now reads 待 OS 核对 at Um 40.5, because most 2026 orders of that kind bought 72.5. A winding above Um 363 is refused instead of returning no class.
+- Security: Vercel sends CSP, frame, referrer and HSTS headers; Next.js and build tools patched within their majors. The site stays a static export with no server code.
+- Transformer kind: two-winding or autotransformer, with where the tap changer sits (neutral, line end, series–common junction, MV line lead). Current, step voltage and switch insulation come from that, not from a typed connection. An autotransformer takes the HV system's insulation (225 kV → class 252) and only combined types; the 27 Oct 2026 case gives 3×CM2I-500/252D-10193W, not CV2.
+- A neutral on a winding above 72.5 kV assumes Um 72.5 and says so; set the insulation to earth from the OS to override it.
+- New layout: one form sheet beside a rating plate that shows the live duty (Imax, Ust, Um, tap point) and, after Select, the type, cautions, ratings and the basis it was sized on. IBM Plex Sans; no gradients or glass.
+- CLI: `--kind two|auto`, `--tap neutral|line|junction|mv-line`, `--winding star|delta`, `--hv`, `--mv`, `--earth-um`. Text output adds a basis line; JSON adds `basis`.
 - Bahasa Indonesia (ID) replaces Russian in the language chips, the selector, the release notes, and the assistant guide. A saved Russian choice falls back to Chinese.
-- Star voltage caption reads 中性点 · 开关 72.5 kV 级 instead of 对地 140/350 kV: the 72.5 is the switch's class at the neutral, not the winding's Um. Delta still shows Um alone.
+- Delta voltage caption shows the actual IEC 60038 Um of the tap-side system (22 kV → 24, 110 kV → 123, 230 kV → 245), not the catalogue class the type string snaps to. Star shows no caption: the neutral's insulation does not follow from Un.
 - On wide screens the duty title sits on the language-chip row and centres on the chips.
 - Chinese shows CV2 as VCV-G, the name on the Chinese catalogue and the sales order (VCV-GIII-600D/40.5-10193W). CV2 stays the export code everywhere else.
 - On wide screens the language chips sit at the top of the duty pane, level with the left title, instead of floating mid-page with the centred form. Phones are unchanged.

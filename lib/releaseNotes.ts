@@ -19,6 +19,21 @@ export type Release = {
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
     {
+      version: "2.0.0",
+      date: "2026-10",
+      groups: [
+        { kind: "new", items: ["可以选择变压器种类（双绕组或自耦变）和开关位置（中性点、线端、串联/公共绕组连接点、中压出线），电流、级电压和开关绝缘按位置计算。"] },
+        {
+          kind: "fix",
+          items: [
+            "自耦变按高压系统的绝缘选型，只给组合式开关，不再出现复合式型号。",
+            "中性点绝缘没给时按 Um 72.5 选，并标「待 OS 核对」；35 kV 级中性点同样提示。",
+          ],
+        },
+        { kind: "imp", items: ["页面重新设计：表单和结果并排，结果区实时显示电流、级电压、开关绝缘和开关位置；手机端单独排版。"] },
+      ],
+    },
+    {
       version: "1.3.0",
       date: "2026-10",
       groups: [
@@ -185,6 +200,21 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.0.0",
+      date: "2026-10",
+      groups: [
+        { kind: "new", items: ["Pick the transformer kind (two-winding or autotransformer) and where the tap changer sits (neutral, line end, series–common junction, MV line lead); current, step voltage and switch insulation follow from that."] },
+        {
+          kind: "fix",
+          items: [
+            "Autotransformers take the HV system's insulation and only combined tap changers; compound types no longer appear for them.",
+            "An unstated neutral insulation is sized at Um 72.5 and marked Check OS; a 35 kV-class neutral is marked the same way.",
+          ],
+        },
+        { kind: "imp", items: ["Redesigned page: form and result side by side, with current, step voltage, switch insulation and tap position shown live; a separate phone layout."] },
+      ],
+    },
     {
       version: "1.3.0",
       date: "2026-10",
@@ -357,6 +387,21 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.0.0",
+      date: "2026-10",
+      groups: [
+        { kind: "new", items: ["Chọn loại máy biến áp (hai cuộn dây hoặc tự ngẫu) và vị trí bộ ĐAPT (trung tính, đầu dây, điểm nối nối tiếp – chung, đầu ra trung áp); dòng điện, điện áp nấc và cách điện được tính theo vị trí đó."] },
+        {
+          kind: "fix",
+          items: [
+            "Máy biến áp tự ngẫu lấy cách điện của hệ thống cao áp và chỉ dùng bộ ĐAPT kiểu tổ hợp; không còn ra kiểu phức hợp.",
+            "Khi chưa cho cách điện trung tính, chọn theo Um 72.5 và ghi Kiểm tra OS; trung tính cấp 35 kV cũng được ghi như vậy.",
+          ],
+        },
+        { kind: "imp", items: ["Thiết kế lại trang: biểu mẫu và kết quả đặt cạnh nhau, hiển thị trực tiếp dòng điện, điện áp nấc, cách điện và vị trí bộ ĐAPT; bố cục riêng cho điện thoại."] },
+      ],
+    },
+    {
       version: "1.3.0",
       date: "2026-10",
       groups: [
@@ -525,6 +570,21 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.0.0",
+      date: "2026-10",
+      groups: [
+        { kind: "new", items: ["Elija el tipo de transformador (dos devanados o autotransformador) y dónde va el cambiador (neutro, extremo de línea, unión serie–común, salida de MT); la corriente, la tensión de escalón y el aislamiento salen de esa posición."] },
+        {
+          kind: "fix",
+          items: [
+            "Los autotransformadores toman el aislamiento del sistema de AT y solo cambiadores combinados; ya no aparecen tipos compuestos.",
+            "Si no se indica el aislamiento del neutro, se dimensiona a Um 72.5 y se marca Verificar en OS; un neutro de clase 35 kV se marca igual.",
+          ],
+        },
+        { kind: "imp", items: ["Página rediseñada: formulario y resultado lado a lado, con corriente, tensión de escalón, aislamiento y posición en vivo; diseño propio para móvil."] },
+      ],
+    },
     {
       version: "1.3.0",
       date: "2026-10",
@@ -697,6 +757,21 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.0.0",
+      date: "2026-10",
+      groups: [
+        { kind: "new", items: ["Transformatör tipini (iki sargılı veya ototransformatör) ve kademe değiştiricinin yerini (nötr, hat ucu, seri–ortak bağlantı noktası, OG çıkışı) seçin; akım, kademe gerilimi ve yalıtım bu konumdan hesaplanır."] },
+        {
+          kind: "fix",
+          items: [
+            "Ototransformatörler YG sisteminin yalıtımını alır ve yalnızca kombine kademe değiştirici kullanır; kompakt tipler artık çıkmaz.",
+            "Nötr yalıtımı verilmediğinde Um 72.5 ile seçilir ve OS ile teyit olarak işaretlenir; 35 kV sınıfı nötr de aynı şekilde işaretlenir.",
+          ],
+        },
+        { kind: "imp", items: ["Sayfa yeniden tasarlandı: form ve sonuç yan yana, akım, kademe gerilimi, yalıtım ve konum canlı gösterilir; telefon için ayrı düzen."] },
+      ],
+    },
+    {
       version: "1.3.0",
       date: "2026-10",
       groups: [
@@ -865,6 +940,21 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.0.0",
+      date: "2026-10",
+      groups: [
+        { kind: "new", items: ["Pilih jenis transformator (dua belitan atau autotransformator) dan letak OLTC (netral, ujung saluran, sambungan seri – bersama, saluran TM); arus, tegangan tap dan isolasi dihitung dari letak itu."] },
+        {
+          kind: "fix",
+          items: [
+            "Autotransformator memakai isolasi sistem TT dan hanya OLTC kombinasi; tipe kompon tidak lagi muncul.",
+            "Bila isolasi netral tidak diberikan, dipilih pada Um 72.5 dan ditandai Cek OS; netral kelas 35 kV ditandai sama.",
+          ],
+        },
+        { kind: "imp", items: ["Halaman didesain ulang: formulir dan hasil berdampingan, arus, tegangan tap, isolasi dan letak OLTC tampil langsung; tata letak khusus ponsel."] },
+      ],
+    },
     {
       version: "1.3.0",
       date: "2026-10",

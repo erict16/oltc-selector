@@ -1,3 +1,5 @@
+import { TRANSFORMER_STRINGS } from "./i18nTransformer";
+
 export type Lang = "zh" | "en" | "vi" | "es" | "tr" | "id";
 
 export const LANG_OPTIONS: { id: Lang; label: string; short: string }[] = [
@@ -116,7 +118,6 @@ const en: Dict = {
   mvaPlaceholder: "25",
   needMva: "Enter transformer capacity first.",
   kBelowOne: "Safety factor must be at least 1.",
-  starClass: "Neutral · OLTC {um} kV class",
   derivedCurrent: "≈ {a} A",
   currentRated: "Rated {a}A",
   currentMax: "Imax = {a}A",
@@ -281,7 +282,6 @@ const zh: Dict = {
   mvaPlaceholder: "25",
   needMva: "先填变压器容量。",
   kBelowOne: "安全系数不能小于 1。",
-  starClass: "中性点 · 开关 {um} kV 级",
   derivedCurrent: "约 {a} A",
   currentRated: "额定电流 {a}A",
   currentMax: "最大通过电流 {a}A",
@@ -400,7 +400,7 @@ const zh: Dict = {
   specCage: "笼式",
   specDrum: "鼓式",
   specSel: "选择器",
-  specEarth: "对地 工频 / 雷电",
+  specEarth: "对地工频/雷电",
   specArc: "灭弧方式",
   specVac: "真空",
   specOil: "油灭弧",
@@ -445,7 +445,6 @@ const vi: Dict = {
   mvaPlaceholder: "25",
   needMva: "Nhập dung lượng máy biến áp trước.",
   kBelowOne: "Hệ số an toàn phải ≥ 1.",
-  starClass: "Trung tính · OLTC cấp {um} kV",
   derivedCurrent: "≈ {a} A",
   currentRated: "Định mức {a}A",
   currentMax: "Imax = {a}A",
@@ -611,7 +610,6 @@ const es: Dict = {
   mvaPlaceholder: "25",
   needMva: "Indique primero la potencia del transformador.",
   kBelowOne: "El factor de seguridad debe ser ≥ 1.",
-  starClass: "Neutro · OLTC clase {um} kV",
   derivedCurrent: "≈ {a} A",
   currentRated: "Asignada {a}A",
   currentMax: "Imax = {a}A",
@@ -776,7 +774,6 @@ const tr: Dict = {
   mvaPlaceholder: "25",
   needMva: "Önce transformatör gücünü girin.",
   kBelowOne: "Güvenlik katsayısı en az 1 olmalı.",
-  starClass: "Nötr · OLTC {um} kV sınıfı",
   derivedCurrent: "≈ {a} A",
   currentRated: "Anma {a}A",
   currentMax: "Imax = {a}A",
@@ -941,7 +938,6 @@ const idn: Dict = {
   mvaPlaceholder: "25",
   needMva: "Isi kapasitas trafo terlebih dahulu.",
   kBelowOne: "Faktor keamanan minimal 1.",
-  starClass: "Netral · OLTC kelas {um} kV",
   derivedCurrent: "≈ {a} A",
   currentRated: "Nominal {a}A",
   currentMax: "Imax = {a}A",
@@ -1068,7 +1064,15 @@ const idn: Dict = {
   langAria: "Bahasa",
 };
 
-const TABLES: Record<Lang, Dict> = { en, zh, vi, es, tr, id: idn };
+const X = TRANSFORMER_STRINGS;
+const TABLES: Record<Lang, Dict> = {
+  en: { ...en, ...X.en },
+  zh: { ...zh, ...X.zh },
+  vi: { ...vi, ...X.vi },
+  es: { ...es, ...X.es },
+  tr: { ...tr, ...X.tr },
+  id: { ...idn, ...X.id },
+};
 
 export function t(
   lang: Lang,
@@ -1076,7 +1080,7 @@ export function t(
   vars?: Record<string, string | number>,
 ): string {
   const table = TABLES[lang] ?? en;
-  let s = table[key] ?? en[key] ?? key;
+  let s = table[key] ?? TABLES.en[key] ?? key;
   if (vars) {
     for (const [k, v] of Object.entries(vars)) {
       s = s.replaceAll(`{${k}}`, String(v));

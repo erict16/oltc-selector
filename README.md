@@ -2,7 +2,7 @@
 
 填工况，给出 2025 目录里**最低满足**的型号。网页和 `oltc` CLI 共用同一份 `selectOltc` 引擎。
 
-**CLI：** `npx -y oltc-selector@1.3.0`，命令是 `oltc`。Agent 技能包另放，不在这个仓库里。  
+**CLI：** `npx -y oltc-selector@2.0.0`，命令是 `oltc`。Agent 技能包另放，不在这个仓库里。  
 **网页：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) · [GitHub Pages](https://erict16.github.io/oltc-selector/)
 
 私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。
@@ -21,7 +21,13 @@ oltc --iu 350 --um 40.5 --conn D --reg W --pm 8
 
 oltc --octc --iu 800 --um 72.5 --conn D --series II --contact 6x5
 oltc --iu 600 --um 72.5 --conn Y --reg W --pm 8 --structure combined
-oltc --mva 25 --kv 110 --conn Y --reg W --pm 8
+oltc --mva 25 --kv 110 --tap neutral --reg W --pm 8
+oltc --mva 16 --kv 22 --tap line --winding star
+# CV2III-600D/40.5-10193W
+
+# Autotransformer tapped at the series/common junction (sized on the HV side)
+oltc --mva 125 --kind auto --hv 225 --mv 115 --tap junction
+# 3xCM2I-500/252D-10193W
 ```
 
 | Flag | Meaning | Default |
@@ -29,9 +35,14 @@ oltc --mva 25 --kv 110 --conn Y --reg W --pm 8
 | `--iu` / `--imax` | Max through-current Imax (A). **No** safety factor. | required unless `--mva` |
 | `--mva` `--kv` | Transformer MVA + tap-side kV → Imax (min tap + `--k`) | |
 | `--k` | Safety factor ≥ 1, **capacity path only** | 1.0 |
+| `--kind two\|auto` | Transformer kind (`--auto` = `--kind auto`) | two-winding |
+| `--tap` | Where the OLTC sits: `neutral` / `line` (two-winding), `junction` / `mv-line` (autotransformer). Sets current, Ust and Um. | neutral |
+| `--winding star\|delta` | Tapped winding connection (two-winding) | star |
+| `--hv` `--mv` | Autotransformer HV / MV rated kV | |
+| `--earth-um` | OLTC insulation to earth from the OS; overrides the rule | |
 | `--um` | Equipment Um (kV) | derived from `--kv` on MVA path |
 | `--ust` | Step voltage (V) | 0, or derived on MVA path |
-| `--conn Y\|D` | Switch star / delta (not Dyn11) | Y |
+| `--conn Y\|D` | Switch star / delta on the `--iu` path (with `--mva`, use `--tap`) | Y |
 | `--reg W\|G\|0` | Reversing / coarse-fine / linear | W |
 | `--pm` | ± steps | 8 |
 | `--octc` | Off-circuit 无载 (WSL/WSG) | on-load |
@@ -54,6 +65,7 @@ oltc --mva 25 --kv 110 --conn Y --reg W --pm 8
 6. **WSL / WDL existence is 2025-list row keys without prices** (`lib/listIndex.data.json`). Missing rows (no `WSLIV-2000D/126`, no `7x6E` @ 72.5) are not emitted.
 7. **WSG** is catalogue axes only (no 2025 list sheet in the index).
 8. **Typing Imax (`--iu`) does not apply a safety factor.** `--k` only applies on the transformer-capacity (`--mva`) path.
+9. **Um is set where the tap changer sits** (`lib/transformer.ts`). Line end: the winding system's class (132 kV → 145, 220 kV → 252). Neutral: the full class up to 72.5; above that 72.5 is assumed and flagged. Autotransformer: the HV system's class, combined types only (no CV / CV2 / SV).
 
 ## Web app
 

@@ -3,7 +3,10 @@ import {
   DEFAULT_WINDING_RATED_KV,
   calculatedUm,
   deriveOltcUm,
+  RATED_TO_WINDING_UM,
+  catalogueUmFromRatedKv,
   formatUmKv,
+  iecUmFromRatedKv,
   isTapSideRatedKv,
   maxThroughCurrent,
   oltcUmFromRatedKv,
@@ -340,5 +343,29 @@ describe("training cases from tap-side Un", () => {
 
   it("138 kV Y → 72.5 (103 MVA training)", () => {
     expect(oltcUmFromRatedKv(138, "Y")).toBe(72.5);
+  });
+});
+
+describe("iecUmFromRatedKv", () => {
+  it("gives the IEC 60038 Um, not the catalogue class", () => {
+    const cases: [number, number][] = [
+      [6.6, 7.2], [11, 12], [13.8, 17.5], [22, 24], [33, 36], [34.5, 36], [38.5, 40.5], [10.5, 12],
+      [35, 40.5], [66, 72.5], [69, 72.5], [110, 123], [115, 123], [121, 123],
+      [132, 145], [138, 145], [150, 170], [154, 170], [220, 245],
+      [225, 245], [230, 245], [242, 245], [330, 362], [345, 362], [400, 420], [500, 550],
+    ];
+    for (const [un, um] of cases) expect(iecUmFromRatedKv(un)).toBe(um);
+  });
+
+  it("is NaN without a voltage", () => {
+    expect(iecUmFromRatedKv(0)).toBeNaN();
+  });
+
+  it("catalogue class covers the actual Um and matches the menu map", () => {
+    expect(catalogueUmFromRatedKv(22)).toBe(40.5);
+    expect(catalogueUmFromRatedKv(11)).toBe(12);
+    for (const [kv, um] of Object.entries(RATED_TO_WINDING_UM)) {
+      expect(catalogueUmFromRatedKv(Number(kv))).toBe(um);
+    }
   });
 });

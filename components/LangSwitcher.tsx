@@ -14,35 +14,41 @@ export function LangSwitcher({
   lang: Lang;
   onChange: (l: Lang) => void;
   ariaLabel: string;
+  /** Kept for older call sites; the switch has one look. */
+  tone?: "light" | "dark";
 }) {
   return (
-    <div
-      className="ml-auto flex w-auto max-w-full shrink-0 flex-nowrap items-center justify-end gap-1"
-      role="group"
-      aria-label={ariaLabel}
-    >
-      {LANG_OPTIONS.map((opt) => {
-        const on = lang === opt.id;
-        return (
-          <button
-            key={opt.id}
-            type="button"
-            title={opt.label}
-            aria-pressed={on}
-            onClick={() => onChange(opt.id)}
-            className={cx(
-              "inline-flex h-7 w-[2.35rem] shrink-0 items-center justify-center rounded-[var(--radius-sm)] border text-[0.6875rem] font-medium leading-none transition-colors duration-150",
-              opt.id === "zh" ? "tracking-normal" : "tracking-[0.14em]",
-              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-              on
-                ? "border-[var(--color-accent)] text-[var(--color-accent)]"
-                : "border-[var(--color-rule)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink-2)]",
-            )}
-          >
+    <>
+      {/* Phones: one native menu instead of six chips. */}
+      <select
+        aria-label={ariaLabel}
+        value={lang}
+        onChange={(e) => onChange(e.target.value as Lang)}
+        className="ui-control ui-control-sm w-auto sm:hidden"
+      >
+        {LANG_OPTIONS.map((opt) => (
+          <option key={opt.id} value={opt.id}>
             {opt.short}
-          </button>
-        );
-      })}
-    </div>
+          </option>
+        ))}
+      </select>
+      <div className="ui-track ui-track-sm hidden sm:grid" role="group" aria-label={ariaLabel}>
+        {LANG_OPTIONS.map((opt) => {
+          const on = lang === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              title={opt.label}
+              aria-pressed={on}
+              onClick={() => onChange(opt.id)}
+              className={cx("ui-seg w-10", on && "is-on")}
+            >
+              {opt.short}
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 }

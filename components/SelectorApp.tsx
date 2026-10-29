@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   CheckIcon,
   ChevronDownIcon,
-  ClipboardDocumentIcon,
+  Square2StackIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -24,10 +24,6 @@ import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
   formatUmKv,
-  maxThroughCurrent,
-  oltcUmFromRatedKv,
-  stepVoltageFromPercent,
-  throughCurrentFromRated,
 } from "@/lib/deriveUm";
 
 import {
@@ -51,7 +47,22 @@ import {
   type ParsedTapRange,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
+import {
+  KindToggle,
+  TapList,
+  TransformerSketch,
+} from "@/components/TransformerPicker";
+import {
+  TAP_POINTS_FOR,
+  deriveDuty,
+  type DutyBasis,
+  type TransformerSpec,
+  type TapPoint,
+  type TransformerKind,
+  type WindingConnection,
+} from "@/lib/transformer";
 import { UpSelect } from "@/components/UpSelect";
+import { localizeNote, notesFor } from "@/lib/noteI18n";
 import { useAppLang } from "@/components/LangProvider";
 import {
   currentLabel,
@@ -105,6 +116,9 @@ const SAFETY_K_OPTIONS = [
   1, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.5, 1.6, 1.7, 1.8,
 ] as const;
 
+/** Catalogue Um classes offered when the OS states the switch insulation. */
+const EARTH_UM_OPTIONS = [40.5, 72.5, 126, 145, 170, 252, 300, 363] as const;
+
 const defaultInput: SelectInput = {
   mounting: "in_tank",
   medium: "oil_vacuum",
@@ -128,32 +142,6 @@ const defaultInput: SelectInput = {
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
-}
-
-function CaptionSub({
-  name,
-  sub,
-  eq,
-  value,
-  unit,
-}: {
-  name: string;
-  sub: string;
-  eq?: boolean;
-  value: string;
-  unit: string;
-}) {
-  return (
-    <>
-      {name}
-      <sub className="relative top-[0.22em] ml-px text-[0.62em] leading-none">
-        {sub}
-      </sub>
-      {eq !== false ? " = " : " "}
-      {value}
-      {unit}
-    </>
-  );
 }
 
 /**
@@ -194,19 +182,11 @@ function DecimalInput({
   );
 }
 
-/** Comfortable control — one hover signal (border), shared height */
-const controlClass =
-  "h-11 w-full min-w-0 rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white px-3 text-[0.9rem] leading-snug text-[var(--color-ink)] transition-colors duration-150 hover:border-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none";
+/** Shared field and segment styles live in globals.css (UI kit). */
+const controlClass = "ui-control";
 
-/** Same white field as the menus. The accent border is the only selected mark. */
 function segBtn(on: boolean) {
-  return cx(
-    "inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] border bg-white text-[0.9rem] text-[var(--color-ink)] transition-colors duration-150",
-    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-    on
-      ? "border-[var(--color-accent)] font-medium"
-      : "border-[var(--color-rule-2)] hover:border-[var(--color-accent)]",
-  );
+  return cx("ui-seg", on && "is-on");
 }
 
 function Field({
@@ -236,7 +216,7 @@ function Field({
   return (
     <Tag className={cx("flex min-w-0 flex-col gap-2 overflow-visible", className)}>
       <span className="flex min-h-[1.625rem] flex-nowrap items-center gap-2 overflow-visible">
-        <span className="min-w-0 flex-1 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink)]">
+        <span className="min-w-0 flex-1 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]">
           {label.split("ᵤ").map((part, i, arr) =>
             i < arr.length - 1 ? (
               <span key={i}>
@@ -275,6 +255,273 @@ function Field({
   );
 }
 
+function CardHead({
+  title,
+  right,
+}: {
+  title: string;
+  right?: React.ReactNode;
+}) {
+  return (
+    <div className="mb-4 flex min-h-6 items-center gap-3">
+      <h2 className="min-w-0 flex-1 text-[0.9375rem] leading-tight font-semibold text-[var(--color-ink)]">
+        {title}
+      </h2>
+      {right}
+    </div>
+  );
+}
+
+function Readout({
+  label,
+  value,
+  unit,
+  note,
+  warn,
+  text,
+  sub,
+}: {
+  label: string;
+  value: string;
+  unit?: string;
+  note?: string;
+  warn?: boolean;
+  /** A word, not a number: keep it in the sans face. */
+  text?: boolean;
+  /** Where the value came from, one quiet line under it. */
+  sub?: string;
+}) {
+  return (
+    <div className="min-w-0 px-4 py-2">
+      <dt className="truncate text-[0.75rem] text-[var(--color-muted)]">{label}</dt>
+      <dd className="mt-1 flex items-baseline gap-1 overflow-hidden py-px whitespace-nowrap">
+        <span
+          className={cx(
+            "min-w-0 truncate text-[1.125rem] leading-[1.3] font-semibold text-[var(--color-ink)]",
+            !text && "num",
+          )}
+        >
+          {value}
+        </span>
+        {unit ? <span className="text-[0.75rem] text-[var(--color-muted)]">{unit}</span> : null}
+        {note ? (
+          <span
+            className={cx(
+              "ml-1 truncate text-[0.75rem]",
+              warn ? "font-medium text-[var(--color-warn)]" : "text-[var(--color-caption)]",
+            )}
+          >
+            {note}
+          </span>
+        ) : null}
+      </dd>
+      {sub ? (
+        <dd className="mt-0.5 truncate text-[0.75rem] leading-snug text-[var(--color-caption)]">{sub}</dd>
+      ) : null}
+    </div>
+  );
+}
+
+/** Icon-only copy; says 已复制 for a moment after a click. */
+function CopyButton({
+  lang,
+  copied,
+  onCopy,
+  small,
+}: {
+  lang: Lang;
+  copied: boolean;
+  onCopy: () => void;
+  small?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onCopy}
+      title={t(lang, "copyType")}
+      aria-label={copied ? t(lang, "copied") : t(lang, "copyType")}
+      className={cx(
+        "inline-flex shrink-0 items-center justify-center gap-1 rounded-[6px] transition-colors duration-150",
+        "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-accent)]",
+        small ? "h-8 min-w-8" : "h-9 min-w-9",
+        copied
+          ? "px-2 text-[0.75rem] font-medium text-[var(--color-accent)]"
+          : "text-[var(--color-caption)] hover:bg-[var(--color-field)] hover:text-[var(--color-ink)]",
+      )}
+    >
+      {copied ? (
+        <>
+          <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+          <span aria-live="polite">{t(lang, "copied")}</span>
+        </>
+      ) : (
+        <Square2StackIcon className={small ? "h-4 w-4" : "h-[18px] w-[18px]"} strokeWidth={1.6} aria-hidden />
+      )}
+    </button>
+  );
+}
+
+/** Duty the form implies right now; it is the plate's top row. */
+function DutyReadout({
+  lang,
+  duty,
+  dutyA,
+  ratedA,
+  tap,
+  transformerLine,
+}: {
+  lang: Lang;
+  duty: DutyBasis;
+  dutyA: number | null;
+  /** Rated current when the form works from MVA; null when typed. */
+  ratedA: number | null;
+  tap: TapPoint;
+  transformerLine: string;
+}) {
+  const ok = duty.ok;
+  const showActual =
+    ok &&
+    Number.isFinite(duty.actualUmKv) &&
+    duty.umRule !== "neutral_full" &&
+    duty.umRule !== "neutral_assumed" &&
+    duty.umRule !== "explicit";
+  return (
+    <dl
+      aria-label={t(lang, "liveTitle")}
+      className="grid grid-cols-2 gap-y-1 px-1 pt-2 pb-3"
+    >
+      <Readout
+        label={t(lang, "kpiImax")}
+        value={dutyA != null && dutyA > 0 ? round1(dutyA) : "—"}
+        unit="A"
+        sub={ratedA != null && ratedA > 0 ? t(lang, "kpiRated", { a: round1(ratedA) }) : undefined}
+      />
+      <Readout
+        label={t(lang, "kpiUst")}
+        value={ok && duty.stepV != null ? round1(duty.stepV) : "—"}
+        unit="V"
+      />
+      <Readout
+        label={t(lang, "kpiUm")}
+        value={ok ? round1(duty.umKv) : "—"}
+        unit="kV"
+        note={ok && duty.umAssumed ? t(lang, "checkOs") : undefined}
+        warn
+        sub={showActual ? t(lang, "kpiActual", { um: round1(duty.actualUmKv) }) : undefined}
+      />
+      <Readout
+        label={t(lang, "kpiTap")}
+        value={t(lang, `tapShort_${tap}`)}
+        text
+        sub={transformerLine}
+      />
+    </dl>
+  );
+}
+
+type PickedBasis = {
+  duty: DutyBasis;
+  kind: TransformerKind;
+  tapPoint: TapPoint;
+  winding: WindingConnection;
+  tapKv: number;
+  hvKv: number;
+  mvKv: number;
+  capacity: boolean;
+};
+
+function round1(n: number): string {
+  if (!Number.isFinite(n)) return "—";
+  const r = Math.round(n * 10) / 10;
+  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+}
+
+/** Rated-voltage menu with a custom entry. */
+function KvField({
+  lang,
+  label,
+  kvValue,
+  onKv,
+}: {
+  lang: Lang;
+  label: string;
+  kvValue: number;
+  onKv: (kv: number) => void;
+}) {
+  const [custom, setCustom] = useState(false);
+  return (
+            <Field
+              as="div"
+              label={label}
+            >
+              <div className="relative">
+                {custom ||
+                (kvValue > 0 &&
+                  !(WINDING_RATED_KV as readonly number[]).includes(
+                    kvValue,
+                  )) ? (
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step={0.1}
+                    className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                    value={kvValue > 0 ? String(kvValue) : ""}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === "") {
+                        onKv(0);
+                        return;
+                      }
+                      const n = Number(raw);
+                      if (!Number.isFinite(n) || n < 0) return;
+                      onKv(n);
+                    }}
+                    onBlur={() => {
+                      if (
+                        (WINDING_RATED_KV as readonly number[]).includes(
+                          kvValue,
+                        )
+                      ) {
+                        setCustom(false);
+                      }
+                    }}
+                  />
+                ) : (
+                  <select
+                    className={controlClass}
+                    value={kvValue > 0 ? String(kvValue) : ""}
+                    onChange={(e) => {
+                      if (e.target.value === "__custom__") {
+                        setCustom(true);
+                        return;
+                      }
+                      setCustom(false);
+                      onKv(Number(e.target.value));
+                    }}
+                  >
+                    <option value="__custom__">{t(lang, "custom")}</option>
+                    {WINDING_RATED_KV.map((v) => (
+                      <option key={v} value={v}>
+                        {v} kV
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {custom ||
+                (kvValue > 0 &&
+                  !(WINDING_RATED_KV as readonly number[]).includes(
+                    kvValue,
+                  )) ? (
+                  <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.75rem] text-[var(--color-muted)]">
+                    kV
+                  </span>
+                ) : null}
+              </div>
+            </Field>
+  );
+}
+
 /** Break a type string after "-" and "/", never in the middle of a token. */
 function modelNodes(model: string) {
   return model.split(/([-/])/).map((part, i) =>
@@ -287,12 +534,6 @@ function modelNodes(model: string) {
       part
     ),
   );
-}
-
-function formatAmps(a: number): string {
-  if (!Number.isFinite(a) || a <= 0) return "";
-  const r = Math.round(a * 10) / 10;
-  return Number.isInteger(r) ? String(r) : r.toFixed(1);
 }
 
 /** Ceiling tip from in-tank vacuum III axes only (not dry-type 160 A). */
@@ -313,7 +554,6 @@ export function SelectorApp() {
   );
   const [transformerMva, setTransformerMva] = useState(25);
   const [mvaCustom, setMvaCustom] = useState(false);
-  const [kvCustom, setKvCustom] = useState(false);
   const [tapPlus, setTapPlus] = useState(8);
   const [tapMinus, setTapMinus] = useState(8);
   const [stepPercentPct, setStepPercentPct] = useState(1.25);
@@ -321,6 +561,13 @@ export function SelectorApp() {
   const [safetyK, setSafetyK] = useState(1);
   const [safetyKCustom, setSafetyKCustom] = useState(false);
   const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
+  const [kind, setKind] = useState<TransformerKind>("two_winding");
+  const [tapPoint, setTapPoint] = useState<TapPoint>("neutral");
+  const [winding, setWinding] = useState<WindingConnection>("star");
+  const [hvKv, setHvKv] = useState(220);
+  const [mvKv, setMvKv] = useState(110);
+  /** OLTC insulation to earth stated by the OS / maker. 0 = by rule. */
+  const [earthUm, setEarthUm] = useState(0);
   const [altsOpen, setAltsOpen] = useState(false);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
@@ -330,6 +577,7 @@ export function SelectorApp() {
   /** Through-current actually sent on the last successful sizing. */
   const [pickedDutyA, setPickedDutyA] = useState<number | null>(null);
   const [pickedStepV, setPickedStepV] = useState(0);
+  const [pickedBasis, setPickedBasis] = useState<PickedBasis | null>(null);
   const [resultKey, setResultKey] = useState(0);
   const [hasRun, setHasRun] = useState(false);
   const [stale, setStale] = useState(false);
@@ -403,6 +651,33 @@ export function SelectorApp() {
       setWindingRatedKv(0);
       patch("umKv", kv);
       return;
+    }
+    touch();
+  };
+
+  const pickTap = (p: TapPoint) => {
+    if (kind === "two_winding" && winding === "delta" && p === "neutral") return;
+    setTapPoint(p);
+    // Engine Y = one switch on a common star point; D = no common star point.
+    setInput((s) => ({ ...s, connection: p === "neutral" ? "Y" : "D" }));
+    touch();
+  };
+
+  const pickKind = (k: TransformerKind) => {
+    if (k === kind) return;
+    setKind(k);
+    const p: TapPoint =
+      k === "auto" ? "auto_junction" : winding === "delta" ? "line_end" : "neutral";
+    setTapPoint(p);
+    setInput((s) => ({ ...s, connection: p === "neutral" ? "Y" : "D" }));
+    touch();
+  };
+
+  const pickWinding = (w: WindingConnection) => {
+    setWinding(w);
+    if (w === "delta" && tapPoint === "neutral") {
+      setTapPoint("line_end");
+      setInput((s) => ({ ...s, connection: "D" }));
     }
     touch();
   };
@@ -541,33 +816,30 @@ export function SelectorApp() {
     return 0;
   };
 
+  /** Transformer → duty. The one place current, Ust and Um come from. */
+  const transformerSpec = (): TransformerSpec => ({
+      kind: isOctc ? "two_winding" : kind,
+      tapPoint: isOctc && kind === "auto" ? "line_end" : tapPoint,
+      winding,
+      mva: currentMode === "capacity" ? transformerMva : 0,
+      tapKv: windingRatedKv,
+      hvKv,
+      mvKv,
+      minusSteps: minusSteps(),
+      stepFraction: stepFraction(),
+      safetyK,
+      ...(earthUm > 0 ? { earthUmKv: earthUm } : {}),
+    });
+  const transformerDuty = (): DutyBasis => deriveDuty(transformerSpec());
+
   const capacityThroughA = (): number | null => {
-    if (!(transformerMva > 0) || !(windingRatedKv > 0)) return null;
-    const rated = throughCurrentFromRated(
-      transformerMva,
-      windingRatedKv,
-      input.connection,
-    );
-    if (!Number.isFinite(rated) || rated <= 0) return null;
-    const minus = minusSteps();
-    const pct = stepFraction();
-    const iMax =
-      minus > 0 && pct != null && pct > 0
-        ? maxThroughCurrent(rated, minus, pct)
-        : rated;
-    const k = safetyK > 0 ? safetyK : 1;
-    return iMax * k;
+    const d = transformerDuty();
+    return d.ok && Number.isFinite(d.dutyA) && d.dutyA > 0 ? d.dutyA : null;
   };
 
   const computedStepVoltage = (): number | null => {
-    const pct = stepFraction();
-    if (!(windingRatedKv > 0) || pct == null || !(pct > 0)) return null;
-    const v = stepVoltageFromPercent(
-      windingRatedKv,
-      pct,
-      input.connection,
-    );
-    return Number.isFinite(v) && v > 0 ? v : null;
+    const d = transformerDuty();
+    return d.ok && d.stepV != null && d.stepV > 0 ? d.stepV : null;
   };
 
   const withOctcSeries = (duty: SelectInput): SelectInput => {
@@ -586,33 +858,31 @@ export function SelectorApp() {
 
   const dutyForSelect = ():
     | SelectInput
-    | { error: true; msgKey: string } => {
+    | { error: true; msgKey?: string; msg?: string } => {
     if (currentMode === "capacity") {
       if (safetyK > 0 && safetyK < 1) return { error: true, msgKey: "kBelowOne" };
       if (!(transformerMva > 0)) return { error: true, msgKey: "needMva" };
-      if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
-      const i = capacityThroughA();
-      if (i == null) return { error: true, msgKey: "needMva" };
-      const ust = computedStepVoltage();
-      return withOctcSeries({
-        ...input,
-        throughCurrentA: i,
-        // Catalogue class for the switch. The corner shows calculatedUm.
-        umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
-        ...(ust != null ? { stepVoltageV: ust } : {}),
-      });
     }
-    if (voltageMode === "winding") {
-      if (!(windingRatedKv > 0)) return { error: true, msgKey: "needRated" };
-      const ust = computedStepVoltage();
-      return withOctcSeries({
-        ...input,
-        umKv: oltcUmFromRatedKv(windingRatedKv, input.connection),
-        ...(ust != null ? { stepVoltageV: ust } : {}),
-      });
+    const d = transformerDuty();
+    if (!d.ok) {
+      return {
+        error: true,
+        msg: lang === "zh" ? d.errorZh : localizeNote(d.errorEn ?? "", lang),
+      };
     }
-    if (!(input.umKv > 0)) return { error: true, msgKey: "needUm" };
-    return withOctcSeries({ ...input, umKv: input.umKv });
+    const ust = d.stepV != null && d.stepV > 0 ? d.stepV : null;
+    const sized: SelectInput = {
+      ...input,
+      connection: d.connection,
+      transformerKind: isOctc ? "two_winding" : kind,
+      umKv: d.umKv,
+      ...(ust != null ? { stepVoltageV: ust } : {}),
+    };
+    if (currentMode === "capacity") {
+      if (!(d.dutyA > 0)) return { error: true, msgKey: "needMva" };
+      return withOctcSeries({ ...sized, throughCurrentA: d.dutyA });
+    }
+    return withOctcSeries(sized);
   };
 
   const runSelect = () => {
@@ -623,9 +893,10 @@ export function SelectorApp() {
     runTimer.current = setTimeout(() => {
       const duty = dutyForSelect();
       if ("error" in duty) {
-        const msg = t(lang, duty.msgKey);
+        const msg = duty.msg ?? t(lang, duty.msgKey ?? "needRated");
         setPickedDutyA(null);
         setPickedStepV(0);
+        setPickedBasis(null);
         setResult({
           ok: false,
           results: [],
@@ -639,6 +910,16 @@ export function SelectorApp() {
         return;
       }
       setPickedDutyA(duty.throughCurrentA);
+      setPickedBasis({
+        duty: transformerDuty(),
+        kind: isOctc ? "two_winding" : kind,
+        tapPoint: isOctc && kind === "auto" ? "line_end" : tapPoint,
+        winding,
+        tapKv: windingRatedKv,
+        hvKv,
+        mvKv,
+        capacity: currentMode === "capacity",
+      });
       setPickedStepV(duty.stepVoltageV > 0 ? duty.stepVoltageV : 0);
       const out = selectOltc(duty);
       setResult(out);
@@ -708,10 +989,6 @@ export function SelectorApp() {
     !loose && result?.ok && pickedDutyA != null
       ? insuranceModel(result.results, pickedDutyA, pickedStepV, marginNeed)
       : null;
-  const posHint =
-    !isLinear && input.positions != null
-      ? t(lang, "posHint", { n: input.positions })
-      : null;
 
   const pmOptions = pmStepOptionsFor(input.regulation);
   const pmN =
@@ -728,56 +1005,175 @@ export function SelectorApp() {
   const derivedOk =
     derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
   const ustV = computedStepVoltage();
-  // The class the engine sends, not Un/√3 (110 kV star used to show 63.5).
-  // Star: the switch sits at the neutral, so the caption names the switch's
-  // class (72.5 beside 150 kV), not a Um of the winding. Delta: the Um alone.
-  const um =
-    voltageMode === "winding" && windingRatedKv > 0
-      ? oltcUmFromRatedKv(windingRatedKv, input.connection)
-      : NaN;
-
+  const duty = transformerDuty();
+  const ruleDuty = deriveDuty({ ...transformerSpec(), earthUmKv: undefined });
+  const kindEff: TransformerKind = isOctc ? "two_winding" : kind;
   return (
-    <div className="flex w-full min-w-0 flex-1 flex-col lg:grid lg:h-dvh lg:grid-cols-2 lg:overflow-hidden">
+    <div className="flex w-full min-w-0 flex-1 flex-col">
+      <header className="topbar sticky top-0 z-30">
+        <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`}
+            alt=""
+            width={28}
+            height={28}
+            className="h-6 w-6 shrink-0 rounded-[6px] sm:h-7 sm:w-7"
+          />
+          <div className="min-w-0 leading-tight">
+            <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-ink)]">
+              {t(lang, "title")}
+            </h1>
+          </div>
+          <div className="ml-auto">
+            <LangSwitcher
+              lang={lang}
+              onChange={setLang}
+              ariaLabel={t(lang, "langAria")}
+            />
+          </div>
+        </div>
+      </header>
+      <div className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-3 pb-6 sm:gap-8 sm:px-8 sm:pt-6 sm:pb-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-12 lg:pt-8 xl:grid-cols-[minmax(0,1fr)_28rem] xl:gap-16">
         <form
-          className="pane-in pane-in-late order-2 flex min-w-0 flex-col overflow-y-auto lg:relative bg-[#f4f7fb] px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-7 sm:py-8 lg:col-start-2 lg:row-start-1 lg:h-dvh lg:min-h-0 lg:px-8 lg:py-6"
+          className="flex min-w-0 flex-col"
           onSubmit={(e) => {
             e.preventDefault();
             runSelect();
           }}
         >
-          {/* Desktop: the row sits at the pane top, level with the left title,
-              and the title centres on the chips. The fields centre below. */}
-          <div className="mb-3 flex items-center gap-x-3 lg:mt-[3px]">
-            <h2 className="min-w-0 flex-1 font-[family-name:var(--font-display)] text-[0.9375rem] font-semibold leading-snug text-[var(--color-ink)]">
-              {t(lang, "duty")}
-            </h2>
-            <div className="ml-auto">
-              <LangSwitcher
-                lang={lang}
-                onChange={setLang}
-                ariaLabel={t(lang, "langAria")}
-              />
-            </div>
-          </div>
-          <div className="mx-auto my-auto w-full">
+          <div className="w-full">
 
-          <div className="grid gap-x-5 gap-y-3 sm:grid-cols-2">
+          <div className="sheet">
+            <section aria-label={t(lang, "transformer")} className="sheet-section">
+              <CardHead
+                title={t(lang, "transformer")}
+                right={
+                  kindEff === "auto" ? (
+                    <span className="shrink-0 text-[0.75rem] font-medium text-[var(--color-accent)]">
+                      {t(lang, "combinedOnly")}
+                    </span>
+                  ) : undefined
+                }
+              />
+              <KindToggle
+                lang={lang}
+                kind={kindEff}
+                onKind={pickKind}
+                autoDisabled={isOctc}
+              />
+              {isOctc ? (
+                <p className="mt-2 text-[0.75rem] leading-snug text-[var(--color-muted)]">
+                  {t(lang, "autoOctcNote")}
+                </p>
+              ) : null}
+              <div className="mt-5 grid items-center gap-6 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
+                <div className="sketch-stage flex justify-center px-3 py-3 sm:py-4">
+                  <TransformerSketch
+                    lang={lang}
+                    kind={kindEff}
+                    tapPoint={isOctc && kind === "auto" ? "line_end" : tapPoint}
+                    winding={winding}
+                    tapKv={windingRatedKv}
+                    hvKv={hvKv}
+                    mvKv={mvKv}
+                    onTap={pickTap}
+                  />
+                </div>
+                <div className="flex min-w-0 flex-col gap-3">
+                  <Field as="div" label={t(lang, "tapPoint")}>
+                    <TapList
+                      lang={lang}
+                      kind={kindEff}
+                      winding={winding}
+                      tapPoint={isOctc && kind === "auto" ? "line_end" : tapPoint}
+                      onTap={pickTap}
+                    />
+                  </Field>
+                  {kindEff === "two_winding" ? (
+                    <Field as="div" label={t(lang, "winding")}>
+                      <div role="radiogroup" aria-label={t(lang, "winding")} className="ui-track">
+                        {(["star", "delta"] as const).map((w) => (
+                          <button
+                            key={w}
+                            type="button"
+                            role="radio"
+                            aria-checked={winding === w}
+                            className={segBtn(winding === w)}
+                            onClick={() => pickWinding(w)}
+                          >
+                            {t(lang, w === "star" ? "windingStar" : "windingDelta")}
+                          </button>
+                        ))}
+                      </div>
+                    </Field>
+                  ) : null}
+                </div>
+              </div>
+              <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
+                {kindEff === "auto" ? (
+                  <>
+                    <KvField
+                      lang={lang}
+                      label={t(lang, "hvKv")}
+                      kvValue={hvKv}
+                      onKv={(kv) => {
+                        setHvKv(kv);
+                        touch();
+                      }}
+                    />
+                    <KvField
+                      lang={lang}
+                      label={t(lang, "mvKv")}
+                      kvValue={mvKv}
+                      onKv={(kv) => {
+                        setMvKv(kv);
+                        touch();
+                      }}
+                    />
+                  </>
+                ) : (
+                  <KvField
+                    lang={lang}
+                    label={t(lang, "umWinding")}
+                    kvValue={windingRatedKv}
+                    onKv={setVoltageKv}
+                  />
+                )}
+                <Field
+                  label={t(lang, "earthUm")}
+                >
+                  <select
+                    className={controlClass}
+                    value={String(earthUm)}
+                    onChange={(e) => {
+                      setEarthUm(Number(e.target.value));
+                      touch();
+                    }}
+                  >
+                    <option value="0">
+                      {ruleDuty.ok
+                        ? t(lang, "earthRule", { um: `Um ${formatUmKv(ruleDuty.umKv)} kV` })
+                        : t(lang, "earthRuleNone")}
+                    </option>
+                    {EARTH_UM_OPTIONS.map((u) => (
+                      <option key={u} value={String(u)}>
+                        Um {u} kV
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
+            </section>
+            <section aria-label={t(lang, "cardDuty")} className="sheet-section">
+              <CardHead title={t(lang, "cardDuty")} />
+              <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
             <Field
               as="div"
               label={
                 currentMode === "capacity"
                   ? t(lang, "transformerMva")
                   : t(lang, "throughCurrent")
-              }
-              action={
-                currentMode === "capacity" && derivedOk && derivedA != null ? (
-                  <CaptionSub
-                    name="I"
-                    sub="max"
-                    value={formatAmps(derivedA)}
-                    unit="A"
-                  />
-                ) : undefined
               }
             >
               {currentMode === "capacity" ? (
@@ -882,103 +1278,7 @@ export function SelectorApp() {
               )}
             </Field>
 
-            <Field
-              as="div"
-              label={t(lang, "umWinding")}
-              action={
-                !(Number.isFinite(um) && um > 0) ? undefined : input.connection === "Y" ? (
-                  t(lang, "starClass", { um: formatUmKv(um) })
-                ) : (
-                  <CaptionSub
-                    name="U"
-                    sub="m"
-                    value={formatUmKv(um)}
-                    unit="kV"
-                  />
-                )
-              }
-            >
-              <div className="relative">
-                {kvCustom ||
-                (windingRatedKv > 0 &&
-                  !(WINDING_RATED_KV as readonly number[]).includes(
-                    windingRatedKv,
-                  )) ? (
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step={0.1}
-                    className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                    value={windingRatedKv > 0 ? String(windingRatedKv) : ""}
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      if (raw === "") {
-                        setVoltageKv(0);
-                        return;
-                      }
-                      const n = Number(raw);
-                      if (!Number.isFinite(n) || n < 0) return;
-                      setVoltageKv(n);
-                    }}
-                    onBlur={() => {
-                      if (
-                        (WINDING_RATED_KV as readonly number[]).includes(
-                          windingRatedKv,
-                        )
-                      ) {
-                        setKvCustom(false);
-                      }
-                    }}
-                  />
-                ) : (
-                  <select
-                    className={controlClass}
-                    value={windingRatedKv > 0 ? String(windingRatedKv) : ""}
-                    onChange={(e) => {
-                      if (e.target.value === "__custom__") {
-                        setKvCustom(true);
-                        return;
-                      }
-                      setKvCustom(false);
-                      setVoltageKv(Number(e.target.value));
-                    }}
-                  >
-                    <option value="__custom__">{t(lang, "custom")}</option>
-                    {WINDING_RATED_KV.map((v) => (
-                      <option key={v} value={v}>
-                        {v} kV
-                      </option>
-                    ))}
-                  </select>
-                )}
-                {kvCustom ||
-                (windingRatedKv > 0 &&
-                  !(WINDING_RATED_KV as readonly number[]).includes(
-                    windingRatedKv,
-                  )) ? (
-                  <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.75rem] text-[var(--color-muted)]">
-                    kV
-                  </span>
-                ) : null}
-              </div>
-            </Field>
 
-            <Field as="div" label={t(lang, "connection")}>
-              <select
-                className={controlClass}
-                value={input.connection}
-                onChange={(e) =>
-                  patch(
-                    "connection",
-                    e.target.value as SelectInput["connection"],
-                  )
-                }
-              >
-                <option value="Y">{t(lang, "connY")}</option>
-                <option value="D">{t(lang, "connD")}</option>
-              </select>
-            </Field>
 
             {isOctc ? (
               <Field label={t(lang, "octcSeries")}>
@@ -1023,7 +1323,6 @@ export function SelectorApp() {
               <Field
                 as="div"
                 label={t(lang, "pmSteps")}
-                action={posHint && pm ? posHint : undefined}
               >
                 <select
                   className={controlClass}
@@ -1044,16 +1343,6 @@ export function SelectorApp() {
             <Field
               as="div"
               label={t(lang, "stepPercent")}
-              action={
-                ustV != null ? (
-                  <CaptionSub
-                    name="U"
-                    sub="st"
-                    value={String(Math.round(ustV))}
-                    unit="V"
-                  />
-                ) : undefined
-              }
             >
               <div className="relative">
                 {stepPctCustom ||
@@ -1124,11 +1413,6 @@ export function SelectorApp() {
                 <Field
                   as="div"
                   label={t(lang, "positions")}
-                  action={
-                    input.positions != null
-                      ? t(lang, "posHint", { n: input.positions })
-                      : undefined
-                  }
                 >
                   <div className="grid grid-cols-2 gap-2">
                       <select
@@ -1240,9 +1524,14 @@ export function SelectorApp() {
                 <option value="I">I</option>
               </select>
             </Field>
+              </div>
+            </section>
+            <section aria-label={t(lang, "cardSwitch")} className="sheet-section">
+              <CardHead title={t(lang, "cardSwitch")} />
+              <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
                   <Field label={t(lang, "dutyKind")} as="div">
                     <div
-                      className="grid h-11 grid-cols-2 gap-2"
+                      className="ui-track"
                       role="group"
                       aria-label={t(lang, "dutyKind")}
                     >
@@ -1292,10 +1581,7 @@ export function SelectorApp() {
                   {input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
                     <Field label={t(lang, "arcMode")} as="div">
                       <div
-                        className={cx(
-                          "grid h-11 grid-cols-2 gap-2",
-                          isOctc && "opacity-45",
-                        )}
+                        className={cx("ui-track", isOctc && "opacity-45")}
                         role="group"
                         aria-label={t(lang, "arcMode")}
                         aria-disabled={isOctc || undefined}
@@ -1322,11 +1608,7 @@ export function SelectorApp() {
                                 }));
                                 touch();
                               }}
-                              className={cx(
-                                segBtn(on),
-                                isOctc &&
-                                  "cursor-not-allowed hover:border-[var(--color-rule-2)]",
-                              )}
+                              className={segBtn(on)}
                             >
                               {t(lang, key)}
                             </button>
@@ -1392,7 +1674,7 @@ export function SelectorApp() {
                     </select>
                   </Field>
 
-                  <Field as="div" label={t(lang, "acrossInsul")}>
+                  <Field as="div" label={t(lang, "acrossInsul")} className="col-span-2 sm:col-span-1">
                     <div className="grid grid-cols-2 gap-2">
                       <UpSelect
                         label={t(lang, "acrossBil")}
@@ -1517,9 +1799,10 @@ export function SelectorApp() {
                       ) : null}
                     </div>
                   </Field>
-          </div>
+              </div>
+            </section>
 
-          <div className="mt-[30px] flex flex-col items-stretch gap-2">
+          <div className="submit-bar">
             <button
               type="submit"
               disabled={
@@ -1529,9 +1812,7 @@ export function SelectorApp() {
                   : !input.throughCurrentA)
               }
               className={cx(
-                "inline-flex min-h-11 w-full touch-manipulation items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--color-accent)] px-6 text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-accent-ink)] transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.2,0,0,1)]",
-                "hover:opacity-90 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-                "disabled:cursor-not-allowed disabled:opacity-50",
+                "ui-primary whitespace-nowrap",
                 running && "pointer-events-none",
               )}
             >
@@ -1548,93 +1829,99 @@ export function SelectorApp() {
             </button>
           </div>
           </div>
+          </div>
         </form>
 
-        <div className="pane-in order-1 bg-[#0A386A] text-white lg:col-start-1 lg:row-start-1">
-          <aside
-            ref={resultPaneRef}
-            className="flex flex-col px-5 pt-5 pb-4 sm:px-8 lg:sticky lg:top-0 lg:h-dvh lg:min-h-0 lg:px-8 lg:pt-7 lg:pb-6"
+        <aside
+          ref={resultPaneRef}
+          className="flex min-w-0 scroll-mt-20 flex-col gap-3 quiet-scroll lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto lg:pb-2"
+        >
+          <section
+            aria-label={t(lang, "resultAria")}
+            className={cx("plate", stale && !running && "is-stale")}
           >
-            <h1 className="shrink-0 text-[1.0625rem] font-semibold tracking-[0.08em] text-[#d7e4f0]">
-              {t(lang, "title")}
-            </h1>
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-clip overflow-y-auto">
-            <div className="w-full py-4 lg:my-auto lg:py-8">
-          {!hasRun || !result ? (
-            <IdlePanel lang={lang} running={running} />
-          ) : (
-            <div
-              className={cx(
-                "result-stage",
-                stale && !running && "is-stale",
-                running && "is-running",
-              )}
-            >
-              {stale && !running ? (
-                <p className="mb-3 text-[0.8125rem] leading-snug text-[#f3d48a]">
-                  {t(lang, "stale")}
-                </p>
-              ) : null}
-              <div className="grid">
-                <div key={resultKey} className="result-pop col-start-1 row-start-1">
-              {!result.ok || !primary ? (
-                <>
-                  <p className="text-[0.9375rem] font-semibold text-[#ffb4b4]">
-                    {t(lang, "noMatch")}
-                  </p>
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-[0.8125rem] leading-snug text-[#ffd0d0]">
-                    {(lang === "zh" ? result.errorsZh : result.errorsEn).map((e) => (
-                      <li key={e}>{e}</li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <>
-                  <p className="text-[0.75rem] font-semibold leading-snug tracking-[0.08em] text-[#8fd0e2]">
-                    {t(
-                      lang,
-                      showsMinimumLabel(loose)
-                        ? "recommended"
-                        : "allRound",
-                    )}
-                  </p>
-                  <div className="result-model mt-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                    <p className="min-w-0 font-mono text-[1.5rem] leading-[1.2] font-medium tracking-tight break-words text-white sm:flex-1 sm:text-[clamp(1.375rem,2.4vw,2rem)]">
-                      {modelNodes(displayModel(primary.model, lang))}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => copyModel(displayModel(primary.model, lang))}
-                      className="inline-flex h-9 shrink-0 self-start items-center gap-1.5 rounded-[var(--radius-sm)] border border-white px-3 text-[0.8125rem] font-semibold text-white transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-white/10 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:self-auto"
-                      aria-label={
-                        copiedModel === displayModel(primary.model, lang)
-                          ? t(lang, "copied")
-                          : t(lang, "copyType")
-                      }
-                    >
-                      {copiedModel === displayModel(primary.model, lang) ? (
-                        <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
-                      ) : (
-                        <ClipboardDocumentIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
-                      )}
-                      <span aria-live="polite">
-                        {copiedModel === displayModel(primary.model, lang)
-                          ? t(lang, "copied")
-                          : t(lang, "copy")}
-                      </span>
-                    </button>
+            <div className="plate-frame">
+              <DutyReadout
+                lang={lang}
+                duty={duty}
+                dutyA={currentMode === "capacity" ? derivedA : input.throughCurrentA}
+                ratedA={currentMode === "capacity" && duty.ok ? duty.ratedA : null}
+                tap={isOctc && kind === "auto" ? "line_end" : tapPoint}
+                transformerLine={(kindEff === "auto"
+                  ? [t(lang, "kindAuto"), `${round1(hvKv)}/${round1(mvKv)} kV`]
+                  : [
+                      t(lang, "kindTwo"),
+                      t(lang, winding === "star" ? "windingStar" : "windingDelta"),
+                      `${round1(windingRatedKv)} kV`,
+                    ]
+                ).join(lang === "zh" ? "，" : ", ")}
+              />
+              <div className="plate-rule px-5 pt-4 pb-4" aria-live="polite">
+                {running ? (
+                  <div className="flex h-[4.25rem] items-center gap-2.5 text-[0.9375rem] text-[var(--color-muted)]">
+                    <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[var(--color-rule-2)] border-t-[var(--color-accent)]" />
+                    {t(lang, "selecting")}
                   </div>
+                ) : !hasRun || !result ? (
+                  <div className="flex min-h-[4.25rem] flex-col justify-center">
+                    <p className="num text-[1.75rem] leading-none text-[var(--color-rule-2)]">—</p>
+                    <p className="mt-2 text-[0.8125rem] text-[var(--color-muted)]">
+                      {t(lang, "idleBody")}
+                    </p>
+                  </div>
+                ) : !result.ok || !primary ? (
+                  <div key={resultKey} className="plate-in">
+                    <p className="text-[0.9375rem] font-semibold text-[var(--color-danger)]">
+                      {t(lang, "noMatch")}
+                    </p>
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-[0.8125rem] leading-snug text-[var(--color-ink-2)]">
+                      {notesFor(lang, result.errorsZh, result.errorsEn).map((e) => (
+                        <li key={e}>{e}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div key={resultKey} className="plate-in">
+                    <p className="plate-cap truncate text-[0.75rem] font-medium text-[var(--color-muted)]">
+                      {stale ? (
+                        <span className="text-[var(--color-warn)]">{t(lang, "stale")}</span>
+                      ) : (
+                        t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")
+                      )}
+                    </p>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <p translate="no" className="plate-type min-w-0 flex-1 text-[clamp(1.0625rem,4.9vw,1.625rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.25rem,1.7vw,1.625rem)]">
+                        {modelNodes(displayModel(primary.model, lang))}
+                      </p>
+                      <CopyButton
+                        lang={lang}
+                        copied={copiedModel === displayModel(primary.model, lang)}
+                        onCopy={() => copyModel(displayModel(primary.model, lang))}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
 
-                  {primary.cautionsEn.length > 0 ? (
-                    <ul className="mt-3 space-y-1.5">
-                      {(lang === "zh" ? primary.cautionsZh : primary.cautionsEn).map((c) => (
+              {hasRun && result?.ok && primary && !running ? (
+                <div key={`d${resultKey}`} className="plate-in">
+                  {primary.cautionsEn.length + (pickedBasis?.duty.cautionsEn.length ?? 0) > 0 ? (
+                    <ul className="space-y-1.5 px-5 pb-4">
+                      {[
+                        ...notesFor(lang, primary.cautionsZh, primary.cautionsEn),
+                        ...notesFor(
+                          lang,
+                          pickedBasis?.duty.cautionsZh ?? [],
+                          pickedBasis?.duty.cautionsEn ?? [],
+                        ),
+                      ].map((c) => (
                         <li
                           key={c}
-                          className="flex gap-2 text-[0.8125rem] leading-snug text-[#f3d48a]"
+                          className="flex gap-2 text-[0.8125rem] leading-snug text-[var(--color-ink-2)]"
                         >
                           <ExclamationTriangleIcon
-                            className="mt-px h-4 w-4 shrink-0"
-                            strokeWidth={2}
+                            className="mt-px h-4 w-4 shrink-0 text-[var(--color-warn)]"
+                            strokeWidth={1.75}
                             aria-hidden
                           />
                           <span>{c}</span>
@@ -1643,27 +1930,22 @@ export function SelectorApp() {
                     </ul>
                   ) : null}
 
-                  <ModelSpec
-                    lang={lang}
-                    r={primary}
-                    dutyMounting={input.mounting}
-                    inverse
-                  />
+                  <div className="plate-rule">
+                    <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} />
+                  </div>
 
                   {alts.length > 0 ? (
-                    <div className="mt-7 border-t border-white/15 pt-4">
+                    <div className="plate-rule">
                       <button
                         type="button"
                         onClick={() => setAltsOpen((o) => !o)}
-                        className="flex w-full items-center justify-between text-left text-[0.75rem] font-medium text-[#d5e2ef] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                        className="flex h-11 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                         aria-expanded={altsOpen}
                       >
-                        <span>
-                          {t(lang, "otherOpts", { n: alts.length })}
-                        </span>
+                        <span>{t(lang, "otherOpts", { n: alts.length })}</span>
                         <ChevronDownIcon
                           className={cx(
-                            "h-4 w-4 shrink-0 text-[#9bb4c9] transition-transform duration-200",
+                            "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
                             altsOpen && "rotate-180",
                           )}
                           aria-hidden
@@ -1671,74 +1953,50 @@ export function SelectorApp() {
                       </button>
                       <div
                         className={cx(
-                          "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
-                          altsOpen
-                            ? "grid-rows-[1fr] opacity-100"
-                            : "grid-rows-[0fr] opacity-0",
+                          "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
+                          altsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
                         )}
                       >
                         <div className="min-h-0 overflow-hidden">
-                          <ul className="space-y-2 pt-2.5 pb-0.5">
+                          <ul className="divide-y divide-[var(--color-rule)] border-t border-[var(--color-rule)]">
                             {alts.map((r) => {
                               const open = openAlts.includes(r.model);
                               const shown = displayModel(r.model, lang);
                               return (
-                                <li
-                                  key={r.model}
-                                  className="rounded-[var(--radius-sm)] border border-white/20"
-                                >
-                                  <div className="flex items-center gap-1.5 px-3 py-2">
+                                <li key={r.model}>
+                                  <div className="flex items-center gap-1 pr-3 pl-3">
                                     <button
                                       type="button"
                                       aria-expanded={open}
-                                      onClick={() =>
-                                        setOpenAlts(open ? [] : [r.model])
-                                      }
-                                      className="flex min-w-0 flex-1 items-center gap-2 rounded-[var(--radius-sm)] px-0.5 py-0.5 text-left text-white transition-colors hover:text-[#8fd0e2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                                      onClick={() => setOpenAlts(open ? [] : [r.model])}
+                                      className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-[4px] px-2 py-1.5 text-left focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
                                     >
                                       <ChevronDownIcon
                                         className={cx(
-                                          "h-4 w-4 shrink-0 text-[#9bb4c9] transition-transform duration-200",
+                                          "h-4 w-4 shrink-0 text-[var(--color-caption)] transition-transform duration-200",
                                           open && "rotate-180",
                                         )}
                                         aria-hidden
                                       />
-                                      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-1">
-                                        <span className="min-w-0 break-words font-mono text-[0.8125rem] leading-snug text-white sm:text-[0.875rem]">
+                                      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+                                        <span translate="no" className="plate-type min-w-0 text-[0.875rem] leading-snug text-[var(--color-ink)]">
                                           {modelNodes(shown)}
                                         </span>
                                         {insuranceId === r.model ? (
-                                          <span className="shrink-0 rounded-full border border-[#8fd0e2]/55 bg-[#8fd0e2]/10 px-2 py-1 text-[0.75rem] font-semibold leading-none tracking-[0.04em] text-[#8fd0e2]">
+                                          <span className="shrink-0 text-[0.75rem] font-medium text-[var(--color-accent)]">
                                             {t(lang, "allRound")}
                                           </span>
                                         ) : null}
                                       </span>
                                     </button>
-                                    <span className="flex shrink-0 items-center">
-                                      <button
-                                        type="button"
-                                        onClick={() => copyModel(shown)}
-                                        className="inline-flex h-8 shrink-0 items-center rounded-[var(--radius-sm)] px-2 text-[0.75rem] font-semibold text-[#8fd0e2] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                                        aria-label={
-                                          copiedModel === shown
-                                            ? t(lang, "copied")
-                                            : t(lang, "copy")
-                                        }
-                                      >
-                                        <span aria-live="polite">
-                                          {copiedModel === shown
-                                            ? t(lang, "copied")
-                                            : t(lang, "copy")}
-                                        </span>
-                                      </button>
-                                    </span>
+                                    <CopyButton
+                                      lang={lang}
+                                      small
+                                      copied={copiedModel === shown}
+                                      onCopy={() => copyModel(shown)}
+                                    />
                                   </div>
-                                  <div
-                                    className={cx(
-                                      "more-drop",
-                                      open && "more-drop-open",
-                                    )}
-                                  >
+                                  <div className={cx("more-drop", open && "more-drop-open")}>
                                     <div className="min-h-0 overflow-hidden">
                                       <div className="more-drop-inner">
                                         <ModelSpec
@@ -1746,7 +2004,6 @@ export function SelectorApp() {
                                           r={r}
                                           dutyMounting={input.mounting}
                                           compact
-                                          inverse
                                         />
                                       </div>
                                     </div>
@@ -1759,48 +2016,15 @@ export function SelectorApp() {
                       </div>
                     </div>
                   ) : null}
-                </>
-              )}
                 </div>
-                {running ? (
-                  <div className="result-work result-work-delay col-start-1 row-start-1 flex items-center gap-2.5 self-center text-[0.9375rem] text-[#d5e2ef]">
-                    <span className="h-[18px] w-[18px] shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    {t(lang, "selecting")}
-                  </div>
-                ) : null}
-              </div>
+              ) : null}
             </div>
-          )}
-            </div>
-            </div>
-            <div className="flex shrink-0 items-center pt-3">
-              <p className="min-w-0 text-[0.75rem] leading-snug text-[#8aa4bb]">
-                {t(lang, "disclaimer")}
-              </p>
-            </div>
-          </aside>
-        </div>
-    </div>
-  );
-}
-
-function IdlePanel({ lang, running }: { lang: Lang; running: boolean }) {
-  if (running) {
-    return (
-      <div className="flex items-center gap-2.5 text-[0.9375rem] text-[#d5e2ef]">
-        <span className="h-[18px] w-[18px] shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-        <p>{t(lang, "selecting")}</p>
+          </section>
+          <p className="px-4 text-[0.75rem] leading-snug text-[var(--color-caption)] sm:px-5">
+            {t(lang, "disclaimer")}
+          </p>
+        </aside>
       </div>
-    );
-  }
-  return (
-    <div>
-      <p className="font-[family-name:var(--font-display)] text-[1.875rem] font-semibold leading-[1.15] tracking-[-0.03em] text-white lg:text-[2.5rem]">
-        {t(lang, "idleTitle")}
-      </p>
-      <p className="mt-2 max-w-[22rem] text-base leading-snug text-[#d5e2ef] lg:mt-3 lg:text-[1.125rem]">
-        {t(lang, "idleBody")}
-      </p>
     </div>
   );
 }
@@ -1840,13 +2064,11 @@ function ModelSpec({
   r,
   dutyMounting,
   compact,
-  inverse,
 }: {
   lang: Lang;
   r: ModelResult;
   dutyMounting: SelectInput["mounting"];
   compact?: boolean;
-  inverse?: boolean;
 }) {
   const nb = "\u00a0";
   const series = SERIES.find((s) => s.id === r.seriesId);
@@ -1886,30 +2108,16 @@ function ModelSpec({
     <dl
       className={cx(
         "grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3",
-        compact
-          ? inverse
-            ? "mt-3 border-t border-white/15 px-3 py-2.5"
-            : "shrink-0 border-t border-[var(--color-rule)] px-3 py-2.5"
-          : inverse
-            ? "mt-4 px-0 py-0"
-            : "shrink-0 gap-x-5 gap-y-2 px-4 py-2.5",
+        compact ? "pt-1 pr-5 pb-3 pl-11" : "px-5 py-4",
       )}
     >
       {items.map((item) => (
         <div key={item.key} className="min-w-0">
-          <dt
-            className={cx(
-              "text-[0.6875rem] leading-snug break-words",
-              inverse ? "text-[#9bb4c9]" : "text-[var(--color-muted)]",
-            )}
-          >
+          <dt className="text-[0.75rem] leading-snug break-words text-[var(--color-muted)]">
             {t(lang, item.key)}
           </dt>
           <dd
-            className={cx(
-              "mt-0.5 text-[0.875rem] leading-snug tabular-nums",
-              inverse ? "text-white" : "text-[var(--color-ink)]",
-            )}
+            className="mt-0.5 text-[0.875rem] leading-snug tabular-nums text-[var(--color-ink)]"
             translate="no"
           >
             {item.value}

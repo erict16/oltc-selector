@@ -48,6 +48,11 @@ export interface SelectInput {
 
   phases: PhaseCode;
   connection: Connection;
+  /**
+   * Unset = two-winding. `auto` drops compound types (CV/CV2/SV): their
+   * 200 kV across-tap limit does not cover an autotransformer tap winding.
+   */
+  transformerKind?: "two_winding" | "auto";
   /** Required through-current (A) — engine picks next catalogue Ium ≥ this */
   throughCurrentA: number;
   /** Highest voltage for equipment Um (kV) */
