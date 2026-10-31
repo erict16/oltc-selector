@@ -19,6 +19,25 @@ export type Release = {
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
     {
+      version: "2.1.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "imp",
+          items: [
+            "改参数后型号立即更新，不用再点「选型」；结果卡把工况和型号额定并排列出（最大通过电流、级电压、级容量、开关绝缘），并显示占用比例。",
+            "手机端底部固定显示当前型号，可直接复制，点箭头跳到完整结果；「开关」一组默认收起，标题下一行列出当前取值。",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "命令行：粗细调和正反调下指定的工作位置数不再被 ±8 覆盖；线性调 ±8 按 17 位计算；自耦变输入电流时默认开关在连接点；手动指定的对地绝缘可用于 363 kV 以上系统；只写角接时默认线端。",
+          ],
+        },
+      ],
+    },
+    {
       version: "2.0.0",
       date: "2026-10",
       groups: [
@@ -200,6 +219,25 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.1.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "imp",
+          items: [
+            "The type updates as soon as a parameter changes, with no Select button; the result card sets the duty beside the type's rating (Imax, step voltage, step capacity, switch Um) and shows how much of each rating is used.",
+            "On phones the current type stays in a bar at the bottom with Copy and a jump to the full result; the Tap changer section is folded by default behind one line that lists its values.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "CLI: a position count on W/G is no longer replaced by ±8; linear ±8 means 17 positions; an autotransformer sized from current defaults to the junction; a stated insulation to earth works above 363 kV; delta alone defaults to the line end.",
+          ],
+        },
+      ],
+    },
     {
       version: "2.0.0",
       date: "2026-10",
@@ -387,6 +425,25 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.1.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "imp",
+          items: [
+            "Kiểu được cập nhật ngay khi đổi thông số, không cần bấm Chọn; thẻ kết quả đặt chế độ làm việc cạnh định mức của kiểu (Imax, điện áp nấc, công suất nấc, Um bộ ĐAPT) và cho biết mức dùng của từng định mức.",
+            "Trên điện thoại, kiểu hiện tại luôn nằm ở thanh dưới cùng, có nút Sao chép và nút chuyển tới kết quả đầy đủ; mục Bộ điều áp được thu gọn mặc định, một dòng liệt kê các giá trị đang chọn.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "CLI: số vị trí trên W/G không còn bị ±8 ghi đè; tuyến tính ±8 là 17 vị trí; máy biến áp tự ngẫu tính theo dòng điện mặc định đặt ở điểm nối; cách điện với đất do người dùng nhập áp dụng được trên 363 kV; chỉ chọn tam giác thì mặc định ở đầu dây.",
+          ],
+        },
+      ],
+    },
+    {
       version: "2.0.0",
       date: "2026-10",
       groups: [
@@ -570,6 +627,25 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.1.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "imp",
+          items: [
+            "El tipo se actualiza en cuanto cambia un dato, sin botón Seleccionar; la tarjeta de resultado pone el servicio junto al valor nominal del tipo (Imax, tensión de escalón, potencia de escalón, Um del cambiador) y muestra qué parte de cada valor se usa.",
+            "En el móvil, el tipo actual queda en una barra inferior con Copiar y un salto al resultado completo; la sección Cambiador viene plegada, con una línea que resume sus valores.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "CLI: el número de posiciones en W/G ya no se sustituye por ±8; lineal ±8 son 17 posiciones; un autotransformador dimensionado por corriente va por defecto en la unión; el aislamiento a tierra indicado funciona por encima de 363 kV; solo triángulo va por defecto al extremo de línea.",
+          ],
+        },
+      ],
+    },
     {
       version: "2.0.0",
       date: "2026-10",
@@ -757,6 +833,25 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.1.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "imp",
+          items: [
+            "Tip, bir parametre değişir değişmez güncellenir, Seç düğmesi yoktur; sonuç kartı görevi tipin anma değerlerinin yanına koyar (Imax, kademe gerilimi, kademe gücü, cihaz Um) ve her birinin ne kadarının kullanıldığını gösterir.",
+            "Telefonda geçerli tip, Kopyala ve tam sonuca geçiş düğmesiyle alttaki çubukta kalır; Kademe değiştirici bölümü varsayılan olarak kapalıdır ve değerlerini tek satırda özetler.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "CLI: W/G'de verilen konum sayısı artık ±8 ile değiştirilmez; doğrusal ±8, 17 konumdur; akımdan boyutlanan ototransformatör varsayılan olarak bağlantı noktasına konur; verilen toprağa yalıtım 363 kV üstünde de geçerlidir; yalnızca üçgen seçilince hat ucu varsayılır.",
+          ],
+        },
+      ],
+    },
+    {
       version: "2.0.0",
       date: "2026-10",
       groups: [
@@ -940,6 +1035,25 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.1.0",
+      date: "2026-10",
+      groups: [
+        {
+          kind: "imp",
+          items: [
+            "Tipe langsung berubah begitu parameter diubah, tanpa tombol Pilih; kartu hasil menaruh kondisi kerja di samping rating tipe (Imax, tegangan tap, kapasitas tap, Um OLTC) dan menunjukkan berapa bagian tiap rating yang terpakai.",
+            "Di ponsel, tipe saat ini tetap di bilah bawah dengan tombol Salin dan lompatan ke hasil lengkap; bagian OLTC terlipat secara bawaan dengan satu baris yang merangkum nilainya.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "CLI: jumlah posisi pada W/G tidak lagi diganti ±8; linear ±8 berarti 17 posisi; autotransformator yang dihitung dari arus secara bawaan berada di titik sambungan; isolasi ke tanah yang diisi berlaku di atas 363 kV; hanya segitiga secara bawaan di ujung saluran.",
+          ],
+        },
+      ],
+    },
     {
       version: "2.0.0",
       date: "2026-10",

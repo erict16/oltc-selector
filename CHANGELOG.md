@@ -1,12 +1,14 @@
 # Changelog
 
-## Unreleased
+## 2.1.0
 
 - The type follows the form live. The Select button and its fixed 280 ms spinner are gone, so the readouts and the type can no longer disagree (a changed form used to keep the old type, greyed, under new readouts).
 - Result card: type, then a basis table that sets each duty beside the type's rating (Imax, step voltage, step capacity, switch Um) with the share of the rating used; 95 % and above reads amber. Off-circuit types drop the step rows. Max step voltage and step capacity leave the spec grid, which now holds interrupter, construction, earth PF/LI and mounting.
 - The Tap changer section folds by default behind one line that lists its current values (on-load/off-circuit, interrupter, construction, mounting, plus any across-tap or safety factor that was set).
 - Phones: the current type stays in a bottom bar with Copy and a jump to the full result; the bar hides while the result card is on screen. The header shows one language menu (an unlayered `.ui-track` display used to beat Tailwind's `hidden`, so both showed) and no icon. The transformer sketch is smaller.
-- CLI review 2026-10-31: `--pos` on W/G is no longer replaced by the ±8 default (`--reg G --pos 27` at 300 A is `CM2III-500Y/72.5B-14273G`, was `CV2III-…-10193G`). Linear `--pm 8` means 17 positions. Linear and OCTC capacity sizing takes the minus steps from the given range, not ±8. `--kind auto` on the `--iu` path defaults to the junction (`3xCM2I-…D`) like the `--mva` path, and the echo names the connection used. `--earth-um` overrides the rule before the above-363 refusal. `--winding delta` without `--tap` sits at the line end. Published CLI is unchanged until the next pack.
+- CLI review 2026-10-31: `--pos` on W/G is no longer replaced by the ±8 default (`--reg G --pos 27` at 300 A is `CM2III-500Y/72.5B-14273G`, was `CV2III-…-10193G`). Linear `--pm 8` means 17 positions. Linear and OCTC capacity sizing takes the minus steps from the given range, not ±8. `--kind auto` on the `--iu` path defaults to the junction (`3xCM2I-…D`) like the `--mva` path, and the echo names the connection used. `--earth-um` overrides the rule before the above-363 refusal. `--winding delta` without `--tap` sits at the line end.
+
+## 2.0.0
 
 - Nameplate replay (`scripts/nameplateReplay.ts`, reports in `docs/replay/*-nameplate-replay.md`): the 2025/2026 OS rows run from MVA, kV and Y/D through the same path as the form. A 35 kV-class star neutral now reads 待 OS 核对 at Um 40.5, because most 2026 orders of that kind bought 72.5. A winding above Um 363 is refused instead of returning no class.
 - Security: Vercel sends CSP, frame, referrer and HSTS headers; Next.js and build tools patched within their majors. The site stays a static export with no server code.

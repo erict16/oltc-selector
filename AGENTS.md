@@ -21,7 +21,7 @@ Result card **开关结构** (not 工作位置): CV/CV2/SV/CVT/CZ → 复合式;
 
 ## CLI
 
-CLI: `npm run oltc -- <args>` in this repo (published pack: `npx -y oltc-selector@2.0.0`). Same engine as the web app. `--kind auto --tap junction --hv 225 --mv 115` for autotransformers; the tap point, not a typed Y/D, sets current, Ust and Um (`lib/transformer.ts`). No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only). Do not commit list RMB, coefficients, or the 2025 xlsx.
+CLI: `npm run oltc -- <args>` in this repo (published pack: `npx -y oltc-selector@2.1.0`). Same engine as the web app. `--kind auto --tap junction --hv 225 --mv 115` for autotransformers; the tap point, not a typed Y/D, sets current, Ust and Um (`lib/transformer.ts`). No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only). Do not commit list RMB, coefficients, or the 2025 xlsx.
 
 Agent dock on `/` (scheme A). Tutorial `/agents/`. Agent skill is the separate repo `erict16/huaming-oltc-selector` (not in this tree). Selection only; after `oltc`, check brochure existence and explain why the type is correct.
 
