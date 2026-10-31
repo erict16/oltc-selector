@@ -19,6 +19,11 @@ export type Release = {
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
     {
+      version: "2.2.0",
+      date: "2026-10",
+      groups: [{ kind: "new", items: ["命令行每天最多查一次 npm，有新版本时在输出末尾提示并给出更新命令，不会自动更新；--no-update-check 或 OLTC_NO_UPDATE_CHECK=1 可关闭。"] }],
+    },
+    {
       version: "2.1.0",
       date: "2026-10",
       groups: [
@@ -219,6 +224,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.2.0",
+      date: "2026-10",
+      groups: [{ kind: "new", items: ["The CLI checks npm at most once a day and, when a newer version exists, prints a notice with the update command at the end; it never updates itself. --no-update-check or OLTC_NO_UPDATE_CHECK=1 turns it off."] }],
+    },
     {
       version: "2.1.0",
       date: "2026-10",
@@ -425,6 +435,11 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.2.0",
+      date: "2026-10",
+      groups: [{ kind: "new", items: ["CLI kiểm tra npm tối đa mỗi ngày một lần và, khi có phiên bản mới, in thông báo kèm lệnh cập nhật ở cuối; nó không tự cập nhật. Tắt bằng --no-update-check hoặc OLTC_NO_UPDATE_CHECK=1."] }],
+    },
+    {
       version: "2.1.0",
       date: "2026-10",
       groups: [
@@ -627,6 +642,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.2.0",
+      date: "2026-10",
+      groups: [{ kind: "new", items: ["La CLI consulta npm como máximo una vez al día y, si hay una versión más nueva, muestra un aviso con el comando de actualización al final; nunca se actualiza sola. Se desactiva con --no-update-check u OLTC_NO_UPDATE_CHECK=1."] }],
+    },
     {
       version: "2.1.0",
       date: "2026-10",
@@ -833,6 +853,11 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.2.0",
+      date: "2026-10",
+      groups: [{ kind: "new", items: ["CLI, npm'i günde en fazla bir kez kontrol eder ve daha yeni bir sürüm varsa sonunda güncelleme komutuyla bir uyarı yazar; kendini asla güncellemez. --no-update-check veya OLTC_NO_UPDATE_CHECK=1 ile kapatılır."] }],
+    },
+    {
       version: "2.1.0",
       date: "2026-10",
       groups: [
@@ -1035,6 +1060,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.2.0",
+      date: "2026-10",
+      groups: [{ kind: "new", items: ["CLI memeriksa npm paling banyak sekali sehari dan, jika ada versi baru, menampilkan pemberitahuan beserta perintah pembaruan di akhir; CLI tidak pernah memperbarui dirinya sendiri. Matikan dengan --no-update-check atau OLTC_NO_UPDATE_CHECK=1."] }],
+    },
     {
       version: "2.1.0",
       date: "2026-10",

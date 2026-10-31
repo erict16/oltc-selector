@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0
+
+- CLI update notice: at most one registry call a day (cached in `~/.cache/oltc-selector/update-check.json`, 1.5 s timeout). A newer version prints two lines on stderr with the install command; nothing is installed and `--json` stdout is untouched. `--no-update-check`, `OLTC_NO_UPDATE_CHECK=1`, `NO_UPDATE_NOTIFIER=1` and `CI` turn it off. Tests never call the registry.
+
 ## 2.1.0
 
 - The type follows the form live. The Select button and its fixed 280 ms spinner are gone, so the readouts and the type can no longer disagree (a changed form used to keep the old type, greyed, under new readouts).

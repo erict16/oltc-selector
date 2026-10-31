@@ -109,6 +109,10 @@ export function parseCliArgs(argv: string[]): CliArgs {
       out.json = true;
       continue;
     }
+    // Read by scripts/oltc.ts before the update check; nothing to select on.
+    if (a === "--no-update-check") {
+      continue;
+    }
     if (a === "--octc") {
       out.given.add("octc");
       out.octc = true;
@@ -380,6 +384,9 @@ Flags:
   --contact          OCTC contact e.g. 6x5.
   --phases           I|II|III. Default III.
   --json             Machine-readable result (still no prices).
+  --no-update-check  Skip the daily check for a newer version. The check only
+                     prints a notice on stderr; it never installs anything.
+                     OLTC_NO_UPDATE_CHECK=1 or CI=1 also turn it off.
   -h, --help         This text.
 
 Defaults match the web first paint: on-load, in-tank vacuum, structure auto,

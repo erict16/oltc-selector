@@ -2,7 +2,7 @@
 
 填工况，给出 2025 目录里**最低满足**的型号。网页和 `oltc` CLI 共用同一份 `selectOltc` 引擎。
 
-**CLI：** `npx -y oltc-selector@2.1.0`，命令是 `oltc`。Agent 技能包另放，不在这个仓库里。  
+**CLI：** `npx -y oltc-selector@2.2.0`，命令是 `oltc`。Agent 技能包另放，不在这个仓库里。  
 **网页：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) · [GitHub Pages](https://erict16.github.io/oltc-selector/)
 
 私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。
@@ -52,6 +52,7 @@ oltc --mva 125 --kind auto --hv 225 --mv 115 --tap junction
 | `--oil` / `--vacuum` | Switching medium | vacuum (on-load) |
 | `--contact` | OCTC contact e.g. `6x5` | |
 | `--json` | Machine output | |
+| `--no-update-check` | Skip the daily npm check. A newer version only prints a notice on stderr; nothing is installed. `OLTC_NO_UPDATE_CHECK=1` or `CI=1` also skip it. | check on |
 
 `--structure auto` and omitting `--octc` match the web first paint: on-load, in-tank vacuum, minimum-adequate ranking.
 
