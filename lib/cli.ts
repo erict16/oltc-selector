@@ -7,6 +7,7 @@ import {
   type TransformerKind,
   type WindingConnection,
 } from "./transformer";
+import { lookupByPositions, plusMinusFromPositions } from "./tapCode";
 import { commercialTypeExists } from "./typeExists";
 import type {
   Connection,
@@ -385,6 +386,80 @@ Defaults match the web first paint: on-load, in-tank vacuum, structure auto,
 ±8 mid-3 reversing. Omitting --octc and --structure auto is minimum-adequate.
 `;
 
+/**
+ * Where the OLTC sits. An autotransformer defaults to the series/common
+ * junction on both paths; a delta winding has no neutral, so
+ * `--winding delta` alone means line end.
+ */
+export function cliTapPoint(args: CliArgs): TapPoint {
+  if (args.tap) return args.tap;
+  if (args.kind === "auto") return "auto_junction";
+  return args.conn === "D" || args.winding === "delta" ? "line_end" : "neutral";
+}
+
+/** True when the tap point, not a typed --conn, sets Y/D. */
+function tapSetsConnection(args: CliArgs): boolean {
+  return (
+    args.mva != null ||
+    args.tap != null ||
+    args.kind === "auto" ||
+    args.winding === "delta"
+  );
+}
+
+/** Y/D the engine actually gets. */
+export function cliConnection(args: CliArgs): Connection {
+  if (!tapSetsConnection(args)) return args.conn;
+  return cliTapPoint(args) === "neutral" ? "Y" : "D";
+}
+
+const pmGiven = (args: CliArgs): boolean =>
+  args.given.has("pm") && args.pm != null && args.pm > 0;
+
+/**
+ * W/G ±N and mid. An explicit --pm wins (mid 3, as before); else a
+ * brochure position count (--pos 23 → ±10 mid 3, --pos 17 → ±8 mid 1);
+ * else the ±8 default. Null: a position count with no Fig. 3-3 row.
+ */
+function cliPlusMinus(args: CliArgs): { n: number; mid: 1 | 3 } | null {
+  if (pmGiven(args)) return { n: args.pm!, mid: 3 };
+  if (args.positions != null) {
+    const n = plusMinusFromPositions(args.positions, args.reg);
+    if (n == null) return null;
+    const mid = lookupByPositions(args.positions, 3, args.reg) ? 3 : 1;
+    return { n, mid };
+  }
+  if (args.given.has("pm")) return null; // --pm 0: no ±N, engine default
+  return args.pm != null && args.pm > 0 ? { n: args.pm, mid: 3 } : null;
+}
+
+/**
+ * Minus steps for the lowest-tap current. Linear / OCTC follow the web
+ * range (positions = plus + minus + 1, symmetric): --pos P → (P−1)/2,
+ * rounded up; --pm N → N. With no range at all the ±8 default stays.
+ */
+function cliMinusSteps(args: CliArgs): number {
+  const fromPositions =
+    args.positions != null && args.positions > 1
+      ? Math.ceil((args.positions - 1) / 2)
+      : null;
+  if (args.octc || args.reg === "linear") {
+    if (fromPositions != null) return fromPositions;
+    if (pmGiven(args)) return args.pm!;
+    return 8;
+  }
+  const pm = cliPlusMinus(args);
+  if (pm) return pm.n;
+  return fromPositions ?? 8;
+}
+
+/** Linear positions: --pos, else 2N+1 from an explicit --pm. */
+function cliLinearPositions(args: CliArgs): number | undefined {
+  if (args.positions != null) return args.positions;
+  if (pmGiven(args)) return Math.round(2 * args.pm! + 1);
+  return undefined;
+}
+
 /** Capacity path: transformer → duty. Null on the --iu path. */
 export function cliDuty(args: CliArgs): DutyBasis | null {
   if (args.mva == null) return null;
@@ -396,8 +471,7 @@ export function cliDuty(args: CliArgs): DutyBasis | null {
   } else if (!(args.kv != null && args.kv > 0)) {
     throw new CliError("--mva requires --kv (tap-side rated voltage)");
   }
-  const tap: TapPoint =
-    args.tap ?? (auto ? "auto_junction" : args.conn === "D" ? "line_end" : "neutral");
+  const tap = cliTapPoint(args);
   // Legacy --conn D on the capacity path meant a delta winding (I = S/3U).
   const winding: WindingConnection =
     args.winding ?? (tap === "neutral" || args.conn === "Y" ? "star" : "delta");
@@ -417,7 +491,7 @@ export function cliDuty(args: CliArgs): DutyBasis | null {
     tapKv: args.kv ?? 0,
     hvKv: args.hv ?? 0,
     mvKv: args.mv ?? 0,
-    minusSteps: args.pm != null && args.pm > 0 ? args.pm : 8,
+    minusSteps: cliMinusSteps(args),
     stepFraction: pct,
     // 与网页版首屏一致：容量路径默认不额外加安全系数
     safetyK: args.k != null && args.k > 0 ? args.k : 1.0,
@@ -460,8 +534,9 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     if (um == null || !(um > 0)) um = duty.umKv;
     if (!(ust > 0) && duty.stepV != null) ust = duty.stepV;
     conn = duty.connection;
-  } else if (args.tap) {
-    conn = args.tap === "neutral" ? "Y" : "D";
+  } else {
+    // --iu path: --tap, --kind auto (junction) or a delta winding set Y/D.
+    conn = cliConnection(args);
   }
 
   if (iu == null || !(iu > 0)) {
@@ -497,11 +572,14 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
       input.positions = Math.round(2 * args.pm + 1);
     }
   } else if (args.reg === "linear") {
-    if (args.positions != null) input.positions = args.positions;
+    const pos = cliLinearPositions(args);
+    if (pos != null) input.positions = pos;
   } else {
-    if (args.pm != null && args.pm > 0) {
-      input.plusMinusSteps = args.pm;
-      input.midPositions = 3;
+    // --pos used to lose to the parse default ±8 (--reg G --pos 27 → 10193G).
+    const pm = cliPlusMinus(args);
+    if (pm) {
+      input.plusMinusSteps = pm.n;
+      input.midPositions = pm.mid;
     }
     if (args.positions != null) input.positions = args.positions;
   }
@@ -533,23 +611,31 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     auto_junction: "串联/公共绕组连接点",
     auto_mv_line: "中压出线",
   };
+  const tapGiven =
+    args.given.has("tap") || args.given.has("conn") || args.winding === "delta";
   if (args.mva != null) {
     const duty = cliDuty(args);
-    const tap: TapPoint =
-      args.tap ??
-      (args.kind === "auto" ? "auto_junction" : args.conn === "D" ? "line_end" : "neutral");
+    const tap = cliTapPoint(args);
     items.push(`${args.kind === "auto" ? "自耦变" : "双绕组"}${mark("kind")}`);
-    items.push(`开关在${tapZh[tap]}${args.given.has("tap") || args.given.has("conn") ? "" : "（默认）"}`);
+    items.push(`开关在${tapZh[tap]}${tapGiven ? "" : "（默认）"}`);
     if (args.kind !== "auto") {
       const w = args.winding ?? (tap === "neutral" || args.conn === "Y" ? "star" : "delta");
       items.push(`${w === "star" ? "星形" : "角形"}绕组${args.given.has("winding") ? "" : "（默认）"}`);
     }
     if (duty?.umAssumed) items.push(`对地 Um ${duty.umKv}（未指定）`);
   } else {
+    // Echo the Y/D the engine got, not the --conn default it replaced.
+    const conn = cliConnection(args);
+    const derived = tapSetsConnection(args);
     items.push(
-      `conn=${args.conn} ${args.conn === "Y" ? "星点" : "线端"}${mark("conn")}`,
+      `conn=${conn} ${conn === "Y" ? "星点" : "线端"}${derived ? "" : mark("conn")}`,
     );
     if (args.kind === "auto") items.push("自耦变");
+    if (derived) {
+      items.push(
+        `开关在${tapZh[cliTapPoint(args)]}${tapGiven ? "" : "（默认）"}`,
+      );
+    }
   }
   // 容量路径上 k 和 step-pct 也会静默生效，必须喊出来
   if (args.mva != null) {
@@ -591,8 +677,13 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     items.push(
       args.positions != null
         ? `${args.positions} 档${mark("positions")}`
-        : "档数未指定",
+        : pmGiven(args)
+          ? `${cliLinearPositions(args)} 档（由 ±${args.pm} 推）`
+          : "档数未指定",
     );
+  } else if (args.positions != null && !args.given.has("pm")) {
+    const pm = cliPlusMinus(args);
+    items.push(pm ? `${args.positions} 档（±${pm.n}）` : `${args.positions} 档`);
   } else {
     items.push(`±${args.pm ?? 8} 档${mark("pm")}`);
   }

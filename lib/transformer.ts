@@ -213,16 +213,18 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     umKv = catalogueUmFromRatedKv(spec.tapKv);
     umRule = "line";
   }
+  // The OS / maker figure wins before the range check: a 400/220 kV auto
+  // whose switch is stated at Um 252 must not be refused on the HV rule.
+  if (spec.earthUmKv != null && spec.earthUmKv > 0) {
+    umKv = spec.earthUmKv;
+    umRule = "explicit";
+    umAssumed = false;
+  }
   if (!Number.isFinite(umKv) || umKv > 363) {
     return fail(
       "电压超出目录：开关最高 Um 363 kV。",
       "Voltage above the catalogue: the highest switch class is Um 363 kV.",
     );
-  }
-  if (spec.earthUmKv != null && spec.earthUmKv > 0) {
-    umKv = spec.earthUmKv;
-    umRule = "explicit";
-    umAssumed = false;
   }
 
   if (umRule === "neutral_full" && umAssumed) {

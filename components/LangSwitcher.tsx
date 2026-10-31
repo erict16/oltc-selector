@@ -32,22 +32,25 @@ export function LangSwitcher({
           </option>
         ))}
       </select>
-      <div className="ui-track ui-track-sm hidden sm:grid" role="group" aria-label={ariaLabel}>
-        {LANG_OPTIONS.map((opt) => {
-          const on = lang === opt.id;
-          return (
-            <button
-              key={opt.id}
-              type="button"
-              title={opt.label}
-              aria-pressed={on}
-              onClick={() => onChange(opt.id)}
-              className={cx("ui-seg w-10", on && "is-on")}
-            >
-              {opt.short}
-            </button>
-          );
-        })}
+      {/* .ui-track sets display outside a layer, which beats Tailwind's hidden. */}
+      <div className="hidden sm:block">
+        <div className="ui-track ui-track-sm" role="group" aria-label={ariaLabel}>
+          {LANG_OPTIONS.map((opt) => {
+            const on = lang === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                title={opt.label}
+                aria-pressed={on}
+                onClick={() => onChange(opt.id)}
+                className={cx("ui-seg w-10", on && "is-on")}
+              >
+                {opt.short}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </>
   );

@@ -212,3 +212,72 @@ describe("oltc CLI", () => {
     expect(a.out).not.toContain("17 档");
   });
 });
+
+describe("oltc CLI tap range and tap point", () => {
+  const first = (argv: string[]) => capture(argv).out.trim().split(/\r?\n/)[0];
+
+  it("--pos on W/G sets the brochure ±N instead of the ±8 default", () => {
+    // 27 positions G is ±12 mid 3; CV2 stops at 23, so CM2.
+    expect(first(["--iu", "300", "--um", "72.5", "--reg", "G", "--pos", "27"])).toBe(
+      "CM2III-500Y/72.5B-14273G",
+    );
+    expect(first(["--iu", "300", "--um", "72.5", "--pos", "23"])).toBe(
+      "CV2III-350Y/72.5-12233W",
+    );
+    expect(capture(["--iu", "300", "--um", "72.5", "--pos", "23"]).out).toContain("23 档（±10）");
+    // --pm alone is unchanged
+    expect(first(["--iu", "300", "--um", "72.5", "--pm", "8"])).toBe("CV2III-350Y/72.5-10193W");
+    expect(first(["--iu", "300", "--um", "72.5"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+
+  it("linear --pm N means 2N+1 positions, same as --pos", () => {
+    const a = capture(["--iu", "300", "--um", "72.5", "--reg", "0", "--pm", "8"]);
+    expect(a.out.split(/\r?\n/)[0]).toBe("CM2III-500Y/72.5B-18170");
+    expect(a.out).toContain("17 档（由 ±8 推）");
+    expect(first(["--iu", "300", "--um", "72.5", "--reg", "0", "--pos", "17"])).toBe(
+      "CM2III-500Y/72.5B-18170",
+    );
+  });
+
+  it("capacity path takes minus steps from the linear / OCTC range", () => {
+    const basis = (argv: string[]) => JSON.parse(capture(["--json", ...argv]).out).basis;
+    // 131.2 A rated; −4 × 1.25% → 138.1, −2 × 1.25% → 134.6 (was −8 → 145.8)
+    expect(basis(["--mva", "25", "--kv", "110", "--reg", "0", "--pos", "9"]).maxA).toBe(138.1);
+    expect(basis(["--mva", "25", "--kv", "110", "--reg", "0", "--pm", "4"]).maxA).toBe(138.1);
+    expect(basis(["--mva", "25", "--kv", "110", "--octc", "--pos", "5"]).maxA).toBe(134.6);
+    // W/G --pos 23 → ±10
+    expect(basis(["--mva", "25", "--kv", "110", "--pos", "23"]).maxA).toBe(150);
+    // no range given: the ±8 default stays
+    expect(basis(["--mva", "25", "--kv", "110", "--reg", "0"]).maxA).toBe(145.8);
+    expect(basis(["--mva", "25", "--kv", "110"]).maxA).toBe(145.8);
+  });
+
+  it("--kind auto on the --iu path defaults to the junction and echoes D", () => {
+    const a = capture(["--iu", "600", "--um", "252", "--kind", "auto"]);
+    expect(a.out.split(/\r?\n/)[0]).toBe("3xCM2I-600/252D-10193W");
+    expect(a.out).toContain("conn=D 线端");
+    expect(a.out).not.toContain("conn=Y");
+    expect(a.out).toContain("开关在串联/公共绕组连接点（默认）");
+    const b = capture(["--iu", "600", "--um", "252", "--kind", "auto", "--tap", "junction"]);
+    expect(b.out.split(/\r?\n/)[0]).toBe("3xCM2I-600/252D-10193W");
+    expect(b.out).toContain("conn=D 线端");
+    expect(b.out).not.toContain("（默认） · 自耦变");
+  });
+
+  it("--winding delta without --tap sits at the line end", () => {
+    const a = capture(["--mva", "10", "--kv", "33", "--winding", "delta"]);
+    expect(a.code).toBe(0);
+    expect(a.out.split(/\r?\n/)[0]).toBe("CV2III-350D/40.5-10193W");
+    expect(a.out).toContain("I = S/(3×33 kV)");
+    expect(a.out).toContain("开关在线端 ");
+  });
+
+  it("--earth-um rescues a duty whose rule Um is above 363", () => {
+    const a = capture(["--mva", "250", "--kind", "auto", "--hv", "400", "--mv", "220", "--earth-um", "252"]);
+    expect(a.code).toBe(0);
+    expect(a.out.split(/\r?\n/)[0]).toBe("3xCM2I-500/252D-10193W");
+    const b = capture(["--mva", "250", "--kind", "auto", "--hv", "400", "--mv", "220"]);
+    expect(b.code).toBe(1);
+    expect(b.err).toContain("363");
+  });
+});

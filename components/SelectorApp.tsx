@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  ArrowDownIcon,
   CheckIcon,
   ChevronDownIcon,
   Square2StackIcon,
@@ -272,67 +273,20 @@ function CardHead({
   );
 }
 
-function Readout({
-  label,
-  value,
-  unit,
-  note,
-  warn,
-  text,
-  sub,
-}: {
-  label: string;
-  value: string;
-  unit?: string;
-  note?: string;
-  warn?: boolean;
-  /** A word, not a number: keep it in the sans face. */
-  text?: boolean;
-  /** Where the value came from, one quiet line under it. */
-  sub?: string;
-}) {
-  return (
-    <div className="min-w-0 px-4 py-2">
-      <dt className="truncate text-[0.75rem] text-[var(--color-muted)]">{label}</dt>
-      <dd className="mt-1 flex items-baseline gap-1 overflow-hidden py-px whitespace-nowrap">
-        <span
-          className={cx(
-            "min-w-0 truncate text-[1.125rem] leading-[1.3] font-semibold text-[var(--color-ink)]",
-            !text && "num",
-          )}
-        >
-          {value}
-        </span>
-        {unit ? <span className="text-[0.75rem] text-[var(--color-muted)]">{unit}</span> : null}
-        {note ? (
-          <span
-            className={cx(
-              "ml-1 truncate text-[0.75rem]",
-              warn ? "font-medium text-[var(--color-warn)]" : "text-[var(--color-caption)]",
-            )}
-          >
-            {note}
-          </span>
-        ) : null}
-      </dd>
-      {sub ? (
-        <dd className="mt-0.5 truncate text-[0.75rem] leading-snug text-[var(--color-caption)]">{sub}</dd>
-      ) : null}
-    </div>
-  );
-}
-
 /** Icon-only copy; says 已复制 for a moment after a click. */
 function CopyButton({
   lang,
   copied,
   onCopy,
   small,
+  touch,
 }: {
   lang: Lang;
   copied: boolean;
   onCopy: () => void;
   small?: boolean;
+  /** 44 px target for the phone dock. */
+  touch?: boolean;
 }) {
   return (
     <button
@@ -343,7 +297,7 @@ function CopyButton({
       className={cx(
         "inline-flex shrink-0 items-center justify-center gap-1 rounded-[6px] transition-colors duration-150",
         "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-accent)]",
-        small ? "h-8 min-w-8" : "h-9 min-w-9",
+        small ? "h-8 min-w-8" : touch ? "h-11 min-w-11" : "h-9 min-w-9",
         copied
           ? "px-2 text-[0.75rem] font-medium text-[var(--color-accent)]"
           : "text-[var(--color-caption)] hover:bg-[var(--color-field)] hover:text-[var(--color-ink)]",
@@ -361,74 +315,147 @@ function CopyButton({
   );
 }
 
-/** Duty the form implies right now; it is the plate's top row. */
-function DutyReadout({
+/** Share of a rating the duty uses; null when either side is missing. */
+function useOf(need: number | null, rating: number | null | undefined): number | null {
+  if (need == null || rating == null || !(need > 0) || !(rating > 0)) return null;
+  return need / rating;
+}
+
+/**
+ * Duty beside the chosen type's rating, one row per axis the engine checks.
+ * The bar shows how much of the rating the duty takes.
+ */
+function BasisTable({
   lang,
   duty,
   dutyA,
   ratedA,
-  tap,
-  transformerLine,
+  stepV,
+  model,
 }: {
   lang: Lang;
   duty: DutyBasis;
   dutyA: number | null;
   /** Rated current when the form works from MVA; null when typed. */
   ratedA: number | null;
-  tap: TapPoint;
-  transformerLine: string;
+  stepV: number;
+  model: ModelResult | null;
 }) {
   const ok = duty.ok;
+  const a = dutyA != null && dutyA > 0 ? dutyA : null;
+  const u = ok && stepV > 0 ? stepV : null;
+  const kva = a != null && u != null ? (a * u) / 1000 : null;
   const showActual =
     ok &&
     Number.isFinite(duty.actualUmKv) &&
     duty.umRule !== "neutral_full" &&
     duty.umRule !== "neutral_assumed" &&
     duty.umRule !== "explicit";
+  const rows: Array<{
+    key: string;
+    label: string;
+    need: string;
+    unit: string;
+    sub?: string;
+    flag?: string;
+    rating: string | null;
+    use: number | null;
+  }> = [
+    {
+      key: "i",
+      label: t(lang, "kpiImax"),
+      need: a != null ? round1(a) : "—",
+      unit: "A",
+      sub: ratedA != null && ratedA > 0 ? t(lang, "kpiRated", { a: round1(ratedA) }) : undefined,
+      rating: model ? `${model.currentA}` : null,
+      use: useOf(a, model?.currentA),
+    },
+    {
+      key: "u",
+      label: t(lang, "kpiUst"),
+      need: u != null ? round1(u) : "—",
+      unit: "V",
+      rating: model?.maxStepVoltageV != null ? `${model.maxStepVoltageV}` : null,
+      use: useOf(u, model?.maxStepVoltageV),
+    },
+    {
+      key: "p",
+      label: t(lang, "specPsin"),
+      need: kva != null ? round1(kva) : "—",
+      unit: "kVA",
+      rating: model?.stepCapacityKva != null ? `${model.stepCapacityKva}` : null,
+      use: useOf(kva, model?.stepCapacityKva),
+    },
+    {
+      key: "um",
+      label: t(lang, "kpiUm"),
+      need: ok ? round1(duty.umKv) : "—",
+      unit: "kV",
+      sub: showActual ? t(lang, "kpiActual", { um: round1(duty.actualUmKv) }) : undefined,
+      flag: ok && duty.umAssumed ? t(lang, "checkOs") : undefined,
+      rating: model ? round1(model.umKv) : null,
+      use: null,
+    },
+  ];
   return (
-    <dl
-      aria-label={t(lang, "liveTitle")}
-      className="grid grid-cols-2 gap-y-1 px-1 pt-2 pb-3"
-    >
-      <Readout
-        label={t(lang, "kpiImax")}
-        value={dutyA != null && dutyA > 0 ? round1(dutyA) : "—"}
-        unit="A"
-        sub={ratedA != null && ratedA > 0 ? t(lang, "kpiRated", { a: round1(ratedA) }) : undefined}
-      />
-      <Readout
-        label={t(lang, "kpiUst")}
-        value={ok && duty.stepV != null ? round1(duty.stepV) : "—"}
-        unit="V"
-      />
-      <Readout
-        label={t(lang, "kpiUm")}
-        value={ok ? round1(duty.umKv) : "—"}
-        unit="kV"
-        note={ok && duty.umAssumed ? t(lang, "checkOs") : undefined}
-        warn
-        sub={showActual ? t(lang, "kpiActual", { um: round1(duty.actualUmKv) }) : undefined}
-      />
-      <Readout
-        label={t(lang, "kpiTap")}
-        value={t(lang, `tapShort_${tap}`)}
-        text
-        sub={transformerLine}
-      />
-    </dl>
+    <div className="plate-rule px-5 pt-4 pb-3 sm:px-6">
+      <table className="basis-table">
+        <thead>
+          <tr>
+            <th scope="col">{t(lang, "basisTitle")}</th>
+            <th scope="col" className="r">{t(lang, "cardDuty")}</th>
+            <th scope="col" className="r">{t(lang, "colRating")}</th>
+            <th scope="col" className="r">
+              <span className="sr-only">{t(lang, "colUse")}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows
+            // Off-circuit types carry no step rating; a row of dashes says nothing.
+            .filter((r) => !(model && r.rating == null))
+            .map((r) => {
+            const pct = r.use != null ? Math.round(r.use * 100) : null;
+            const tone = r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 ? "is-tight" : "";
+            return (
+              <tr key={r.key}>
+                <th scope="row">
+                  <span className="block">{r.label}</span>
+                  {r.sub ? <span className="basis-sub">{r.sub}</span> : null}
+                </th>
+                <td className="r num">
+                  {r.need}
+                  {r.need !== "—" ? <span className="basis-unit">{r.unit}</span> : null}
+                  {r.flag ? <span className="basis-flag">{r.flag}</span> : null}
+                </td>
+                <td className="r num">
+                  {r.rating != null ? (
+                    <>
+                      {r.rating}
+                      <span className="basis-unit">{r.unit}</span>
+                    </>
+                  ) : (
+                    <span className="text-[var(--color-caption)]">—</span>
+                  )}
+                </td>
+                <td className="r">
+                  {pct != null ? (
+                    <span className={cx("basis-use", tone)} title={`${t(lang, "colUse")} ${pct}%`}>
+                      <span className="basis-bar" aria-hidden>
+                        <i style={{ transform: `scaleX(${Math.min(100, pct) / 100})` }} />
+                      </span>
+                      <span className="num">{pct}%</span>
+                    </span>
+                  ) : null}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
-
-type PickedBasis = {
-  duty: DutyBasis;
-  kind: TransformerKind;
-  tapPoint: TapPoint;
-  winding: WindingConnection;
-  tapKv: number;
-  hvKv: number;
-  mvKv: number;
-  capacity: boolean;
-};
 
 function round1(n: number): string {
   if (!Number.isFinite(n)) return "—";
@@ -573,24 +600,15 @@ export function SelectorApp() {
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [result, setResult] = useState<SelectOutput | null>(null);
-  /** Through-current actually sent on the last successful sizing. */
-  const [pickedDutyA, setPickedDutyA] = useState<number | null>(null);
-  const [pickedStepV, setPickedStepV] = useState(0);
-  const [pickedBasis, setPickedBasis] = useState<PickedBasis | null>(null);
-  const [resultKey, setResultKey] = useState(0);
-  const [hasRun, setHasRun] = useState(false);
-  const [stale, setStale] = useState(false);
-  const [running, setRunning] = useState(false);
-  const runTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [switchOpen, setSwitchOpen] = useState(false);
   const resultPaneRef = useRef<HTMLElement | null>(null);
+  const resultCardRef = useRef<HTMLElement | null>(null);
+  /** Phones: the dock hides while the full result card is on screen. */
+  const [resultInView, setResultInView] = useState(false);
 
   const isOctc = (input.dutyKind ?? "oltc") === "octc";
   const isLinear = isOctc || input.regulation === "linear";
 
-  const touch = () => {
-    if (hasRun) setStale(true);
-  };
 
   const commitSafetyK = (n: number) => {
     setSafetyK(n);
@@ -605,7 +623,6 @@ export function SelectorApp() {
         setVoltageMode("winding");
       }
     }
-    touch();
   };
 
   const patch = <K extends keyof SelectInput>(k: K, v: SelectInput[K]) => {
@@ -616,7 +633,6 @@ export function SelectorApp() {
       }
       return next;
     });
-    touch();
   };
 
   const setVoltageEntry = (mode: "winding" | "equipment") => {
@@ -630,7 +646,6 @@ export function SelectorApp() {
       setInput((s) => ({ ...s, umKv: 0 }));
       if (currentMode === "capacity") setCurrentMode("current");
     }
-    touch();
   };
 
   const setCurrentEntry = (mode: "current" | "capacity") => {
@@ -640,7 +655,6 @@ export function SelectorApp() {
       setVoltageEntry("winding");
       return;
     }
-    touch();
   };
 
   const setVoltageKv = (kv: number) => {
@@ -652,7 +666,6 @@ export function SelectorApp() {
       patch("umKv", kv);
       return;
     }
-    touch();
   };
 
   const pickTap = (p: TapPoint) => {
@@ -660,7 +673,6 @@ export function SelectorApp() {
     setTapPoint(p);
     // Engine Y = one switch on a common star point; D = no common star point.
     setInput((s) => ({ ...s, connection: p === "neutral" ? "Y" : "D" }));
-    touch();
   };
 
   const pickKind = (k: TransformerKind) => {
@@ -670,7 +682,6 @@ export function SelectorApp() {
       k === "auto" ? "auto_junction" : winding === "delta" ? "line_end" : "neutral";
     setTapPoint(p);
     setInput((s) => ({ ...s, connection: p === "neutral" ? "Y" : "D" }));
-    touch();
   };
 
   const pickWinding = (w: WindingConnection) => {
@@ -679,11 +690,9 @@ export function SelectorApp() {
       setTapPoint("line_end");
       setInput((s) => ({ ...s, connection: "D" }));
     }
-    touch();
   };
 
   const setRegulation = (reg: SelectInput["regulation"]) => {
-    touch();
     if (reg === "linear") {
       setPm("");
       const plus = tapPlus > 0 ? tapPlus : 4;
@@ -756,7 +765,6 @@ export function SelectorApp() {
 
   const applyPm = (raw: string) => {
     setPm(raw);
-    touch();
     if (!raw) {
       const n = Number(pm) > 0 ? Number(pm) : 8;
       setTapPlus(n);
@@ -779,7 +787,6 @@ export function SelectorApp() {
 
   const applyMid = (raw: string) => {
     const mid = (Number(raw) === 1 ? 1 : 3) as 1 | 3;
-    touch();
     setInput((s) => {
       const n = s.plusMinusSteps;
       if (n != null && n > 0) {
@@ -885,67 +892,22 @@ export function SelectorApp() {
     return withOctcSeries(sized);
   };
 
-  const runSelect = () => {
-    if (runTimer.current) clearTimeout(runTimer.current);
-    setRunning(true);
-    setAltsOpen(false);
-    setOpenAlts([]);
-    runTimer.current = setTimeout(() => {
-      const duty = dutyForSelect();
-      if ("error" in duty) {
-        const msg = duty.msg ?? t(lang, duty.msgKey ?? "needRated");
-        setPickedDutyA(null);
-        setPickedStepV(0);
-        setPickedBasis(null);
-        setResult({
-          ok: false,
-          results: [],
-          errorsEn: [msg],
-          errorsZh: [msg],
-        });
-        setResultKey((k) => k + 1);
-        setHasRun(true);
-        setStale(false);
-        setRunning(false);
-        return;
-      }
-      setPickedDutyA(duty.throughCurrentA);
-      setPickedBasis({
-        duty: transformerDuty(),
-        kind: isOctc ? "two_winding" : kind,
-        tapPoint: isOctc && kind === "auto" ? "line_end" : tapPoint,
-        winding,
-        tapKv: windingRatedKv,
-        hvKv,
-        mvKv,
-        capacity: currentMode === "capacity",
-      });
-      setPickedStepV(duty.stepVoltageV > 0 ? duty.stepVoltageV : 0);
-      const out = selectOltc(duty);
-      setResult(out);
-      setResultKey((k) => k + 1);
-      setHasRun(true);
-      setStale(false);
-      setRunning(false);
-      setAltsOpen(out.ok && out.results.length > 1);
-      // Narrow screens stack the answer above the form — bring it back into view.
-      if (
-        typeof window !== "undefined" &&
-        window.matchMedia("(max-width: 1023px)").matches
-      ) {
-        window.setTimeout(() => {
-          resultPaneRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }, 40);
-      }
-    }, 280);
-  };
+  // The engine is synchronous and cheap, so the answer is computed on every
+  // render. A Select button used to let the readouts and the type disagree.
+  const sizing = dutyForSelect();
+  const sized = "error" in sizing ? null : sizing;
+  const result: SelectOutput = sized
+    ? selectOltc(sized)
+    : (() => {
+        const msg =
+          ("error" in sizing && (sizing.msg ?? t(lang, sizing.msgKey ?? "needRated"))) || "";
+        return { ok: false, results: [], errorsEn: [msg], errorsZh: [msg] };
+      })();
+  const pickedDutyA = sized ? sized.throughCurrentA : null;
+  const pickedStepV = sized && sized.stepVoltageV > 0 ? sized.stepVoltageV : 0;
 
   useEffect(() => {
     return () => {
-      if (runTimer.current) clearTimeout(runTimer.current);
       if (copiedTimer.current) clearTimeout(copiedTimer.current);
     };
   }, []);
@@ -955,8 +917,25 @@ export function SelectorApp() {
   }, [lang]);
 
   useEffect(() => {
-    setOpenAlts([]);
-  }, [resultKey]);
+    const el = resultPaneRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => setResultInView(entry.isIntersecting),
+      { threshold: 0.15 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const jumpToResult = () => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    resultPaneRef.current?.scrollIntoView({
+      behavior: reduce ? "auto" : "smooth",
+      block: "start",
+    });
+    // The dock hides once the card is in view; keep focus somewhere visible.
+    resultCardRef.current?.focus({ preventScroll: true });
+  };
 
   const copyModel = async (text: string) => {
     const ok = await copyText(text);
@@ -966,7 +945,20 @@ export function SelectorApp() {
     copiedTimer.current = setTimeout(() => setCopiedModel(null), 2000);
   };
 
-  const primary = result?.ok ? result.results[0] : null;
+  const primary = result.ok ? (result.results[0] ?? null) : null;
+  const primaryModel = primary?.model ?? null;
+  useEffect(() => {
+    setOpenAlts([]);
+  }, [primaryModel]);
+  // Screen readers hear the type once typing settles, not on every keystroke.
+  const liveText = primary
+    ? displayModel(primary.model, lang)
+    : t(lang, sized ? "noMatch" : "needInput");
+  const [announced, setAnnounced] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setAnnounced(liveText), 700);
+    return () => clearTimeout(id);
+  }, [liveText]);
   const marginNeed = {
     acrossTapBilKv: input.acrossTapBilKv,
     acrossTapPfKv: input.acrossTapPfKv,
@@ -1002,24 +994,44 @@ export function SelectorApp() {
     : midControl(pmN, input.regulation, input.positions);
   const midOpts = midCtrl.options;
   const derivedA = currentMode === "capacity" ? capacityThroughA() : null;
-  const derivedOk =
-    derivedA != null && Number.isFinite(derivedA) && derivedA > 0;
   const ustV = computedStepVoltage();
   const duty = transformerDuty();
   const ruleDuty = deriveDuty({ ...transformerSpec(), earthUmKv: undefined });
   const kindEff: TransformerKind = isOctc ? "two_winding" : kind;
+  const tapEff: TapPoint = isOctc && kind === "auto" ? "line_end" : tapPoint;
+  const listSep = lang === "zh" ? "，" : ", ";
+  const transformerLine = (
+    kindEff === "auto"
+      ? [t(lang, "kindAuto"), `${round1(hvKv)}/${round1(mvKv)} kV`]
+      : [
+          t(lang, "kindTwo"),
+          t(lang, winding === "star" ? "windingStar" : "windingDelta"),
+          `${round1(windingRatedKv)} kV`,
+        ]
+  ).join(listSep);
+  const cautions = [
+    ...(primary ? notesFor(lang, primary.cautionsZh, primary.cautionsEn) : []),
+    ...(duty.ok ? notesFor(lang, duty.cautionsZh, duty.cautionsEn) : []),
+  ].filter((c, i, all) => all.indexOf(c) === i);
+  // Folded switch section: one line that says what the hidden fields hold.
+  // Settings that change the result lead, so a clamped line still shows them.
+  const switchSummary = [
+    ...(input.acrossTapBilKv ? [`LI ${input.acrossTapBilKv} kV`] : []),
+    ...(input.acrossTapPfKv ? [`PF ${input.acrossTapPfKv} kV`] : []),
+    ...(safetyK > 1 ? [`${t(lang, "safetyK")} ×${safetyK}`] : []),
+    t(lang, isOctc ? "dutyOctc" : "dutyOltc"),
+    ...(input.mounting !== "dry_type" && input.mounting !== "reactor"
+      ? [t(lang, isOctc || !input.preferVacuum ? "arcOil" : "arcVac")]
+      : []),
+    input.preferStructure && input.preferStructure !== "auto"
+      ? t(lang, structureLabelKey(input.preferStructure))
+      : `${t(lang, "specStructure")} ${t(lang, "auto")}`,
+    t(lang, mountLabelKey(input.mounting)),
+  ].join(listSep);
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col">
       <header className="topbar sticky top-0 z-30">
         <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`}
-            alt=""
-            width={28}
-            height={28}
-            className="h-6 w-6 shrink-0 rounded-[6px] sm:h-7 sm:w-7"
-          />
           <div className="min-w-0 leading-tight">
             <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-ink)]">
               {t(lang, "title")}
@@ -1034,13 +1046,10 @@ export function SelectorApp() {
           </div>
         </div>
       </header>
-      <div className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-3 pb-6 sm:gap-8 sm:px-8 sm:pt-6 sm:pb-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-12 lg:pt-8 xl:grid-cols-[minmax(0,1fr)_28rem] xl:gap-16">
+      <div className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-3 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:gap-8 sm:px-8 sm:pt-6 lg:grid-cols-[minmax(0,1fr)_27rem] lg:gap-10 lg:pt-8 lg:pb-8 xl:grid-cols-[minmax(0,1fr)_30rem] xl:gap-14">
         <form
           className="flex min-w-0 flex-col"
-          onSubmit={(e) => {
-            e.preventDefault();
-            runSelect();
-          }}
+          onSubmit={(e) => e.preventDefault()}
         >
           <div className="w-full">
 
@@ -1068,7 +1077,7 @@ export function SelectorApp() {
                 </p>
               ) : null}
               <div className="mt-5 grid items-center gap-6 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
-                <div className="sketch-stage flex justify-center px-3 py-3 sm:py-4">
+                <div className="sketch-stage flex justify-center px-3 py-2 sm:py-4">
                   <TransformerSketch
                     lang={lang}
                     kind={kindEff}
@@ -1119,7 +1128,6 @@ export function SelectorApp() {
                       kvValue={hvKv}
                       onKv={(kv) => {
                         setHvKv(kv);
-                        touch();
                       }}
                     />
                     <KvField
@@ -1128,7 +1136,6 @@ export function SelectorApp() {
                       kvValue={mvKv}
                       onKv={(kv) => {
                         setMvKv(kv);
-                        touch();
                       }}
                     />
                   </>
@@ -1148,7 +1155,6 @@ export function SelectorApp() {
                     value={String(earthUm)}
                     onChange={(e) => {
                       setEarthUm(Number(e.target.value));
-                      touch();
                     }}
                   >
                     <option value="0">
@@ -1195,13 +1201,11 @@ export function SelectorApp() {
                         const raw = e.target.value;
                         if (raw === "") {
                           setTransformerMva(0);
-                          touch();
                           return;
                         }
                         const n = Number(raw);
                         if (!Number.isFinite(n) || n < 0) return;
                         setTransformerMva(n);
-                        touch();
                       }}
                       onBlur={() => {
                         if (
@@ -1230,7 +1234,6 @@ export function SelectorApp() {
                         }
                         setTransformerMva(Number(e.target.value));
                         setMvaCustom(false);
-                        touch();
                       }}
                     >
                       <option value="__custom__">{t(lang, "custom")}</option>
@@ -1355,7 +1358,6 @@ export function SelectorApp() {
                     value={stepPercentPct}
                     onValue={(n) => {
                       setStepPercentPct(n);
-                      touch();
                       if (isLinear || !pm) commitTapRange(tapPlus, tapMinus, n);
                     }}
                     onBlur={() => {
@@ -1382,7 +1384,6 @@ export function SelectorApp() {
                       const n = Number(e.target.value);
                       setStepPercentPct(n);
                       setStepPctCustom(false);
-                      touch();
                       if (isLinear || !pm) {
                         commitTapRange(tapPlus, tapMinus, n);
                       }
@@ -1421,7 +1422,6 @@ export function SelectorApp() {
                         onChange={(e) => {
                           const plus = Number(e.target.value);
                           setTapPlus(plus);
-                          touch();
                           commitTapRange(plus, tapMinus, stepPercentPct);
                         }}
                         aria-label="+"
@@ -1438,7 +1438,6 @@ export function SelectorApp() {
                         onChange={(e) => {
                           const minus = Number(e.target.value);
                           setTapMinus(minus);
-                          touch();
                           commitTapRange(tapPlus, minus, stepPercentPct);
                         }}
                         aria-label="−"
@@ -1526,9 +1525,33 @@ export function SelectorApp() {
             </Field>
               </div>
             </section>
-            <section aria-label={t(lang, "cardSwitch")} className="sheet-section">
-              <CardHead title={t(lang, "cardSwitch")} />
-              <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
+            <section aria-label={t(lang, "cardSwitch")} className="sheet-section sheet-section-fold">
+              <button
+                type="button"
+                aria-expanded={switchOpen}
+                aria-controls="switch-fields"
+                onClick={() => setSwitchOpen((o) => !o)}
+                className="fold-head"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[0.9375rem] leading-tight font-semibold text-[var(--color-ink)]">
+                    {t(lang, "cardSwitch")}
+                  </span>
+                  <span className="mt-1 line-clamp-2 text-[0.8125rem] leading-snug text-[var(--color-muted)]">
+                    {switchSummary}
+                  </span>
+                </span>
+                <ChevronDownIcon
+                  className={cx(
+                    "h-5 w-5 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
+                    switchOpen && "rotate-180",
+                  )}
+                  aria-hidden
+                />
+              </button>
+              <div className={cx("more-drop", switchOpen && "more-drop-open")}>
+              <div className="-mx-1 min-h-0 overflow-hidden px-1" {...(switchOpen ? {} : { inert: true })}>
+              <div id="switch-fields" className="grid grid-cols-2 gap-x-3 gap-y-5 pt-5 sm:gap-x-4">
                   <Field label={t(lang, "dutyKind")} as="div">
                     <div
                       className="ui-track"
@@ -1553,7 +1576,6 @@ export function SelectorApp() {
                                       ? s.octcSeries
                                       : "IV",
                                 }));
-                                touch();
                                 return;
                               }
                               setInput((s) => {
@@ -1568,7 +1590,6 @@ export function SelectorApp() {
                                     }
                                   : { ...s, dutyKind: "oltc", preferStructure: "auto" };
                               });
-                              touch();
                             }}
                             className={segBtn(on)}
                           >
@@ -1606,7 +1627,6 @@ export function SelectorApp() {
                                   preferVacuum: vac,
                                   medium: mediumFor(s.mounting, vac),
                                 }));
-                                touch();
                               }}
                               className={segBtn(on)}
                             >
@@ -1659,7 +1679,6 @@ export function SelectorApp() {
                           mounting,
                           medium: mediumFor(mounting, s.preferVacuum),
                         }));
-                        touch();
                       }}
                     >
                       <option value="in_tank">{t(lang, "mountIn")}</option>
@@ -1800,230 +1819,229 @@ export function SelectorApp() {
                     </div>
                   </Field>
               </div>
+              </div>
+              </div>
             </section>
-
-          <div className="submit-bar">
-            <button
-              type="submit"
-              disabled={
-                running ||
-                (currentMode === "capacity"
-                  ? !derivedOk
-                  : !input.throughCurrentA)
-              }
-              className={cx(
-                "ui-primary whitespace-nowrap",
-                running && "pointer-events-none",
-              )}
-            >
-              {running ? (
-                <>
-                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  {t(lang, "working")}
-                </>
-              ) : stale ? (
-                t(lang, "selectAgain")
-              ) : (
-                t(lang, "select")
-              )}
-            </button>
-          </div>
           </div>
           </div>
         </form>
 
         <aside
           ref={resultPaneRef}
-          className="flex min-w-0 scroll-mt-20 flex-col gap-3 quiet-scroll lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto lg:pb-2"
+          className="flex min-w-0 scroll-mt-16 flex-col gap-3 quiet-scroll lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto lg:pb-2"
         >
           <section
+            ref={resultCardRef}
+            tabIndex={-1}
             aria-label={t(lang, "resultAria")}
-            className={cx("plate", stale && !running && "is-stale")}
+            className="plate focus:outline-none"
           >
-            <div className="plate-frame">
-              <DutyReadout
-                lang={lang}
-                duty={duty}
-                dutyA={currentMode === "capacity" ? derivedA : input.throughCurrentA}
-                ratedA={currentMode === "capacity" && duty.ok ? duty.ratedA : null}
-                tap={isOctc && kind === "auto" ? "line_end" : tapPoint}
-                transformerLine={(kindEff === "auto"
-                  ? [t(lang, "kindAuto"), `${round1(hvKv)}/${round1(mvKv)} kV`]
-                  : [
-                      t(lang, "kindTwo"),
-                      t(lang, winding === "star" ? "windingStar" : "windingDelta"),
-                      `${round1(windingRatedKv)} kV`,
-                    ]
-                ).join(lang === "zh" ? "，" : ", ")}
-              />
-              <div className="plate-rule px-5 pt-4 pb-4" aria-live="polite">
-                {running ? (
-                  <div className="flex h-[4.25rem] items-center gap-2.5 text-[0.9375rem] text-[var(--color-muted)]">
-                    <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[var(--color-rule-2)] border-t-[var(--color-accent)]" />
-                    {t(lang, "selecting")}
-                  </div>
-                ) : !hasRun || !result ? (
-                  <div className="flex min-h-[4.25rem] flex-col justify-center">
-                    <p className="num text-[1.75rem] leading-none text-[var(--color-rule-2)]">—</p>
-                    <p className="mt-2 text-[0.8125rem] text-[var(--color-muted)]">
-                      {t(lang, "idleBody")}
-                    </p>
-                  </div>
-                ) : !result.ok || !primary ? (
-                  <div key={resultKey} className="plate-in">
-                    <p className="text-[0.9375rem] font-semibold text-[var(--color-danger)]">
-                      {t(lang, "noMatch")}
-                    </p>
-                    <ul className="mt-2 list-disc space-y-1 pl-5 text-[0.8125rem] leading-snug text-[var(--color-ink-2)]">
-                      {notesFor(lang, result.errorsZh, result.errorsEn).map((e) => (
-                        <li key={e}>{e}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : (
-                  <div key={resultKey} className="plate-in">
-                    <p className="plate-cap truncate text-[0.75rem] font-medium text-[var(--color-muted)]">
-                      {stale ? (
-                        <span className="text-[var(--color-warn)]">{t(lang, "stale")}</span>
-                      ) : (
-                        t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")
-                      )}
-                    </p>
-                    <div className="mt-1.5 flex items-center gap-2">
-                      <p translate="no" className="plate-type min-w-0 flex-1 text-[clamp(1.0625rem,4.9vw,1.625rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.25rem,1.7vw,1.625rem)]">
-                        {modelNodes(displayModel(primary.model, lang))}
-                      </p>
-                      <CopyButton
-                        lang={lang}
-                        copied={copiedModel === displayModel(primary.model, lang)}
-                        onCopy={() => copyModel(displayModel(primary.model, lang))}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {hasRun && result?.ok && primary && !running ? (
-                <div key={`d${resultKey}`} className="plate-in">
-                  {primary.cautionsEn.length + (pickedBasis?.duty.cautionsEn.length ?? 0) > 0 ? (
-                    <ul className="space-y-1.5 px-5 pb-4">
-                      {[
-                        ...notesFor(lang, primary.cautionsZh, primary.cautionsEn),
-                        ...notesFor(
-                          lang,
-                          pickedBasis?.duty.cautionsZh ?? [],
-                          pickedBasis?.duty.cautionsEn ?? [],
-                        ),
-                      ].map((c) => (
-                        <li
-                          key={c}
-                          className="flex gap-2 text-[0.8125rem] leading-snug text-[var(--color-ink-2)]"
-                        >
-                          <ExclamationTriangleIcon
-                            className="mt-px h-4 w-4 shrink-0 text-[var(--color-warn)]"
-                            strokeWidth={1.75}
-                            aria-hidden
-                          />
-                          <span>{c}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-
-                  <div className="plate-rule">
-                    <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} />
-                  </div>
-
-                  {alts.length > 0 ? (
-                    <div className="plate-rule">
-                      <button
-                        type="button"
-                        onClick={() => setAltsOpen((o) => !o)}
-                        className="flex h-11 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-                        aria-expanded={altsOpen}
-                      >
-                        <span>{t(lang, "otherOpts", { n: alts.length })}</span>
-                        <ChevronDownIcon
-                          className={cx(
-                            "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
-                            altsOpen && "rotate-180",
-                          )}
-                          aria-hidden
-                        />
-                      </button>
-                      <div
-                        className={cx(
-                          "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
-                          altsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-                        )}
-                      >
-                        <div className="min-h-0 overflow-hidden">
-                          <ul className="divide-y divide-[var(--color-rule)] border-t border-[var(--color-rule)]">
-                            {alts.map((r) => {
-                              const open = openAlts.includes(r.model);
-                              const shown = displayModel(r.model, lang);
-                              return (
-                                <li key={r.model}>
-                                  <div className="flex items-center gap-1 pr-3 pl-3">
-                                    <button
-                                      type="button"
-                                      aria-expanded={open}
-                                      onClick={() => setOpenAlts(open ? [] : [r.model])}
-                                      className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-[4px] px-2 py-1.5 text-left focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
-                                    >
-                                      <ChevronDownIcon
-                                        className={cx(
-                                          "h-4 w-4 shrink-0 text-[var(--color-caption)] transition-transform duration-200",
-                                          open && "rotate-180",
-                                        )}
-                                        aria-hidden
-                                      />
-                                      <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-                                        <span translate="no" className="plate-type min-w-0 text-[0.875rem] leading-snug text-[var(--color-ink)]">
-                                          {modelNodes(shown)}
-                                        </span>
-                                        {insuranceId === r.model ? (
-                                          <span className="shrink-0 text-[0.75rem] font-medium text-[var(--color-accent)]">
-                                            {t(lang, "allRound")}
-                                          </span>
-                                        ) : null}
-                                      </span>
-                                    </button>
-                                    <CopyButton
-                                      lang={lang}
-                                      small
-                                      copied={copiedModel === shown}
-                                      onCopy={() => copyModel(shown)}
-                                    />
-                                  </div>
-                                  <div className={cx("more-drop", open && "more-drop-open")}>
-                                    <div className="min-h-0 overflow-hidden">
-                                      <div className="more-drop-inner">
-                                        <ModelSpec
-                                          lang={lang}
-                                          r={r}
-                                          dutyMounting={input.mounting}
-                                          compact
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
+            <p className="sr-only" aria-live="polite">
+              {announced}
+            </p>
+            <div className="px-5 pt-5 pb-4 sm:px-6">
+              {!primary ? (
+                <div>
+                  <p
+                    className={cx(
+                      "text-[0.9375rem] font-semibold",
+                      sized ? "text-[var(--color-danger)]" : "text-[var(--color-ink)]",
+                    )}
+                  >
+                    {sized ? t(lang, "noMatch") : t(lang, "needInput")}
+                  </p>
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-[0.8125rem] leading-snug text-[var(--color-ink-2)]">
+                    {notesFor(lang, result.errorsZh, result.errorsEn).map((e) => (
+                      <li key={e}>{e}</li>
+                    ))}
+                  </ul>
                 </div>
-              ) : null}
+              ) : (
+                <>
+                  <p className="text-[0.8125rem] font-medium text-[var(--color-accent)]">
+                    {t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")}
+                  </p>
+                  <div className="mt-1.5 flex items-start gap-2">
+                    <p
+                      key={primary.model}
+                      translate="no"
+                      className="plate-type plate-in min-w-0 flex-1 text-[clamp(1.25rem,5.6vw,1.75rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.375rem,1.8vw,1.75rem)]"
+                    >
+                      {modelNodes(displayModel(primary.model, lang))}
+                    </p>
+                    <CopyButton
+                      lang={lang}
+                      copied={copiedModel === displayModel(primary.model, lang)}
+                      onCopy={() => copyModel(displayModel(primary.model, lang))}
+                    />
+                  </div>
+                  <p className="mt-2 text-[0.8125rem] leading-snug text-[var(--color-muted)]">
+                    {[t(lang, `tapShort_${tapEff}`), transformerLine].join(listSep)}
+                  </p>
+                </>
+              )}
             </div>
+
+            {cautions.length > 0 ? (
+              <ul className="caution-list">
+                {cautions.map((c) => (
+                  <li key={c} className="flex gap-2">
+                    <ExclamationTriangleIcon
+                      className="mt-px h-4 w-4 shrink-0 text-[var(--color-warn)]"
+                      strokeWidth={1.75}
+                      aria-hidden
+                    />
+                    <span>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            <BasisTable
+              lang={lang}
+              duty={duty}
+              dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
+              ratedA={currentMode === "capacity" && duty.ok ? duty.ratedA : null}
+              stepV={pickedStepV}
+              model={primary}
+            />
+
+            {primary ? (
+              <div className="plate-rule">
+                <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} hideRatings />
+              </div>
+            ) : null}
+
+            {primary && alts.length > 0 ? (
+              <div className="plate-rule">
+                <button
+                  type="button"
+                  onClick={() => setAltsOpen((o) => !o)}
+                  className="flex h-12 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:px-6"
+                  aria-expanded={altsOpen}
+                >
+                  <span>{t(lang, "otherOpts", { n: alts.length })}</span>
+                  <ChevronDownIcon
+                    className={cx(
+                      "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
+                      altsOpen && "rotate-180",
+                    )}
+                    aria-hidden
+                  />
+                </button>
+                <div
+                  className={cx(
+                    "grid transition-[grid-template-rows,opacity] duration-200 ease-out",
+                    altsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+                  )}
+                >
+                  <div className="min-h-0 overflow-hidden" {...(altsOpen ? {} : { inert: true })}>
+                    <ul className="divide-y divide-[var(--color-rule)] border-t border-[var(--color-rule)]">
+                      {alts.map((r) => {
+                        const open = openAlts.includes(r.model);
+                        const shown = displayModel(r.model, lang);
+                        return (
+                          <li key={r.model}>
+                            <div className="flex items-center gap-1 pr-3 pl-3 sm:pl-4">
+                              <button
+                                type="button"
+                                aria-expanded={open}
+                                onClick={() => setOpenAlts(open ? [] : [r.model])}
+                                className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-[4px] px-2 py-1.5 text-left focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+                              >
+                                <ChevronDownIcon
+                                  className={cx(
+                                    "h-4 w-4 shrink-0 text-[var(--color-caption)] transition-transform duration-200",
+                                    open && "rotate-180",
+                                  )}
+                                  aria-hidden
+                                />
+                                <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+                                  <span translate="no" className="plate-type min-w-0 text-[0.875rem] leading-snug text-[var(--color-ink)]">
+                                    {modelNodes(shown)}
+                                  </span>
+                                  {insuranceId === r.model ? (
+                                    <span className="shrink-0 text-[0.75rem] font-medium text-[var(--color-accent)]">
+                                      {t(lang, "allRound")}
+                                    </span>
+                                  ) : null}
+                                </span>
+                              </button>
+                              <CopyButton
+                                lang={lang}
+                                small
+                                copied={copiedModel === shown}
+                                onCopy={() => copyModel(shown)}
+                              />
+                            </div>
+                            <div className={cx("more-drop", open && "more-drop-open")}>
+                              <div className="min-h-0 overflow-hidden">
+                                <div className="more-drop-inner">
+                                  <ModelSpec
+                                    lang={lang}
+                                    r={r}
+                                    dutyMounting={input.mounting}
+                                    compact
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </section>
-          <p className="px-4 text-[0.75rem] leading-snug text-[var(--color-caption)] sm:px-5">
+          <p className="px-4 text-[0.75rem] leading-snug text-[var(--color-caption)] sm:px-1">
             {t(lang, "disclaimer")}
           </p>
         </aside>
+      </div>
+
+      {/* Phones: the current type rides along at the bottom while the form scrolls. */}
+      <div className={cx("result-dock", resultInView && "is-hidden")} {...(resultInView ? { inert: true } : {})}>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-[0.6875rem] font-medium text-[var(--color-muted)]">
+            {primary
+              ? t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")
+              : sized
+                ? t(lang, "noMatch")
+                : t(lang, "needInput")}
+          </span>
+          <span
+            translate="no"
+            className={cx(
+              "line-clamp-2 text-[0.9375rem] leading-snug font-semibold",
+              primary
+                ? "plate-type text-[var(--color-ink)]"
+                : sized
+                  ? "text-[var(--color-danger)]"
+                  : "text-[var(--color-caption)]",
+            )}
+          >
+            {primary ? modelNodes(displayModel(primary.model, lang)) : "—"}
+          </span>
+        </div>
+        {primary ? (
+          <CopyButton
+            lang={lang}
+            touch
+            copied={copiedModel === displayModel(primary.model, lang)}
+            onCopy={() => copyModel(displayModel(primary.model, lang))}
+          />
+        ) : null}
+        <button
+          type="button"
+          onClick={jumpToResult}
+          aria-label={t(lang, "showResult")}
+          title={t(lang, "showResult")}
+          className="dock-jump"
+        >
+          <ArrowDownIcon className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
+        </button>
       </div>
     </div>
   );
@@ -2064,11 +2082,14 @@ function ModelSpec({
   r,
   dutyMounting,
   compact,
+  hideRatings,
 }: {
   lang: Lang;
   r: ModelResult;
   dutyMounting: SelectInput["mounting"];
   compact?: boolean;
+  /** The basis table already shows max Ust and step capacity. */
+  hideRatings?: boolean;
 }) {
   const nb = "\u00a0";
   const series = SERIES.find((s) => s.id === r.seriesId);
@@ -2083,10 +2104,10 @@ function ModelSpec({
       value: t(lang, vacuum ? "specVac" : "specOil"),
     },
   ];
-  if (r.maxStepVoltageV != null) {
+  if (!hideRatings && r.maxStepVoltageV != null) {
     items.push({ key: "specUst", value: `${r.maxStepVoltageV}${nb}V` });
   }
-  if (r.stepCapacityKva != null) {
+  if (!hideRatings && r.stepCapacityKva != null) {
     items.push({ key: "specPsin", value: `${r.stepCapacityKva}${nb}kVA` });
   }
   items.push({
@@ -2108,7 +2129,7 @@ function ModelSpec({
     <dl
       className={cx(
         "grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3",
-        compact ? "pt-1 pr-5 pb-3 pl-11" : "px-5 py-4",
+        compact ? "pt-1 pr-5 pb-3 pl-11" : "px-5 py-4 sm:px-6",
       )}
     >
       {items.map((item) => (
