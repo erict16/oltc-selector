@@ -142,3 +142,16 @@ describe("中间位 control across ±N changes", () => {
     });
   });
 });
+
+describe("linear ±N", () => {
+  it("±8 with no positions is 17 positions, not the 9 fallback", () => {
+    const t = resolveTapFields({ regulation: "linear", plusMinusSteps: 8 });
+    expect(t.positions).toBe(17);
+    expect(t.tapCode).toBe("18170");
+  });
+
+  it("explicit positions still win, and nothing given stays 9", () => {
+    expect(resolveTapFields({ regulation: "linear", positions: 9, plusMinusSteps: 8 }).positions).toBe(9);
+    expect(resolveTapFields({ regulation: "linear" }).tapCode).toBe("10090");
+  });
+});

@@ -401,7 +401,12 @@ export function resolveTapFields(input: {
   };
 
   if (reg === "linear") {
-    const positions = input.positions ?? 9;
+    // Linear ±N is 2N+1 positions (no mid). A bare ±8 used to fall to 9.
+    const positions =
+      input.positions ??
+      (input.plusMinusSteps != null && input.plusMinusSteps > 0
+        ? 2 * input.plusMinusSteps + 1
+        : 9);
     const pitch = input.pitch ?? defaultPitch(positions, reg);
     const mid: 0 | 1 | 3 = 0;
     return {

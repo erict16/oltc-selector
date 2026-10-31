@@ -23,6 +23,7 @@
   --color-accent: oklch(48.2% 0.114 246.7);
   --color-accent-ink: oklch(99% 0.01 250);
   --color-graphite: oklch(22% 0.016 260);
+  --color-ok: oklch(54% 0.1 160);
   --color-warn: #9a5a00;
   --color-warn-bg: #fff5e1;
   --color-danger: #b42318;
@@ -1260,51 +1261,6 @@ select.ui-control-sm {
   }
 }
 
-.ui-primary {
-  display: inline-flex;
-  height: 2.75rem;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: var(--radius-sm);
-  background: var(--color-accent);
-  color: #fff;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  transition: background-color 150ms ease, transform 120ms ease;
-  touch-action: manipulation;
-}
-.ui-primary:hover {
-  background: color-mix(in oklch, var(--color-accent) 88%, black);
-}
-.ui-primary:active {
-  transform: translateY(1px);
-}
-.ui-primary:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-.ui-primary:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-.submit-bar {
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
-  border-top: 1px solid var(--color-rule);
-  border-radius: 0 0 12px 12px;
-  background: rgb(255 255 255 / 0.96);
-  padding: 0.875rem 1.25rem max(0.875rem, env(safe-area-inset-bottom));
-  backdrop-filter: blur(6px);
-}
-@media (min-width: 640px) {
-  .submit-bar {
-    padding-inline: 2rem;
-  }
-}
-
 .topbar {
   border-bottom: 1px solid var(--color-card-rule);
   background: rgb(255 255 255 / 0.94);
@@ -1318,14 +1274,8 @@ select.ui-control-sm {
   background: #fff;
   box-shadow: 0 1px 2px rgb(21 33 46 / 0.04);
 }
-.plate-frame {
-  padding: 0.25rem 0;
-}
 .plate-rule {
   border-top: 1px solid var(--color-rule);
-}
-.plate.is-stale .plate-type {
-  opacity: 0.4;
 }
 .plate-type {
   font-family: var(--font-mono);
@@ -1385,8 +1335,220 @@ select.ui-control-sm {
   .sheet-section {
     padding: 1.25rem 1rem;
   }
-  .submit-bar {
-    border-radius: 0;
-    padding-inline: 1rem;
+}
+
+/* Folded section: the whole head is the toggle; a summary line says what is inside. */
+.sheet-section-fold {
+  padding-block: 0;
+}
+.fold-head {
+  display: flex;
+  width: 100%;
+  min-height: 4.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding-block: 1rem;
+  text-align: left;
+  border-radius: var(--radius-sm);
+}
+.fold-head:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.sheet-section-fold #switch-fields {
+  padding-bottom: 1.5rem;
+}
+@media (min-width: 640px) {
+  .sheet-section-fold #switch-fields {
+    padding-bottom: 1.75rem;
+  }
+}
+
+/* Must-read notes sit on a warm band between the type and the basis. */
+.caution-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin: 0 1.25rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-warn-bg);
+  padding: 0.625rem 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: oklch(36% 0.07 65);
+}
+@media (min-width: 640px) {
+  .caution-list {
+    margin-inline: 1.5rem;
+  }
+}
+
+/* Duty against the type's rating, one row per checked axis. */
+.basis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.basis-table thead th {
+  padding: 0 0 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  text-align: left;
+  white-space: nowrap;
+}
+.basis-table thead th:first-child {
+  color: var(--color-ink);
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+.basis-table tbody th,
+.basis-table td {
+  border-top: 1px solid var(--color-rule);
+  padding: 0.5625rem 0;
+  vertical-align: baseline;
+}
+.basis-table tbody th {
+  font-weight: 400;
+  color: var(--color-ink-2);
+  text-align: left;
+  padding-right: 0.5rem;
+}
+.basis-table td {
+  color: var(--color-ink);
+  white-space: nowrap;
+  padding-left: 0.75rem;
+}
+.basis-table .r {
+  text-align: right;
+}
+.basis-table td.num {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.basis-unit {
+  margin-left: 0.25rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+.basis-sub {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--color-caption);
+}
+.basis-flag {
+  display: block;
+  margin-top: 0.125rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-warn);
+}
+.basis-use {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+.basis-use .num {
+  min-width: 2.25rem;
+  text-align: right;
+}
+.basis-bar {
+  position: relative;
+  display: inline-block;
+  width: 3.5rem;
+  height: 0.3125rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6eaef;
+}
+.basis-bar i {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-ok);
+  transform-origin: left center;
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.basis-use.is-tight {
+  color: var(--color-warn);
+  font-weight: 500;
+}
+.basis-use.is-tight .basis-bar i {
+  background: #d08a1c;
+}
+.basis-use.is-over {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+.basis-use.is-over .basis-bar i {
+  background: var(--color-danger);
+}
+@media (max-width: 400px) {
+  .basis-bar {
+    display: none;
+  }
+}
+
+/* Phones: the current type stays at the bottom while the form scrolls. */
+.result-dock {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid var(--color-card-rule);
+  background: rgb(255 255 255 / 0.97);
+  padding: 0.5rem max(0.75rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  box-shadow: 0 -6px 20px rgb(21 33 46 / 0.07);
+  backdrop-filter: blur(8px);
+  transition:
+    transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 200ms ease;
+}
+/* Focused fields are not scrolled in behind the dock. */
+@media (max-width: 1023px) {
+  html {
+    scroll-padding-bottom: 6rem;
+  }
+}
+/* Unlayered display beats Tailwind's lg:hidden, so the breakpoint lives here. */
+@media (min-width: 1024px) {
+  .result-dock {
+    display: none;
+  }
+}
+.result-dock.is-hidden {
+  transform: translateY(110%);
+  opacity: 0;
+  pointer-events: none;
+}
+.dock-jump {
+  display: inline-flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: #fff;
+  touch-action: manipulation;
+}
+.dock-jump:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .result-dock,
+  .basis-bar i {
+    transition: none;
   }
 }

@@ -200,3 +200,24 @@ describe("guards", () => {
     expect(deriveDuty(spec({ kind: "auto", tapPoint: "neutral", hvKv: 225, mvKv: 115 })).ok).toBe(false);
   });
 });
+
+describe("explicit earth Um and the 363 kV ceiling", () => {
+  const auto400 = { kind: "auto" as const, tapPoint: "auto_junction" as const, hvKv: 400, mvKv: 220, mva: 250 };
+
+  it("an OS-stated Um is applied before the range check", () => {
+    const d = deriveDuty(spec({ ...auto400, earthUmKv: 252 }));
+    expect(d.ok).toBe(true);
+    expect(d.umKv).toBe(252);
+    expect(d.umRule).toBe("explicit");
+  });
+
+  it("without an override, a 420 kV class is still refused", () => {
+    const d = deriveDuty(spec(auto400));
+    expect(d.ok).toBe(false);
+    expect(d.errorEn).toContain("363");
+  });
+
+  it("an override above 363 is refused too", () => {
+    expect(deriveDuty(spec({ ...auto400, earthUmKv: 420 })).ok).toBe(false);
+  });
+});
