@@ -8,6 +8,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["lib/**/*.test.ts"],
+    // Spawned CLI runs in tests must not call the npm registry.
+    env: { OLTC_NO_UPDATE_CHECK: "1" },
   },
   resolve: {
     alias: {
