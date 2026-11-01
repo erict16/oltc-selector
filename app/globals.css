@@ -1337,33 +1337,6 @@ select.ui-control-sm {
   }
 }
 
-/* Folded section: the whole head is the toggle; a summary line says what is inside. */
-.sheet-section-fold {
-  padding-block: 0;
-}
-.fold-head {
-  display: flex;
-  width: 100%;
-  min-height: 4.5rem;
-  align-items: center;
-  gap: 0.75rem;
-  padding-block: 1rem;
-  text-align: left;
-  border-radius: var(--radius-sm);
-}
-.fold-head:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-.sheet-section-fold #switch-fields {
-  padding-bottom: 1.5rem;
-}
-@media (min-width: 640px) {
-  .sheet-section-fold #switch-fields {
-    padding-bottom: 1.75rem;
-  }
-}
-
 /* Must-read notes sit on a warm band between the type and the basis. */
 .caution-list {
   display: flex;

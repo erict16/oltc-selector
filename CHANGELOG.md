@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Star neutral → delta → star puts the neutral back. It used to stay at the line end, so 25 MVA 110 kV went from CV2III-350Y/72.5 to CV2III-350D/126 without a word. A line end the user picked stays.
+- Delta: a one-line note under the tap position says why Neutral is off (also read by screen readers).
+- Off-circuit with an autotransformer now really switches the form to two-winding. Before, the form only looked two-winding: Neutral clicks did nothing, and back on on-load the result read "Tap position does not fit the transformer kind".
+- The Tap changer section is always open; the fold and its summary line are gone.
+
 ## 2.2.0
 
 - CLI update notice: at most one registry call a day (cached in `~/.cache/oltc-selector/update-check.json`, 1.5 s timeout). A newer version prints two lines on stderr with the install command; nothing is installed and `--json` stdout is untouched. `--no-update-check`, `OLTC_NO_UPDATE_CHECK=1`, `NO_UPDATE_NOTIFIER=1` and `CI` turn it off. Tests never call the registry.

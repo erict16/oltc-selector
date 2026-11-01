@@ -59,6 +59,7 @@ const en: Dict = {
   impulse: "HV impulse",
   diagramAria: "Wiring sketch. Pick where the tap changer sits.",
   autoOctcNote: "Off-circuit duty here is two-winding only.",
+  deltaNoNeutral: "Delta has no neutral: line end only.",
   kindTwoDesc: "Star or delta winding",
   kindAutoDesc: "YNa0, HV and MV share a winding",
 };
@@ -119,6 +120,7 @@ const zh: Dict = {
   impulse: "高压冲击",
   diagramAria: "接线示意，点选开关所在位置。",
   autoOctcNote: "无载这里只按双绕组算。",
+  deltaNoNeutral: "角形没有中性点，只能在线端。",
   kindTwoDesc: "星形或角形绕组",
   kindAutoDesc: "YNa0，高压和中压共用绕组",
 };
@@ -179,6 +181,7 @@ const vi: Dict = {
   impulse: "Xung cao áp",
   diagramAria: "Sơ đồ đấu nối. Chọn vị trí bộ ĐAPT.",
   autoOctcNote: "Không tải ở đây chỉ tính hai cuộn dây.",
+  deltaNoNeutral: "Tam giác không có trung tính, chỉ đặt ở đầu dây.",
   kindTwoDesc: "Cuộn sao hoặc tam giác",
   kindAutoDesc: "YNa0, cao áp và trung áp chung cuộn",
 };
@@ -239,6 +242,7 @@ const es: Dict = {
   impulse: "Impulso AT",
   diagramAria: "Esquema. Elija dónde está el cambiador.",
   autoOctcNote: "Sin carga aquí solo cubre dos devanados.",
+  deltaNoNeutral: "El triángulo no tiene neutro: solo extremo de línea.",
   kindTwoDesc: "Devanado estrella o triángulo",
   kindAutoDesc: "YNa0, AT y MT comparten devanado",
 };
@@ -299,6 +303,7 @@ const tr: Dict = {
   impulse: "YG darbesi",
   diagramAria: "Bağlantı şeması. Kademe değiştiricinin yerini seçin.",
   autoOctcNote: "Yüksüz burada yalnız iki sargılı.",
+  deltaNoNeutral: "Üçgende nötr yok, yalnız hat ucu.",
   kindTwoDesc: "Yıldız veya üçgen sargı",
   kindAutoDesc: "YNa0, YG ve OG ortak sargı",
 };
@@ -359,6 +364,7 @@ const id: Dict = {
   impulse: "Impuls TT",
   diagramAria: "Skema. Pilih posisi OLTC.",
   autoOctcNote: "Tanpa beban di sini hanya dua belitan.",
+  deltaNoNeutral: "Delta tidak punya netral, hanya ujung saluran.",
   kindTwoDesc: "Belitan bintang atau delta",
   kindAutoDesc: "YNa0, TT dan TM berbagi belitan",
 };

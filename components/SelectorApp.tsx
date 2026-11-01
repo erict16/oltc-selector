@@ -56,6 +56,7 @@ import {
 import {
   TAP_POINTS_FOR,
   deriveDuty,
+  tapAfterWinding,
   type DutyBasis,
   type TransformerSpec,
   type TapPoint,
@@ -591,6 +592,8 @@ export function SelectorApp() {
   const [kind, setKind] = useState<TransformerKind>("two_winding");
   const [tapPoint, setTapPoint] = useState<TapPoint>("neutral");
   const [winding, setWinding] = useState<WindingConnection>("star");
+  /** Line end set by delta, not by the user: star puts the neutral back. */
+  const [tapForced, setTapForced] = useState(false);
   const [hvKv, setHvKv] = useState(220);
   const [mvKv, setMvKv] = useState(110);
   /** OLTC insulation to earth stated by the OS / maker. 0 = by rule. */
@@ -600,7 +603,6 @@ export function SelectorApp() {
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [switchOpen, setSwitchOpen] = useState(false);
   const resultPaneRef = useRef<HTMLElement | null>(null);
   const resultCardRef = useRef<HTMLElement | null>(null);
   /** Phones: the dock hides while the full result card is on screen. */
@@ -669,8 +671,10 @@ export function SelectorApp() {
   };
 
   const pickTap = (p: TapPoint) => {
+    if (!TAP_POINTS_FOR[kind].includes(p)) return;
     if (kind === "two_winding" && winding === "delta" && p === "neutral") return;
     setTapPoint(p);
+    setTapForced(false);
     // Engine Y = one switch on a common star point; D = no common star point.
     setInput((s) => ({ ...s, connection: p === "neutral" ? "Y" : "D" }));
   };
@@ -681,14 +685,18 @@ export function SelectorApp() {
     const p: TapPoint =
       k === "auto" ? "auto_junction" : winding === "delta" ? "line_end" : "neutral";
     setTapPoint(p);
+    setTapForced(k === "two_winding" && winding === "delta");
     setInput((s) => ({ ...s, connection: p === "neutral" ? "Y" : "D" }));
   };
 
   const pickWinding = (w: WindingConnection) => {
     setWinding(w);
-    if (w === "delta" && tapPoint === "neutral") {
-      setTapPoint("line_end");
-      setInput((s) => ({ ...s, connection: "D" }));
+    if (kind !== "two_winding") return;
+    const next = tapAfterWinding(w, tapPoint, tapForced);
+    setTapForced(next.forced);
+    if (next.tapPoint !== tapPoint) {
+      setTapPoint(next.tapPoint);
+      setInput((s) => ({ ...s, connection: next.tapPoint === "neutral" ? "Y" : "D" }));
     }
   };
 
@@ -825,8 +833,8 @@ export function SelectorApp() {
 
   /** Transformer → duty. The one place current, Ust and Um come from. */
   const transformerSpec = (): TransformerSpec => ({
-      kind: isOctc ? "two_winding" : kind,
-      tapPoint: isOctc && kind === "auto" ? "line_end" : tapPoint,
+      kind,
+      tapPoint,
       winding,
       mva: currentMode === "capacity" ? transformerMva : 0,
       tapKv: windingRatedKv,
@@ -881,7 +889,7 @@ export function SelectorApp() {
     const sized: SelectInput = {
       ...input,
       connection: d.connection,
-      transformerKind: isOctc ? "two_winding" : kind,
+      transformerKind: kind,
       umKv: d.umKv,
       ...(ust != null ? { stepVoltageV: ust } : {}),
     };
@@ -997,11 +1005,9 @@ export function SelectorApp() {
   const ustV = computedStepVoltage();
   const duty = transformerDuty();
   const ruleDuty = deriveDuty({ ...transformerSpec(), earthUmKv: undefined });
-  const kindEff: TransformerKind = isOctc ? "two_winding" : kind;
-  const tapEff: TapPoint = isOctc && kind === "auto" ? "line_end" : tapPoint;
   const listSep = lang === "zh" ? "，" : ", ";
   const transformerLine = (
-    kindEff === "auto"
+    kind === "auto"
       ? [t(lang, "kindAuto"), `${round1(hvKv)}/${round1(mvKv)} kV`]
       : [
           t(lang, "kindTwo"),
@@ -1013,21 +1019,6 @@ export function SelectorApp() {
     ...(primary ? notesFor(lang, primary.cautionsZh, primary.cautionsEn) : []),
     ...(duty.ok ? notesFor(lang, duty.cautionsZh, duty.cautionsEn) : []),
   ].filter((c, i, all) => all.indexOf(c) === i);
-  // Folded switch section: one line that says what the hidden fields hold.
-  // Settings that change the result lead, so a clamped line still shows them.
-  const switchSummary = [
-    ...(input.acrossTapBilKv ? [`LI ${input.acrossTapBilKv} kV`] : []),
-    ...(input.acrossTapPfKv ? [`PF ${input.acrossTapPfKv} kV`] : []),
-    ...(safetyK > 1 ? [`${t(lang, "safetyK")} ×${safetyK}`] : []),
-    t(lang, isOctc ? "dutyOctc" : "dutyOltc"),
-    ...(input.mounting !== "dry_type" && input.mounting !== "reactor"
-      ? [t(lang, isOctc || !input.preferVacuum ? "arcOil" : "arcVac")]
-      : []),
-    input.preferStructure && input.preferStructure !== "auto"
-      ? t(lang, structureLabelKey(input.preferStructure))
-      : `${t(lang, "specStructure")} ${t(lang, "auto")}`,
-    t(lang, mountLabelKey(input.mounting)),
-  ].join(listSep);
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col">
       <header className="topbar sticky top-0 z-30">
@@ -1058,7 +1049,7 @@ export function SelectorApp() {
               <CardHead
                 title={t(lang, "transformer")}
                 right={
-                  kindEff === "auto" ? (
+                  kind === "auto" ? (
                     <span className="shrink-0 text-[0.75rem] font-medium text-[var(--color-accent)]">
                       {t(lang, "combinedOnly")}
                     </span>
@@ -1067,7 +1058,7 @@ export function SelectorApp() {
               />
               <KindToggle
                 lang={lang}
-                kind={kindEff}
+                kind={kind}
                 onKind={pickKind}
                 autoDisabled={isOctc}
               />
@@ -1080,8 +1071,8 @@ export function SelectorApp() {
                 <div className="sketch-stage flex justify-center px-3 py-2 sm:py-4">
                   <TransformerSketch
                     lang={lang}
-                    kind={kindEff}
-                    tapPoint={isOctc && kind === "auto" ? "line_end" : tapPoint}
+                    kind={kind}
+                    tapPoint={tapPoint}
                     winding={winding}
                     tapKv={windingRatedKv}
                     hvKv={hvKv}
@@ -1093,13 +1084,22 @@ export function SelectorApp() {
                   <Field as="div" label={t(lang, "tapPoint")}>
                     <TapList
                       lang={lang}
-                      kind={kindEff}
+                      kind={kind}
                       winding={winding}
-                      tapPoint={isOctc && kind === "auto" ? "line_end" : tapPoint}
+                      tapPoint={tapPoint}
                       onTap={pickTap}
+                      offHintId="delta-no-neutral"
                     />
+                    {kind === "two_winding" && winding === "delta" ? (
+                      <p
+                        id="delta-no-neutral"
+                        className="mt-1.5 text-[0.75rem] leading-snug text-[var(--color-muted)]"
+                      >
+                        {t(lang, "deltaNoNeutral")}
+                      </p>
+                    ) : null}
                   </Field>
-                  {kindEff === "two_winding" ? (
+                  {kind === "two_winding" ? (
                     <Field as="div" label={t(lang, "winding")}>
                       <div role="radiogroup" aria-label={t(lang, "winding")} className="ui-track">
                         {(["star", "delta"] as const).map((w) => (
@@ -1120,7 +1120,7 @@ export function SelectorApp() {
                 </div>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
-                {kindEff === "auto" ? (
+                {kind === "auto" ? (
                   <>
                     <KvField
                       lang={lang}
@@ -1525,33 +1525,9 @@ export function SelectorApp() {
             </Field>
               </div>
             </section>
-            <section aria-label={t(lang, "cardSwitch")} className="sheet-section sheet-section-fold">
-              <button
-                type="button"
-                aria-expanded={switchOpen}
-                aria-controls="switch-fields"
-                onClick={() => setSwitchOpen((o) => !o)}
-                className="fold-head"
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[0.9375rem] leading-tight font-semibold text-[var(--color-ink)]">
-                    {t(lang, "cardSwitch")}
-                  </span>
-                  <span className="mt-1 line-clamp-2 text-[0.8125rem] leading-snug text-[var(--color-muted)]">
-                    {switchSummary}
-                  </span>
-                </span>
-                <ChevronDownIcon
-                  className={cx(
-                    "h-5 w-5 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
-                    switchOpen && "rotate-180",
-                  )}
-                  aria-hidden
-                />
-              </button>
-              <div className={cx("more-drop", switchOpen && "more-drop-open")}>
-              <div className="-mx-1 min-h-0 overflow-hidden px-1" {...(switchOpen ? {} : { inert: true })}>
-              <div id="switch-fields" className="grid grid-cols-2 gap-x-3 gap-y-5 pt-5 sm:gap-x-4">
+            <section aria-label={t(lang, "cardSwitch")} className="sheet-section">
+              <CardHead title={t(lang, "cardSwitch")} />
+              <div id="switch-fields" className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
                   <Field label={t(lang, "dutyKind")} as="div">
                     <div
                       className="ui-track"
@@ -1567,6 +1543,8 @@ export function SelectorApp() {
                             aria-pressed={on}
                             onClick={() => {
                               if (k === "octc") {
+                                // Off-circuit is two-winding only (autoOctcNote).
+                                if (kind === "auto") pickKind("two_winding");
                                 setInput((s) => ({
                                   ...s,
                                   dutyKind: "octc",
@@ -1819,8 +1797,6 @@ export function SelectorApp() {
                     </div>
                   </Field>
               </div>
-              </div>
-              </div>
             </section>
           </div>
           </div>
@@ -1876,7 +1852,7 @@ export function SelectorApp() {
                     />
                   </div>
                   <p className="mt-2 text-[0.8125rem] leading-snug text-[var(--color-muted)]">
-                    {[t(lang, `tapShort_${tapEff}`), transformerLine].join(listSep)}
+                    {[t(lang, `tapShort_${tapPoint}`), transformerLine].join(listSep)}
                   </p>
                 </>
               )}
