@@ -34,6 +34,28 @@ export const TAP_POINTS_FOR: Record<TransformerKind, readonly TapPoint[]> = {
   auto: ["auto_junction", "auto_mv_line"],
 };
 
+/**
+ * Two-winding tap point after the winding changes. Delta has no neutral, so
+ * a neutral moves to the line end and `forced` remembers that the move was
+ * ours. Back to star undoes it; a line end the user picked stays.
+ * 2026-11-01: star neutral → delta → star used to keep the line end, and
+ * 25 MVA 110 kV went from CV2III-350Y/72.5 to CV2III-350D/126 unannounced.
+ */
+export function tapAfterWinding(
+  winding: WindingConnection,
+  tapPoint: TapPoint,
+  forced: boolean,
+): { tapPoint: TapPoint; forced: boolean } {
+  if (winding === "delta") {
+    return tapPoint === "neutral"
+      ? { tapPoint: "line_end", forced: true }
+      : { tapPoint, forced };
+  }
+  return forced && tapPoint === "line_end"
+    ? { tapPoint: "neutral", forced: false }
+    : { tapPoint, forced: false };
+}
+
 export interface TransformerSpec {
   kind: TransformerKind;
   tapPoint: TapPoint;

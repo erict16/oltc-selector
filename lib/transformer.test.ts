@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { selectOltc } from "./engine";
-import { deriveDuty, type TransformerSpec } from "./transformer";
+import { deriveDuty, tapAfterWinding, type TransformerSpec } from "./transformer";
 import type { SelectInput } from "./types";
 
 const spec = (over: Partial<TransformerSpec>): TransformerSpec => ({
@@ -219,5 +219,31 @@ describe("explicit earth Um and the 363 kV ceiling", () => {
 
   it("an override above 363 is refused too", () => {
     expect(deriveDuty(spec({ ...auto400, earthUmKv: 420 })).ok).toBe(false);
+  });
+});
+
+describe("tapAfterWinding", () => {
+  it("moves a neutral to the line end on delta and back on star", () => {
+    const d = tapAfterWinding("delta", "neutral", false);
+    expect(d).toEqual({ tapPoint: "line_end", forced: true });
+    expect(tapAfterWinding("star", d.tapPoint, d.forced)).toEqual({
+      tapPoint: "neutral",
+      forced: false,
+    });
+  });
+
+  it("keeps a line end the user picked", () => {
+    const d = tapAfterWinding("delta", "line_end", false);
+    expect(d).toEqual({ tapPoint: "line_end", forced: false });
+    expect(tapAfterWinding("star", d.tapPoint, d.forced).tapPoint).toBe("line_end");
+  });
+
+  it("round trip gives the star-neutral type again", () => {
+    const star = deriveDuty(spec({}));
+    const d = tapAfterWinding("delta", "neutral", false);
+    const back = tapAfterWinding("star", d.tapPoint, d.forced);
+    const again = deriveDuty(spec({ tapPoint: back.tapPoint }));
+    expect(again.connection).toBe(star.connection);
+    expect(again.umKv).toBe(star.umKv);
   });
 });
