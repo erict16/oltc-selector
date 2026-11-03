@@ -91,7 +91,7 @@ for (const row of rows) {
   if (!duties.length) { skip("deriveDuty refused"); continue; }
   const { s, d } = duties[0]!;
 
-  const input = { ...base, umKv: d.umKv, connection: parsed.phases === "I" ? base.connection : d.connection };
+  const input = { ...base, umKv: d.umKv, combinedOnly: d.combinedOnly, connection: parsed.phases === "I" ? base.connection : d.connection };
   const res = selectOltc(input);
   const models = res.results.map((r) => r.model);
   const primary = models[0] ?? "";

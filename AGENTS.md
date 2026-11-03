@@ -1,5 +1,9 @@
 # Agent notes — OLTC Selector
 
+## Labels and descriptions
+
+Avoid unnecessary secondary labels and descriptions. Let the layout do the explaining. **2026-11-03 Eric: permanent.** Hierarchy, grouping and clear controls carry the meaning; no caption that the page still makes sense without. Keep error messages, action feedback, and cautions the user must act on (assumed Um, 须工程确认).
+
 ## Icons
 
 **Do not invent or hand-draw icons** (Unicode glyphs like `▾`/`→`, DIY SVGs, emoji decoys, Imagine-drawn icons). They look wrong in this UI. **2026-09-11 Eric: 记死了. Match the app or use an open-source set already in the repo. Native `<select>` keeps the system arrow.**

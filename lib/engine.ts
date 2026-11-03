@@ -117,7 +117,10 @@ function isOctcSeries(s: SeriesDef): boolean {
 function maxStepVoltageForSeries(
   s: SeriesDef,
   pitch: number,
+  current?: number,
 ): number {
+  const byCurrent = current != null ? s.maxStepVoltageByCurrent?.[current] : undefined;
+  if (byCurrent != null) return byCurrent;
   if (s.id === "cv2" || s.id === "cv" || s.id === "sv") {
     if (pitch <= 10) return s.id === "cv2" ? 2000 : 1500;
     if (pitch <= 12) return s.id === "cv2" ? 1500 : 1400;
@@ -509,16 +512,21 @@ export function selectOltc(input: SelectInput): SelectOutput {
   });
 
   const wantStruct = input.preferStructure;
-  if (input.transformerKind === "auto" && !wantOctc) {
+  const autoKind = input.transformerKind === "auto";
+  if ((autoKind || input.combinedOnly) && !wantOctc) {
     if (wantStruct === "compound") {
       return {
         ok: false,
         results: [],
         errorsEn: [
-          "Autotransformers take combined types only: compound types (CV/CV2/SV) stop at 200 kV across the tap winding.",
+          autoKind
+            ? "Autotransformers take combined types only: compound types (CV/CV2/SV) stop at 200 kV across the tap winding."
+            : "Tapped windings of 220 kV class and above take combined types only: compound types (CV/CV2/SV) stop at 200 kV across the tap winding.",
         ],
         errorsZh: [
-          "自耦变只用组合式：复合式（CV/CV2/SV）跨调压绕组冲击上限 200 kV。",
+          autoKind
+            ? "自耦变只用组合式：复合式（CV/CV2/SV）跨调压绕组冲击上限 200 kV。"
+            : "220 kV 级及以上调压绕组只用组合式：复合式（CV/CV2/SV）跨调压绕组冲击上限 200 kV。",
         ],
       };
     }
@@ -589,6 +597,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const capacityOk = (c: number) => {
           const psin = s.stepCapacityByCurrent?.[c];
           if (psin != null && need > psin + 0.5) return false;
+          if (input.stepVoltageV > maxStepVoltageForSeries(s, tap.pitch, c) + 0.5) return false;
           return true;
         };
         // Nameplate current already includes short-time overload.
@@ -732,6 +741,42 @@ export function selectOltc(input: SelectInput): SelectOutput {
             `分接代码 ${tap.tapCode} 不在样本图 3-3 标准接线内，须工程确认接线。`,
           );
         }
+        if (!octc) {
+          // Huaming 选型培训 (JL 2024-05): these go to technical special review.
+          const review: string[] = [];
+          const reviewZh: string[] = [];
+          if (s.id === "cm2" && input.stepVoltageV > 2500 + 0.5) {
+            review.push("CM2 step voltage above 2500 V");
+            reviewZh.push("CM2 级电压超过 2500 V");
+          }
+          if (s.id === "shzv" && input.stepVoltageV > 3300 + 0.5) {
+            review.push("SHZV step voltage above 3300 V");
+            reviewZh.push("SHZV 级电压超过 3300 V");
+          }
+          if (selectorSize === "DE" || selectorSize === "E") {
+            review.push(`selector grade ${selectorSize}`);
+            reviewZh.push(`选择器 ${selectorSize} 级`);
+          }
+          if (att.um >= 300) {
+            review.push(`Um ${att.um} kV`);
+            reviewZh.push(`Um ${att.um} kV`);
+          }
+          if (review.length) {
+            cautionsEn.push(`Needs Huaming technical review: ${review.join(", ")}.`);
+            cautionsZh.push(`须华明技术特别评审：${reviewZh.join("，")}。`);
+          }
+          // Change-over selector recovery voltage: 35 kV combined, 15 kV CV2.
+          if (
+            tap.changeOver !== "0" &&
+            input.transformerKind !== "auto" &&
+            (input.tapWindingKv ?? 0) > 121
+          ) {
+            cautionsEn.push(
+              "Change-over selector above 110 kV: check the recovery voltage and quote the tie-in resistor as an option (maker's Cw/Ce needed).",
+            );
+            cautionsZh.push("110 kV 以上正反调/粗细调：核恢复电压，束缚电阻作为可选项报价（需变压器厂 Cw/Ce）。");
+          }
+        }
         if (gradePick?.raisedFrom) {
           cautionsEn.push(
             `Selector grade raised from ${gradePick.raisedFrom} to ${selectorSize} (Um ${att.um} kV / across-tap stress).`,
@@ -865,7 +910,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
         const maxStepVoltageV = octc
           ? null
-          : maxStepVoltageForSeries(s, tap.pitch);
+          : maxStepVoltageForSeries(s, tap.pitch, current);
         const stepCapacityKva = s.stepCapacityByCurrent?.[current] ?? null;
 
         let confidence = 0.88;

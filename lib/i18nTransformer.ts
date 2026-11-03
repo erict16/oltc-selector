@@ -62,6 +62,17 @@ const en: Dict = {
   deltaNoNeutral: "Delta has no neutral: line end only.",
   kindTwoDesc: "Star or delta winding",
   kindAutoDesc: "YNa0, HV and MV share a winding",
+  lineLabel: "Tender line",
+  linePlaceholder: "Paste e.g. 125MVA 225±8x1.25%/115/35kV YNa0d11",
+  lineRead: "Read",
+  lineFail: "No MVA and kV found. Fill the fields below.",
+  lineCheck: "Not stated, check",
+  lineF_kind: "transformer kind",
+  lineF_tap_point: "tap point",
+  lineF_winding: "winding connection",
+  lineF_tap_winding: "tapped winding",
+  lineF_range: "tap range",
+  lineF_mva: "MVA",
 };
 
 const zh: Dict = {
@@ -123,6 +134,17 @@ const zh: Dict = {
   deltaNoNeutral: "角形没有中性点，只能在线端。",
   kindTwoDesc: "星形或角形绕组",
   kindAutoDesc: "YNa0，高压和中压共用绕组",
+  lineLabel: "招标参数行",
+  linePlaceholder: "粘贴如 125MVA 225±8x1.25%/115/35kV YNa0d11",
+  lineRead: "读取",
+  lineFail: "没读到容量和电压，请在下面填写。",
+  lineCheck: "参数行没写，请确认",
+  lineF_kind: "变压器种类",
+  lineF_tap_point: "开关位置",
+  lineF_winding: "绕组接法",
+  lineF_tap_winding: "调压绕组",
+  lineF_range: "调压范围",
+  lineF_mva: "容量",
 };
 
 const vi: Dict = {
@@ -184,6 +206,17 @@ const vi: Dict = {
   deltaNoNeutral: "Tam giác không có trung tính, chỉ đặt ở đầu dây.",
   kindTwoDesc: "Cuộn sao hoặc tam giác",
   kindAutoDesc: "YNa0, cao áp và trung áp chung cuộn",
+  lineLabel: "Dòng thông số thầu",
+  linePlaceholder: "Dán ví dụ 125MVA 225±8x1,25%/115/35kV YNa0d11",
+  lineRead: "Đọc",
+  lineFail: "Không thấy MVA và kV. Điền các ô bên dưới.",
+  lineCheck: "Không ghi, cần kiểm tra",
+  lineF_kind: "loại máy biến áp",
+  lineF_tap_point: "vị trí bộ chuyển nấc",
+  lineF_winding: "đấu dây cuộn",
+  lineF_tap_winding: "cuộn điều áp",
+  lineF_range: "dải điều áp",
+  lineF_mva: "MVA",
 };
 
 const es: Dict = {
@@ -245,6 +278,17 @@ const es: Dict = {
   deltaNoNeutral: "El triángulo no tiene neutro: solo extremo de línea.",
   kindTwoDesc: "Devanado estrella o triángulo",
   kindAutoDesc: "YNa0, AT y MT comparten devanado",
+  lineLabel: "Línea del pliego",
+  linePlaceholder: "Pegue p. ej. 125MVA 225±8x1,25%/115/35kV YNa0d11",
+  lineRead: "Leer",
+  lineFail: "No se encontró MVA ni kV. Complete los campos.",
+  lineCheck: "No indicado, verifique",
+  lineF_kind: "tipo de transformador",
+  lineF_tap_point: "punto del cambiador",
+  lineF_winding: "conexión del devanado",
+  lineF_tap_winding: "devanado regulado",
+  lineF_range: "rango de tomas",
+  lineF_mva: "MVA",
 };
 
 const tr: Dict = {
@@ -306,6 +350,17 @@ const tr: Dict = {
   deltaNoNeutral: "Üçgende nötr yok, yalnız hat ucu.",
   kindTwoDesc: "Yıldız veya üçgen sargı",
   kindAutoDesc: "YNa0, YG ve OG ortak sargı",
+  lineLabel: "İhale satırı",
+  linePlaceholder: "Örnek yapıştırın: 125MVA 225±8x1,25%/115/35kV YNa0d11",
+  lineRead: "Oku",
+  lineFail: "MVA ve kV bulunamadı. Aşağıdaki alanları doldurun.",
+  lineCheck: "Belirtilmemiş, kontrol edin",
+  lineF_kind: "trafo tipi",
+  lineF_tap_point: "kademe değiştirici yeri",
+  lineF_winding: "sargı bağlantısı",
+  lineF_tap_winding: "kademeli sargı",
+  lineF_range: "kademe aralığı",
+  lineF_mva: "MVA",
 };
 
 const id: Dict = {
@@ -367,6 +422,17 @@ const id: Dict = {
   deltaNoNeutral: "Delta tidak punya netral, hanya ujung saluran.",
   kindTwoDesc: "Belitan bintang atau delta",
   kindAutoDesc: "YNa0, TT dan TM berbagi belitan",
+  lineLabel: "Baris tender",
+  linePlaceholder: "Tempel mis. 125MVA 225±8x1,25%/115/35kV YNa0d11",
+  lineRead: "Baca",
+  lineFail: "MVA dan kV tidak ditemukan. Isi kolom di bawah.",
+  lineCheck: "Tidak disebut, periksa",
+  lineF_kind: "jenis trafo",
+  lineF_tap_point: "posisi OLTC",
+  lineF_winding: "hubungan belitan",
+  lineF_tap_winding: "belitan bertap",
+  lineF_range: "rentang tap",
+  lineF_mva: "MVA",
 };
 
 export const TRANSFORMER_STRINGS: Record<Lang, Dict> = { en, zh, vi, es, tr, id };

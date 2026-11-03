@@ -17,7 +17,9 @@ import {
   SERIES,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
+  umForEarthInsulation,
 } from "@/lib/catalog";
+import { parseTenderLine, type TenderLine } from "@/lib/nameplate";
 import { copyText } from "@/lib/clipboard";
 import { decimalDraft } from "@/lib/decimal";
 import { displayModel } from "@/lib/domesticModel";
@@ -598,6 +600,10 @@ export function SelectorApp() {
   const [mvKv, setMvKv] = useState(110);
   /** OLTC insulation to earth stated by the OS / maker. 0 = by rule. */
   const [earthUm, setEarthUm] = useState(0);
+  /** Tender line as typed, and what was read from it (null = not read). */
+  const [lineText, setLineText] = useState("");
+  const [lineRead, setLineRead] = useState<TenderLine | null>(null);
+  const [lineFailed, setLineFailed] = useState(false);
   const [altsOpen, setAltsOpen] = useState(false);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
@@ -698,6 +704,80 @@ export function SelectorApp() {
       setTapPoint(next.tapPoint);
       setInput((s) => ({ ...s, connection: next.tapPoint === "neutral" ? "Y" : "D" }));
     }
+  };
+
+  /**
+   * Fill the transformer and range fields from one tender line. The kind,
+   * tap point and winding come from the vector group, so a YNa0d11 line
+   * cannot be sized as a two-winding job by a missed click.
+   */
+  const readTenderLine = () => {
+    const tl = parseTenderLine(lineText);
+    if (!tl || tl.mva == null || !tl.voltagesKv.length) {
+      setLineRead(null);
+      setLineFailed(true);
+      return;
+    }
+    setLineFailed(false);
+    setLineRead(tl);
+    setCurrentMode("capacity");
+    setVoltageMode("winding");
+    setTransformerMva(tl.mva);
+    setMvaCustom(false);
+    setKind(tl.kind);
+    if (tl.kind === "auto") {
+      if (tl.hvKv != null) setHvKv(tl.hvKv);
+      if (tl.mvKv != null) setMvKv(tl.mvKv);
+    } else {
+      if (tl.tapKv != null) setWindingRatedKv(tl.tapKv);
+      setWinding(tl.winding);
+    }
+    setTapPoint(tl.tapPoint);
+    setTapForced(false);
+    const bilUm =
+      tl.neutralBilKv != null && tl.tapPoint === "neutral"
+        ? umForEarthInsulation(0, tl.neutralBilKv)
+        : null;
+    setEarthUm(bilUm ?? 0);
+    if (tl.stepPct != null && tl.stepPct > 0) {
+      setStepPercentPct(tl.stepPct);
+      setStepPctCustom(false);
+    }
+    const conn = tl.tapPoint === "neutral" ? "Y" : "D";
+    if (tl.plus != null && tl.minus != null && tl.plus !== tl.minus) {
+      // +4-12 has no ±N diagram: linear with the real minus steps.
+      setPm("");
+      setTapPlus(tl.plus);
+      setTapMinus(tl.minus);
+      const range: ParsedTapRange = {
+        plus: tl.plus,
+        minus: tl.minus,
+        positions: tl.plus + tl.minus + 1,
+        stepPercent: tl.stepPct != null ? tl.stepPct / 100 : null,
+      };
+      setTapRange(range);
+      setInput((s) => ({
+        ...s,
+        connection: conn,
+        umKv: 0,
+        regulation: "linear",
+        plusMinusSteps: undefined,
+        positions: range.positions,
+        midPositions: 0,
+        pitch: defaultPitch(range.positions, "linear") as 10 | 12 | 14 | 16 | 18,
+      }));
+      return;
+    }
+    const n = tl.plus ?? (pm && Number(pm) > 0 ? Number(pm) : 8);
+    setPm(String(n));
+    setTapRange(null);
+    setInput((s) => {
+      const reg =
+        s.regulation === "linear" || !pmStepOptionsFor(s.regulation).includes(n)
+          ? "reversing"
+          : s.regulation;
+      return { ...s, connection: conn, umKv: 0, regulation: reg, ...geometryForPm(n, reg) };
+    });
   };
 
   const setRegulation = (reg: SelectInput["regulation"]) => {
@@ -890,6 +970,8 @@ export function SelectorApp() {
       ...input,
       connection: d.connection,
       transformerKind: kind,
+      combinedOnly: d.combinedOnly,
+      ...(kind !== "auto" ? { tapWindingKv: d.umSystemKv } : {}),
       umKv: d.umKv,
       ...(ust != null ? { stepVoltageV: ust } : {}),
     };
@@ -1056,6 +1138,53 @@ export function SelectorApp() {
                   ) : undefined
                 }
               />
+              <div className="mb-4 flex flex-col gap-2">
+                <label
+                  htmlFor="tender-line"
+                  className="text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]"
+                >
+                  {t(lang, "lineLabel")}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    id="tender-line"
+                    type="text"
+                    className={cx(controlClass, "min-w-0 flex-1")}
+                    value={lineText}
+                    placeholder={t(lang, "linePlaceholder")}
+                    spellCheck={false}
+                    autoComplete="off"
+                    onChange={(e) => {
+                      setLineText(e.target.value);
+                      setLineFailed(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        readTenderLine();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="ui-seg is-on shrink-0 px-4"
+                    disabled={!lineText.trim()}
+                    onClick={readTenderLine}
+                  >
+                    {t(lang, "lineRead")}
+                  </button>
+                </div>
+                {lineFailed ? (
+                  <p role="status" className="text-[0.75rem] leading-snug text-[var(--color-accent)]">
+                    {t(lang, "lineFail")}
+                  </p>
+                ) : lineRead?.assumed.length ? (
+                  <p role="status" className="text-[0.75rem] leading-snug text-[var(--color-accent)]">
+                    {t(lang, "lineCheck")}:{" "}
+                    {lineRead.assumed.map((f) => t(lang, `lineF_${f}`)).join(", ")}
+                  </p>
+                ) : null}
+              </div>
               <KindToggle
                 lang={lang}
                 kind={kind}

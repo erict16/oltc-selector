@@ -2,12 +2,15 @@ import { parseDecimal } from "./decimal";
 import { octcRoman, optionsWithInsurance, selectOltc } from "./engine";
 import {
   deriveDuty,
+  umChoices,
   type DutyBasis,
   type TapPoint,
   type TransformerKind,
   type WindingConnection,
 } from "./transformer";
 import { lookupByPositions, plusMinusFromPositions } from "./tapCode";
+import { umForEarthInsulation } from "./catalog";
+import { parseTenderLine, type TenderLine } from "./nameplate";
 import { commercialTypeExists } from "./typeExists";
 import type {
   Connection,
@@ -51,6 +54,10 @@ export type CliArgs = {
   phases: PhaseCode;
   json: boolean;
   help: boolean;
+  /** --line: the tender line as read. Flags given beside it win. */
+  line?: TenderLine;
+  /** Minus steps of an asymmetric range (+4-12): sizes the lowest-tap current. */
+  minus?: number;
   /** flags the user actually passed; everything else is a silent default */
   given: Set<string>;
 };
@@ -99,6 +106,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
     return [v, i + 1];
   };
 
+  let lineRaw: string | null = null;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]!;
     if (a === "-h" || a === "--help") {
@@ -329,6 +337,13 @@ export function parseCliArgs(argv: string[]): CliArgs {
       i = n;
       continue;
     }
+    if (a === "--line" || a === "--nameplate") {
+      out.given.add("line");
+      const [v, n] = take(i, a);
+      lineRaw = v;
+      i = n;
+      continue;
+    }
     if (a === "--duty") {
       out.given.add("octc");
       const [v, n] = take(i, a);
@@ -341,8 +356,57 @@ export function parseCliArgs(argv: string[]): CliArgs {
     }
     throw new CliError(`Unknown flag: ${a}`);
   }
+  if (lineRaw != null) applyTenderLine(out, lineRaw);
   return out;
 }
+
+/**
+ * Fill the capacity path from a tender line. A flag typed beside --line
+ * wins. A field the line only implies (tap point, star winding) is not
+ * marked given, so the 假定 block still asks for it.
+ */
+function applyTenderLine(out: CliArgs, raw: string): void {
+  const t = parseTenderLine(raw);
+  if (!t || t.mva == null || !t.voltagesKv.length) {
+    throw new CliError(
+      `Could not read MVA and kV from --line: ${raw}. Give --mva/--kv (or --hv/--mv) instead.`,
+    );
+  }
+  out.line = t;
+  const fill = (key: string, apply: () => void, sure = true) => {
+    if (out.given.has(key)) return;
+    apply();
+    if (sure) out.given.add(key);
+  };
+  fill("kind", () => (out.kind = t.kind), !t.assumed.includes("kind"));
+  fill("mva", () => (out.mva = t.mva!));
+  if (t.kind === "auto") {
+    if (t.hvKv != null) fill("hv", () => (out.hv = t.hvKv!));
+    if (t.mvKv != null) fill("mv", () => (out.mv = t.mvKv!));
+  } else if (t.tapKv != null) {
+    fill("kv", () => (out.kv = t.tapKv!));
+    fill("winding", () => (out.winding = t.winding), !t.assumed.includes("winding"));
+  }
+  fill("tap", () => (out.tap = t.tapPoint), !t.assumed.includes("tap_point"));
+  if (t.plus != null && t.minus != null && !out.given.has("pm") && !out.given.has("positions")) {
+    if (t.plus === t.minus) {
+      out.pm = t.plus;
+      out.given.add("pm");
+    } else {
+      // +4-12 is not a Fig. 3-3 ±N diagram: linear positions, real minus steps.
+      out.positions = t.plus + t.minus + 1;
+      out.minus = t.minus;
+      out.given.add("positions");
+      fill("reg", () => (out.reg = "linear"), false);
+    }
+  }
+  if (t.stepPct != null) fill("stepPct", () => (out.stepPct = t.stepPct!));
+  if (t.neutralBilKv != null && t.tapPoint === "neutral") {
+    const um = umForEarthInsulation(0, t.neutralBilKv);
+    if (um != null) fill("earthUm", () => (out.earthUm = um));
+  }
+}
+
 
 export const CLI_HELP = `oltc — OLTC/OCTC type selection (package: oltc-selector, no prices)
 
@@ -351,11 +415,16 @@ Usage:
   oltc --mva 25 --kv 110 --tap neutral --reg W --pm 8
   oltc --mva 16 --kv 22 --tap line --winding star
   oltc --mva 125 --kind auto --hv 225 --mv 115 --tap junction
+  oltc --line "125MVA 225±8x1,25%/115/35kV YNa0d11"
   oltc --octc --iu 800 --um 72.5 --conn D --series II --contact 6x5
   oltc --iu 600 --um 72.5 --conn Y --reg W --pm 8 --structure combined
 
 Flags:
   --iu, --imax A     Max through-current (Imax). No safety factor.
+  --line "text"      Tender line: MVA, kV ratio with ±N×x%, vector group.
+                     Reads autotransformer from YNa0 / auto / OSFPSZ, delta
+                     line end from D, star neutral from Y (asked in 假定).
+                     Flags given beside it win.
   --mva MVA --kv kV  Capacity path: Imax from rated I, minus steps, --step-pct, --k
   --kind two|auto    Transformer kind (--auto = --kind auto). Default two-winding.
   --tap P            Where the OLTC sits: neutral|line (two-winding),
@@ -446,6 +515,7 @@ function cliPlusMinus(args: CliArgs): { n: number; mid: 1 | 3 } | null {
  * rounded up; --pm N → N. With no range at all the ±8 default stays.
  */
 function cliMinusSteps(args: CliArgs): number {
+  if (args.minus != null && args.minus > 0) return args.minus;
   const fromPositions =
     args.positions != null && args.positions > 1
       ? Math.ceil((args.positions - 1) / 2)
@@ -561,6 +631,8 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     phases: args.phases,
     connection: conn,
     ...(args.kind === "auto" ? { transformerKind: "auto" as const } : {}),
+    ...(duty?.combinedOnly ? { combinedOnly: true } : {}),
+    ...(duty?.ok && args.kind !== "auto" ? { tapWindingKv: duty.umSystemKv } : {}),
     throughCurrentA: iu,
     umKv: um,
     stepVoltageV: ust,
@@ -755,6 +827,19 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
   if (duty?.ok) lines.push(`依据：${basisLineZh(duty)}`);
   for (const c of primary.cautionsZh) lines.push(`注意：${c}`);
   for (const c of duty?.cautionsZh ?? []) lines.push(`注意：${c}`);
+  const choices = args && duty?.ok ? umChoicesFor(args, input) : [];
+  if (choices.length > 1) {
+    lines.push(
+      `对地绝缘未定：${choices.map((c) => `Um ${c.um} → ${c.model ?? "无"}`).join(" · ")}（按招标的中性点/调压绕组绝缘取，用 --earth-um）`,
+    );
+  }
+  if (args?.line) {
+    const t = args.line;
+    lines.push(
+      `招标行：${t.kind === "auto" ? "自耦变" : "双绕组"} · ${t.mva} MVA · ${t.voltagesKv.join("/")} kV${t.vectorGroup ? ` · ${t.vectorGroup}` : " · 无联结组"}`,
+    );
+    for (const w of t.warnings) lines.push(`注意：招标行 ${w}`);
+  }
   if (alts.length) {
     lines.push("");
     lines.push("其他");
@@ -812,10 +897,37 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
           }
         : null;
     })(),
+    umChoices: args ? umChoicesFor(args, input) : [],
     assumptions: args ? assumptionsFromArgs(args, primary?.seriesCode) : [],
     errors: out.errorsZh.length ? out.errorsZh : out.errorsEn,
   };
   return JSON.stringify(payload, null, 2) + "\n";
+}
+
+/** The primary type at each open Um class (empty when Um is settled). */
+export function umChoicesFor(
+  args: CliArgs,
+  input: SelectInput,
+): Array<{ um: number; model: string | null }> {
+  const d = cliDuty(args);
+  if (!d?.ok) return [];
+  const tap = cliTapPoint(args);
+  const spec = {
+    kind: args.kind,
+    tapPoint: tap,
+    winding: args.winding ?? (tap === "neutral" ? "star" : "delta"),
+    mva: args.mva ?? 0,
+    tapKv: args.kv ?? 0,
+    hvKv: args.hv ?? 0,
+    mvKv: args.mv ?? 0,
+    minusSteps: 0,
+    stepFraction: null,
+    safetyK: 1,
+  } as const;
+  return umChoices(d, spec).map((um) => ({
+    um,
+    model: selectOltc({ ...input, umKv: um }).results[0]?.model ?? null,
+  }));
 }
 
 export function runCli(

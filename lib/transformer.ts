@@ -257,6 +257,14 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     cautionsZh.push(`中性点绝缘未给，先按 Um ${NEUTRAL_DEFAULT_UM} 选，以 OS 为准。`);
     cautionsEn.push(`Neutral insulation not given: sized at Um ${NEUTRAL_DEFAULT_UM}; the OS decides.`);
   }
+  // 2025–2026 OS: 67 tapped windings on 220 kV class and above, every one
+  // CM / CM2 / SHZV, none compound. CV2's 200 kV across-tap limit does not
+  // cover a 220 kV regulating winding, neutral end included.
+  const highWinding = !auto && catalogueUmFromRatedKv(spec.tapKv) >= 252;
+  if (highWinding) {
+    cautionsZh.push("220 kV 级及以上调压绕组只用组合式（2025–2026 订单无复合式）。");
+    cautionsEn.push("220 kV-class tapped winding: combined types only (no compound in 2025–2026 orders).");
+  }
   if (auto) {
     if (spec.tapPoint === "auto_mv_line" && umRule === "auto_hv") {
       cautionsZh.push("HMR 230/121 kV 先例按厂家数据用 Um 170。");
@@ -283,10 +291,33 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     currentKv,
     currentDivisor,
     stepV,
-    combinedOnly: auto,
+    combinedOnly: auto || highWinding,
     cautionsZh,
     cautionsEn,
   };
+}
+
+/**
+ * Um classes the switch could take when the tender has not fixed it, lowest
+ * first. Empty when the rule is settled (line end, or a stated Um).
+ * 2025–2026 OS star points above 110 kV sold 72.5 / 126 / 170 / 252, and the
+ * one Colin autotransformer took 252 where IEC 60214-2 and the selecting
+ * manual start from the MV class. Showing the type for each class turns the
+ * assumption into a choice the OEM makes from its own insulation table.
+ */
+export function umChoices(d: DutyBasis, spec: TransformerSpec): number[] {
+  if (!d.ok || d.umRule === "explicit") return [];
+  const ladder = [40.5, 72.5, 126, 170, 252, 300, 363];
+  if (d.umRule === "neutral_assumed" || (d.umRule === "neutral_full" && d.umAssumed)) {
+    // 35 kV-class neutrals: many orders bought 72.5, so offer it too.
+    const top = Math.max(catalogueUmFromRatedKv(spec.tapKv), NEUTRAL_DEFAULT_UM);
+    return ladder.filter((u) => u >= d.umKv - 0.01 && u <= top + 0.01);
+  }
+  if (d.umRule === "auto_hv") {
+    const floor = catalogueUmFromRatedKv(spec.tapPoint === "auto_mv_line" || spec.tapPoint === "auto_junction" ? spec.mvKv : spec.hvKv);
+    return ladder.filter((u) => u >= floor - 0.01 && u <= d.umKv + 0.01);
+  }
+  return [];
 }
 
 function fmtKv(kv: number): string {

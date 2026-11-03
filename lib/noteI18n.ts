@@ -148,6 +148,42 @@ const RULES: Rule[] = [
     }),
   ],
   [
+    /^Tapped windings of 220 kV class and above take combined types only: compound types \(CV\/CV2\/SV\) stop at 200 kV across the tap winding\.$/,
+    () => ({
+      vi: "Cuộn điều áp cấp 220 kV trở lên chỉ dùng kiểu tổ hợp: kiểu phức hợp (CV/CV2/SV) chỉ chịu 200 kV qua cuộn điều chỉnh.",
+      es: "Los devanados regulados de clase 220 kV o más solo admiten tipos combinados: los compuestos (CV/CV2/SV) llegan a 200 kV a través del devanado de regulación.",
+      tr: "220 kV sınıfı ve üzeri kademeli sargılar yalnızca kombine tip alır: kompakt tipler (CV/CV2/SV) kademe sargısı boyunca 200 kV ile sınırlı.",
+      id: "Belitan bertap kelas 220 kV ke atas hanya memakai tipe kombinasi: tipe kompon (CV/CV2/SV) terbatas 200 kV melintasi belitan tap.",
+    }),
+  ],
+  [
+    /^220 kV-class tapped winding: combined types only \(no compound in 2025–2026 orders\)\.$/,
+    () => ({
+      vi: "Cuộn điều áp cấp 220 kV: chỉ kiểu tổ hợp (đơn hàng 2025–2026 không có kiểu phức hợp).",
+      es: "Devanado regulado de clase 220 kV: solo tipos combinados (ningún compuesto en pedidos 2025–2026).",
+      tr: "220 kV sınıfı kademeli sargı: yalnızca kombine tip (2025–2026 siparişlerinde kompakt tip yok).",
+      id: "Belitan bertap kelas 220 kV: hanya tipe kombinasi (tidak ada tipe kompon di pesanan 2025–2026).",
+    }),
+  ],
+  [
+    /^Needs Huaming technical review: (.+)\.$/,
+    (m) => ({
+      vi: `Cần Huaming xét duyệt kỹ thuật riêng: ${m[1]}.`,
+      es: `Requiere revisión técnica de Huaming: ${m[1]}.`,
+      tr: `Huaming teknik incelemesi gerekli: ${m[1]}.`,
+      id: `Perlu tinjauan teknis Huaming: ${m[1]}.`,
+    }),
+  ],
+  [
+    /^Change-over selector above 110 kV: check the recovery voltage and quote the tie-in resistor as an option \(maker's Cw\/Ce needed\)\.$/,
+    () => ({
+      vi: "Bộ chọn đảo chiều trên 110 kV: kiểm tra điện áp phục hồi, chào điện trở ghim thế như tùy chọn (cần Cw/Ce của nhà sản xuất máy biến áp).",
+      es: "Preselector por encima de 110 kV: compruebe la tensión de recuperación y ofrezca la resistencia de fijación de potencial como opción (Cw/Ce del fabricante).",
+      tr: "110 kV üzeri ön seçici: geri dönüş gerilimini kontrol edin, potansiyel bağlama direncini opsiyon olarak teklif edin (üreticinin Cw/Ce değerleri gerekli).",
+      id: "Pemilih pembalik di atas 110 kV: periksa tegangan pulih, tawarkan resistor pengikat potensial sebagai opsi (perlu Cw/Ce dari pabrikan trafo).",
+    }),
+  ],
+  [
     /^No (OCTC|OLTC) family matches this mounting \/ medium combination\. Adjust filters or contact engineering\.$/,
     (m) => ({
       vi: `Không có dòng ${m[1]} nào khớp vị trí lắp đặt / môi chất này. Đổi điều kiện hoặc liên hệ kỹ thuật.`,

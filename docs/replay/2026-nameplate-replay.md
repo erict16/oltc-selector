@@ -68,7 +68,7 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 | E-CM2260238 | 意大利Trafoser | 33 MVA 132 kV Y | neutral/star | 144.3 / 144.3 | 170 / 72.5* | `CM2III-300Y/170B-12233W` | `CV2III-350Y/72.5-12233W` |
 | E-CM2260250-256 | 印度T&R | 6 MVA 33 kV D | line_end/star | 176 / 105.0 | 72.5 / 40.5 | `CM2I-500D/72.5B-14273W` | `CM2I-500/72.5B-14273W` |
 | E-CM2260257 | 土耳其HMT-BETA | 28 MVA 34.5 kV Y | neutral/star | 468.6 / 468.6 | 72.5 / 40.5* | `CM2III-600Y/72.5B-10193W` | `CV2III-600Y/40.5-10193W` |
-| E-CM2260260-261 | 土耳其HMT-Elsewedy | 80 MVA 220 kV Y | neutral/star | 209.9 / 209.9 | 170 / 72.5* | `CM2III-500Y/170C-10193W` | `CV2III-350Y/72.5-10193W` |
+| E-CM2260260-261 | 土耳其HMT-Elsewedy | 80 MVA 220 kV Y | neutral/star | 209.9 / 209.9 | 170 / 72.5* | `CM2III-500Y/170C-10193W` | `CM2III-500Y/72.5C-10193W` |
 | E-CM2260262 | 意大利GBE | 63 MVA 115 kV Y | neutral/star | 316.29 / 316.3 | 126 / 72.5* | `CM2III-500Y/126B-10191W` | `CV2III-350Y/72.5-10191W` |
 | E-CM2260264-265 | 意大利TAMINI | 0.11 MVA 150 kV Y | neutral/star | 423.4 / 0.4 | 170 / 72.5* | `CM2III-500Y/170B-12233W` | `CV2III-600Y/72.5-12233W` |
 | E-CM2260271-272 | 土耳其HMT-BEST | 100 MVA 159 kV Y | neutral/star | 363.1 / 363.1 | 252 / 72.5* | `CM2III-500Y/252D-16313G` | `CM2III-500Y/72.5D-16313G` |

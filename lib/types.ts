@@ -53,6 +53,11 @@ export interface SelectInput {
    * 200 kV across-tap limit does not cover an autotransformer tap winding.
    */
   transformerKind?: "two_winding" | "auto";
+  /**
+   * Compound types (CV/CV2/SV) out on a two-winding job too: a tapped
+   * winding on a 220 kV-class system or above (deriveDuty sets it).
+   */
+  combinedOnly?: boolean;
   /** Required through-current (A) — engine picks next catalogue Ium ≥ this */
   throughCurrentA: number;
   /** Highest voltage for equipment Um (kV) */
@@ -85,6 +90,8 @@ export interface SelectInput {
    * OCTC form uses 接线方式 instead — leave auto.
    */
   preferStructure?: StructureKind | "auto";
+  /** Rated kV of the tapped winding's system (two-winding). Drives review notes. */
+  tapWindingKv?: number;
   /** Optional transformer BIL (kV) to earth */
   bilKv?: number;
   /** Optional PF withstand to earth (kV) */
@@ -111,6 +118,8 @@ export interface SeriesDef {
   usesSelectorSize: boolean;
   umSizePairs?: string[];
   maxStepVoltageV: number;
+  /** Lower Ust ceiling for some currents (CMD 400/600 A: 3300 V). */
+  maxStepVoltageByCurrent?: Record<number, number>;
   stepCapacityByCurrent?: Record<number, number>;
   connections: Connection[];
   /**

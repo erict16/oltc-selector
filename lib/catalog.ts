@@ -418,6 +418,8 @@ export const SERIES: SeriesDef[] = [
     umKv: [72.5, 126, 170, 252],
     usesSelectorSize: true,
     maxStepVoltageV: 4000,
+    // TD-CMD Table 1: 3300 V at 400/600 A, 4000 V from 1000 A.
+    maxStepVoltageByCurrent: { 400: 3300, 600: 3300 },
     stepCapacityByCurrent: {
       400: 1320,
       600: 1600,
