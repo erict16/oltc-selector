@@ -121,6 +121,16 @@ export interface SeriesDef {
   /** Lower Ust ceiling for some currents (CMD 400/600 A: 3300 V). */
   maxStepVoltageByCurrent?: Record<number, number>;
   stepCapacityByCurrent?: Record<number, number>;
+  /**
+   * Step capacity (kVA) by Iᵤ, then by contact pitch, where the brochure
+   * gives one per pitch (CV / SV Table 1). Wins over `stepCapacityByCurrent`.
+   */
+  stepCapacityByPitch?: Record<number, Record<number, number>>;
+  /**
+   * Brochure footnote: a higher step capacity, by pitch, when the duty
+   * current is at or below `currentA` (SV: 525 kVA at ≤350 A, 10 contacts).
+   */
+  stepCapacityReduced?: Record<number, { currentA: number; kva: number }>;
   connections: Connection[];
   /**
    * Connection letters that exist on the III commercial type string.

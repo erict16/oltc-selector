@@ -10,7 +10,7 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 | Um derived below sold (under-insulated if trusted) | 66 | 21.1% |
 | Um derived above sold | 6 | 1.9% |
 | Current off the OS by more than 5% | 23 | 7.3% |
-| Engine #1 = sold (family, I, Um) | 225 | 71.9% |
+| Engine #1 = sold (family, I, Um) | 226 | 72.2% |
 | Sold type in the engine's list | 277 | 88.5% |
 
 `*` = neutral Um assumed (72.5) and flagged 待 OS 核对 in the app.
