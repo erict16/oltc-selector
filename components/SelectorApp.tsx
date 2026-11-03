@@ -59,6 +59,7 @@ import {
   TAP_POINTS_FOR,
   deriveDuty,
   tapAfterWinding,
+  umChoices,
   type DutyBasis,
   type TransformerSpec,
   type TapPoint,
@@ -1097,6 +1098,15 @@ export function SelectorApp() {
           `${round1(windingRatedKv)} kV`,
         ]
   ).join(listSep);
+  // Open insulation class: the type at each Um the tender could state.
+  // Picking a row sets 开关对地绝缘, the same as the select above.
+  const umRows =
+    sized && earthUm === 0
+      ? umChoices(duty, transformerSpec()).map((um) => ({
+          um,
+          model: selectOltc({ ...sized, umKv: um }).results[0]?.model ?? null,
+        }))
+      : [];
   const cautions = [
     ...(primary ? notesFor(lang, primary.cautionsZh, primary.cautionsEn) : []),
     ...(duty.ok ? notesFor(lang, duty.cautionsZh, duty.cautionsEn) : []),
@@ -2000,6 +2010,40 @@ export function SelectorApp() {
                   </li>
                 ))}
               </ul>
+            ) : null}
+
+            {umRows.length > 1 ? (
+              <div className="plate-rule px-5 py-4 sm:px-6">
+                <p className="mb-2 text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
+                  {t(lang, "earthUm")}
+                </p>
+                <ul className="flex flex-col gap-1">
+                  {umRows.map((row) => {
+                    const on = Math.abs(row.um - duty.umKv) < 0.01;
+                    return (
+                      <li key={row.um}>
+                        <button
+                          type="button"
+                          aria-pressed={on}
+                          disabled={!row.model}
+                          onClick={() => setEarthUm(row.um)}
+                          className={cx(
+                            "flex w-full items-baseline gap-3 rounded-md px-2 py-1.5 text-left text-[0.8125rem] hover:bg-[var(--color-rule)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]",
+                            on && "bg-[var(--color-rule)]",
+                          )}
+                        >
+                          <span className="w-16 shrink-0 tabular-nums text-[var(--color-muted)]">
+                            Um {formatUmKv(row.um)}
+                          </span>
+                          <span className="min-w-0 truncate font-mono text-[var(--color-ink)]">
+                            {row.model ? displayModel(row.model, lang) : "—"}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             ) : null}
 
             <BasisTable
