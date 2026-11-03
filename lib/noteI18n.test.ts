@@ -39,6 +39,14 @@ function collectNotes(): Set<string> {
     { transformerKind: "auto", preferStructure: "compound" },
     { throughCurrentA: 99999 },
     { mounting: "dry_type", medium: "oil", preferVacuum: false },
+    // No-result lines (engine noFitReasons)
+    { mounting: "dry_type", medium: "dry", preferVacuum: false, umKv: 126 },
+    { regulation: "linear", plusMinusSteps: undefined, midPositions: undefined, positions: 20 },
+    { throughCurrentA: 500, umKv: 126, stepVoltageV: 7000 },
+    { throughCurrentA: 2000, umKv: 126, stepVoltageV: 5000 },
+    { throughCurrentA: 500, umKv: 126, stepVoltageV: 4950, plusMinusSteps: 17, midPositions: 1 },
+    { medium: "oil", preferVacuum: false, throughCurrentA: 3000 },
+    { dutyKind: "octc", preferVacuum: false, medium: "oil", throughCurrentA: 9000 },
   ];
   for (const c of cases) {
     const out = selectOltc({ ...base, ...c });

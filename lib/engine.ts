@@ -1,13 +1,14 @@
 import {
   EARTH_INSULATION,
   FAMILY_MIN_RANK,
-  INTERNAL_INSULATION,
   SERIES,
   coveringUms,
+  internalInsulation,
   nearestCurrent,
   nearestUm,
   phaseToken,
   resolveSelectorSize,
+  stepCapacityKva,
   umForEarthInsulation,
 } from "./catalog";
 import {
@@ -253,6 +254,7 @@ function adequacyScore(
   current: number,
   um: number,
   unitCount: number,
+  pitch: number,
 ): number {
   let score = 10000;
 
@@ -290,7 +292,7 @@ function adequacyScore(
   score -= overshootUm * 3;
 
   // Mild step-capacity tightness
-  const psin = s.stepCapacityByCurrent?.[current];
+  const psin = stepCapacityKva(s, current, pitch, input.throughCurrentA);
   if (psin && input.stepVoltageV > 0) {
     const need = (input.throughCurrentA * input.stepVoltageV) / 1000;
     if (need > 0 && psin >= need) {
@@ -448,6 +450,238 @@ function diversifyResults(ranked: ModelResult[]): ModelResult[] {
   return [primary, ...rest];
 }
 
+type TapFields = ReturnType<typeof resolveTapFields>;
+type LimitAxis = "um" | "current" | "positions" | "ust" | "kva";
+/** One catalogue limit a family misses: what the duty needs, what it has. */
+type LimitBlock = { axis: LimitAxis; need: number; limit: number; label: string };
+type FamilyMiss = { s: SeriesDef; blocks: LimitBlock[]; worst: number };
+
+const LIMIT_AXES: LimitAxis[] = ["um", "current", "positions", "ust", "kva"];
+
+/** Mounting + arc medium words for a no-result line (noteI18n translates them). */
+function limitScope(input: SelectInput): { en: string; zh: string } {
+  if (input.dutyKind === "octc") return { en: "OCTC", zh: "无载" };
+  if (input.mounting === "dry_type") return { en: "dry-type", zh: "干式" };
+  if (input.mounting === "reactor") return { en: "reactor", zh: "电抗式" };
+  const on =
+    input.mounting === "on_tank" || input.mounting === "external_compartment";
+  const vac = input.preferVacuum || input.medium === "oil_vacuum";
+  const oil = !vac && input.medium === "oil";
+  return {
+    en: `${on ? "on-tank" : "in-tank"}${vac ? " vacuum" : oil ? " oil" : ""}`,
+    zh: `${on ? "箱外" : "箱内"}${vac ? "真空" : oil ? "油浸" : ""}`,
+  };
+}
+
+/** Every limit this family misses for the duty. Null when no type of it exists for the phase / connection. */
+function familyMiss(s: SeriesDef, input: SelectInput, tap: TapFields): FamilyMiss | null {
+  const octc = isOctcSeries(s);
+  const ratings: { current: number; label: string }[] = [];
+  if (s.id === "cz") {
+    for (const c of s.currents.I ?? []) ratings.push({ current: c, label: `3×${s.code}I-${c}` });
+  } else {
+    const legal = phaseConnectionLegal(s, input.phases, input.connection);
+    if (legal) {
+      for (const c of s.currents[input.phases] ?? []) {
+        ratings.push({ current: c, label: `${s.code}${input.phases}-${c}` });
+      }
+    }
+    if (!octc && (input.phases === "III" || !legal)) {
+      for (const c of s.currents.I ?? []) ratings.push({ current: c, label: `3×${s.code}I-${c}` });
+    }
+  }
+  if (!ratings.length) return null;
+
+  const blocks: LimitBlock[] = [];
+  if (!s.umKv.some((u) => u >= input.umKv - 0.1)) {
+    blocks.push({ axis: "um", need: input.umKv, limit: Math.max(...s.umKv), label: s.code });
+  }
+  const top = ratings.reduce((a, b) => (b.current > a.current ? b : a));
+  const covering = ratings.filter((r) => ratingCoversDuty(input.throughCurrentA, r.current));
+  if (!covering.length) {
+    blocks.push({ axis: "current", need: input.throughCurrentA, limit: top.current, label: top.label });
+  }
+  const pool = covering.length ? covering : [top];
+
+  if (octc) {
+    let pos = input.positions;
+    if (input.plusMinusSteps != null && input.plusMinusSteps > 0) pos = 2 * input.plusMinusSteps + 1;
+    if (pos != null && pos > s.maxPositionsLinear) {
+      blocks.push({ axis: "positions", need: pos, limit: s.maxPositionsLinear, label: s.code });
+    }
+  } else {
+    const maxPos =
+      input.regulation === "linear" ? s.maxPositionsLinear : s.maxPositionsWithChangeOver;
+    if (tap.positions > maxPos) {
+      blocks.push({ axis: "positions", need: tap.positions, limit: maxPos, label: s.code });
+    }
+    if (input.stepVoltageV > 0) {
+      const ust = Math.max(
+        ...pool.map((r) => maxStepVoltageForSeries(s, tap.pitch, r.current)),
+      );
+      if (input.stepVoltageV > ust + 0.5) {
+        blocks.push({ axis: "ust", need: input.stepVoltageV, limit: ust, label: s.code });
+      }
+      const caps = pool.map((r) => ({
+        r,
+        kva: stepCapacityKva(s, r.current, tap.pitch, input.throughCurrentA),
+      }));
+      const needKva = (input.throughCurrentA * input.stepVoltageV) / 1000;
+      if (caps.every((c) => c.kva != null)) {
+        const best = caps.reduce((a, b) => ((b.kva ?? 0) > (a.kva ?? 0) ? b : a));
+        if (needKva > (best.kva ?? 0) + 0.5) {
+          blocks.push({ axis: "kva", need: needKva, limit: best.kva ?? 0, label: best.r.label });
+        }
+      }
+    }
+  }
+  const worst = Math.max(0, ...blocks.map((b) => (b.limit > 0 ? b.need / b.limit : Infinity)));
+  return { s, blocks, worst };
+}
+
+function fmtNeed(axis: LimitAxis, v: number): string {
+  if (axis === "um") return String(v);
+  if (axis === "current" && v < 100) return String(Math.round(v * 10) / 10);
+  return String(Math.round(v));
+}
+
+/** A limit that blocks every family: the duty against the catalogue ceiling. */
+function everyFamilyLine(
+  b: LimitBlock,
+  scope: { en: string; zh: string },
+  pitch: number,
+): { en: string; zh: string } {
+  const n = fmtNeed(b.axis, b.need);
+  const max = fmtNeed(b.axis, b.limit);
+  switch (b.axis) {
+    case "um":
+      return {
+        en: `Um ${n} kV is above the highest ${scope.en} class (${max} kV, ${b.label}).`,
+        zh: `Um ${n} kV 超出${scope.zh}最高等级（${max} kV，${b.label}）。`,
+      };
+    case "current":
+      return {
+        en: `Through-current ${n} A is above the largest ${scope.en} rating (${max} A, ${b.label}).`,
+        zh: `通过电流 ${n} A 超出${scope.zh}最大额定（${max} A，${b.label}）。`,
+      };
+    case "positions":
+      return {
+        en: `${n} positions are above every ${scope.en} family (max ${max}, ${b.label}).`,
+        zh: `${n} 个工作位置超出${scope.zh}所有系列（最多 ${max}，${b.label}）。`,
+      };
+    case "ust":
+      return {
+        en: `Step voltage ${n} V is above every ${scope.en} family at pitch ${pitch} (max ${max} V, ${b.label}).`,
+        zh: `级电压 ${n} V 超出节距 ${pitch} 下${scope.zh}所有系列（最高 ${max} V，${b.label}）。`,
+      };
+    case "kva":
+      return {
+        en: `Step capacity ${n} kVA is above every ${scope.en} family at pitch ${pitch} (max ${max} kVA, ${b.label}).`,
+        zh: `级容量 ${n} kVA 超出节距 ${pitch} 下${scope.zh}所有系列（最大 ${max} kVA，${b.label}）。`,
+      };
+  }
+}
+
+/** One family's own limit, when no single limit blocks every family. */
+function familyLine(code: string, b: LimitBlock, pitch: number): { en: string; zh: string } {
+  const n = fmtNeed(b.axis, b.need);
+  const max = fmtNeed(b.axis, b.limit);
+  switch (b.axis) {
+    case "um":
+      return {
+        en: `${code}: Um ${n} kV is above its ${max} kV.`,
+        zh: `${code}：Um ${n} kV 超出其 ${max} kV。`,
+      };
+    case "current":
+      return {
+        en: `${code}: through-current ${n} A is above its ${max} A.`,
+        zh: `${code}：通过电流 ${n} A 超出其 ${max} A。`,
+      };
+    case "positions":
+      return {
+        en: `${code}: ${n} positions are above its ${max}.`,
+        zh: `${code}：${n} 个工作位置超出其 ${max}。`,
+      };
+    case "ust":
+      return {
+        en: `${code}: step voltage ${n} V is above its ${max} V at pitch ${pitch}.`,
+        zh: `${code}：级电压 ${n} V 超出其节距 ${pitch} 下的 ${max} V。`,
+      };
+    case "kva":
+      return {
+        en: `${code}: step capacity ${n} kVA is above its ${max} kVA at pitch ${pitch}.`,
+        zh: `${code}：级容量 ${n} kVA 超出其节距 ${pitch} 下的 ${max} kVA。`,
+      };
+  }
+}
+
+/**
+ * Why nothing fits, in one or two lines. A limit that blocks every family is
+ * reported against the catalogue ceiling. Otherwise the family closest to
+ * fitting (fewest misses, smallest overshoot) and the nearest family that
+ * clears its limit each name what stops them. Null when some family clears
+ * every limit here (type existence, selector grade): the caller keeps its
+ * own message.
+ */
+function noFitReasons(
+  families: SeriesDef[],
+  input: SelectInput,
+  tap: TapFields,
+): { en: string[]; zh: string[] } | null {
+  const misses = families
+    .map((s) => familyMiss(s, input, tap))
+    .filter((m): m is FamilyMiss => m != null);
+  if (!misses.length || misses.some((m) => !m.blocks.length)) return null;
+  const pitch = tap.pitch;
+  const en: string[] = [];
+  const zh: string[] = [];
+
+  const everywhere = LIMIT_AXES.filter((ax) =>
+    misses.every((m) => m.blocks.some((b) => b.axis === ax)),
+  ).filter((ax, _, all) => !(ax === "kva" && all.includes("current"))); // kVA follows from I
+  if (everywhere.length) {
+    const scope = limitScope(input);
+    for (const ax of everywhere.slice(0, 2)) {
+      const blocks = misses
+        .map((m) => ({ m, b: m.blocks.find((b) => b.axis === ax)! }))
+        .sort((x, y) => y.b.limit - x.b.limit || x.m.s.rank - y.m.s.rank);
+      const ceiling = blocks[0].b;
+      // Families that share a code-level ceiling (35 positions) are listed together.
+      const label =
+        ax === "current" || ax === "kva"
+          ? ceiling.label
+          : [...new Set(blocks.filter((x) => x.b.limit === ceiling.limit).map((x) => x.m.s.code))]
+              .slice(0, 3)
+              .join("/");
+      const line = everyFamilyLine({ ...ceiling, label }, scope, pitch);
+      en.push(line.en);
+      zh.push(line.zh);
+    }
+    return { en, zh };
+  }
+
+  const ranked = [...misses].sort(
+    (a, b) => a.blocks.length - b.blocks.length || a.worst - b.worst || a.s.rank - b.s.rank,
+  );
+  const ratio = (b: LimitBlock) => (b.limit > 0 ? b.need / b.limit : Infinity);
+  const worstBlock = (m: FamilyMiss) =>
+    m.blocks.reduce((a, b) => (ratio(b) > ratio(a) ? b : a));
+  const closest = ranked[0];
+  const bind = worstBlock(closest);
+  const first = familyLine(closest.s.code, bind, pitch);
+  en.push(first.en);
+  zh.push(first.zh);
+  const clears = ranked.find(
+    (m) => m !== closest && !m.blocks.some((b) => b.axis === bind.axis),
+  );
+  if (clears) {
+    const second = familyLine(clears.s.code, worstBlock(clears), pitch);
+    en.push(second.en);
+    zh.push(second.zh);
+  }
+  return { en, zh };
+}
+
 export function selectOltc(input: SelectInput): SelectOutput {
   const errorsEn: string[] = [];
   const errorsZh: string[] = [];
@@ -595,7 +829,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
             ? (input.throughCurrentA * input.stepVoltageV) / 1000
             : 0;
         const capacityOk = (c: number) => {
-          const psin = s.stepCapacityByCurrent?.[c];
+          const psin = stepCapacityKva(s, c, tap.pitch, input.throughCurrentA);
           if (psin != null && need > psin + 0.5) return false;
           if (input.stepVoltageV > maxStepVoltageForSeries(s, tap.pitch, c) + 0.5) return false;
           return true;
@@ -634,6 +868,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
                 input.selectorSize ?? "auto",
                 input.acrossTapBilKv,
                 input.acrossTapPfKv,
+                s.id,
               )
             : null;
         if (gradePick && gradePick.size == null) {
@@ -709,7 +944,14 @@ export function selectOltc(input: SelectInput): SelectOutput {
         seen.add(finalModel);
 
         const modelWithMdu = mduStr ? `${finalModel}+${mduStr}` : finalModel;
-        const score = adequacyScore(s, input, current, att.um, att.unitCount);
+        const score = adequacyScore(
+          s,
+          input,
+          current,
+          att.um,
+          att.unitCount,
+          tap.pitch,
+        );
 
         const reasonsEn: string[] = [];
         const reasonsZh: string[] = [];
@@ -911,7 +1153,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const maxStepVoltageV = octc
           ? null
           : maxStepVoltageForSeries(s, tap.pitch, current);
-        const stepCapacityKva = s.stepCapacityByCurrent?.[current] ?? null;
+        const stepCapacity = stepCapacityKva(s, current, tap.pitch, input.throughCurrentA);
 
         let confidence = 0.88;
         if (att.unitCount > 1) confidence -= 0.08;
@@ -944,7 +1186,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           mdu: mduStr,
           unitCount: att.unitCount,
           maxStepVoltageV,
-          stepCapacityKva,
+          stepCapacityKva: stepCapacity,
           earthPfKv: earth?.pf ?? null,
           earthBilKv: earth?.bil ?? null,
           reasonsEn,
@@ -989,6 +1231,21 @@ export function selectOltc(input: SelectInput): SelectOutput {
   });
 
   if (!final.length) {
+    // Name the limit that blocks. Arc medium is a hard lock, so only the
+    // families the result filter keeps count.
+    const locked = candidates.filter((s) =>
+      wantOctc
+        ? s.medium === "oil" && !s.vacuum
+        : input.preferVacuum
+          ? s.vacuum
+          : input.medium === "oil"
+            ? !s.vacuum
+            : true,
+    );
+    const why = noFitReasons(locked, input, tap);
+    if (why) {
+      return { ok: false, results: [], errorsEn: why.en, errorsZh: why.zh };
+    }
     return {
       ok: false,
       results: [],
@@ -1178,7 +1435,7 @@ function insulationUse(row: ModelResult, need?: MarginNeed): number {
     aLi = 200;
     aPf = 50;
   } else if (row.selectorSize) {
-    const ins = INTERNAL_INSULATION[row.selectorSize];
+    const ins = internalInsulation(row.seriesId, row.selectorSize);
     aLi = ins?.a_li ?? 0;
     aPf = ins?.a_pf ?? 0;
   }

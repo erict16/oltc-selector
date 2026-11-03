@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { selectOltc } from "./engine";
-import { INTERNAL_INSULATION, SERIES, umForEarthInsulation } from "./catalog";
+import { SERIES, internalInsulation, umForEarthInsulation } from "./catalog";
 import { commercialTypeExists } from "./typeExists";
 import { decimalDraft, parseDecimal } from "./decimal";
 import { resolveTapFields } from "./tapCode";
@@ -202,7 +202,7 @@ describe("fuzz invariants", () => {
         const li = inp.acrossTapBilKv ?? 0;
         const pf = inp.acrossTapPfKv ?? 0;
         if (s.usesSelectorSize && (li || pf)) {
-          const ins = INTERNAL_INSULATION[r.selectorSize];
+          const ins = internalInsulation(s.id, r.selectorSize);
           if (ins.a_li + 0.5 < li || ins.a_pf + 0.5 < pf) bad.push(`grade ${tag}`);
         }
         if (!r.model.startsWith("HWDK") && !commercialTypeExists(r.model.replace(/^3x/, ""), s)) {

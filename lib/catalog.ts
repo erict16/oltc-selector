@@ -133,14 +133,19 @@ export const SELECTOR_SIZES_BY_UM: Record<number, SelectorSize[]> = {
 /** Rank selector sizes weakest → strongest */
 export const SIZE_ORDER: SelectorSize[] = ["B", "C", "D", "DE"];
 
+export type InternalInsulation = {
+  a_li: number;
+  a_pf: number;
+  b_li: number;
+  b_pf: number;
+};
+
 /**
  * Internal insulation withstand (kV) by selector size — SHZV Table 4-2 (a / b distances).
- * Used for across-tap winding stress → grade letter.
+ * Used for across-tap winding stress → grade letter. Default for every
+ * combined family; see INTERNAL_INSULATION_BY_FAMILY for brochure overrides.
  */
-export const INTERNAL_INSULATION: Record<
-  SelectorSize,
-  { a_li: number; a_pf: number; b_li: number; b_pf: number }
-> = {
+export const INTERNAL_INSULATION: Record<SelectorSize, InternalInsulation> = {
   "": { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
   A: { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
   B: { a_li: 265, a_pf: 50, b_li: 265, b_pf: 50 },
@@ -149,6 +154,77 @@ export const INTERNAL_INSULATION: Record<
   DE: { a_li: 550, a_pf: 120, b_li: 550, b_pf: 160 },
   E: { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
 };
+
+/**
+ * Grades where a family's own brochure table differs from SHZV Table 4-2.
+ *  - CM2 Table 2 (HM0.154.5701) and CM Table 2 (HM0.154.301): C a = 350 kV LI (SHZV 365).
+ *  - CMD Table 2 (HM0.154.1901): D a / b = 490 kV LI (SHZV 460).
+ * SHZV / SDZV / SHZVG keep the default table.
+ */
+export const INTERNAL_INSULATION_BY_FAMILY: Record<
+  string,
+  Partial<Record<SelectorSize, InternalInsulation>>
+> = {
+  cm2: { C: { a_li: 350, a_pf: 82, b_li: 350, b_pf: 82 } },
+  cm: { C: { a_li: 350, a_pf: 82, b_li: 350, b_pf: 82 } },
+  cmd: { D: { a_li: 490, a_pf: 105, b_li: 490, b_pf: 146 } },
+};
+
+/** Internal insulation of this grade on this family (default: SHZV table). */
+export function internalInsulation(
+  seriesId: string | undefined,
+  size: SelectorSize,
+): InternalInsulation {
+  const own = seriesId ? INTERNAL_INSULATION_BY_FAMILY[seriesId]?.[size] : undefined;
+  return own ?? INTERNAL_INSULATION[size];
+}
+
+/** Smallest listed pitch at or above `pitch`; past the last one, the last one. */
+function atPitch<T>(table: Record<number, T>, pitch: number): T | undefined {
+  const pitches = Object.keys(table)
+    .map(Number)
+    .sort((a, b) => a - b);
+  const at = pitches.find((p) => p >= pitch) ?? pitches[pitches.length - 1];
+  return at != null ? table[at] : undefined;
+}
+
+/**
+ * Rated step capacity (kVA) at this Iᵤ and contact pitch.
+ * A per-pitch table (CV / SV) uses the smallest listed pitch at or above
+ * the asked pitch; above the last listed pitch it keeps the last value.
+ * With `dutyA`, a brochure footnote rating for a reduced current applies
+ * (SV 525 kVA when the duty is ≤350 A). Null when the brochure gives no
+ * step capacity for this current.
+ */
+export function stepCapacityKva(
+  s: Pick<
+    SeriesDef,
+    "stepCapacityByCurrent" | "stepCapacityByPitch" | "stepCapacityReduced"
+  >,
+  current: number,
+  pitch: number,
+  dutyA?: number,
+): number | null {
+  const byPitch = s.stepCapacityByPitch?.[current];
+  const rated =
+    (byPitch ? atPitch(byPitch, pitch) : undefined) ??
+    s.stepCapacityByCurrent?.[current] ??
+    null;
+  const reduced = s.stepCapacityReduced
+    ? atPitch(s.stepCapacityReduced, pitch)
+    : undefined;
+  // Same 1% commercial current tolerance as a catalogue rating (engine
+  // ratingCoversDuty): 351 A at 1182 V shipped on SVIII-500 (E-V250432-433).
+  if (
+    rated != null &&
+    reduced &&
+    dutyA != null &&
+    dutyA <= reduced.currentA * 1.01 + 0.5
+  ) {
+    return Math.max(rated, reduced.kva);
+  }
+  return rated;
+}
 
 /**
  * Family preference when vacuum preferred / in-tank (lower = more preferred as minimum path).
@@ -489,6 +565,11 @@ export const SERIES: SeriesDef[] = [
       350: 525,
       700: 660,
     },
+    // TD-CV&SV (HM0.154.001) Table 1 row 7, by contacts 10 / 12 / 14.
+    stepCapacityByPitch: {
+      350: { 10: 525, 12: 420, 14: 350 },
+      700: { 10: 660, 12: 520, 14: 450 },
+    },
     connections: ["Y", "D"],
     maxPositionsLinear: 14,
     maxPositionsWithChangeOver: 27,
@@ -513,7 +594,18 @@ export const SERIES: SeriesDef[] = [
     usesSelectorSize: false,
     maxStepVoltageV: 1500,
     stepCapacityByCurrent: {
-      500: 525,
+      500: 400,
+    },
+    // TD-CV&SV Table 1 gives SV "400~525* / 325~420*" (10 / 12 contacts, no 14).
+    // Footnote *: 525 / 420 kVA only with through-current cut to 350 / 300 A.
+    // Conservative reading: 400 / 325 kVA at any duty above 350 / 300 A
+    // (no interpolation between the two brochure points).
+    stepCapacityByPitch: {
+      500: { 10: 400, 12: 325 },
+    },
+    stepCapacityReduced: {
+      10: { currentA: 350, kva: 525 },
+      12: { currentA: 300, kva: 420 },
     },
     connections: ["Y", "D"],
     maxPositionsLinear: 12,
@@ -728,8 +820,9 @@ function coversAcrossTap(
   size: SelectorSize,
   needALi: number,
   needAPf: number,
+  seriesId?: string,
 ): boolean {
-  const ins = INTERNAL_INSULATION[size];
+  const ins = internalInsulation(seriesId, size);
   return ins.a_li + 0.5 >= needALi && ins.a_pf + 0.5 >= needAPf;
 }
 
@@ -747,12 +840,14 @@ export type SelectorSizePick = {
  * A typed grade stays when it is legal on this Um and covers the stress.
  * Otherwise it is raised and `raisedFrom` says so.
  * Stress above DE returns null. Never hand back a grade that does not cover.
+ * `seriesId` picks that family's own withstand table (CM2 C is 350, not 365).
  */
 export function resolveSelectorSize(
   um: number,
   requested: SelectorSize | "auto" | undefined,
   acrossTapBilKv?: number,
   acrossTapPfKv?: number,
+  seriesId?: string,
 ): SelectorSizePick {
   const allowed = SELECTOR_SIZES_BY_UM[um] ?? ["B", "C", "D", "DE"];
   const needALi = acrossTapBilKv ?? 0;
@@ -769,7 +864,7 @@ export function resolveSelectorSize(
     const cand = SIZE_ORDER[i];
     if (!allowed.includes(cand)) continue;
     // Across-tap winding (a distance) — training case 2: BIL 285 → C
-    if (!coversAcrossTap(cand, needALi, needAPf)) continue;
+    if (!coversAcrossTap(cand, needALi, needAPf, seriesId)) continue;
     return typed && cand !== typed ? { size: cand, raisedFrom: typed } : { size: cand };
   }
   return { size: null };
@@ -781,8 +876,9 @@ export function pickSelectorSize(
   requested: SelectorSize | "auto" | undefined,
   acrossTapBilKv?: number,
   acrossTapPfKv?: number,
+  seriesId?: string,
 ): SelectorSize | null {
-  return resolveSelectorSize(um, requested, acrossTapBilKv, acrossTapPfKv).size;
+  return resolveSelectorSize(um, requested, acrossTapBilKv, acrossTapPfKv, seriesId).size;
 }
 
 /**

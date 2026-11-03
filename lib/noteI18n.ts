@@ -8,6 +8,23 @@ import type { Lang } from "./i18n";
 type Tr = Record<"vi" | "es" | "tr" | "id", string>;
 type Rule = [RegExp, (m: RegExpMatchArray) => Tr];
 
+/** Mounting + arc medium words in the engine's no-result lines (limitScope). */
+const SCOPE: Record<string, Tr> = {
+  "in-tank vacuum": { vi: "chân không trong thùng", es: "de vacío en cuba", tr: "tank içi vakum", id: "vakum dalam tangki" },
+  "in-tank oil": { vi: "dầu trong thùng", es: "en aceite en cuba", tr: "tank içi yağlı", id: "minyak dalam tangki" },
+  "on-tank vacuum": { vi: "chân không ngoài thùng", es: "de vacío fuera de cuba", tr: "tank dışı vakum", id: "vakum luar tangki" },
+  "on-tank oil": { vi: "dầu ngoài thùng", es: "en aceite fuera de cuba", tr: "tank dışı yağlı", id: "minyak luar tangki" },
+  "in-tank": { vi: "trong thùng", es: "en cuba", tr: "tank içi", id: "dalam tangki" },
+  "on-tank": { vi: "ngoài thùng", es: "fuera de cuba", tr: "tank dışı", id: "luar tangki" },
+  "dry-type": { vi: "kiểu khô", es: "de tipo seco", tr: "kuru tip", id: "tipe kering" },
+  reactor: { vi: "kiểu điện kháng", es: "de reactancia", tr: "reaktör tipi", id: "tipe reaktor" },
+  OCTC: { vi: "không tải (OCTC)", es: "sin carga (OCTC)", tr: "yüksüz (OCTC)", id: "tanpa beban (OCTC)" },
+};
+const SCOPE_RE = Object.keys(SCOPE)
+  .sort((a, b) => b.length - a.length)
+  .join("|");
+const sc = (en: string) => SCOPE[en];
+
 const RULES: Rule[] = [
   // Engine cautions
   [
@@ -208,6 +225,98 @@ const RULES: Rule[] = [
       es: "Parámetros fuera del catálogo (corriente, Um, tensión de escalón o posiciones).",
       tr: "Parametreler katalog aralığı dışında (akım, Um, kademe gerilimi veya kademe sayısı).",
       id: "Parameter di luar rentang katalog (arus, Um, tegangan tap, atau jumlah posisi).",
+    }),
+  ],
+  // No-result lines: one limit blocks every family (engine everyFamilyLine)
+  [
+    new RegExp(`^Um ([\\d.]+) kV is above the highest (${SCOPE_RE}) class \\(([\\d.]+) kV, (\\S+)\\)\\.$`),
+    (m) => ({
+      vi: `Um ${m[1]} kV vượt cấp cao nhất loại ${sc(m[2]).vi} (${m[3]} kV, ${m[4]}).`,
+      es: `Um ${m[1]} kV supera la clase más alta ${sc(m[2]).es} (${m[3]} kV, ${m[4]}).`,
+      tr: `Um ${m[1]} kV, en yüksek ${sc(m[2]).tr} sınıfının üzerinde (${m[3]} kV, ${m[4]}).`,
+      id: `Um ${m[1]} kV di atas kelas ${sc(m[2]).id} tertinggi (${m[3]} kV, ${m[4]}).`,
+    }),
+  ],
+  [
+    new RegExp(`^Through-current ([\\d.]+) A is above the largest (${SCOPE_RE}) rating \\(([\\d.]+) A, (\\S+)\\)\\.$`),
+    (m) => ({
+      vi: `Dòng điện ${m[1]} A vượt định mức lớn nhất loại ${sc(m[2]).vi} (${m[3]} A, ${m[4]}).`,
+      es: `La corriente de ${m[1]} A supera la mayor nominal ${sc(m[2]).es} (${m[3]} A, ${m[4]}).`,
+      tr: `${m[1]} A akım, en büyük ${sc(m[2]).tr} anma değerinin üzerinde (${m[3]} A, ${m[4]}).`,
+      id: `Arus ${m[1]} A di atas rating ${sc(m[2]).id} terbesar (${m[3]} A, ${m[4]}).`,
+    }),
+  ],
+  [
+    new RegExp(`^(\\d+) positions are above every (${SCOPE_RE}) family \\(max (\\d+), (\\S+)\\)\\.$`),
+    (m) => ({
+      vi: `${m[1]} vị trí vượt mọi dòng ${sc(m[2]).vi} (tối đa ${m[3]}, ${m[4]}).`,
+      es: `${m[1]} posiciones superan todas las familias ${sc(m[2]).es} (máx. ${m[3]}, ${m[4]}).`,
+      tr: `${m[1]} kademe, tüm ${sc(m[2]).tr} serilerinin üzerinde (en fazla ${m[3]}, ${m[4]}).`,
+      id: `${m[1]} posisi di atas semua keluarga ${sc(m[2]).id} (maks. ${m[3]}, ${m[4]}).`,
+    }),
+  ],
+  [
+    new RegExp(`^Step voltage (\\d+) V is above every (${SCOPE_RE}) family at pitch (\\d+) \\(max (\\d+) V, (\\S+)\\)\\.$`),
+    (m) => ({
+      vi: `Điện áp nấc ${m[1]} V vượt mọi dòng ${sc(m[2]).vi} ở ${m[3]} tiếp điểm (tối đa ${m[4]} V, ${m[5]}).`,
+      es: `La tensión de escalón de ${m[1]} V supera todas las familias ${sc(m[2]).es} con ${m[3]} contactos (máx. ${m[4]} V, ${m[5]}).`,
+      tr: `${m[1]} V kademe gerilimi, ${m[3]} kontakta tüm ${sc(m[2]).tr} serilerinin üzerinde (en fazla ${m[4]} V, ${m[5]}).`,
+      id: `Tegangan tap ${m[1]} V di atas semua keluarga ${sc(m[2]).id} pada ${m[3]} kontak (maks. ${m[4]} V, ${m[5]}).`,
+    }),
+  ],
+  [
+    new RegExp(`^Step capacity (\\d+) kVA is above every (${SCOPE_RE}) family at pitch (\\d+) \\(max (\\d+) kVA, (\\S+)\\)\\.$`),
+    (m) => ({
+      vi: `Công suất nấc ${m[1]} kVA vượt mọi dòng ${sc(m[2]).vi} ở ${m[3]} tiếp điểm (tối đa ${m[4]} kVA, ${m[5]}).`,
+      es: `La potencia de escalón de ${m[1]} kVA supera todas las familias ${sc(m[2]).es} con ${m[3]} contactos (máx. ${m[4]} kVA, ${m[5]}).`,
+      tr: `${m[1]} kVA kademe gücü, ${m[3]} kontakta tüm ${sc(m[2]).tr} serilerinin üzerinde (en fazla ${m[4]} kVA, ${m[5]}).`,
+      id: `Daya tap ${m[1]} kVA di atas semua keluarga ${sc(m[2]).id} pada ${m[3]} kontak (maks. ${m[4]} kVA, ${m[5]}).`,
+    }),
+  ],
+  // No-result lines: one family's own limit (engine familyLine)
+  [
+    /^(\S+): Um ([\d.]+) kV is above its ([\d.]+) kV\.$/,
+    (m) => ({
+      vi: `${m[1]}: Um ${m[2]} kV vượt mức ${m[3]} kV của nó.`,
+      es: `${m[1]}: Um ${m[2]} kV supera su máximo de ${m[3]} kV.`,
+      tr: `${m[1]}: Um ${m[2]} kV, ${m[3]} kV sınırının üzerinde.`,
+      id: `${m[1]}: Um ${m[2]} kV di atas batasnya ${m[3]} kV.`,
+    }),
+  ],
+  [
+    /^(\S+): through-current ([\d.]+) A is above its ([\d.]+) A\.$/,
+    (m) => ({
+      vi: `${m[1]}: dòng điện ${m[2]} A vượt định mức ${m[3]} A của nó.`,
+      es: `${m[1]}: la corriente de ${m[2]} A supera su nominal de ${m[3]} A.`,
+      tr: `${m[1]}: ${m[2]} A akım, ${m[3]} A anma değerinin üzerinde.`,
+      id: `${m[1]}: arus ${m[2]} A di atas rating-nya ${m[3]} A.`,
+    }),
+  ],
+  [
+    /^(\S+): (\d+) positions are above its (\d+)\.$/,
+    (m) => ({
+      vi: `${m[1]}: ${m[2]} vị trí vượt mức tối đa ${m[3]} của nó.`,
+      es: `${m[1]}: ${m[2]} posiciones superan su máximo de ${m[3]}.`,
+      tr: `${m[1]}: ${m[2]} kademe, en fazla ${m[3]} sınırının üzerinde.`,
+      id: `${m[1]}: ${m[2]} posisi di atas batasnya ${m[3]}.`,
+    }),
+  ],
+  [
+    /^(\S+): step voltage (\d+) V is above its (\d+) V at pitch (\d+)\.$/,
+    (m) => ({
+      vi: `${m[1]}: điện áp nấc ${m[2]} V vượt mức ${m[3]} V của nó ở ${m[4]} tiếp điểm.`,
+      es: `${m[1]}: la tensión de escalón de ${m[2]} V supera su máximo de ${m[3]} V con ${m[4]} contactos.`,
+      tr: `${m[1]}: ${m[2]} V kademe gerilimi, ${m[4]} kontakta ${m[3]} V sınırının üzerinde.`,
+      id: `${m[1]}: tegangan tap ${m[2]} V di atas batasnya ${m[3]} V pada ${m[4]} kontak.`,
+    }),
+  ],
+  [
+    /^(\S+): step capacity (\d+) kVA is above its (\d+) kVA at pitch (\d+)\.$/,
+    (m) => ({
+      vi: `${m[1]}: công suất nấc ${m[2]} kVA vượt mức ${m[3]} kVA của nó ở ${m[4]} tiếp điểm.`,
+      es: `${m[1]}: la potencia de escalón de ${m[2]} kVA supera su máximo de ${m[3]} kVA con ${m[4]} contactos.`,
+      tr: `${m[1]}: ${m[2]} kVA kademe gücü, ${m[4]} kontakta ${m[3]} kVA sınırının üzerinde.`,
+      id: `${m[1]}: daya tap ${m[2]} kVA di atas batasnya ${m[3]} kVA pada ${m[4]} kontak.`,
     }),
   ],
   // Duty errors (lib/transformer.ts)
