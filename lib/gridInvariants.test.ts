@@ -248,7 +248,7 @@ function oracleCovers(c: Case, input: SelectInput, positions: number, pitch: num
       for (const cur of s.currents[ph] ?? []) {
         if (cur * 1.01 + 0.5 < iu) continue;
         if (ust > maxUst(s, pitch, cur) + 0.5) continue;
-        const cap = s.stepCapacityByCurrent?.[cur];
+        const cap = capFor(s, cur, pitch, iu);
         if (cap != null && ust > 0 && (iu * ust) / 1000 > cap + 0.5) continue;
         hits.push(`${ph === "I" ? "3x" : ""}${s.code}${ph}-${cur}`);
       }
@@ -318,7 +318,7 @@ function checkCase(c: Case, r: Run): Issue[] {
     if (input.stepVoltageV > lim + 0.5) push("UST_OVER", `${input.stepVoltageV.toFixed(0)} > ${lim}`);
     if (s.id === "cmd" && (res.currentA === 400 || res.currentA === 600) && input.stepVoltageV > 3300 + 0.5)
       push("CMD_UST_OVER_3300", `${input.stepVoltageV.toFixed(0)} V`);
-    const cap = s.stepCapacityByCurrent?.[res.currentA];
+    const cap = capFor(s, res.currentA, res.pitch, input.throughCurrentA);
     if (cap != null && input.stepVoltageV > 0 && (input.throughCurrentA * input.stepVoltageV) / 1000 > cap + 0.5)
       push("CAPACITY_OVER", `${((input.throughCurrentA * input.stepVoltageV) / 1000).toFixed(0)} > ${cap}`);
 
@@ -394,6 +394,22 @@ function digest(issues: Issue[]): string[] {
 }
 
 // ---------------------------------------------------------------- tests
+
+/**
+ * Step capacity written out from TD-CV&SV Table 1, independent of the
+ * catalogue lookup: CV by contacts 10/12/14; SV 400/325 kVA at 500 A, or
+ * 525/420 kVA when the duty is cut to 350/300 A (footnote *).
+ */
+function capFor(s: { id: string; stepCapacityByCurrent?: Record<number, number> }, cur: number, pitch: number, dutyA: number): number | null {
+  const by = (row: Record<number, number>) => row[[10, 12, 14].find((p) => p >= pitch) ?? 14] ?? row[14];
+  if (s.id === "cv" && cur === 350) return by({ 10: 525, 12: 420, 14: 350 });
+  if (s.id === "cv" && cur === 700) return by({ 10: 660, 12: 520, 14: 450 });
+  if (s.id === "sv" && cur === 500) {
+    if (pitch <= 10) return dutyA <= 350 * 1.01 + 0.5 ? 525 : 400;
+    return dutyA <= 300 * 1.01 + 0.5 ? 420 : 325;
+  }
+  return s.stepCapacityByCurrent?.[cur] ?? null;
+}
 
 describe(`grid invariants (${FULL ? "full grid" : `sample, seed ${SEED}`})`, () => {
   const cases = sample(GRID, SAMPLE.grid, 1);
@@ -475,7 +491,7 @@ describe("monotonic", () => {
       const s = SERIES_BY_ID.get(prev.seriesId)!;
       if (prev.currentA * 1.01 + 0.5 < input.throughCurrentA) return false;
       if (input.stepVoltageV > maxUst(s, prev.pitch, prev.currentA) + 0.5) return false;
-      const cap = s.stepCapacityByCurrent?.[prev.currentA];
+      const cap = capFor(s, prev.currentA, prev.pitch, input.throughCurrentA);
       if (cap != null && (input.throughCurrentA * input.stepVoltageV) / 1000 > cap + 0.5) return false;
       return true;
     };

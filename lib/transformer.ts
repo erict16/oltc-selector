@@ -216,6 +216,14 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     umSystemKv = spec.hvKv;
     umKv = catalogueUmFromRatedKv(spec.hvKv);
     umRule = "auto_hv";
+    // Orders split: junction taps 252 (Vietnam 2026-10-27, HMR 230 kV) and
+    // 170 (EEMC 250 MVA 225 kV, training 230/115 kV). MV-lead taps were 170
+    // on all four HMR autotransformers (121 and 158 kV MV), never the HV
+    // class. The maker's tap-point insulation decides, so it stays assumed.
+    if (spec.tapPoint === "auto_mv_line") {
+      umKv = Math.min(umKv, Math.max(catalogueUmFromRatedKv(spec.mvKv), 170));
+    }
+    umAssumed = true;
   } else if (spec.tapPoint === "neutral") {
     umSystemKv = spec.tapKv;
     const lineClass = catalogueUmFromRatedKv(spec.tapKv);
@@ -314,7 +322,12 @@ export function umChoices(d: DutyBasis, spec: TransformerSpec): number[] {
     return ladder.filter((u) => u >= d.umKv - 0.01 && u <= top + 0.01);
   }
   if (d.umRule === "auto_hv") {
-    const floor = catalogueUmFromRatedKv(spec.tapPoint === "auto_mv_line" || spec.tapPoint === "auto_junction" ? spec.mvKv : spec.hvKv);
+    if (spec.tapPoint === "auto_mv_line") {
+      const hv = catalogueUmFromRatedKv(spec.hvKv);
+      const mv = catalogueUmFromRatedKv(spec.mvKv);
+      return ladder.filter((u) => u >= mv - 0.01 && u <= Math.min(hv, 363) + 0.01);
+    }
+    const floor = catalogueUmFromRatedKv(spec.mvKv);
     return ladder.filter((u) => u >= floor - 0.01 && u <= d.umKv + 0.01);
   }
   return [];

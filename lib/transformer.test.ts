@@ -98,13 +98,23 @@ describe("autotransformer tapped at the series/common junction", () => {
 });
 
 describe("autotransformer tapped in the MV line lead", () => {
-  it("carries MV current and keeps HV insulation unless stated", () => {
+  // HMR-UETM / SVEL / PMTT: 121 kV and 158 kV MV-lead taps all sold Um 170.
+  it("carries MV current and takes Um 170, assumed", () => {
     const d = deriveDuty(
       spec({ kind: "auto", tapPoint: "auto_mv_line", mva: 250, hvKv: 230, mvKv: 121 }),
     );
     expect(d.ratedA).toBeCloseTo((250e3 / (Math.sqrt(3) * 121)), 1);
-    expect(d.umKv).toBe(252);
+    expect(d.umKv).toBe(170);
+    expect(d.umAssumed).toBe(true);
     expect(d.cautionsZh.join()).toContain("HMR");
+  });
+
+  it("does not refuse a 330/158 kV MV-lead tap on the HV class", () => {
+    const d = deriveDuty(
+      spec({ kind: "auto", tapPoint: "auto_mv_line", mva: 250, hvKv: 330, mvKv: 158 }),
+    );
+    expect(d.ok).toBe(true);
+    expect(d.umKv).toBe(170);
   });
 
   it("takes a maker-stated insulation class", () => {
