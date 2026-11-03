@@ -28,10 +28,15 @@ oltc --mva 16 --kv 22 --tap line --winding star
 # Autotransformer tapped at the series/common junction (sized on the HV side)
 oltc --mva 125 --kind auto --hv 225 --mv 115 --tap junction
 # 3xCM2I-500/252D-10193W
+
+# Or paste the tender line: YNa0 makes it an autotransformer
+oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
+# 3xCM2I-500/252D-10193W, plus the type at Um 126 / 170 / 252
 ```
 
 | Flag | Meaning | Default |
 |------|---------|---------|
+| `--line "text"` | Tender line: MVA, kV ratio with ±N×x%, vector group. Flags given beside it win. | |
 | `--iu` / `--imax` | Max through-current Imax (A). **No** safety factor. | required unless `--mva` |
 | `--mva` `--kv` | Transformer MVA + tap-side kV → Imax (min tap + `--k`) | |
 | `--k` | Safety factor ≥ 1, **capacity path only** | 1.0 |
@@ -67,6 +72,8 @@ oltc --mva 125 --kind auto --hv 225 --mv 115 --tap junction
 7. **WSG** is catalogue axes only (no 2025 list sheet in the index).
 8. **Typing Imax (`--iu`) does not apply a safety factor.** `--k` only applies on the transformer-capacity (`--mva`) path.
 9. **Um is set where the tap changer sits** (`lib/transformer.ts`). Line end: the winding system's class (132 kV → 145, 220 kV → 252). Neutral: the full class up to 72.5; above that 72.5 is assumed and flagged. Autotransformer: the HV system's class, combined types only (no CV / CV2 / SV).
+10. **Tapped windings on 220 kV class and above take combined types only.** 2025–2026 OS: 67 of 67 were CM / CM2 / SHZV.
+11. **An open Um is shown as a choice.** Star points above 72.5 and autotransformers list the type at each Um class; the tender's insulation picks one (`--earth-um`, or a row on the card).
 
 ## Web app
 
