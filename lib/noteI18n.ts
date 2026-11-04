@@ -110,6 +110,61 @@ const RULES: Rule[] = [
       id: `${m[1]} tipe drum (OCTC) hanya dijual untuk titik bintang (Y); untuk delta (D) gunakan tipe sangkar.`,
     }),
   ],
+  // 2026-11-04 r3 engine track (ENGINE-6/7/8/10)
+  [
+    /^(\S+) drum OCTC is sold for star \(Y\) points only\.$/,
+    (m) => ({
+      vi: `${m[1]} kiểu trống (OCTC) chỉ bán cho điểm sao (Y).`,
+      es: `${m[1]} de tambor (OCTC) solo se vende para puntos en estrella (Y).`,
+      tr: `${m[1]} tambur tipi (OCTC) yalnız yıldız (Y) noktası için satılır.`,
+      id: `${m[1]} tipe drum (OCTC) hanya dijual untuk titik bintang (Y).`,
+    }),
+  ],
+  [
+    /^No ([\d.]+) kV list row covers this duty: next class ([\d.]+) kV\.$/,
+    (m) => ({
+      vi: `Không có dòng ${m[1]} kV nào trong bảng giá đáp ứng chế độ này: lên cấp kế tiếp ${m[2]} kV.`,
+      es: `Ninguna fila de la lista a ${m[1]} kV cubre este servicio: siguiente clase ${m[2]} kV.`,
+      tr: `Listede bu görevi karşılayan ${m[1]} kV satırı yok: bir üst sınıf ${m[2]} kV.`,
+      id: `Tidak ada baris daftar ${m[1]} kV yang memenuhi tugas ini: kelas berikutnya ${m[2]} kV.`,
+    }),
+  ],
+  [
+    /^Selector grade (\S+) from the stated across-tap (.+) kV \(330 kV-class step gives (\S+)\)\.$/,
+    (m) => ({
+      vi: `Cấp bộ chọn nấc ${m[1]} theo cách điện giữa các nấc đã cho ${m[2]} kV (bậc cấp 330 kV cho ${m[3]}).`,
+      es: `Grado del selector ${m[1]} por el aislamiento entre tomas indicado ${m[2]} kV (el escalón de clase 330 kV da ${m[3]}).`,
+      tr: `Seçici sınıfı ${m[1]}, verilen kademeler arası yalıtıma göre ${m[2]} kV (330 kV sınıfı adımı ${m[3]} verir).`,
+      id: `Kelas selektor ${m[1]} dari isolasi antar-tap yang diberikan ${m[2]} kV (langkah kelas 330 kV memberi ${m[3]}).`,
+    }),
+  ],
+  [
+    /^Minus range ([\d.]+)% is unusually large: lowest-tap current ([\d.]+) A, check the OS\.$/,
+    (m) => ({
+      vi: `Dải nấc âm ${m[1]}% lớn bất thường: dòng ở nấc thấp nhất ${m[2]} A, hãy kiểm tra OS.`,
+      es: `El rango negativo de ${m[1]}% es inusualmente grande: corriente en la toma más baja ${m[2]} A, revise la OS.`,
+      tr: `Eksi kademe aralığı %${m[1]} alışılmadık derecede büyük: en düşük kademe akımı ${m[2]} A, OS'yi kontrol edin.`,
+      id: `Rentang minus ${m[1]}% luar biasa besar: arus tap terendah ${m[2]} A, periksa OS.`,
+    }),
+  ],
+  [
+    /^Selector grade raised to (\S+): Turkish buyers take (\S+) on 110 kV-class neutrals \(sold 25 of 26 orders; (\S+) also fits\)\.$/,
+    (m) => ({
+      vi: `Cấp bộ chọn nấc nâng lên ${m[1]}: khách Thổ Nhĩ Kỳ chọn ${m[2]} cho trung tính cấp 110 kV (25/26 đơn đã bán; ${m[3]} cũng đáp ứng).`,
+      es: `Grado del selector elevado a ${m[1]}: los compradores turcos eligen ${m[2]} en neutros de clase 110 kV (25 de 26 pedidos vendidos; ${m[3]} también sirve).`,
+      tr: `Seçici sınıfı ${m[1]}'ye yükseltildi: Türk alıcılar 110 kV sınıfı nötrlerde ${m[2]} alıyor (satılan 26 siparişin 25'i; ${m[3]} de uygun).`,
+      id: `Kelas selektor dinaikkan ke ${m[1]}: pembeli Turki mengambil ${m[2]} pada netral kelas 110 kV (25 dari 26 pesanan terjual; ${m[3]} juga memenuhi).`,
+    }),
+  ],
+  [
+    /^Minus range ≥ 100%\.$/,
+    () => ({
+      vi: "Dải nấc âm ≥ 100%.",
+      es: "Rango negativo ≥ 100%.",
+      tr: "Eksi kademe aralığı ≥ %100.",
+      id: "Rentang minus ≥ 100%.",
+    }),
+  ],
   // Duty notes (lib/transformer.ts)
   [
     /^35 kV-class neutral sized at Um 40\.5 kV; Russian\/CIS buyers chose 72\.5 on about half of CV\/SV orders; the OS decides\. CM\/CM2\/SHZV start at 72\.5\.$/,

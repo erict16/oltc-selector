@@ -2,26 +2,26 @@
 
 Source: `2025-os-sales.json`
 Rows: 910. Judged: 580. Skipped: 330.
-Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an autotransformer, so every row is read as two-winding); 252 kV class and above is combined only. Cut-off sold tap codes (`1`, `12231` without W/G) are skipped; 10181G / 10183W go in as positions + mid, as `--range` does. Since 2026-11-04 r2 this changed engine #1 on 26 rows (15 in 2026, 11 in 2025, cut-off codes now skipped included), mostly CM2 → SHZV on 225–400 kV windings.
+Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an autotransformer, so every row is read as two-winding); 252 kV class and above is combined only. Cut-off sold tap codes (`1`, `12231` without W/G) are skipped; 10181G / 10183W go in as positions + mid, as `--range` does. Since 2026-11-04 r2 this changed engine #1 on 26 rows (15 in 2026, 11 in 2025, cut-off codes now skipped included), mostly CM2 → SHZV on 225–400 kV windings. Since r3: with no OS Imax, a W/G row is sized on the lowest-tap current from MVA / kV / Ust / minus steps, as the app does (the OS current is the floor), and Turkish buyers go in as `--market TR`.
 
 | verdict | n | % of judged | meaning |
 |---|---:|---:|---|
-| exact | 461 | 79.5% | engine #1 = sold type (selector letter / 3× prefix ignored) |
+| exact | 470 | 81.0% | engine #1 = sold type (selector letter / 3× prefix ignored) |
 | family-i-um | 6 | 1.0% | #1 same family / I / Um (tap or grade differs) |
-| family | 51 | 8.8% | #1 same family, different I or Um |
-| eligible | 41 | 7.1% | sold type is in the list, not #1 |
+| family | 43 | 7.4% | #1 same family, different I or Um |
+| eligible | 40 | 6.9% | sold type is in the list, not #1 |
 | oil-vs-vac | 0 | 0.0% | sold oil (CM/CV/CMD), engine vacuum twin |
 | miss | 21 | 3.6% | sold type not produced |
 
-**#1 family+I+Um or better:** 80.5%
+**#1 family+I+Um or better:** 82.1%
 **sold type or vacuum twin eligible:** 96.4%
-**grade (engine #1 vs sold letter):** match 49 / weaker than sold 29 / stronger 62
+**grade (engine #1 vs sold letter):** match 58 / weaker than sold 21 / stronger 62
 
 | sold Um | match | weaker than sold | stronger |
 |---:|---:|---:|---:|
 | 12 | 1 | 0 | 0 |
 | 40.5 | 1 | 0 | 0 |
-| 72.5 | 32 | 26 | 0 |
+| 72.5 | 41 | 18 | 0 |
 | 126 | 11 | 3 | 18 |
 | 170 | 1 | 0 | 40 |
 | 252 | 2 | 0 | 4 |
@@ -42,8 +42,8 @@ Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an auto
 | E-SHZVG250001 | SHZVG | `SHZVI-1300/126DE-18353W` | `` | 508.8 | 126 | 5176.1 |
 | E-CM2250195 | VCM | `CM2III-600Y/145C-1223` | `CV2III-350Y/145-10193W` | 218.7 | 145 | 763 |
 | E-CM2250220 | VCM | `CM2III-300Y/145B-12233W` | `CV2III-350Y/145-12233W` | 109.9 | 145 | 1082 |
-| E-CV2250179-180 | VCV | `CV2III-350D/145-12233W` | `3xCM2I-500/170D-12233W` | 48.31 | 145 | 1725 |
-| E-CV2250303 | VCV | `CV2III-350D/145-12231W` | `3xCM2I-500/170D-12231W` | 36.23 | 145 | 1725 |
+| E-CV2250179-180 | VCV | `CV2III-350D/145-12233W` | `3xCM2I-500/170D-12233W` | 55.21048999309869 | 145 | 1725 |
+| E-CV2250303 | VCV | `CV2III-350D/145-12231W` | `3xCM2I-500/170D-12231W` | 42.00798151648813 | 145 | 1725 |
 | E-CV2250307 | VCV | `CV2III-600D/40.5-10193W` | `3xCM2I-800/72.5B-10193W` | 603.86 | 40.5 | 172.5 |
 | E-CV2250414 | VCV | `CV2III-350D/145-1223` | `3xCM2I-500/170D-10193W` | 217.4 | 145 | 2070 |
 | E-W250001-002 | W□L | `WSLV-1000D/145-5x4E` | `` | 1000 | 145 | 0 |
@@ -58,16 +58,16 @@ Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an auto
 | family | judged | exact | miss |
 |---|---:|---:|---:|
 | CM | 45 | 34 | 2 |
-| CM2 | 102 | 55 | 2 |
+| CM2 | 102 | 61 | 2 |
 | CMD | 6 | 6 | 0 |
 | CV | 90 | 85 | 2 |
-| CV2 | 231 | 201 | 4 |
+| CV2 | 231 | 202 | 4 |
 | CVT | 4 | 2 | 0 |
 | CZ | 7 | 7 | 0 |
 | HWDK | 1 | 1 | 0 |
 | HWV | 5 | 4 | 0 |
-| SHZV | 22 | 11 | 4 |
-| SHZVG | 3 | 2 | 0 |
+| SHZV | 22 | 12 | 4 |
+| SHZVG | 3 | 3 | 0 |
 | SV | 12 | 10 | 1 |
 | WDG | 20 | 20 | 0 |
 | WDL | 3 | 1 | 2 |

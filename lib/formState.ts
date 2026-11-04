@@ -215,6 +215,8 @@ export function formSelectInput(f: FormState): FormSizing {
     transformerKind: f.kind,
     combinedOnly: d.combinedOnly,
     ...(f.kind !== "auto" ? { tapWindingKv: d.umSystemKv } : {}),
+    // 2026-11-04 r3 ORDERS-11: buyer practice on the grade, as the CLI.
+    ...(f.market ? { market: f.market } : {}),
     umKv: d.umKv,
     ...(ust != null ? { stepVoltageV: ust } : {}),
   };

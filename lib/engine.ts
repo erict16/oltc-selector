@@ -38,7 +38,9 @@ import type {
 function normOctcContact(raw: string | undefined): string {
   // "6×5" and "6*5" are written in OS sheets too.
   const t = (raw ?? "").replace(/\s+/g, "").replace(/[×*✕]/g, "x").toLowerCase();
-  const m = t.match(/^(\d+)x(\d+)$/);
+  // 2026-11-04 r3 ENGINE-5: the OS writes the grade letter too (12x11D, 6x5B);
+  // it was dropped and 6x5 came out. The list lookup still picks the letter.
+  const m = t.match(/^(\d+)x(\d+)[a-e]?$/);
   if (!m) return "";
   return `${Number(m[1])}x${Number(m[2])}`;
 }
@@ -83,10 +85,15 @@ export function octcContactCode(
   }
   if (seriesId === "wdg" || seriesId === "wlg") {
     const roman = input.octcSeries ?? "auto";
+    // 2026-11-04 r3 ENGINE-9: each sold drum contact has one roman (WDG 6x5 = V,
+    // WLG 4x2 = VIII), so a typed contact on auto settles it. It gave no type.
+    const hintRoman = roman === "auto" && hinted === "6x5" && seriesId === "wdg";
     let drum = "";
     if (seriesId === "wlg") {
-      if (roman === "VIII" && (pos == null || pos <= 5)) drum = "4x2";
-    } else if (roman === "V") {
+      if ((roman === "VIII" || (roman === "auto" && hinted === "4x2")) && (pos == null || pos <= 5)) {
+        drum = "4x2";
+      }
+    } else if (roman === "V" || hintRoman) {
       if (pos == null || pos <= 6) drum = "6x5";
     } else if (roman === "auto" || roman === "IV") {
       if (pos == null || pos <= 5) drum = "5x5";
@@ -148,11 +155,15 @@ export function octcRoman(
   familyCode?: string,
 ): OctcSeriesRoman {
   if (series && series !== "auto") return series;
-  const c = (contact ?? "").toLowerCase();
+  // r3 ENGINE-5: a typed contact may carry its grade letter (5x2B).
+  const c = normOctcContact(contact);
   if (c === "5x2" || c === "12x2") return "VIII";
   if (c === "3x2" || c === "6x2") return "VI";
   if (c === "5x4" || c === "4x3") return "V";
   if (c === "12x12") return "VII";
+  // r3 ENGINE-9: the sold drum rows tie the contact to the roman.
+  if (familyCode === "WDG" && c === "6x5") return "V";
+  if (familyCode === "WLG" && c === "4x2") return "VIII";
   if (familyCode === "WSG" && connection === "D") return "II";
   return "IV";
 }
@@ -410,7 +421,7 @@ function ratingCoversDuty(wanted: number, rating: number): boolean {
   return wanted <= rating + 0.01;
 }
 
-function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
+function buildAttempts(s: SeriesDef, input: SelectInput, octcWide = false): Attempt[] {
   const out: Attempt[] = [];
   const covering = coveringUms(input.umKv, s.umKv).filter(
     (u) => u >= input.umKv - 0.1,
@@ -425,7 +436,7 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
   const ums =
     !isOctcSeries(s) && (FAMILY_MIN_RANK[s.id] ?? s.rank) < 40
       ? covering
-      : s.id === "wsl" && input.preferStructure === "cage"
+      : s.id === "wsl" && (input.preferStructure === "cage" || octcWide)
         ? covering
         : [um0];
 
@@ -435,7 +446,7 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
   if (DRUM_SINGLE.has(s.id)) {
     const curI = nearestCurrent(input.throughCurrentA, s.currents.I ?? []);
     if (curI != null && ratingCoversDuty(input.throughCurrentA, curI)) {
-      for (const um of input.preferStructure === "drum" ? covering : [um0]) {
+      for (const um of input.preferStructure === "drum" || octcWide ? covering : [um0]) {
         out.push({
           series: s,
           phases: "I",
@@ -929,8 +940,16 @@ export function selectOltc(input: SelectInput): SelectOutput {
   const seen = new Set<string>();
   /** A family fit on current/Um/Ust but no grade covered the across-tap stress. */
   let acrossTapShort = false;
+  /** r3 ORDERS-11: results raised by the TR practice, with the Um-default letter. */
+  const trRaised = new Map<ModelResult, SelectorSize>();
 
-  for (const s of candidates) {
+  // 2026-11-04 r3 ENGINE-6: OCTC auto takes the duty Um first (WSG @40.5 ranks
+  // ahead of WSL @72.5). When that finds nothing, a second pass takes the Ums
+  // the cage and drum locks use: the list has only 5 WSL rows at 40.5.
+  const octcWidePass = wantOctc && (wantStruct ?? "auto") === "auto";
+  for (const wide of octcWidePass ? [false, true] : [false]) {
+    if (wide && results.length) break;
+    for (const s of candidates) {
       if (!compoundCoversAcrossTap(s, input)) {
         acrossTapShort = true;
         continue;
@@ -956,7 +975,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
         if (octcPos != null && octcPos > s.maxPositionsLinear) continue;
       }
 
-      for (const att of buildAttempts(s, input)) {
+      for (const att of buildAttempts(s, input, wide)) {
         const phaseCurrents = s.currents[att.phases] ?? s.currents.I ?? [];
 
         // Covering catalogue I: smallest first, then the next step so a
@@ -1015,6 +1034,21 @@ export function selectOltc(input: SelectInput): SelectOutput {
           !((input.acrossTapBilKv ?? 0) > 0 && (input.acrossTapPfKv ?? 0) > 0)
             ? SIZE_ORDER[SIZE_ORDER.indexOf(umDefault) + 1]
             : undefined;
+        // 2026-11-04 r3 ORDERS-11: Turkish buyers take 72.5C on star neutrals of
+        // 110 kV class and up (sold 25 of 26 row groups; HMT-Green E-M250149 took B).
+        // Buyer practice, not a limit: the B string stays in the alternatives.
+        const trBump =
+          !octc &&
+          !classBump &&
+          s.usesSelectorSize &&
+          (input.market ?? "").trim().toUpperCase() === "TR" &&
+          input.connection === "Y" &&
+          input.transformerKind !== "auto" &&
+          (input.tapWindingKv ?? 0) >= 110 &&
+          att.um <= 72.5 + 0.1 &&
+          !((input.acrossTapBilKv ?? 0) > 0 && (input.acrossTapPfKv ?? 0) > 0)
+            ? SIZE_ORDER[SIZE_ORDER.indexOf(umDefault) + 1]
+            : undefined;
         const gradePick =
           !octc && s.usesSelectorSize
             ? resolveSelectorSize(
@@ -1026,7 +1060,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
                 // Only a, not b, is checked: the stated stress may lower the
                 // grade where no phase-to-phase gap matters (2026-11-04 GRADE-2).
                 att.phases === "I" || (att.phases === "III" && input.connection === "Y"),
-                classBump,
+                classBump ?? trBump,
               )
             : null;
         if (gradePick && gradePick.size == null) {
@@ -1186,6 +1220,13 @@ export function selectOltc(input: SelectInput): SelectOutput {
             cautionsZh.push("110 kV 以上正反调/粗细调：核恢复电压，束缚电阻作为可选项报价（需变压器厂 Cw/Ce）。");
           }
         }
+        if (wide) {
+          const from = nearestUm(input.umKv, s.umKv);
+          if (from != null && att.um > from + 0.1) {
+            cautionsEn.push(`No ${from} kV list row covers this duty: next class ${att.um} kV.`);
+            cautionsZh.push(`${from} kV 价目表没有满足此工况的型号：上靠至 ${att.um} kV。`);
+          }
+        }
         if (gradePick?.raisedFrom) {
           cautionsEn.push(
             `Selector grade raised from ${gradePick.raisedFrom} to ${selectorSize} (Um ${att.um} kV / across-tap stress).`,
@@ -1194,16 +1235,39 @@ export function selectOltc(input: SelectInput): SelectOutput {
             `选择器等级已由 ${gradePick.raisedFrom} 升为 ${selectorSize}（Um ${att.um} kV 或调压绕组间绝缘要求）。`,
           );
         }
-        if (
-          classBump &&
-          !gradePick?.raisedFrom &&
-          (input.selectorSize ?? "auto") === "auto" &&
-          SIZE_ORDER.indexOf(selectorSize) > SIZE_ORDER.indexOf(umDefault)
-        ) {
+        // 2026-11-04 r3 ENGINE-10: the class caution only for the class step; a
+        // grade above it comes from the stated stress (LI 500 gave DE, not D).
+        const gradeAuto =
+          !gradePick?.raisedFrom && (input.selectorSize ?? "auto") === "auto";
+        if (gradeAuto && classBump && selectorSize === classBump) {
           cautionsEn.push(
             `Selector grade raised one step to ${selectorSize}: winding of 330 kV class or above (sold practice).`,
           );
           cautionsZh.push(`选择器等级上调一级为 ${selectorSize}：330 kV 级及以上绕组（按已售订单）。`);
+        } else if (
+          gradeAuto &&
+          classBump &&
+          ((input.acrossTapBilKv ?? 0) > 0 || (input.acrossTapPfKv ?? 0) > 0) &&
+          SIZE_ORDER.indexOf(selectorSize) > SIZE_ORDER.indexOf(classBump)
+        ) {
+          // Without the class step the reason line already names the stress.
+          const li = input.acrossTapBilKv ?? 0;
+          const ac = input.acrossTapPfKv ?? 0;
+          const en = [li > 0 ? `LI ${li}` : "", ac > 0 ? `AC ${ac}` : ""].filter(Boolean).join(" / ");
+          const zh = [li > 0 ? `雷电 ${li}` : "", ac > 0 ? `工频 ${ac}` : ""].filter(Boolean).join(" / ");
+          cautionsEn.push(
+            `Selector grade ${selectorSize} from the stated across-tap ${en} kV (330 kV-class step gives ${classBump}).`,
+          );
+          cautionsZh.push(`选择器等级 ${selectorSize} 依据给定的调压绕组间 ${zh} kV（330 kV 级上调为 ${classBump}）。`);
+        }
+        const trRaise = gradeAuto && trBump != null && selectorSize === trBump;
+        if (trRaise) {
+          cautionsEn.push(
+            `Selector grade raised to ${selectorSize}: Turkish buyers take ${selectorSize} on 110 kV-class neutrals (sold 25 of 26 orders; ${umDefault} also fits).`,
+          );
+          cautionsZh.push(
+            `选择器等级上调为 ${selectorSize}：土耳其客户 110 kV 级中性点取 ${selectorSize}（已售 26 组中 25 组；${umDefault} 也满足）。`,
+          );
         }
         // 2026-11-04 r2 ENGINE-1: a grade below the Um default rests on the stated values.
         if (gradePick?.loweredFrom) {
@@ -1385,9 +1449,36 @@ export function selectOltc(input: SelectInput): SelectOutput {
           confidence,
           adequacyScore: score,
         });
+        if (trRaise) trRaised.set(results[results.length - 1]!, umDefault);
         }
       }
     }
+  }
+
+  // 2026-11-04 r3 ORDERS-11: the TR letter is practice, not a limit, so the
+  // Um-default string (72.5B) stays in the list, just after the raised one.
+  for (const [r, from] of trRaised) {
+    const s = SERIES.find((x) => x.id === r.seriesId);
+    if (!s) continue;
+    const umToken = formatUmToken(r.umKv, from, true);
+    const model = r.model.replace(`/${r.umToken}-`, `/${umToken}-`);
+    if (model === r.model || seen.has(model) || !commercialTypeExists(model, s)) continue;
+    seen.add(model);
+    const keep = r.cautionsEn.map((c) => !c.startsWith("Selector grade raised to "));
+    results.push({
+      ...r,
+      model,
+      modelWithMdu: r.mdu ? `${model}+${r.mdu}` : model,
+      selectorSize: from,
+      umToken,
+      reasonsEn: r.reasonsEn.map((x) => x.replace(`grade ${r.selectorSize} (`, `grade ${from} (`)),
+      reasonsZh: r.reasonsZh.map((x) => x.replace(`等级 ${r.selectorSize}（`, `等级 ${from}（`)),
+      cautionsEn: r.cautionsEn.filter((_, i) => keep[i]),
+      cautionsZh: r.cautionsZh.filter((_, i) => keep[i]),
+      confidence: Math.min(0.96, r.confidence + 0.05),
+      adequacyScore: r.adequacyScore - 1e-6,
+    });
+  }
 
   // Vacuum / oil are hard locks. Do not fall back across the arc mode
   // (oil 2915 A used to leak 3xSHZVGI; on-tank vacuum used to leak HWDK).
@@ -1399,6 +1490,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
       const s = SERIES.find((x) => x.id === r.seriesId);
       return s != null && s.medium === "oil" && !s.vacuum;
     });
+    // 2026-11-04 r3 ENGINE-9: WSG is never sold; on a drum lock a sold WDG/WLG
+    // row goes first (WSGIV-800Y/40.5-6x5A outranked WDGV-800/40.5-6x5B).
+    if (wantStruct === "drum" && final.some((r) => DRUM_SINGLE.has(r.seriesId))) {
+      final = final.filter((r) => r.seriesId !== "wsg");
+    }
   } else if (input.preferVacuum) {
     final = results.filter(
       (r) => SERIES.find((s) => s.id === r.seriesId)?.vacuum,
@@ -1459,17 +1555,34 @@ export function selectOltc(input: SelectInput): SelectOutput {
           !s.connections.includes(conn) &&
           !s.connections.includes("any") &&
           (!wantStruct || wantStruct === "auto" || s.structure === wantStruct),
-      ).filter((s) => {
-        const m = familyMiss(s, { ...input, connection: s.connections[0]! }, tap);
-        return m != null && !m.blocks.length;
-      });
-      if (dropped.length) {
-        const codes = dropped.map((s) => s.code).join("/");
+      );
+      // 2026-11-04 r3 ENGINE-7: run Y for real. familyMiss skipped the roman, the
+      // contact and the sold row's Um, so the line showed when the drum did not
+      // fit on Y either, and it sent users to a cage type that did not fit. The Y
+      // run skips this branch and the cage run drops the drums: no loop.
+      const onY = dropped.length ? selectOltc({ ...input, connection: "Y" }) : null;
+      const fitY = dropped.filter((s) => onY?.ok && onY.results.some((r) => r.seriesId === s.id));
+      if (fitY.length) {
+        const codes = fitY.map((s) => s.code).join("/");
+        if (selectOltc({ ...input, preferStructure: "cage" }).ok) {
+          return {
+            ok: false,
+            results: [],
+            errorsEn: [`${codes} drum OCTC is sold for star (Y) points only; for delta (D) use a cage type.`],
+            errorsZh: [`${codes} 鼓式无载只用于星点（Y）；角接（D）请用笼式。`],
+          };
+        }
         return {
           ok: false,
           results: [],
-          errorsEn: [`${codes} drum OCTC is sold for star (Y) points only; for delta (D) use a cage type.`],
-          errorsZh: [`${codes} 鼓式无载只用于星点（Y）；角接（D）请用笼式。`],
+          errorsEn: [
+            `${codes} drum OCTC is sold for star (Y) points only.`,
+            ...(why?.en ?? ["Parameters out of catalogue range (current, Um, step voltage, or positions)."]),
+          ],
+          errorsZh: [
+            `${codes} 鼓式无载只用于星点（Y）。`,
+            ...(why?.zh ?? ["参数超出目录范围（电流、Um、级电压或档位数）。"]),
+          ],
         };
       }
     }

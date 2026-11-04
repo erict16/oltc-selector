@@ -15,7 +15,7 @@ import {
 } from "../lib/orderReplay";
 import { catalogueUmFromRatedKv } from "../lib/deriveUm";
 import { buildOsHonestOctcInput } from "../lib/osReplay";
-import { truncatedTapCode, unevenTapGeometry } from "./replayTap";
+import { osLowestTapCurrent, osMarket, truncatedTapCode, unevenTapGeometry } from "./replayTap";
 import type {
   Connection,
   Mounting,
@@ -285,6 +285,21 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
     regulation: shortLinear ? "linear" : tm.regulation,
     mdu: "none",
   };
+  // 2026-11-04 r3 ORDERS-10: no OS Imax → size on the lowest-tap current from
+  // the nameplate, as the app does; the OS current is the floor.
+  if (num(row.i_max_a) == null && duty.dutyKind !== "octc" && input.regulation !== "linear") {
+    input.throughCurrentA = osLowestTapCurrent({
+      iOs: iDuty,
+      mva: num(row.mva),
+      kv: num(row.rated_kv),
+      conn: connection === "D" ? "D" : "Y",
+      minusSteps: num(row.minus_steps) ?? plusMinus,
+      ustV: ust,
+    });
+  }
+  // r3 ORDERS-11: the --market a user would type (TR raises 72.5 neutrals to C).
+  const market = osMarket(row.customer);
+  if (market) input.market = market;
   // 2026-11-04 r2 ORDERS-2: the app passes the tapped winding kV (FAM-2/FAM-3,
   // the 330 kV-class grade). No OS field marks an auto, so every row is two-winding.
   const ratedKv = num(row.rated_kv);
@@ -571,7 +586,7 @@ const lines = [
   `Source: \`${path.basename(jsonPath)}\``,
   `Rows: ${rows.length}. Judged: ${judged.length}. Skipped: ${counts.skip}.`,
   // 2026-11-04 r2 ORDERS-2: say what the app-side inputs are.
-  "Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an autotransformer, so every row is read as two-winding); 252 kV class and above is combined only. Cut-off sold tap codes (`1`, `12231` without W/G) are skipped; 10181G / 10183W go in as positions + mid, as `--range` does. Since 2026-11-04 r2 this changed engine #1 on 26 rows (15 in 2026, 11 in 2025, cut-off codes now skipped included), mostly CM2 → SHZV on 225–400 kV windings.",
+  "Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an autotransformer, so every row is read as two-winding); 252 kV class and above is combined only. Cut-off sold tap codes (`1`, `12231` without W/G) are skipped; 10181G / 10183W go in as positions + mid, as `--range` does. Since 2026-11-04 r2 this changed engine #1 on 26 rows (15 in 2026, 11 in 2025, cut-off codes now skipped included), mostly CM2 → SHZV on 225–400 kV windings. Since r3: with no OS Imax, a W/G row is sized on the lowest-tap current from MVA / kV / Ust / minus steps, as the app does (the OS current is the floor), and Turkish buyers go in as `--market TR`.",
   "",
   "| verdict | n | % of judged | meaning |",
   "|---|---:|---:|---|",

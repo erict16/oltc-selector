@@ -138,8 +138,10 @@ export function maxThroughCurrent(
   if (!(minusSteps > 0) || !(stepPercent > 0)) return ratedA;
   const drop = minusSteps * stepPercent;
   if (drop <= 0) return ratedA;
-  const denom = 1 - Math.min(drop, 0.45);
-  return ratedA / denom;
+  // 2026-11-04 r3 ENGINE-8: a silent 45% cap sized −48% at 490.9 A, not 519.2 A
+  // (below the CM2-500 rating). deriveDuty refuses ≥ 100% and flags > 45%.
+  if (drop >= 1) return NaN;
+  return ratedA / (1 - drop);
 }
 
 /**

@@ -226,10 +226,23 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     spec.mva > 0
       ? (spec.mva * 1000) / ((currentDivisor === "three" ? 3 : SQRT3) * currentKv)
       : NaN;
+  // 2026-11-04 r3 ENGINE-8: the lowest-tap current is no longer capped at −45%.
+  const minusDrop =
+    spec.stepFraction != null && spec.stepFraction > 0 && spec.minusSteps > 0
+      ? spec.minusSteps * spec.stepFraction
+      : 0;
+  if (minusDrop >= 1) {
+    return fail("负分接范围 ≥ 100%。", "Minus range ≥ 100%.");
+  }
   const derivedMaxA =
     spec.stepFraction != null && spec.stepFraction > 0
       ? maxThroughCurrent(ratedA, spec.minusSteps, spec.stepFraction)
       : ratedA;
+  if (minusDrop > 0.45 && Number.isFinite(derivedMaxA)) {
+    const pct = String(Math.round(minusDrop * 1000) / 10);
+    cautionsZh.push(`负分接范围 ${pct}% 异常大：最低档电流 ${fmtA(derivedMaxA)} A，请核对 OS。`);
+    cautionsEn.push(`Minus range ${pct}% is unusually large: lowest-tap current ${fmtA(derivedMaxA)} A, check the OS.`);
+  }
   let maxA = derivedMaxA;
   let maxRule: DutyBasis["maxRule"] = "full_range";
   const statedMaxA = spec.statedMaxA ?? 0;

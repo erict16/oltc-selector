@@ -702,3 +702,46 @@ describe("tender line reader", () => {
     expect(typed).toBeGreaterThan(cases.length * 0.5);
   });
 });
+
+// ---------------------------------------------------------------- OCTC auto vs the locks
+
+/**
+ * 2026-11-04 r3 ENGINE-6: the FALSE_NEGATIVE oracle for OCTC. Auto must not
+ * come back empty when the cage or the drum lock finds a type (auto took the
+ * duty Um only, and the 2025 list has 5 WSL rows at 40.5).
+ */
+describe("OCTC auto is never empty where a structure lock finds a type", () => {
+  const cases: string[][] = [];
+  for (const kv of [6.3, 10.5, 11, 20, 22, 33, 35, 36.75, 66, 110, 121])
+    for (const mva of [1, 2.5, 6.3, 16, 25, 40, 50, 63, 80, 125])
+      for (const [tap, winding] of TWO_TAPS)
+        for (const pm of [2, 4])
+          for (const pct of [1.25, 2.5])
+            cases.push([
+              "--mva", String(mva), "--kv", String(kv), "--tap", tap, "--winding", winding,
+              "--octc", "--pm", String(pm), "--step-pct", String(pct),
+            ]);
+  for (const iu of [100, 300, 630, 900, 1250, 2000])
+    for (const um of [12, 24, 40.5, 72.5, 126])
+      for (const pos of [3, 5, 6, 7, 9, 12, 17])
+        for (const conn of ["Y", "D"])
+          cases.push(["--iu", String(iu), "--um", String(um), "--octc", "--pos", String(pos), "--conn", conn]);
+  const picked = sample(cases, 900, 7);
+
+  it("auto finds a type whenever --structure cage or drum does", async () => {
+    const bad: string[] = [];
+    let none = 0;
+    for (const a of picked) {
+      await breathe();
+      const auto = run(a);
+      if (auto.status !== "none") continue;
+      none++;
+      for (const lock of ["cage", "drum"]) {
+        const r = run([...a, "--structure", lock]);
+        if (r.status === "ok") bad.push(`${a.join(" ")}: auto none (${auto.errors[0]}), ${lock} ${r.results[0]!.model}`);
+      }
+    }
+    expect(bad.slice(0, 10)).toEqual([]);
+    expect(none).toBeLessThan(picked.length);
+  });
+});

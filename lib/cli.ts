@@ -384,6 +384,10 @@ export function parseCliArgs(argv: string[]): CliArgs {
     if (a === "--contact") {
       out.given.add("contact");
       const [v, n] = take(i, a);
+      // 2026-11-04 r3 ENGINE-5: an unreadable contact used to be dropped without a word.
+      if (!/^\d+\s*[xX×*✕]\s*\d+[A-Ea-e]?$/.test(v.trim())) {
+        throw new CliError("--contact must look like 6x5 or 12x11D");
+      }
       out.contact = v;
       i = n;
       continue;
@@ -808,6 +812,8 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     ...(args.kind === "auto" ? { transformerKind: "auto" as const } : {}),
     ...(duty?.combinedOnly ? { combinedOnly: true } : {}),
     ...(duty?.ok && args.kind !== "auto" ? { tapWindingKv: duty.umSystemKv } : {}),
+    // 2026-11-04 r3 ORDERS-11: buyer practice on the grade (TR 72.5C neutrals).
+    ...(args.market ? { market: args.market } : {}),
     throughCurrentA: iu,
     umKv: um,
     stepVoltageV: ust,

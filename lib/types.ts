@@ -92,6 +92,8 @@ export interface SelectInput {
   preferStructure?: StructureKind | "auto";
   /** Rated kV of the tapped winding's system (two-winding). Drives review notes. */
   tapWindingKv?: number;
+  /** Buyer's country (ISO code), as `--market`. Drives buyer-practice grades (TR). */
+  market?: string;
   /** Optional transformer BIL (kV) to earth */
   bilKv?: number;
   /** Optional PF withstand to earth (kV) */

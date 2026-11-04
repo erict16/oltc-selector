@@ -2,24 +2,24 @@
 
 Source: `2026-os-sales.json`
 Rows: 675. Judged: 402. Skipped: 273.
-Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an autotransformer, so every row is read as two-winding); 252 kV class and above is combined only. Cut-off sold tap codes (`1`, `12231` without W/G) are skipped; 10181G / 10183W go in as positions + mid, as `--range` does. Since 2026-11-04 r2 this changed engine #1 on 26 rows (15 in 2026, 11 in 2025, cut-off codes now skipped included), mostly CM2 → SHZV on 225–400 kV windings.
+Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an autotransformer, so every row is read as two-winding); 252 kV class and above is combined only. Cut-off sold tap codes (`1`, `12231` without W/G) are skipped; 10181G / 10183W go in as positions + mid, as `--range` does. Since 2026-11-04 r2 this changed engine #1 on 26 rows (15 in 2026, 11 in 2025, cut-off codes now skipped included), mostly CM2 → SHZV on 225–400 kV windings. Since r3: with no OS Imax, a W/G row is sized on the lowest-tap current from MVA / kV / Ust / minus steps, as the app does (the OS current is the floor), and Turkish buyers go in as `--market TR`.
 
 | verdict | n | % of judged | meaning |
 |---|---:|---:|---|
-| exact | 341 | 84.8% | engine #1 = sold type (selector letter / 3× prefix ignored) |
+| exact | 342 | 85.1% | engine #1 = sold type (selector letter / 3× prefix ignored) |
 | family-i-um | 3 | 0.7% | #1 same family / I / Um (tap or grade differs) |
-| family | 35 | 8.7% | #1 same family, different I or Um |
+| family | 34 | 8.5% | #1 same family, different I or Um |
 | eligible | 17 | 4.2% | sold type is in the list, not #1 |
 | oil-vs-vac | 0 | 0.0% | sold oil (CM/CV/CMD), engine vacuum twin |
 | miss | 6 | 1.5% | sold type not produced |
 
-**#1 family+I+Um or better:** 85.6%
+**#1 family+I+Um or better:** 85.8%
 **sold type or vacuum twin eligible:** 98.5%
-**grade (engine #1 vs sold letter):** match 45 / weaker than sold 27 / stronger 40
+**grade (engine #1 vs sold letter):** match 52 / weaker than sold 20 / stronger 40
 
 | sold Um | match | weaker than sold | stronger |
 |---:|---:|---:|---:|
-| 72.5 | 31 | 26 | 0 |
+| 72.5 | 38 | 19 | 0 |
 | 126 | 7 | 1 | 6 |
 | 170 | 4 | 0 | 28 |
 | 252 | 3 | 0 | 5 |
@@ -44,7 +44,7 @@ Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an auto
 | CM2 | 51 | 29 | 1 |
 | CMD | 7 | 5 | 0 |
 | CV | 77 | 74 | 0 |
-| CV2 | 147 | 140 | 3 |
+| CV2 | 147 | 141 | 3 |
 | CVT | 2 | 1 | 0 |
 | CZ | 6 | 6 | 0 |
 | HWV | 4 | 4 | 0 |
