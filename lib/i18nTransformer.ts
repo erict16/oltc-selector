@@ -93,6 +93,8 @@ const en: Dict = {
   lineW_percent_small: "{pct} gives no step count: range not read",
   lineW_zero_range: "Range ±0 ignored",
   lineW_second_range: "{kv} kV {range} is a second tapped winding: used for off-circuit duty",
+  lineW_largest_mva: "Several ratings: sized on the largest, {mva} MVA",
+  lineW_mid_winding: "Tap in the middle of the winding: sized as line end; take the insulation to earth from the OS",
 };
 
 const zh: Dict = {
@@ -185,6 +187,8 @@ const zh: Dict = {
   lineW_percent_small: "{pct} 没写级数：未读调压范围",
   lineW_zero_range: "±0 范围已忽略",
   lineW_second_range: "{kv} kV {range} 是第二个调压绕组：用于无载开关",
+  lineW_largest_mva: "有多个容量：按最大 {mva} MVA 选",
+  lineW_mid_winding: "调压在绕组中部：按线端选，对地绝缘按 OS 取",
 };
 
 const vi: Dict = {
@@ -277,6 +281,8 @@ const vi: Dict = {
   lineW_percent_small: "{pct} không có số nấc: chưa đọc dải điều áp",
   lineW_zero_range: "Bỏ qua dải ±0",
   lineW_second_range: "{kv} kV {range} là cuộn điều áp thứ hai: dùng cho bộ chuyển nấc không tải",
+  lineW_largest_mva: "Có nhiều công suất: chọn theo công suất lớn nhất {mva} MVA",
+  lineW_mid_winding: "Nấc ở giữa cuộn dây: chọn như đầu đường dây; lấy cách điện với đất theo OS",
 };
 
 const es: Dict = {
@@ -369,6 +375,8 @@ const es: Dict = {
   lineW_percent_small: "{pct} no indica el número de escalones: rango no leído",
   lineW_zero_range: "Rango ±0 ignorado",
   lineW_second_range: "{kv} kV {range} es un segundo devanado regulado: se usa para el cambiador sin carga",
+  lineW_largest_mva: "Varias potencias: se dimensiona con la mayor, {mva} MVA",
+  lineW_mid_winding: "Tomas en el centro del devanado: se dimensiona como extremo de línea; tome el aislamiento a tierra de la OS",
 };
 
 const tr: Dict = {
@@ -461,6 +469,8 @@ const tr: Dict = {
   lineW_percent_small: "{pct} kademe sayısı vermiyor: aralık okunmadı",
   lineW_zero_range: "±0 aralığı yok sayıldı",
   lineW_second_range: "{kv} kV {range} ikinci kademeli sargı: yüksüz değiştirici için kullanıldı",
+  lineW_largest_mva: "Birden çok güç değeri: en büyüğü {mva} MVA ile seçildi",
+  lineW_mid_winding: "Kademe sargının ortasında: hat ucu olarak seçildi; toprağa karşı yalıtımı OS'den alın",
 };
 
 const id: Dict = {
@@ -553,6 +563,8 @@ const id: Dict = {
   lineW_percent_small: "{pct} tanpa jumlah langkah: rentang tidak dibaca",
   lineW_zero_range: "Rentang ±0 diabaikan",
   lineW_second_range: "{kv} kV {range} adalah belitan tap kedua: dipakai untuk pengubah tap tanpa beban",
+  lineW_largest_mva: "Ada beberapa daya: dipilih dengan yang terbesar, {mva} MVA",
+  lineW_mid_winding: "Tap di tengah belitan: dipilih sebagai ujung saluran; ambil isolasi ke tanah dari OS",
 };
 
 export const TRANSFORMER_STRINGS: Record<Lang, Dict> = { en, zh, vi, es, tr, id };

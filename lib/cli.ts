@@ -541,7 +541,8 @@ function applyTenderLine(out: CliArgs, raw: string): void {
     if (s.hvKv != null) fill("hv", () => (out.hv = s.hvKv!));
     if (s.mvKv != null) fill("mv", () => (out.mv = s.mvKv!));
   } else if (s.tapKv != null) {
-    fill("kv", () => (out.kv = s.tapKv!));
+    // 2026-11-04 R2: a guessed tapped winding is not a stated --kv; 假定 says so.
+    fill("kv", () => (out.kv = s.tapKv!), s.tapKvStated);
     fill("winding", () => (out.winding = s.winding), s.windingStated);
   }
   fill("tap", () => (out.tap = s.tapPoint), s.tapPointStated);
@@ -549,7 +550,8 @@ function applyTenderLine(out: CliArgs, raw: string): void {
   if (s.regulation) fill("reg", () => (out.reg = s.regulation!), s.regulationStated);
   if (s.plus != null && s.minus != null) applyRange(out, s.plus, s.minus);
   if (s.stepPct != null) fill("stepPct", () => (out.stepPct = s.stepPct!));
-  if (s.earthUm != null) fill("earthUm", () => (out.earthUm = s.earthUm!));
+  // 2026-11-04 R2: Um from a neutral BIL in the line is read, not typed: not given.
+  if (s.earthUm != null) fill("earthUm", () => (out.earthUm = s.earthUm!), false);
 }
 
 
@@ -877,6 +879,11 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     if (args.kind !== "auto") {
       const w = args.winding ?? (tap === "neutral" || args.conn === "Y" ? "star" : "delta");
       items.push(`${w === "star" ? "星形" : "角形"}绕组${args.given.has("winding") ? "" : "（默认）"}`);
+      // 2026-11-04 R2: a tender line's guessed tapped winding was silent.
+      if (args.kv != null && !args.given.has("kv")) items.push(`调压绕组 ${args.kv} kV（默认）`);
+    }
+    if (args.earthUm != null && !args.given.has("earthUm") && args.line?.neutralBilKv != null) {
+      items.push(`对地 Um ${args.earthUm}（招标行中性点 BIL ${args.line.neutralBilKv} kV）`);
     }
     if (duty?.umAssumed) items.push(`对地 Um ${duty.umKv}（未指定）`);
     if (args.market) items.push(`市场=${args.market}`);

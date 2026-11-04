@@ -445,6 +445,7 @@ describe("tender-line notes have text in every UI language", () => {
   const keys: LineNoteKey[] = [
     "auto_needs_mv", "auto_tertiary", "zigzag", "tiny_mva", "single_phase", "tap_ladder", "auto_vg",
     "delta_text", "percent", "percent_positions", "percent_small", "zero_range", "second_range",
+    "largest_mva", "mid_winding",
   ];
   it("lineW_* and lineFailAutoMv", () => {
     for (const lang of ["en", "zh", "vi", "es", "tr", "id"] as const) {
