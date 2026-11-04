@@ -35,6 +35,19 @@ type Verdict = {
   primary: string;
   primaryMatch: boolean;
   soldListed: boolean;
+  /** Engine #1 letter with selectorSize auto, and the sold letter. */
+  gradeEngine: string;
+  gradeSold: string;
+};
+
+// 2026-11-04 audit GRADE-3: the type verdicts feed the sold letter in, so
+// they never test the grade. A second run with selectorSize auto does.
+const GRADES = ["B", "C", "D", "DE"];
+const gradeCmp = (e: string, s: string): "match" | "weaker" | "stronger" | null => {
+  const ei = GRADES.indexOf(e);
+  const si = GRADES.indexOf(s);
+  if (ei < 0 || si < 0) return null;
+  return ei === si ? "match" : ei < si ? "weaker" : "stronger";
 };
 
 const year = process.argv[2] ?? "2026";
@@ -95,6 +108,7 @@ for (const row of rows) {
   const res = selectOltc(input);
   const models = res.results.map((r) => r.model);
   const primary = models[0] ?? "";
+  const auto = selectOltc({ ...input, selectorSize: "auto" }).results[0];
   out.push({
     serial: (row.serial ?? row.file ?? "").toString(),
     customer: (row.customer ?? "").toString(),
@@ -114,6 +128,8 @@ for (const row of rows) {
       (commercialMatch(primary.replace(/^3[x×]/, ""), sold.replace(/^3[x×]/, ""), "full") ||
         commercialMatch(primary.replace(/^3[x×]/, ""), sold.replace(/^3[x×]/, ""), "family-i-um")),
     soldListed: soldTypeInResults(sold, models),
+    gradeEngine: auto?.selectorSize ?? "",
+    gradeSold: parsed.selectorSize ?? "",
   });
 }
 
@@ -125,6 +141,23 @@ const umHigh = out.filter((v) => v.umDerived > v.umSold);
 const iOff = out.filter((v) => Math.abs(v.iDerived / v.iOs - 1) > 0.05);
 const listed = out.filter((v) => v.soldListed);
 const top = out.filter((v) => v.primaryMatch);
+const grade = { match: 0, weaker: 0, stronger: 0 };
+const gradeByUm = new Map<number, typeof grade>();
+for (const v of out) {
+  const c = gradeCmp(v.gradeEngine, v.gradeSold);
+  if (!c) continue;
+  grade[c]++;
+  const g = gradeByUm.get(v.umSold) ?? { match: 0, weaker: 0, stronger: 0 };
+  g[c]++;
+  gradeByUm.set(v.umSold, g);
+}
+const gradeRows = [...gradeByUm.keys()]
+  .sort((a, b) => a - b)
+  .map((u) => {
+    const g = gradeByUm.get(u)!;
+    return `| ${u} | ${g.match} | ${g.weaker} | ${g.stronger} |`;
+  })
+  .join("\n");
 
 const row = (v: Verdict) =>
   `| ${v.serial} | ${v.customer.slice(0, 24)} | ${v.mva} MVA ${v.kv} kV ${v.conn} | ${v.tap} | ${v.iOs} / ${v.iDerived.toFixed(1)} | ${v.umSold} / ${v.umDerived}${v.umAssumed ? "*" : ""} | \`${v.sold}\` | \`${v.primary}\` |`;
@@ -147,8 +180,17 @@ Rows judged: ${n}. Skipped: ${Object.values(skipped).reduce((a, b) => a + b, 0)}
 | Current off the OS by more than 5% | ${iOff.length} | ${pct(iOff.length)} |
 | Engine #1 = sold (family, I, Um) | ${top.length} | ${pct(top.length)} |
 | Sold type in the engine's list | ${listed.length} | ${pct(listed.length)} |
+| Grade (engine #1, auto) = sold letter | ${grade.match} | |
+| Grade weaker than sold | ${grade.weaker} | |
+| Grade stronger than sold | ${grade.stronger} | |
 
 \`*\` = neutral Um assumed (72.5) and flagged 待 OS 核对 in the app.
+
+## Grade by sold Um
+
+| sold Um | match | weaker than sold | stronger |
+|---:|---:|---:|---:|
+${gradeRows}
 
 ## Um derived below sold
 
@@ -182,6 +224,7 @@ console.log(
       iOff: iOff.length,
       top: top.length,
       listed: listed.length,
+      grade,
     },
     null,
     1,

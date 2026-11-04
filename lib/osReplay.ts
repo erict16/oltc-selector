@@ -2,7 +2,7 @@
  * OS (order spec) replay against shipped selectOltc.
  * Duty from transformer I / Ust / steps + sold Um / Y-D / phases.
  */
-import { SERIES, SIZE_ORDER, defaultSelectorSizeForUm } from "./catalog";
+import { SERIES, stepCapacityKva } from "./catalog";
 import { selectOltc } from "./engine";
 import { commercialMatch, parseTypeString } from "./orderReplay";
 import { commercialTypeExists } from "./typeExists";
@@ -305,13 +305,8 @@ function soldCoversDuty(
   const s = SERIES.find((row) => row.code === parsed.family);
   if (!s) return false;
   if (parsed.currentA + 0.5 < input.throughCurrentA) return false;
-  if (s.usesSelectorSize && parsed.selectorSize) {
-    const min = defaultSelectorSizeForUm(parsed.umKv);
-    const soldIdx = SIZE_ORDER.indexOf(parsed.selectorSize as SelectorSize);
-    const minIdx = SIZE_ORDER.indexOf(min);
-    if (soldIdx >= 0 && minIdx >= 0 && soldIdx < minIdx) return false;
-    if (soldIdx < 0 && minIdx >= 0) return false;
-  }
+  // No selector-letter test: a letter below the Um default is a sale, not a
+  // duty violation (2026-11-04 audit GRADE-3: it dropped 93 rows).
   const tap = parsed.tapCode || "";
   if (s.dutyKind !== "octc" && !oltcTapCatalogue(tap) && !/^\d+x\d+/i.test(tap)) {
     return false;
@@ -326,6 +321,11 @@ function soldCoversDuty(
     if (positions > maxP) return false;
     const ustCap = maxUstForFamily(parsed.family, pitch);
     if (ustCap != null && input.stepVoltageV > ustCap + 0.5) return false;
+    // Step capacity, as the engine checks it. E-V250432-433 (351 A × 1182 V
+    // on SVIII-500, 400 kVA) shipped 0.3% over the ≤350 A row (audit D2).
+    const psin = stepCapacityKva(s, parsed.currentA, pitch, input.throughCurrentA);
+    const need = (input.throughCurrentA * input.stepVoltageV) / 1000;
+    if (psin != null && need > psin + 0.5) return false;
   }
   return true;
 }

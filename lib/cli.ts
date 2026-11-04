@@ -58,6 +58,13 @@ export type CliArgs = {
   line?: TenderLine;
   /** Minus steps of an asymmetric range (+4-12): sizes the lowest-tap current. */
   minus?: number;
+  /** OS / maker Imax on the --mva path (--os-imax, or --imax beside --mva). */
+  osImax?: number;
+  /** Buyer's country (ISO code) for the neutral Um practice. */
+  market?: string;
+  /** Stated across-tap-winding LI / AC (kV). */
+  acrossLi?: number;
+  acrossAc?: number;
   /** flags the user actually passed; everything else is a silent default */
   given: Set<string>;
 };
@@ -140,8 +147,33 @@ export function parseCliArgs(argv: string[]): CliArgs {
     }
     if (a === "--iu" || a === "--imax") {
       out.given.add("iu");
+      // --imax beside --mva is the OS Imax (moved after the loop).
+      if (a === "--imax") out.given.add("imaxFlag");
       const [v, n] = take(i, a);
       out.iu = num(v, a);
+      i = n;
+      continue;
+    }
+    if (a === "--os-imax") {
+      out.given.add("osImax");
+      const [v, n] = take(i, a);
+      out.osImax = num(v, a);
+      i = n;
+      continue;
+    }
+    if (a === "--market") {
+      out.given.add("market");
+      const [v, n] = take(i, a);
+      if (!/^[A-Za-z]{2}$/.test(v)) throw new CliError(`--market must be a 2-letter country code (IT, TR, RU…)`);
+      out.market = v.toUpperCase();
+      i = n;
+      continue;
+    }
+    if (a === "--across-li" || a === "--across-ac") {
+      const key = a === "--across-li" ? "acrossLi" : "acrossAc";
+      out.given.add(key);
+      const [v, n] = take(i, a);
+      out[key] = num(v, a);
       i = n;
       continue;
     }
@@ -357,6 +389,14 @@ export function parseCliArgs(argv: string[]): CliArgs {
     throw new CliError(`Unknown flag: ${a}`);
   }
   if (lineRaw != null) applyTenderLine(out, lineRaw);
+  // 2026-11-04 audit D1: `--mva … --imax 334` used to fail "not both".
+  // Beside --mva, --imax is the OS Imax; alone it stays the --iu alias.
+  if (out.given.has("imaxFlag") && out.mva != null && out.osImax == null) {
+    out.osImax = out.iu;
+    out.iu = undefined;
+    out.given.delete("iu");
+    out.given.add("osImax");
+  }
   return out;
 }
 
@@ -421,6 +461,9 @@ Usage:
 
 Flags:
   --iu, --imax A     Max through-current (Imax). No safety factor.
+                     Beside --mva, --imax means --os-imax.
+  --os-imax A        Capacity path: the OS / maker Imax at the lowest tap.
+                     Replaces the full-range current, floored at rated I.
   --line "text"      Tender line: MVA, kV ratio with ±N×x%, vector group.
                      Reads autotransformer from YNa0 / auto / OSFPSZ, delta
                      line end from D, star neutral from Y (asked in 假定).
@@ -436,8 +479,14 @@ Flags:
   --earth-um kV      OLTC insulation to earth from the OS or maker (catalogue
                      class). Overrides the rule: line end = winding system,
                      neutral ≤72.5 full else 72.5 assumed, autotransformer = HV.
+  --market CC        Buyer's country for a neutral's assumed Um: IT (line
+                     class up to 252), TR (126 on 220 kV class and above).
   --um kV            Equipment Um (OLTC). With --mva/--kv, derived if omitted.
-  --ust V            Step voltage. With --mva/--kv/--step-pct, derived if omitted.
+  --ust V            Step voltage. With --mva/--kv/--step-pct, derived if omitted;
+                     given, it is the OS figure and a floor (never lowers Ust).
+  --across-li kV --across-ac kV
+                     Stated across-tap-winding LI / AC withstand: sets the
+                     selector grade (B/C/D/DE).
   --step-pct %       Step as percent (1.25 means 1.25%). Capacity path only.
   --k n              Safety factor on capacity path only (default 1.0, same as the web app).
   --conn Y|D         Switch connection (star point / line end). Default Y.
@@ -573,6 +622,10 @@ export function cliDuty(args: CliArgs): DutyBasis | null {
     // 与网页版首屏一致：容量路径默认不额外加安全系数
     safetyK: args.k != null && args.k > 0 ? args.k : 1.0,
     ...(earth != null ? { earthUmKv: earth } : {}),
+    ...(args.osImax != null && args.osImax > 0 ? { statedMaxA: args.osImax } : {}),
+    // --ust used to replace Ust after deriveDuty: basis.stepV disagreed (D3).
+    ...(args.ust != null && args.ust > 0 ? { statedStepV: args.ust } : {}),
+    ...(args.market ? { market: args.market } : {}),
   });
 }
 
@@ -591,7 +644,10 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
 
   // Two current sources used to resolve silently in favour of --mva.
   if (args.iu != null && args.mva != null) {
-    throw new CliError("Give --iu or --mva/--kv, not both");
+    throw new CliError("Give --iu or --mva/--kv, not both (the OS Imax beside --mva is --os-imax)");
+  }
+  if (args.osImax != null && args.mva == null) {
+    throw new CliError("--os-imax needs --mva/--kv; on the --iu path give the current as --iu");
   }
   if (args.k != null && args.mva == null) {
     throw new CliError("--k applies only on the --mva path (--iu has no safety factor)");
@@ -609,7 +665,8 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     if (!duty.ok) throw new CliError(duty.errorZh ?? duty.errorEn ?? "Bad transformer data");
     iu = duty.dutyA;
     if (um == null || !(um > 0)) um = duty.umKv;
-    if (!(ust > 0) && duty.stepV != null) ust = duty.stepV;
+    // duty.stepV already holds max(derived, --ust).
+    if (duty.stepV != null) ust = duty.stepV;
     conn = duty.connection;
   } else {
     // --iu path: --tap, --kind auto (junction) or a delta winding set Y/D.
@@ -638,6 +695,8 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     stepVoltageV: ust,
     regulation: args.octc ? "linear" : args.reg,
     selectorSize: "auto",
+    ...(args.acrossLi != null && args.acrossLi > 0 ? { acrossTapBilKv: args.acrossLi } : {}),
+    ...(args.acrossAc != null && args.acrossAc > 0 ? { acrossTapPfKv: args.acrossAc } : {}),
     preferStructure: args.structure,
     mdu: "none",
   };
@@ -702,6 +761,7 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
       items.push(`${w === "star" ? "星形" : "角形"}绕组${args.given.has("winding") ? "" : "（默认）"}`);
     }
     if (duty?.umAssumed) items.push(`对地 Um ${duty.umKv}（未指定）`);
+    if (args.market) items.push(`市场=${args.market}`);
   } else {
     // Echo the Y/D the engine got, not the --conn default it replaced.
     const conn = cliConnection(args);
@@ -796,7 +856,8 @@ export function basisLineZh(d: DutyBasis): string {
         ? `中性点 Um ${d.umKv}${d.umAssumed ? "（待 OS 核对）" : ""}`
         : `${d.umSystemKv} kV 系统 Um ${d.actualUmKv} → ${d.umKv} 级`;
   const ust = d.stepV == null ? "" : ` · Ust ${round1(d.stepV)} V`;
-  return `I = S/(${div}×${d.currentKv} kV) = ${round1(d.ratedA)} A，最低档 ${round1(d.maxA)} A${ust} · ${um}`;
+  const max = d.maxRule === "stated" ? "OS Imax" : "最低档";
+  return `I = S/(${div}×${d.currentKv} kV) = ${round1(d.ratedA)} A，${max} ${round1(d.maxA)} A${ust} · ${um}`;
 }
 
 export function formatCliText(input: SelectInput, args?: CliArgs): string {
@@ -888,6 +949,7 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
             connection: d.connection,
             ratedA: round1(d.ratedA),
             maxA: round1(d.maxA),
+            maxRule: d.maxRule,
             stepV: d.stepV == null ? null : round1(d.stepV),
             umSystemKv: d.umSystemKv,
             actualUmKv: d.actualUmKv,

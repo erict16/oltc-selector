@@ -125,8 +125,10 @@ export const SELECTOR_SIZES_BY_UM: Record<number, SelectorSize[]> = {
   126: ["B", "C", "D", "DE"],
   145: ["C", "D", "DE"],
   170: ["B", "C", "D", "DE"],
-  252: ["C", "D", "DE"],
-  300: ["DE"],
+  // 252 B and 300 D: sold (3× 252B, e.g. CM2III-500Y/252B on E-CM2250216;
+  // 3xSHZVI-1200/300D on E-SHZV260102). The Um default stays the auto floor.
+  252: ["B", "C", "D", "DE"],
+  300: ["D", "DE"],
   363: ["DE"],
 };
 
@@ -213,13 +215,14 @@ export function stepCapacityKva(
   const reduced = s.stepCapacityReduced
     ? atPitch(s.stepCapacityReduced, pitch)
     : undefined;
-  // Same 1% commercial current tolerance as a catalogue rating (engine
-  // ratingCoversDuty): 351 A at 1182 V shipped on SVIII-500 (E-V250432-433).
+  // Strict like a catalogue rating (engine ratingCoversDuty, 2026-11-04
+  // audit D2). 351 A at 1182 V (E-V250432-433, sold SVIII-500) is 0.3% over
+  // the ≤350 A row, so it now goes to the next family, not a silent overrun.
   if (
     rated != null &&
     reduced &&
     dutyA != null &&
-    dutyA <= reduced.currentA * 1.01 + 0.5
+    dutyA <= reduced.currentA + 0.01
   ) {
     return Math.max(rated, reduced.kva);
   }
@@ -778,12 +781,8 @@ export function nearestCurrent(
 ): number | null {
   if (!allowed?.length) return null;
   const sorted = [...allowed].sort((a, b) => a - b);
-  const ge = sorted.find((c) => c >= wanted - 0.01);
-  if (ge != null) return ge;
-  const max = sorted[sorted.length - 1];
-  // 2026 OS: 603.75 A shipped on CV2-600. 1% commercial overcurrent.
-  if (wanted <= max * 1.01 + 0.5) return max;
-  return null;
+  // No tolerance above the top rating (2026-11-04 audit D2, IEC "not less than").
+  return sorted.find((c) => c >= wanted - 0.01) ?? null;
 }
 
 export function phaseToken(p: PhaseCode): string {
@@ -796,7 +795,8 @@ export function phaseToken(p: PhaseCode): string {
  *   126 / 145 (~110–150 kV) → C
  *   170 / 252 (~170–220 kV) → D
  *   ≥300 → DE
- * Across-tap a/b stress can only raise this, never lower it.
+ * Across-tap stress raises it; a stated stress on a star point or a
+ * single-phase unit may also lower it (resolveSelectorSize, GRADE-2).
  */
 export function defaultSelectorSizeForUm(um: number): SelectorSize {
   if (um <= 72.5 + 0.1) return "B";
@@ -841,6 +841,11 @@ export type SelectorSizePick = {
  * Otherwise it is raised and `raisedFrom` says so.
  * Stress above DE returns null. Never hand back a grade that does not cover.
  * `seriesId` picks that family's own withstand table (CM2 C is 350, not 365).
+ * `statedFloor`: a star point or single-phase unit with a stated across-tap
+ * stress starts from the weakest grade on the Um row, not the Um default.
+ * 2026-11-04 audit GRADE-2: A01 (PLN, OS "across tap winding AC82/LI350",
+ * Um 170) was sold 3xCM2I-600/170C; the Um map alone gave D. Only distance
+ * a is checked, so three-phase line-end / delta units keep the Um default.
  */
 export function resolveSelectorSize(
   um: number,
@@ -848,16 +853,18 @@ export function resolveSelectorSize(
   acrossTapBilKv?: number,
   acrossTapPfKv?: number,
   seriesId?: string,
+  statedFloor = false,
 ): SelectorSizePick {
   const allowed = SELECTOR_SIZES_BY_UM[um] ?? ["B", "C", "D", "DE"];
   const needALi = acrossTapBilKv ?? 0;
   const needAPf = acrossTapPfKv ?? 0;
   const typed = requested && requested !== "auto" ? requested : null;
+  const stated = statedFloor && (needALi > 0 || needAPf > 0);
 
   // Floor = typed grade, else the commercial Um default
   // (not always the weakest letter for that Um row).
   const floor = firstAllowedAtOrAbove(
-    typed ?? defaultSelectorSizeForUm(um),
+    typed ?? (stated ? allowed[0]! : defaultSelectorSizeForUm(um)),
     allowed,
   );
   for (let i = SIZE_ORDER.indexOf(floor); i < SIZE_ORDER.length; i++) {
@@ -877,8 +884,9 @@ export function pickSelectorSize(
   acrossTapBilKv?: number,
   acrossTapPfKv?: number,
   seriesId?: string,
+  statedFloor = false,
 ): SelectorSize | null {
-  return resolveSelectorSize(um, requested, acrossTapBilKv, acrossTapPfKv, seriesId).size;
+  return resolveSelectorSize(um, requested, acrossTapBilKv, acrossTapPfKv, seriesId, statedFloor).size;
 }
 
 /**

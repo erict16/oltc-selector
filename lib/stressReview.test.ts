@@ -40,11 +40,19 @@ describe("across-tap above every grade", () => {
     expect(out.results[0]?.model).toBe("CM2III-600Y/252DE-10193W");
   });
 
+  // 2026-11-04 GRADE-3: 252 B is a sold grade now, so the raise needs a
+  // stress B (LI 265) does not cover.
   it("a typed grade below the stress is raised and says so", () => {
-    const out = run({ umKv: 252, throughCurrentA: 600, stepVoltageV: 2500, selectorSize: "B" });
+    const out = run({ umKv: 252, throughCurrentA: 600, stepVoltageV: 2500, selectorSize: "B", acrossTapBilKv: 300 });
     const r = out.results[0]!;
     expect(r.selectorSize).toBe("C");
     expect(r.cautionsZh.join()).toContain("由 B 升为 C");
+  });
+
+  it("a typed 252 B with no stated stress stands (sold on E-CM2250216)", () => {
+    const r = run({ umKv: 252, throughCurrentA: 500, stepVoltageV: 2500, selectorSize: "B" }).results[0]!;
+    expect(r.selectorSize).toBe("B");
+    expect(r.model).toBe("CM2III-500Y/252B-10193W");
   });
 
   it("HWV says across-tap was not checked", () => {
@@ -92,11 +100,18 @@ describe("tap codes outside Fig. 3-3", () => {
   });
 });
 
-describe("1% commercial overcurrent is visible", () => {
-  it("1010 A on SHZV-1000 says how far over", () => {
-    const r = run({ throughCurrentA: 1010, stepVoltageV: 2000 }).results[0]!;
+// 2026-11-04 audit D2: the 1% over-rating tolerance is gone (IEC 60214-2
+// "not less than"). This test used to expect 1010 A on SHZV-1000.
+describe("no commercial overcurrent", () => {
+  it("1010 A does not sit on SHZV-1000", () => {
+    const out = run({ throughCurrentA: 1010, stepVoltageV: 2000 });
+    expect(out.results[0]!.model).toBe("SHZVGIII-1300Y/72.5B-10193W");
+    for (const r of out.results) expect(r.currentA).toBeGreaterThanOrEqual(1010);
+  });
+
+  it("1000 A still sits on SHZV-1000", () => {
+    const r = run({ throughCurrentA: 1000, stepVoltageV: 2000 }).results[0]!;
     expect(r.model).toBe("SHZVIII-1000Y/72.5B-10193W");
-    expect(r.cautionsZh.join()).toContain("超出额定 1000 A 的 1.0%");
   });
 });
 
@@ -186,7 +201,7 @@ describe("fuzz invariants", () => {
         const s = SERIES.find((x) => x.id === r.seriesId)!;
         const tag = `${r.model} <- ${JSON.stringify(inp)}`;
         if (r.umKv + 0.01 < inp.umKv) bad.push(`Um ${tag}`);
-        if (r.currentA * 1.01 + 0.5 < inp.throughCurrentA) bad.push(`I ${tag}`);
+        if (r.currentA + 0.01 < inp.throughCurrentA) bad.push(`I ${tag}`);
         if (r.currentA + 0.01 < inp.throughCurrentA && !r.cautionsZh.join().includes("超出额定")) {
           bad.push(`silent overcurrent ${tag}`);
         }

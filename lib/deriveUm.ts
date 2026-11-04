@@ -12,51 +12,13 @@ export const WINDING_RATED_KV = [
 /** First-paint tap-side Un. 110 kV is the common HV class; star still → Um 72.5. */
 export const DEFAULT_WINDING_RATED_KV = 110;
 
-/** Un → winding highest voltage (IEC / GB equipment class). */
-export const RATED_TO_WINDING_UM: Record<number, number> = {
-  33: 40.5,
-  35: 40.5,
-  66: 72.5,
-  69: 72.5,
-  110: 126,
-  115: 126,
-  132: 145,
-  138: 145,
-  150: 170,
-  220: 252,
-  230: 252,
-  330: 363,
-};
-
-const SNAP_UN = (Object.keys(RATED_TO_WINDING_UM).map(Number) as number[]).sort(
-  (a, b) => a - b,
-);
-
 /**
- * Nearest nameplate Un. 138 → 138, 135 → 132, 121 → 115, 158 → 150.
- * Far outliers (10.5, 400, 725) stay as-is so the engine can reject / cover.
+ * System nominals a nameplate kV steps down to (nominalSystemKv).
+ * 2026-11-04 audit UM-7: the second Um rule that used the old
+ * RATED_TO_WINDING_UM map (220 kV star → 252) is gone; deriveDuty is the
+ * one rule, and deriveUm.os.test.ts now checks it.
  */
-export function snapRatedKv(ratedKv: number): number {
-  if (!Number.isFinite(ratedKv) || ratedKv <= 0) return ratedKv;
-  if (RATED_TO_WINDING_UM[ratedKv] != null) return ratedKv;
-  let best = SNAP_UN[0]!;
-  let bestDist = Math.abs(ratedKv - best);
-  for (const u of SNAP_UN) {
-    const d = Math.abs(ratedKv - u);
-    if (d < bestDist) {
-      best = u;
-      bestDist = d;
-    }
-  }
-  const rel = bestDist / Math.max(ratedKv, 1);
-  if (rel <= 0.12 || bestDist <= 8) return best;
-  return ratedKv;
-}
-
-export function windingUmFromRatedKv(ratedKv: number): number {
-  const snapped = snapRatedKv(ratedKv);
-  return RATED_TO_WINDING_UM[snapped] ?? snapped;
-}
+const SNAP_UN = [33, 35, 66, 69, 110, 115, 132, 138, 150, 220, 230, 330] as const;
 
 /**
  * Calculated Um the form shows and sends. Catalogue snap is the engine.
@@ -79,28 +41,6 @@ export function formatUmKv(um: number): string {
   return Number.isInteger(r) ? String(r) : r.toFixed(1);
 }
 
-/**
- * OLTC Um from the tap-winding equipment class + where the switch sits.
- *
- * Y (star / neutral), graded insulation:
- *   110 / 132 / 150 kV class → catalogue 72.5 (LI 350 / PF 140)
- *   220 kV class stays 252 — do not silently pick CV2 / 72.5
- *   35 / 66 kV stay at winding Um (40.5 / 72.5)
- *
- * D / any (line end): winding Um. Do not drop — line-end 132 is 145, not 72.5.
- *
- * Wilson Q30136: 132 kV on the OLTC, star → 72.5.
- * 220 kV star that really wants 72.5: switch to the Um tab and pick 72.5.
- */
-export function deriveOltcUm(
-  windingUmKv: number,
-  connection: SelectInput["connection"],
-): number {
-  if (connection !== "Y") return windingUmKv;
-  if (windingUmKv >= 125.9 && windingUmKv <= 170.1) return 72.5;
-  return windingUmKv;
-}
-
 /** IEC 60038 highest voltages for equipment (kV). */
 const IEC_UM = [
   3.6, 7.2, 12, 17.5, 24, 36, 40.5, 52, 72.5, 100, 123, 145, 170, 245, 300,
@@ -113,11 +53,14 @@ const CATALOGUE_UM = [12, 17.5, 40.5, 72.5, 126, 145, 170, 252, 300, 363] as con
 /**
  * Nameplate kV often sits above its system's nominal (121 on 110, 242 on
  * 220, 38.5 on 35). Step down to that nominal when it is within 12%.
+ * 400 and 500 take a 5% window: 420 → 400 (Um 420, not 550), while 440 kV
+ * (Brazil, Um 460, not an IEC value) still rounds up to 550 (audit UM-8).
  */
 function nominalSystemKv(ratedKv: number): number {
   let best = ratedKv;
-  for (const u of SNAP_UN) {
-    if (u <= ratedKv && (ratedKv - u) / ratedKv <= 0.12) best = u;
+  for (const u of [...SNAP_UN, 400, 500]) {
+    const win = u >= 400 ? 0.05 : 0.12;
+    if (u <= ratedKv && (ratedKv - u) / ratedKv <= win) best = u;
   }
   return best;
 }
@@ -138,13 +81,6 @@ export function catalogueUmFromRatedKv(ratedKv: number): number {
   const um = iecUmFromRatedKv(ratedKv);
   if (!Number.isFinite(um)) return NaN;
   return CATALOGUE_UM.find((c) => c >= um - 1e-9) ?? um;
-}
-
-export function oltcUmFromRatedKv(
-  ratedKv: number,
-  connection: SelectInput["connection"],
-): number {
-  return deriveOltcUm(windingUmFromRatedKv(ratedKv), connection);
 }
 
 /**

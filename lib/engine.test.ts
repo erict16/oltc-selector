@@ -1710,7 +1710,9 @@ describe("2026 OS — other options + list axes", () => {
     expect(alts.every((r) => r.unitCount === 1)).toBe(true);
   });
 
-  it("oil 350 A / 1400 V other options stay on SV", () => {
+  // 1400 V is past the 90% Ust line on CV (FAM-1, CM primary); 1300 V keeps
+  // the CV primary this test is about.
+  it("oil 350 A / 1300 V other options stay on SV", () => {
     const out = selectOltc({
       mounting: "in_tank",
       medium: "oil",
@@ -1719,7 +1721,7 @@ describe("2026 OS — other options + list axes", () => {
       connection: "Y",
       throughCurrentA: 350,
       umKv: 72.5,
-      stepVoltageV: 1400,
+      stepVoltageV: 1300,
       regulation: "reversing",
       plusMinusSteps: 8,
       positions: 19,
@@ -1749,7 +1751,10 @@ describe("2026 OS — other options + list axes", () => {
     );
   });
 
-  it("603.75 A / 72.5 Δ stays on CV2-600 (2026 OS E-CV2260277)", () => {
+  // 2026-11-04 audit D2: E-CV2260277 (603.75 A) shipped on CV2-600 under a
+  // 1% tolerance IEC does not give. It is one of only 2 such sales; the
+  // engine now takes the next rating that covers.
+  it("603.75 A / 72.5 Δ does not sit on CV2-600 (no 1% tolerance)", () => {
     const out = selectOltc({
       ...vacY,
       connection: "D",
@@ -1759,9 +1764,8 @@ describe("2026 OS — other options + list axes", () => {
       plusMinusSteps: 10,
     });
     expect(out.ok).toBe(true);
-    expect(out.results[0].seriesCode).toBe("CV2");
-    expect(out.results[0].currentA).toBe(600);
-    expect(out.results[0].model).toContain("CV2III-600D/72.5");
+    expect(out.results[0].model).toBe("3xCM2I-800/72.5B-12233W");
+    expect(out.results.some((r) => r.currentA < 603.75)).toBe(false);
   });
 
   it("626 A Δ uses 3×CM2I-800, not an invented SHZVIII-1000D", () => {

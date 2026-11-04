@@ -84,7 +84,23 @@ type ReplayOut = {
   steps: number | "";
   connection: string;
   phases: string;
+  /** Selector letter of engine #1 and of the sold type ("" when none). */
+  engine_grade: string;
+  sold_grade: string;
 };
+
+/**
+ * Engine #1 grade against the sold letter. 2026-11-04 audit GRADE-3: the
+ * verdicts ignore the letter, so a weaker engine grade never showed.
+ */
+type GradeCmp = "match" | "weaker" | "stronger";
+const GRADE_ORDER = ["B", "C", "D", "DE"];
+function gradeCmp(engine: string, sold: string): GradeCmp | null {
+  const e = GRADE_ORDER.indexOf(engine);
+  const s = GRADE_ORDER.indexOf(sold);
+  if (e < 0 || s < 0) return null;
+  return e === s ? "match" : e < s ? "weaker" : "stronger";
+}
 
 const VAC_COMBINED = new Set(["CM2", "SHZV", "SDZV", "SHZVG"]);
 const VAC_COMPOUND = new Set(["CV2"]);
@@ -421,6 +437,8 @@ for (const row of rows) {
     steps: num(row.plus_minus_steps) ?? ("" as const),
     connection: (row.connection || "").toString(),
     phases: (row.phases || "").toString(),
+    engine_grade: "",
+    sold_grade: "",
   };
 
   if (!sold) {
@@ -456,7 +474,23 @@ for (const row of rows) {
     steps: built.plusMinusSteps ?? ("" as const),
     connection: built.connection,
     phases: built.phases,
+    engine_grade: result.results[0]?.selectorSize ?? "",
+    sold_grade: parsed.selectorSize ?? "",
   });
+}
+
+// Grade: engine #1 letter (selectorSize auto) vs the sold letter, by sold Um.
+const gradeCounts: Record<GradeCmp, number> = { match: 0, weaker: 0, stronger: 0 };
+const gradeByUm = new Map<number, Record<GradeCmp, number>>();
+for (const r of out) {
+  if (r.verdict === "skip") continue;
+  const cmp = gradeCmp(r.engine_grade, r.sold_grade);
+  if (!cmp) continue;
+  gradeCounts[cmp]++;
+  const soldUm = parseTypeString(r.sold_type)?.umKv ?? 0;
+  const row = gradeByUm.get(soldUm) ?? { match: 0, weaker: 0, stronger: 0 };
+  row[cmp]++;
+  gradeByUm.set(soldUm, row);
 }
 
 const judged = out.filter((r) => r.verdict !== "skip");
@@ -496,6 +530,16 @@ const lines = [
   "",
   `**#1 family+I+Um or better:** ${(((counts.exact + counts["family-i-um"]) / n) * 100).toFixed(1)}%`,
   `**sold type or vacuum twin eligible:** ${(((counts.exact + counts["family-i-um"] + counts.family + counts.eligible + counts["oil-vs-vac"]) / n) * 100).toFixed(1)}%`,
+  `**grade (engine #1 vs sold letter):** match ${gradeCounts.match} / weaker than sold ${gradeCounts.weaker} / stronger ${gradeCounts.stronger}`,
+  "",
+  "| sold Um | match | weaker than sold | stronger |",
+  "|---:|---:|---:|---:|",
+  ...[...gradeByUm.keys()]
+    .sort((a, b) => a - b)
+    .map((um) => {
+      const g = gradeByUm.get(um)!;
+      return `| ${um} | ${g.match} | ${g.weaker} | ${g.stronger} |`;
+    }),
   "",
   "## Misses",
   "",

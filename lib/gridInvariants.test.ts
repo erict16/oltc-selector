@@ -246,7 +246,7 @@ function oracleCovers(c: Case, input: SelectInput, positions: number, pitch: num
     for (const ph of ["III", "I"] as const) {
       if (ph === "III" && input.connection === "D" && !(s.iiiConnections ?? s.connections).includes("D")) continue;
       for (const cur of s.currents[ph] ?? []) {
-        if (cur * 1.01 + 0.5 < iu) continue;
+        if (cur + 0.01 < iu) continue; // strict (2026-11-04 audit D2)
         if (ust > maxUst(s, pitch, cur) + 0.5) continue;
         const cap = capFor(s, cur, pitch, iu);
         if (cap != null && ust > 0 && (iu * ust) / 1000 > cap + 0.5) continue;
@@ -311,7 +311,7 @@ function checkCase(c: Case, r: Run): Issue[] {
     }
     if (!commercialTypeExists(res.model, s)) push("NOT_A_TYPE");
 
-    if (res.currentA * 1.01 + 0.5 < input.throughCurrentA)
+    if (res.currentA + 0.01 < input.throughCurrentA)
       push("CURRENT_SHORT", `${res.currentA} < ${input.throughCurrentA.toFixed(1)}`);
     if (res.umKv + 0.01 < input.umKv) push("UM_SHORT", `${res.umKv} < ${input.umKv}`);
     const lim = maxUst(s, res.pitch, res.currentA);
@@ -405,8 +405,8 @@ function capFor(s: { id: string; stepCapacityByCurrent?: Record<number, number> 
   if (s.id === "cv" && cur === 350) return by({ 10: 525, 12: 420, 14: 350 });
   if (s.id === "cv" && cur === 700) return by({ 10: 660, 12: 520, 14: 450 });
   if (s.id === "sv" && cur === 500) {
-    if (pitch <= 10) return dutyA <= 350 * 1.01 + 0.5 ? 525 : 400;
-    return dutyA <= 300 * 1.01 + 0.5 ? 420 : 325;
+    if (pitch <= 10) return dutyA <= 350 + 0.01 ? 525 : 400;
+    return dutyA <= 300 + 0.01 ? 420 : 325;
   }
   return s.stepCapacityByCurrent?.[cur] ?? null;
 }
@@ -429,7 +429,8 @@ describe(`grid invariants (${FULL ? "full grid" : `sample, seed ${SEED}`})`, () 
     expect(digest(rep.issues)).toEqual([]);
     // The sample must exercise the engine, not just CLI refusals.
     expect(rep.ok).toBeGreaterThan(rep.cases * 0.5);
-  });
+    // 1.6 s alone; the full parallel suite pushed it past the 5 s default.
+  }, 20000);
 
   it("220 kV class tapped windings and autotransformers never get CV/CV2/SV", async () => {
     const rep = await reportOnce();
@@ -489,7 +490,7 @@ describe("monotonic", () => {
     // fits is.
     const stillFits = (prev: ModelResult, input: SelectInput): boolean => {
       const s = SERIES_BY_ID.get(prev.seriesId)!;
-      if (prev.currentA * 1.01 + 0.5 < input.throughCurrentA) return false;
+      if (prev.currentA + 0.01 < input.throughCurrentA) return false;
       if (input.stepVoltageV > maxUst(s, prev.pitch, prev.currentA) + 0.5) return false;
       const cap = capFor(s, prev.currentA, prev.pitch, input.throughCurrentA);
       if (cap != null && (input.throughCurrentA * input.stepVoltageV) / 1000 > cap + 0.5) return false;

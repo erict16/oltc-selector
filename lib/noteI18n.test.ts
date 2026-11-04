@@ -99,12 +99,15 @@ describe("note translations", () => {
   });
 
   it("keeps numbers and type strings", () => {
-    const n = "Duty 354.0 A is 1.1% above the 350 A rating (1% commercial tolerance). Confirm with engineering.";
+    // The 1% over-rating note went with the tolerance (2026-11-04 audit D2).
+    const n =
+      "OS Imax 334.0 A is below the full-range 376.6 A: the maker caps the current below −5.3% (maximum-current tapping). Sized on the OS figure.";
     for (const lang of LANGS) {
       const out = localizeNote(n, lang);
-      expect(out).toContain("354.0");
-      expect(out).toContain("350");
-      expect(out).toContain("1.1");
+      expect(out).not.toBe(n);
+      expect(out).toContain("334.0");
+      expect(out).toContain("376.6");
+      expect(out).toContain("5.3");
     }
   });
 });

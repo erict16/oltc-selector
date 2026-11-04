@@ -17,6 +17,7 @@ import {
   phaseConnectionLegal,
   resolveOctcListModel,
 } from "./typeExists";
+import { catalogueUmFromRatedKv } from "./deriveUm";
 import { resolveTapFields } from "./tapCode";
 import type {
   Connection,
@@ -278,6 +279,38 @@ function adequacyScore(
   }
   if (input.mounting === "in_tank" && s.id === "hwv") score -= 4000;
 
+  // Sales-practice exceptions to the family order (2026-11-04 audit, OS
+  // 2025–2026). Each moves the primary only; the other family stays listed.
+  // FAM-1: oil CV/SV past the 90% Ust line. Promotes the insurance card
+  // (CM) to primary: CM sold on 8 of 9 such rows. Counter-case: ELIZ
+  // E-V250092 bought CVIII-350Y at 1368 V (91%).
+  if (
+    (s.id === "cv" || s.id === "sv") &&
+    input.stepVoltageV > STEP_VOLTAGE_LINE * maxStepVoltageForSeries(s, pitch)
+  ) {
+    score -= 3500;
+  }
+  // FAM-4: single-phase duty takes combined CM2I, not compound CV2I
+  // (E-CM2250006, E-CM2250242, E-CM2260142-143). Oil CVI stays: Sanaky.
+  if (input.phases === "I" && s.id === "cv2") score -= 3500;
+  // FAM-2: tapped winding of 400 kV class: SHZV on 15 of 17 orders (HMT,
+  // TAMINI, Brazil); EFACEC bought CM2 twice.
+  // FAM-3 (low confidence, fitted on 3 rows: E-SHZV250020-023 453 A,
+  // E-SHZV260095-098 571 A, E-SHZV260105 446 A): 220–275 kV class, one III
+  // unit above 430 A went SHZV. E-CM2260140 at 423 A stayed CM2. One III
+  // unit only: 3× moved R02 to 3xSHZVI-1500, not in the SHZV data.
+  const windUm = input.tapWindingKv ? catalogueUmFromRatedKv(input.tapWindingKv) : 0;
+  if (
+    s.id === "shzv" &&
+    (windUm >= 420 ||
+      (unitCount === 1 &&
+        input.phases === "III" &&
+        windUm >= 252 &&
+        input.throughCurrentA > 430))
+  ) {
+    score += 1700;
+  }
+
   // Multi-unit is last resort commercially (see post-sort hard rule too).
   // Soft penalty only ranks among multi options when no single exists.
   if (unitCount > 1) {
@@ -313,10 +346,14 @@ type Attempt = {
   deltaForced?: boolean;
 };
 
-/** Catalogue I covers duty, with 1% commercial overcurrent (2026 OS: 603.75 on CV2-600). */
+/**
+ * Catalogue I covers duty: not less than the duty (IEC 60214-2, SelMan).
+ * 2026-11-04 audit D2: the 1% tolerance put 351–353 A on 350 A units where
+ * Huaming sold the next size 4 times; only 2 sales (603.75 / 603.86 A on
+ * CV2-600) ever used it.
+ */
 function ratingCoversDuty(wanted: number, rating: number): boolean {
-  if (wanted <= rating + 0.01) return true;
-  return wanted <= rating * 1.01 + 0.5;
+  return wanted <= rating + 0.01;
 }
 
 function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
@@ -869,6 +906,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
                 input.acrossTapBilKv,
                 input.acrossTapPfKv,
                 s.id,
+                // Only a, not b, is checked: the stated stress may lower the
+                // grade where no phase-to-phase gap matters (2026-11-04 GRADE-2).
+                att.phases === "I" || (att.phases === "III" && input.connection === "Y"),
               )
             : null;
         if (gradePick && gradePick.size == null) {
@@ -960,15 +1000,6 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const cautionsEn: string[] = [];
         const cautionsZh: string[] = [];
 
-        if (input.throughCurrentA > current + 0.01) {
-          const pct = ((input.throughCurrentA / current - 1) * 100).toFixed(1);
-          cautionsEn.push(
-            `Duty ${input.throughCurrentA.toFixed(1)} A is ${pct}% above the ${current} A rating (1% commercial tolerance). Confirm with engineering.`,
-          );
-          cautionsZh.push(
-            `需求 ${input.throughCurrentA.toFixed(1)} A 超出额定 ${current} A 的 ${pct}%（按 1% 商务容差放行），须工程确认。`,
-          );
-        }
         if (!octc && !(input.stepVoltageV > 0)) {
           cautionsEn.push(
             "Step voltage not given: step-voltage and step-capacity limits were not checked.",

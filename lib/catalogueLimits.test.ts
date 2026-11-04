@@ -47,8 +47,8 @@ describe("CV / SV step capacity by contact pitch (TD-CV&SV Table 1)", () => {
     expect(stepCapacityKva(sv, 500, 10, 350)).toBe(525);
     expect(stepCapacityKva(sv, 500, 12, 300)).toBe(420);
     expect(stepCapacityKva(sv, 500, 12, 340)).toBe(325);
-    // 1% commercial current tolerance, as on a rating (E-V250432-433: 351 A).
-    expect(stepCapacityKva(sv, 500, 10, 351)).toBe(525);
+    // Strict like a rating (2026-11-04 audit D2): 351 A is over the ≤350 A row.
+    expect(stepCapacityKva(sv, 500, 10, 351)).toBe(400);
   });
 
   it("families without a pitch table keep one value", () => {

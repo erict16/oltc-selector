@@ -608,6 +608,11 @@ export function SelectorApp() {
   const [mvKv, setMvKv] = useState(110);
   /** OLTC insulation to earth stated by the OS / maker. 0 = by rule. */
   const [earthUm, setEarthUm] = useState(0);
+  /** OS / maker Imax (A) and Ust (V) on the capacity path. 0 = not given. */
+  const [osImaxA, setOsImaxA] = useState(0);
+  const [osUstV, setOsUstV] = useState(0);
+  /** Buyer's country for a neutral's assumed Um ("" = voltage rule only). */
+  const [market, setMarket] = useState("");
   /** Tender line as typed, and what was read from it (null = not read). */
   const [lineText, setLineText] = useState("");
   const [lineRead, setLineRead] = useState<TenderLine | null>(null);
@@ -932,6 +937,9 @@ export function SelectorApp() {
       stepFraction: stepFraction(),
       safetyK,
       ...(earthUm > 0 ? { earthUmKv: earthUm } : {}),
+      ...(currentMode === "capacity" && osImaxA > 0 ? { statedMaxA: osImaxA } : {}),
+      ...(currentMode === "capacity" && osUstV > 0 ? { statedStepV: osUstV } : {}),
+      ...(market ? { market } : {}),
     });
   const transformerDuty = (): DutyBasis => deriveDuty(transformerSpec());
 
@@ -1298,6 +1306,20 @@ export function SelectorApp() {
                     ))}
                   </select>
                 </Field>
+                {/* Neutral Um follows country practice (2026-11-04 audit UM-2). */}
+                {kind === "two_winding" && tapPoint === "neutral" ? (
+                  <Field label={t(lang, "market")}>
+                    <select
+                      className={controlClass}
+                      value={market}
+                      onChange={(e) => setMarket(e.target.value)}
+                    >
+                      <option value="">{t(lang, "marketNone")}</option>
+                      <option value="IT">{t(lang, "market_IT")}</option>
+                      <option value="TR">{t(lang, "market_TR")}</option>
+                    </select>
+                  </Field>
+                ) : null}
               </div>
             </section>
             <section aria-label={t(lang, "cardDuty")} className="sheet-section">
@@ -1924,6 +1946,32 @@ export function SelectorApp() {
                       ) : null}
                     </div>
                   </Field>
+                  {/* The maker's own figures: Imax replaces the full-range
+                      current, Ust is a floor (2026-11-04 audit D1, D3). */}
+                  {currentMode === "capacity" ? (
+                    <>
+                      <Field label={t(lang, "osImax")}>
+                        <div className="relative">
+                          <DecimalInput
+                            className={`${controlClass} has-suffix`}
+                            value={osImaxA}
+                            onValue={setOsImaxA}
+                          />
+                          <span className="ui-affix ui-affix-end">A</span>
+                        </div>
+                      </Field>
+                      <Field label={t(lang, "osUst")}>
+                        <div className="relative">
+                          <DecimalInput
+                            className={`${controlClass} has-suffix`}
+                            value={osUstV}
+                            onValue={setOsUstV}
+                          />
+                          <span className="ui-affix ui-affix-end">V</span>
+                        </div>
+                      </Field>
+                    </>
+                  ) : null}
               </div>
             </section>
           </div>

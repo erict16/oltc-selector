@@ -26,16 +26,8 @@ const SCOPE_RE = Object.keys(SCOPE)
 const sc = (en: string) => SCOPE[en];
 
 const RULES: Rule[] = [
-  // Engine cautions
-  [
-    /^Duty ([\d.]+) A is ([\d.]+)% above the (\d+) A rating \(1% commercial tolerance\)\. Confirm with engineering\.$/,
-    (m) => ({
-      vi: `Dòng yêu cầu ${m[1]} A vượt định mức ${m[3]} A ${m[2]}% (dung sai thương mại 1%). Cần kỹ thuật xác nhận.`,
-      es: `La corriente de ${m[1]} A supera en ${m[2]}% la nominal de ${m[3]} A (tolerancia comercial del 1%). Debe confirmarlo ingeniería.`,
-      tr: `${m[1]} A ihtiyaç, ${m[3]} A anma akımını %${m[2]} aşıyor (%1 ticari tolerans). Mühendislik onaylamalı.`,
-      id: `Arus ${m[1]} A melebihi rating ${m[3]} A sebesar ${m[2]}% (toleransi komersial 1%). Harus dikonfirmasi bagian teknik.`,
-    }),
-  ],
+  // Engine cautions. The 1% over-rating note went with the tolerance
+  // (2026-11-04 audit D2: IEC 60214-2 says "not less than").
   [
     /^Step voltage not given: step-voltage and step-capacity limits were not checked\.$/,
     () => ({
@@ -74,12 +66,93 @@ const RULES: Rule[] = [
   ],
   // Duty notes (lib/transformer.ts)
   [
-    /^35 kV-class neutral sized at Um 40\.5 kV; many orders \(Russia, Turkey\) bought 72\.5 kV\. The OS decides\.$/,
+    /^35 kV-class neutral sized at Um 40\.5 kV; Russian\/CIS buyers chose 72\.5 on about half of CV\/SV orders; the OS decides\. CM\/CM2\/SHZV start at 72\.5\.$/,
     () => ({
-      vi: "Trung tính cấp 35 kV chọn theo Um 40.5 kV; nhiều đơn hàng (Nga, Thổ Nhĩ Kỳ) mua 72.5 kV. Theo OS.",
-      es: "Neutro de clase 35 kV dimensionado a Um 40.5 kV; muchos pedidos (Rusia, Turquía) compraron 72.5 kV. Decide la OS.",
-      tr: "35 kV sınıfı nötr Um 40.5 kV ile seçildi; birçok sipariş (Rusya, Türkiye) 72.5 kV aldı. OS belirler.",
-      id: "Netral kelas 35 kV dipilih pada Um 40.5 kV; banyak pesanan (Rusia, Turki) membeli 72.5 kV. OS yang menentukan.",
+      vi: "Trung tính cấp 35 kV chọn theo Um 40.5 kV; khách Nga/SNG chọn 72.5 ở khoảng một nửa đơn CV/SV; theo OS. CM/CM2/SHZV thấp nhất là 72.5.",
+      es: "Neutro de clase 35 kV dimensionado a Um 40.5 kV; los compradores rusos/CEI eligieron 72.5 en cerca de la mitad de los pedidos CV/SV; decide la OS. CM/CM2/SHZV empiezan en 72.5.",
+      tr: "35 kV sınıfı nötr Um 40.5 kV ile seçildi; Rus/BDT alıcılar CV/SV siparişlerinin yaklaşık yarısında 72.5 seçti; OS belirler. CM/CM2/SHZV 72.5'ten başlar.",
+      id: "Netral kelas 35 kV dipilih pada Um 40.5 kV; pembeli Rusia/CIS memilih 72.5 pada sekitar separuh pesanan CV/SV; OS yang menentukan. CM/CM2/SHZV mulai dari 72.5.",
+    }),
+  ],
+  [
+    /^Italy: neutral sized at the line class, Um ([\d.]+) kV \(TERNA\/GETRA 250 MVA orders bought 72\.5\); the OS decides\.$/,
+    (m) => ({
+      vi: `Ý: trung tính chọn theo cấp đầu dây, Um ${m[1]} kV (đơn TERNA/GETRA 250 MVA mua 72.5); theo OS.`,
+      es: `Italia: neutro dimensionado a la clase de línea, Um ${m[1]} kV (los pedidos TERNA/GETRA de 250 MVA compraron 72.5); decide la OS.`,
+      tr: `İtalya: nötr hat sınıfına göre seçildi, Um ${m[1]} kV (TERNA/GETRA 250 MVA siparişleri 72.5 aldı); OS belirler.`,
+      id: `Italia: netral dipilih pada kelas saluran, Um ${m[1]} kV (pesanan TERNA/GETRA 250 MVA membeli 72.5); OS yang menentukan.`,
+    }),
+  ],
+  [
+    /^Turkey: 220 kV-class and above neutral sized at Um ([\d.]+) kV \(orders 126 ×11, 170 ×4, 72\.5 ×0\); the OS decides\.$/,
+    (m) => ({
+      vi: `Thổ Nhĩ Kỳ: trung tính cấp 220 kV trở lên chọn theo Um ${m[1]} kV (đơn hàng 126 ×11, 170 ×4, 72.5 ×0); theo OS.`,
+      es: `Turquía: neutro de clase 220 kV o superior dimensionado a Um ${m[1]} kV (pedidos 126 ×11, 170 ×4, 72.5 ×0); decide la OS.`,
+      tr: `Türkiye: 220 kV sınıfı ve üstü nötr Um ${m[1]} kV ile seçildi (siparişler 126 ×11, 170 ×4, 72.5 ×0); OS belirler.`,
+      id: `Turki: netral kelas 220 kV ke atas dipilih pada Um ${m[1]} kV (pesanan 126 ×11, 170 ×4, 72.5 ×0); OS yang menentukan.`,
+    }),
+  ],
+  [
+    /^Neutral of a 400 kV-class winding sized at Um ([\d.]+) kV \(Turkey and Portugal orders bought 126; Brazil 440\/500 kV bought 72\.5\); the OS decides\.$/,
+    (m) => ({
+      vi: `Trung tính cuộn dây cấp 400 kV chọn theo Um ${m[1]} kV (đơn Thổ Nhĩ Kỳ và Bồ Đào Nha mua 126; Brazil 440/500 kV mua 72.5); theo OS.`,
+      es: `Neutro de un devanado de clase 400 kV dimensionado a Um ${m[1]} kV (los pedidos de Turquía y Portugal compraron 126; Brasil 440/500 kV compró 72.5); decide la OS.`,
+      tr: `400 kV sınıfı sargının nötrü Um ${m[1]} kV ile seçildi (Türkiye ve Portekiz siparişleri 126 aldı; Brezilya 440/500 kV 72.5 aldı); OS belirler.`,
+      id: `Netral belitan kelas 400 kV dipilih pada Um ${m[1]} kV (pesanan Turki dan Portugal membeli 126; Brasil 440/500 kV membeli 72.5); OS yang menentukan.`,
+    }),
+  ],
+  [
+    /^MV line lead sized at the MV class, Um ([\d.]+) kV; the OS decides\.$/,
+    (m) => ({
+      vi: `Đầu ra trung áp chọn theo cấp trung áp, Um ${m[1]} kV; theo OS.`,
+      es: `Salida de MT dimensionada a la clase de MT, Um ${m[1]} kV; decide la OS.`,
+      tr: `OG hat çıkışı OG sınıfına göre seçildi, Um ${m[1]} kV; OS belirler.`,
+      id: `Saluran TM dipilih pada kelas TM, Um ${m[1]} kV; OS yang menentukan.`,
+    }),
+  ],
+  [
+    /^Variable flux: Ust and current differ per tap; Ust at the extreme tap is not checked\. Get the maker's per-tap table\.$/,
+    () => ({
+      vi: "Từ thông thay đổi: Ust và dòng điện khác nhau ở mỗi nấc; chưa kiểm tra Ust ở nấc cực biên. Hãy lấy bảng từng nấc của nhà sản xuất.",
+      es: "Flujo variable: la Ust y la corriente cambian en cada toma; no se comprobó la Ust en la toma extrema. Pida al fabricante la tabla por toma.",
+      tr: "Değişken akı: Ust ve akım her kademede farklıdır; uç kademedeki Ust kontrol edilmedi. Üreticiden kademe tablosunu isteyin.",
+      id: "Fluks variabel: Ust dan arus berbeda di tiap tap; Ust di tap ekstrem tidak diperiksa. Minta tabel per tap dari pabrikan.",
+    }),
+  ],
+  [
+    /^OS Imax ([\d.]+) A is below the rated ([\d.]+) A: sized on the rated current\. Check the OS\.$/,
+    (m) => ({
+      vi: `Imax trong OS ${m[1]} A thấp hơn dòng định mức ${m[2]} A: chọn theo dòng định mức. Kiểm tra OS.`,
+      es: `La Imax de la OS, ${m[1]} A, es menor que la nominal de ${m[2]} A: dimensionado a la corriente nominal. Revise la OS.`,
+      tr: `OS Imax ${m[1]} A, ${m[2]} A anma akımının altında: anma akımına göre seçildi. OS'yi kontrol edin.`,
+      id: `Imax OS ${m[1]} A di bawah arus pengenal ${m[2]} A: dipilih pada arus pengenal. Periksa OS.`,
+    }),
+  ],
+  [
+    /^OS Imax ([\d.]+) A is below the full-range ([\d.]+) A: the maker caps the current below −([\d.]+)% \(maximum-current tapping\)\. Sized on the OS figure\.$/,
+    (m) => ({
+      vi: `Imax trong OS ${m[1]} A thấp hơn ${m[2]} A của toàn dải: nhà sản xuất giới hạn dòng dưới −${m[3]}% (nấc dòng cực đại). Chọn theo số OS.`,
+      es: `La Imax de la OS, ${m[1]} A, es menor que los ${m[2]} A de todo el rango: el fabricante limita la corriente por debajo de −${m[3]}% (toma de corriente máxima). Dimensionado con el valor de la OS.`,
+      tr: `OS Imax ${m[1]} A, tam aralıktaki ${m[2]} A'nın altında: üretici akımı −%${m[3]} altında sınırlıyor (maksimum akım kademesi). OS değerine göre seçildi.`,
+      id: `Imax OS ${m[1]} A di bawah ${m[2]} A rentang penuh: pabrikan membatasi arus di bawah −${m[3]}% (tap arus maksimum). Dipilih pada angka OS.`,
+    }),
+  ],
+  [
+    /^OS Imax ([\d.]+) A is far above the full-range ([\d.]+) A: line current or a data error\? Sized on the OS figure\.$/,
+    (m) => ({
+      vi: `Imax trong OS ${m[1]} A cao hơn nhiều so với ${m[2]} A của toàn dải: dòng dây hay lỗi số liệu? Chọn theo số OS.`,
+      es: `La Imax de la OS, ${m[1]} A, está muy por encima de los ${m[2]} A de todo el rango: ¿corriente de línea o error de datos? Dimensionado con el valor de la OS.`,
+      tr: `OS Imax ${m[1]} A, tam aralıktaki ${m[2]} A'nın çok üstünde: hat akımı mı, veri hatası mı? OS değerine göre seçildi.`,
+      id: `Imax OS ${m[1]} A jauh di atas ${m[2]} A rentang penuh: arus saluran atau salah data? Dipilih pada angka OS.`,
+    }),
+  ],
+  [
+    /^OS Ust (\d+) V looks like a line value; the physical step is (\d+) V\. Sized on the OS figure\.$/,
+    (m) => ({
+      vi: `Ust trong OS ${m[1]} V giống giá trị điện áp dây; điện áp nấc thực là ${m[2]} V. Chọn theo số OS.`,
+      es: `La Ust de la OS, ${m[1]} V, parece un valor de línea; el escalón real es ${m[2]} V. Dimensionado con el valor de la OS.`,
+      tr: `OS Ust ${m[1]} V hat değeri gibi görünüyor; gerçek kademe ${m[2]} V. OS değerine göre seçildi.`,
+      id: `Ust OS ${m[1]} V tampak seperti nilai saluran; tegangan tap sebenarnya ${m[2]} V. Dipilih pada angka OS.`,
     }),
   ],
   [
@@ -390,6 +463,15 @@ const RULES: Rule[] = [
       es: "Tensión por encima del catálogo: la clase más alta del cambiador es Um 363 kV.",
       tr: "Gerilim katalog üstünde: en yüksek kademe değiştirici sınıfı Um 363 kV.",
       id: "Tegangan di atas katalog: kelas OLTC tertinggi Um 363 kV.",
+    }),
+  ],
+  [
+    /^Autotransformer HV class Um ([\d.]+) kV is above the catalogue \(top 363 kV\)\. Give the switch's insulation to earth from the OS: ([\d., ]+) kV\.$/,
+    (m) => ({
+      vi: `Cấp cao áp của biến áp tự ngẫu Um ${m[1]} kV vượt catalogue (cao nhất 363 kV). Nhập cách điện với đất của bộ ĐAPT theo OS: ${m[2]} kV.`,
+      es: `La clase de AT del autotransformador, Um ${m[1]} kV, supera el catálogo (máx. 363 kV). Indique el aislamiento a tierra del cambiador según la OS: ${m[2]} kV.`,
+      tr: `Ototransformatör YG sınıfı Um ${m[1]} kV katalog üstünde (en yüksek 363 kV). Kademe değiştiricinin toprağa yalıtımını OS'den girin: ${m[2]} kV.`,
+      id: `Kelas TT autotransformator Um ${m[1]} kV di atas katalog (maks. 363 kV). Masukkan isolasi ke tanah OLTC dari OS: ${m[2]} kV.`,
     }),
   ],
 ];

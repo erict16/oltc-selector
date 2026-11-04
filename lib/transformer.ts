@@ -77,6 +77,25 @@ export interface TransformerSpec {
    * transformer maker states it. Undefined = rule below.
    */
   earthUmKv?: number;
+  /**
+   * Max through-current the OS / maker states (A). Russian OS forms stop at
+   * about −5/−6% (maximum-current tapping): 63 MVA 115 kV ±9×1.78% says
+   * 334 A, not the full-range 376.6 A, and Huaming sold CVIII-350Y ten
+   * times (2026-11-04 audit D1). Floored at the rated current.
+   */
+  statedMaxA?: number;
+  /**
+   * Step voltage the OS / maker states (V). A floor over the derived Ust:
+   * star forms often write the line value (√3 × the phase step), and an
+   * autotransformer's extreme tap can sit above nominal (audit D3, D5).
+   */
+  statedStepV?: number;
+  /**
+   * Buyer's country (ISO code). Neutral insulation follows country
+   * practice, not voltage: Italy buys the line class, Turkey 126 on 220 kV
+   * class and above (audit UM-2). Unset = the voltage rule alone.
+   */
+  market?: string;
 }
 
 export type UmRule =
@@ -105,6 +124,8 @@ export interface DutyBasis {
   ratedA: number;
   /** At the lowest tap. */
   maxA: number;
+  /** full_range: I/(1−n·s) over the whole minus range. stated: OS Imax. */
+  maxRule: "full_range" | "stated";
   /** maxA × safety factor: what the engine sizes against. */
   dutyA: number;
   /** Voltage (kV, line) the current formula uses. */
@@ -132,6 +153,7 @@ const fail = (zh: string, en: string): DutyBasis => ({
   umAssumed: false,
   ratedA: NaN,
   maxA: NaN,
+  maxRule: "full_range",
   dutyA: NaN,
   currentKv: NaN,
   currentDivisor: "sqrt3",
@@ -143,6 +165,13 @@ const fail = (zh: string, en: string): DutyBasis => ({
 
 /** Neutral of a star winding: full class up to 72.5, else 72.5 assumed. */
 const NEUTRAL_DEFAULT_UM = 72.5;
+
+/**
+ * Neutral of a 400 kV-class winding (line class above 363). 2026-11-04
+ * audit UM-1: matched-current orders bought 126 on 11 of 13 rows (Turkey
+ * BEST/ASTOR/GE/TEIAS, Portugal EFACEC); Brazil 440/500 kV bought 72.5.
+ */
+const NEUTRAL_400KV_UM = 126;
 
 export function deriveDuty(spec: TransformerSpec): DutyBasis {
   const cautionsZh: string[] = [];
@@ -197,21 +226,56 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     spec.mva > 0
       ? (spec.mva * 1000) / ((currentDivisor === "three" ? 3 : SQRT3) * currentKv)
       : NaN;
-  const maxA =
+  const derivedMaxA =
     spec.stepFraction != null && spec.stepFraction > 0
       ? maxThroughCurrent(ratedA, spec.minusSteps, spec.stepFraction)
       : ratedA;
+  let maxA = derivedMaxA;
+  let maxRule: DutyBasis["maxRule"] = "full_range";
+  const statedMaxA = spec.statedMaxA ?? 0;
+  if (statedMaxA > 0) {
+    // 2026-11-04 audit D1: the maker's Imax is the highest tap current that
+    // really occurs (IEC 60214-2, SelMan §1.11). Never below rated.
+    maxA = Number.isFinite(ratedA) ? Math.max(ratedA, statedMaxA) : statedMaxA;
+    maxRule = "stated";
+    if (Number.isFinite(ratedA) && statedMaxA < ratedA - 0.05) {
+      cautionsZh.push(`OS Imax ${fmtA(statedMaxA)} A 低于额定 ${fmtA(ratedA)} A：按额定电流选，请核对 OS。`);
+      cautionsEn.push(`OS Imax ${fmtA(statedMaxA)} A is below the rated ${fmtA(ratedA)} A: sized on the rated current. Check the OS.`);
+    } else if (Number.isFinite(derivedMaxA) && statedMaxA < 0.97 * derivedMaxA) {
+      const capPct = ((1 - ratedA / statedMaxA) * 100).toFixed(1);
+      cautionsZh.push(`OS Imax ${fmtA(statedMaxA)} A 低于全范围 ${fmtA(derivedMaxA)} A：厂家在 −${capPct}% 以下限电流（最大电流分接）。按 OS 值选。`);
+      cautionsEn.push(`OS Imax ${fmtA(statedMaxA)} A is below the full-range ${fmtA(derivedMaxA)} A: the maker caps the current below −${capPct}% (maximum-current tapping). Sized on the OS figure.`);
+    } else if (Number.isFinite(derivedMaxA) && statedMaxA > 1.25 * derivedMaxA) {
+      // E-M250148: OS Imax 577 A = 2.0× rated; delta rows give the line current.
+      cautionsZh.push(`OS Imax ${fmtA(statedMaxA)} A 远高于全范围 ${fmtA(derivedMaxA)} A：是线电流还是数据错误？按 OS 值选。`);
+      cautionsEn.push(`OS Imax ${fmtA(statedMaxA)} A is far above the full-range ${fmtA(derivedMaxA)} A: line current or a data error? Sized on the OS figure.`);
+    }
+  }
   const k = spec.safetyK > 0 ? spec.safetyK : 1;
-  const stepV =
+  const derivedStepV =
     spec.stepFraction != null && spec.stepFraction > 0
       ? stepBaseV * spec.stepFraction
       : null;
+  let stepV = derivedStepV;
+  const statedStepV = spec.statedStepV ?? 0;
+  if (statedStepV > 0) {
+    // 2026-11-04 audit D3: a floor, never an override. --ust 300 on a 498 V
+    // job used to size at 300 V while the basis still printed 498.
+    stepV = derivedStepV != null ? Math.max(derivedStepV, statedStepV) : statedStepV;
+    const ratio = derivedStepV != null && derivedStepV > 0 ? statedStepV / derivedStepV : 0;
+    // 60 OS rows write a star winding's Ust as √3 × the phase step.
+    if ((auto || spec.winding === "star") && ratio >= 1.7 && ratio <= 1.76) {
+      cautionsZh.push(`OS Ust ${Math.round(statedStepV)} V 像线电压值；实际级电压 ${Math.round(derivedStepV!)} V。按 OS 值选。`);
+      cautionsEn.push(`OS Ust ${Math.round(statedStepV)} V looks like a line value; the physical step is ${Math.round(derivedStepV!)} V. Sized on the OS figure.`);
+    }
+  }
 
   // Insulation to earth.
   let umSystemKv: number;
   let umKv: number;
   let umRule: UmRule;
   let umAssumed = false;
+  let neutralMarket: "IT" | "TR" | null = null;
   if (auto) {
     umSystemKv = spec.hvKv;
     umKv = catalogueUmFromRatedKv(spec.hvKv);
@@ -234,9 +298,21 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
       // 72.5 (Russian and Turkish makers). Keep 40.5 but do not state it as settled.
       if (lineClass === 40.5) umAssumed = true;
     } else {
-      umKv = NEUTRAL_DEFAULT_UM;
+      umKv = lineClass > 363 ? NEUTRAL_400KV_UM : NEUTRAL_DEFAULT_UM;
       umRule = "neutral_assumed";
       umAssumed = true;
+      const market = (spec.market ?? "").trim().toUpperCase();
+      // 2026-11-04 audit UM-2, sold Um on neutrals above the 72.5 class.
+      // Italy: 150 kV class 170 on 17 of 20, 220–230 kV 252 on 3 of 3; its
+      // 400 kV TERNA rows bought 72.5, so above 252 the voltage rule stays.
+      if (market === "IT" && lineClass <= 252) {
+        umKv = lineClass === 145 ? 170 : lineClass;
+        neutralMarket = "IT";
+      } else if (market === "TR" && lineClass >= 252 && lineClass <= 363) {
+        // Turkey 220 kV class and above: 126 ×11, 170 ×4, 72.5 ×0.
+        umKv = 126;
+        neutralMarket = "TR";
+      }
     }
   } else {
     umSystemKv = spec.tapKv;
@@ -262,6 +338,16 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     umRule = "explicit";
     umAssumed = false;
   }
+  if (auto && spec.tapPoint === "auto_junction" && umRule === "auto_hv" && umKv > 363) {
+    // 2026-11-04 audit UM-4: no evidence-backed junction default above 363,
+    // but the user needs the way forward, not a bare refusal.
+    const mvClass = catalogueUmFromRatedKv(spec.mvKv);
+    const open = [72.5, 126, 170, 252, 300, 363].filter((u) => u >= mvClass - 0.01);
+    return fail(
+      `自耦变高压 Um ${umKv} kV 超出目录（最高 363 kV）。请按 OS 填开关对地绝缘，可选 ${open.join("、")} kV。`,
+      `Autotransformer HV class Um ${umKv} kV is above the catalogue (top 363 kV). Give the switch's insulation to earth from the OS: ${open.join(", ")} kV.`,
+    );
+  }
   if (!Number.isFinite(umKv) || umKv > 363) {
     return fail(
       "电压超出目录：开关最高 Um 363 kV。",
@@ -270,12 +356,25 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   }
 
   if (umRule === "neutral_full" && umAssumed) {
-    cautionsZh.push("35 kV 级中性点先按 Um 40.5 kV 选；不少订单（俄罗斯、土耳其）按 72.5 kV 买，以 OS 为准。");
-    cautionsEn.push("35 kV-class neutral sized at Um 40.5 kV; many orders (Russia, Turkey) bought 72.5 kV. The OS decides.");
+    // 2026-11-04 audit UM-5: Turkey's 72.5 orders were CM/CM2/SHZV, whose
+    // lowest class is 72.5. Where a 40.5 type existed, Russia split 19/17.
+    cautionsZh.push("35 kV 级中性点先按 Um 40.5 kV 选；俄罗斯/独联体客户在 CV/SV 上约一半买 72.5，以 OS 为准。CM/CM2/SHZV 最低就是 72.5。");
+    cautionsEn.push("35 kV-class neutral sized at Um 40.5 kV; Russian/CIS buyers chose 72.5 on about half of CV/SV orders; the OS decides. CM/CM2/SHZV start at 72.5.");
   }
   if (umRule === "neutral_assumed") {
-    cautionsZh.push(`中性点绝缘未给，先按 Um ${NEUTRAL_DEFAULT_UM} kV 选，以 OS 为准。`);
-    cautionsEn.push(`Neutral insulation not given: sized at Um ${NEUTRAL_DEFAULT_UM} kV; the OS decides.`);
+    if (neutralMarket === "IT") {
+      cautionsZh.push(`意大利中性点先按线端等级 Um ${umKv} kV 选（TERNA/GETRA 250 MVA 订单买 72.5），以 OS 为准。`);
+      cautionsEn.push(`Italy: neutral sized at the line class, Um ${umKv} kV (TERNA/GETRA 250 MVA orders bought 72.5); the OS decides.`);
+    } else if (neutralMarket === "TR") {
+      cautionsZh.push(`土耳其 220 kV 级及以上中性点先按 Um ${umKv} kV 选（订单 126 ×11、170 ×4、72.5 ×0），以 OS 为准。`);
+      cautionsEn.push(`Turkey: 220 kV-class and above neutral sized at Um ${umKv} kV (orders 126 ×11, 170 ×4, 72.5 ×0); the OS decides.`);
+    } else if (umKv === NEUTRAL_400KV_UM) {
+      cautionsZh.push(`400 kV 级绕组中性点先按 Um ${umKv} kV 选（土耳其、葡萄牙订单买 126；巴西 440/500 kV 买 72.5），以 OS 为准。`);
+      cautionsEn.push(`Neutral of a 400 kV-class winding sized at Um ${umKv} kV (Turkey and Portugal orders bought 126; Brazil 440/500 kV bought 72.5); the OS decides.`);
+    } else {
+      cautionsZh.push(`中性点绝缘未给，先按 Um ${umKv} kV 选，以 OS 为准。`);
+      cautionsEn.push(`Neutral insulation not given: sized at Um ${umKv} kV; the OS decides.`);
+    }
   }
   // 2025–2026 OS: 67 tapped windings on 220 kV class and above, every one
   // CM / CM2 / SHZV, none compound. CV2's 200 kV across-tap limit does not
@@ -287,8 +386,14 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   }
   if (auto) {
     if (spec.tapPoint === "auto_mv_line" && umRule === "auto_hv") {
-      cautionsZh.push("HMR 230/121 kV 先例按厂家数据用 Um 170 kV。");
-      cautionsEn.push("HMR 230/121 kV orders used Um 170 kV on the maker's data.");
+      // 2026-11-04 audit UM-4: the HMR note printed on 400/220 at Um 252.
+      if (umKv === 170) {
+        cautionsZh.push("HMR 230/121 kV 先例按厂家数据用 Um 170 kV。");
+        cautionsEn.push("HMR 230/121 kV orders used Um 170 kV on the maker's data.");
+      } else {
+        cautionsZh.push(`中压出线先按中压等级 Um ${umKv} kV 选，以 OS 为准。`);
+        cautionsEn.push(`MV line lead sized at the MV class, Um ${umKv} kV; the OS decides.`);
+      }
     } else if (spec.tapPoint === "auto_junction" && umKv === 252 && umRule === "auto_hv") {
       cautionsZh.push("先例：125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W（2026-10-27）。");
       cautionsEn.push("Precedent: 125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W (27 Oct 2026).");
@@ -297,6 +402,12 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     cautionsEn.push("Autotransformer: combined types only (compound types stop at 200 kV across the tap winding).");
     cautionsZh.push("未核：跨调压绕组冲击（a 值）、束缚电阻。");
     cautionsEn.push("Not checked: impulse across the tap winding (a), tie-in resistor.");
+    // 2026-11-04 audit D5 (IEC 60214-2 §7.2.1.4.2): HMR MV-line OS Ust ran
+    // −3.6…+5.7% around nominal. A stated Ust is the floor; else say so.
+    if (!(statedStepV > 0)) {
+      cautionsZh.push("变磁通：各档 Ust 和电流不同，极限档 Ust 未校验。请向厂家要分接表。");
+      cautionsEn.push("Variable flux: Ust and current differ per tap; Ust at the extreme tap is not checked. Get the maker's per-tap table.");
+    }
   }
 
   return {
@@ -309,6 +420,7 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     umAssumed,
     ratedA,
     maxA,
+    maxRule,
     dutyA: maxA * k,
     currentKv,
     currentDivisor,
@@ -331,9 +443,12 @@ export function umChoices(d: DutyBasis, spec: TransformerSpec): number[] {
   if (!d.ok || d.umRule === "explicit") return [];
   const ladder = [40.5, 72.5, 126, 170, 252, 300, 363];
   if (d.umRule === "neutral_assumed" || (d.umRule === "neutral_full" && d.umAssumed)) {
-    // 35 kV-class neutrals: many orders bought 72.5, so offer it too.
+    // 35 kV-class neutrals: many orders bought 72.5, so offer it too. An
+    // assumed 126/170/252 (400 kV class, market) still offers 72.5: Brazil
+    // and TERNA bought it (2026-11-04 audit UM-1/UM-2).
     const top = Math.max(catalogueUmFromRatedKv(spec.tapKv), NEUTRAL_DEFAULT_UM);
-    return ladder.filter((u) => u >= d.umKv - 0.01 && u <= top + 0.01);
+    const low = Math.min(d.umKv, NEUTRAL_DEFAULT_UM);
+    return ladder.filter((u) => u >= low - 0.01 && u <= top + 0.01);
   }
   if (d.umRule === "auto_hv") {
     if (spec.tapPoint === "auto_mv_line") {
@@ -345,6 +460,10 @@ export function umChoices(d: DutyBasis, spec: TransformerSpec): number[] {
     return ladder.filter((u) => u >= floor - 0.01 && u <= d.umKv + 0.01);
   }
   return [];
+}
+
+function fmtA(a: number): string {
+  return (Math.round(a * 10) / 10).toFixed(1);
 }
 
 function fmtKv(kv: number): string {
