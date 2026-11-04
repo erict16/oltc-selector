@@ -260,7 +260,11 @@ export const FAMILY_MIN_RANK: Record<string, number> = {
   hwv: 15, // only wins on on-tank path
   cvt: 12,
   cz: 14,
-  wsg: 6,
+  // 2026-11-04: WDG/WLG are the drum OCTC sold (45 OS rows, none WSG), so
+  // they rank before WSG; WSG stays for the D quote QS2607203.
+  wsg: 7,
+  wdg: 5.9,
+  wlg: 5.9,
   hwdk: 80,
   wsl: 5, // OCTC-only list (never mixed into CV2→CM2→SHZV)
   wdl: 6,
@@ -683,7 +687,9 @@ export const SERIES: SeriesDef[] = [
       I: [1500, 2000, 2500],
       III: [1500, 2000, 2500],
     },
-    umKv: [35, 40.5, 69],
+    // 2026-11-04: Um classes of HWDK Un 35 / 69 kV. The type carries Um
+    // (sold HWDKI-1500/40.5-17), not Un.
+    umKv: [40.5, 72.5],
     usesSelectorSize: false,
     maxStepVoltageV: 6000,
     connections: ["Y", "D", "any"],
@@ -742,14 +748,64 @@ export const SERIES: SeriesDef[] = [
     usesSelectorSize: false,
     maxStepVoltageV: 10000,
     connections: ["Y", "D"],
-    maxPositionsLinear: 12,
-    maxPositionsWithChangeOver: 12,
+    // 2026-11-04: contacts are 4x5 / 6x5 only. 12 let a 6x5 stand for 7–12
+    // positions; no WSG string was ever sold.
+    maxPositionsLinear: 6,
+    maxPositionsWithChangeOver: 6,
     defaultMdu: "CMA7",
     notesEn:
       "Drum OCTC (WG sheet). dutyKind=octc only. Wiring roman follows octcSeries (form default IV). Auto D → WSGII (Anthony WSG II-800D/40.5-4x5A).",
     notesZh:
       "鼓式无载（WG 价目表）。仅 dutyKind=octc。接线方式跟 octcSeries（页面默认 IV）。未指定时 D → WSGII。",
-    rank: 6,
+    rank: 7,
+  },
+  // 2026-11-04: the drum OCTC Huaming actually sells. Single-phase, one per
+  // phase (3xWDGIV-800/40.5-5x5A). Existence is the sold-row list in
+  // lib/listIndex.ts; every sold row is Y or blank, so no D.
+  {
+    id: "wdg",
+    code: "WDG",
+    nameEn: "WDG single-phase drum off-circuit tap changer (OCTC)",
+    nameZh: "WDG 单相鼓式无载分接开关（OCTC）",
+    mounting: ["in_tank"],
+    medium: "oil",
+    structure: "drum",
+    vacuum: false,
+    dutyKind: "octc",
+    currents: { I: [300, 400, 800, 1250] },
+    umKv: [40.5, 72.5],
+    usesSelectorSize: false,
+    maxStepVoltageV: 10000,
+    connections: ["Y"],
+    maxPositionsLinear: 6,
+    maxPositionsWithChangeOver: 6,
+    defaultMdu: "CMA7",
+    notesEn:
+      "Single-phase drum OCTC, one unit per phase. IV 5x5 up to 5 positions; V 6x5 up to 6 when V is asked.",
+    notesZh: "单相鼓式无载，每相一台。IV 5x5 至 5 档；指定 V 时 6x5 至 6 档。",
+    rank: 5.9,
+  },
+  {
+    id: "wlg",
+    code: "WLG",
+    nameEn: "WLG single-phase drum off-circuit tap changer (OCTC)",
+    nameZh: "WLG 单相鼓式无载分接开关（OCTC）",
+    mounting: ["in_tank"],
+    medium: "oil",
+    structure: "drum",
+    vacuum: false,
+    dutyKind: "octc",
+    currents: { I: [800] },
+    umKv: [40.5],
+    usesSelectorSize: false,
+    maxStepVoltageV: 10000,
+    connections: ["Y"],
+    maxPositionsLinear: 5,
+    maxPositionsWithChangeOver: 5,
+    defaultMdu: "CMA7",
+    notesEn: "Single-phase drum OCTC, series-parallel VIII 4x2 only (one sale).",
+    notesZh: "单相鼓式无载，只有串并联 VIII 4x2（一单）。",
+    rank: 5.9,
   },
 ];
 

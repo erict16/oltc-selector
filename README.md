@@ -50,10 +50,10 @@ oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
 | `--conn Y\|D` | Switch star / delta on the `--iu` path (with `--mva`, use `--tap`) | Y |
 | `--reg W\|G\|0` | Reversing / coarse-fine / linear | W |
 | `--pm` | ± steps | 8 |
-| `--octc` | Off-circuit 无载 (WSL/WSG) | on-load |
+| `--octc` | Off-circuit 无载 (WSL cage; WDG/WLG/WSG drum) | on-load |
 | `--structure` | `auto` / `combined` 组合式 / `compound` 复合式 / `cage` 笼式 / `drum` 鼓式 | `auto` |
 | `--series` | OCTC wiring II IV V VI VII VIII | auto is linear IV for Y and D |
-| `--mount` | `in-tank` / `on-tank` / `dry` | in-tank |
+| `--mount` | `in-tank` / `on-tank` / `dry` / `reactor` (oil HWDK) | in-tank |
 | `--oil` / `--vacuum` | Switching medium | vacuum (on-load) |
 | `--contact` | OCTC contact e.g. `6x5` | |
 | `--json` | Machine output | |
@@ -69,7 +69,7 @@ oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
 4. **No combined III-D.** CM / CM2 / CMD / SHZV / SDZV / SHZVG three-phase strings are star-point Y. Cover delta with `3x…I-` when that I type exists. Compound **CV / CV2 / SV** and on-tank **HWV** III-D **do** exist. No SDZV II, I-1200/1500, or III-1300.
 5. **Compound has no selector grade letter.** No `CV2III-350Y/40.5B-…`. Combined in-tank may have B/C/D/DE after Um.
 6. **WSL / WDL existence is 2025-list row keys without prices** (`lib/listIndex.data.json`). Missing rows (no `WSLIV-2000D/126`, no `7x6E` @ 72.5) are not emitted.
-7. **WSG** is catalogue axes only (no 2025 list sheet in the index).
+7. **Drum OCTC is the sold WDG / WLG** (single-phase, `3x` per three-phase set, no Y/D in the string). Existence is the distinct sold OS rows (`DRUM_SOLD_ROWS` in `lib/listIndex.ts`). WDG IV is 5x5 up to 5 positions, V is 6x5 up to 6; no WDG on D. **WSG** is catalogue axes only (II/IV/V, 4x5/6x5, up to 6 positions) and stays for the D quote `WSGII-800D/40.5-4x5A`.
 8. **Typing Imax (`--iu`) does not apply a safety factor.** `--k` only applies on the transformer-capacity (`--mva`) path.
 9. **Um is set where the tap changer sits** (`lib/transformer.ts`). Line end: the winding system's class (132 kV → 145, 220 kV → 252). Neutral: the full class up to 72.5; above that 72.5 is assumed and flagged. Autotransformer: the HV system's class, combined types only (no CV / CV2 / SV).
 10. **Tapped windings on 220 kV class and above take combined types only.** 2025–2026 OS: 67 of 67 were CM / CM2 / SHZV.

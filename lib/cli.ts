@@ -315,7 +315,9 @@ export function parseCliArgs(argv: string[]): CliArgs {
       if (m === "in-tank" || m === "intank") out.mount = "in_tank";
       else if (m === "on-tank" || m === "ontank") out.mount = "on_tank";
       else if (m === "dry" || m === "dry-type") out.mount = "dry_type";
-      else throw new CliError(`--mount must be in-tank|on-tank|dry`);
+      // 2026-11-04: HWDK used to need the unlisted on-tank --oil route.
+      else if (m === "reactor") out.mount = "reactor";
+      else throw new CliError(`--mount must be in-tank|on-tank|dry|reactor`);
       i = n;
       continue;
     }
@@ -448,7 +450,7 @@ Flags:
   --octc             Off-circuit (无载). Default on-load.
   --structure        auto|combined|compound|cage|drum  (组合式/复合式/笼式/鼓式)
   --series           II|IV|V|VI|VII|VIII  OCTC wiring. Default auto is linear IV (Y and D).
-  --mount            in-tank|on-tank|dry. Default in-tank.
+  --mount            in-tank|on-tank|dry|reactor. Default in-tank. Reactor is oil (HWDK).
   --oil / --vacuum   Switching medium. Default vacuum (on-load).
   --contact          OCTC contact e.g. 6x5.
   --phases           I|II|III. Default III.
@@ -578,7 +580,7 @@ export function cliDuty(args: CliArgs): DutyBasis | null {
 
 export function cliToSelectInput(args: CliArgs): SelectInput {
   const dutyKind: DutyKind = args.octc ? "octc" : "oltc";
-  const oil = args.octc || args.oil || !args.vacuum;
+  const oil = args.octc || args.oil || !args.vacuum || args.mount === "reactor";
   const medium: SwitchingMedium = args.mount === "dry_type"
     ? "dry"
     : oil
@@ -670,7 +672,7 @@ const MOUNT_ZH: Record<Mounting, string> = {
   in_tank: "箱内",
   on_tank: "箱顶",
   dry_type: "干式",
-  // CLI 不会接收这两种，列上只为 Record 完整性
+  // CLI 不接收外置隔室，列上只为 Record 完整性
   external_compartment: "外置隔室",
   reactor: "电抗器",
 };
@@ -769,7 +771,9 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
   if (!args.given.has("ust") && args.mva == null) {
     items.push("Ust 未指定（级电压、级容量未校验）");
   }
-  items.push(`${args.oil || !args.vacuum ? "油浸" : "真空"}${mark("medium")}`);
+  items.push(
+    `${args.oil || !args.vacuum || args.mount === "reactor" ? "油浸" : "真空"}${mark("medium")}`,
+  );
   items.push(`${MOUNT_ZH[args.mount]}${mark("mount")}`);
   items.push(phases);
   return items;

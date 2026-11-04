@@ -13,6 +13,7 @@ import {
   commercialMatch,
   parseTypeString,
 } from "../lib/orderReplay";
+import { buildOsHonestOctcInput } from "../lib/osReplay";
 import type {
   Connection,
   Mounting,
@@ -84,6 +85,10 @@ type ReplayOut = {
   steps: number | "";
   connection: string;
   phases: string;
+  /** OCTC only: no sold contact / roman / Um fed in (lib/osReplay buildOsHonestOctcInput). */
+  honest_primary: string;
+  honest_verdict: Verdict | "";
+  honest_um: number | "";
 };
 
 const VAC_COMBINED = new Set(["CM2", "SHZV", "SDZV", "SHZVG"]);
@@ -92,7 +97,7 @@ const OIL_COMBINED = new Set(["CM", "CMD"]);
 const OIL_COMPOUND = new Set(["CV", "SV"]);
 const ON_TANK = new Set(["HWV"]);
 const DRY = new Set(["CVT", "CZ"]);
-const OCTC = new Set(["WSL", "WDL", "WSG"]);
+const OCTC = new Set(["WSL", "WDL", "WSG", "WDG", "WLG"]);
 
 function num(v: unknown): number | null {
   if (v == null || v === "") return null;
@@ -346,6 +351,12 @@ function identityMatch(actual: string, expected: string): boolean {
 }
 
 function classify(sold: string, models: string[]): Verdict {
+  // 2026-11-04: the OS writes WDGIV-800/40.5-5x5A for a 3-, 6- or 12-unit
+  // drum order, so the set count is not part of the drum answer.
+  if (/^(?:\d+x)?W[DL]G/i.test(sold)) {
+    sold = sold.replace(/^\d+x/i, "");
+    models = models.map((m) => m.replace(/^\d+x/i, ""));
+  }
   const primary = models[0] ?? "";
   if (identityMatch(primary, sold)) return "exact";
   if (looseMatch(primary, sold)) return "family-i-um";
@@ -421,6 +432,9 @@ for (const row of rows) {
     steps: num(row.plus_minus_steps) ?? ("" as const),
     connection: (row.connection || "").toString(),
     phases: (row.phases || "").toString(),
+    honest_primary: "",
+    honest_verdict: "" as const,
+    honest_um: "" as const,
   };
 
   if (!sold) {
@@ -444,8 +458,28 @@ for (const row of rows) {
   const models = result.results.map((r) => r.model);
   const verdict = classify(sold, models);
   counts[verdict]++;
+  // 2026-11-04: OCTC beside the as-is verdict, judged without the answer.
+  let honest: Pick<ReplayOut, "honest_primary" | "honest_verdict" | "honest_um"> = {
+    honest_primary: "",
+    honest_verdict: "",
+    honest_um: "",
+  };
+  if (built.dutyKind === "octc") {
+    const h = buildOsHonestOctcInput(row, parsed);
+    if ("skip" in h) {
+      honest = { ...honest, honest_verdict: "skip" };
+    } else {
+      const hm = selectOltc(h).results.map((r) => r.model);
+      honest = {
+        honest_primary: hm[0] ?? "",
+        honest_verdict: classify(sold, hm),
+        honest_um: h.umKv,
+      };
+    }
+  }
   out.push({
     ...base,
+    ...honest,
     engine_primary: models[0] ?? "",
     engine_next: models.slice(1, 4).join(" | "),
     verdict,
@@ -514,6 +548,27 @@ for (const fam of [...familyCounts.keys()].sort()) {
   const c = familyCounts.get(fam)!;
   if (!c.judged) continue;
   lines.push(`| ${fam} | ${c.judged} | ${c.exact} | ${c.miss} |`);
+}
+
+// 2026-11-04: as-is feeds the sold contact, roman and Um back in for OCTC.
+const octcRows = out.filter((r) => r.honest_verdict && r.verdict !== "skip");
+if (octcRows.length) {
+  lines.push(
+    "",
+    "## OCTC without the answer",
+    "",
+    "No sold contact, roman auto, structure from the folder (drum / cage), ±N from the OS (5 positions when blank), Um from rated kV through `deriveDuty`.",
+    "",
+    "| family | judged | exact as-is | exact honest | honest skipped |",
+    "|---|---:|---:|---:|---:|",
+  );
+  const fams = [...new Set(octcRows.map((r) => parseTypeString(r.sold_type)?.family ?? "?"))].sort();
+  for (const fam of fams) {
+    const rs = octcRows.filter((r) => (parseTypeString(r.sold_type)?.family ?? "?") === fam);
+    lines.push(
+      `| ${fam} | ${rs.length} | ${rs.filter((r) => r.verdict === "exact").length} | ${rs.filter((r) => r.honest_verdict === "exact").length} | ${rs.filter((r) => r.honest_verdict === "skip").length} |`,
+    );
+  }
 }
 
 const docs = path.join(process.cwd(), "docs", "replay");

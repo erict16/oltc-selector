@@ -22,6 +22,7 @@ import {
 } from "@/lib/catalog";
 import { parseTenderLine, type TenderLine } from "@/lib/nameplate";
 import { copyText } from "@/lib/clipboard";
+import { parseTypeString } from "@/lib/parseType";
 import { decimalDraft } from "@/lib/decimal";
 import { displayModel } from "@/lib/domesticModel";
 import {
@@ -89,6 +90,8 @@ function mediumFor(
   preferVacuum: boolean,
 ): SelectInput["medium"] {
   if (mounting === "dry_type") return "dry";
+  // 2026-11-04: reactor is HWDK, oil only; the arc toggle is hidden there.
+  if (mounting === "reactor") return "oil";
   return preferVacuum ? "oil_vacuum" : "oil";
 }
 
@@ -946,11 +949,14 @@ export function SelectorApp() {
   };
 
   const withOctcSeries = (duty: SelectInput): SelectInput => {
-    if ((duty.dutyKind ?? "oltc") !== "octc") return duty;
-    const series =
-      duty.octcSeries && duty.octcSeries !== "auto"
-        ? duty.octcSeries
-        : "IV";
+    if ((duty.dutyKind ?? "oltc") !== "octc") {
+      // 2026-11-04: reactor (HWDK) is oil. A kept preferVacuum filtered it out.
+      return duty.mounting === "reactor"
+        ? { ...duty, preferVacuum: false, medium: "oil" }
+        : duty;
+    }
+    // 2026-11-04: auto goes to the engine, like the CLI (WSG on D is II).
+    const series = duty.octcSeries ?? "auto";
     return {
       ...duty,
       octcSeries: series,
@@ -1416,11 +1422,7 @@ export function SelectorApp() {
               <Field label={t(lang, "octcSeries")}>
                 <select
                   className={controlClass}
-                  value={
-                    input.octcSeries && input.octcSeries !== "auto"
-                      ? input.octcSeries
-                      : "IV"
-                  }
+                  value={input.octcSeries ?? "auto"}
                   onChange={(e) =>
                     patch(
                       "octcSeries",
@@ -1428,6 +1430,16 @@ export function SelectorApp() {
                     )
                   }
                 >
+                  <option value="auto">
+                    {(() => {
+                      const roman = primary
+                        ? parseTypeString(primary.model)?.phases
+                        : undefined;
+                      return roman
+                        ? `${t(lang, "auto")} · ${roman}`
+                        : t(lang, "auto");
+                    })()}
+                  </option>
                   {OCTC_SERIES_ROMANS.map((r) => (
                     <option key={r} value={r}>
                       {t(lang, `octc${r}`)}
@@ -1673,14 +1685,18 @@ export function SelectorApp() {
                               if (k === "octc") {
                                 // Off-circuit is two-winding only (autoOctcNote).
                                 if (kind === "auto") pickKind("two_winding");
+                                // 2026-11-04: an unedited range starts at ±2 (6x5,
+                                // as the CLI), not the OLTC ±8 (18x17E).
+                                if (tapRange == null) {
+                                  setTapPlus(2);
+                                  setTapMinus(2);
+                                  commitTapRange(2, 2, stepPercentPct);
+                                }
                                 setInput((s) => ({
                                   ...s,
                                   dutyKind: "octc",
                                   preferStructure: "auto",
-                                  octcSeries:
-                                    s.octcSeries && s.octcSeries !== "auto"
-                                      ? s.octcSeries
-                                      : "IV",
+                                  octcSeries: s.octcSeries ?? "auto",
                                 }));
                                 return;
                               }
