@@ -1,6 +1,6 @@
 /**
  * Tender-line reader corpus (2026-11-04 round-2 audit, READER-01 … READER-21; round 3,
- * READER-R3-01 … READER-R3-15).
+ * READER-R3-01 … READER-R3-15; round 4, READER-R4-01 … READER-R4-11).
  * Every repro line of the audit with the engineer's reading, so a later edit to
  * lib/nameplate.ts cannot bring one back. Fields left out of a row are not checked.
  */
@@ -318,6 +318,123 @@ const ROWS: Row[] = [
   ["R3-15", "ТДТН-25000/110 115±9х1,78%/38,5±2х2,5%/11 кВ", { mva: 25, voltages: [115, 38.5, 11], kv: 115, plus: 9, step: 1.78 }],
   ["R3-15", "ТМН-6300/35 35±6х1,5%/11 кВ Y/Д-11", { mva: 6.3, kv: 35, vg: "Yd11", conn: "star", tap: "neutral", plus: 6, step: 1.5 }],
   ["R3-15", "Трансформатор 40 МВА 110/10 кВ, РПН ±9х1,78%", { mva: 40, voltages: [110, 10], kv: 110, plus: 9, step: 1.78 }],
+
+  // ---- Round-4 audit (2026-11-04), READER-R4-01 … READER-R4-11.
+  // R4-01: a kVA rating after a cooling word and a separator keeps its thousands; the top rating is sized.
+  ["R4-01", "25,000 kVA (ONAN) / 31,500 kVA (ONAF), 132±8x1.25%/33 kV, YNd11", { mva: 31.5, kv: 132, conn: "star", tap: "neutral", notes: ["largest_mva"], notAssumed: ["mva"] }],
+  ["R4-01", "Rating 10 000 kVA ONAN, 12 500 kVA ONAF, 33±8x1.25%/11 kV, Dyn11", { mva: 12.5, kv: 33, conn: "delta", tap: "line_end" }],
+  ["R4-01", "Power: 7,500 kVA (ONAN)/10,000 kVA (ONAF), 33±8x1.25%/11 kV, Dyn11", { mva: 10, kv: 33, conn: "delta" }],
+  ["R4-01", "60,000 kVA ONAN, 80,000 kVA ONAF, 33±8x1.25%/11 kV, Dyn11", { mva: 80, kv: 33 }],
+  ["R4-01", "32,000 kVA ONAN / 40,000 kVA ONAF, 132±8x1.25%/33 kV, YNd11", { mva: 40, kv: 132 }],
+  ["R4-01", "32,000 kVA (ONAN) / 40,000 kVA (ONAF); 132/33 kV; YNd11; OLTC ±8x1.25% on HV", { mva: 40, kv: 132 }],
+  ["R4-01", "32 000 kVA ONAN / 40 000 kVA ONAF, 132±8x1.25%/33 kV, YNd11", { mva: 40, kv: 132 }],
+  ["R4-01", "33/11 kV, 1 600 kVA", { mva: 1.6, voltages: [33, 11] }],
+  // A three-decimal kVA the joins kept ("…/11 31,500 kVA") is read whole and flagged.
+  ["R4-01", "33±8x1.25%/11 31,500 kVA Dyn11", { mva: 31.5, kv: 33, conn: "delta", assumed: ["mva"] }],
+  // R4-02: an insulation, Um or impulse label after its figure is not a winding voltage.
+  ["R4-02", "40 MVA, HV 132 kV ±8x1.25% (650 kV BIL), LV 33 kV, YNd11", { voltages: [132, 33], kv: 132, conn: "star", tap: "neutral" }],
+  ["R4-02", "40 MVA, HV 132 kV ±8x1.25% (145 kV Um), LV 33 kV, YNd11", { voltages: [132, 33], kv: 132, conn: "star", tap: "neutral" }],
+  ["R4-02", "25 MVA, HV 110 kV ±8x1.25% (550 kV BIL), LV 11 kV, YNd11", { voltages: [110, 11], kv: 110, conn: "star" }],
+  ["R4-02", "16 MVA, HV 66 kV ±8x1.25% (325 kV BIL), LV 11 kV, Dyn11", { voltages: [66, 11], kv: 66, conn: "delta", tap: "line_end" }],
+  ["R4-02", "40 MVA, HV 132 kV, 650 kV BIL; LV 33 kV; YNd11; OLTC ±8x1.25%", { voltages: [132, 33], kv: 132, conn: "star", tap: "neutral" }],
+  ["R4-02", "100 MVA, HV 132 kV, 650 kV BIL; LV 33 kV; YNd11; OLTC ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  ["R4-02", "40 MVA, HV 132 kV, 650 kV impulse; LV 33 kV; YNd11; OLTC ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  ["R4-02", "40 MVA, HV 132 kV, 275 kV power frequency; LV 33 kV; YNd11; OLTC ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  ["R4-02", "40 MVA, HV: 132 kV / 650 kV LI; LV: 33 kV / 170 kV LI; YNd11; OLTC ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  // Guards: "132 kV AC" is the system voltage; "Um 145 kV" names the 145, not the 132.
+  ["R4-02", "40 MVA, 132 kV AC, 33 kV, YNd11, ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  ["R4-02", "40 MVA, HV 132 kV Um 145 kV, LV 33 kV, YNd11, OLTC ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  // R4-03: pairs inside an insulation list are not the ratio.
+  ["R4-03", "40 MVA, YNd11; insulation levels HV 650/275 kV, LV 170/70 kV; voltage 132/33 kV; OLTC ±8x1.25%", { voltages: [132, 33], kv: 132, conn: "star" }],
+  ["R4-03", "63 MVA, YNyn0; insulation levels HV 650/275 kV, LV 125/50 kV; voltage 150/20 kV; OLTC ±10x1.25%", { voltages: [150, 20], kv: 150 }],
+  ["R4-03", "25 MVA, YNd11; insulation levels HV 550/230 kV, LV 75/28 kV; voltage 110/11 kV; OLTC ±8x1.25%", { voltages: [110, 11], kv: 110 }],
+  ["R4-03", "40 MVA, YNd11; LI/AC HV 650/275 kV, HV neutral 325/140 kV, LV 170/70 kV; voltage 132/33 kV; OLTC ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  ["R4-03", "40 MVA, YNd11, 650/275 kV LI/AC, 132/33 kV, OLTC ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  ["R4-03", "40 MVA, YNd11, HV neutral 170/70 kV, voltages 132/33 kV, OLTC ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  // Guards: an insulation word at the line start does not drop a later ratio written after a comma.
+  ["R4-03", "Lightning impulse 650/170 kV, 40 MVA, 132/33 kV, YNd11, ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  ["R4-03", "Impulse 650 kV, 132/33 kV, 40 MVA; YNd11; ±8x1.25%", { voltages: [132, 33], kv: 132 }],
+  // R4-04: an earthing or star-winding phrase does not cancel a stated line-end tap.
+  ["R4-04", "40 MVA 132/33 kV YNd11 ±8x1.25%, line-end tapping, HV neutral point solidly earthed", { kv: 132, conn: "star", tap: "line_end", notAssumed: ["tap_point"] }],
+  ["R4-04", "40 MVA 132/33 kV YNd11 ±8x1.25%, OLTC at the line end of the HV star winding", { tap: "line_end", notAssumed: ["tap_point"] }],
+  ["R4-04", "40 MVA 132/33 kV YNd11 ±8x1.25%, regulation at line end of star-connected HV winding", { tap: "line_end" }],
+  ["R4-04", "40 MVA 132/33 kV YNd11, tapping at line end (not in neutral), ±8x1.25%", { tap: "line_end" }],
+  ["R4-04", "40 MVA 132/33 kV YNd11 ±8x1.25%, HV star neutral solidly earthed, tappings at line end", { tap: "line_end" }],
+  ["R4-04", "40 MVA 132/33 kV YNd11 ±8x1.25%, tappings at HV line end; neutral point earthed via NER", { tap: "line_end" }],
+  ["R4-04", "40 MVA 132±8x1.25%/33 kV YNd11, line end OLTC, neutral point grounded through resistor", { tap: "line_end" }],
+  ["R4-04", "100 MVA 220/33 kV YNd11 ±8x1.25%, line-end regulation; HV neutral point: solidly earthed", { kv: 220, tap: "line_end" }],
+  ["R4-04", "40 MVA 132/33 kV ±8x1.25%, line end tapping, star neutral earthed", { tap: "line_end" }],
+  ["R4-04", "63 MVA 150/20 kV YNyn0, ±10x1.25%, OLTC in the line end of the star-connected HV winding", { kv: 150, tap: "line_end" }],
+  // Guards: a bare "star neutral" is still a stated neutral tap; an earthing phrase alone is not stated.
+  ["R4-04", "103 MVA, 138/33 kV, ±8x1.5%, reversing, star neutral", { kv: 138, conn: "star", tap: "neutral", notAssumed: ["tap_point"] }],
+  ["R4-04", "15 MVA 33±8x1.25%/11 kV, HV star, neutral point earthed", { kv: 33, tap: "neutral", assumed: ["tap_point"] }],
+  // R4-05: an LV/secondary/tertiary delta word is not the tapped winding's.
+  ["R4-05", "40 MVA 132/33 kV, HV winding star with OLTC at neutral, LV winding delta, ±8x1.25%", { kv: 132, conn: "star", tap: "neutral" }],
+  ["R4-05", "40 MVA 132/33 kV ±8x1.25%, HV: Y connection, LV: D connection", { kv: 132, conn: "star", tap: "neutral" }],
+  ["R4-05", "40 MVA 132/33 kV, regulation on HV side, secondary connected in delta, ±8x1.25%", { conn: "star", tap: "neutral" }],
+  ["R4-05", "40 MVA 132/33 kV, OLTC at HV neutral end, LV in delta, ±8x1.25%", { conn: "star", tap: "neutral", notAssumed: ["tap_point"] }],
+  ["R4-05", "100 MVA 132/33 kV ±8x1.25%, OLTC at HV neutral end, LV in delta", { conn: "star", tap: "neutral" }],
+  ["R4-05", "Tapping on HV star, tertiary in delta, 40 MVA 132/33/11 kV ±8x1.25%", { kv: 132, conn: "star", tap: "neutral" }],
+  ["R4-05", "40 MVA 132/33 kV, tappings on HV winding (star), LV winding: delta, ±8x1.25%", { conn: "star", tap: "neutral" }],
+  ["R4-05", "40 MVA 132/33 kV ±8x1.25%, OLTC on HV, LV connected delta", { conn: "star", tap: "neutral" }],
+  ["R4-05", "40 MVA 132/33 kV ±8x1.25%, OLTC on HV winding, LV winding delta-connected", { conn: "star", tap: "neutral" }],
+  // Guards: a delta tied to the tapped winding stays delta.
+  ["R4-05", "40 MVA 132/33 kV ±8x1.25%, OLTC on HV winding, delta connected", { kv: 132, conn: "delta", tap: "line_end" }],
+  ["R4-05", "15 MVA, 33/11 kV, ±8x1.25%, D connection", { kv: 33, conn: "delta", tap: "line_end" }],
+  // R4-06: single-phase in other languages, symbols and Russian single-phase models.
+  ["R4-06", "Máy biến áp 1 pha 167 MVA 500/220/35 kV, OLTC ±8x1.25% on 220 kV", { mva: 167, kv: 220, phases: "I" }],
+  ["R4-06", "MBA 1 pha 83.3 MVA 220±8x1.25%/110 kV", { mva: 83.3, kv: 220, phases: "I" }],
+  ["R4-06", "Transformateur monophasé 100 MVA 225±8x1.25%/63 kV", { mva: 100, kv: 225, phases: "I" }],
+  ["R4-06", "Transformador monofásico 100 MVA 230±8x1.25%/69 kV", { mva: 100, kv: 230, phases: "I" }],
+  ["R4-06", "Transformador monofasico 100 MVA 230±8x1.25%/69 kV", { phases: "I" }],
+  ["R4-06", "Einphasentransformator 100 MVA 220±8x1.25%/110 kV", { phases: "I" }],
+  ["R4-06", "Однофазный трансформатор 100 МВА 230±8х1,25%/121 кВ", { mva: 100, kv: 230, phases: "I" }],
+  ["R4-06", "ОРДТНЖ-25000/110 110±8х1,5%/27,5 кВ", { mva: 25, voltages: [110, 27.5], kv: 110, phases: "I", step: 1.5 }],
+  ["R4-06", "ОДЦТН-167000/500 500±8x1.25%/230 kV", { kind: "two_winding", mva: 167, kv: 500, phases: "I" }],
+  ["R4-06", "Trafo 1 fasa 100 MVA 275±8x1.25%/150 kV", { phases: "I" }],
+  ["R4-06", "100 MVA 1Ø 230±8x1.25%/69 kV", { phases: "I" }],
+  ["R4-06", "100 MVA 1φ 230±8x1.25%/69 kV", { phases: "I" }],
+  ["R4-06", "100 MVA, single-ph, 230±8x1.25%/69 kV", { phases: "I" }],
+  ["R4-06", "100 MVA per phase, 230±8x1.25%/69 kV", { mva: 100, phases: "I" }],
+  // Guards: "per phase" after a figure that is not a rating, auxiliary single-phase supplies.
+  ["R4-06", "40 MVA 132±8x1.25%/33 kV YNd11, impedance 10% per phase", { mva: 40, phases: null }],
+  ["R4-06", "40 MVA 132±8x1.25%/33 kV YNd11, auxiliary 1 pha 220 V", { phases: null }],
+  ["R4-06", "40 MVA 132±8x1.25%/33 kV YNd11, monophasée 230 V", { phases: null }],
+  ["R4-06", "40 MVA 132±8x1.25%/33 kV YNd11, aux 1Ø 230 V", { phases: null }],
+  // R4-07: an HV written with the range before its unit.
+  ["R4-07", "40 MVA, HV 132±10x1.25% kV, LV 33 kV, YNyn0", { voltages: [132, 33], kv: 132, conn: "star", tap: "neutral", plus: 10, notAssumed: ["tap_winding"] }],
+  ["R4-07", "Rated voltages: HV 220±8x1.25% kV, LV 33 kV; 100 MVA; YNd11", { voltages: [220, 33], kv: 220 }],
+  ["R4-07", "U HV = 132 ± 8 x 1.25 % kV, U LV = 11 kV, 40 MVA, YNd11", { voltages: [132, 11], kv: 132, plus: 8, step: 1.25 }],
+  ["R4-07", "HV 115 ±9x1.78 % kV, LV 23 kV, 31.5 MVA, YNd1", { voltages: [115, 23], kv: 115, plus: 9, step: 1.78 }],
+  ["R4-07", "10 MVA, HV 132±8x1.25% kV, LV 33 kV, YNd11, line-end tapping", { kv: 132, tap: "line_end" }],
+  ["R4-07", "16 MVA, HV 66±8x1.25% kV, LV 11 kV, Dyn11", { kv: 66, conn: "delta", tap: "line_end" }],
+  // R4-08: a rated/highest voltage pair is the rated figure, never a flipped HV/LV.
+  ["R4-08", "40 MVA, 132/145 kV (Un/Um), LV 33 kV, YNd11, OLTC ±8x1.25%", { kv: 132 }],
+  ["R4-08", "40 MVA, nominal voltage 132/145 kV, LV 33 kV, YNd11, OLTC ±8x1.25% on HV", { kv: 132 }],
+  ["R4-08", "40 MVA, HV 132/145 kV, LV 33/36 kV, YNd11, OLTC ±8x1.25%", { kv: 132 }],
+  ["R4-08", "40 MVA, 132/145 kV, 33/36 kV, YNd11, OLTC ±8x1.25%", { kv: 132 }],
+  ["R4-08", "Nominal / Highest system voltage: 132 / 145 kV; LV 33 kV; 40 MVA; YNd11; OLTC ±8x1.25%", { kv: 132 }],
+  ["R4-08", "40 MVA, nominal/highest voltage HV 132/145 kV, YNd11, OLTC ±8x1.25%, LV 33 kV", { kv: 132 }],
+  // R4-09: an LV in volts after a kV HV.
+  ["R4-09", "1000 kVA, 33 kV ±2x2.5%/433 V, Dyn11", { mva: 1, voltages: [33, 0.433], kv: 33, conn: "delta", tap: "line_end", notAssumed: ["winding"] }],
+  ["R4-09", "5 MVA, 11 kV ±8x1.25%/433 V, Dyn11", { voltages: [11, 0.433], kv: 11, conn: "delta", tap: "line_end" }],
+  ["R4-09", "2500 kVA, 33 kV ±2x2.5% / 415 V, Dyn11, OLTC", { voltages: [33, 0.415], kv: 33, conn: "delta" }],
+  ["R4-09", "2500 kVA, 11 kV±4x2.5%/415 V, Dyn11, OLTC", { voltages: [11, 0.415], kv: 11, conn: "delta" }],
+  // R4-11: the neutral LI in a label list, label first, French and Spanish.
+  ["R4-11", "100 MVA 220±8x1.25%/33 kV YNd11, BIL (HV/HVN/LV) 1050/550/170 kV", { kv: 220, tap: "neutral", nbil: 550 }],
+  ["R4-11", "100 MVA 220±8x1.25%/33 kV YNd11, LI HV/N: 1050/550 kV", { nbil: 550 }],
+  ["R4-11", "100 MVA 220±8x1.25%/33 kV YNd11, HV/N/LV LI 1050/550/170 kV", { nbil: 550 }],
+  ["R4-11", "100 MVA 220±8x1.25%/33 kV YNd11, LIWL HV 1050 kV, N 550 kV, LV 170 kV", { nbil: 550 }],
+  ["R4-11", "100 MVA 220±8x1.25%/33 kV YNd11, LI: HV 1050, HV-N 550, LV 170 kV", { nbil: 550 }],
+  ["R4-11", "100 MVA 220±8x1.25%/33 kV YNd11, neutral BIL/AC 550/230 kV", { nbil: 550 }],
+  ["R4-11", "100 MVA 220±8x1.25%/33 kV YNd11, neutral insulation 550 kV LI, 230 kV AC", { nbil: 550 }],
+  ["R4-11", "100 MVA 220±8x1.25%/33 kV YNd11, insulation HV line/neutral 1050/550 kV", { nbil: 550 }],
+  ["R4-11", "100 MVA 220±8x1.25%/33 kV YNd11, insulation (LI) line/neutral: 1050/550 kV", { nbil: 550 }],
+  ["R4-11", "100 MVA 225±8x1.25%/63 kV YNyn0, tenue au choc neutre 550 kV", { nbil: 550 }],
+  ["R4-11", "100 MVA 230±8x1.25%/69 kV YNd1, BIL neutro 550 kV", { nbil: 550 }],
+  // Guards: no neutral named, or an LV neutral.
+  ["R4-11", "100 MVA 220±8x1.25%/33 kV YNd11, BIL (HV/LV) 650/170 kV", { nbil: null }],
+  ["R4-11", "40 MVA 132±8x1.25%/33 kV YNyn0, LV/N LI 170/75 kV", { nbil: null }],
 ];
 
 function reading(line: string) {
@@ -448,10 +565,113 @@ describe("tender-line reader corpus: off-circuit duty and settings", () => {
     expect(parseCliArgs(["--line", "Rated power (MVA): 40; 33±8x1.25%/11 kV; Dyn11; earthing transformer 0.5 MVA"]).mva).toBe(40);
     expect(() => parseCliArgs(["--line", "MVA 40/50, kV 132/33, YNd11, OLTC ±8x1.25%"])).toThrow(/Could not read MVA and kV/);
   });
+  it("R4-10: --octc takes the range its side word names, before the duty word", () => {
+    const lines: [string, number][] = [
+      ["63 MVA 110/38.5/11 kV YNyn0d11; HV OLTC ±8x1.25%; MV OCTC ±2x2.5%", 38.5],
+      ["63 MVA 110/38.5/11 kV YNyn0d11; HV OLTC ±8x1.25%; MV DETC ±2x2.5%", 38.5],
+      ["63 MVA 110/38.5/11 kV YNyn0d11; OLTC ±8x1.25% on HV; MV off-circuit taps ±2x2.5%", 38.5],
+      ["40MVA 110/38.5/10.5kV YNyn0d11 高压有载±8×1.25%，中压无载±2×2.5%", 38.5],
+      ["40MVA 110±8×1.25%/10.5kV YNd11 低压侧无载调压±2×2.5%", 10.5],
+    ];
+    for (const [line, kv] of lines) {
+      const t = parseTenderLine(line)!;
+      expect([t.tapKv, t.plus, t.stepPct], line).toEqual([110, 8, 1.25]);
+      expect(t.otherRanges[0], line).toMatchObject({ kv, plus: 2, stepPct: 2.5, offCircuit: true, kvAssumed: false });
+      const off = tenderLineSettings(t, { octc: true });
+      expect(off.ok && [off.s.tapKv, off.s.plus, off.s.tapKvStated], line).toEqual([kv, 2, true]);
+    }
+    // The LV off-circuit winding of a YNd11 is the delta.
+    const lv = tenderLineSettings(parseTenderLine("40MVA 110±8×1.25%/10.5kV YNd11 低压侧无载调压±2×2.5%")!, { octc: true });
+    expect(lv.ok && [lv.s.winding, lv.s.tapPoint]).toEqual(["delta", "line_end"]);
+  });
+  it("R4-10: the CLI says when the off-circuit winding is a default", () => {
+    const said = (line: string) => assumptionsFromArgs(parseCliArgs(["--line", line, "--octc"])).join(" · ");
+    expect(said("40 MVA 132/33 kV YNd11, DETC ±2x2.5%, OLTC ±8x1.25%")).toContain("无载开关取 132 kV 绕组的范围（默认，");
+    expect(said("63 MVA 110/38.5/11 kV YNyn0d11; HV OLTC ±8x1.25%; MV OCTC ±2x2.5%")).toContain(
+      "无载开关取 38.5 kV 绕组的范围（招标行有两个调压范围）",
+    );
+  });
+  it("R4-11: a neutral LI read from a label list sets the earth Um", () => {
+    const r = tenderLineSettings(parseTenderLine("100 MVA 220±8x1.25%/33 kV YNd11, BIL (HV/HVN/LV) 1050/550/170 kV")!);
+    expect(r.ok && r.s.earthUm).toBe(126);
+    const said = assumptionsFromArgs(parseCliArgs(["--line", "100 MVA 220±8x1.25%/33 kV YNd11, LI HV/N: 1050/550 kV"])).join(" ");
+    expect(said).toContain("对地 Um 126（招标行中性点 BIL 550 kV）");
+  });
+  it("R4-06: a single-phase unit read from another language is sized on 3 × its MVA", () => {
+    const r = tenderLineSettings(parseTenderLine("Transformador monofásico 100 MVA 230±8x1.25%/69 kV")!);
+    expect(r.ok && [r.s.mva, r.s.phases]).toEqual([300, "I"]);
+  });
+  it("R4-01: the CLI echoes an MVA it had to guess, and sizes the top rating", () => {
+    const g = parseCliArgs(["--line", "33±8x1.25%/11 31,500 kVA Dyn11"]);
+    expect(g.mva).toBe(31.5);
+    expect(assumptionsFromArgs(g).join(" ")).toContain("容量 31.5 MVA（默认）");
+    const s = parseCliArgs(["--line", "25,000 kVA (ONAN) / 31,500 kVA (ONAF), 132±8x1.25%/33 kV, YNd11"]);
+    expect(s.mva).toBe(31.5);
+    expect(assumptionsFromArgs(s).join(" ")).not.toContain("容量");
+  });
   it("R19: tapKvStated follows the tapped-winding guess", () => {
     const guess = tenderLineSettings(parseTenderLine("63 MVA 132/33 kV YNd11 OLTC ±10x1.25%")!);
     expect(guess.ok && [guess.s.tapKv, guess.s.tapKvStated]).toEqual([132, false]);
     const stated = tenderLineSettings(parseTenderLine("25MVA 110±8x1.25%/10.5kV YNd11")!);
     expect(stated.ok && [stated.s.tapKv, stated.s.tapKvStated]).toEqual([110, true]);
+  });
+});
+
+/**
+ * 2026-11-04 R4 safety net. Free text will keep bringing forms the reader has not seen, so a
+ * guessed field must never show as stated. The signs below are read from the line itself,
+ * apart from the reader: a line with no sign for a field must have that field in assumed
+ * (page: Not stated, check), and the CLI must mark it （默认）.
+ */
+const SIGN = {
+  mva: /\d\s*(?:MVA|kVA|МВА|кВА)|(?:MVA|kVA)\W{0,6}\d|-\d{3,7}\/\d/i,
+  conn: /delta|star|wye|\bY\b|\bHV\s*[:=]\s*[DY]\b|connect|Δ|△|三角|角接|星形|neutral|中性点/i,
+  tap: /line[\s-]?end|neutral|star[\s-]?point|middle|mid[\s-]?winding|线端|中性点|delta|\bHV\s*[:=]\s*D\b|D[\s-]?connection|三角|角接/i,
+  side: /\b(?:HV|LV|MV|high[\s-]voltage|low[\s-]voltage|secondary|tapped\s+winding|tap(?:ping)?\s+side|regulated\s+winding)\b|[高中低]压|\bon\s+(?:the\s+)?\d+(?:\.\d+)?\s*kV|\d+(?:\.\d+)?\s*kV\s+(?:side|winding)|\d\s*(?:kV)?\s*\(?\s*(?:±|\+\s*\d)|±[^,;]{0,25}%\s*kV/i,
+};
+
+describe("tender-line reader corpus: a guessed field is flagged (R4 safety net)", () => {
+  for (const [id, line] of ROWS) {
+    const t = parseTenderLine(line);
+    if (!t || t.kind !== "two_winding") continue;
+    const letter = t.tapIndex != null ? t.windings[t.tapIndex] : undefined;
+    const guessed: AssumedField[] = [];
+    if (!SIGN.mva.test(line)) guessed.push("mva");
+    if (letter == null && !SIGN.conn.test(line)) guessed.push("winding");
+    if (letter !== "D" && !SIGN.tap.test(line)) guessed.push("tap_point");
+    if (t.voltagesKv.length >= 2 && !SIGN.side.test(line)) guessed.push("tap_winding");
+    if (!guessed.length) continue;
+    it(`${id}: ${line} flags ${guessed.join(", ")}`, () => {
+      for (const f of guessed) expect(t.assumed, `assumed ${f}`).toContain(f);
+      let said: string;
+      try {
+        said = assumptionsFromArgs(parseCliArgs(["--line", line])).join(" · ");
+      } catch {
+        return; // refused: nothing is sized on the guess
+      }
+      if (guessed.includes("winding")) expect(said).toMatch(/[星角]形绕组（默认）/);
+      if (guessed.includes("tap_point")) expect(said).toMatch(/开关在\S+（默认）/);
+      if (guessed.includes("tap_winding")) expect(said).toContain(`调压绕组 ${t.tapKv} kV（默认）`);
+      if (guessed.includes("mva")) expect(said).toMatch(/容量 \S+ MVA（默认）/);
+    });
+  }
+  it("a vector-group letter after the reader reordered the figures is not stated", () => {
+    // Written LV first: the reader sorts the figures, so which letter is the HV's is its guess.
+    const t = parseTenderLine("40 MVA, LV 33 kV, HV 132 kV ±8x1.25%, YNd11")!;
+    expect([t.tapKv, t.winding]).toEqual([132, "star"]);
+    expect(t.assumed).toContain("winding");
+    expect(t.assumed).toContain("tap_point");
+    const gsu = parseTenderLine("GSU 100 MVA 11/132±8x1.25% kV YNd1")!;
+    expect([gsu.voltagesKv, gsu.tapKv]).toEqual([[132, 11], 132]);
+    expect(gsu.assumed).toContain("winding");
+    // In the line's own order the letter is the line's word.
+    expect(parseTenderLine("40 MVA, HV 132 kV ±8x1.25%, LV 33 kV, YNd11")!.assumed).not.toContain("winding");
+  });
+  it("the net catches rows on its own (not an empty loop)", () => {
+    const flagged = ROWS.filter(([, l]) => {
+      const t = parseTenderLine(l);
+      return t?.kind === "two_winding" && (!SIGN.conn.test(l) || !SIGN.tap.test(l));
+    });
+    expect(flagged.length).toBeGreaterThan(20);
   });
 });

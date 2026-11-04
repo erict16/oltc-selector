@@ -541,7 +541,8 @@ function applyTenderLine(out: CliArgs, raw: string): void {
   };
   fill("kind", () => (out.kind = s.kind), s.kindStated);
   // Single-phase: 3 × the unit MVA gives the winding current on S/(√3U).
-  fill("mva", () => (out.mva = s.mva));
+  // 2026-11-04 R4: an MVA the reader had to guess (a "31.500 kVA" thousands misread) is echoed.
+  fill("mva", () => (out.mva = s.mva), !t.assumed.includes("mva"));
   if (s.phases) fill("phases", () => (out.phases = s.phases!));
   if (s.kind === "auto") {
     if (s.hvKv != null) fill("hv", () => (out.hv = s.hvKv!));
@@ -882,12 +883,14 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     auto_junction: "串联/公共绕组连接点",
     auto_mv_line: "中压出线",
   };
+  // 2026-11-04 R4: a delta the --line reader only guessed does not make its line end stated.
   const tapGiven =
-    args.given.has("tap") || args.given.has("conn") || args.winding === "delta";
+    args.given.has("tap") || args.given.has("conn") || (args.winding === "delta" && (args.line == null || args.given.has("winding")));
   if (args.mva != null) {
     const duty = cliDuty(args);
     const tap = cliTapPoint(args);
     items.push(`${args.kind === "auto" ? "自耦变" : "双绕组"}${mark("kind")}`);
+    if (!args.given.has("mva")) items.push(`容量 ${args.mva} MVA（默认）`);
     items.push(`开关在${tapZh[tap]}${tapGiven ? "" : "（默认）"}`);
     if (args.kind !== "auto") {
       const w = args.winding ?? (tap === "neutral" || args.conn === "Y" ? "star" : "delta");
@@ -930,7 +933,9 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
       items.push(`调压范围 ${plus === minus ? `±${plus}` : `+${plus}/−${minus}`}（默认，招标行未写全）`);
     }
     if (args.lineOctcKv != null) {
-      items.push(`无载开关取 ${args.lineOctcKv} kV 绕组的范围（招标行有两个调压范围）`);
+      // 2026-11-04 R4: a range with no winding of its own takes the OLTC's: say it is a default.
+      const guess = args.given.has("kv") ? "" : "默认，";
+      items.push(`无载开关取 ${args.lineOctcKv} kV 绕组的范围（${guess}招标行有两个调压范围）`);
     }
   }
   // 2026-11-04 r2 ENGINE-1: echo the across-tap stress; one value alone keeps the Um default grade.
