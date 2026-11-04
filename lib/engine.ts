@@ -18,6 +18,7 @@ import {
   resolveOctcListModel,
 } from "./typeExists";
 import { catalogueUmFromRatedKv } from "./deriveUm";
+import { parseTypeString } from "./parseType";
 import { resolveTapFields } from "./tapCode";
 import type {
   Connection,
@@ -48,15 +49,34 @@ export function octcContactCode(
   seriesId?: string,
 ): string {
   const hinted = normOctcContact(input.octcContact);
-  if (hinted) return hinted;
   let pos = input.positions;
   if (input.plusMinusSteps != null && input.plusMinusSteps > 0) {
     pos = 2 * input.plusMinusSteps + 1;
   }
+  // 2026-11-04: drum contacts must cover the positions; "" = no type. A 6x5
+  // used to stand for 7–12 positions and a 12x12 hint made WSGVII strings.
   if (seriesId === "wsg") {
+    if (pos != null && pos > 6) return "";
+    if (hinted) return hinted === "4x5" || hinted === "6x5" ? hinted : "";
     if (pos == null || pos <= 5) return "4x5";
     return "6x5";
   }
+  if (seriesId === "wdg" || seriesId === "wlg") {
+    const roman = input.octcSeries ?? "auto";
+    let drum = "";
+    if (seriesId === "wlg") {
+      if (roman === "VIII" && (pos == null || pos <= 5)) drum = "4x2";
+    } else if (roman === "V") {
+      if (pos == null || pos <= 6) drum = "6x5";
+    } else if (roman === "auto" || roman === "IV") {
+      if (pos == null || pos <= 5) drum = "5x5";
+    }
+    return hinted && hinted !== drum ? "" : drum;
+  }
+  if (hinted) return hinted;
+  // 2026-11-04: every sold WSLVIII is 5x2 (web has no contact field). More
+  // positions keep the derivation, so the list decides.
+  if (input.octcSeries === "VIII" && (pos == null || pos <= 5)) return "5x2";
   if (pos == null || pos <= 6) return "6x5";
   if (pos <= 7) return "7x6";
   if (pos <= 8) return "8x7";
@@ -72,6 +92,7 @@ export function octcSizeLetter(
   um: number,
   contact: string,
   requested?: SelectorSize | "auto",
+  acrossTapGiven = false,
 ): SelectorSize {
   if (requested && requested !== "auto") {
     if (requested === "DE") return "E";
@@ -80,8 +101,10 @@ export function octcSizeLetter(
   const c = contact.toLowerCase();
   if (c === "18x17" || c === "16x15") return "E";
   if (c === "12x11" || c === "10x9" || c === "12x12") return "D";
+  // 2026-11-04: sales write A up to 145 kV (126-6x5A ×5). The letter may be
+  // an inner-insulation size, so a stated across-tap stress keeps B above 72.5.
   if (
-    um <= 72.5 + 0.1 &&
+    um <= (acrossTapGiven ? 72.5 : 145) + 0.1 &&
     ["6x5", "4x5", "5x4", "5x2", "4x3", "3x2", "7x6"].includes(c)
   ) {
     return "A";
@@ -113,6 +136,12 @@ export function octcRoman(
 
 function isOctcSeries(s: SeriesDef): boolean {
   return s.dutyKind === "octc";
+}
+
+/** 2026-11-04: single-phase drum OCTC. A 3x set is the normal product, ranked as one unit. */
+const DRUM_SINGLE = new Set(["wdg", "wlg"]);
+function rankUnits(seriesId: string, unitCount: number): number {
+  return DRUM_SINGLE.has(seriesId) ? 1 : unitCount;
 }
 
 /** CV2 brochure: 2000 V @ 10 contacts, 1500 V @ 12 contacts (approx by pitch). */
@@ -191,7 +220,9 @@ function buildModelString(
       octcSeries,
       series.code,
     );
-    core = `${series.code}${roman}-${current}${yd}/${umToken}-${tapCode}`;
+    // 2026-11-04: single-phase drum strings carry no Y/D (WDGIV-800/40.5-5x5A).
+    const ydToken = DRUM_SINGLE.has(series.id) ? "" : yd;
+    core = `${series.code}${roman}-${current}${ydToken}/${umToken}-${tapCode}`;
   } else if (series.code === "HWDK") {
     core = `${series.code}${phases}-${current}/${umToken}`;
     if (tapCode && /^\d+$/.test(tapCode)) core += `-${tapCode}`;
@@ -366,10 +397,33 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
   // 126 twin only on the min-adequate families (CV2/CM2/…). SHZV extra Ums
   // crowd the ranked list and hide customer-locked oil CM rows (QS2607197).
   // OCTC never takes the twin: WSL @72.5 used to beat WSG @40.5 by 4 points.
+  // 2026-11-04: except a cage lock. The list has 5 WSL rows at 40.5; the 35 kV
+  // class cage sales are all WSL @72.5. The Um overshoot keeps 40.5 first.
   const ums =
     !isOctcSeries(s) && (FAMILY_MIN_RANK[s.id] ?? s.rank) < 40
       ? covering
-      : [um0];
+      : s.id === "wsl" && input.preferStructure === "cage"
+        ? covering
+        : [um0];
+
+  // 2026-11-04: single-phase drum, one unit per phase. A drum lock takes the
+  // next Um too, as the cage lock does: the sold rows are the list, and 19 of
+  // 36 drum sales on 35 kV windings are @72.5 (no WDGIV-1250/40.5 row).
+  if (DRUM_SINGLE.has(s.id)) {
+    const curI = nearestCurrent(input.throughCurrentA, s.currents.I ?? []);
+    if (curI != null && ratingCoversDuty(input.throughCurrentA, curI)) {
+      for (const um of input.preferStructure === "drum" ? covering : [um0]) {
+        out.push({
+          series: s,
+          phases: "I",
+          current: curI,
+          um,
+          unitCount: input.phases === "I" ? 1 : input.phases === "II" ? 2 : 3,
+        });
+      }
+    }
+    return out;
+  }
 
   // CZ dry: 2025 list + 2026 OS are 3×CZI only (no CZIII / CZI row).
   // Do not emit a single-unit CZIII — ranking would put it first.
@@ -781,6 +835,12 @@ export function selectOltc(input: SelectInput): SelectOutput {
       s.connections.includes("any")
     );
   });
+  // 2026-11-04: WSG is quoted as II only and never sold; VI–VIII gave invented strings.
+  candidates = candidates.filter(
+    (s) =>
+      s.id !== "wsg" ||
+      ["auto", "II", "IV", "V"].includes(input.octcSeries ?? "auto"),
+  );
 
   const wantStruct = input.preferStructure;
   const autoKind = input.transformerKind === "auto";
@@ -898,6 +958,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
         for (const current of currentsToEmit) {
         const octc = isOctcSeries(s);
         const contact = octc ? octcContactCode(input, s.id) : "";
+        if (octc && !contact) continue;
         const gradePick =
           !octc && s.usesSelectorSize
             ? resolveSelectorSize(
@@ -916,15 +977,30 @@ export function selectOltc(input: SelectInput): SelectOutput {
           acrossTapShort = true;
           continue;
         }
-        const selectorSize: SelectorSize = octc
-          ? octcSizeLetter(att.um, contact, input.selectorSize ?? "auto")
+        let selectorSize: SelectorSize = octc
+          ? octcSizeLetter(
+              att.um,
+              contact,
+              input.selectorSize ?? "auto",
+              (input.acrossTapBilKv ?? 0) > 0 || (input.acrossTapPfKv ?? 0) > 0,
+            )
           : (gradePick?.size ?? "");
         const tapCode = octc ? contact : tap.tapCode;
+        // 2026-11-04: HWDK writes 2N+1 (sold HWDKI-1500/40.5-17 for ±8, not
+        // Fig. 3-3's 19). CVT writes pitch 09 + positions (brochure 0909).
         const modelTap = octc
           ? `${contact}${selectorSize}`
-          : s.id === "cz" || s.id === "hwdk"
+          : s.id === "cz"
             ? String(tap.positions)
-            : tap.tapCode;
+            : s.id === "hwdk"
+              ? String(
+                  input.plusMinusSteps != null && input.plusMinusSteps > 0
+                    ? 2 * input.plusMinusSteps + 1
+                    : tap.positions,
+                )
+              : s.id === "cvt"
+                ? `09${String(tap.positions).padStart(2, "0")}`
+                : tap.tapCode;
 
         const umToken = formatUmToken(att.um, selectorSize, s.usesSelectorSize);
         const phases = phaseToken(att.phases);
@@ -976,6 +1052,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
           const listed = resolveOctcListModel(finalModel);
           if (!listed) continue;
           finalModel = listed;
+          // 2026-11-04: the list row's letter wins when the resolver fell back.
+          const listedSize = parseTypeString(listed)?.selectorSize;
+          if (listedSize) selectorSize = listedSize as SelectorSize;
         } else if (!commercialTypeExists(finalModel, s)) {
           continue;
         }
@@ -989,7 +1068,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           input,
           current,
           att.um,
-          att.unitCount,
+          rankUnits(s.id, att.unitCount),
           tap.pitch,
         );
 
@@ -1127,7 +1206,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           );
         }
 
-        if (att.unitCount > 1) {
+        if (rankUnits(s.id, att.unitCount) > 1) {
           if (att.deltaForced) {
             reasonsEn.push(
               `${att.unitCount}× single-phase — no brochure III type for this connection (e.g. CM2III-…D does not exist).`,
@@ -1187,7 +1266,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const stepCapacity = stepCapacityKva(s, current, tap.pitch, input.throughCurrentA);
 
         let confidence = 0.88;
-        if (att.unitCount > 1) confidence -= 0.08;
+        if (rankUnits(s.id, att.unitCount) > 1) confidence -= 0.08;
         confidence -= 0.05 * cautionsEn.length;
         if (warningsEn.length > 2) confidence -= 0.03;
         confidence = Math.max(0.45, Math.min(0.96, confidence));
@@ -1255,7 +1334,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
   final.sort((a, b) => {
     // Hard rule: any brochure-legal single-unit outranks any multi.
-    if (a.unitCount !== b.unitCount) return a.unitCount - b.unitCount;
+    const ua = rankUnits(a.seriesId, a.unitCount);
+    const ub = rankUnits(b.seriesId, b.unitCount);
+    if (ua !== ub) return ua - ub;
     if (b.adequacyScore !== a.adequacyScore)
       return b.adequacyScore - a.adequacyScore;
     return b.confidence - a.confidence;

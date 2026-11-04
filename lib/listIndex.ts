@@ -69,10 +69,34 @@ type OctcIndex = {
 
 let octcIndex: OctcIndex | null = null;
 
+/**
+ * 2026-11-04: WDG/WLG drum rows have no 2025-list sheet. The distinct sold
+ * strings of the 45 drum OS rows (docs/replay/2025+2026-os-sales.json) are
+ * the row oracle, one unit each (the OS writes 3x for the set).
+ */
+export const DRUM_SOLD_ROWS = [
+  "WDGIV-300/40.5-5x5A",
+  "WDGIV-400/40.5-5x5A",
+  "WDGIV-800/40.5-5x5A",
+  "WDGIV-300/72.5-5x5B",
+  "WDGIV-400/72.5-5x5A",
+  "WDGIV-800/72.5-5x5A",
+  "WDGIV-1250/72.5-5x5A",
+  "WDGV-800/40.5-6x5B",
+  "WDGV-800/72.5-6x5B",
+  "WLGVIII-800/40.5-4x2A",
+] as const;
+
+const DRUM_FAMILIES = new Set(["WDG", "WLG"]);
+
 function getOctcIndex(): OctcIndex {
   if (octcIndex) return octcIndex;
   const bySig = new Map<string, OctcRow[]>();
-  for (const row of file.octc) {
+  const drumRows: OctcRow[] = DRUM_SOLD_ROWS.flatMap((listKey) => {
+    const p = parseTypeString(listKey);
+    return p ? [{ ...p, listKey }] : [];
+  });
+  for (const row of [...file.octc, ...drumRows]) {
     const k = octcSig(row);
     const bucket = bySig.get(k);
     if (bucket) bucket.push(row);
@@ -113,14 +137,20 @@ function lookupOctcRows(
   );
 }
 
-/** True when this commercial string is a 2025-list WSL/WDL row (no RMB). */
+/** True when this commercial string is a 2025-list WSL/WDL row or a sold WDG/WLG row (no RMB). */
 export function listRowExists(model: string): boolean {
   const compact = compactTypeKey(model);
   if (!compact) return false;
   if (KEYS.has(compact)) return true;
   const parsed = parseTypeString(compact);
   if (!parsed) return false;
-  if (parsed.family !== "WSL" && parsed.family !== "WDL") return false;
+  if (
+    parsed.family !== "WSL" &&
+    parsed.family !== "WDL" &&
+    !DRUM_FAMILIES.has(parsed.family)
+  ) {
+    return false;
+  }
   return Boolean(lookupOctcRows(parsed)?.length);
 }
 
@@ -132,7 +162,19 @@ export function resolveOctcListKey(model: string): string | null {
   const parsed = parseTypeString(model);
   if (!parsed) return null;
   if (parsed.family === "WSG") return model;
-  if (parsed.family !== "WSL" && parsed.family !== "WDL") return null;
+  // 2026-11-04: a 3x drum set resolves its one-unit row and keeps the count.
+  const unit = model.match(/^(\d+)x/i);
+  if (unit) {
+    const one = resolveOctcListKey(model.slice(unit[0].length));
+    return one ? `${unit[1]}x${one}` : null;
+  }
+  if (
+    parsed.family !== "WSL" &&
+    parsed.family !== "WDL" &&
+    !DRUM_FAMILIES.has(parsed.family)
+  ) {
+    return null;
+  }
 
   const candidates = new Set<string>();
   const add = (m: string) => {
