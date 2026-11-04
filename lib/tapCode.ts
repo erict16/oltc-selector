@@ -415,7 +415,8 @@ export function resolveTapFields(input: {
       mid,
       tapCode: buildTapCode({ pitch, positions, mid, regulation: reg }),
       changeOver: "0",
-      standard: true,
+      // 2–4 linear positions are not a brochure diagram (r2 ORDERS-9).
+      standard: positions >= 5,
     };
   }
 

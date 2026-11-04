@@ -465,7 +465,14 @@ export function readLine(f: FormState, text: string): FormState {
     return { ...applyLine(f, tl, s), mvKv: 0, lineRead: null, lineFailed: "lineFailAutoMv" };
   }
   if (!tl || !r || !r.ok) return { ...f, lineRead: null, lineFailed: "lineFail" };
-  return applyLine(f, tl, r.s);
+  const out = applyLine(f, tl, r.s);
+  if (isOctc(f)) {
+    // Read in 无载: the on-load 调压方式 to restore is the line's own, not
+    // the one saved before this line (a +2/−6 line is linear on-load).
+    const on = tenderLineSettings(tl, { octc: false });
+    if (on.ok && on.s.regulation) return { ...out, oltcRegulation: on.s.regulation };
+  }
+  return out;
 }
 
 /**
@@ -496,7 +503,7 @@ function remapLine(f: FormState, tl: TenderLine, octc: boolean): FormState | nul
     };
   }
   if (f.earthUm === (a.earthUm ?? 0)) next.earthUm = b.earthUm ?? 0;
-  const step = f.stepPercentPct === lineStep(a) ? lineStep(b) : f.stepPercentPct;
+  const step = windingMoved || f.stepPercentPct === lineStep(a) ? lineStep(b) : f.stepPercentPct;
   if (step !== f.stepPercentPct) {
     next.stepPercentPct = step;
     next.stepPctCustom = false;
@@ -505,7 +512,8 @@ function remapLine(f: FormState, tl: TenderLine, octc: boolean): FormState | nul
   const base = octc ? f.input.regulation : f.oltcRegulation;
   const rangeMoved = a.plus !== b.plus || a.minus !== b.minus || a.regulation !== b.regulation;
   const untouched = sameRange(f, lineRangeFields(a, !octc, base, lineStep(a)));
-  if (rangeMoved || untouched) return withRange(next, lineRangeFields(b, octc, base, step));
+  const bb = !octc && !b.regulationStated && f.oltcRegulation ? { ...b, regulation: f.oltcRegulation } : b;
+  if (rangeMoved || untouched || bb !== b) return withRange(next, lineRangeFields(bb, octc, base, step));
   return withRange(next, octc ? rangeToOctc(next) : rangeToOltc(next, f.oltcRegulation));
 }
 
@@ -514,7 +522,8 @@ export function toOctc(f: FormState): FormState {
   if (isOctc(f)) return f;
   // A read autotransformer line stays one and is refused, as when read in
   // 无载 and as the CLI; forcing two-winding sized it on the old kV.
-  let next = f.kind === "auto" && f.lineRead?.kind !== "auto" ? pickKind(f, "two_winding") : f;
+  const autoLine = f.lineRead?.kind === "auto" || f.lineFailed === "lineFailAutoMv";
+  let next = f.kind === "auto" && !autoLine ? pickKind(f, "two_winding") : f;
   next = { ...next, oltcRegulation: next.input.regulation };
   next = (next.lineRead ? remapLine(next, next.lineRead, true) : null) ?? withRange(next, rangeToOctc(next));
   return {

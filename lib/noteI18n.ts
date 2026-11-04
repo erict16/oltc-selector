@@ -75,12 +75,12 @@ const RULES: Rule[] = [
     }),
   ],
   [
-    /^Selector grade raised one step to (\S+): 330 kV-class winding \(sold practice\)\.$/,
+    /^Selector grade raised one step to (\S+): winding of 330 kV class or above \(sold practice\)\.$/,
     (m) => ({
-      vi: `Cấp bộ chọn nấc nâng một bậc lên ${m[1]}: cuộn dây cấp 330 kV (theo đơn hàng đã bán).`,
-      es: `Grado del selector elevado un escalón a ${m[1]}: devanado de clase 330 kV (práctica de ventas).`,
-      tr: `Seçici sınıfı bir kademe ${m[1]}'ye yükseltildi: 330 kV sınıfı sargı (satış uygulaması).`,
-      id: `Kelas selektor dinaikkan satu tingkat ke ${m[1]}: belitan kelas 330 kV (praktik penjualan).`,
+      vi: `Cấp bộ chọn nấc nâng một bậc lên ${m[1]}: cuộn dây cấp 330 kV trở lên (theo đơn hàng đã bán).`,
+      es: `Grado del selector elevado un escalón a ${m[1]}: devanado de clase 330 kV o superior (práctica de ventas).`,
+      tr: `Seçici sınıfı bir kademe ${m[1]}'ye yükseltildi: 330 kV sınıfı ve üzeri sargı (satış uygulaması).`,
+      id: `Kelas selektor dinaikkan satu tingkat ke ${m[1]}: belitan kelas 330 kV ke atas (praktik penjualan).`,
     }),
   ],
   [

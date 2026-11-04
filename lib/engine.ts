@@ -36,7 +36,8 @@ import type {
 } from "./types";
 
 function normOctcContact(raw: string | undefined): string {
-  const t = (raw ?? "").replace(/\s+/g, "").toLowerCase();
+  // "6×5" and "6*5" are written in OS sheets too.
+  const t = (raw ?? "").replace(/\s+/g, "").replace(/[×*✕]/g, "x").toLowerCase();
   const m = t.match(/^(\d+)x(\d+)$/);
   if (!m) return "";
   return `${Number(m[1])}x${Number(m[2])}`;
@@ -1010,8 +1011,8 @@ export function selectOltc(input: SelectInput): SelectOutput {
           input.transformerKind !== "auto" &&
           (input.tapWindingKv ?? 0) >= 330 &&
           att.um <= 126 + 0.1 &&
-          !((input.acrossTapBilKv ?? 0) > 0) &&
-          !((input.acrossTapPfKv ?? 0) > 0)
+          // One stated value alone does not settle the grade (ENGINE-1).
+          !((input.acrossTapBilKv ?? 0) > 0 && (input.acrossTapPfKv ?? 0) > 0)
             ? SIZE_ORDER[SIZE_ORDER.indexOf(umDefault) + 1]
             : undefined;
         const gradePick =
@@ -1200,9 +1201,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
           SIZE_ORDER.indexOf(selectorSize) > SIZE_ORDER.indexOf(umDefault)
         ) {
           cautionsEn.push(
-            `Selector grade raised one step to ${selectorSize}: 330 kV-class winding (sold practice).`,
+            `Selector grade raised one step to ${selectorSize}: winding of 330 kV class or above (sold practice).`,
           );
-          cautionsZh.push(`选择器等级上调一级为 ${selectorSize}：330 kV 级绕组（按已售订单）。`);
+          cautionsZh.push(`选择器等级上调一级为 ${selectorSize}：330 kV 级及以上绕组（按已售订单）。`);
         }
         // 2026-11-04 r2 ENGINE-1: a grade below the Um default rests on the stated values.
         if (gradePick?.loweredFrom) {

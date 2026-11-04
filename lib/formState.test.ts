@@ -266,3 +266,20 @@ describe("formDiff", () => {
     expect(formDiff(f, f)).toEqual({});
   });
 });
+
+describe("checker round 2: mode switches after a read", () => {
+  it("takes the new winding's step when 无载 moves the tap (618 → 631 A)", () => {
+    const line = "40MVA 115±8x1.25%/38.5±2x2.5%/11kV YNyn0d11";
+    const f = read(INITIAL_FORM, line);
+    const edited: FormState = { ...f, stepPercentPct: 1.5, stepPctCustom: true };
+    expect(web(toOctc(edited)).I).toBeCloseTo(cli(["--line", line, "--octc"]).I!, 0);
+  });
+
+  it("keeps an autotransformer line refused for no MV refused on 无载", () => {
+    const f = read(INITIAL_FORM, "OSFPSZ-250000/220 220±8x1.25%");
+    expect(f.kind).toBe("auto");
+    const off = toOctc(f);
+    expect(off.kind).toBe("auto");
+    expect(web(off).model).toBeNull();
+  });
+});

@@ -466,3 +466,31 @@ describe("oltc CLI checker regressions", () => {
     );
   });
 });
+
+describe("oltc CLI checker regressions, round 2", () => {
+  const top = (argv: string[]) => capture([...argv, "--no-update-check"]).out.split(/\r?\n/)[0];
+
+  it("reads 'Grid / Network transformer N MVA' as the rating", () => {
+    expect(top(["--line", "Grid transformer 90 MVA, tertiary 30 MVA, 132±8x1.25%/33 kV YNyn0d11"])).toBe(
+      "CV2III-600Y/72.5-10193W",
+    );
+    expect(top(["--line", "Network transformer 63 MVA, 132±8x1.25%/11 kV, Dyn1"])).toMatch(/^CV2III-350D\/145/);
+  });
+
+  it("does not read an ambient temperature range as the tap range", () => {
+    expect(top(["--line", "40 MVA 132/33 kV YNd11, ambient -25/+40 deg C, OLTC ±8x1.25%"])).toBe(
+      "CV2III-350Y/72.5-10193W",
+    );
+    expect(top(["--line", "ambient -25 to +40, 40 MVA 132±8x1.25%/33 kV YNd11"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+
+  it("keeps the 330 kV-class grade raise when only one across-tap value is given", () => {
+    expect(
+      top(["--mva", "125", "--kv", "400", "--tap", "neutral", "--reg", "G", "--pm", "12", "--ust", "2886.8", "--across-li", "100"]),
+    ).toBe("SHZVIII-400Y/126D-14273G");
+  });
+
+  it("reads a contact written with ×", () => {
+    expect(top(["--octc", "--iu", "800", "--um", "72.5", "--contact", "6×5", "--pos", "5"])).toBe("WSLIV-800Y/72.5-6x5A");
+  });
+});

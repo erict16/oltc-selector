@@ -169,8 +169,9 @@ export function normalizeTenderText(raw: string): string {
       .replace(
         new RegExp(String.raw`(?<![\w.%/])-\s*(${NUM})\s*(%?)\s*(?:\/|\bto\b|\.\.\.|…)\s*\+\s*(${NUM})\s*(%?)`, "gi"),
         // "-5/+10%": a % on either side makes both percent.
-        (_m: string, minus: string, p1: string, plus: string, p2: string) => {
+        (m: string, minus: string, p1: string, plus: string, p2: string, offset: number, s: string) => {
           const pct = p1 || p2;
+          if (!pct && !/^\s*x\s*\d/i.test(s.slice(offset + m.length, offset + m.length + 12))) return m;
           return `+${plus}${pct}/-${minus}${pct}`;
         },
       )
@@ -243,7 +244,10 @@ function parseMva(text: string): MvaRead {
   // "system voltage 150 kV 60 MVA": a figure between keeps the rating.
   const notRating = (i: number) => {
     const head = text.slice(Math.max(0, i - 30), i);
-    return /(?:fault|short[\s-]?circuit|\bs?s\.?c\b)[^;,]{0,30}$/i.test(head) || /(?:network|system|grid)[^;,\d]{0,30}$/i.test(head);
+    if (/(?:fault|short[\s-]?circuit|\bs?s\.?c\b)[^;,]{0,30}$/i.test(head)) return true;
+    // "Grid transformer 90 MVA" names the transformer, not the network.
+    const g = head.match(/(?:network|system|grid)([^;,\d]{0,30})$/i);
+    return g != null && !/transformer|trafo|\bunit\b/i.test(g[1]);
   };
   const read = (unitRe: string, scale: number) =>
     [...text.matchAll(new RegExp(String.raw`(${NUM})(?:\s*/\s*${NUM})*\s*${unitRe}`, "gi"))]

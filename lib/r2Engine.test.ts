@@ -125,7 +125,7 @@ describe("ORDERS-1 330 kV-class neutral one grade above the Um default", () => {
   it("400 kV neutral, 180.4 A, 2886.8 V, ±12 G gives SHZVIII-400Y/126D-14273G", () => {
     const r = cli(["--mva", "125", "--kv", "400", "--tap", "neutral", "--reg", "G", "--pm", "12", "--ust", "2886.8"]);
     expect(r.out.split(/\r?\n/)[0]).toBe("SHZVIII-400Y/126D-14273G");
-    expect(r.out).toContain("330 kV 级绕组");
+    expect(r.out).toContain("330 kV 级及以上绕组");
   });
 
   it("the same duty on a 115 kV winding keeps the Um default", () => {
@@ -134,7 +134,7 @@ describe("ORDERS-1 330 kV-class neutral one grade above the Um default", () => {
     expect(low.model).toBe("CM2III-500Y/72.5B-10193W");
     const high = selectOltc({ ...duty, tapWindingKv: 400 }).results[0]!;
     expect(high.selectorSize).toBe("C");
-    expect(high.cautionsEn).toContain("Selector grade raised one step to C: 330 kV-class winding (sold practice).");
+    expect(high.cautionsEn).toContain("Selector grade raised one step to C: winding of 330 kV class or above (sold practice).");
     // An autotransformer, a typed grade or a stated stress is left alone.
     expect(selectOltc({ ...duty, tapWindingKv: 400, transformerKind: "auto" }).results[0]!.selectorSize).toBe("B");
     expect(selectOltc({ ...duty, tapWindingKv: 400, selectorSize: "B" }).results[0]!.selectorSize).toBe("B");
