@@ -346,6 +346,15 @@ function BasisTable({
   const a = dutyA != null && dutyA > 0 ? dutyA : null;
   const u = ok && stepV > 0 ? stepV : null;
   const kva = a != null && u != null ? (a * u) / 1000 : null;
+  // Insulation need: the system's IEC Um where the rule is the system
+  // (line end, a full-class neutral): 33 kV line end needs 36 kV, not the
+  // 40.5 class the engine then picks. An assumed or stated class is the
+  // need itself.
+  const umNeed = !ok
+    ? null
+    : (duty.umRule === "line" || duty.umRule === "neutral_full") && Number.isFinite(duty.actualUmKv)
+      ? duty.actualUmKv
+      : duty.umKv;
   // Every row is one line: name, duty, rating, use. An assumed Um is said
   // once, in the caution above the table, not again inside it.
   const rows: Array<{
@@ -385,10 +394,10 @@ function BasisTable({
     {
       key: "um",
       label: t(lang, "kpiUm"),
-      need: ok ? round1(duty.umKv) : "—",
+      need: umNeed != null ? round1(umNeed) : "—",
       unit: "kV",
       rating: model ? round1(model.umKv) : null,
-      use: ok ? useOf(duty.umKv, model?.umKv) : null,
+      use: useOf(umNeed, model?.umKv),
       plain: true,
     },
   ];
