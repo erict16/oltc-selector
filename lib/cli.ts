@@ -8,9 +8,14 @@ import {
   type TransformerKind,
   type WindingConnection,
 } from "./transformer";
-import { lookupByPositions, plusMinusFromPositions } from "./tapCode";
-import { umForEarthInsulation } from "./catalog";
-import { parseTenderLine, type TenderLine } from "./nameplate";
+import { lookupByPositions, parseTapRange, plusMinusFromPositions } from "./tapCode";
+import {
+  defaultRegulationForRange,
+  geometryForRange,
+  parseTenderLine,
+  tenderLineSettings,
+  type TenderLine,
+} from "./nameplate";
 import { commercialTypeExists } from "./typeExists";
 import type {
   Connection,
@@ -65,6 +70,12 @@ export type CliArgs = {
   /** Stated across-tap-winding LI / AC (kV). */
   acrossLi?: number;
   acrossAc?: number;
+  /** Mid positions of the W/G diagram (--mid, or the +a/−b geometry). */
+  mid?: 1 | 3;
+  /** +a/−b as stated by --range or --line, for the 假定 echo. */
+  range?: { plus: number; minus: number };
+  /** --octc on a line with two ranges: kV of the winding the OCTC took. */
+  lineOctcKv?: number;
   /** flags the user actually passed; everything else is a silent default */
   given: Set<string>;
 };
@@ -114,8 +125,16 @@ export function parseCliArgs(argv: string[]): CliArgs {
   };
 
   let lineRaw: string | null = null;
+  let rangeRaw: string | null = null;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]!;
+    // --line=… keeps a pasted line that starts with a dash.
+    const eq = a.match(/^--(line|nameplate)=(.*)$/s);
+    if (eq) {
+      out.given.add("line");
+      lineRaw = eq[2]!;
+      continue;
+    }
     if (a === "-h" || a === "--help") {
       out.help = true;
       continue;
@@ -373,8 +392,34 @@ export function parseCliArgs(argv: string[]): CliArgs {
     }
     if (a === "--line" || a === "--nameplate") {
       out.given.add("line");
-      const [v, n] = take(i, a);
+      // 2026-11-04: a pasted line may start with "-" ("- 25 MVA …"); it is
+      // still the value, not a flag.
+      const v = argv[i + 1];
+      if (v == null) throw new CliError(`Missing value for ${a}`);
       lineRaw = v;
+      i += 1;
+      continue;
+    }
+    if (a === "--minus") {
+      out.given.add("minus");
+      const [v, n] = take(i, a);
+      const m = num(v, a);
+      if (!(m >= 0) || !Number.isInteger(m)) throw new CliError(`--minus must be a whole number of steps`);
+      out.minus = m;
+      i = n;
+      continue;
+    }
+    if (a === "--range") {
+      const [v, n] = take(i, a);
+      rangeRaw = v;
+      i = n;
+      continue;
+    }
+    if (a === "--mid") {
+      out.given.add("mid");
+      const [v, n] = take(i, a);
+      if (v !== "1" && v !== "3") throw new CliError(`--mid must be 1 or 3`);
+      out.mid = v === "1" ? 1 : 3;
       i = n;
       continue;
     }
@@ -390,6 +435,15 @@ export function parseCliArgs(argv: string[]): CliArgs {
     }
     throw new CliError(`Unknown flag: ${a}`);
   }
+  if (rangeRaw != null) {
+    const r = parseTapRange(rangeRaw);
+    if (!r) throw new CliError(`--range must look like +4/-12 or +4/-12x1.25%`);
+    if (r.stepPercent != null && !out.given.has("stepPct")) {
+      out.stepPct = Math.round(r.stepPercent * 1e6) / 1e4;
+      out.given.add("stepPct");
+    }
+    applyRange(out, r.plus, r.minus);
+  }
   if (lineRaw != null) applyTenderLine(out, lineRaw);
   // 2026-11-04 audit D1: `--mva … --imax 334` used to fail "not both".
   // Beside --mva, --imax is the OS Imax; alone it stays the --iu alias.
@@ -403,50 +457,84 @@ export function parseCliArgs(argv: string[]): CliArgs {
 }
 
 /**
+ * A stated +a/−b (--range or --line). 2026-11-04: an uneven W/G range takes
+ * the Fig. 3-3 row Huaming sold (+4/−12 → ±8, 10193W; +7/−10 → 10181W) and
+ * keeps the real minus steps for the lowest-tap current, also when --pm or
+ * --pos picks the diagram. It used to become linear S + 1 positions (17
+ * positions put CV2 out of reach) or, beside --pm, size with −8 instead of −12.
+ */
+function applyRange(out: CliArgs, plus: number, minus: number): void {
+  if (out.given.has("range")) return;
+  out.given.add("range");
+  out.range = { plus, minus };
+  if (plus !== minus && !out.given.has("minus")) out.minus = minus;
+  // Uneven S ≤ 9 was sold linear (+2/−6 → 10090) unless --reg says otherwise.
+  if (!out.given.has("reg") && defaultRegulationForRange(plus, minus)) out.reg = "linear";
+  if (out.given.has("pm") || out.given.has("positions")) return;
+  if (plus === minus) {
+    out.pm = plus;
+    out.given.add("pm");
+    return;
+  }
+  if (out.octc || out.reg === "linear") {
+    out.positions = plus + minus + 1;
+    out.given.add("positions");
+    return;
+  }
+  const g = geometryForRange(plus, minus, out.reg);
+  if (g.plusMinusSteps != null) {
+    out.pm = g.plusMinusSteps;
+    out.given.add("pm");
+  } else {
+    out.positions = g.positions;
+    out.given.add("positions");
+  }
+  if (out.mid == null && (g.mid === 1 || g.mid === 3)) out.mid = g.mid;
+}
+
+/**
  * Fill the capacity path from a tender line. A flag typed beside --line
  * wins. A field the line only implies (tap point, star winding) is not
- * marked given, so the 假定 block still asks for it.
+ * marked given, so the 假定 block still asks for it. The mapping is
+ * tenderLineSettings, shared with the page.
  */
 function applyTenderLine(out: CliArgs, raw: string): void {
   const t = parseTenderLine(raw);
-  if (!t || t.mva == null || !t.voltagesKv.length) {
+  const r = t ? tenderLineSettings(t, { octc: out.octc }) : null;
+  if (r && !r.ok && r.reason === "auto_needs_mv") {
+    throw new CliError(
+      `--line reads an autotransformer without both HV and MV kV: ${raw}. Give --hv and --mv.`,
+    );
+  }
+  if (!t || !r || !r.ok) {
     throw new CliError(
       `Could not read MVA and kV from --line: ${raw}. Give --mva/--kv (or --hv/--mv) instead.`,
     );
   }
+  const s = r.s;
   out.line = t;
   const fill = (key: string, apply: () => void, sure = true) => {
     if (out.given.has(key)) return;
     apply();
     if (sure) out.given.add(key);
   };
-  fill("kind", () => (out.kind = t.kind), !t.assumed.includes("kind"));
-  fill("mva", () => (out.mva = t.mva!));
-  if (t.kind === "auto") {
-    if (t.hvKv != null) fill("hv", () => (out.hv = t.hvKv!));
-    if (t.mvKv != null) fill("mv", () => (out.mv = t.mvKv!));
-  } else if (t.tapKv != null) {
-    fill("kv", () => (out.kv = t.tapKv!));
-    fill("winding", () => (out.winding = t.winding), !t.assumed.includes("winding"));
+  fill("kind", () => (out.kind = s.kind), s.kindStated);
+  // Single-phase: 3 × the unit MVA gives the winding current on S/(√3U).
+  fill("mva", () => (out.mva = s.mva));
+  if (s.phases) fill("phases", () => (out.phases = s.phases!));
+  if (s.kind === "auto") {
+    if (s.hvKv != null) fill("hv", () => (out.hv = s.hvKv!));
+    if (s.mvKv != null) fill("mv", () => (out.mv = s.mvKv!));
+  } else if (s.tapKv != null) {
+    fill("kv", () => (out.kv = s.tapKv!));
+    fill("winding", () => (out.winding = s.winding), s.windingStated);
   }
-  fill("tap", () => (out.tap = t.tapPoint), !t.assumed.includes("tap_point"));
-  if (t.plus != null && t.minus != null && !out.given.has("pm") && !out.given.has("positions")) {
-    if (t.plus === t.minus) {
-      out.pm = t.plus;
-      out.given.add("pm");
-    } else {
-      // +4-12 is not a Fig. 3-3 ±N diagram: linear positions, real minus steps.
-      out.positions = t.plus + t.minus + 1;
-      out.minus = t.minus;
-      out.given.add("positions");
-      fill("reg", () => (out.reg = "linear"), false);
-    }
-  }
-  if (t.stepPct != null) fill("stepPct", () => (out.stepPct = t.stepPct!));
-  if (t.neutralBilKv != null && t.tapPoint === "neutral") {
-    const um = umForEarthInsulation(0, t.neutralBilKv);
-    if (um != null) fill("earthUm", () => (out.earthUm = um));
-  }
+  fill("tap", () => (out.tap = s.tapPoint), s.tapPointStated);
+  if (s.octcWinding && s.tapKv != null) out.lineOctcKv = s.tapKv;
+  if (s.regulation) fill("reg", () => (out.reg = s.regulation!), s.regulationStated);
+  if (s.plus != null && s.minus != null) applyRange(out, s.plus, s.minus);
+  if (s.stepPct != null) fill("stepPct", () => (out.stepPct = s.stepPct!));
+  if (s.earthUm != null) fill("earthUm", () => (out.earthUm = s.earthUm!));
 }
 
 
@@ -469,7 +557,9 @@ Flags:
   --line "text"      Tender line: MVA, kV ratio with ±N×x%, vector group.
                      Reads autotransformer from YNa0 / auto / OSFPSZ, delta
                      line end from D, star neutral from Y (asked in 假定).
-                     Flags given beside it win.
+                     Percent ranges (+0/-30%), single-phase, coarse/fine and
+                     linear words are read. Flags given beside it win.
+                     --line="…" keeps a line that starts with a dash.
   --mva MVA --kv kV  Capacity path: Imax from rated I, minus steps, --step-pct, --k
   --kind two|auto    Transformer kind (--auto = --kind auto). Default two-winding.
   --tap P            Where the OLTC sits: neutral|line (two-winding),
@@ -495,6 +585,10 @@ Flags:
                      On the capacity path, legacy: Y = star neutral, D = delta line end.
   --reg W|G|0        Reversing / coarse-fine / linear. Default W.
   --pm N             ± steps. Default 8.
+  --range +a/-b[xs%] Uneven range, e.g. +4/-12x1.25%. W/G takes the Fig. 3-3
+                     row Huaming sells (+4/-12 → 10193W); the lowest tap uses −b.
+  --minus N          Minus steps for the lowest-tap current (beside --pm/--pos).
+  --mid 1|3          Mid positions of the W/G diagram, when Fig. 3-3 has the pair.
   --pos, --positions Linear / OCTC positions.
   --octc             Off-circuit (无载). Default on-load.
   --structure        auto|combined|compound|cage|drum  (组合式/复合式/笼式/鼓式)
@@ -549,24 +643,29 @@ const pmGiven = (args: CliArgs): boolean =>
  * else the ±8 default. Null: a position count with no Fig. 3-3 row.
  */
 function cliPlusMinus(args: CliArgs): { n: number; mid: 1 | 3 } | null {
-  if (pmGiven(args)) return { n: args.pm!, mid: 3 };
+  // --mid picks the diagram when it is a Fig. 3-3 pair; resolveTapFields
+  // falls back to the brochure mid otherwise.
+  if (pmGiven(args)) return { n: args.pm!, mid: args.mid ?? 3 };
   if (args.positions != null) {
+    const own = args.mid ? lookupByPositions(args.positions, args.mid, args.reg) : null;
+    if (own) return { n: own.plusMinus, mid: args.mid! };
     const n = plusMinusFromPositions(args.positions, args.reg);
     if (n == null) return null;
     const mid = lookupByPositions(args.positions, 3, args.reg) ? 3 : 1;
     return { n, mid };
   }
   if (args.given.has("pm")) return null; // --pm 0: no ±N, engine default
-  return args.pm != null && args.pm > 0 ? { n: args.pm, mid: 3 } : null;
+  return args.pm != null && args.pm > 0 ? { n: args.pm, mid: args.mid ?? 3 } : null;
 }
 
 /**
- * Minus steps for the lowest-tap current. Linear / OCTC follow the web
- * range (positions = plus + minus + 1, symmetric): --pos P → (P−1)/2,
- * rounded up; --pm N → N. With no range at all the ±8 default stays.
+ * Minus steps for the lowest-tap current. A stated minus (--minus, --range,
+ * an uneven --line) wins. Linear / OCTC follow the web range (positions =
+ * plus + minus + 1, symmetric): --pos P → (P−1)/2, rounded up; --pm N → N.
+ * With no range at all the ±8 default stays.
  */
 function cliMinusSteps(args: CliArgs): number {
-  if (args.minus != null && args.minus > 0) return args.minus;
+  if (args.minus != null && args.minus >= 0) return args.minus;
   const fromPositions =
     args.positions != null && args.positions > 1
       ? Math.ceil((args.positions - 1) / 2)
@@ -722,6 +821,8 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
       input.midPositions = pm.mid;
     }
     if (args.positions != null) input.positions = args.positions;
+    // 10181W / 10183W: no Fig. 3-3 row, so the mid comes from the range or --mid.
+    if (args.mid && input.plusMinusSteps == null) input.midPositions = args.mid;
   }
 
   return input;
@@ -784,6 +885,14 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     items.push(
       args.given.has("stepPct") ? `step=${args.stepPct}%` : "step=1.25%（默认）",
     );
+    // 2026-11-04: +4/−12 sold on 17 positions was sized as ±8; say the
+    // lowest tap assumes a symmetric range when no minus was stated.
+    if (!args.given.has("minus") && !args.given.has("range")) {
+      items.push(`最低档按 −${cliMinusSteps(args)} 算（−档未指定，+a/−b 用 --range 或 --minus）`);
+    }
+    if (args.lineOctcKv != null) {
+      items.push(`无载开关取 ${args.lineOctcKv} kV 绕组的范围（招标行有两个调压范围）`);
+    }
   }
   const phases = `相数=${args.phases}${mark("phases")}`;
   if (args.octc) {
@@ -814,13 +923,23 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
           : "0 线性调"
     }${mark("reg")}`,
   );
+  const uneven =
+    args.range && args.range.plus !== args.range.minus
+      ? `+${args.range.plus}/−${args.range.minus}`
+      : null;
   if (args.reg === "linear") {
     items.push(
       args.positions != null
-        ? `${args.positions} 档${mark("positions")}`
+        ? `${args.positions} 档${uneven ? `（${uneven}）` : mark("positions")}`
         : pmGiven(args)
           ? `${cliLinearPositions(args)} 档（由 ±${args.pm} 推）`
           : "档数未指定",
+    );
+  } else if (uneven) {
+    // +4/−12 → ±8 (10193W); +7/−10 → 18 档 (10181W).
+    const pm = cliPlusMinus(args);
+    items.push(
+      `${uneven} 档 → ${args.positions != null && !pmGiven(args) ? `${args.positions} 档` : `±${pm?.n ?? args.pm}`}（最低档按 −${cliMinusSteps(args)}）`,
     );
   } else if (args.positions != null && !args.given.has("pm")) {
     const pm = cliPlusMinus(args);

@@ -39,7 +39,7 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 | E-M260102 | 委内瑞拉 VALECILLOS | 20 MVA 115 kV Y | neutral/star | 100.41 / 100.4 | 126 / 72.5* | `CMIII-500Y/126B-10091W` | `CMIII-500Y/72.5B-10091W` |
 | E-M260122 | 俄罗斯HMR-JSHC | 250 MVA 220 kV Y | neutral/star | 1193 / 656.1 | 126 / 72.5* | `3xCMI-1500Y/126B-14131W` | `CMI-1500/72.5B-14131W` |
 | E-M260143 | 印尼GE UNINDO | 75 MVA 220 kV Y | neutral/star | 197 / 196.8 | 126 / 72.5* | `CMIII-500Y/126DE-14273W` | `CMIII-500Y/72.5DE-14273W` |
-| E-M260167-168 | 土耳其HMT-ATS Trafo | 30 MVA 33 kV Y | neutral/star | 524.9 / 524.9 | 72.5 / 40.5* | `CMIII-600Y/72.5B-10173G` | `CMIII-600Y/72.5B-16151G` |
+| E-M260167-168 | 土耳其HMT-ATS Trafo | 30 MVA 33 kV Y | neutral/star | 524.9 / 524.9 | 72.5 / 40.5* | `CMIII-600Y/72.5B-10173G` | `CMIII-600Y/72.5B-10173G` |
 | E-CMD260006 | 俄罗斯HMR-UETM | 40 MVA 36.75 kV Y | neutral/star | 628.4 / 628.4 | 72.5 / 40.5* | `CMDIII-1000Y/72.5B-10193W` | `CMDIII-1000Y/72.5B-10193W` |
 | E-CMD260007 | 俄罗斯HMR-Remenergo | 16 MVA 10.5 kV Y | neutral/star | 880 / 879.8 | 72.5 / 12 | `CMDIII-1000Y/72.5B-10193W` | `CMDIII-1000Y/72.5B-10193W` |
 | E-V260003 | 泰国 Tirathai | 2 MVA 6.93 kV D | line_end/star | 133.3 / 166.6 | 40.5 / 12 | `CVIII-350D/40.5-12233G` | `CVIII-350D/40.5-12233G` |
