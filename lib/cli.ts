@@ -76,6 +76,8 @@ export type CliArgs = {
   range?: { plus: number; minus: number };
   /** --octc on a line with two ranges: kV of the winding the OCTC took. */
   lineOctcKv?: number;
+  /** --line range the reader guessed (from a position count or a bare %), for the 假定 echo. */
+  lineRangeAssumed?: boolean;
   /** flags the user actually passed; everything else is a silent default */
   given: Set<string>;
 };
@@ -548,7 +550,12 @@ function applyTenderLine(out: CliArgs, raw: string): void {
   fill("tap", () => (out.tap = s.tapPoint), s.tapPointStated);
   if (s.octcWinding && s.tapKv != null) out.lineOctcKv = s.tapKv;
   if (s.regulation) fill("reg", () => (out.reg = s.regulation!), s.regulationStated);
-  if (s.plus != null && s.minus != null) applyRange(out, s.plus, s.minus);
+  if (s.plus != null && s.minus != null) {
+    // 2026-11-04 R3: a range guessed from "21 positions" or "16 steps" was echoed as stated.
+    const typed = out.given.has("range") || out.given.has("pm") || out.given.has("positions");
+    applyRange(out, s.plus, s.minus);
+    if (!typed && !s.octcWinding && t.assumed.includes("range")) out.lineRangeAssumed = true;
+  }
   if (s.stepPct != null) fill("stepPct", () => (out.stepPct = s.stepPct!));
   // 2026-11-04 R2: Um from a neutral BIL in the line is read, not typed: not given.
   if (s.earthUm != null) fill("earthUm", () => (out.earthUm = s.earthUm!), false);
@@ -911,6 +918,10 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     // lowest tap assumes a symmetric range when no minus was stated.
     if (!args.given.has("minus") && !args.given.has("range")) {
       items.push(`最低档按 −${cliMinusSteps(args)} 算（−档未指定，+a/−b 用 --range 或 --minus）`);
+    }
+    if (args.lineRangeAssumed && args.range) {
+      const { plus, minus } = args.range;
+      items.push(`调压范围 ${plus === minus ? `±${plus}` : `+${plus}/−${minus}`}（默认，招标行未写全）`);
     }
     if (args.lineOctcKv != null) {
       items.push(`无载开关取 ${args.lineOctcKv} kV 绕组的范围（招标行有两个调压范围）`);
