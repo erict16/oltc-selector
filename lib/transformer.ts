@@ -401,6 +401,11 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     } else if (spec.tapPoint === "auto_junction" && umKv === 252 && umRule === "auto_hv") {
       cautionsZh.push("先例：125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W（2026-10-27）。");
       cautionsEn.push("Precedent: 125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W (27 Oct 2026).");
+    } else if (spec.tapPoint === "auto_junction" && umRule === "auto_hv") {
+      // 2026-11-04 (r3 UI-11): 132/33 at Um 145 is assumed, but the card
+      // said so nowhere since the basis-row flag went (8b4bc64).
+      cautionsZh.push(`自耦变串联-公共连接点先按高压等级 Um ${umKv} kV 选，以 OS 为准。`);
+      cautionsEn.push(`Autotransformer junction sized at the HV class, Um ${umKv} kV; the OS decides.`);
     }
     cautionsZh.push("自耦变只用组合式（复合式跨调压绕组冲击上限 200 kV）。");
     cautionsEn.push("Autotransformer: combined types only (compound types stop at 200 kV across the tap winding).");

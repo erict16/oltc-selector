@@ -157,6 +157,15 @@ const RULES: Rule[] = [
     }),
   ],
   [
+    /^Autotransformer junction sized at the HV class, Um ([\d.]+) kV; the OS decides\.$/,
+    (m) => ({
+      vi: `Điểm nối nối tiếp – chung của máy biến áp tự ngẫu chọn theo cấp cao áp, Um ${m[1]} kV; theo OS.`,
+      es: `Unión serie – común del autotransformador dimensionada a la clase de AT, Um ${m[1]} kV; decide la OS.`,
+      tr: `Ototransformatörün seri – ortak bağlantısı YG sınıfına göre seçildi, Um ${m[1]} kV; OS belirler.`,
+      id: `Sambungan seri – bersama autotransformator dipilih pada kelas TT, Um ${m[1]} kV; OS yang menentukan.`,
+    }),
+  ],
+  [
     /^Variable flux: Ust and current differ per tap; Ust at the extreme tap is not checked\. Get the maker's per-tap table\.$/,
     () => ({
       vi: "Từ thông thay đổi: Ust và dòng điện khác nhau ở mỗi nấc; chưa kiểm tra Ust ở nấc cực biên. Hãy lấy bảng từng nấc của nhà sản xuất.",
