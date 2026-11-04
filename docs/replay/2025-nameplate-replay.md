@@ -24,7 +24,7 @@ Rows judged: 457. Skipped: 453 (no Y/D 29, no MVA / kV / I on the OS 159, no / u
 | E-M250033 | 意大利ISOTECH-OCREV | 30 MVA 132 kV Y | neutral/star | 131.2 / 131.2 | 126 / 72.5* | `CMIII-500Y/126C-12233W` | `CVIII-350Y/72.5-12233W` |
 | E-M250124-125 | 俄罗斯HMR-SIEMENS | 25 MVA 13.8 kV D | line_end/delta | 604 / 603.9 | 72.5 / 17.5 | `3xCMI-800D/72.5B-10193W` | `CVI-700/40.5-10193W` |
 | E-M250150-153 | 土耳其HMT-Green Transfo | 63 MVA 118 kV Y | neutral/star | 308.25 / 308.2 | 126 / 72.5* | `CMIII-500Y/126C-10191G` | `CVIII-350Y/72.5-10191G` |
-| E-M250154 | REVOS 售后 | 63 MVA 110 kV Y | neutral/star | 331 / 330.7 | 126 / 72.5* | `3xCMIII-500Y/126C-10193G` | `SVIII-500Y/72.5-10193G` |
+| E-M250154 | REVOS 售后 | 63 MVA 110 kV Y | neutral/star | 331 / 330.7 | 126 / 72.5* | `3xCMIII-500Y/126C-10193G` | `CMIII-500Y/72.5C-10193G` |
 | E-M250162-163 | 俄罗斯HMR-SIEMENS | 63 MVA 158 kV Y | neutral/star | 230.2 / 230.2 | 126 / 72.5* | `CMIII-500Y/126B-10193W` | `CVIII-350Y/72.5-10193W` |
 | E-M250195-198 | 土耳其HMT-Green Transfo | 63 MVA 118 kV Y | neutral/star | 308.25 / 308.2 | 126 / 72.5* | `CMIII-500Y/126C-10191G` | `CVIII-350Y/72.5-10191G` |
 | E-V250026-029 | 俄罗斯HMR-UETM | 16 MVA 38.5 kV Y | neutral/star | 251 / 239.9 | 72.5 / 40.5* | `CVIII-350Y/72.5-10193W` | `CVIII-350Y/40.5-10193W` |

@@ -281,3 +281,139 @@ describe("oltc CLI tap range and tap point", () => {
     expect(b.err).toContain("363");
   });
 });
+
+// 2026-11-04 tender-line and tap-range audit (track A).
+describe("oltc CLI uneven ranges and tender lines", () => {
+  const first = (argv: string[]) => capture(argv).out.trim().split(/\r?\n/)[0];
+  const json = (argv: string[]) => JSON.parse(capture(["--json", ...argv]).out);
+
+  it("an uneven line takes the Fig. 3-3 row Huaming sold (UNEVEN-1, WC-05)", () => {
+    // B01/B02 +7/−10 → 10181W; W02 +12/−8 had no type (21 linear positions).
+    expect(first(["--line", "65MVA 150+7-10x1.5%/20kV YNd11"])).toBe("CV2III-350Y/72.5-10181W");
+    expect(first(["--line", "165MVA 150+7-10x1.5%/20kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-10181W");
+    expect(first(["--line", "370MVA 275+12-8x1.25%/33kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-12233W");
+    expect(first(["--line", "120MVA 110+6-10x1.25%/33kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-10193W");
+    expect(first(["--line", "130MVA 132+6-4x2.5%/33kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-12111W");
+    expect(first(["--line", "110MVA 64+10-15x1.5%/20kV YNd11"])).toBe("SHZVGIII-1300Y/72.5B-14271W");
+    expect(first(["--line", "185 MVA, 275/33 kV, YNd11, +12/-8 x 1.25%"])).toBe("CM2III-500Y/72.5B-12233W");
+    // A19 and TRAEL were 3 × single-phase 18170.
+    expect(first(["--line", "7.5MVA 20+2-14x2.5%/0.4kV YNd11 line end", "--oil"])).toBe("CVIII-350D/40.5-10193W");
+    expect(first(["--line", "20MVA 69+4-12x1.25%/13.8kV Dyn1", "--oil"])).toBe("CVIII-350D/72.5-10193W");
+    // G rows
+    expect(first(["--line", "60MVA 150+8-9x1.5%/20kV YNd11", "--reg", "G"])).toBe("CV2III-350Y/72.5-10181G");
+    expect(first(["--line", "66MVA 132+8-11x2%/20kV YNd11", "--reg", "G"])).toMatch(/-12233G$/);
+    expect(first(["--line", "20MVA 34.5+4-12x1.25%/0.4kV Dyn11", "--reg", "G", "--oil"])).toBe(
+      "CVIII-350D/40.5-10193G",
+    );
+    // symmetric unchanged
+    expect(first(["--line", "25MVA 110±8x1.25%/10.5kV YNd11"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+
+  it("the lowest tap uses the real minus steps", () => {
+    const b = json(["--line", "65MVA 150+7-10x1.5%/20kV YNd11"]).basis;
+    expect([b.maxA, b.stepV]).toEqual([294.3, 1299]);
+    expect(json(["--line", "370MVA 275+12-8x1.25%/33kV YNd11"]).basis.maxA).toBe(863.1);
+    // E-CV2250412 (WEG): sold CV2III-600Y/40.5-10193W at OS 369.15 A
+    const weg = json(["--line", "7.5MVA 13.8+4-12x1.25%/0.44kV YNd11"]);
+    expect([weg.model, weg.basis.maxA]).toEqual(["CV2III-600Y/40.5-10193W", 369.1]);
+  });
+
+  it("an uneven S ≤ 9 stays linear unless --reg says otherwise (UNEVEN-6)", () => {
+    expect(first(["--line", "30MVA 22+2-6x2.5%/0.4kV Dyn11"])).toBe("CV2III-600D/40.5-10090");
+    expect(first(["--line", "30MVA 22+2-6x2.5%/0.4kV Dyn11", "--reg", "0"])).toBe("CV2III-600D/40.5-10090");
+  });
+
+  it("--pm beside an uneven line keeps the line's minus (UNEVEN-2)", () => {
+    // B05 +0/−16: −8 gave 339.6 A and a 350 A switch.
+    const a = json(["--line", "10MVA 20+0-16x1.875%/0.4kV YNd11 line end", "--pm", "8", "--oil"]);
+    expect(a.basis.maxA).toBe(412.4);
+    expect(a.model).toBe("SVIII-500D/40.5-10193W");
+    const b = json(["--line", "160MVA 120+3-17x1.5%/20kV YNd11", "--reg", "G", "--pm", "10"]);
+    expect(b.basis.maxA).toBe(1033.3);
+    expect(Number(b.model.match(/-(\d+)Y\//)[1])).toBeGreaterThanOrEqual(1033);
+  });
+
+  it("reads the range after a closed ratio and percent ranges (UNEVEN-3, UNEVEN-4)", () => {
+    expect(first(["--line", "10MVA 20/0.4kV ±8x1.875% Dyn11", "--oil"])).toBe("CVIII-350D/40.5-10193W");
+    expect(first(["--line", "10MVA 20/0.4kV +0/-30% YNd11 line end", "--oil"])).toBe("SVIII-500D/40.5-10193W");
+    expect(first(["--line", "7.5MVA 20/0.4kV +5/-35% YNd11 line end", "--oil"])).toBe("CVIII-350D/40.5-10193W");
+    const a = capture(["--line", "10MVA 20/0.4kV +0/-30% YNd11 line end", "--oil"]);
+    expect(a.out).toContain("+0/-30% read as +0/−16 × 1.875 %");
+  });
+
+  it("±7 G is 10173G, as sold (UNEVEN-5)", () => {
+    expect(first(["--iu", "525", "--um", "72.5", "--reg", "G", "--pm", "7", "--oil"])).toBe(
+      "CMIII-600Y/72.5B-10173G",
+    );
+  });
+
+  it("says when the lowest tap assumes a symmetric range (D4)", () => {
+    const flags = ["--mva", "45", "--kv", "138", "--tap", "line", "--winding", "delta", "--step-pct", "1.25"];
+    const a = capture([...flags, "--pm", "8"]);
+    expect(a.out).toContain("最低档按 −8 算（−档未指定");
+    expect(json([...flags, "--pm", "8"]).basis.maxA).toBe(120.8);
+    const b = capture([...flags, "--minus", "12"]);
+    expect(b.out).not.toContain("−档未指定");
+    expect(json([...flags, "--minus", "12"]).basis.maxA).toBe(127.9);
+    const c = capture(["--line", "45MVA 138+4-12x1.25%/13.8kV Dyn1"]);
+    expect(c.out).not.toContain("−档未指定");
+    expect(json(["--line", "45MVA 138+4-12x1.25%/13.8kV Dyn1"]).basis.maxA).toBe(127.9);
+    expect(c.out.split(/\r?\n/)[0]).toMatch(/-10193W$/);
+  });
+
+  it("--range, --minus and --mid state what the web form can (WC-10)", () => {
+    const flags = ["--mva", "40", "--kv", "66", "--tap", "line", "--winding", "delta"];
+    const a = json([...flags, "--range", "+4/-12x1.25%"]);
+    expect(a.model).toMatch(/-10193W$/);
+    expect(a.basis.maxA).toBe(237.7); // 202 A / (1 − 12 × 1.25 %)
+    expect(first(["--mva", "40", "--kv", "66", "--range", "+2/-6"])).toMatch(/-10090$/);
+    expect(first(["--iu", "300", "--um", "72.5", "--pm", "9", "--mid", "3"])).toBe("CV2III-350Y/72.5-10191W");
+    expect(first(["--iu", "300", "--um", "72.5", "--pos", "19", "--mid", "1"])).toBe("CV2III-350Y/72.5-10191W");
+    expect(capture(["--iu", "300", "--um", "72.5", "--mid", "2"]).code).toBe(1);
+  });
+
+  it("refuses an autotransformer line without MV, like the page (WC-06)", () => {
+    const a = capture(["--line", "OSFPSZ-250000/220 220±8x1.25%"]);
+    expect(a.code).toBe(1);
+    expect(a.err).toContain("--hv and --mv");
+  });
+
+  it("sizes a single-phase unit on 3 × MVA, single-phase (WC-03)", () => {
+    const a = json(["--line", "333 MVA single-phase 500/220 kV, 500 kV ±13x1.25%, regulation at the neutral point"]);
+    expect(a.model).toBe("SHZVI-2400/72.5B-14271W");
+    expect(a.basis.maxA).toBe(1377.4); // tender Imax 1377.33 A
+  });
+
+  it("reads delta words, coarse/fine and a contradicted 'auto' (WC-07, WC-13, WC-14)", () => {
+    expect(first(["--line", "15 MVA, 33/11 kV, ±8x1.25%, D connection"])).toBe("CV2III-350D/40.5-10193W");
+    expect(first(["--line", "10 MVA, 33/11.5 kV, Dyn11, ±8x1.25% coarse/fine"])).toBe("CV2III-350D/40.5-10193G");
+    expect(first(["--line", "130 MVA 132/33 kV, +15%/-10%, 11 positions (2.5% steps), linear"])).toMatch(/-12110$/);
+    expect(first(["--line", "200 MVA, 225/115 kV; Auto-transformer, vector group YNd11d11; ±8x1.25%"])).toBe(
+      "CM2III-600Y/72.5B-10193W",
+    );
+  });
+
+  it("reads separators and tap ladders (WC-02, WC-04, WC-09)", () => {
+    expect(json(["--line", "150,000 kVA 150±10*1,25%/11 kV Yd11"]).basis.maxA).toBe(659.8);
+    expect(json(["--line", "YNd11,66±12x1.78%/10.5 kV,40 MVA"]).basis.maxA).toBe(445);
+    const q = json(["--line", "80/100/120 MVA, 118.25/110/96.25 kV (+6/-10 x 1.25%), Y"]);
+    expect([q.model, q.basis.maxA]).toEqual(["SHZVIII-1000Y/72.5B-10193W", 719.8]);
+  });
+
+  it("±0 gives the ±8 default with a note; a line may start with a dash (WC-15)", () => {
+    const a = capture(["--line", "25 MVA 110±0x1.25%/11 kV YNd11"]);
+    expect(a.out.split(/\r?\n/)[0]).toBe("CV2III-350Y/72.5-10193W");
+    expect(a.out).toContain("range ±0 ignored");
+    expect(first(["--line", "- 25 MVA 110±8x1.25%/11 kV YNd11"])).toBe("CV2III-350Y/72.5-10193W");
+    expect(first(["--line=-25 MVA 110±8x1.25%/11 kV YNd11"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+
+  it("--octc takes the second winding's range (F4)", () => {
+    const line = "40MVA 115±8x1.25%/38.5±2x2.5%/11kV YNyn0d11";
+    const off = json(["--line", line, "--octc"]);
+    expect(off.basis.maxA).toBe(631.4);
+    expect(off.assumptions.join(" ")).toContain("38.5 kV 绕组");
+    const on = json(["--line", line]);
+    expect([on.model, on.basis.maxA]).toEqual(["CV2III-350Y/72.5-10193W", 223.1]);
+  });
+});

@@ -20,7 +20,13 @@ import {
   EARTH_INSULATION,
   umForEarthInsulation,
 } from "@/lib/catalog";
-import { parseTenderLine, type TenderLine } from "@/lib/nameplate";
+import {
+  geometryForRange,
+  lineMinusSteps,
+  parseTenderLine,
+  tenderLineSettings,
+  type TenderLine,
+} from "@/lib/nameplate";
 import { copyText } from "@/lib/clipboard";
 import { decimalDraft } from "@/lib/decimal";
 import { displayModel } from "@/lib/domesticModel";
@@ -611,7 +617,7 @@ export function SelectorApp() {
   /** Tender line as typed, and what was read from it (null = not read). */
   const [lineText, setLineText] = useState("");
   const [lineRead, setLineRead] = useState<TenderLine | null>(null);
-  const [lineFailed, setLineFailed] = useState(false);
+  const [lineFailed, setLineFailed] = useState<false | "lineFail" | "lineFailAutoMv">(false);
   const [altsOpen, setAltsOpen] = useState(false);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
@@ -721,70 +727,89 @@ export function SelectorApp() {
    */
   const readTenderLine = () => {
     const tl = parseTenderLine(lineText);
-    if (!tl || tl.mva == null || !tl.voltagesKv.length) {
+    // Same mapping as the CLI --line (lib/nameplate tenderLineSettings).
+    const read = tl ? tenderLineSettings(tl, { octc: isOctc }) : null;
+    if (!tl || !read || !read.ok) {
+      // 2026-11-04: an autotransformer line with no MV kept the form's old MV
+      // (110 kV) and showed a type; the CLI refused. Refuse here too.
       setLineRead(null);
-      setLineFailed(true);
+      setLineFailed(read && !read.ok && read.reason === "auto_needs_mv" ? "lineFailAutoMv" : "lineFail");
       return;
     }
+    const s = read.s;
     setLineFailed(false);
     setLineRead(tl);
     setCurrentMode("capacity");
     setVoltageMode("winding");
-    setTransformerMva(tl.mva);
+    // Single-phase: 3 × the unit MVA, on a single-phase switch.
+    setTransformerMva(s.mva);
     setMvaCustom(false);
-    setKind(tl.kind);
-    if (tl.kind === "auto") {
-      if (tl.hvKv != null) setHvKv(tl.hvKv);
-      if (tl.mvKv != null) setMvKv(tl.mvKv);
+    setKind(s.kind);
+    if (s.kind === "auto") {
+      if (s.hvKv != null) setHvKv(s.hvKv);
+      if (s.mvKv != null) setMvKv(s.mvKv);
     } else {
-      if (tl.tapKv != null) setWindingRatedKv(tl.tapKv);
-      setWinding(tl.winding);
+      if (s.tapKv != null) setWindingRatedKv(s.tapKv);
+      setWinding(s.winding);
     }
-    setTapPoint(tl.tapPoint);
+    setTapPoint(s.tapPoint);
     setTapForced(false);
-    const bilUm =
-      tl.neutralBilKv != null && tl.tapPoint === "neutral"
-        ? umForEarthInsulation(0, tl.neutralBilKv)
-        : null;
-    setEarthUm(bilUm ?? 0);
-    if (tl.stepPct != null && tl.stepPct > 0) {
-      setStepPercentPct(tl.stepPct);
-      setStepPctCustom(false);
-    }
-    const conn = tl.tapPoint === "neutral" ? "Y" : "D";
-    if (tl.plus != null && tl.minus != null && tl.plus !== tl.minus) {
-      // +4-12 has no ±N diagram: linear with the real minus steps.
+    setEarthUm(s.earthUm ?? 0);
+    // 2026-11-04: a line with no step % or range takes the CLI defaults; the
+    // previous line's 2.5 % and ±10 used to stay and change the type.
+    setStepPercentPct(s.stepPct != null && s.stepPct > 0 ? s.stepPct : 1.25);
+    setStepPctCustom(false);
+    const conn = s.tapPoint === "neutral" ? "Y" : "D";
+    const phases = (cur: SelectInput["phases"]): SelectInput["phases"] =>
+      s.phases ?? (lineRead?.phases === "I" && cur === "I" ? "III" : cur);
+    const linearLine = s.regulation === "linear" && !isOctc;
+    if ((s.plus != null && s.minus != null && s.plus !== s.minus) || linearLine) {
+      // 2026-11-04: an uneven +a/−b keeps W/G on the Fig. 3-3 row Huaming
+      // sold (+4/−12 → 10193W) with the real minus steps; it used to go
+      // linear S + 1 (17 positions: no CV2, often 3 × single-phase).
+      const plus = s.plus ?? 8;
+      const minus = s.minus ?? 8;
+      const reg: SelectInput["regulation"] = isOctc
+        ? "linear"
+        : (s.regulation ?? (input.regulation === "linear" ? "reversing" : input.regulation));
+      const g = geometryForRange(plus, minus, reg);
       setPm("");
-      setTapPlus(tl.plus);
-      setTapMinus(tl.minus);
+      setTapPlus(plus);
+      setTapMinus(minus);
       const range: ParsedTapRange = {
-        plus: tl.plus,
-        minus: tl.minus,
-        positions: tl.plus + tl.minus + 1,
-        stepPercent: tl.stepPct != null ? tl.stepPct / 100 : null,
+        plus,
+        minus,
+        positions: g.positions,
+        stepPercent: s.stepPct != null ? s.stepPct / 100 : null,
       };
       setTapRange(range);
-      setInput((s) => ({
-        ...s,
+      setInput((st) => ({
+        ...st,
         connection: conn,
         umKv: 0,
-        regulation: "linear",
-        plusMinusSteps: undefined,
-        positions: range.positions,
-        midPositions: 0,
-        pitch: defaultPitch(range.positions, "linear") as 10 | 12 | 14 | 16 | 18,
+        phases: phases(st.phases),
+        regulation: reg,
+        plusMinusSteps: g.plusMinusSteps,
+        positions: g.positions,
+        midPositions: g.mid,
+        pitch: g.pitch,
       }));
       return;
     }
-    const n = tl.plus ?? (pm && Number(pm) > 0 ? Number(pm) : 8);
+    const n = s.plus ?? 8;
     setPm(String(n));
     setTapRange(null);
-    setInput((s) => {
-      const reg =
-        s.regulation === "linear" || !pmStepOptionsFor(s.regulation).includes(n)
-          ? "reversing"
-          : s.regulation;
-      return { ...s, connection: conn, umKv: 0, regulation: reg, ...geometryForPm(n, reg) };
+    setInput((st) => {
+      const want = s.regulation ?? (st.regulation === "linear" ? "reversing" : st.regulation);
+      const reg = pmStepOptionsFor(want).includes(n) ? want : "reversing";
+      return {
+        ...st,
+        connection: conn,
+        umKv: 0,
+        phases: phases(st.phases),
+        regulation: reg,
+        ...geometryForPm(n, reg),
+      };
     });
   };
 
@@ -817,6 +842,21 @@ export function SelectorApp() {
       }));
       return;
     }
+    // 2026-11-04: an uneven custom range (+4/−12) stays live on W/G with its
+    // Fig. 3-3 row; snapping to ±8 sized the lowest tap with −8.
+    if (!pm && tapRange && tapRange.plus !== tapRange.minus) {
+      const g = geometryForRange(tapRange.plus, tapRange.minus, reg);
+      setTapRange({ ...tapRange, positions: g.positions });
+      setInput((s) => ({
+        ...s,
+        regulation: reg,
+        plusMinusSteps: g.plusMinusSteps,
+        positions: g.positions,
+        midPositions: g.mid,
+        pitch: g.pitch,
+      }));
+      return;
+    }
     // G brochure set starts at ±8; clamp small W-only steps when switching to G
     const allowed = pmStepOptionsFor(reg);
     let n = pm && Number(pm) > 0 ? Number(pm) : 8;
@@ -838,25 +878,41 @@ export function SelectorApp() {
       setTapRange(null);
       return;
     }
+    // 2026-11-04: a W/G custom +a/−b takes the Fig. 3-3 row Huaming sells
+    // (+4/−12 → 10193W), not plus + minus + 1 positions on mid 1 (18171W).
+    const g =
+      !isOctc && input.regulation !== "linear"
+        ? geometryForRange(plus, minus, input.regulation)
+        : null;
     const range: ParsedTapRange = {
       plus,
       minus,
-      positions: plus + minus + 1,
+      positions: g?.positions ?? plus + minus + 1,
       stepPercent: pct > 0 ? pct / 100 : null,
     };
     setTapRange(range);
-    setInput((s) => ({
-      ...s,
-      positions: range.positions,
-      plusMinusSteps: undefined,
-      midPositions: s.regulation === "linear" ? 0 : 1,
-      pitch: defaultPitch(range.positions, s.regulation) as
-        | 10
-        | 12
-        | 14
-        | 16
-        | 18,
-    }));
+    setInput((s) =>
+      g
+        ? {
+            ...s,
+            positions: g.positions,
+            plusMinusSteps: g.plusMinusSteps,
+            midPositions: g.mid,
+            pitch: g.pitch,
+          }
+        : {
+            ...s,
+            positions: range.positions,
+            plusMinusSteps: undefined,
+            midPositions: s.regulation === "linear" ? 0 : 1,
+            pitch: defaultPitch(range.positions, s.regulation) as
+              | 10
+              | 12
+              | 14
+              | 16
+              | 18,
+          },
+    );
   };
 
   const applyPm = (raw: string) => {
@@ -913,10 +969,13 @@ export function SelectorApp() {
   };
 
   const minusSteps = (): number => {
-    if (rangeLive && tapRange && tapRange.minus > 0) return tapRange.minus;
+    // 2026-11-04: never below the read line's real minus. Picking W/G or a ±N
+    // after reading +4/−12 sized the lowest tap with −8. Larger is never unsafe.
+    const floor = lineMinusSteps(lineRead, isOctc);
+    if (rangeLive && tapRange && tapRange.minus > 0) return Math.max(tapRange.minus, floor);
     const n = pm && Number(pm) > 0 ? Number(pm) : input.plusMinusSteps;
-    if (n != null && n > 0) return n;
-    return 0;
+    if (n != null && n > 0) return Math.max(n, floor);
+    return floor;
   };
 
   /** Transformer → duty. The one place current, Ust and Um come from. */
@@ -1175,7 +1234,7 @@ export function SelectorApp() {
                 </div>
                 {lineFailed ? (
                   <p role="status" className="text-[0.75rem] leading-snug text-[var(--color-danger)]">
-                    {t(lang, "lineFail")}
+                    {t(lang, lineFailed)}
                   </p>
                 ) : lineRead?.assumed.length ? (
                   <p role="status" className="flex gap-2 text-[0.75rem] leading-snug text-[var(--color-warn)]">
@@ -1186,6 +1245,18 @@ export function SelectorApp() {
                       {lineRead.assumed.map((f) => t(lang, `lineF_${f}`)).join(listSep)}
                     </span>
                   </p>
+                ) : null}
+                {/* 2026-11-04: the reader's notes (percent split, single-phase,
+                    tap ladder…) reached only the CLI. */}
+                {!lineFailed && lineRead?.notes.length ? (
+                  <ul role="status" className="flex flex-col gap-1 text-[0.75rem] leading-snug text-[var(--color-warn)]">
+                    {lineRead.notes.map((n, i) => (
+                      <li key={`${n.key}-${i}`} className="flex gap-2">
+                        <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+                        <span>{t(lang, `lineW_${n.key}`, n.vars)}</span>
+                      </li>
+                    ))}
+                  </ul>
                 ) : null}
               </div>
               <KindToggle

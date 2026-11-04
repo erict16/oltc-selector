@@ -50,6 +50,9 @@ oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
 | `--conn Y\|D` | Switch star / delta on the `--iu` path (with `--mva`, use `--tap`) | Y |
 | `--reg W\|G\|0` | Reversing / coarse-fine / linear | W |
 | `--pm` | ± steps | 8 |
+| `--range +a/-b[xs%]` | Uneven range. W/G takes the Fig. 3-3 row Huaming sells (+4/-12 → 10193W); the lowest tap uses −b | |
+| `--minus` | Minus steps for the lowest-tap current, beside `--pm` / `--pos` | ± steps |
+| `--mid 1\|3` | Mid positions of the W/G diagram, when Fig. 3-3 has the pair | brochure |
 | `--octc` | Off-circuit 无载 (WSL/WSG) | on-load |
 | `--structure` | `auto` / `combined` 组合式 / `compound` 复合式 / `cage` 笼式 / `drum` 鼓式 | `auto` |
 | `--series` | OCTC wiring II IV V VI VII VIII | auto is linear IV for Y and D |
