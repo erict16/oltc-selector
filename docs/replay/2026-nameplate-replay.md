@@ -6,14 +6,26 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 
 | check | n | share |
 |---|---:|---:|
-| Um class derived = sold | 241 | 77.0% |
-| Um derived below sold (under-insulated if trusted) | 66 | 21.1% |
-| Um derived above sold | 6 | 1.9% |
+| Um class derived = sold | 245 | 78.3% |
+| Um derived below sold (under-insulated if trusted) | 60 | 19.2% |
+| Um derived above sold | 8 | 2.6% |
 | Current off the OS by more than 5% | 23 | 7.3% |
-| Engine #1 = sold (family, I, Um) | 226 | 72.2% |
-| Sold type in the engine's list | 277 | 88.5% |
+| Engine #1 = sold (family, I, Um) | 233 | 74.4% |
+| Sold type in the engine's list | 281 | 89.8% |
+| Grade (engine #1, auto) = sold letter | 33 | |
+| Grade weaker than sold | 37 | |
+| Grade stronger than sold | 0 | |
 
 `*` = neutral Um assumed (72.5) and flagged 待 OS 核对 in the app.
+
+## Grade by sold Um
+
+| sold Um | match | weaker than sold | stronger |
+|---:|---:|---:|---:|
+| 72.5 | 27 | 22 | 0 |
+| 126 | 5 | 8 | 0 |
+| 170 | 1 | 5 | 0 |
+| 252 | 0 | 2 | 0 |
 
 ## Um derived below sold
 
@@ -21,9 +33,9 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 |---|---|---|---|---|---|---|---|
 | E-M260021 | 俄罗斯HMR-SIEMENS | 18 MVA 33 kV Y | neutral/star | 314.9 / 314.9 | 72.5 / 40.5* | `CMIII-500Y/72.5B-10080` | `CVIII-350Y/40.5-10080` |
 | E-M260032-033 | 俄罗斯HMR-TOGLIATTI | 200 MVA 115 kV Y | neutral/star | 1004 / 1004.1 | 170 / 72.5* | `3xCMI-1200Y/170C-14131W` | `CMI-1200/72.5C-14131W` |
-| E-M260034 | 俄罗斯HMR-UETM | 63 MVA 158 kV Y | neutral/star | 230.2 / 230.2 | 126 / 72.5* | `CMIII-500Y/126B-10193W` | `CVIII-350Y/72.5-10193W` |
+| E-M260034 | 俄罗斯HMR-UETM | 63 MVA 158 kV Y | neutral/star | 230.2 / 230.2 | 126 / 72.5* | `CMIII-500Y/126B-10193W` | `CMIII-500Y/72.5B-10193W` |
 | E-M260093 | 土耳其HMT-Eren Transformer | 2.5 MVA 21 kV Y | neutral/star | 68.7 / 68.7 | 72.5 / 40.5* | `CMIII-600Y/72.5C-14271G` | `CVIII-350Y/40.5-14271G` |
-| E-M260099-101 | 俄罗斯HMR-UETM | 63 MVA 158 kV Y | neutral/star | 230.2 / 230.2 | 126 / 72.5* | `CMIII-500Y/126B-10193W` | `CVIII-350Y/72.5-10193W` |
+| E-M260099-101 | 俄罗斯HMR-UETM | 63 MVA 158 kV Y | neutral/star | 230.2 / 230.2 | 126 / 72.5* | `CMIII-500Y/126B-10193W` | `CMIII-500Y/72.5B-10193W` |
 | E-M260102 | 委内瑞拉 VALECILLOS | 20 MVA 115 kV Y | neutral/star | 100.41 / 100.4 | 126 / 72.5* | `CMIII-500Y/126B-10091W` | `CMIII-500Y/72.5B-10091W` |
 | E-M260122 | 俄罗斯HMR-JSHC | 250 MVA 220 kV Y | neutral/star | 1193 / 656.1 | 126 / 72.5* | `3xCMI-1500Y/126B-14131W` | `CMI-1500/72.5B-14131W` |
 | E-M260143 | 印尼GE UNINDO | 75 MVA 220 kV Y | neutral/star | 197 / 196.8 | 126 / 72.5* | `CMIII-500Y/126DE-14273W` | `CMIII-500Y/72.5DE-14273W` |
@@ -47,14 +59,8 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 | E-HWV260002 | 意大利TMC-Intermagnetic | 5 MVA 11 kV Y | neutral/star | 350 / 262.4 | 40.5 / 12 | `HWVI-800Y/40.5-10193W` | `HWVI-800/17.5-10193W` |
 | E-SHZV260002 | 土耳其HMT-BEST | 180 MVA 330 kV Y | neutral/star | 314.9 / 314.9 | 170 / 72.5* | `SHZVIII-600Y/170D-14273G` | `CM2III-500Y/72.5D-14273G` |
 | E-SHZV260015-019 | 土耳其HMT-Astor | 45 MVA 33 kV Y | neutral/star | 787.3 / 787.3 | 72.5 / 40.5* | `SHZVIII-1000Y/72.5C-10193G` | `SHZVIII-1000Y/72.5C-10193G` |
-| E-SHZV260021-022 | 土耳其HMT-BEST | 125 MVA 400 kV Y | neutral/star | 180.4 / 180.4 | 126 / 72.5* | `SHZVIII-600Y/126D-14273G` | `CM2III-500Y/72.5D-14273G` |
-| E-SHZV260044-045 | 土耳其HMT-ASTOR | 125 MVA 400 kV Y | neutral/star | 180.4 / 180.4 | 126 / 72.5* | `SHZVIII-600Y/126D-14273G` | `CM2III-500Y/72.5D-14273G` |
 | E-SHZV260080 | 土耳其HMT-Green Transfo | 120 MVA 110 kV Y | neutral/star | 630 / 629.8 | 126 / 72.5* | `SHZVIII-1000Y/126C-14273G` | `SHZVIII-1000Y/72.5C-14273G` |
 | E-SHZV260099-100 | 意大利GETRA | 63 MVA 220 kV Y | neutral/star | 165.3 / 165.3 | 252 / 72.5* | `SHZVIII-400Y/252D-14273W` | `CM2III-500Y/72.5D-14273W` |
-| E-SHZV260107-108 | 土耳其HMT-BEST | 125 MVA 400 kV Y | neutral/star | 180.4 / 180.4 | 126 / 72.5* | `SHZVIII-600Y/126D-14273G` | `CM2III-500Y/72.5D-14273G` |
-| E-SHZV260109-113 | 土耳其HMT-BEST | 125 MVA 400 kV Y | neutral/star | 180.4 / 180.4 | 126 / 72.5* | `SHZVIII-600Y/126D-14273G` | `CM2III-500Y/72.5D-14273G` |
-| E-SHZV260116 | 土耳其HMT-TEIAS库存 | 125 MVA 400 kV Y | neutral/star | 180.4 / 180.4 | 126 / 72.5* | `SHZVIII-600Y/126D-14273G` | `CM2III-500Y/72.5D-14273G` |
-| E-SHZV260120-125 | 土耳其HMT-BEST | 125 MVA 400 kV Y | neutral/star | 180.4 / 180.4 | 126 / 72.5* | `SHZVIII-600Y/126D-14273G` | `CM2III-500Y/72.5D-14273G` |
 | E-SHZV260131 | 印尼BAMBANGDJAJA | 15.8 MVA 13.8 kV Y | neutral/star | 661.02 / 661.0 | 72.5 / 17.5 | `SHZVIII-1000Y/72.5B-18353W` | `SHZVIII-1000Y/72.5B-18353W` |
 | E-SHZV260132 | 澳大利亚 Wilson Transformer | 240 MVA 220 kV Y | neutral/star | 629.9 / 629.8 | 170 / 72.5* | `SHZVIII-1000Y/170D-12233W` | `SHZVIII-1000Y/72.5D-12233W` |
 | E-CM2260118 | 意大利TRAFOSER | 20 MVA 150 kV Y | neutral/star | 77 / 77.0 | 170 / 72.5* | `CM2III-300Y/170B-12233W` | `CV2III-350Y/72.5-12233W` |
@@ -90,6 +96,8 @@ Rows judged: 313. Skipped: 362 (no MVA / kV / I on the OS 145, no / unparsed sol
 
 | serial | customer | nameplate | tap point | I OS / derived | Um sold / derived | sold | engine #1 |
 |---|---|---|---|---|---|---|---|
+| E-SHZV260050-051 | 巴西SIEMENS | 150 MVA 440 kV Y | neutral/star | 196.8 / 196.8 | 72.5 / 126* | `SHZVIII-400Y/72.5C-1223` | `CM2III-500Y/126C-10193W` |
+| E-SHZV260076-077 | 巴西DATA | 300 MVA 500 kV Y | neutral/star | 346.4 / 346.4 | 72.5 / 126* | `SHZVIII-600Y/72.5-18353W` | `CM2III-500Y/126C-18353W` |
 | E-CV2260017 | 巴西WEG | 40 MVA 72.45 kV Y | neutral/star | 334.7 / 318.8 | 40.5 / 72.5 | `CV2III-600Y/40.5-10193W` | `CV2III-350Y/72.5-10193W` |
 | E-CV2260077 | 巴西TRAEL | 30 MVA 69 kV Y | neutral/star | 251 / 251.0 | 40.5 / 72.5 | `CV2III-350Y/40.5-10193W` | `CV2III-350Y/72.5-10193W` |
 | E-CV2260112 | 巴西WEG | 41.66 MVA 138 kV D | line_end/star | 348.6 / 174.3 | 126 / 145 | `CV2III-600D/126-10193W` | `CV2III-350D/145-10193W` |
