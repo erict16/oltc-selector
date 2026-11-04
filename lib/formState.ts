@@ -425,10 +425,25 @@ function applyLine(f: FormState, tl: TenderLine, s: LineSettings): FormState {
     // A line with no step % or range takes the CLI defaults.
     stepPercentPct: step,
     stepPctCustom: false,
-    input: { ...f.input, connection: connFor(s.tapPoint), umKv: 0, phases },
+    // 2026-11-04 (r3 UI-8): across-tap LI/AC belong to one transformer too.
+    // T06's 320/80 kept on Q07 gave 72.5C where the CLI gives 72.5B.
+    input: {
+      ...f.input,
+      connection: connFor(s.tapPoint),
+      umKv: 0,
+      phases,
+      acrossTapBilKv: undefined,
+      acrossTapPfKv: undefined,
+    },
   };
-  return withRange(next, lineRangeFields(s, isOctc(f), f.input.regulation, step));
+  // 2026-11-04 (r3 UI-7): a G / linear the previous line set is not the
+  // user's pick; a line that states none takes the CLI default W.
+  const base: Regulation = lineSet(f) ? "reversing" : f.input.regulation;
+  return withRange(next, lineRangeFields(s, isOctc(f), base, step));
 }
+
+/** The form's range and regulation came from a read (or failed) line. */
+const lineSet = (f: FormState): boolean => f.lineRead != null || f.lineFailed !== false;
 
 /**
  * 读取: map the typed line onto the form for the current mode, as the CLI
@@ -466,13 +481,39 @@ export function readLine(f: FormState, text: string): FormState {
     };
     return { ...applyLine(f, tl, s), mvKv: 0, lineRead: null, lineFailed: "lineFailAutoMv" };
   }
-  if (!tl || !r || !r.ok) return { ...f, lineRead: null, lineFailed: "lineFail" };
+  if (!tl || !r || !r.ok) {
+    // 2026-11-04 (r3 UI-9): the error says to fill the fields below, so the
+    // card must not keep the previous line's type: MVA empty (needMva), and
+    // the figures typed for the previous transformer go, as in applyLine.
+    const winding = f.voltageMode === "winding" && f.windingRatedKv > 0;
+    return {
+      ...f,
+      lineRead: null,
+      lineFailed: "lineFail",
+      currentMode: "capacity",
+      voltageMode: "winding",
+      windingRatedKv: winding ? f.windingRatedKv : DEFAULT_WINDING_RATED_KV,
+      transformerMva: 0,
+      mvaCustom: true,
+      osImaxA: 0,
+      osUstV: 0,
+      input: {
+        ...f.input,
+        ...(winding ? {} : { umKv: 0 }),
+        acrossTapBilKv: undefined,
+        acrossTapPfKv: undefined,
+      },
+    };
+  }
   const out = applyLine(f, tl, r.s);
   if (isOctc(f)) {
     // Read in 无载: the on-load 调压方式 to restore is the line's own, not
     // the one saved before this line (a +2/−6 line is linear on-load).
+    // 2026-11-04 (r3 UI-7): a line that states none drops the previous
+    // line's (Q08 linear came back on A11); a G picked before any line stays.
     const on = tenderLineSettings(tl, { octc: false });
-    if (on.ok && on.s.regulation) return { ...out, oltcRegulation: on.s.regulation };
+    const reg = on.ok && on.s.regulation ? on.s.regulation : lineSet(f) ? "reversing" : f.oltcRegulation;
+    return { ...out, oltcRegulation: reg };
   }
   return out;
 }
@@ -498,10 +539,16 @@ function remapLine(f: FormState, tl: TenderLine, octc: boolean): FormState | nul
       winding: b.winding,
       tapPoint: b.tapPoint,
       tapForced: false,
-      // An OS figure belongs to one winding.
+      // An OS figure belongs to one winding (r3 UI-8: across-tap LI/AC too).
       osImaxA: 0,
       osUstV: 0,
-      input: { ...next.input, connection: connFor(b.tapPoint), umKv: 0 },
+      input: {
+        ...next.input,
+        connection: connFor(b.tapPoint),
+        umKv: 0,
+        acrossTapBilKv: undefined,
+        acrossTapPfKv: undefined,
+      },
     };
   }
   if (f.earthUm === (a.earthUm ?? 0)) next.earthUm = b.earthUm ?? 0;
@@ -576,6 +623,26 @@ export function commitRange(f: FormState, plus: number, minus: number, pct: numb
         pitch: defaultPitch(range.positions, octc ? "linear" : reg) as Pitch,
       };
   return { ...f, tapPlus: plus, tapMinus: minus, tapRange: range, input };
+}
+
+/**
+ * ± 级数 select. 自定义 ("") opens the +/− selects on the current ±N.
+ * 2026-11-04 (r3 UI-6): it keeps the step % on screen. Resetting to 1.25
+ * took B07's 2.5 % line from 384.9 A to 329.9 A and a 350 A switch.
+ */
+export function pickPm(f: FormState, raw: string): FormState {
+  if (!raw) {
+    const n = Number(f.pm) > 0 ? Number(f.pm) : 8;
+    // An empty step would give no step fraction at all.
+    const pct = f.stepPercentPct > 0 ? f.stepPercentPct : 1.25;
+    return commitRange({ ...f, pm: "", tapPlus: n, tapMinus: n, stepPercentPct: pct }, n, n, pct);
+  }
+  const next: FormState = { ...f, pm: raw, tapRange: null };
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) return next;
+  // Always the brochure mid for this ±N: mid 1 carried from ±4…±7 onto ±8
+  // would emit 18171W instead of the commercial 10193W.
+  return { ...next, input: { ...next.input, ...geometryForPm(n, next.input.regulation) } };
 }
 
 /**

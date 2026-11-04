@@ -29,6 +29,7 @@ import {
   formSpec,
   geometryForPm,
   pickKind as pickKindIn,
+  pickPm,
   readLine,
   stepMovesRange,
   toOctc,
@@ -332,7 +333,8 @@ function BasisTable({
       ? duty.actualUmKv
       : duty.umKv;
   // Every row is one line: name, duty, rating, use. An assumed Um is said
-  // once, in the caution above the table, not again inside it.
+  // once, in a deriveDuty caution above the table (neutral, MV lead and,
+  // since r3 UI-11, the auto junction), not again inside it.
   const rows: Array<{
     key: string;
     label: string;
@@ -818,27 +820,8 @@ export function SelectorApp() {
   const commitTapRange = (plus: number, minus: number, pct: number) =>
     updateForm((f) => commitRange(f, plus, minus, pct));
 
-  const applyPm = (raw: string) => {
-    setPm(raw);
-    if (!raw) {
-      const n = Number(pm) > 0 ? Number(pm) : 8;
-      setTapPlus(n);
-      setTapMinus(n);
-      setStepPercentPct(1.25);
-      commitTapRange(n, n, 1.25);
-      return;
-    }
-    setTapRange(null);
-    const n = Number(raw);
-    if (!Number.isFinite(n) || n <= 0) return;
-    // Always snap to brochure preferred mid for this ±N.
-    // Carrying mid=1 from ±4…±7 onto ±8 would silently emit 18171W
-    // instead of commercial 10193W (P=19, mid3).
-    setInput((s) => ({
-      ...s,
-      ...geometryForPm(n, s.regulation),
-    }));
-  };
+  // 2026-11-04 (r3 UI-6): lib/formState pickPm; 自定义 keeps the step %.
+  const applyPm = (raw: string) => updateForm((f) => pickPm(f, raw));
 
   const applyMid = (raw: string) => {
     const mid = (Number(raw) === 1 ? 1 : 3) as 1 | 3;
