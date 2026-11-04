@@ -756,7 +756,7 @@ const NOT_WINDING =
  * and a label followed by its own figure ("132 kV Um 145 kV") names that figure, not this one.
  */
 const AFTER_LABEL =
-  /^\s*(?:kV\s*)?(?:BIL|LIWL|LI|SIL|Um|impulse|lightning|power[\s-]?frequency|withstand|test)\b(?!\s*[:=]?\s*\d)/i;
+  /^\s*(?:kV\s*)?(?:BIL|LIWL|LI|SIL|Um|impulse|lightning|power[\s-]?frequency|withstand|test)\b(?![^,;\d]{0,30}\d)/i;
 
 /** IEC rated voltage → highest voltage for equipment: "132/145 kV" is Un/Um, not HV/LV. */
 const UN_UM: Record<number, number> = { 11: 12, 33: 36, 66: 72.5, 110: 123, 132: 145, 150: 170, 220: 245, 230: 245 };
@@ -775,6 +775,8 @@ function inInsulationList(text: string, at: number): boolean {
   const clauses = text.slice(0, at).split(/[,;]/);
   for (let i = clauses.length - 1; i >= 0; i--) {
     const c = clauses[i]!;
+    // "HV/LV 132/33 kV" is the ratio, whatever came before it.
+    if (i === clauses.length - 1 && /^\s*(?:HV|MV|LV)\s*\/\s*(?:MV|LV)\b/i.test(c)) return false;
     if (/^\s*(?:insulation|LI\b|LIWL|BIL|AC\b|test|withstand|impulse|lightning)/i.test(c)) return true;
     if (!/^\s*(?:HV|MV|LV|HVN|N|neutral|tertiary|line[\s-]?end)\b/i.test(c)) return false;
   }
@@ -891,7 +893,7 @@ function findVoltages(
       (x) =>
         x.unUm ||
         (!NOT_WINDING.test(clauseBefore(text, x.at)) &&
-          !AFTER_LABEL.test(text.slice(x.end, x.end + 25)) &&
+          !AFTER_LABEL.test(text.slice(x.end, x.end + 50)) &&
           !inInsulationList(text, x.at)),
     )
     .filter((x) => x.c.every((n) => n > 0.2 && n < 1200));
@@ -916,7 +918,7 @@ function findVoltages(
       // 2026-11-04 R4: the look-back stops at the clause ("(650 kV BIL), LV 33 kV" lost the
       // LV); a label after the figure ("650 kV BIL", "(145 kV Um)") is not a winding either.
       const head = clauseBefore(text, h.index);
-      return !NOT_WINDING.test(head) && !/\bneutral\b[^\d]{0,20}$/i.test(head) && !AFTER_LABEL.test(text.slice(h.end, h.end + 25));
+      return !NOT_WINDING.test(head) && !/\bneutral\b[^\d]{0,20}$/i.test(head) && !AFTER_LABEL.test(text.slice(h.end, h.end + 50));
     });
   const kv = [...new Set(hits.map((h) => h.kv))].sort((a, b) => b - a);
   if (!kv.length || kv.length > 3) return { kv: [], tapIndex: null, extra: [] };
@@ -970,7 +972,7 @@ function autoText(text: string): "word" | "at" | null {
 const DELTA_TAP =
   /(?:regulat\w*|tapp\w*|OLTC)\b(?:(?!\b(?:LV|MV|secondary|tertiary|low[\s-]voltage)\b)[^;.]){0,40}\bdelta\b|\bHV\b[\s:]*(?:winding\s*)?(?:is\s*)?delta\b|\bHV\b\s*[:=]\s*D\b|\bdelta[\s-]connected\s+HV\b|\bdelta[\s/-]*star\b|(?<!\b(?:LV|MV|secondary|tertiary)\b[\s:]*)\bD[\s-]?connection\b|三角形调压|角接调压/i;
 const DELTA_OTHER =
-  /\b(?:LV|MV|tertiary|secondary|stabili[sz]ing|low[\s-]voltage)\b[^;.,]{0,25}\b(?:delta|D[\s-]?connect)|\bdelta\s+(?:tertiary|stabili)|star\s*\/\s*delta/i;
+  /\b(?:LV|MV|tertiary|secondary|stabili[sz]ing|low[\s-]voltage)\b(?:(?!\bHV\b|\bstar\b)[^;.,]){0,25}\b(?:delta|D[\s-]?connect)|\bdelta\s+(?:tertiary|stabili)|star\s*\/\s*delta/i;
 // 2026-11-04 R2: "LV neutral point earthed" / "11 kV neutral point brought out" made the
 // HV a stated star neutral. A neutral after a winding word or a kV figure is not the tap's.
 // 2026-11-04 R4: "HV neutral point solidly earthed", "line end of the HV star winding", "not in
@@ -1068,7 +1070,7 @@ export function parseTenderLine(raw: string): TenderLine | null {
   const singleWord = [
     ...text.matchAll(
       new RegExp(
-        String.raw`single[\s-]?phase|single[\s-]?ph\b|\b1[\s-]?ph(?:ase)?\b|\b1\s*pha\b|\b(?:1|satu)\s*fasa\b|monof[aá]sic[a-z]*|monophas[a-zéè]*|einphas[a-z]*|однофазн[а-яё]*|\b1\s*[ØΦφ]|(?<=[MkМк][VВ][AА]\s*,?\s*)per\s+phase\b|单相(?!电源|供电|交流)|\bbank of 3\b`,
+        String.raw`single[\s-]?phase|single[\s-]?ph\b|\b1[\s-]?ph(?:ase)?\b|\b1\s*pha\b|\b(?:1|satu)\s*fasa\b|monof[aá]sic[a-z]*|monophas[a-zéè]*|einphas[a-z]*|однофазн[а-яё]*|\b1\s*[ØΦφ]|(?<=[MkМк][VВ][AА]\s*)per\s+phase\b(?!\s+(?:impedance|reactance|resistance|loss))|单相(?!电源|供电|交流)|\bbank of 3\b`,
         "gi",
       ),
     ),
@@ -1085,7 +1087,7 @@ export function parseTenderLine(raw: string): TenderLine | null {
   const singleModel =
     /\bO?D[A-Z]*Z[A-Z0-9]*-\d{3,7}\/\d/.test(text) ||
     /(?<![А-ЯЁа-яё])АО[А-ЯЁ]*-\d/u.test(text) ||
-    /(?<![А-ЯЁа-яё])О[А-ЯЁ]*-\d{3,6}\/\d/u.test(text) ||
+    /(?<![А-ЯЁа-яё])О(?!ПН)[А-ЯЁ]*-\d{3,6}\/\d/u.test(text) ||
     /\bAOD[A-Z]*-\d/.test(text);
   const rootThree = /\/\s*(?:√|sqrt\s*|v)\s*3\b/i.test(raw) && !THREE_PHASE.test(text);
   // IEC "Ii0" / "Ia0i0" are single-phase groups.
@@ -1405,6 +1407,7 @@ function neutralFromList(text: string): number | null {
     const figs = m[3]!.split("/").map((f) => Number(f.trim()));
     const k = names.findIndex(isN);
     if (k < 0 || figs[k] == null || figs[k]! < 95) continue;
+    if (/^N$/i.test(names[k]!) && !(k > 0 && /^HV$/i.test(names[k - 1]!))) continue;
     if (!/^HV[\s-]?N$|^HVN$/i.test(names[k]!) && !names.some((n) => /^(?:HV|line)/i.test(n))) continue;
     return figs[k]!;
   }

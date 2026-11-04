@@ -515,3 +515,24 @@ describe("oltc CLI checker regressions, round 3", () => {
     expect(top(["--line", "40 MVA, 132/33 kV, YNd11, HV/LV ±8x1.25%"])).toBe("CV2III-350Y/72.5-10193W");
   });
 });
+
+describe("oltc CLI checker regressions, final round", () => {
+  const top = (argv: string[]) => capture([...argv, "--no-update-check"]).out.split(/\r?\n/)[0];
+  const out = (argv: string[]) => capture([...argv, "--no-update-check"]).out;
+  it("keeps the HV figure before a multi-word insulation label", () => {
+    expect(out(["--line", "10 MVA, HV 132 kV lightning impulse withstand 650 kV, LV 33 kV, YNd11, OLTC ±8x1.25%"])).toContain("√3×132 kV");
+  });
+  it("reads 'HV/LV 132/33 kV' after an insulation clause", () => {
+    expect(top(["--line", "40 MVA, YNd11, BIL 650/170 kV, HV/LV 132/33 kV, OLTC ±8x1.25%"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+  it("keeps 'HV delta' after 'LV star'", () => {
+    expect(top(["--line", "40 MVA 132/33 kV ±8x1.25%, LV star and HV delta with OLTC"])).toBe("CV2III-350D/145-10193W");
+  });
+  it("does not read a surge arrester code or 'per phase impedance' as single-phase", () => {
+    expect(top(["--line", "ТДН-16000/110 110±9х1,78%/11 кВ, ОПН-110/73 в нейтрали"])).toBe("CV2III-350Y/72.5-10191W");
+    expect(top(["--line", "40 MVA, per phase impedance 10%, 132±8x1.25%/33 kV YNd11"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+  it("does not take a bare N after LV as the HV neutral", () => {
+    expect(out(["--line", "100 MVA 220±8x1.25%/33 kV YNyn0, BIL (HV/LV/N) 1050/170/95 kV"])).not.toContain("17.5");
+  });
+});
