@@ -325,6 +325,10 @@ export function parseCliArgs(argv: string[]): CliArgs {
       out.given.add("positions");
       const [v, n] = take(i, a);
       out.positions = num(v, a);
+      // 2026-11-04 r2 ORDERS-9: --pos 1 gave tap code 10010 (no regulation).
+      if (!Number.isInteger(out.positions) || out.positions < 2) {
+        throw new CliError(`${a} must be a whole number of at least 2`);
+      }
       i = n;
       continue;
     }
@@ -904,6 +908,13 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     if (args.lineOctcKv != null) {
       items.push(`无载开关取 ${args.lineOctcKv} kV 绕组的范围（招标行有两个调压范围）`);
     }
+  }
+  // 2026-11-04 r2 ENGINE-1: echo the across-tap stress; one value alone keeps the Um default grade.
+  if (args.given.has("acrossLi") || args.given.has("acrossAc")) {
+    const li = args.acrossLi != null && args.acrossLi > 0 ? `LI ${args.acrossLi}` : "LI 未指定";
+    const ac = args.acrossAc != null && args.acrossAc > 0 ? `AC ${args.acrossAc}` : "AC 未指定";
+    const half = li.includes("未指定") !== ac.includes("未指定");
+    items.push(`调压绕组间 ${li} / ${ac} kV${half ? "（只给一项：等级不低于 Um 默认）" : ""}`);
   }
   const phases = `相数=${args.phases}${mark("phases")}`;
   if (args.octc) {

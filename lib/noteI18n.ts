@@ -64,6 +64,52 @@ const RULES: Rule[] = [
       id: `Ketahanan antar-tap ${m[1]} tidak ada di data katalog: isolasi antar-tap tidak diperiksa.`,
     }),
   ],
+  // 2026-11-04 r2 engine track (ENGINE-1/2/3, ORDERS-1/9)
+  [
+    /^Selector grade (\S+) is below the Um ([\d.]+) kV default (\S+), from the stated across-tap LI ([\d.]+) \/ AC ([\d.]+) kV\.$/,
+    (m) => ({
+      vi: `Cấp bộ chọn nấc ${m[1]} thấp hơn mặc định ${m[3]} của Um ${m[2]} kV, theo cách điện giữa các nấc đã cho LI ${m[4]} / AC ${m[5]} kV.`,
+      es: `El grado del selector ${m[1]} está por debajo del grado por defecto ${m[3]} para Um ${m[2]} kV, según el aislamiento entre tomas indicado LI ${m[4]} / AC ${m[5]} kV.`,
+      tr: `Seçici sınıfı ${m[1]}, Um ${m[2]} kV için varsayılan ${m[3]} sınıfının altında; verilen kademeler arası yalıtıma göre LI ${m[4]} / AC ${m[5]} kV.`,
+      id: `Kelas selektor ${m[1]} di bawah bawaan ${m[3]} untuk Um ${m[2]} kV, berdasarkan isolasi antar-tap yang diberikan LI ${m[4]} / AC ${m[5]} kV.`,
+    }),
+  ],
+  [
+    /^Selector grade raised one step to (\S+): 330 kV-class winding \(sold practice\)\.$/,
+    (m) => ({
+      vi: `Cấp bộ chọn nấc nâng một bậc lên ${m[1]}: cuộn dây cấp 330 kV (theo đơn hàng đã bán).`,
+      es: `Grado del selector elevado un escalón a ${m[1]}: devanado de clase 330 kV (práctica de ventas).`,
+      tr: `Seçici sınıfı bir kademe ${m[1]}'ye yükseltildi: 330 kV sınıfı sargı (satış uygulaması).`,
+      id: `Kelas selektor dinaikkan satu tingkat ke ${m[1]}: belitan kelas 330 kV (praktik penjualan).`,
+    }),
+  ],
+  [
+    /^Positions must be a whole number of at least 2\.$/,
+    () => ({
+      vi: "Số vị trí phải là số nguyên, ít nhất là 2.",
+      es: "El número de posiciones debe ser un entero de al menos 2.",
+      tr: "Kademe sayısı en az 2 olan bir tam sayı olmalı.",
+      id: "Jumlah posisi harus bilangan bulat, paling sedikit 2.",
+    }),
+  ],
+  [
+    /^Contact (\S+) covers (\d+) positions; (\d+) were asked\.$/,
+    (m) => ({
+      vi: `Tiếp điểm ${m[1]} chỉ có ${m[2]} vị trí; yêu cầu ${m[3]}.`,
+      es: `El contacto ${m[1]} cubre ${m[2]} posiciones; se pidieron ${m[3]}.`,
+      tr: `${m[1]} kontağı ${m[2]} kademeyi karşılar; ${m[3]} istendi.`,
+      id: `Kontak ${m[1]} mencakup ${m[2]} posisi; yang diminta ${m[3]}.`,
+    }),
+  ],
+  [
+    /^(\S+) drum OCTC is sold for star \(Y\) points only; for delta \(D\) use a cage type\.$/,
+    (m) => ({
+      vi: `${m[1]} kiểu trống (OCTC) chỉ bán cho điểm sao (Y); với tam giác (D) hãy dùng kiểu lồng.`,
+      es: `${m[1]} de tambor (OCTC) solo se vende para puntos en estrella (Y); para triángulo (D) use un tipo de jaula.`,
+      tr: `${m[1]} tambur tipi (OCTC) yalnız yıldız (Y) noktası için satılır; üçgen (D) için kafes tipi kullanın.`,
+      id: `${m[1]} tipe drum (OCTC) hanya dijual untuk titik bintang (Y); untuk delta (D) gunakan tipe sangkar.`,
+    }),
+  ],
   // Duty notes (lib/transformer.ts)
   [
     /^35 kV-class neutral sized at Um 40\.5 kV; Russian\/CIS buyers chose 72\.5 on about half of CV\/SV orders; the OS decides\. CM\/CM2\/SHZV start at 72\.5\.$/,

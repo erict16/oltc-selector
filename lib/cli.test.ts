@@ -382,7 +382,9 @@ describe("oltc CLI uneven ranges and tender lines", () => {
   it("sizes a single-phase unit on 3 × MVA, single-phase (WC-03)", () => {
     const a = json(["--line", "333 MVA single-phase 500/220 kV, 500 kV ±13x1.25%, regulation at the neutral point"]);
     // 500 kV-class neutral: Um 126 assumed (UM-1, 11 of 13 orders).
-    expect(a.model).toBe("SHZVI-2400/126C-14271W");
+    // 2026-11-04 r2 ORDERS-1: 330 kV-class neutral one grade up, C → D (T05;
+    // E-SHZVG250001 HMR-PMTT single-phase was sold 126DE).
+    expect(a.model).toBe("SHZVI-2400/126D-14271W");
     expect(a.basis.maxA).toBe(1377.4); // tender Imax 1377.33 A
   });
 

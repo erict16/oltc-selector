@@ -887,6 +887,8 @@ export type SelectorSizePick = {
   size: SelectorSize | null;
   /** The typed grade, when the engine had to raise it. */
   raisedFrom?: SelectorSize;
+  /** The Um default, when a stated across-tap stress took the grade below it. */
+  loweredFrom?: SelectorSize;
 };
 
 /**
@@ -902,6 +904,9 @@ export type SelectorSizePick = {
  * 2026-11-04 audit GRADE-2: A01 (PLN, OS "across tap winding AC82/LI350",
  * Um 170) was sold 3xCM2I-600/170C; the Um map alone gave D. Only distance
  * a is checked, so three-phase line-end / delta units keep the Um default.
+ * 2026-11-04 r2 ENGINE-1: both LI and AC must be stated to go below the Um
+ * default. A missing value read as 0 kV, so LI 260 alone gave 170B.
+ * `minSize`: an untyped floor above the Um default (ORDERS-1, 330 kV class).
  */
 export function resolveSelectorSize(
   um: number,
@@ -910,17 +915,23 @@ export function resolveSelectorSize(
   acrossTapPfKv?: number,
   seriesId?: string,
   statedFloor = false,
+  minSize?: SelectorSize,
 ): SelectorSizePick {
   const allowed = SELECTOR_SIZES_BY_UM[um] ?? ["B", "C", "D", "DE"];
   const needALi = acrossTapBilKv ?? 0;
   const needAPf = acrossTapPfKv ?? 0;
   const typed = requested && requested !== "auto" ? requested : null;
-  const stated = statedFloor && (needALi > 0 || needAPf > 0);
+  const stated = statedFloor && needALi > 0 && needAPf > 0;
+  const umDefault = defaultSelectorSizeForUm(um);
+  const untyped =
+    minSize && SIZE_ORDER.indexOf(minSize) > SIZE_ORDER.indexOf(umDefault)
+      ? minSize
+      : umDefault;
 
   // Floor = typed grade, else the commercial Um default
   // (not always the weakest letter for that Um row).
   const floor = firstAllowedAtOrAbove(
-    typed ?? (stated ? allowed[0]! : defaultSelectorSizeForUm(um)),
+    typed ?? (stated ? allowed[0]! : untyped),
     allowed,
   );
   for (let i = SIZE_ORDER.indexOf(floor); i < SIZE_ORDER.length; i++) {
@@ -928,7 +939,11 @@ export function resolveSelectorSize(
     if (!allowed.includes(cand)) continue;
     // Across-tap winding (a distance) — training case 2: BIL 285 → C
     if (!coversAcrossTap(cand, needALi, needAPf, seriesId)) continue;
-    return typed && cand !== typed ? { size: cand, raisedFrom: typed } : { size: cand };
+    if (typed && cand !== typed) return { size: cand, raisedFrom: typed };
+    if (!typed && SIZE_ORDER.indexOf(cand) < SIZE_ORDER.indexOf(umDefault)) {
+      return { size: cand, loweredFrom: umDefault };
+    }
+    return { size: cand };
   }
   return { size: null };
 }

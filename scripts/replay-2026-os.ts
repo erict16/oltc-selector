@@ -13,7 +13,9 @@ import {
   commercialMatch,
   parseTypeString,
 } from "../lib/orderReplay";
+import { catalogueUmFromRatedKv } from "../lib/deriveUm";
 import { buildOsHonestOctcInput } from "../lib/osReplay";
+import { truncatedTapCode, unevenTapGeometry } from "./replayTap";
 import type {
   Connection,
   Mounting,
@@ -230,6 +232,11 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
   const tm = tapMeta(tap);
   const ust = num(row.ust_max_v) ?? num(row.ust_v) ?? 0;
   const nxm = tapNorm.match(/^(\d+)x(\d+)/i);
+  // 2026-11-04 r2 ORDERS-2: a cut-off code is not a linear count.
+  if (duty.dutyKind !== "octc" && truncatedTapCode(tapNorm, parsed.family)) {
+    return { skip: "tap code truncated" };
+  }
+  const uneven = duty.dutyKind === "octc" ? null : unevenTapGeometry(tapNorm);
 
   // Sold tap code beats OS ± boxes (those often pick up mid-position "12"
   // or +4/−12 leftovers). Short `7`/`9`/`17` / `0909` = linear contact count.
@@ -247,6 +254,8 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
     const stripped = tapNorm.replace(/^0+/, "") || "0";
     linearPositions =
       stripped.length >= 3 ? Number(stripped.slice(-2)) : Number(stripped);
+  } else if (uneven) {
+    // 10181G: positions + mid, as --range does (not ±9).
   } else if (tm.positions && tm.mid != null && tm.mid > 0) {
     plusMinus = (tm.positions - tm.mid) / 2;
   } else {
@@ -276,6 +285,13 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
     regulation: shortLinear ? "linear" : tm.regulation,
     mdu: "none",
   };
+  // 2026-11-04 r2 ORDERS-2: the app passes the tapped winding kV (FAM-2/FAM-3,
+  // the 330 kV-class grade). No OS field marks an auto, so every row is two-winding.
+  const ratedKv = num(row.rated_kv);
+  if (ratedKv && ratedKv > 0) {
+    input.tapWindingKv = ratedKv;
+    if (catalogueUmFromRatedKv(ratedKv) >= 252) input.combinedOnly = true;
+  }
 
   if (duty.dutyKind === "octc") {
     const roman = parsed.phases;
@@ -298,6 +314,8 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
   } else if (plusMinus && plusMinus > 0 && input.regulation !== "linear") {
     input.plusMinusSteps = Math.round(plusMinus);
     if (tm.mid === 1 || tm.mid === 3) input.midPositions = tm.mid;
+  } else if (uneven && input.regulation !== "linear") {
+    Object.assign(input, uneven);
   } else if (linearPositions) {
     input.positions = linearPositions;
   } else if (tm.positions) {
@@ -552,6 +570,8 @@ const lines = [
   "",
   `Source: \`${path.basename(jsonPath)}\``,
   `Rows: ${rows.length}. Judged: ${judged.length}. Skipped: ${counts.skip}.`,
+  // 2026-11-04 r2 ORDERS-2: say what the app-side inputs are.
+  "Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an autotransformer, so every row is read as two-winding); 252 kV class and above is combined only. Cut-off sold tap codes (`1`, `12231` without W/G) are skipped; 10181G / 10183W go in as positions + mid, as `--range` does. Since 2026-11-04 r2 this changed engine #1 on 26 rows (15 in 2026, 11 in 2025, cut-off codes now skipped included), mostly CM2 → SHZV on 225–400 kV windings.",
   "",
   "| verdict | n | % of judged | meaning |",
   "|---|---:|---:|---|",

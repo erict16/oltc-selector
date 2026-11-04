@@ -1,25 +1,26 @@
 # 2026 OS replay
 
 Source: `2026-os-sales.json`
-Rows: 675. Judged: 403. Skipped: 272.
+Rows: 675. Judged: 402. Skipped: 273.
+Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an autotransformer, so every row is read as two-winding); 252 kV class and above is combined only. Cut-off sold tap codes (`1`, `12231` without W/G) are skipped; 10181G / 10183W go in as positions + mid, as `--range` does. Since 2026-11-04 r2 this changed engine #1 on 26 rows (15 in 2026, 11 in 2025, cut-off codes now skipped included), mostly CM2 → SHZV on 225–400 kV windings.
 
 | verdict | n | % of judged | meaning |
 |---|---:|---:|---|
-| exact | 340 | 84.4% | engine #1 = sold type (selector letter / 3× prefix ignored) |
+| exact | 341 | 84.8% | engine #1 = sold type (selector letter / 3× prefix ignored) |
 | family-i-um | 3 | 0.7% | #1 same family / I / Um (tap or grade differs) |
-| family | 25 | 6.2% | #1 same family, different I or Um |
-| eligible | 29 | 7.2% | sold type is in the list, not #1 |
+| family | 35 | 8.7% | #1 same family, different I or Um |
+| eligible | 17 | 4.2% | sold type is in the list, not #1 |
 | oil-vs-vac | 0 | 0.0% | sold oil (CM/CV/CMD), engine vacuum twin |
 | miss | 6 | 1.5% | sold type not produced |
 
-**#1 family+I+Um or better:** 85.1%
+**#1 family+I+Um or better:** 85.6%
 **sold type or vacuum twin eligible:** 98.5%
-**grade (engine #1 vs sold letter):** match 35 / weaker than sold 35 / stronger 40
+**grade (engine #1 vs sold letter):** match 45 / weaker than sold 27 / stronger 40
 
 | sold Um | match | weaker than sold | stronger |
 |---:|---:|---:|---:|
-| 72.5 | 27 | 28 | 0 |
-| 126 | 1 | 7 | 6 |
+| 72.5 | 31 | 26 | 0 |
+| 126 | 7 | 1 | 6 |
 | 170 | 4 | 0 | 28 |
 | 252 | 3 | 0 | 5 |
 | 300 | 0 | 0 | 1 |
@@ -40,13 +41,13 @@ Rows: 675. Judged: 403. Skipped: 272.
 | family | judged | exact | miss |
 |---|---:|---:|---:|
 | CM | 42 | 36 | 0 |
-| CM2 | 51 | 28 | 1 |
+| CM2 | 51 | 29 | 1 |
 | CMD | 7 | 5 | 0 |
 | CV | 77 | 74 | 0 |
 | CV2 | 147 | 140 | 3 |
 | CVT | 2 | 1 | 0 |
 | CZ | 6 | 6 | 0 |
-| HWV | 5 | 4 | 0 |
+| HWV | 4 | 4 | 0 |
 | SHZV | 23 | 10 | 0 |
 | SV | 7 | 7 | 0 |
 | WDG | 15 | 15 | 0 |

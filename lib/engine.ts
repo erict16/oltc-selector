@@ -3,11 +3,13 @@ import {
   FAMILY_MIN_RANK,
   SERIES,
   coveringUms,
+  defaultSelectorSizeForUm,
   internalInsulation,
   nearestCurrent,
   nearestUm,
   phaseToken,
   resolveSelectorSize,
+  SIZE_ORDER,
   stepCapacityKva,
   umForEarthInsulation,
 } from "./catalog";
@@ -18,6 +20,7 @@ import {
   resolveOctcListModel,
 } from "./typeExists";
 import { catalogueUmFromRatedKv } from "./deriveUm";
+import { DRUM_SOLD_ROWS } from "./listIndex";
 import { parseTypeString } from "./parseType";
 import { resolveTapFields } from "./tapCode";
 import type {
@@ -37,6 +40,19 @@ function normOctcContact(raw: string | undefined): string {
   const m = t.match(/^(\d+)x(\d+)$/);
   if (!m) return "";
   return `${Number(m[1])}x${Number(m[2])}`;
+}
+
+/** Positions a DETC contact covers: the first number; 4x5 / 5x5 / 4x2 / 5x2 cover 5. */
+export function octcContactPositions(contact: string): number {
+  const c = normOctcContact(contact);
+  if (c === "4x5" || c === "5x5" || c === "4x2" || c === "5x2") return 5;
+  return Number(c.split("x")[0]) || 0;
+}
+
+/** Position count the OCTC duty asks for: ±N → 2N+1, else positions. */
+function octcPositionsAsked(input: SelectInput): number | undefined {
+  if (input.plusMinusSteps != null && input.plusMinusSteps > 0) return 2 * input.plusMinusSteps + 1;
+  return input.positions;
 }
 
 /**
@@ -76,6 +92,9 @@ export function octcContactCode(
     }
     return hinted && hinted !== drum ? "" : drum;
   }
+  // 2026-11-04 r2 ENGINE-2: a typed cage contact must cover the positions too
+  // (6x5 for 17 positions gave WSLIV-800D/72.5-6x5A).
+  if (hinted && pos != null && octcContactPositions(hinted) < pos) return "";
   if (hinted) return hinted;
   // 2026-11-04: every sold WSLVIII is 5x2 (web has no contact field). More
   // positions keep the derivation, so the list decides.
@@ -571,9 +590,18 @@ function limitScope(input: SelectInput): { en: string; zh: string } {
 function familyMiss(s: SeriesDef, input: SelectInput, tap: TapFields): FamilyMiss | null {
   const octc = isOctcSeries(s);
   const ratings: { current: number; label: string }[] = [];
-  // CZ and the drum WDG / WLG are sold as 3 × phase I only.
-  if (s.id === "cz" || s.id === "wdg" || s.id === "wlg") {
+  // CZ is sold as 3 × phase I only.
+  if (s.id === "cz") {
     for (const c of s.currents.I ?? []) ratings.push({ current: c, label: `3×${s.code}I-${c}` });
+  } else if (s.id === "wdg" || s.id === "wlg") {
+    // 2026-11-04 r2 ENGINE-4: name a sold drum row (WDGIV-1250/72.5; no WDGI
+    // string exists) and the unit count buildAttempts uses for the phases.
+    const n = input.phases === "I" ? 1 : input.phases === "II" ? 2 : 3;
+    for (const c of s.currents.I ?? []) {
+      const row = DRUM_SOLD_ROWS.filter((r) => r.startsWith(s.code) && r.includes(`-${c}/`)).pop();
+      const name = row ? row.replace(/-[^-]+$/, "") : `${s.code}-${c}`;
+      ratings.push({ current: c, label: `${n > 1 ? `${n}×` : ""}${name}` });
+    }
   } else {
     const legal = phaseConnectionLegal(s, input.phases, input.connection);
     if (legal) {
@@ -795,6 +823,14 @@ export function selectOltc(input: SelectInput): SelectOutput {
     errorsEn.push("Step voltage must be a number ≥ 0 (0 = not given).");
     errorsZh.push("级电压须为 ≥ 0 的数字（0 表示未给）。");
   }
+  // 2026-11-04 r2 ORDERS-9: 1 position gave CV2III-350D/40.5-10010 (no regulation).
+  if (
+    input.positions != null &&
+    !(Number.isInteger(input.positions) && input.positions >= 2)
+  ) {
+    errorsEn.push("Positions must be a whole number of at least 2.");
+    errorsZh.push("档位数须为不小于 2 的整数。");
+  }
 
   if (errorsEn.length) {
     return { ok: false, results: [], errorsEn, errorsZh };
@@ -963,6 +999,21 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const octc = isOctcSeries(s);
         const contact = octc ? octcContactCode(input, s.id) : "";
         if (octc && !contact) continue;
+        // 2026-11-04 r2 ORDERS-1: a 330 kV-class neutral at Um ≤ 126 was sold one
+        // grade above the Um default on 5 of 6 designs (HMT 400 kV 126D ×9 groups,
+        // Siemens Brazil 440 kV and HMR 330 kV 72.5C; EFACEC bought 126C). Held
+        // out: fit on 2025 it gains 8 / loses 0 on 2026; fit on 2026 it nets +1 on 2025.
+        const umDefault = defaultSelectorSizeForUm(att.um);
+        const classBump =
+          !octc &&
+          s.usesSelectorSize &&
+          input.transformerKind !== "auto" &&
+          (input.tapWindingKv ?? 0) >= 330 &&
+          att.um <= 126 + 0.1 &&
+          !((input.acrossTapBilKv ?? 0) > 0) &&
+          !((input.acrossTapPfKv ?? 0) > 0)
+            ? SIZE_ORDER[SIZE_ORDER.indexOf(umDefault) + 1]
+            : undefined;
         const gradePick =
           !octc && s.usesSelectorSize
             ? resolveSelectorSize(
@@ -974,6 +1025,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
                 // Only a, not b, is checked: the stated stress may lower the
                 // grade where no phase-to-phase gap matters (2026-11-04 GRADE-2).
                 att.phases === "I" || (att.phases === "III" && input.connection === "Y"),
+                classBump,
               )
             : null;
         if (gradePick && gradePick.size == null) {
@@ -1139,6 +1191,26 @@ export function selectOltc(input: SelectInput): SelectOutput {
           );
           cautionsZh.push(
             `选择器等级已由 ${gradePick.raisedFrom} 升为 ${selectorSize}（Um ${att.um} kV 或调压绕组间绝缘要求）。`,
+          );
+        }
+        if (
+          classBump &&
+          !gradePick?.raisedFrom &&
+          (input.selectorSize ?? "auto") === "auto" &&
+          SIZE_ORDER.indexOf(selectorSize) > SIZE_ORDER.indexOf(umDefault)
+        ) {
+          cautionsEn.push(
+            `Selector grade raised one step to ${selectorSize}: 330 kV-class winding (sold practice).`,
+          );
+          cautionsZh.push(`选择器等级上调一级为 ${selectorSize}：330 kV 级绕组（按已售订单）。`);
+        }
+        // 2026-11-04 r2 ENGINE-1: a grade below the Um default rests on the stated values.
+        if (gradePick?.loweredFrom) {
+          cautionsEn.push(
+            `Selector grade ${selectorSize} is below the Um ${att.um} kV default ${gradePick.loweredFrom}, from the stated across-tap LI ${input.acrossTapBilKv} / AC ${input.acrossTapPfKv} kV.`,
+          );
+          cautionsZh.push(
+            `选择器等级 ${selectorSize} 低于 Um ${att.um} kV 的默认 ${gradePick.loweredFrom}，依据给定的调压绕组间 雷电 ${input.acrossTapBilKv} / 工频 ${input.acrossTapPfKv} kV。`,
           );
         }
         if (
@@ -1359,6 +1431,47 @@ export function selectOltc(input: SelectInput): SelectOutput {
             : true,
     );
     const why = noFitReasons(locked, input, tap);
+    // 2026-11-04 r2 ENGINE-2: a typed contact short of the positions is the block.
+    const hinted = normOctcContact(input.octcContact);
+    const asked = octcPositionsAsked(input);
+    if (wantOctc && hinted && asked != null && octcContactPositions(hinted) < asked) {
+      const cov = octcContactPositions(hinted);
+      return {
+        ok: false,
+        results: [],
+        errorsEn: [`Contact ${hinted} covers ${cov} positions; ${asked} were asked.`, ...(why?.en ?? [])],
+        errorsZh: [`触头 ${hinted} 只覆盖 ${cov} 个工作位置，要求 ${asked} 个。`, ...(why?.zh ?? [])],
+      };
+    }
+    // 2026-11-04 r2 ENGINE-3: WDG/WLG left by the Y/D filter used to read as
+    // "Um above the highest OCTC class". Name the connection when that family
+    // would fit on its own connection. Only the drum families are Y-only.
+    if (wantOctc && input.connection === "D") {
+      const conn = input.connection;
+      const dropped = SERIES.filter(
+        (s) =>
+          isOctcSeries(s) &&
+          s.medium === "oil" &&
+          !s.vacuum &&
+          seriesMatchesMounting(s, input) &&
+          seriesMatchesMedium(s, input) &&
+          !s.connections.includes(conn) &&
+          !s.connections.includes("any") &&
+          (!wantStruct || wantStruct === "auto" || s.structure === wantStruct),
+      ).filter((s) => {
+        const m = familyMiss(s, { ...input, connection: s.connections[0]! }, tap);
+        return m != null && !m.blocks.length;
+      });
+      if (dropped.length) {
+        const codes = dropped.map((s) => s.code).join("/");
+        return {
+          ok: false,
+          results: [],
+          errorsEn: [`${codes} drum OCTC is sold for star (Y) points only; for delta (D) use a cage type.`],
+          errorsZh: [`${codes} 鼓式无载只用于星点（Y）；角接（D）请用笼式。`],
+        };
+      }
+    }
     if (why) {
       return { ok: false, results: [], errorsEn: why.en, errorsZh: why.zh };
     }
