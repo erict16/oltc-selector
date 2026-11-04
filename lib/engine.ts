@@ -57,7 +57,10 @@ export function octcContactCode(
   // used to stand for 7–12 positions and a 12x12 hint made WSGVII strings.
   if (seriesId === "wsg") {
     if (pos != null && pos > 6) return "";
-    if (hinted) return hinted === "4x5" || hinted === "6x5" ? hinted : "";
+    // A typed contact must cover the positions too (4x5 → 5, 6x5 → 6).
+    if (hinted === "4x5") return pos == null || pos <= 5 ? hinted : "";
+    if (hinted === "6x5") return hinted;
+    if (hinted) return "";
     if (pos == null || pos <= 5) return "4x5";
     return "6x5";
   }
@@ -568,7 +571,8 @@ function limitScope(input: SelectInput): { en: string; zh: string } {
 function familyMiss(s: SeriesDef, input: SelectInput, tap: TapFields): FamilyMiss | null {
   const octc = isOctcSeries(s);
   const ratings: { current: number; label: string }[] = [];
-  if (s.id === "cz") {
+  // CZ and the drum WDG / WLG are sold as 3 × phase I only.
+  if (s.id === "cz" || s.id === "wdg" || s.id === "wlg") {
     for (const c of s.currents.I ?? []) ratings.push({ current: c, label: `3×${s.code}I-${c}` });
   } else {
     const legal = phaseConnectionLegal(s, input.phases, input.connection);

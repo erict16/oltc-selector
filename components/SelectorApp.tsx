@@ -1780,7 +1780,9 @@ export function SelectorApp() {
                                 if (kind === "auto") pickKind("two_winding");
                                 // 2026-11-04: an unedited range starts at ±2 (6x5,
                                 // as the CLI), not the OLTC ±8 (18x17E).
-                                if (tapRange == null) {
+                                // Only the untouched ±8 OLTC default becomes ±2; a ±5
+                                // read from a tender line or picked stays (current 8% low).
+                                if (tapRange == null && !lineRead && pm === "8") {
                                   setTapPlus(2);
                                   setTapMinus(2);
                                   commitTapRange(2, 2, stepPercentPct);

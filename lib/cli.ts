@@ -165,6 +165,11 @@ export function parseCliArgs(argv: string[]): CliArgs {
       continue;
     }
     if (a === "--iu" || a === "--imax") {
+      // Two current figures used to overwrite each other in flag order.
+      if (out.given.has(a === "--iu" ? "imaxFlag" : "iuFlag")) {
+        throw new CliError("Give --iu or --imax, not both");
+      }
+      if (a === "--iu") out.given.add("iuFlag");
       out.given.add("iu");
       // --imax beside --mva is the OS Imax (moved after the loop).
       if (a === "--imax") out.given.add("imaxFlag");
@@ -488,6 +493,12 @@ function applyRange(out: CliArgs, plus: number, minus: number): void {
   } else {
     out.positions = g.positions;
     out.given.add("positions");
+  }
+  if (out.mid != null && (g.mid === 1 || g.mid === 3) && out.mid !== g.mid) {
+    // --mid 3 on +7/−10 gave 10183W: 15 steps for a 17-step range.
+    throw new CliError(
+      `--mid ${out.mid} does not fit +${plus}/-${minus}: the Fig. 3-3 row has mid ${g.mid}.`,
+    );
   }
   if (out.mid == null && (g.mid === 1 || g.mid === 3)) out.mid = g.mid;
 }

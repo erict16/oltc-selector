@@ -420,3 +420,47 @@ describe("oltc CLI uneven ranges and tender lines", () => {
     expect([on.model, on.basis.maxA]).toEqual(["CV2III-350Y/72.5-10193W", 223.1]);
   });
 });
+
+// 2026-11-04 checker round: defects found after the three audit tracks merged.
+describe("oltc CLI checker regressions", () => {
+  const top = (argv: string[]) =>
+    capture([...argv, "--no-update-check"]).out.split(/\r?\n/)[0];
+  const errOf = (argv: string[]) => capture([...argv, "--no-update-check"]).err;
+
+  it("keeps a stated ±N × s % beside an impedance figure", () => {
+    expect(top(["--line", "20 MVA 66/11 kV Dyn1, OLTC on HV, Uz 8%, ±10x2.5%"])).toBe(
+      "3xCM2I-500/72.5B-12233W",
+    );
+    expect(top(["--line", "25 MVA YNd11 Uk 10.5% 110±8x1.25%/11 kV"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+
+  it("does not take 'highest voltage' as the tapped winding", () => {
+    const out = capture(["--line", "40 MVA YNd11 rated voltage 132 kV highest voltage 145 kV ±10x1.25%", "--no-update-check"]).out;
+    expect(out).toContain("√3×132 kV");
+  });
+
+  it("does not read an auxiliary single-phase supply as a single-phase unit", () => {
+    expect(top(["--line", "40 MVA 132±8x1.25%/33 kV YNd11, auxiliary supply 230 V single-phase"])).toBe(
+      "CV2III-350Y/72.5-10193W",
+    );
+  });
+
+  it("joins '1 600 kVA' after a vector group", () => {
+    expect(capture(["--line", "Dyn11 1 600 kVA 11±2x2.5%/0.4 kV", "--no-update-check"]).out).toContain("48.5 A");
+  });
+
+  it("refuses a --mid that does not fit the uneven range, and --iu with --imax", () => {
+    expect(errOf(["--range", "+7/-10x1.5%", "--mid", "3", "--mva", "65", "--kv", "150"])).toContain("does not fit");
+    expect(errOf(["--mva", "63", "--kv", "115", "--iu", "400", "--imax", "334"])).toContain("not both");
+  });
+
+  it("refuses a typed drum contact that covers fewer positions", () => {
+    expect(capture(["--octc", "--iu", "600", "--um", "40.5", "--structure", "drum", "--pos", "6", "--contact", "4x5", "--no-update-check"]).code).toBe(1);
+  });
+
+  it("says when a stated Ust below the derived one is not used", () => {
+    expect(capture(["--mva", "25", "--kv", "110", "--tap", "neutral", "--ust", "300", "--no-update-check"]).out).toContain(
+      "低于按容量和档距算的",
+    );
+  });
+});

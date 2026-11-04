@@ -17,7 +17,7 @@
  * 20261103) so the file stays well under 15 s.
  * Full run: GRID_FULL=1 npx vitest run lib/gridInvariants.test.ts
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   CliError,
   cliToSelectInput,
@@ -34,6 +34,8 @@ import { resolveTapFields } from "./tapCode";
 import type { ModelResult, SelectInput, SeriesDef } from "./types";
 
 const FULL = process.env.GRID_FULL === "1";
+// The full grid takes minutes on a busy machine; the sample stays fast.
+if (FULL) vi.setConfig({ testTimeout: 900_000 });
 const SEED = Number(process.env.GRID_SEED ?? 20261103);
 /** Sampled cases per check in the default run. */
 const SAMPLE = {
@@ -430,7 +432,7 @@ describe(`grid invariants (${FULL ? "full grid" : `sample, seed ${SEED}`})`, () 
     // The sample must exercise the engine, not just CLI refusals.
     expect(rep.ok).toBeGreaterThan(rep.cases * 0.5);
     // 1.6 s alone; the full parallel suite pushed it past the 5 s default.
-  }, 20000);
+  }, FULL ? 900_000 : 20_000);
 
   it("220 kV class tapped windings and autotransformers never get CV/CV2/SV", async () => {
     const rep = await reportOnce();

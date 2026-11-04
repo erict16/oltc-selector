@@ -147,6 +147,15 @@ const RULES: Rule[] = [
     }),
   ],
   [
+    /^OS Ust (\d+) V is below the (\d+) V from the rating and step\. Sized on (\d+) V\.$/,
+    (m) => ({
+      vi: `Ust trong OS ${m[1]} V thấp hơn ${m[2]} V tính từ công suất và nấc. Chọn theo ${m[3]} V.`,
+      es: `La Ust de la OS, ${m[1]} V, es menor que los ${m[2]} V de la potencia y el escalón. Dimensionado con ${m[3]} V.`,
+      tr: `OS Ust ${m[1]} V, güç ve kademeden çıkan ${m[2]} V değerinin altında. ${m[3]} V ile seçildi.`,
+      id: `Ust OS ${m[1]} V di bawah ${m[2]} V dari rating dan tap. Dipilih pada ${m[3]} V.`,
+    }),
+  ],
+  [
     /^OS Ust (\d+) V looks like a line value; the physical step is (\d+) V\. Sized on the OS figure\.$/,
     (m) => ({
       vi: `Ust trong OS ${m[1]} V giống giá trị điện áp dây; điện áp nấc thực là ${m[2]} V. Chọn theo số OS.`,
@@ -466,7 +475,7 @@ const RULES: Rule[] = [
     }),
   ],
   [
-    /^Autotransformer HV class Um ([\d.]+) kV is above the catalogue \(top 363 kV\)\. Give the switch's insulation to earth from the OS: ([\d., ]+) kV\.$/,
+    /^Autotransformer HV class Um ([\d.]+) kV is above the catalogue \(top 363 kV\)\. Give the switch's insulation to earth from the OS \(CLI: --earth-um\): ([\d., ]+) kV\.$/,
     (m) => ({
       vi: `Cấp cao áp của biến áp tự ngẫu Um ${m[1]} kV vượt catalogue (cao nhất 363 kV). Nhập cách điện với đất của bộ ĐAPT theo OS: ${m[2]} kV.`,
       es: `La clase de AT del autotransformador, Um ${m[1]} kV, supera el catálogo (máx. 363 kV). Indique el aislamiento a tierra del cambiador según la OS: ${m[2]} kV.`,

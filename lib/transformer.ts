@@ -267,6 +267,10 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     if ((auto || spec.winding === "star") && ratio >= 1.7 && ratio <= 1.76) {
       cautionsZh.push(`OS Ust ${Math.round(statedStepV)} V 像线电压值；实际级电压 ${Math.round(derivedStepV!)} V。按 OS 值选。`);
       cautionsEn.push(`OS Ust ${Math.round(statedStepV)} V looks like a line value; the physical step is ${Math.round(derivedStepV!)} V. Sized on the OS figure.`);
+    } else if (derivedStepV != null && statedStepV < derivedStepV * 0.97) {
+      // A lower stated Ust was dropped with no word (checker, track B).
+      cautionsZh.push(`OS Ust ${Math.round(statedStepV)} V 低于按容量和档距算的 ${Math.round(derivedStepV)} V，按 ${Math.round(derivedStepV)} V 选。`);
+      cautionsEn.push(`OS Ust ${Math.round(statedStepV)} V is below the ${Math.round(derivedStepV)} V from the rating and step. Sized on ${Math.round(derivedStepV)} V.`);
     }
   }
 
@@ -344,8 +348,8 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     const mvClass = catalogueUmFromRatedKv(spec.mvKv);
     const open = [72.5, 126, 170, 252, 300, 363].filter((u) => u >= mvClass - 0.01);
     return fail(
-      `自耦变高压 Um ${umKv} kV 超出目录（最高 363 kV）。请按 OS 填开关对地绝缘，可选 ${open.join("、")} kV。`,
-      `Autotransformer HV class Um ${umKv} kV is above the catalogue (top 363 kV). Give the switch's insulation to earth from the OS: ${open.join(", ")} kV.`,
+      `自耦变高压 Um ${umKv} kV 超出目录（最高 363 kV）。请按 OS 填开关对地绝缘（CLI：--earth-um），可选 ${open.join("、")} kV。`,
+      `Autotransformer HV class Um ${umKv} kV is above the catalogue (top 363 kV). Give the switch's insulation to earth from the OS (CLI: --earth-um): ${open.join(", ")} kV.`,
     );
   }
   if (!Number.isFinite(umKv) || umKv > 363) {
@@ -404,7 +408,7 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     cautionsEn.push("Not checked: impulse across the tap winding (a), tie-in resistor.");
     // 2026-11-04 audit D5 (IEC 60214-2 §7.2.1.4.2): HMR MV-line OS Ust ran
     // −3.6…+5.7% around nominal. A stated Ust is the floor; else say so.
-    if (!(statedStepV > 0)) {
+    if (!(statedStepV > 0 && statedStepV >= (derivedStepV ?? 0) - 0.5)) {
       cautionsZh.push("变磁通：各档 Ust 和电流不同，极限档 Ust 未校验。请向厂家要分接表。");
       cautionsEn.push("Variable flux: Ust and current differ per tap; Ust at the extreme tap is not checked. Get the maker's per-tap table.");
     }

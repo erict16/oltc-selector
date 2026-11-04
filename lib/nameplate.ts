@@ -129,9 +129,13 @@ export function normalizeTenderText(raw: string): string {
       .replace(/[×✕✖*]/g, "x")
       // 2026-11-04: "31,500 kVA" / "2 500 kVA" is one number; read as 31.5 / 0.5 kVA
       // before, the current came out 1000× low. Not a ratio digit ("33/11 630 kVA").
-      .replace(/(?<![\d/.,]\s?)\b\d{1,3}(?:[,   ]\d{3})+(?=\s*kVA)/gi, (m) =>
-        m.replace(/[,   ]/g, ""),
-      )
+      .replace(/\b\d{1,3}(?:[,   ]\d{3})+(?=\s*kVA)/gi, (m: string, offset: number, s: string) => {
+        // "33/11 630 kVA": 630 follows a ratio figure, it is not 11 630.
+        // "Dyn11 1 600 kVA": a clock number is not a figure; join the 1 600.
+        const before = s.slice(Math.max(0, offset - 12), offset);
+        if (/[\d/.,]\s?$/.test(before) && !/[A-Za-z]\d{1,2}\s$/.test(before)) return m;
+        return m.replace(/[,   ]/g, "");
+      })
       // 2026-11-04: a comma after a vector-group clock is a separator, not a
       // decimal: "YNd11,66±…" was read as 11.66 kV.
       .replace(/(?<![DdYyNnaZz]\d{0,2})(\d),(\d)/g, "$1.$2")
@@ -303,7 +307,8 @@ function findRange(text: string): RangeHit | null {
     ...[...text.matchAll(sym)].map((m) => ({ m, plus: Number(m[1]), minus: Number(m[1]), step: m[2] })),
     ...[...text.matchAll(asym)].map((m) => ({ m, plus: Number(m[1]), minus: Number(m[2]), step: m[3] })),
   ]
-    .filter((h) => !nearTolerance(text, h.m.index ?? 0))
+    // A stated step (±10x2.5 %) is a tap range even beside "Uz 8 %".
+    .filter((h) => h.step != null || !nearTolerance(text, h.m.index ?? 0))
     .sort((x, y) => (x.m.index ?? 0) - (y.m.index ?? 0));
   const real = steps.filter((h) => h.plus + h.minus > 0);
   const s = real[0];
@@ -406,7 +411,7 @@ function findVoltages(
     .filter((h) => h.kv > 0.2 && h.kv < 1200)
     .filter(
       (h) =>
-        !/\b(?:BIL|LIWL|LI|SIL|AC|Um|insulation|withstand|neutral)\b[^\d]{0,15}$/i.test(
+        !/\b(?:BIL|LIWL|LI|SIL|AC|Um|insulation|withstand|neutral|highest|maximum|max\.?|equipment)\b[^\d]{0,20}$/i.test(
           text.slice(Math.max(0, h.index - 30), h.index),
         ),
     );
@@ -563,7 +568,13 @@ export function parseTenderLine(raw: string): TenderLine | null {
 
   // 2026-11-04 T05: "333 MVA single-phase" was sized as a three-phase 333 MVA,
   // a third of the winding current.
-  const phases = /single[\s-]?phase|\b1[\s-]?ph(?:ase)?\b|单相/i.test(text) ? ("I" as const) : null;
+  // "auxiliary supply 230 V single-phase" is not the transformer.
+  const phases =
+    /\bMVA\b[^,;]{0,25}single[\s-]?phase|single[\s-]?phase\s+(?:unit|units|transformer|auto|bank|\d)|\b1[\s-]?ph(?:ase)?\s+(?:unit|transformer|\d)|单相(?!电源|供电|交流)/i.test(
+      text,
+    )
+      ? ("I" as const)
+      : null;
   if (phases && mva != null) notes.push({ key: "single_phase", vars: { mva } });
   // 2026-11-04 T01/T03: "coarse/fine" and "linear" words were ignored ("non-linear load" is not linear).
   const regulation: Regulation | null = /coarse[\s/-]*fine|粗细调/i.test(text)
