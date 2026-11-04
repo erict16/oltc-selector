@@ -20,13 +20,21 @@ import {
   EARTH_INSULATION,
   umForEarthInsulation,
 } from "@/lib/catalog";
+import { geometryForRange } from "@/lib/nameplate";
 import {
-  geometryForRange,
-  lineMinusSteps,
-  parseTenderLine,
-  tenderLineSettings,
-  type TenderLine,
-} from "@/lib/nameplate";
+  INITIAL_FORM,
+  commitRange,
+  formDiff,
+  formSelectInput,
+  formSpec,
+  geometryForPm,
+  pickKind as pickKindIn,
+  readLine,
+  stepMovesRange,
+  toOctc,
+  toOltc,
+  type FormState,
+} from "@/lib/formState";
 import { copyText } from "@/lib/clipboard";
 import { parseTypeString } from "@/lib/parseType";
 import { decimalDraft } from "@/lib/decimal";
@@ -49,12 +57,8 @@ import {
   defaultMid,
   defaultPitch,
   lookupByPositions,
-  lookupDiagram,
   midControl,
-  pitchFromPlusMinus,
   pmStepOptionsFor,
-  positionsFor,
-  preferredMid,
   type ParsedTapRange,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
@@ -90,7 +94,6 @@ import {
   type StructureKind,
 } from "@/lib/types";
 
-/** Apply brochure (±N, mid) geometry onto a SelectInput patch. */
 function mediumFor(
   mounting: SelectInput["mounting"],
   preferVacuum: boolean,
@@ -99,21 +102,6 @@ function mediumFor(
   // 2026-11-04: reactor is HWDK, oil only; the arc toggle is hidden there.
   if (mounting === "reactor") return "oil";
   return preferVacuum ? "oil_vacuum" : "oil";
-}
-
-function geometryForPm(
-  n: number,
-  regulation: SelectInput["regulation"],
-  mid?: 1 | 3,
-): Pick<SelectInput, "plusMinusSteps" | "positions" | "midPositions" | "pitch"> {
-  const m = mid ?? preferredMid(n, regulation);
-  const row = lookupDiagram(n, m, regulation);
-  return {
-    plusMinusSteps: n,
-    midPositions: m,
-    positions: row?.positions ?? positionsFor(n, m),
-    pitch: (row?.pitch ?? pitchFromPlusMinus(n, m)) as 10 | 12 | 14 | 16 | 18,
-  };
 }
 
 const MVA_OPTIONS = [
@@ -132,27 +120,6 @@ const SAFETY_K_OPTIONS = [
 
 /** Catalogue Um classes offered when the OS states the switch insulation. */
 const EARTH_UM_OPTIONS = [40.5, 72.5, 126, 145, 170, 252, 300, 363] as const;
-
-const defaultInput: SelectInput = {
-  mounting: "in_tank",
-  medium: "oil_vacuum",
-  preferVacuum: true,
-  phases: "III",
-  connection: "Y",
-  throughCurrentA: 400,
-  umKv: 0,
-  stepVoltageV: 1500,
-  regulation: "reversing",
-  // Brochure default: ±8 mid3 → 10193W (most common); must stay in sync with `pm`
-  plusMinusSteps: 8,
-  positions: 19,
-  pitch: 10,
-  midPositions: 3,
-  selectorSize: "auto",
-  preferStructure: "auto",
-  mdu: "none",
-  dutyKind: "oltc",
-};
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -587,45 +554,42 @@ function modelNodes(model: string) {
 export function SelectorApp() {
   const lang = useAppLang();
   const setLang = setAppLang;
-  const [input, setInput] = useState<SelectInput>(defaultInput);
-  const [pm, setPm] = useState("8");
+  // First paint is lib/formState INITIAL_FORM, so the tests start where the page does.
+  const f0 = INITIAL_FORM;
+  const [input, setInput] = useState<SelectInput>(f0.input);
+  const [pm, setPm] = useState(f0.pm);
   /** Default: fill transformer / tap-winding voltage; engine still gets OLTC Um. */
-  const [voltageMode, setVoltageMode] = useState<"winding" | "equipment">(
-    "winding",
-  );
-  const [windingRatedKv, setWindingRatedKv] = useState(
-    DEFAULT_WINDING_RATED_KV,
-  );
-  const [currentMode, setCurrentMode] = useState<"current" | "capacity">(
-    "capacity",
-  );
-  const [transformerMva, setTransformerMva] = useState(25);
-  const [mvaCustom, setMvaCustom] = useState(false);
-  const [tapPlus, setTapPlus] = useState(8);
-  const [tapMinus, setTapMinus] = useState(8);
-  const [stepPercentPct, setStepPercentPct] = useState(1.25);
-  const [stepPctCustom, setStepPctCustom] = useState(false);
-  const [safetyK, setSafetyK] = useState(1);
+  const [voltageMode, setVoltageMode] = useState(f0.voltageMode);
+  const [windingRatedKv, setWindingRatedKv] = useState(f0.windingRatedKv);
+  const [currentMode, setCurrentMode] = useState(f0.currentMode);
+  const [transformerMva, setTransformerMva] = useState(f0.transformerMva);
+  const [mvaCustom, setMvaCustom] = useState(f0.mvaCustom);
+  const [tapPlus, setTapPlus] = useState(f0.tapPlus);
+  const [tapMinus, setTapMinus] = useState(f0.tapMinus);
+  const [stepPercentPct, setStepPercentPct] = useState(f0.stepPercentPct);
+  const [stepPctCustom, setStepPctCustom] = useState(f0.stepPctCustom);
+  const [safetyK, setSafetyK] = useState(f0.safetyK);
   const [safetyKCustom, setSafetyKCustom] = useState(false);
-  const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
-  const [kind, setKind] = useState<TransformerKind>("two_winding");
-  const [tapPoint, setTapPoint] = useState<TapPoint>("neutral");
-  const [winding, setWinding] = useState<WindingConnection>("star");
+  const [tapRange, setTapRange] = useState(f0.tapRange);
+  const [kind, setKind] = useState(f0.kind);
+  const [tapPoint, setTapPoint] = useState(f0.tapPoint);
+  const [winding, setWinding] = useState(f0.winding);
   /** Line end set by delta, not by the user: star puts the neutral back. */
-  const [tapForced, setTapForced] = useState(false);
-  const [hvKv, setHvKv] = useState(220);
-  const [mvKv, setMvKv] = useState(110);
+  const [tapForced, setTapForced] = useState(f0.tapForced);
+  const [hvKv, setHvKv] = useState(f0.hvKv);
+  const [mvKv, setMvKv] = useState(f0.mvKv);
   /** OLTC insulation to earth stated by the OS / maker. 0 = by rule. */
-  const [earthUm, setEarthUm] = useState(0);
+  const [earthUm, setEarthUm] = useState(f0.earthUm);
   /** OS / maker Imax (A) and Ust (V) on the capacity path. 0 = not given. */
-  const [osImaxA, setOsImaxA] = useState(0);
-  const [osUstV, setOsUstV] = useState(0);
+  const [osImaxA, setOsImaxA] = useState(f0.osImaxA);
+  const [osUstV, setOsUstV] = useState(f0.osUstV);
   /** Buyer's country for a neutral's assumed Um ("" = voltage rule only). */
-  const [market, setMarket] = useState("");
+  const [market, setMarket] = useState(f0.market);
   /** Tender line as typed, and what was read from it (null = not read). */
   const [lineText, setLineText] = useState("");
-  const [lineRead, setLineRead] = useState<TenderLine | null>(null);
-  const [lineFailed, setLineFailed] = useState<false | "lineFail" | "lineFailAutoMv">(false);
+  const [lineRead, setLineRead] = useState(f0.lineRead);
+  const [lineFailed, setLineFailed] = useState(f0.lineFailed);
+  const [oltcRegulation, setOltcRegulation] = useState(f0.oltcRegulation);
   const [altsOpen, setAltsOpen] = useState(false);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
@@ -639,6 +603,71 @@ export function SelectorApp() {
   const isOctc = (input.dutyKind ?? "oltc") === "octc";
   const isLinear = isOctc || input.regulation === "linear";
 
+  /** The form as one value, for the pure transitions in lib/formState. */
+  const formNow = (): FormState => ({
+    input,
+    pm,
+    tapPlus,
+    tapMinus,
+    tapRange,
+    stepPercentPct,
+    stepPctCustom,
+    currentMode,
+    voltageMode,
+    windingRatedKv,
+    transformerMva,
+    mvaCustom,
+    safetyK,
+    kind,
+    tapPoint,
+    winding,
+    tapForced,
+    hvKv,
+    mvKv,
+    earthUm,
+    osImaxA,
+    osUstV,
+    market,
+    lineRead,
+    lineFailed,
+    oltcRegulation,
+  });
+  const setters: { [K in Exclude<keyof FormState, "input">]: (v: FormState[K]) => void } = {
+    pm: setPm,
+    tapPlus: setTapPlus,
+    tapMinus: setTapMinus,
+    tapRange: setTapRange,
+    stepPercentPct: setStepPercentPct,
+    stepPctCustom: setStepPctCustom,
+    currentMode: setCurrentMode,
+    voltageMode: setVoltageMode,
+    windingRatedKv: setWindingRatedKv,
+    transformerMva: setTransformerMva,
+    mvaCustom: setMvaCustom,
+    safetyK: setSafetyK,
+    kind: setKind,
+    tapPoint: setTapPoint,
+    winding: setWinding,
+    tapForced: setTapForced,
+    hvKv: setHvKv,
+    mvKv: setMvKv,
+    earthUm: setEarthUm,
+    osImaxA: setOsImaxA,
+    osUstV: setOsUstV,
+    market: setMarket,
+    lineRead: setLineRead,
+    lineFailed: setLineFailed,
+    oltcRegulation: setOltcRegulation,
+  };
+  /** Run one transition and set only the fields it changed. */
+  const updateForm = (step: (f: FormState) => FormState) => {
+    const was = formNow();
+    const { input: inputDiff, ...rest } = formDiff(was, step(was));
+    if (inputDiff) setInput((s) => ({ ...s, ...inputDiff }));
+    for (const k of Object.keys(rest) as Array<keyof typeof rest>) {
+      (setters[k] as (v: unknown) => void)(rest[k]);
+    }
+  };
 
   const commitSafetyK = (n: number) => {
     setSafetyK(n);
@@ -707,15 +736,7 @@ export function SelectorApp() {
     setInput((s) => ({ ...s, connection: p === "neutral" ? "Y" : "D" }));
   };
 
-  const pickKind = (k: TransformerKind) => {
-    if (k === kind) return;
-    setKind(k);
-    const p: TapPoint =
-      k === "auto" ? "auto_junction" : winding === "delta" ? "line_end" : "neutral";
-    setTapPoint(p);
-    setTapForced(k === "two_winding" && winding === "delta");
-    setInput((s) => ({ ...s, connection: p === "neutral" ? "Y" : "D" }));
-  };
+  const pickKind = (k: TransformerKind) => updateForm((f) => pickKindIn(f, k));
 
   const pickWinding = (w: WindingConnection) => {
     setWinding(w);
@@ -731,95 +752,10 @@ export function SelectorApp() {
   /**
    * Fill the transformer and range fields from one tender line. The kind,
    * tap point and winding come from the vector group, so a YNa0d11 line
-   * cannot be sized as a two-winding job by a missed click.
+   * cannot be sized as a two-winding job by a missed click. Same mapping as
+   * the CLI --line (lib/formState readLine).
    */
-  const readTenderLine = () => {
-    const tl = parseTenderLine(lineText);
-    // Same mapping as the CLI --line (lib/nameplate tenderLineSettings).
-    const read = tl ? tenderLineSettings(tl, { octc: isOctc }) : null;
-    if (!tl || !read || !read.ok) {
-      // 2026-11-04: an autotransformer line with no MV kept the form's old MV
-      // (110 kV) and showed a type; the CLI refused. Refuse here too.
-      setLineRead(null);
-      setLineFailed(read && !read.ok && read.reason === "auto_needs_mv" ? "lineFailAutoMv" : "lineFail");
-      return;
-    }
-    const s = read.s;
-    setLineFailed(false);
-    setLineRead(tl);
-    setCurrentMode("capacity");
-    setVoltageMode("winding");
-    // Single-phase: 3 × the unit MVA, on a single-phase switch.
-    setTransformerMva(s.mva);
-    setMvaCustom(false);
-    setKind(s.kind);
-    if (s.kind === "auto") {
-      if (s.hvKv != null) setHvKv(s.hvKv);
-      if (s.mvKv != null) setMvKv(s.mvKv);
-    } else {
-      if (s.tapKv != null) setWindingRatedKv(s.tapKv);
-      setWinding(s.winding);
-    }
-    setTapPoint(s.tapPoint);
-    setTapForced(false);
-    setEarthUm(s.earthUm ?? 0);
-    // 2026-11-04: a line with no step % or range takes the CLI defaults; the
-    // previous line's 2.5 % and ±10 used to stay and change the type.
-    setStepPercentPct(s.stepPct != null && s.stepPct > 0 ? s.stepPct : 1.25);
-    setStepPctCustom(false);
-    const conn = s.tapPoint === "neutral" ? "Y" : "D";
-    const phases = (cur: SelectInput["phases"]): SelectInput["phases"] =>
-      s.phases ?? (lineRead?.phases === "I" && cur === "I" ? "III" : cur);
-    const linearLine = s.regulation === "linear" && !isOctc;
-    if ((s.plus != null && s.minus != null && s.plus !== s.minus) || linearLine) {
-      // 2026-11-04: an uneven +a/−b keeps W/G on the Fig. 3-3 row Huaming
-      // sold (+4/−12 → 10193W) with the real minus steps; it used to go
-      // linear S + 1 (17 positions: no CV2, often 3 × single-phase).
-      const plus = s.plus ?? 8;
-      const minus = s.minus ?? 8;
-      const reg: SelectInput["regulation"] = isOctc
-        ? "linear"
-        : (s.regulation ?? (input.regulation === "linear" ? "reversing" : input.regulation));
-      const g = geometryForRange(plus, minus, reg);
-      setPm("");
-      setTapPlus(plus);
-      setTapMinus(minus);
-      const range: ParsedTapRange = {
-        plus,
-        minus,
-        positions: g.positions,
-        stepPercent: s.stepPct != null ? s.stepPct / 100 : null,
-      };
-      setTapRange(range);
-      setInput((st) => ({
-        ...st,
-        connection: conn,
-        umKv: 0,
-        phases: phases(st.phases),
-        regulation: reg,
-        plusMinusSteps: g.plusMinusSteps,
-        positions: g.positions,
-        midPositions: g.mid,
-        pitch: g.pitch,
-      }));
-      return;
-    }
-    const n = s.plus ?? 8;
-    setPm(String(n));
-    setTapRange(null);
-    setInput((st) => {
-      const want = s.regulation ?? (st.regulation === "linear" ? "reversing" : st.regulation);
-      const reg = pmStepOptionsFor(want).includes(n) ? want : "reversing";
-      return {
-        ...st,
-        connection: conn,
-        umKv: 0,
-        phases: phases(st.phases),
-        regulation: reg,
-        ...geometryForPm(n, reg),
-      };
-    });
-  };
+  const readTenderLine = () => updateForm((f) => readLine(f, lineText));
 
   const setRegulation = (reg: SelectInput["regulation"]) => {
     if (reg === "linear") {
@@ -877,51 +813,10 @@ export function SelectorApp() {
     }));
   };
 
-  const commitTapRange = (
-    plus: number,
-    minus: number,
-    pct: number,
-  ) => {
-    if (!(plus > 0) || !(minus > 0)) {
-      setTapRange(null);
-      return;
-    }
-    // 2026-11-04: a W/G custom +a/−b takes the Fig. 3-3 row Huaming sells
-    // (+4/−12 → 10193W), not plus + minus + 1 positions on mid 1 (18171W).
-    const g =
-      !isOctc && input.regulation !== "linear"
-        ? geometryForRange(plus, minus, input.regulation)
-        : null;
-    const range: ParsedTapRange = {
-      plus,
-      minus,
-      positions: g?.positions ?? plus + minus + 1,
-      stepPercent: pct > 0 ? pct / 100 : null,
-    };
-    setTapRange(range);
-    setInput((s) =>
-      g
-        ? {
-            ...s,
-            positions: g.positions,
-            plusMinusSteps: g.plusMinusSteps,
-            midPositions: g.mid,
-            pitch: g.pitch,
-          }
-        : {
-            ...s,
-            positions: range.positions,
-            plusMinusSteps: undefined,
-            midPositions: s.regulation === "linear" ? 0 : 1,
-            pitch: defaultPitch(range.positions, s.regulation) as
-              | 10
-              | 12
-              | 14
-              | 16
-              | 18,
-          },
-    );
-  };
+  // 2026-11-04: a W/G custom +a/−b takes the Fig. 3-3 row Huaming sells
+  // (+4/−12 → 10193W), not plus + minus + 1 positions on mid 1 (18171W).
+  const commitTapRange = (plus: number, minus: number, pct: number) =>
+    updateForm((f) => commitRange(f, plus, minus, pct));
 
   const applyPm = (raw: string) => {
     setPm(raw);
@@ -964,45 +859,8 @@ export function SelectorApp() {
     });
   };
 
-  // The +/− range only drives the duty while its selects are on screen.
-  // A range left from OCTC or linear used to override the ±N preset and step %.
-  const rangeLive = isLinear || !pm;
-
-  const stepFraction = (): number | null => {
-    if (rangeLive && tapRange?.stepPercent && tapRange.stepPercent > 0) {
-      return tapRange.stepPercent;
-    }
-    if (stepPercentPct > 0) return stepPercentPct / 100;
-    return null;
-  };
-
-  const minusSteps = (): number => {
-    // 2026-11-04: never below the read line's real minus. Picking W/G or a ±N
-    // after reading +4/−12 sized the lowest tap with −8. Larger is never unsafe.
-    const floor = lineMinusSteps(lineRead, isOctc);
-    if (rangeLive && tapRange && tapRange.minus > 0) return Math.max(tapRange.minus, floor);
-    const n = pm && Number(pm) > 0 ? Number(pm) : input.plusMinusSteps;
-    if (n != null && n > 0) return Math.max(n, floor);
-    return floor;
-  };
-
-  /** Transformer → duty. The one place current, Ust and Um come from. */
-  const transformerSpec = (): TransformerSpec => ({
-      kind,
-      tapPoint,
-      winding,
-      mva: currentMode === "capacity" ? transformerMva : 0,
-      tapKv: windingRatedKv,
-      hvKv,
-      mvKv,
-      minusSteps: minusSteps(),
-      stepFraction: stepFraction(),
-      safetyK,
-      ...(earthUm > 0 ? { earthUmKv: earthUm } : {}),
-      ...(currentMode === "capacity" && osImaxA > 0 ? { statedMaxA: osImaxA } : {}),
-      ...(currentMode === "capacity" && osUstV > 0 ? { statedStepV: osUstV } : {}),
-      ...(market ? { market } : {}),
-    });
+  /** Transformer → duty (lib/formState formSpec: minus steps, step %, OS figures). */
+  const transformerSpec = (): TransformerSpec => formSpec(formNow());
   const transformerDuty = (): DutyBasis => deriveDuty(transformerSpec());
 
   const capacityThroughA = (): number | null => {
@@ -1015,52 +873,16 @@ export function SelectorApp() {
     return d.ok && d.stepV != null && d.stepV > 0 ? d.stepV : null;
   };
 
-  const withOctcSeries = (duty: SelectInput): SelectInput => {
-    if ((duty.dutyKind ?? "oltc") !== "octc") {
-      // 2026-11-04: reactor (HWDK) is oil. A kept preferVacuum filtered it out.
-      return duty.mounting === "reactor"
-        ? { ...duty, preferVacuum: false, medium: "oil" }
-        : duty;
-    }
-    // 2026-11-04: auto goes to the engine, like the CLI (WSG on D is II).
-    const series = duty.octcSeries ?? "auto";
-    return {
-      ...duty,
-      octcSeries: series,
-      preferVacuum: false,
-      medium: "oil",
-    };
-  };
-
   const dutyForSelect = ():
     | SelectInput
     | { error: true; msgKey?: string; msg?: string } => {
-    if (currentMode === "capacity") {
-      if (safetyK > 0 && safetyK < 1) return { error: true, msgKey: "kBelowOne" };
-      if (!(transformerMva > 0)) return { error: true, msgKey: "needMva" };
-    }
-    const d = transformerDuty();
-    if (!d.ok) {
-      return {
-        error: true,
-        msg: lang === "zh" ? d.errorZh : localizeNote(d.errorEn ?? "", lang),
-      };
-    }
-    const ust = d.stepV != null && d.stepV > 0 ? d.stepV : null;
-    const sized: SelectInput = {
-      ...input,
-      connection: d.connection,
-      transformerKind: kind,
-      combinedOnly: d.combinedOnly,
-      ...(kind !== "auto" ? { tapWindingKv: d.umSystemKv } : {}),
-      umKv: d.umKv,
-      ...(ust != null ? { stepVoltageV: ust } : {}),
+    const r = formSelectInput(formNow());
+    if (r.ok) return r.input;
+    if ("msgKey" in r) return { error: true, msgKey: r.msgKey };
+    return {
+      error: true,
+      msg: lang === "zh" ? r.duty.errorZh : localizeNote(r.duty.errorEn ?? "", lang),
     };
-    if (currentMode === "capacity") {
-      if (!(d.dutyA > 0)) return { error: true, msgKey: "needMva" };
-      return withOctcSeries({ ...sized, throughCurrentA: d.dutyA });
-    }
-    return withOctcSeries(sized);
   };
 
   // The engine is synchronous and cheap, so the answer is computed on every
@@ -1591,7 +1413,8 @@ export function SelectorApp() {
                     value={stepPercentPct}
                     onValue={(n) => {
                       setStepPercentPct(n);
-                      if (isLinear || !pm) commitTapRange(tapPlus, tapMinus, n);
+                      // 2026-11-04: the untouched 无载 ±2 is a display; the duty keeps −8.
+                      if (stepMovesRange(formNow())) commitTapRange(tapPlus, tapMinus, n);
                     }}
                     onBlur={() => {
                       if (
@@ -1617,7 +1440,7 @@ export function SelectorApp() {
                       const n = Number(e.target.value);
                       setStepPercentPct(n);
                       setStepPctCustom(false);
-                      if (isLinear || !pm) {
+                      if (stepMovesRange(formNow())) {
                         commitTapRange(tapPlus, tapMinus, n);
                       }
                     }}
@@ -1774,40 +1597,9 @@ export function SelectorApp() {
                             key={k}
                             type="button"
                             aria-pressed={on}
-                            onClick={() => {
-                              if (k === "octc") {
-                                // Off-circuit is two-winding only (autoOctcNote).
-                                if (kind === "auto") pickKind("two_winding");
-                                // 2026-11-04: an unedited range starts at ±2 (6x5,
-                                // as the CLI), not the OLTC ±8 (18x17E).
-                                // Only the untouched ±8 OLTC default becomes ±2; a ±5
-                                // read from a tender line or picked stays (current 8% low).
-                                if (tapRange == null && !lineRead && pm === "8") {
-                                  setTapPlus(2);
-                                  setTapMinus(2);
-                                  commitTapRange(2, 2, stepPercentPct);
-                                }
-                                setInput((s) => ({
-                                  ...s,
-                                  dutyKind: "octc",
-                                  preferStructure: "auto",
-                                  octcSeries: s.octcSeries ?? "auto",
-                                }));
-                                return;
-                              }
-                              setInput((s) => {
-                                const n = Number(pm);
-                                // OCTC +/− edits rewrote positions; put the ±N preset back.
-                                return s.regulation !== "linear" && n > 0
-                                  ? {
-                                      ...s,
-                                      dutyKind: "oltc",
-                                      preferStructure: "auto",
-                                      ...geometryForPm(n, s.regulation),
-                                    }
-                                  : { ...s, dutyKind: "oltc", preferStructure: "auto" };
-                              });
-                            }}
+                            // 2026-11-04 (r2 UI-2…4): a switch re-maps the read line
+                            // for the new mode and leaves no ±2 or winding behind.
+                            onClick={() => updateForm(k === "octc" ? toOctc : toOltc)}
                             className={segBtn(on)}
                           >
                             {t(lang, k === "oltc" ? "dutyOltc" : "dutyOctc")}
