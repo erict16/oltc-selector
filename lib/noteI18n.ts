@@ -201,6 +201,15 @@ const RULES: Rule[] = [
     }),
   ],
   [
+    /^Stated Um ([\d.]+) is below the system class Um ([\d.]+) at this point\. Check the OS\.$/,
+    (m) => ({
+      vi: `Um đã chọn ${m[1]} thấp hơn cấp hệ thống Um ${m[2]} tại điểm này. Kiểm tra OS.`,
+      es: `La Um indicada ${m[1]} está por debajo de la clase del sistema Um ${m[2]} en este punto. Revise la OS.`,
+      tr: `Belirtilen Um ${m[1]}, bu noktadaki sistem sınıfı Um ${m[2]} değerinin altında. OS'u kontrol edin.`,
+      id: `Um yang disebut ${m[1]} di bawah kelas sistem Um ${m[2]} di titik ini. Periksa OS.`,
+    }),
+  ],
+  [
     /^No (OCTC|OLTC) family matches this mounting \/ medium combination\. Adjust filters or contact engineering\.$/,
     (m) => ({
       vi: `Không có dòng ${m[1]} nào khớp vị trí lắp đặt / môi chất này. Đổi điều kiện hoặc liên hệ kỹ thuật.`,

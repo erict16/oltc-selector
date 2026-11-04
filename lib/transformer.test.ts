@@ -257,3 +257,21 @@ describe("tapAfterWinding", () => {
     expect(again.umKv).toBe(star.umKv);
   });
 });
+
+describe("stated Um below the point's system class", () => {
+  it("warns on a 110 kV line end stated at Um 72.5", () => {
+    const d = deriveDuty(spec({ tapPoint: "line_end", winding: "delta", tapKv: 110, earthUmKv: 72.5 }));
+    expect(d.umKv).toBe(72.5);
+    expect(d.cautionsEn.join()).toContain("below the system class Um 126");
+  });
+  it("stays quiet on a 110 kV neutral stated at Um 72.5", () => {
+    const d = deriveDuty(spec({ tapPoint: "neutral", tapKv: 110, earthUmKv: 72.5 }));
+    expect(d.cautionsEn.join()).not.toContain("below the system class");
+  });
+  it("warns on an autotransformer stated below its MV class", () => {
+    const d = deriveDuty(
+      spec({ kind: "auto", tapPoint: "auto_junction", mva: 125, hvKv: 225, mvKv: 115, earthUmKv: 72.5 }),
+    );
+    expect(d.cautionsEn.join()).toContain("below the system class Um 126");
+  });
+});

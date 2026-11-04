@@ -17,6 +17,7 @@ import {
   SERIES,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
+  EARTH_INSULATION,
   umForEarthInsulation,
 } from "@/lib/catalog";
 import { parseTenderLine, type TenderLine } from "@/lib/nameplate";
@@ -59,7 +60,6 @@ import {
   TAP_POINTS_FOR,
   deriveDuty,
   tapAfterWinding,
-  umChoices,
   type DutyBasis,
   type TransformerSpec,
   type TapPoint,
@@ -333,15 +333,12 @@ function BasisTable({
   lang,
   duty,
   dutyA,
-  ratedA,
   stepV,
   model,
 }: {
   lang: Lang;
   duty: DutyBasis;
   dutyA: number | null;
-  /** Rated current when the form works from MVA; null when typed. */
-  ratedA: number | null;
   stepV: number;
   model: ModelResult | null;
 }) {
@@ -349,28 +346,23 @@ function BasisTable({
   const a = dutyA != null && dutyA > 0 ? dutyA : null;
   const u = ok && stepV > 0 ? stepV : null;
   const kva = a != null && u != null ? (a * u) / 1000 : null;
-  const showActual =
-    ok &&
-    Number.isFinite(duty.actualUmKv) &&
-    duty.umRule !== "neutral_full" &&
-    duty.umRule !== "neutral_assumed" &&
-    duty.umRule !== "explicit";
+  // Every row is one line: name, duty, rating, use. An assumed Um is said
+  // once, in the caution above the table, not again inside it.
   const rows: Array<{
     key: string;
     label: string;
     need: string;
     unit: string;
-    sub?: string;
-    flag?: string;
     rating: string | null;
     use: number | null;
+    /** Insulation is a class, not a load: 100% is a match, not tight. */
+    plain?: boolean;
   }> = [
     {
       key: "i",
       label: t(lang, "kpiImax"),
       need: a != null ? round1(a) : "—",
       unit: "A",
-      sub: ratedA != null && ratedA > 0 ? t(lang, "kpiRated", { a: round1(ratedA) }) : undefined,
       rating: model ? `${model.currentA}` : null,
       use: useOf(a, model?.currentA),
     },
@@ -395,10 +387,9 @@ function BasisTable({
       label: t(lang, "kpiUm"),
       need: ok ? round1(duty.umKv) : "—",
       unit: "kV",
-      sub: showActual ? t(lang, "kpiActual", { um: round1(duty.actualUmKv) }) : undefined,
-      flag: ok && duty.umAssumed ? t(lang, "checkOs") : undefined,
       rating: model ? round1(model.umKv) : null,
-      use: null,
+      use: ok ? useOf(duty.umKv, model?.umKv) : null,
+      plain: true,
     },
   ];
   return (
@@ -420,17 +411,14 @@ function BasisTable({
             .filter((r) => !(model && r.rating == null))
             .map((r) => {
             const pct = r.use != null ? Math.round(r.use * 100) : null;
-            const tone = r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 ? "is-tight" : "";
+            const tone =
+              r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 && !r.plain ? "is-tight" : "";
             return (
               <tr key={r.key}>
-                <th scope="row">
-                  <span className="block">{r.label}</span>
-                  {r.sub ? <span className="basis-sub">{r.sub}</span> : null}
-                </th>
+                <th scope="row">{r.label}</th>
                 <td className="r num">
                   {r.need}
                   {r.need !== "—" ? <span className="basis-unit">{r.unit}</span> : null}
-                  {r.flag ? <span className="basis-flag">{r.flag}</span> : null}
                 </td>
                 <td className="r num">
                   {r.rating != null ? (
@@ -459,6 +447,16 @@ function BasisTable({
       </table>
     </div>
   );
+}
+
+/**
+ * One spelling for an insulation class everywhere it is picked: the Um plus
+ * the AC / LI a tender states, written like the card's 对地工频/雷电 value.
+ */
+function earthUmLabel(um: number): string {
+  const e = EARTH_INSULATION[um];
+  const kv = `Um ${formatUmKv(um)} kV`;
+  return e ? `${kv} · ${e.pf} / ${e.bil} kV` : kv;
 }
 
 function round1(n: number): string {
@@ -1098,15 +1096,6 @@ export function SelectorApp() {
           `${round1(windingRatedKv)} kV`,
         ]
   ).join(listSep);
-  // Open insulation class: the type at each Um the tender could state.
-  // Picking a row sets 开关对地绝缘, the same as the select above.
-  const umRows =
-    sized && earthUm === 0
-      ? umChoices(duty, transformerSpec()).map((um) => ({
-          um,
-          model: selectOltc({ ...sized, umKv: um }).results[0]?.model ?? null,
-        }))
-      : [];
   const cautions = [
     ...(primary ? notesFor(lang, primary.cautionsZh, primary.cautionsEn) : []),
     ...(duty.ok ? notesFor(lang, duty.cautionsZh, duty.cautionsEn) : []),
@@ -1298,12 +1287,12 @@ export function SelectorApp() {
                   >
                     <option value="0">
                       {ruleDuty.ok
-                        ? t(lang, "earthRule", { um: `Um ${formatUmKv(ruleDuty.umKv)} kV` })
+                        ? t(lang, "earthRule", { um: earthUmLabel(ruleDuty.umKv) })
                         : t(lang, "earthRuleNone")}
                     </option>
                     {EARTH_UM_OPTIONS.map((u) => (
                       <option key={u} value={String(u)}>
-                        Um {u} kV
+                        {earthUmLabel(u)}
                       </option>
                     ))}
                   </select>
@@ -2012,52 +2001,17 @@ export function SelectorApp() {
               </ul>
             ) : null}
 
-            {umRows.length > 1 ? (
-              <div className="plate-rule px-5 py-4 sm:px-6">
-                <p className="mb-2 text-[0.8125rem] font-medium text-[var(--color-ink-2)]">
-                  {t(lang, "earthUm")}
-                </p>
-                <ul className="flex flex-col gap-1">
-                  {umRows.map((row) => {
-                    const on = Math.abs(row.um - duty.umKv) < 0.01;
-                    return (
-                      <li key={row.um}>
-                        <button
-                          type="button"
-                          aria-pressed={on}
-                          disabled={!row.model}
-                          onClick={() => setEarthUm(row.um)}
-                          className={cx(
-                            "flex w-full items-baseline gap-3 rounded-md px-2 py-1.5 text-left text-[0.8125rem] hover:bg-[var(--color-rule)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]",
-                            on && "bg-[var(--color-rule)]",
-                          )}
-                        >
-                          <span className="w-16 shrink-0 tabular-nums text-[var(--color-muted)]">
-                            Um {formatUmKv(row.um)}
-                          </span>
-                          <span className="min-w-0 truncate font-mono text-[var(--color-ink)]">
-                            {row.model ? displayModel(row.model, lang) : "—"}
-                          </span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ) : null}
-
             <BasisTable
               lang={lang}
               duty={duty}
               dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
-              ratedA={currentMode === "capacity" && duty.ok ? duty.ratedA : null}
               stepV={pickedStepV}
               model={primary}
             />
 
             {primary ? (
               <div className="plate-rule">
-                <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} hideRatings />
+                <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} />
               </div>
             ) : null}
 

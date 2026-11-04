@@ -246,6 +246,18 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   // The OS / maker figure wins before the range check: a 400/220 kV auto
   // whose switch is stated at Um 252 must not be refused on the HV rule.
   if (spec.earthUmKv != null && spec.earthUmKv > 0) {
+    // A line end, or an autotransformer below its MV class, cannot sit under
+    // the system it is connected to. The stated class still wins; say so.
+    const floor =
+      umRule === "line"
+        ? umKv
+        : auto
+          ? catalogueUmFromRatedKv(spec.mvKv)
+          : 0;
+    if (spec.earthUmKv < floor - 0.01) {
+      cautionsZh.push(`指定 Um ${spec.earthUmKv} 低于该点系统 Um ${floor}，请核对 OS。`);
+      cautionsEn.push(`Stated Um ${spec.earthUmKv} is below the system class Um ${floor} at this point. Check the OS.`);
+    }
     umKv = spec.earthUmKv;
     umRule = "explicit";
     umAssumed = false;
