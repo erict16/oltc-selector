@@ -74,30 +74,30 @@ const RULES: Rule[] = [
   ],
   // Duty notes (lib/transformer.ts)
   [
-    /^35 kV-class neutral sized at Um 40\.5; many orders \(Russia, Turkey\) bought 72\.5\. The OS decides\.$/,
+    /^35 kV-class neutral sized at Um 40\.5 kV; many orders \(Russia, Turkey\) bought 72\.5 kV\. The OS decides\.$/,
     () => ({
-      vi: "Trung tính cấp 35 kV chọn theo Um 40.5; nhiều đơn hàng (Nga, Thổ Nhĩ Kỳ) mua 72.5. Theo OS.",
-      es: "Neutro de clase 35 kV dimensionado a Um 40.5; muchos pedidos (Rusia, Turquía) compraron 72.5. Decide la OS.",
-      tr: "35 kV sınıfı nötr Um 40.5 ile seçildi; birçok sipariş (Rusya, Türkiye) 72.5 aldı. OS belirler.",
-      id: "Netral kelas 35 kV dipilih pada Um 40.5; banyak pesanan (Rusia, Turki) membeli 72.5. OS yang menentukan.",
+      vi: "Trung tính cấp 35 kV chọn theo Um 40.5 kV; nhiều đơn hàng (Nga, Thổ Nhĩ Kỳ) mua 72.5 kV. Theo OS.",
+      es: "Neutro de clase 35 kV dimensionado a Um 40.5 kV; muchos pedidos (Rusia, Turquía) compraron 72.5 kV. Decide la OS.",
+      tr: "35 kV sınıfı nötr Um 40.5 kV ile seçildi; birçok sipariş (Rusya, Türkiye) 72.5 kV aldı. OS belirler.",
+      id: "Netral kelas 35 kV dipilih pada Um 40.5 kV; banyak pesanan (Rusia, Turki) membeli 72.5 kV. OS yang menentukan.",
     }),
   ],
   [
-    /^Neutral insulation not given: sized at Um ([\d.]+); the OS decides\.$/,
+    /^Neutral insulation not given: sized at Um ([\d.]+) kV; the OS decides\.$/,
     (m) => ({
-      vi: `Chưa cho cách điện trung tính: tạm chọn theo Um ${m[1]}, theo OS.`,
-      es: `Aislamiento del neutro no indicado: dimensionado a Um ${m[1]}; decide la OS.`,
-      tr: `Nötr yalıtımı verilmedi: Um ${m[1]} ile seçildi; OS belirler.`,
-      id: `Isolasi netral tidak diberikan: dipilih pada Um ${m[1]}; OS yang menentukan.`,
+      vi: `Chưa cho cách điện trung tính: tạm chọn theo Um ${m[1]} kV, theo OS.`,
+      es: `Aislamiento del neutro no indicado: dimensionado a Um ${m[1]} kV; decide la OS.`,
+      tr: `Nötr yalıtımı verilmedi: Um ${m[1]} kV ile seçildi; OS belirler.`,
+      id: `Isolasi netral tidak diberikan: dipilih pada Um ${m[1]} kV; OS yang menentukan.`,
     }),
   ],
   [
-    /^HMR 230\/121 kV orders used Um 170 on the maker's data\.$/,
+    /^HMR 230\/121 kV orders used Um 170 kV on the maker's data\.$/,
     () => ({
-      vi: "Các đơn HMR 230/121 kV dùng Um 170 theo số liệu của nhà sản xuất máy biến áp.",
-      es: "Los pedidos HMR de 230/121 kV usaron Um 170 según los datos del fabricante.",
-      tr: "HMR 230/121 kV siparişleri üretici verisine göre Um 170 kullandı.",
-      id: "Pesanan HMR 230/121 kV memakai Um 170 sesuai data pabrikan.",
+      vi: "Các đơn HMR 230/121 kV dùng Um 170 kV theo số liệu của nhà sản xuất máy biến áp.",
+      es: "Los pedidos HMR de 230/121 kV usaron Um 170 kV según los datos del fabricante.",
+      tr: "HMR 230/121 kV siparişleri üretici verisine göre Um 170 kV kullandı.",
+      id: "Pesanan HMR 230/121 kV memakai Um 170 kV sesuai data pabrikan.",
     }),
   ],
   [
@@ -201,12 +201,21 @@ const RULES: Rule[] = [
     }),
   ],
   [
-    /^Stated Um ([\d.]+) is below the system class Um ([\d.]+) at this point\. Check the OS\.$/,
+    /^Stated Um ([\d.]+) kV is below the system class Um ([\d.]+) kV at this point\. Check the OS\.$/,
     (m) => ({
-      vi: `Um đã chọn ${m[1]} thấp hơn cấp hệ thống Um ${m[2]} tại điểm này. Kiểm tra OS.`,
-      es: `La Um indicada ${m[1]} está por debajo de la clase del sistema Um ${m[2]} en este punto. Revise la OS.`,
-      tr: `Belirtilen Um ${m[1]}, bu noktadaki sistem sınıfı Um ${m[2]} değerinin altında. OS'u kontrol edin.`,
-      id: `Um yang disebut ${m[1]} di bawah kelas sistem Um ${m[2]} di titik ini. Periksa OS.`,
+      vi: `Um đã chọn ${m[1]} kV thấp hơn cấp hệ thống Um ${m[2]} kV tại điểm này. Kiểm tra OS.`,
+      es: `La Um indicada ${m[1]} kV está por debajo de la clase del sistema Um ${m[2]} kV en este punto. Revise la OS.`,
+      tr: `Belirtilen Um ${m[1]} kV, bu noktadaki sistem sınıfı Um ${m[2]} kV değerinin altında. OS'u kontrol edin.`,
+      id: `Um yang disebut ${m[1]} kV di bawah kelas sistem Um ${m[2]} kV di titik ini. Periksa OS.`,
+    }),
+  ],
+  [
+    /^Autotransformer: combined types only \(compound types stop at 200 kV across the tap winding\)\.$/,
+    () => ({
+      vi: "Máy biến áp tự ngẫu: chỉ kiểu tổ hợp (kiểu phức hợp chỉ chịu 200 kV qua cuộn điều chỉnh).",
+      es: "Autotransformador: solo tipos combinados (los compuestos llegan a 200 kV a través del devanado de regulación).",
+      tr: "Ototransformatör: yalnızca kombine tip (kompakt tipler kademe sargısı boyunca 200 kV ile sınırlı).",
+      id: "Autotransformator: hanya tipe kombinasi (tipe kompon terbatas 200 kV melintasi belitan tap).",
     }),
   ],
   [

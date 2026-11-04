@@ -494,7 +494,7 @@ function KvField({
                     inputMode="decimal"
                     min={0}
                     step={0.1}
-                    className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                    className={`${controlClass} has-suffix [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
                     value={kvValue > 0 ? String(kvValue) : ""}
                     onChange={(e) => {
                       const raw = e.target.value;
@@ -542,7 +542,7 @@ function KvField({
                   !(WINDING_RATED_KV as readonly number[]).includes(
                     kvValue,
                   )) ? (
-                  <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.75rem] text-[var(--color-muted)]">
+                  <span className="ui-affix ui-affix-end">
                     kV
                   </span>
                 ) : null}
@@ -1089,11 +1089,11 @@ export function SelectorApp() {
   const listSep = lang === "zh" ? "，" : ", ";
   const transformerLine = (
     kind === "auto"
-      ? [t(lang, "kindAuto"), `${round1(hvKv)}/${round1(mvKv)} kV`]
+      ? [t(lang, "kindAuto"), `${round1(hvKv)}/${round1(mvKv)}\u00a0kV`]
       : [
           t(lang, "kindTwo"),
           t(lang, winding === "star" ? "windingStar" : "windingDelta"),
-          `${round1(windingRatedKv)} kV`,
+          `${round1(windingRatedKv)}\u00a0kV`,
         ]
   ).join(listSep);
   const cautions = [
@@ -1127,20 +1127,11 @@ export function SelectorApp() {
 
           <div className="sheet">
             <section aria-label={t(lang, "transformer")} className="sheet-section">
-              <CardHead
-                title={t(lang, "transformer")}
-                right={
-                  kind === "auto" ? (
-                    <span className="shrink-0 text-[0.75rem] font-medium text-[var(--color-accent)]">
-                      {t(lang, "combinedOnly")}
-                    </span>
-                  ) : undefined
-                }
-              />
+              <CardHead title={t(lang, "transformer")} />
               <div className="mb-4 flex flex-col gap-2">
                 <label
                   htmlFor="tender-line"
-                  className="text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]"
+                  className="flex min-h-[1.625rem] items-center text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]"
                 >
                   {t(lang, "lineLabel")}
                 </label>
@@ -1166,7 +1157,7 @@ export function SelectorApp() {
                   />
                   <button
                     type="button"
-                    className="ui-seg is-on shrink-0 px-4"
+                    className="ui-btn"
                     disabled={!lineText.trim()}
                     onClick={readTenderLine}
                   >
@@ -1174,13 +1165,17 @@ export function SelectorApp() {
                   </button>
                 </div>
                 {lineFailed ? (
-                  <p role="status" className="text-[0.75rem] leading-snug text-[var(--color-accent)]">
+                  <p role="status" className="text-[0.75rem] leading-snug text-[var(--color-danger)]">
                     {t(lang, "lineFail")}
                   </p>
                 ) : lineRead?.assumed.length ? (
-                  <p role="status" className="text-[0.75rem] leading-snug text-[var(--color-accent)]">
-                    {t(lang, "lineCheck")}:{" "}
-                    {lineRead.assumed.map((f) => t(lang, `lineF_${f}`)).join(", ")}
+                  <p role="status" className="flex gap-2 text-[0.75rem] leading-snug text-[var(--color-warn)]">
+                    <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+                    <span>
+                      {t(lang, "lineCheck")}
+                      {lang === "zh" ? "：" : ": "}
+                      {lineRead.assumed.map((f) => t(lang, `lineF_${f}`)).join(listSep)}
+                    </span>
                   </p>
                 ) : null}
               </div>
@@ -1191,7 +1186,7 @@ export function SelectorApp() {
                 autoDisabled={isOctc}
               />
               {isOctc ? (
-                <p className="mt-2 text-[0.75rem] leading-snug text-[var(--color-muted)]">
+                <p id="auto-octc-note" className="sr-only">
                   {t(lang, "autoOctcNote")}
                 </p>
               ) : null}
@@ -1219,10 +1214,7 @@ export function SelectorApp() {
                       offHintId="delta-no-neutral"
                     />
                     {kind === "two_winding" && winding === "delta" ? (
-                      <p
-                        id="delta-no-neutral"
-                        className="mt-1.5 text-[0.75rem] leading-snug text-[var(--color-muted)]"
-                      >
+                      <p id="delta-no-neutral" className="sr-only">
                         {t(lang, "deltaNoNeutral")}
                       </p>
                     ) : null}
@@ -1322,7 +1314,7 @@ export function SelectorApp() {
                       inputMode="decimal"
                       min={0}
                       step={0.1}
-                      className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                      className={`${controlClass} has-suffix [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
                       value={transformerMva > 0 ? String(transformerMva) : ""}
                       placeholder={t(lang, "mvaPlaceholder")}
                       onChange={(e) => {
@@ -1380,7 +1372,7 @@ export function SelectorApp() {
                     !(MVA_OPTIONS as readonly number[]).includes(
                       transformerMva,
                     )) ? (
-                    <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.75rem] text-[var(--color-muted)]">
+                    <span className="ui-affix ui-affix-end">
                       MVA
                     </span>
                   ) : null}
@@ -1464,7 +1456,6 @@ export function SelectorApp() {
                   {pmOptions.map((n) => (
                     <option key={n} value={String(n)}>
                       ±{n}
-                      {lang === "zh" ? " 级" : ""}
                     </option>
                   ))}
                 </select>
@@ -1482,7 +1473,7 @@ export function SelectorApp() {
                     stepPercentPct,
                   )) ? (
                   <DecimalInput
-                    className={`${controlClass} pr-8`}
+                    className={`${controlClass} has-suffix`}
                     value={stepPercentPct}
                     onValue={(n) => {
                       setStepPercentPct(n);
@@ -1530,7 +1521,7 @@ export function SelectorApp() {
                   !(STEP_PERCENT_OPTIONS as readonly number[]).includes(
                     stepPercentPct,
                   )) ? (
-                  <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.9rem] text-[var(--color-ink)]">
+                  <span className="ui-affix ui-affix-end">
                     %
                   </span>
                 ) : null}
@@ -1708,7 +1699,7 @@ export function SelectorApp() {
                   {input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
                     <Field label={t(lang, "arcMode")} as="div">
                       <div
-                        className={cx("ui-track", isOctc && "opacity-45")}
+                        className="ui-track"
                         role="group"
                         aria-label={t(lang, "arcMode")}
                         aria-disabled={isOctc || undefined}
@@ -1879,7 +1870,7 @@ export function SelectorApp() {
                           safetyK,
                         )) ? (
                         <DecimalInput
-                          className={`${controlClass} pl-7`}
+                          className={`${controlClass} has-prefix`}
                           value={safetyK}
                           onValue={commitSafetyK}
                           onBlur={() => {
@@ -1918,7 +1909,7 @@ export function SelectorApp() {
                         !(SAFETY_K_OPTIONS as readonly number[]).includes(
                           safetyK,
                         )) ? (
-                        <span className="pointer-events-none absolute top-0 left-3 flex h-11 items-center text-[0.9rem] text-[var(--color-ink)]">
+                        <span className="ui-affix ui-affix-start">
                           ×
                         </span>
                       ) : null}
@@ -2232,7 +2223,7 @@ function ModelSpec({
     <dl
       className={cx(
         "grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3",
-        compact ? "pt-1 pr-5 pb-3 pl-11" : "px-5 py-4 sm:px-6",
+        compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-6 sm:pl-12" : "px-5 py-4 sm:px-6",
       )}
     >
       {items.map((item) => (

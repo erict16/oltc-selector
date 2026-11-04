@@ -255,8 +255,8 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
           ? catalogueUmFromRatedKv(spec.mvKv)
           : 0;
     if (spec.earthUmKv < floor - 0.01) {
-      cautionsZh.push(`指定 Um ${spec.earthUmKv} 低于该点系统 Um ${floor}，请核对 OS。`);
-      cautionsEn.push(`Stated Um ${spec.earthUmKv} is below the system class Um ${floor} at this point. Check the OS.`);
+      cautionsZh.push(`指定 Um ${spec.earthUmKv} kV 低于该点系统 Um ${floor} kV，请核对 OS。`);
+      cautionsEn.push(`Stated Um ${spec.earthUmKv} kV is below the system class Um ${floor} kV at this point. Check the OS.`);
     }
     umKv = spec.earthUmKv;
     umRule = "explicit";
@@ -270,12 +270,12 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   }
 
   if (umRule === "neutral_full" && umAssumed) {
-    cautionsZh.push("35 kV 级中性点先按 Um 40.5 选；不少订单（俄罗斯、土耳其）按 72.5 买，以 OS 为准。");
-    cautionsEn.push("35 kV-class neutral sized at Um 40.5; many orders (Russia, Turkey) bought 72.5. The OS decides.");
+    cautionsZh.push("35 kV 级中性点先按 Um 40.5 kV 选；不少订单（俄罗斯、土耳其）按 72.5 kV 买，以 OS 为准。");
+    cautionsEn.push("35 kV-class neutral sized at Um 40.5 kV; many orders (Russia, Turkey) bought 72.5 kV. The OS decides.");
   }
   if (umRule === "neutral_assumed") {
-    cautionsZh.push(`中性点绝缘未给，先按 Um ${NEUTRAL_DEFAULT_UM} 选，以 OS 为准。`);
-    cautionsEn.push(`Neutral insulation not given: sized at Um ${NEUTRAL_DEFAULT_UM}; the OS decides.`);
+    cautionsZh.push(`中性点绝缘未给，先按 Um ${NEUTRAL_DEFAULT_UM} kV 选，以 OS 为准。`);
+    cautionsEn.push(`Neutral insulation not given: sized at Um ${NEUTRAL_DEFAULT_UM} kV; the OS decides.`);
   }
   // 2025–2026 OS: 67 tapped windings on 220 kV class and above, every one
   // CM / CM2 / SHZV, none compound. CV2's 200 kV across-tap limit does not
@@ -287,12 +287,14 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   }
   if (auto) {
     if (spec.tapPoint === "auto_mv_line" && umRule === "auto_hv") {
-      cautionsZh.push("HMR 230/121 kV 先例按厂家数据用 Um 170。");
-      cautionsEn.push("HMR 230/121 kV orders used Um 170 on the maker's data.");
+      cautionsZh.push("HMR 230/121 kV 先例按厂家数据用 Um 170 kV。");
+      cautionsEn.push("HMR 230/121 kV orders used Um 170 kV on the maker's data.");
     } else if (spec.tapPoint === "auto_junction" && umKv === 252 && umRule === "auto_hv") {
       cautionsZh.push("先例：125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W（2026-10-27）。");
       cautionsEn.push("Precedent: 125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W (27 Oct 2026).");
     }
+    cautionsZh.push("自耦变只用组合式（复合式跨调压绕组冲击上限 200 kV）。");
+    cautionsEn.push("Autotransformer: combined types only (compound types stop at 200 kV across the tap winding).");
     cautionsZh.push("未核：跨调压绕组冲击（a 值）、束缚电阻。");
     cautionsEn.push("Not checked: impulse across the tap winding (a), tie-in resistor.");
   }

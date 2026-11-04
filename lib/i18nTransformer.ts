@@ -5,9 +5,9 @@ type Dict = Record<string, string>;
 
 const en: Dict = {
   resultAria: "Result",
-  kpiImax: "Imax",
+  kpiImax: "Max. through-current",
   kpiUst: "Step voltage",
-  kpiUm: "Switch Um",
+  kpiUm: "Insulation to earth",
   kpiTap: "Tap changer",
   kpiActual: "IEC Um {um}",
   kpiRated: "Rated {a} A",
@@ -79,7 +79,7 @@ const zh: Dict = {
   resultAria: "选型结果",
   kpiImax: "最大通过电流",
   kpiUst: "级电压",
-  kpiUm: "开关绝缘",
+  kpiUm: "开关对地绝缘",
   kpiTap: "开关位置",
   kpiActual: "实际 Um {um}",
   kpiRated: "额定 {a} A",
@@ -149,9 +149,9 @@ const zh: Dict = {
 
 const vi: Dict = {
   resultAria: "Kết quả",
-  kpiImax: "Imax",
+  kpiImax: "Dòng Imax",
   kpiUst: "Điện áp nấc",
-  kpiUm: "Um bộ ĐAPT",
+  kpiUm: "Cách điện với đất",
   kpiTap: "Vị trí ĐAPT",
   kpiActual: "Um IEC {um}",
   kpiRated: "Định mức {a} A",
@@ -221,9 +221,9 @@ const vi: Dict = {
 
 const es: Dict = {
   resultAria: "Resultado",
-  kpiImax: "Imax",
+  kpiImax: "Corriente Imax",
   kpiUst: "Tensión de escalón",
-  kpiUm: "Um cambiador",
+  kpiUm: "Aislamiento a tierra",
   kpiTap: "Ubicación",
   kpiActual: "Um IEC {um}",
   kpiRated: "Nominal {a} A",
@@ -293,9 +293,9 @@ const es: Dict = {
 
 const tr: Dict = {
   resultAria: "Sonuç",
-  kpiImax: "Imax",
+  kpiImax: "Akım Imax",
   kpiUst: "Kademe gerilimi",
-  kpiUm: "Cihaz Um",
+  kpiUm: "Toprağa yalıtım",
   kpiTap: "Konum",
   kpiActual: "IEC Um {um}",
   kpiRated: "Anma {a} A",
@@ -365,9 +365,9 @@ const tr: Dict = {
 
 const id: Dict = {
   resultAria: "Hasil",
-  kpiImax: "Imax",
+  kpiImax: "Arus lewat maks.",
   kpiUst: "Tegangan tap",
-  kpiUm: "Um OLTC",
+  kpiUm: "Isolasi ke tanah",
   kpiTap: "Posisi",
   kpiActual: "Um IEC {um}",
   kpiRated: "Pengenal {a} A",

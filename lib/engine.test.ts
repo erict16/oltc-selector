@@ -385,12 +385,14 @@ describe("catalogue menu labels", () => {
     expect(t("zh", "currentBtn")).toBe("电流");
     expect(t("zh", "um")).toBe("设备最高电压 Um");
     expect(t("zh", "umWinding")).toBe("调压侧额定电压");
-    expect(t("zh", "ust")).toBe("级电压 Ust");
+    // Same word in the form and the basis table (2026-11-04).
+    expect(t("zh", "ust")).toBe("级电压");
+    for (const l of ["zh", "en", "vi", "es", "tr", "id"] as const) expect(t(l, "ust")).toBe(t(l, "kpiUst"));
     expect(t("en", "throughCurrent")).toBe("Max. through-current");
     expect(t("en", "currentBtn")).toBe("Imax");
     expect(t("en", "um")).toBe("Equipment Um");
     expect(t("en", "umWinding")).toBe("Tap voltage");
-    expect(t("en", "ust")).toBe("Step voltage Ust");
+    expect(t("en", "ust")).toBe("Step voltage");
   });
 
   it("catalogue construction: OLTC combined/compound, OCTC cage/drum", () => {
