@@ -96,6 +96,8 @@ const en: Dict = {
   lineW_second_range: "{kv} kV {range} is a second tapped winding: used for off-circuit duty",
   lineW_largest_mva: "Several ratings: sized on the largest, {mva} MVA",
   lineW_mid_winding: "Tap in the middle of the winding: sized as line end; take the insulation to earth from the OS",
+  lineW_quantity: "3 × {mva} MVA read as three three-phase units of {mva} MVA: confirm it is not a single-phase bank",
+  lineW_earth_li: "Insulation to earth LI {li} kV is not used: set the Um to earth from it",
 };
 
 const zh: Dict = {
@@ -190,6 +192,8 @@ const zh: Dict = {
   lineW_second_range: "{kv} kV {range} 是第二个调压绕组：用于无载开关",
   lineW_largest_mva: "有多个容量：按最大 {mva} MVA 选",
   lineW_mid_winding: "调压在绕组中部：按线端选，对地绝缘按 OS 取",
+  lineW_quantity: "3 × {mva} MVA 按三台 {mva} MVA 三相变读：请确认不是单相组",
+  lineW_earth_li: "对地绝缘 LI {li} kV 未用于选型：请按它设定对地 Um",
 };
 
 const vi: Dict = {
@@ -284,6 +288,8 @@ const vi: Dict = {
   lineW_second_range: "{kv} kV {range} là cuộn điều áp thứ hai: dùng cho bộ chuyển nấc không tải",
   lineW_largest_mva: "Có nhiều công suất: chọn theo công suất lớn nhất {mva} MVA",
   lineW_mid_winding: "Nấc ở giữa cuộn dây: chọn như đầu đường dây; lấy cách điện với đất theo OS",
+  lineW_quantity: "3 × {mva} MVA được đọc là ba máy ba pha {mva} MVA: xác nhận không phải tổ máy một pha",
+  lineW_earth_li: "Cách điện với đất LI {li} kV chưa được dùng: đặt Um với đất theo giá trị này",
 };
 
 const es: Dict = {
@@ -378,6 +384,8 @@ const es: Dict = {
   lineW_second_range: "{kv} kV {range} es un segundo devanado regulado: se usa para el cambiador sin carga",
   lineW_largest_mva: "Varias potencias: se dimensiona con la mayor, {mva} MVA",
   lineW_mid_winding: "Tomas en el centro del devanado: se dimensiona como extremo de línea; tome el aislamiento a tierra de la OS",
+  lineW_quantity: "3 × {mva} MVA leído como tres unidades trifásicas de {mva} MVA: confirme que no es un banco monofásico",
+  lineW_earth_li: "El aislamiento a tierra LI {li} kV no se usa: fije la Um a tierra según ese valor",
 };
 
 const tr: Dict = {
@@ -472,6 +480,8 @@ const tr: Dict = {
   lineW_second_range: "{kv} kV {range} ikinci kademeli sargı: yüksüz değiştirici için kullanıldı",
   lineW_largest_mva: "Birden çok güç değeri: en büyüğü {mva} MVA ile seçildi",
   lineW_mid_winding: "Kademe sargının ortasında: hat ucu olarak seçildi; toprağa karşı yalıtımı OS'den alın",
+  lineW_quantity: "3 × {mva} MVA, üç adet {mva} MVA üç fazlı ünite olarak okundu: tek fazlı grup olmadığını doğrulayın",
+  lineW_earth_li: "Toprağa karşı yalıtım LI {li} kV kullanılmadı: toprağa karşı Um'yi buna göre ayarlayın",
 };
 
 const id: Dict = {
@@ -566,6 +576,8 @@ const id: Dict = {
   lineW_second_range: "{kv} kV {range} adalah belitan tap kedua: dipakai untuk pengubah tap tanpa beban",
   lineW_largest_mva: "Ada beberapa daya: dipilih dengan yang terbesar, {mva} MVA",
   lineW_mid_winding: "Tap di tengah belitan: dipilih sebagai ujung saluran; ambil isolasi ke tanah dari OS",
+  lineW_quantity: "3 × {mva} MVA dibaca sebagai tiga unit tiga fasa {mva} MVA: pastikan bukan bank satu fasa",
+  lineW_earth_li: "Isolasi ke tanah LI {li} kV tidak dipakai: atur Um ke tanah dari nilai ini",
 };
 
 export const TRANSFORMER_STRINGS: Record<Lang, Dict> = { en, zh, vi, es, tr, id };

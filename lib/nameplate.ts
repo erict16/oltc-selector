@@ -100,7 +100,9 @@ export type LineNoteKey =
   | "zero_range"
   | "second_range"
   | "largest_mva"
-  | "mid_winding";
+  | "mid_winding"
+  | "quantity"
+  | "earth_li";
 
 export type LineNote = { key: LineNoteKey; vars?: Record<string, string | number> };
 
@@ -120,6 +122,8 @@ const NOTE_EN: Record<LineNoteKey, string> = {
   second_range: "{kv} kV {range} is a second tapped winding: used for off-circuit duty",
   largest_mva: "several ratings: sized on the largest, {mva} MVA",
   mid_winding: "tap in the middle of the winding: sized as line end; take the insulation to earth from the OS",
+  quantity: "3 × {mva} MVA read as three three-phase units of {mva} MVA: confirm it is not a single-phase bank",
+  earth_li: "insulation to earth LI {li} kV is not used: set the Um to earth from it",
 };
 
 export function lineNoteEn(n: LineNote): string {
@@ -134,6 +138,14 @@ const NUM = String.raw`\d+(?:\.\d+)?`;
 export function normalizeTenderText(raw: string): string {
   return (
     raw
+      // 2026-11-04 R3: Rosseti "16 МВА", "11 кВ", "кВА" were refused (Latin units only).
+      .replace(/(?<![А-Яа-яЁё])[мМ][вВ][аА](?![А-Яа-яЁё])/g, "MVA")
+      .replace(/(?<![А-Яа-яЁё])[кК][вВ][аА](?![А-Яа-яЁё])/g, "kVA")
+      .replace(/(?<![А-Яа-яЁё])[кК][вВ](?![А-Яа-яЁё])/g, "kV")
+      // Russian vector group "Y/Д-11", "YН/Д-Д-11-11": Д is D, Н is N, У is Y.
+      .replace(/(?<![\p{L}\d])[УYД]Н?(?:\s*\/\s*[УYД]Н?)+(?:\s*-\s*[ДУYН\d]{1,2})*(?!\p{L})/gu, (m: string) =>
+        m.replace(/У/g, "Y").replace(/Д/g, "D").replace(/Н/g, "N"),
+      )
       .replace(/[×✕✖*]/g, "x")
       // 2026-11-04 R2: a Cyrillic х ("±9х1,78%") or an upper-case X ("± 8 X 1.25 %")
       // between figures is the step sign; the step was dropped and the range detached.
@@ -146,13 +158,26 @@ export function normalizeTenderText(raw: string): string {
       )
       // 2026-11-04: "31,500 kVA" / "2 500 kVA" is one number; read as 31.5 / 0.5 kVA
       // before, the current came out 1000× low. Not a ratio digit ("33/11 630 kVA").
-      .replace(/\b\d{1,3}(?:[,   ]\d{3})+(?=\s*kVA)/gi, (m: string, offset: number, s: string) => {
-        // "33/11 630 kVA": 630 follows a ratio figure, it is not 11 630.
-        // "Dyn11 1 600 kVA": a clock number is not a figure; join the 1 600.
-        const before = s.slice(Math.max(0, offset - 12), offset);
-        if (/[\d/.,]\s?$/.test(before) && !/[A-Za-z]\d{1,2}\s$/.test(before)) return m;
-        return m.replace(/[,   ]/g, "");
-      })
+      // 2026-11-04 R3: "31'500 kVA" (Swiss apostrophe) and lists "25 000/31 500 kVA",
+      // "20,000/25,000 kVA" read as 0.5 / 0.025 MVA, the current 80-99 % low with no note.
+      .replace(
+        /\b\d{1,3}(?:[, \u00A0\u202F'’]\d{3})+(?=\s*(?:\/\s*\d{1,3}(?:[, \u00A0\u202F'’]\d{3})+\s*)*kVA)/gi,
+        (m: string, offset: number, s: string) => {
+          // "33/11 630 kVA": 630 follows a ratio figure, it is not 11 630.
+          // "Dyn11 1 600 kVA": a clock number is not a figure; join the 1 600.
+          // "25 000/31 500 kVA": a thousands group before the / is a rating list.
+          const before = s.slice(Math.max(0, offset - 12), offset);
+          const list = /\d[, \u00A0\u202F'’]\d{3}\s*\/\s*$/.test(before);
+          if (!list && /[\d/.,]\s?$/.test(before) && !/[A-Za-z]\d{1,2}\s$/.test(before)) return m;
+          return m.replace(/[, \u00A0\u202F'’]/g, "");
+        },
+      )
+      // 2026-11-04 R3: "11,000±2x2.5%/415 V" became 11.000 kV beside 415, so the HV
+      // delta was read on the 415 figure. A thousands group in a volts chain is one figure.
+      .replace(
+        /\b(\d{1,3})[, \u00A0\u202F](\d{3})(?![\d.,])(?=\s*(?:±\s*\d{1,2}(?:\s*x\s*[\d.,]+\s*%)?)?(?:\s*\/\s*\d[\d, \u00A0\u202F.]*?\s*(?:±\s*\d{1,2}(?:\s*x\s*[\d.,]+\s*%)?)?)*\s*V\b)/g,
+        "$1$2",
+      )
       // 2026-11-04: a comma after a vector-group clock is a separator, not a
       // decimal: "YNd11,66±…" was read as 11.66 kV.
       .replace(/(?<![DdYyNnaZz]\d{0,2})(\d),(\d)/g, "$1.$2")
@@ -161,11 +186,21 @@ export function normalizeTenderText(raw: string): string {
       .replace(/[–—－−]/g, "-")
       // Split LV written "33-33 kV" is one figure (W02 275/33-33 kV).
       .replace(/(\d+(?:\.\d+)?)-\1(?=\s*(?:kV|\/))/gi, "$1")
+      // 2026-11-04 R3: "132:33 kV" / "33-11 kV" kept only the LV (LV tapped, Um below the
+      // HV class). A ratio ≥ 1.5 is HV/LV; "20-21 kV" stays a band; a clock or decimal is not joined.
+      .replace(/(?<![\w.])(\d+(?:\.\d+)?)\s*[:\-]\s*(\d+(?:\.\d+)?)(?=\s*kV)/gi, (m: string, a: string, b: string) =>
+        Number(a) / Number(b) >= 1.5 ? `${a}/${b}` : m,
+      )
       // 2026-11-04 R2: "+- 9 steps of 1.78%" is ± too, not only "+-9 x".
       .replace(/\+\s*\/\s*-|\+\s*-(?=\s*\d+(?:\.\d+)?\s*(?:x|steps?\b|taps?\b|positions?\b|%))/g, "±")
       // 2026-11-04 R2: minus-first and per-side ranges ("-15% to +5%", "-12/+4 x 1.25%",
       // Turkish "+%5/-%15", "+2x2.5%/-4x2.5%") were not read; the ±8 default sized them.
       .replace(new RegExp(String.raw`([+\-±])\s*%\s*(${NUM})`, "g"), "$1$2%")
+      // 2026-11-04 R3: TEİAŞ "154±10 x %1,25/34,5 kV" read the ratio as 34.5/1.25 kV.
+      .replace(new RegExp(String.raw`x\s*%\s*(${NUM})`, "gi"), "x $1%")
+      // 2026-11-04 R3: "+5%, -15%", "+5% and -15%", "plus 5% minus 15%" took the ±8 default.
+      .replace(new RegExp(String.raw`\+\s*(${NUM})\s*%\s*(?:,|\band\b|&)\s*-\s*(${NUM})\s*%`, "gi"), "+$1%/-$2%")
+      .replace(new RegExp(String.raw`\bplus\s*(${NUM})\s*%\s*,?\s*(?:and\s+)?minus\s*(${NUM})\s*%`, "gi"), "+$1%/-$2%")
       .replace(
         new RegExp(String.raw`(?<![\w.%/])-\s*(${NUM})\s*(%?)\s*(?:\/|\bto\b|\.\.\.|…)\s*\+\s*(${NUM})\s*(%?)`, "gi"),
         // "-5/+10%": a % on either side makes both percent.
@@ -179,6 +214,25 @@ export function normalizeTenderText(raw: string): string {
       .replace(
         new RegExp(String.raw`\+\s*(\d{1,2})\s*x\s*(${NUM})\s*%\s*\/\s*-\s*(\d{1,2})\s*x\s*\2\s*%`, "g"),
         "+$1/-$3 x $2%",
+      )
+      // 2026-11-04 R3: a zero side has no sign ("0 to -20%", "-20%/0%", "+16x1.25% / -0") and
+      // the minus side may come first ("-12 x 1.25% / +4 x 1.25%"); all took the ±8 default.
+      .replace(
+        new RegExp(String.raw`(?<![\d.+\-±])0(?![\d.])\s*%?\s*(?:\bto\b|\/)\s*-\s*(${NUM})\s*%`, "gi"),
+        "+0%/-$1%",
+      )
+      .replace(new RegExp(String.raw`(?<![\w.%/])-\s*(${NUM})\s*%\s*(?:\bto\b|\/)\s*\+?\s*0(?![\d.])\s*%?`, "gi"), "+0%/-$1%")
+      .replace(
+        new RegExp(String.raw`(?<![\w.%/])-\s*(\d{1,2})\s*x\s*(${NUM})\s*%\s*\/\s*\+\s*(\d{1,2})\s*x\s*\2\s*%`, "g"),
+        "+$3/-$1 x $2%",
+      )
+      .replace(
+        new RegExp(String.raw`\+\s*(\d{1,2})\s*x\s*(${NUM})\s*%\s*\/\s*-\s*0(?![\d.])(?:\s*x\s*\2\s*%)?`, "g"),
+        "+$1/-0 x $2%",
+      )
+      .replace(
+        new RegExp(String.raw`\+\s*0(?![\d.])(?:\s*x\s*${NUM}\s*%)?\s*\/\s*-\s*(\d{1,2})\s*x\s*(${NUM})\s*%`, "g"),
+        "+0/-$1 x $2%",
       )
       // 2026-11-04 R2: "(110±8x1.25%)/11 kV" was refused and "115 (+8/-8 x 1.25%) / 13.8 kV"
       // put the range on the LV (Um 17.5 for a 115 kV neutral). The brackets go.
@@ -195,17 +249,30 @@ export function normalizeTenderText(raw: string): string {
 export function parseVectorGroup(raw: string): { group: string; windings: WindingLetter[] } | null {
   // 2026-11-04 R2: GB "D,yn11" / "YN,yn0,d11", spaced "D yn11", "Ynd11" and all-caps
   // "DYN11" / "YNYN0D11" gave no group, so an HV delta was sized as a star neutral.
+  // 2026-11-04 R3: "DYn11", "DYn 11", "D-yn11", "Δ/Y", "△/Y-11" gave no group either; a
+  // 132 kV HV delta was sized as a star neutral at Um 72.5.
   const text = raw
+    .replace(/[Δ△]/g, "D")
+    .replace(/\b(YN|Yn|Y|D|ZN|Z)\s*-\s*(?=(?:yn|y|d|zn|z|YN|Yn|Y|D)\s*\d)/g, "$1")
+    .replace(/\b(YN|Y|D|ZN|Z)\s*\/\s*(YN|Y|D|ZN|Z)(?:\s*-\s*(\d{1,2}))?\b/g, (m: string, h: string, l: string, c?: string) =>
+      h + l.toLowerCase() + (c ?? ""),
+    )
     .replace(/\bYn(?=(?:yn|y|d|zn|z|a)\d)/g, "YN")
     .replace(/\b(YN|Y|D|ZN|Z)[,\s/]+(?=(?:yn|y|d|zn|z|a)\d)/g, "$1")
     .replace(/((?:YN|Y|D|ZN|Z)(?:(?:yn|y|d|zn|z|a)\d{1,2})+)[,/]\s*(?=(?:yn|y|d|zn|z|a)\d)/g, "$1")
-    .replace(/\b(YN|D|Y|ZN|Z)((?:YN|Y|D|ZN|Z|A)\d{1,2})+\b/g, (m: string, h: string) => h + m.slice(h.length).toLowerCase());
+    .replace(/\b(YN|D|Y|ZN|Z)((?:YN|Yn|Y|D|ZN|Zn|Z|A)\s?\d{1,2})+\b/g, (m: string, h: string) => h + m.slice(h.length).toLowerCase());
   // HV letter upper case, the rest lower case with optional clock numbers.
   const all = [...text.matchAll(/(?:^|[^A-Za-z])((?:YN|Y|D|ZN|Z)(?:(?:yn|y|d|zn|z|a|auto)\d{0,2}){1,3})(?![A-Za-z])/g)];
   // 2026-11-04 R2: Indonesian "Daya" (power) is D+a+y+a and made the line an
   // autotransformer. A group carries a clock number or an n; else no auto letter.
   const m = all.find((x) => /\d|n/i.test(x[1]!.slice(1))) ?? all.find((x) => !/a/.test(x[1]!.slice(1)));
-  if (!m) return null;
+  if (!m) {
+    // 2026-11-04 R3: IEC single-phase groups. "Ia0i0" is an auto (it was read two-winding,
+    // Um 72.5); "Ii0" a single-phase two-winding unit. The I letters state no star or delta.
+    const one = text.match(/(?<![A-Za-z])I([ai])(\d{1,2})(?:i\d{1,2})?(?![A-Za-z\d])/);
+    if (!one) return null;
+    return { group: one[0], windings: one[1] === "a" ? ["a"] : [] };
+  }
   const group = m[1];
   const windings: WindingLetter[] = [];
   const re = /(YN|Y|D|ZN|Z|yn|y|d|zn|z|auto|a)\d{0,2}/g;
@@ -233,11 +300,18 @@ type MvaRead = {
   bank: boolean;
 };
 
-function parseMva(text: string): MvaRead {
+/** Rosseti model: ТДН-16000/110, ТРДН-40000/110, ТМН-6300/35 (kVA / HV kV). */
+const RU_MODEL = /(?<![А-Яа-яЁёA-Za-z])(А?[ОТ][А-ЯЁ]*)-(\d{3,6})\/(\d{2,3})(?!\d)/u;
+
+/** "3 x N MVA" with nothing else saying single-phase: three three-phase units, or one of a bank. */
+const THREE_X = new RegExp(String.raw`\b3\s*x\s*(${NUM})\s*MVA`, "i");
+
+function parseMva(text: string, threeUnit = true): MvaRead {
   const none = { differ: false, unit: false, bank: false };
   // 2026-11-04 R2: "3x83.3 MVA" is one single-phase unit; it was sized as 83.3 MVA three-phase.
-  const unit = text.match(new RegExp(String.raw`\b3\s*x\s*(${NUM})\s*MVA`, "i"));
-  if (unit && !THREE_PHASE.test(text)) return { ...none, mva: Number(unit[1]), unit: true };
+  // 2026-11-04 R3: only when parseTenderLine finds a single-phase sign (threeUnit).
+  const unit = text.match(THREE_X);
+  if (threeUnit && unit && !THREE_PHASE.test(text)) return { ...none, mva: Number(unit[1]), unit: true };
   // 2026-11-04 R2: only the first rating was read: "40 MVA ONAN / 63 MVA ONAF" sized on
   // 40 (current 36 % low) and "Fault level 5000 MVA" taken as the rating. Every rating is
   // read; fault, network and base figures are not ratings; the largest is sized.
@@ -245,6 +319,11 @@ function parseMva(text: string): MvaRead {
   const notRating = (i: number) => {
     const head = text.slice(Math.max(0, i - 30), i);
     if (/(?:fault|short[\s-]?circuit|\bs?s\.?c\b)[^;,]{0,30}$/i.test(head)) return true;
+    // 2026-11-04 R3: "earthing transformer 0.5 MVA", "tertiary 21 MVA", "auxiliary 100 kVA",
+    // "losses at 63 MVA", "feeder capacity 60 MVA" were sized as the rating.
+    if (/(?:tertiary|stabili\w*|earthing|auxiliary|\baux\b\.?|station\s+service|feeder|losses?\s+at|\bbase)[^;,]{0,25}$/i.test(head)) {
+      return true;
+    }
     // "Grid transformer 90 MVA" names the transformer, not the network.
     const g = head.match(/(?:network|system|grid)([^;,\d]{0,30})$/i);
     return g != null && !/transformer|trafo|\bunit\b/i.test(g[1]);
@@ -252,19 +331,35 @@ function parseMva(text: string): MvaRead {
   const read = (unitRe: string, scale: number) =>
     [...text.matchAll(new RegExp(String.raw`(${NUM})(?:\s*/\s*${NUM})*\s*${unitRe}`, "gi"))]
       .filter((m) => !notRating(m.index ?? 0))
-      .map((m) => Math.max(...(m[0].match(/\d+(?:\.\d+)?/g) ?? []).map(Number)) / scale)
-      .filter((n) => Number.isFinite(n) && n > 0);
-  let all = read(String.raw`MVA(?![a-z])(?!\s*base)`, 1);
+      .map((m) => (m[0].match(/\d+(?:\.\d+)?/g) ?? []).map((x) => Number(x) / scale))
+      .filter((g) => g.length && g.every((n) => Number.isFinite(n) && n > 0));
+  // 2026-11-04 R3: unit first ("Rated power (MVA): 40", "Power rating MVA 63") was not read,
+  // so a tertiary or earthing MVA became the rating. Only after a rating word, never a bare
+  // "MVA 132" (that is the ratio in "40 MVA 132/33 kV").
+  const first = [
+    ...text.matchAll(
+      new RegExp(
+        String.raw`\b(?:rated(?:\s+(?:power|rating|capacity))?|power(?:\s+rating)?|rating|capacity|S[rn])\s*(?:\(\s*([Mk])VA\s*\)|,?\s*([Mk])VA)\s*[:=,]?\s*(${NUM}(?:\s*/\s*${NUM})*)(?![\d.])(?!\s*(?:kV|[±+/]\s*\d|±))`,
+        "gi",
+      ),
+    ),
+  ]
+    .map((m) => m[3]!.split("/").map((x) => Number(x) / (/k/i.test(m[1] ?? m[2] ?? "") ? 1000 : 1)))
+    .filter((g) => g.every((n) => Number.isFinite(n) && n > 0));
+  let all = [...first, ...read(String.raw`MVA(?![a-z])(?!\s*base)`, 1)];
   if (!all.length) all = read(String.raw`kVA(?![a-z])`, 1000);
   if (all.length) {
+    // 2026-11-04 R3: a stage list ("40/50 MVA", "25 000/31 500 kVA") is sized on the
+    // top stage; the largest_mva note says so, as for separate ratings.
+    const figs = all.flat();
     return {
-      mva: Math.max(...all),
-      differ: new Set(all).size > 1,
+      mva: Math.max(...figs),
+      differ: new Set(figs).size > 1,
       unit: false,
       bank: new RegExp(String.raw`${NUM}\s*[Mk]VA\s*\(?\s*bank\b`, "i").test(text),
     };
   }
-  const cn = text.match(CN_MODEL);
+  const cn = text.match(CN_MODEL) ?? text.match(RU_MODEL);
   if (cn) return { ...none, mva: Number(cn[2]) / 1000 };
   return { ...none, mva: null };
 }
@@ -281,6 +376,8 @@ type RangeHit = {
   pct?: { text: string; stated: boolean };
   /** Percent range too small to split (±5 %): range not read. */
   unread?: string;
+  /** Symmetric ±N taken from a position or step count (no ± written). */
+  guessed?: boolean;
 };
 
 const POSITIONS = /(?<![±\d.]\s?)(\d{1,2})\s*(?:positions|pos\b|taps|tappings|kademe|posisi)/i;
@@ -362,12 +459,13 @@ function percentHit(
   // Step size stated anywhere: "(20 x 1.25%)", "21 positions x 1.25%", "(2.5% steps)".
   const nx = text.match(new RegExp(String.raw`(?<![±+\-\d.])(\d{1,2})\s*x\s*(${NUM})\s*%`));
   const xs = text.match(new RegExp(String.raw`x\s*(${NUM})\s*%`));
-  const stepWord = text.match(new RegExp(String.raw`(${NUM})\s*%\s*(?:per\s*)?steps?\b`, "i"));
+  const stepWord = statedStep(text);
   // Turkish "17 kademe", Indonesian "17 posisi" are position counts too (2026-11-04 R2).
   const posM = text.match(POSITIONS);
+  // 2026-11-04 R3: "0/-20% linear in 16 steps" lost the count to the "linear" word.
   const countM = text
     .slice(end, end + 40)
-    .match(/^\s*[,(]?\s*(?:in\s*)?(\d{1,2})\s*(?:steps|级|档)/i);
+    .match(/^\s*[,(]?\s*(?:(?:linear|coarse\W*fine|reversing)\s+)?(?:in\s*)?(\d{1,2})\s*(?:steps|级|档)/i);
   const positions = posM ? Number(posM[1]) : null;
 
   let step: number | null = null;
@@ -376,7 +474,7 @@ function percentHit(
     step = Number(nx[2]);
     total = Number(nx[1]);
   } else if (xs) step = Number(xs[1]);
-  else if (stepWord) step = Number(stepWord[1]);
+  else if (stepWord != null) step = stepWord;
   else if (pmCount) step = (h.plusPct === h.minusPct ? minusPct : span / 2) / pmCount;
   else if (positions != null && positions > 2) step = span / (positions - 1);
   else if (countM) total = Number(countM[1]);
@@ -407,6 +505,51 @@ function percentHit(
   }
   if (plus + minus === 0) return null;
   return { plus, minus, stepPct, index, end, pct: { text: pctText, stated } };
+}
+
+/**
+ * Step size the line states apart from the count: "2.5% steps", "1.25% per step",
+ * "1.25%/step", "steps of 2.5%", "step voltage 2.5%", "Ust 1181.8 V = 1.78%", "Ust 1089 V (1.65%)".
+ * 2026-11-04 R3: these were dropped and the 1.25 % default sized the switch.
+ */
+function statedStep(text: string): number | null {
+  const res = [
+    String.raw`(${NUM})\s*%\s*(?:per\s*step|\/\s*step|each\s+step|steps?)\b`,
+    String.raw`\bsteps?\s+of\s+(${NUM})\s*%`,
+    String.raw`\bstep(?:\s+voltage)?\s*[:=]?\s*(${NUM})\s*%`,
+    String.raw`\bU\s?st\b[^;%]{0,25}?(?:=|\()\s*(${NUM})\s*%`,
+  ];
+  for (const re of res) {
+    const m = text.match(new RegExp(re, "i"));
+    const s = m ? Number(m[1]) : NaN;
+    if (s > 0 && s <= 10) return s;
+  }
+  return null;
+}
+
+/**
+ * 2026-11-04 R3: "OLTC 19 positions (1.78% per step)", "16 steps", "tap positions: 21",
+ * "OLTC 1-21" with no ± were read as the ±8 default. A count gives a symmetric ±N
+ * (assumed symmetric), with the stated step when there is one.
+ */
+function countRange(text: string): RangeHit | null {
+  const pos =
+    text.match(/(?<![±+\-\d.]\s?)\b(\d{1,2})\s*(?:positions|tap\s+positions|pos\b|kademe|posisi)/i) ??
+    text.match(/\bpositions?\s*(?:of\s+)?[:=]?\s*(\d{1,2})\b(?!\s*%)/i) ??
+    text.match(/\b(?:OLTC|tap\w*|positions?)\s*:?\s*1\s*(?:-|~|…|to)\s*(\d{1,2})\b(?![\d.]*\s*(?:%|kV))/i);
+  const steps = text.match(/(?<![±+\-\d.x]\s?)\b(\d{1,2})\s*steps\b/i);
+  let n: number | null = null;
+  let m: RegExpMatchArray | null = null;
+  if (pos && Number(pos[1]) >= 3 && (Number(pos[1]) - 1) % 2 === 0) {
+    n = (Number(pos[1]) - 1) / 2;
+    m = pos;
+  } else if (steps && Number(steps[1]) >= 2 && Number(steps[1]) % 2 === 0) {
+    n = Number(steps[1]) / 2;
+    m = steps;
+  }
+  if (n == null || m == null) return null;
+  const index = m.index ?? 0;
+  return { plus: n, minus: n, stepPct: statedStep(text), index, end: index + m[0].length, guessed: true };
 }
 
 /** Usual step sizes: "±2 (2.5 %)" may be a total of 2 × 1.25 %, not a 2.5 % step. */
@@ -462,7 +605,9 @@ function findRange(text: string): RangeHit | null {
   // "±10 % ±8 positions": the bare ±N is the step count of the percent range.
   const p = percentRange(text, s && s.plus === s.minus ? s.plus : null);
   if (p) return p;
-  if (s) return s;
+  // 2026-11-04 R3: "±9 steps (Ust 1181.8 V = 1.78%)": a step stated apart from the count.
+  if (s) return { ...s, stepPct: statedStep(text) };
+  if (!steps.length) return countRange(text);
   // ±0 x 1.25 %: no range, but keep its place for the voltages.
   const z = steps[0];
   return z ? { ...z, stepPct: z.stepPct, zero: true } : null;
@@ -515,8 +660,21 @@ function sideAfter(text: string, end: number): { side?: string; kv?: number } | 
   const tail = text.slice(end, end + 30);
   const m = tail.match(new RegExp(String.raw`^\s*\(?\s*(?:(?:on|in|at)\s+(?:the\s+)?${SIDE}\b|${SIDE}\s+tapping)`, "i"));
   if (m) return { side: m[1] ?? m[2] };
-  const k = tail.match(new RegExp(String.raw`^\s*\(?\s*on\s+(?:the\s+)?(${NUM})\s*kV\s+side`, "i"));
+  // 2026-11-04 R3: "±10x1.25% on 66 kV" (no "side") went on the HV.
+  const k = tail.match(new RegExp(String.raw`^\s*\(?\s*on\s+(?:the\s+)?(${NUM})\s*kV(?![A-Za-z])(?:\s+(?:side|winding))?`, "i"));
   return k ? { kv: Number(k[1]) } : null;
+}
+
+/**
+ * 2026-11-04 R3: a side word just before the range: "LV ±10x1.25%", "LV tapping ±…",
+ * "MV tapping ±…", "LV side regulation ±…", "DETC on LV ±2x2.5%". The clause stops at , ;
+ */
+function sideBefore(text: string, index: number): { side: string } | null {
+  const head = text.slice(Math.max(0, index - 40), index);
+  const m = head.match(
+    new RegExp(String.raw`\b${SIDE}\s*(?:side\s*)?(?:tapp\w*|regulat\w*|winding)?\s*[:\-]?\s*$`, "i"),
+  );
+  return m ? { side: m[1]! } : null;
 }
 
 /**
@@ -531,24 +689,40 @@ function tapWindingFromWords(text: string, range: RangeHit | null, kv: number[],
     if (w.kv != null) return kv.indexOf(w.kv) >= 0 ? kv.indexOf(w.kv) : null;
     return w.side ? sideIndex(w.side, kv.length, auto) : null;
   };
-  const own = range ? at(sideAfter(text, range.end)) : null;
+  const own = range ? at(sideAfter(text, range.end)) ?? at(sideBefore(text, range.index)) : null;
   if (own != null) return own;
-  const lead = String.raw`(?:OLTC|tapp\w*|regulat\w*)[^;.,]{0,25}?`;
+  // 2026-11-04 R3: "on-load tap changer on LV side", "tap changer on the LV winding",
+  // "tapped winding: LV", "tappings on 33 kV winding", "OLTC 33 kV ±…" and GB 低压侧调压
+  // were ignored and the HV taken (current 56-83 % low). A kV must be one of the ratio's.
+  const lead = String.raw`(?:OLTC|tapp\w*|regulat\w*|tap[\s-]?changer|on[\s-]?load)[^;.,]{0,25}?`;
   const m = text.match(
     new RegExp(
-      String.raw`${lead}\b(?:on|in|at)\s+(?:the\s+)?${SIDE}\b|\((LV|MV) tapping\)|${lead}\bon\s+(?:the\s+)?(${NUM})\s*kV\s+side`,
+      String.raw`${lead}\b(?:on|in|at)\s+(?:the\s+)?${SIDE}\b|\((LV|MV) tapping\)|${lead}\b(?:on|in|at)\s+(?:the\s+)?(${NUM})\s*kV(?![A-Za-z])|\btapped\s+winding\s*[:=]?\s*${SIDE}\b|\b(?:OLTC|regulat\w*)\s+(${NUM})\s*kV\s*(?=±|\+)`,
       "i",
     ),
   );
-  if (!m) return null;
-  return at(m[3] != null ? { kv: Number(m[3]) } : { side: m[1] ?? m[2] });
+  if (m) {
+    const k = m[3] ?? m[5];
+    return at(k != null ? { kv: Number(k) } : { side: m[1] ?? m[2] ?? m[4] });
+  }
+  const cn = text.match(/([低中高])压侧(?:有载)?(?:调压|分接)|(?:调压|分接)[^,;，；]{0,6}?([低中高])压侧/);
+  if (!cn) return null;
+  const w = cn[1] ?? cn[2];
+  return w === "低" ? kv.length - 1 : w === "高" ? 0 : kv.length === 3 || auto ? 1 : null;
 }
 
-type ExtraRange = { at: number; plus: number; minus: number; stepPct: number | null };
+type ExtraRange = { at: number; plus: number; minus: number; stepPct: number | null; offCircuit?: boolean };
+
+/** 2026-11-04 R3: "115±9x1.78% (OLTC)/38.5±2x2.5% (DETC)/11 kV" was refused at the tag. */
+const DUTY_TAG = String.raw`(?:\s*\(\s*(OLTC|OCTC|DETC|NLTC|on[\s-]?load|off[\s-]?circuit)\s*\))?`;
 
 const RANGE_AT_START = new RegExp(
   String.raw`^\s*(?:±\s*(\d{1,2})|\+\s*(\d{1,2})\s*/?\s*-\s*(\d{1,2}))(?![\d.]*\s*%)\s*(?:x\s*(${NUM})\s*%)?`,
 );
+
+/** Insulation, test and system figures before a kV value: not a winding voltage (shared by both filters). */
+const NOT_WINDING =
+  /\b(?:BIL|LIWL|LI|SIL|AC|Um|insulation|withstand|impulse|lightning|switching|power[\s-]?frequency|test|applied|induced|highest|max(?:imum)?\.?(?:\s+system)?|equipment)\b[^\d]{0,20}$/i;
 
 /**
  * Voltage ratio that carries the range: "225±8x1.25%/115/35kV".
@@ -568,7 +742,7 @@ function findVoltages(
     // 2026-11-04: "132/33 kV ±10x1.25%": the kV closes the ratio, so the range
     // stands alone. It used to land on 33 kV (LV current, LV Um) with nothing
     // assumed. kV may sit between figure and range only when the ratio goes on.
-    const continues = new RegExp(String.raw`^\s*(?:kV)?\s*/\s*${NUM}`, "i").test(after);
+    const continues = new RegExp(String.raw`^${DUTY_TAG}\s*(?:kV)?\s*/\s*${NUM}`, "i").test(after);
     const own = before.match(
       new RegExp(continues ? String.raw`(${NUM})\s*(?:kV)?\s*$` : String.raw`(${NUM})\s*$`, "i"),
     );
@@ -585,19 +759,27 @@ function findVoltages(
       const extra: ExtraRange[] = [];
       let tail = after;
       for (;;) {
-        const m = tail.match(new RegExp(String.raw`^\s*(?:kV)?\s*/\s*(${NUM})`, "i"));
+        const m = tail.match(new RegExp(String.raw`^${DUTY_TAG}\s*(?:kV)?\s*/\s*(${NUM})`, "i"));
         if (!m) break;
-        right.push(Number(m[1]));
+        right.push(Number(m[2]));
         tail = tail.slice(m[0].length);
         // A second tapped winding: 115±8x1.25%/38.5±2x2.5%/11 kV.
         const r = tail.match(RANGE_AT_START);
         if (r) {
           const plus = Number(r[1] ?? r[2]);
           const minus = Number(r[1] ?? r[3]);
-          if (plus + minus > 0) {
-            extra.push({ at: left.length + right.length, plus, minus, stepPct: r[4] ? Number(r[4]) : null });
-          }
           tail = tail.slice(r[0].length);
+          // "38.5±2x2.5% (DETC)": the tag says off-circuit duty.
+          const tag = tail.match(new RegExp(String.raw`^${DUTY_TAG}`, "i"))?.[1];
+          if (plus + minus > 0) {
+            extra.push({
+              at: left.length + right.length,
+              plus,
+              minus,
+              stepPct: r[4] ? Number(r[4]) : null,
+              ...(tag && new RegExp(OCTC_WORD.source, "i").test(tag) ? { offCircuit: true } : {}),
+            });
+          }
         }
       }
       let kv = [...left, Number(own[1]), ...right];
@@ -609,38 +791,49 @@ function findVoltages(
     }
   }
   // 2026-11-04 R2: "66 kV/11 kV" is a chain too (it lost the 11 kV, so "(LV tapping)" had no LV).
+  // 2026-11-04 R3: "kVp" is an impulse figure, not a winding.
   const chains = [
-    ...text.matchAll(new RegExp(String.raw`(${NUM}(?:\s*(?:kV)?\s*/\s*${NUM}){1,2})\s*kV(?!A)`, "gi")),
+    ...text.matchAll(new RegExp(String.raw`(${NUM}(?:\s*(?:kV)?\s*/\s*${NUM}){1,2})\s*kV(?![Ap])`, "gi")),
   ]
     // 2026-11-04 R2: "LI/AC 650/275 kV", "BIL HV/LV/N 650/170/325 kV", "Um 145/36/36 kV"
     // were read as the ratio (650 kV tapped, current 80 % low).
-    .filter(
-      (m) =>
-        !/(?:BIL|LIWL|LI|SIL|AC|Um|insulation|withstand|highest)\b[^\d]{0,20}$/i.test(
-          text.slice(Math.max(0, (m.index ?? 0) - 30), m.index ?? 0),
-        ),
-    )
-    .map((m) => m[1].split("/").map((x) => Number(x.replace(/kV/i, "").trim())))
-    .filter((c) => c.every((n) => n > 0.2 && n < 1200));
+    // 2026-11-04 R3: "Impulse 650 kVp", "Test voltages 275/70 kV", "Lightning impulse
+    // 650/170 kV", "Max. system voltage 145/36 kV" too. "Nominal system voltage" is the ratio.
+    // TEİAŞ "x%1,25/34,5 kV": a chain right after % or x is not a ratio.
+    .filter((m) => !NOT_WINDING.test(text.slice(Math.max(0, (m.index ?? 0) - 30), m.index ?? 0)))
+    .filter((m) => !/[%x]\s*$/i.test(text.slice(Math.max(0, (m.index ?? 0) - 2), m.index ?? 0)))
+    .map((m) => {
+      const head = text.slice(Math.max(0, (m.index ?? 0) - 30), m.index ?? 0);
+      const at = m.index ?? 0;
+      const end = at + m[0].length;
+      return {
+        c: m[1].split("/").map((x) => Number(x.replace(/kV/i, "").trim())),
+        at,
+        // A ratio word before it, or the range right beside it, names the ratio.
+        ratio: /(?:ratio|rated\s+voltage|nominal|\bU[rn]\b)[^\d]{0,20}$/i.test(head),
+        near: range != null && (/^\s*$/.test(text.slice(end, range.index)) || /^\s*$/.test(text.slice(range.end, at))),
+      };
+    })
+    .filter((x) => x.c.every((n) => n > 0.2 && n < 1200));
   if (chains.length) {
-    chains.sort((a, b) => b.length - a.length);
-    return { kv: chains[0], tapIndex: null, extra: [] };
+    chains.sort(
+      (a, b) => Number(b.ratio) - Number(a.ratio) || Number(b.near) - Number(a.near) || b.c.length - a.c.length || a.at - b.at,
+    );
+    return { kv: chains[0]!.c, tapIndex: null, extra: [] };
   }
-  // Chinese model SFZ11-25000/110: HV only.
-  const cn = text.match(CN_MODEL);
+  // Chinese model SFZ11-25000/110 or Rosseti ТДН-16000/110: HV only.
+  const cn = text.match(CN_MODEL) ?? text.match(RU_MODEL);
   if (cn) return { kv: [Number(cn[3])], tapIndex: null, extra: [] };
   if (!lone) return { kv: [], tapIndex: null, extra: [] };
   // 2026-11-04: "63 MVA, 225 kV, ±8x1.25%" and "HV 115 kV ±9x1.78%; LV 11 kV"
   // were refused. Insulation figures (BIL 550 kV, Um 145 kV) are not windings.
-  const hits = [...text.matchAll(new RegExp(String.raw`(?<![A-Za-z/\d.])(${NUM})\s*kV(?!A)`, "gi"))]
+  const hits = [...text.matchAll(new RegExp(String.raw`(?<![A-Za-z/\d.])(${NUM})\s*kV(?![Ap])`, "gi"))]
     .map((m) => ({ kv: Number(m[1]), index: m.index ?? 0, end: (m.index ?? 0) + m[0].length }))
     .filter((h) => h.kv > 0.2 && h.kv < 1200)
-    .filter(
-      (h) =>
-        !/\b(?:BIL|LIWL|LI|SIL|AC|Um|insulation|withstand|neutral|highest|maximum|max\.?|equipment)\b[^\d]{0,20}$/i.test(
-          text.slice(Math.max(0, h.index - 30), h.index),
-        ),
-    );
+    .filter((h) => {
+      const head = text.slice(Math.max(0, h.index - 30), h.index);
+      return !NOT_WINDING.test(head) && !/\bneutral\b[^\d]{0,20}$/i.test(head);
+    });
   const kv = [...new Set(hits.map((h) => h.kv))].sort((a, b) => b - a);
   if (!kv.length || kv.length > 3) return { kv: [], tapIndex: null, extra: [] };
   // 2026-11-04 R2: in "132 kV / 33 kV ±10x1.25%" the 33 kV closes the ratio; the range
@@ -666,6 +859,8 @@ function autoText(text: string): "word" | "at" | null {
   // "AT" and the model codes stay case-sensitive.
   if (
     /\bauto[\s-]?(?:transformers?|trafo|TR)\b|\bautotrafo|自耦/i.test(text) ||
+    // 2026-11-04 R3: Spanish, French, German, Russian, Vietnamese and Turkish words.
+    /\bautotransforma(?:dor|teur|tor)\w*|автотрансформатор|\btự\s*ngẫu|\boto[\s-]?(?:trafo|transformat)\w*/i.test(text) ||
     /\bauto\b(?!\s*[/)]|[\s-]*(?:control|mode|operation|start|reclos|tap|voltage|changeover|transfer|reset|cooling|fan|pump|manual|AVR))(?<!(?:manual|hand|\(|AVR)\s*\/?\s*auto)/i.test(text) ||
     // 2026-11-04 R2: PLN "IBT" and the Rosseti АТДЦТН / АОДЦТН models were two-winding.
     /\bIBT\b|\b[Ii]nter[\s-]?bus\s+transformer/.test(text) ||
@@ -679,8 +874,9 @@ function autoText(text: string): "word" | "at" | null {
 
 /** Delta tied to the tapping (not an LV delta or a tertiary). */
 // 2026-11-04 R2: "HV winding delta", "HV: delta" and "delta/star" (HV named first) added.
+// 2026-11-04 R3: "HV: D, LV: yn" and "delta connected HV" too.
 const DELTA_TAP =
-  /(?:regulat\w*|tapp\w*|OLTC)\b[^;.]{0,40}\bdelta\b|\bHV\b[\s:]*(?:winding\s*)?(?:is\s*)?delta\b|\bdelta[\s/-]*star\b|\bD[\s-]?connection\b|三角形调压|角接调压/i;
+  /(?:regulat\w*|tapp\w*|OLTC)\b[^;.]{0,40}\bdelta\b|\bHV\b[\s:]*(?:winding\s*)?(?:is\s*)?delta\b|\bHV\b\s*[:=]\s*D\b|\bdelta[\s-]connected\s+HV\b|\bdelta[\s/-]*star\b|\bD[\s-]?connection\b|三角形调压|角接调压/i;
 const DELTA_OTHER =
   /\b(?:LV|MV|tertiary|secondary|stabili[sz]ing)\s+delta\b|\bdelta\s+(?:tertiary|stabili)|star\s*\/\s*delta/i;
 // 2026-11-04 R2: "LV neutral point earthed" / "11 kV neutral point brought out" made the
@@ -724,7 +920,8 @@ export function parseTenderLine(raw: string): TenderLine | null {
     notes.push({ key: "auto_vg", vars: { vg: vg!.group } });
   }
   let range = findRange(text);
-  let found = findVoltages(text, range, !auto);
+  // A ±N guessed from a position count sits on no voltage figure.
+  let found = findVoltages(text, range?.guessed ? null : range, !auto);
 
   // 2026-11-04 R2: ranges written apart ("HV 132 kV ±2x2.5% (off-circuit), LV 33 kV
   // ±8x1.25% (on-load)", "DETC ±2x2.5%, OLTC ±8x1.25%") sized the OLTC on the first.
@@ -745,7 +942,8 @@ export function parseTenderLine(raw: string): TenderLine | null {
       const head = text.slice(0, h.index);
       const k = head.match(new RegExp(String.raw`(?<![A-Za-z/\d.])(${NUM})(?:\s*kV)?\s*$`, "i"));
       if (k && !/\/\s*$/.test(head.slice(0, k.index))) return { kv: Number(k[1]) };
-      return sideAfter(text, h.end);
+      // 2026-11-04 R3: "DETC on LV ±2x2.5%" put the off-circuit range on the HV (75 % low).
+      return sideAfter(text, h.end) ?? sideBefore(text, h.index);
     };
     stated.forEach((h, i) => {
       if (h !== main) apart.push({ hit: h, offCircuit: tags[i] === "octc", site: siteOf(h) });
@@ -757,7 +955,38 @@ export function parseTenderLine(raw: string): TenderLine | null {
   }
   let kv = found.kv;
   const rangeIndex = found.tapIndex;
-  const mvaRead = parseMva(text);
+
+  // 2026-11-04 T05: "333 MVA single-phase" was sized as a three-phase 333 MVA,
+  // a third of the winding current.
+  // "auxiliary supply 230 V single-phase" is not the transformer.
+  // 2026-11-04 R2: "Single-phase, 167 MVA" and "Type: single phase; rating 100 MVA" were
+  // missed (current 3× low), "control 1-phase 230 V" was taken (3× high), and "3x83.3 MVA",
+  // "/√3" ratings and OD…Z / АО… models never set it. A word followed by volts or a
+  // fault, or after an auxiliary word or a volts figure, is not the transformer's.
+  // 2026-11-04 R3: "single-phase auto-reclosing" is the line breaker's, not the transformer's.
+  const singleWord = [
+    ...text.matchAll(new RegExp(String.raw`single[\s-]?phase|\b1[\s-]?ph(?:ase)?\b|单相(?!电源|供电|交流)|\bbank of 3\b`, "gi")),
+  ].some((m) => {
+    const i = m.index ?? 0;
+    const after = text.slice(i + m[0].length, i + m[0].length + 14);
+    const before = text.slice(Math.max(0, i - 25), i);
+    if (/^\W{0,3}(?:\d+\s*V\b|supply|aux|control|motor|fault|short|earth|to\b|auto[\s-]?reclos|reclos|trip)/i.test(after)) {
+      return false;
+    }
+    if (/(?:aux\w*|supply|control|motor|heater|fault|short[\s-]?circuit|\d+\s*V)\W*$/i.test(before)) return false;
+    return !/^bank/i.test(m[0]) || !THREE_PHASE.test(text);
+  });
+  const singleModel =
+    /\bO?D[A-Z]*Z[A-Z0-9]*-\d{3,7}\/\d/.test(text) || /(?<![А-ЯЁа-яё])АО[А-ЯЁ]*-\d/u.test(text) || /\bAOD[A-Z]*-\d/.test(text);
+  const rootThree = /\/\s*(?:√|sqrt\s*|v)\s*3\b/i.test(raw) && !THREE_PHASE.test(text);
+  // IEC "Ii0" / "Ia0i0" are single-phase groups.
+  const singleGroup = vg != null && /^I/.test(vg.group);
+  // 2026-11-04 R3: "3 x 63 MVA power transformers 132/33 kV" is three three-phase units, not
+  // one single-phase unit (3× current, a single-phase CM2I type). It is one unit of a bank
+  // only with a single-phase or bank sign, or at 220 kV and up, where banks are built.
+  const singleSign = singleWord || singleModel || rootThree || singleGroup;
+  const threeUnit = singleSign || /\bbank\b/i.test(text) || (kv.length > 0 && Math.max(...kv) >= 220);
+  const mvaRead = parseMva(text, threeUnit);
   let mva = mvaRead.mva;
   if (!kv.length && mva == null && !range && !vg) return null;
 
@@ -766,8 +995,10 @@ export function parseTenderLine(raw: string): TenderLine | null {
   if (!vg && autoWord !== "word") assumed.push("kind");
   if (mva == null) assumed.push("mva");
   if (mvaRead.differ && mva != null) notes.push({ key: "largest_mva", vars: { mva } });
+  const threeX = text.match(THREE_X);
+  if (!threeUnit && threeX && !THREE_PHASE.test(text) && mva != null) notes.push({ key: "quantity", vars: { mva } });
   const real = range && !range.zero && !range.unread ? range : null;
-  if (!real || (real.pct && !real.pct.stated)) assumed.push("range");
+  if (!real || (real.pct && !real.pct.stated) || real.guessed) assumed.push("range");
   if (range?.zero) notes.push({ key: "zero_range" });
   if (range?.unread) notes.push({ key: "percent_small", vars: { pct: range.unread } });
   if (real?.pct) {
@@ -821,7 +1052,13 @@ export function parseTenderLine(raw: string): TenderLine | null {
       : null;
   const others: Ranged[] = found.extra
     .filter((e) => e.at < kv.length)
-    .map((e) => ({ tapIndex: at(e.at), plus: e.plus, minus: e.minus, stepPct: e.stepPct }));
+    .map((e) => ({
+      tapIndex: at(e.at),
+      plus: e.plus,
+      minus: e.minus,
+      stepPct: e.stepPct,
+      ...(e.offCircuit ? { offCircuit: true } : {}),
+    }));
   if (main && others.length) {
     const all = [main, ...others];
     const big = all.reduce((x, y) => (y.plus + y.minus > x.plus + x.minus ? y : x));
@@ -903,34 +1140,20 @@ export function parseTenderLine(raw: string): TenderLine | null {
     notes.push({ key: "second_range", vars: { kv: r.kv, range: `${pm}${r.stepPct ? ` × ${r.stepPct} %` : ""}` } });
   }
 
-  // 2026-11-04 T05: "333 MVA single-phase" was sized as a three-phase 333 MVA,
-  // a third of the winding current.
-  // "auxiliary supply 230 V single-phase" is not the transformer.
-  // 2026-11-04 R2: "Single-phase, 167 MVA" and "Type: single phase; rating 100 MVA" were
-  // missed (current 3× low), "control 1-phase 230 V" was taken (3× high), and "3x83.3 MVA",
-  // "/√3" ratings and OD…Z / АО… models never set it. A word followed by volts or a
-  // fault, or after an auxiliary word or a volts figure, is not the transformer's.
-  const singleWord = [
-    ...text.matchAll(
-      new RegExp(String.raw`single[\s-]?phase|\b1[\s-]?ph(?:ase)?\b|单相(?!电源|供电|交流)|\bbank of 3\b|\b3\s*x\s*${NUM}\s*MVA`, "gi"),
-    ),
-  ].some((m) => {
-    const i = m.index ?? 0;
-    const after = text.slice(i + m[0].length, i + m[0].length + 14);
-    const before = text.slice(Math.max(0, i - 25), i);
-    if (/^\W{0,3}(?:\d+\s*V\b|supply|aux|control|motor|fault|short|earth|to\b)/i.test(after)) return false;
-    if (/(?:aux\w*|supply|control|motor|heater|fault|short[\s-]?circuit|\d+\s*V)\W*$/i.test(before)) return false;
-    return !/^(?:bank|3)/i.test(m[0]) || !THREE_PHASE.test(text);
-  });
-  const singleModel =
-    /\bO?D[A-Z]*Z[A-Z0-9]*-\d{3,7}\/\d/.test(text) || /(?<![А-ЯЁа-яё])АО[А-ЯЁ]*-\d/u.test(text) || /\bAOD[A-Z]*-\d/.test(text);
-  const rootThree = /\/\s*(?:√|sqrt\s*|v)\s*3\b/i.test(raw) && !THREE_PHASE.test(text);
-  const phases = singleWord || mvaRead.unit || singleModel || rootThree ? ("I" as const) : null;
+  const phases = mvaRead.unit || singleSign ? ("I" as const) : null;
   // "250 MVA bank of 3 x 1-phase units": the figure is the bank; one unit is a third.
   if (phases && mvaRead.bank && mva != null) mva = Math.round((mva / 3) * 1000) / 1000;
   if (phases && mva != null) notes.push({ key: "single_phase", vars: { mva } });
   // 2026-11-04 R2: 0.05 → 0.2 MVA, so a misread like "63.000 kVA" is flagged.
-  if (mva != null && mva < 0.2) notes.push({ key: "tiny_mva", vars: { mva } });
+  // 2026-11-04 R3: below 1 MVA at 33 kV and up too ("31'500 kVA" read 0.5 MVA). A note
+  // only: 315-630 kVA units at 33 kV exist.
+  const topKv = voltagesKv.length ? Math.max(...voltagesKv) : 0;
+  if (mva != null && (mva < 0.2 || (mva < 1 && topKv >= 33))) notes.push({ key: "tiny_mva", vars: { mva } });
+  const neutralBilKv = parseNeutralBil(text);
+  // 2026-11-04 R3: "OLTC insulation to earth LI 550 kV" does not name the neutral, and B01
+  // ("OS insulation to ground AC275/LI650") was sold at 72.5. Say so; never size on it.
+  const earthLi = text.match(/\bto\s+(?:earth|ground)\b[^;]{0,25}?\b(?:LI|BIL|LIWL)\s*[:=]?\s*(\d{2,4})/i);
+  if (earthLi && neutralBilKv == null) notes.push({ key: "earth_li", vars: { li: Number(earthLi[1]) } });
   // 2026-11-04 T01/T03: "coarse/fine" and "linear" words were ignored ("non-linear load" is not linear).
   const regulation: Regulation | null = /coarse[\s/-]*fine|粗细调/i.test(text)
     ? "coarse_fine"
@@ -949,7 +1172,7 @@ export function parseTenderLine(raw: string): TenderLine | null {
     stepPct: main?.stepPct ?? null,
     vectorGroup: vg?.group ?? null,
     windings,
-    neutralBilKv: parseNeutralBil(text),
+    neutralBilKv,
     phases,
     regulation,
     otherRanges,
@@ -1018,6 +1241,19 @@ function parseNeutralBil(text: string): number | null {
     }
     return Number(m[2]);
   }
+  // 2026-11-04 R3: "HV neutral 550 kV", "HV neutral 550 kV BIL" and the label "HVN 550/230"
+  // were not read (Um 72.5 where LI 550 is stated). Only forms that name the neutral.
+  const named = /\b(?:HV\s+)?neutral\s*[:=]?\s*(?:BIL|LI)?\s*(\d{2,4})\s*kVp?\b/gi;
+  for (const m of text.matchAll(named)) {
+    const at = m.index ?? 0;
+    // A neutral BIL is 95 kV and up; a smaller figure is an AC or a Um.
+    if (Number(m[1]) < 95) continue;
+    if (/\b(?:LV|MV|tertiary|secondary)\s*$/i.test(text.slice(Math.max(0, at - 12), at))) continue;
+    return Number(m[1]);
+  }
+  // "HVN 550/230": LI and AC in either order; the LI is the larger.
+  const hvn = text.match(/\bHVN\b\s*[:=]?\s*(\d{2,4})((?:\s*\/\s*\d{2,4})*)/);
+  if (hvn) return Math.max(Number(hvn[1]), ...(hvn[2]!.match(/\d{2,4}/g) ?? []).map(Number));
   return null;
 }
 
