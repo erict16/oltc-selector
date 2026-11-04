@@ -449,6 +449,7 @@ export function readLine(f: FormState, text: string): FormState {
       hvKv: tl.hvKv ?? Math.max(...tl.voltagesKv),
       mvKv: null,
       tapKv: tl.tapKv,
+      tapKvStated: false,
       winding: tl.winding,
       windingStated: false,
       tapPoint: "auto_junction",
