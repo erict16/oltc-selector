@@ -295,7 +295,8 @@ describe("oltc CLI uneven ranges and tender lines", () => {
     expect(first(["--line", "120MVA 110+6-10x1.25%/33kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-10193W");
     expect(first(["--line", "130MVA 132+6-4x2.5%/33kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-12111W");
     expect(first(["--line", "110MVA 64+10-15x1.5%/20kV YNd11"])).toBe("SHZVGIII-1300Y/72.5B-14271W");
-    expect(first(["--line", "185 MVA, 275/33 kV, YNd11, +12/-8 x 1.25%"])).toBe("CM2III-500Y/72.5B-12233W");
+    // 432 A on a 275 kV class III unit: SHZV first (FAM-3; W02 was quoted SHZV).
+    expect(first(["--line", "185 MVA, 275/33 kV, YNd11, +12/-8 x 1.25%"])).toBe("SHZVIII-600Y/72.5B-12233W");
     // A19 and TRAEL were 3 × single-phase 18170.
     expect(first(["--line", "7.5MVA 20+2-14x2.5%/0.4kV YNd11 line end", "--oil"])).toBe("CVIII-350D/40.5-10193W");
     expect(first(["--line", "20MVA 69+4-12x1.25%/13.8kV Dyn1", "--oil"])).toBe("CVIII-350D/72.5-10193W");
@@ -380,7 +381,8 @@ describe("oltc CLI uneven ranges and tender lines", () => {
 
   it("sizes a single-phase unit on 3 × MVA, single-phase (WC-03)", () => {
     const a = json(["--line", "333 MVA single-phase 500/220 kV, 500 kV ±13x1.25%, regulation at the neutral point"]);
-    expect(a.model).toBe("SHZVI-2400/72.5B-14271W");
+    // 500 kV-class neutral: Um 126 assumed (UM-1, 11 of 13 orders).
+    expect(a.model).toBe("SHZVI-2400/126C-14271W");
     expect(a.basis.maxA).toBe(1377.4); // tender Imax 1377.33 A
   });
 
@@ -388,8 +390,9 @@ describe("oltc CLI uneven ranges and tender lines", () => {
     expect(first(["--line", "15 MVA, 33/11 kV, ±8x1.25%, D connection"])).toBe("CV2III-350D/40.5-10193W");
     expect(first(["--line", "10 MVA, 33/11.5 kV, Dyn11, ±8x1.25% coarse/fine"])).toBe("CV2III-350D/40.5-10193G");
     expect(first(["--line", "130 MVA 132/33 kV, +15%/-10%, 11 positions (2.5% steps), linear"])).toMatch(/-12110$/);
+    // 571 A on a 225 kV class III unit: SHZV first (FAM-3; EEMC PO26-667 sold SHZVIII-1000Y).
     expect(first(["--line", "200 MVA, 225/115 kV; Auto-transformer, vector group YNd11d11; ±8x1.25%"])).toBe(
-      "CM2III-600Y/72.5B-10193W",
+      "SHZVIII-600Y/72.5B-10193W",
     );
   });
 
