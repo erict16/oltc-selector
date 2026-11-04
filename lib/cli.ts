@@ -748,6 +748,8 @@ export function cliDuty(args: CliArgs): DutyBasis | null {
     mvKv: args.mv ?? 0,
     minusSteps: cliMinusSteps(args),
     stepFraction: pct,
+    // 2026-11-04 final ENGINE-12: a defaulted 1.25 % yields to the step --ust implies.
+    stepFractionStated: args.given.has("stepPct"),
     // 与网页版首屏一致：容量路径默认不额外加安全系数
     safetyK: args.k != null && args.k > 0 ? args.k : 1.0,
     ...(earth != null ? { earthUmKv: earth } : {}),

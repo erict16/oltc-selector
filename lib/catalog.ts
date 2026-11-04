@@ -872,7 +872,8 @@ function firstAllowedAtOrAbove(
   return allowed[allowed.length - 1] ?? "B";
 }
 
-function coversAcrossTap(
+// 2026-11-04 final ENGINE-11: exported so the TR practice grade can test the Um default.
+export function coversAcrossTap(
   size: SelectorSize,
   needALi: number,
   needAPf: number,

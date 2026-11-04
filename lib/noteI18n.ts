@@ -274,6 +274,25 @@ const RULES: Rule[] = [
       id: `Ust OS ${m[1]} V tampak seperti nilai saluran; tegangan tap sebenarnya ${m[2]} V. Dipilih pada angka OS.`,
     }),
   ],
+  // 2026-11-04 final ENGINE-12: the step a stated Ust implies.
+  [
+    /^OS Ust (\d+) V is ([\d.]+) % per step, not the ([\d.]+) % default; lowest tap sized on ([\d.]+) %\.$/,
+    (m) => ({
+      vi: `Ust trong OS ${m[1]} V là ${m[2]} % mỗi nấc, không phải ${m[3]} % mặc định; dòng ở nấc thấp nhất tính theo ${m[4]} %.`,
+      es: `La Ust de la OS, ${m[1]} V, es ${m[2]} % por escalón, no el ${m[3]} % por defecto; la toma más baja se dimensiona con ${m[4]} %.`,
+      tr: `OS Ust ${m[1]} V kademe başına %${m[2]}, varsayılan %${m[3]} değil; en düşük kademe %${m[4]} ile boyutlandırıldı.`,
+      id: `Ust OS ${m[1]} V adalah ${m[2]} % per tap, bukan ${m[3]} % bawaan; tap terendah dihitung pada ${m[4]} %.`,
+    }),
+  ],
+  [
+    /^OS Ust (\d+) V is ([\d.]+) % per step, not the stated ([\d.]+) %; lowest tap sized on ([\d.]+) %\. Check the OS\.$/,
+    (m) => ({
+      vi: `Ust trong OS ${m[1]} V là ${m[2]} % mỗi nấc, không khớp ${m[3]} % đã cho; dòng ở nấc thấp nhất tính theo ${m[4]} %. Kiểm tra OS.`,
+      es: `La Ust de la OS, ${m[1]} V, es ${m[2]} % por escalón, no el ${m[3]} % indicado; la toma más baja se dimensiona con ${m[4]} %. Revise la OS.`,
+      tr: `OS Ust ${m[1]} V kademe başına %${m[2]}, belirtilen %${m[3]} değil; en düşük kademe %${m[4]} ile boyutlandırıldı. OS'yi kontrol edin.`,
+      id: `Ust OS ${m[1]} V adalah ${m[2]} % per tap, bukan ${m[3]} % yang dinyatakan; tap terendah dihitung pada ${m[4]} %. Periksa OS.`,
+    }),
+  ],
   [
     /^Neutral insulation not given: sized at Um ([\d.]+) kV; the OS decides\.$/,
     (m) => ({

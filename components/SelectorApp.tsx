@@ -20,18 +20,19 @@ import {
   EARTH_INSULATION,
   umForEarthInsulation,
 } from "@/lib/catalog";
-import { geometryForRange } from "@/lib/nameplate";
 import {
   INITIAL_FORM,
   commitRange,
+  editStepPct,
   formDiff,
   formSelectInput,
   formSpec,
   geometryForPm,
   pickKind as pickKindIn,
+  pickPhases,
   pickPm,
+  pickRegulation,
   readLine,
-  stepMovesRange,
   toOctc,
   toOltc,
   type FormState,
@@ -56,11 +57,9 @@ import {
 import { safetyKKeepsCapacity } from "@/lib/safetyK";
 import {
   defaultMid,
-  defaultPitch,
   lookupByPositions,
   midControl,
   pmStepOptionsFor,
-  type ParsedTapRange,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import {
@@ -592,6 +591,8 @@ export function SelectorApp() {
   const [lineRead, setLineRead] = useState(f0.lineRead);
   const [lineFailed, setLineFailed] = useState(f0.lineFailed);
   const [everRead, setEverRead] = useState(f0.everRead);
+  const [phasesByLine, setPhasesByLine] = useState(f0.phasesByLine);
+  const [stepStated, setStepStated] = useState(f0.stepStated);
   const [oltcRegulation, setOltcRegulation] = useState(f0.oltcRegulation);
   const [altsOpen, setAltsOpen] = useState(false);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
@@ -634,6 +635,8 @@ export function SelectorApp() {
     lineRead,
     lineFailed,
     everRead,
+    phasesByLine,
+    stepStated,
     oltcRegulation,
   });
   const setters: { [K in Exclude<keyof FormState, "input">]: (v: FormState[K]) => void } = {
@@ -662,6 +665,8 @@ export function SelectorApp() {
     lineRead: setLineRead,
     lineFailed: setLineFailed,
     everRead: setEverRead,
+    phasesByLine: setPhasesByLine,
+    stepStated: setStepStated,
     oltcRegulation: setOltcRegulation,
   };
   /** Run one transition and set only the fields it changed. */
@@ -762,61 +767,9 @@ export function SelectorApp() {
    */
   const readTenderLine = () => updateForm((f) => readLine(f, lineText));
 
-  const setRegulation = (reg: SelectInput["regulation"]) => {
-    if (reg === "linear") {
-      setPm("");
-      const plus = tapPlus > 0 ? tapPlus : 4;
-      const minus = tapMinus > 0 ? tapMinus : 4;
-      setTapPlus(plus);
-      setTapMinus(minus);
-      const range: ParsedTapRange = {
-        plus,
-        minus,
-        positions: plus + minus + 1,
-        stepPercent: stepPercentPct > 0 ? stepPercentPct / 100 : null,
-      };
-      setTapRange(range);
-      setInput((s) => ({
-        ...s,
-        regulation: reg,
-        plusMinusSteps: undefined,
-        positions: range.positions,
-        midPositions: 0,
-        pitch: defaultPitch(range.positions, "linear") as
-          | 10
-          | 12
-          | 14
-          | 16
-          | 18,
-      }));
-      return;
-    }
-    // 2026-11-04: an uneven custom range (+4/−12) stays live on W/G with its
-    // Fig. 3-3 row; snapping to ±8 sized the lowest tap with −8.
-    if (!pm && tapRange && tapRange.plus !== tapRange.minus) {
-      const g = geometryForRange(tapRange.plus, tapRange.minus, reg);
-      setTapRange({ ...tapRange, positions: g.positions });
-      setInput((s) => ({
-        ...s,
-        regulation: reg,
-        plusMinusSteps: g.plusMinusSteps,
-        positions: g.positions,
-        midPositions: g.mid,
-        pitch: g.pitch,
-      }));
-      return;
-    }
-    // G brochure set starts at ±8; clamp small W-only steps when switching to G
-    const allowed = pmStepOptionsFor(reg);
-    let n = pm && Number(pm) > 0 ? Number(pm) : 8;
-    if (!allowed.includes(n)) n = allowed[0] ?? 8;
-    setPm(String(n));
-    setInput((s) => ({
-      ...s,
-      regulation: reg,
-      ...geometryForPm(n, reg),
-    }));
-  };
+  // 2026-11-04 final UI-12: lib/formState pickRegulation, so the tests reach it.
+  const setRegulation = (reg: SelectInput["regulation"]) =>
+    updateForm((f) => pickRegulation(f, reg));
 
   // 2026-11-04: a W/G custom +a/−b takes the Fig. 3-3 row Huaming sells
   // (+4/−12 → 10193W), not plus + minus + 1 positions on mid 1 (18171W).
@@ -1397,11 +1350,8 @@ export function SelectorApp() {
                   <DecimalInput
                     className={`${controlClass} has-suffix`}
                     value={stepPercentPct}
-                    onValue={(n) => {
-                      setStepPercentPct(n);
-                      // 2026-11-04: the untouched 无载 ±2 is a display; the duty keeps −8.
-                      if (stepMovesRange(formNow())) commitTapRange(tapPlus, tapMinus, n);
-                    }}
+                    // 2026-11-04: the untouched 无载 ±2 is a display; the duty keeps −8.
+                    onValue={(n) => updateForm((f) => editStepPct(f, n))}
                     onBlur={() => {
                       if (
                         (STEP_PERCENT_OPTIONS as readonly number[]).includes(
@@ -1424,11 +1374,7 @@ export function SelectorApp() {
                         return;
                       }
                       const n = Number(e.target.value);
-                      setStepPercentPct(n);
-                      setStepPctCustom(false);
-                      if (stepMovesRange(formNow())) {
-                        commitTapRange(tapPlus, tapMinus, n);
-                      }
+                      updateForm((f) => editStepPct(f, n, false));
                     }}
                   >
                     <option value="__custom__">{t(lang, "custom")}</option>
@@ -1557,7 +1503,9 @@ export function SelectorApp() {
                 className={controlClass}
                 value={input.phases}
                 onChange={(e) =>
-                  patch("phases", e.target.value as SelectInput["phases"])
+                  updateForm((f) =>
+                    pickPhases(f, e.target.value as SelectInput["phases"]),
+                  )
                 }
               >
                 <option value="III">III</option>

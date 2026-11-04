@@ -70,6 +70,11 @@ export interface TransformerSpec {
   minusSteps: number;
   /** Step as a fraction (0.0125). Null when not given. */
   stepFraction: number | null;
+  /**
+   * The step % was stated (typed, picked or read), not the 1.25 % default.
+   * A defaulted step yields to the step a stated Ust implies (ENGINE-12).
+   */
+  stepFractionStated?: boolean;
   /** Current safety factor ≥ 1. */
   safetyK: number;
   /**
@@ -284,6 +289,28 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
       // A lower stated Ust was dropped with no word (checker, track B).
       cautionsZh.push(`OS Ust ${Math.round(statedStepV)} V 低于按容量和档距算的 ${Math.round(derivedStepV)} V，按 ${Math.round(derivedStepV)} V 选。`);
       cautionsEn.push(`OS Ust ${Math.round(statedStepV)} V is below the ${Math.round(derivedStepV)} V from the rating and step. Sized on ${Math.round(derivedStepV)} V.`);
+    } else if (
+      // 2026-11-04 final ENGINE-12: --ust 1588 on 110 kV with no step % is
+      // 2.5 % per step, but the lowest tap was sized on the 1.25 % default
+      // (333.3 A on a 350 A switch; 375 A at 2.5 %). A stated Imax decides
+      // the current itself; an auto's extreme tap sits above nominal (D5).
+      derivedStepV != null &&
+      statedMaxA <= 0 &&
+      ratio > 1.03 &&
+      Number.isFinite(ratedA) &&
+      !(auto && spec.stepFractionStated)
+    ) {
+      const implied = statedStepV / stepBaseV;
+      const pct = (x: number) => String(Math.round(x * 1e4) / 100);
+      const ust = Math.round(statedStepV);
+      if (!spec.stepFractionStated && spec.minusSteps * implied < 1) {
+        maxA = Math.max(maxA, maxThroughCurrent(ratedA, spec.minusSteps, implied));
+        cautionsZh.push(`OS Ust ${ust} V 即每级 ${pct(implied)}%，不是默认的 ${pct(spec.stepFraction!)}%：最低档电流按 ${pct(implied)}% 算。`);
+        cautionsEn.push(`OS Ust ${ust} V is ${pct(implied)} % per step, not the ${pct(spec.stepFraction!)} % default; lowest tap sized on ${pct(implied)} %.`);
+      } else if (spec.stepFractionStated) {
+        cautionsZh.push(`OS Ust ${ust} V 即每级 ${pct(implied)}%，与给定的 ${pct(spec.stepFraction!)}% 不符：最低档电流按 ${pct(spec.stepFraction!)}% 算，请核对 OS。`);
+        cautionsEn.push(`OS Ust ${ust} V is ${pct(implied)} % per step, not the stated ${pct(spec.stepFraction!)} %; lowest tap sized on ${pct(spec.stepFraction!)} %. Check the OS.`);
+      }
     }
   }
 

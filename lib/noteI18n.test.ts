@@ -77,6 +77,9 @@ function collectNotes(): Set<string> {
     spec({ tapKv: 0 }),
     spec({ winding: "delta" }),
     spec({ tapPoint: "line_end", tapKv: 500 }),
+    // ENGINE-12: a stated Ust above the step, with the step defaulted or stated.
+    spec({ statedStepV: 1588 }),
+    spec({ statedStepV: 1588, stepFractionStated: true }),
   ];
   for (const s of specs) {
     const d = deriveDuty(s);

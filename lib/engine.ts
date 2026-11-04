@@ -3,6 +3,7 @@ import {
   FAMILY_MIN_RANK,
   SERIES,
   coveringUms,
+  coversAcrossTap,
   defaultSelectorSizeForUm,
   internalInsulation,
   nearestCurrent,
@@ -1046,7 +1047,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
           input.transformerKind !== "auto" &&
           (input.tapWindingKv ?? 0) >= 110 &&
           att.um <= 72.5 + 0.1 &&
-          !((input.acrossTapBilKv ?? 0) > 0 && (input.acrossTapPfKv ?? 0) > 0)
+          !((input.acrossTapBilKv ?? 0) > 0 && (input.acrossTapPfKv ?? 0) > 0) &&
+          // 2026-11-04 final ENGINE-11: one stated value above what B withstands
+          // (LI 350 > 265) sets C from the stress, not from practice: no
+          // "B also fits" caution and no B copy.
+          coversAcrossTap(umDefault, input.acrossTapBilKv ?? 0, input.acrossTapPfKv ?? 0, s.id)
             ? SIZE_ORDER[SIZE_ORDER.indexOf(umDefault) + 1]
             : undefined;
         const gradePick =
@@ -1463,6 +1468,8 @@ export function selectOltc(input: SelectInput): SelectOutput {
     const umToken = formatUmToken(r.umKv, from, true);
     const model = r.model.replace(`/${r.umToken}-`, `/${umToken}-`);
     if (model === r.model || seen.has(model) || !commercialTypeExists(model, s)) continue;
+    // ENGINE-11 second guard: never a copy below the stated across-tap stress.
+    if (!coversAcrossTap(from, input.acrossTapBilKv ?? 0, input.acrossTapPfKv ?? 0, r.seriesId)) continue;
     seen.add(model);
     const keep = r.cautionsEn.map((c) => !c.startsWith("Selector grade raised to "));
     results.push({

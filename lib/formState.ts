@@ -70,6 +70,10 @@ export interface FormState {
   lineFailed: LineFailure;
   /** A tender line was read (or tried) in this form: its range is not the user's. */
   everRead?: boolean;
+  /** Phases I came from a read line (kept through a failed read, UI-13). */
+  phasesByLine?: boolean;
+  /** The step % was typed, picked or read, not the 1.25 % default (ENGINE-12). */
+  stepStated?: boolean;
   /** 调压方式 to put back on leaving 无载 (OCTC runs linear, as the CLI). */
   oltcRegulation: Regulation;
 }
@@ -172,6 +176,7 @@ export function formSpec(f: FormState): TransformerSpec {
     mvKv: f.mvKv,
     minusSteps: formMinusSteps(f),
     stepFraction: formStepFraction(f),
+    stepFractionStated: f.stepStated === true,
     safetyK: f.safetyK,
     ...(f.earthUm > 0 ? { earthUmKv: f.earthUm } : {}),
     ...(f.currentMode === "capacity" && f.osImaxA > 0 ? { statedMaxA: f.osImaxA } : {}),
@@ -402,8 +407,11 @@ export function pickKind(f: FormState, k: TransformerKind): FormState {
 /** Fill the form from one read line (s = tenderLineSettings for the current mode). */
 function applyLine(f: FormState, tl: TenderLine, s: LineSettings): FormState {
   const step = lineStep(s);
+  // 2026-11-04 final UI-13: a failed read cleared lineRead, so a single-phase
+  // line's I stayed on every later three-phase line (CM2I-500 for YNd11).
   const phases: SelectInput["phases"] =
-    s.phases ?? (f.lineRead?.phases === "I" && f.input.phases === "I" ? "III" : f.input.phases);
+    s.phases ??
+    ((f.lineRead?.phases === "I" || f.phasesByLine) && f.input.phases === "I" ? "III" : f.input.phases);
   const next: FormState = {
     ...f,
     lineFailed: false,
@@ -414,9 +422,22 @@ function applyLine(f: FormState, tl: TenderLine, s: LineSettings): FormState {
     transformerMva: s.mva,
     mvaCustom: false,
     kind: s.kind,
+    // 2026-11-04 final property test: the other kind's hidden fields go back
+    // to first paint. An earlier line's 225/115 kV (or 220 kV winding) sized
+    // this one when 种类 was switched after the read.
     ...(s.kind === "auto"
-      ? { hvKv: s.hvKv ?? f.hvKv, mvKv: s.mvKv ?? f.mvKv }
-      : { windingRatedKv: s.tapKv ?? f.windingRatedKv, winding: s.winding }),
+      ? {
+          hvKv: s.hvKv ?? f.hvKv,
+          mvKv: s.mvKv ?? f.mvKv,
+          windingRatedKv: INITIAL_FORM.windingRatedKv,
+          winding: INITIAL_FORM.winding,
+        }
+      : {
+          windingRatedKv: s.tapKv ?? f.windingRatedKv,
+          winding: s.winding,
+          hvKv: INITIAL_FORM.hvKv,
+          mvKv: INITIAL_FORM.mvKv,
+        }),
     tapPoint: s.tapPoint,
     tapForced: false,
     earthUm: s.earthUm ?? 0,
@@ -424,9 +445,11 @@ function applyLine(f: FormState, tl: TenderLine, s: LineSettings): FormState {
     // typed for 59 MVA sized the next 61 MVA line (355.7 A) on a 350 A switch.
     osImaxA: 0,
     osUstV: 0,
+    phasesByLine: s.phases === "I",
     // A line with no step % or range takes the CLI defaults.
     stepPercentPct: step,
     stepPctCustom: false,
+    stepStated: s.stepPct != null && s.stepPct > 0,
     // 2026-11-04 (r3 UI-8): across-tap LI/AC belong to one transformer too.
     // T06's 320/80 kept on Q07 gave 72.5C where the CLI gives 72.5B.
     input: {
@@ -505,6 +528,9 @@ function readLineInner(f: FormState, text: string): FormState {
       windingRatedKv: winding ? f.windingRatedKv : DEFAULT_WINDING_RATED_KV,
       transformerMva: 0,
       mvaCustom: true,
+      // 2026-11-04 final UI-15: the earth Um from the previous line's neutral
+      // BIL sized the next hand-filled 115 kV job at Um 40.5 (CLI 72.5).
+      earthUm: 0,
       osImaxA: 0,
       osUstV: 0,
       input: {
@@ -566,6 +592,7 @@ function remapLine(f: FormState, tl: TenderLine, octc: boolean): FormState | nul
   if (step !== f.stepPercentPct) {
     next.stepPercentPct = step;
     next.stepPctCustom = false;
+    next.stepStated = b.stepPct != null && b.stepPct > 0;
   }
   // On-load regulation the line falls back to: the one in use before 无载.
   const base = octc ? f.input.regulation : f.oltcRegulation;
@@ -579,11 +606,10 @@ function remapLine(f: FormState, tl: TenderLine, octc: boolean): FormState | nul
 /** 无载. Off-circuit is two-winding only (autoOctcNote). */
 export function toOctc(f: FormState): FormState {
   if (isOctc(f)) return f;
-  // A read autotransformer line stays one and is refused, as when read in
-  // 无载 and as the CLI; forcing two-winding sized it on the old kV.
-  const autoLine = f.lineRead?.kind === "auto" || f.lineFailed === "lineFailAutoMv";
-  let next = f.kind === "auto" && !autoLine ? pickKind(f, "two_winding") : f;
-  next = { ...next, oltcRegulation: next.input.regulation };
+  // An autotransformer stays one and is refused, as the CLI --octc.
+  // 2026-11-04 final UI-14: a hand-entered one was forced two-winding on the
+  // hidden 110 kV and stayed so on 有载 (Um 72.5 for a 225/115 kV junction).
+  let next: FormState = { ...f, oltcRegulation: f.input.regulation };
   next = (next.lineRead ? remapLine(next, next.lineRead, true) : null) ?? withRange(next, rangeToOctc(next));
   return {
     ...next,
@@ -653,6 +679,72 @@ export function pickPm(f: FormState, raw: string): FormState {
   // Always the brochure mid for this ±N: mid 1 carried from ±4…±7 onto ±8
   // would emit 18171W instead of the commercial 10193W.
   return { ...next, input: { ...next.input, ...geometryForPm(n, next.input.regulation) } };
+}
+
+/**
+ * 调压方式 (on-load only). 2026-11-04 final UI-12: moved here from the page.
+ * An even live range (a ±10 linear line, a custom +12/−12) went to the ±8
+ * default on W/G (340.9 A on a 350 A switch for a 363.6 A duty), and linear
+ * took stale +/− selects after a ±12 pick (+8/−8).
+ */
+export function pickRegulation(f: FormState, reg: Regulation): FormState {
+  if (isOctc(f)) return f;
+  const live = !f.pm && f.tapRange ? f.tapRange : null;
+  if (reg === "linear") {
+    const n = Number(f.pm) > 0 ? Number(f.pm) : 0;
+    const plus = n || (live ? live.plus : f.tapPlus > 0 ? f.tapPlus : 4);
+    const minus = n || (live ? live.minus : f.tapMinus > 0 ? f.tapMinus : 4);
+    const positions = plus + minus + 1;
+    return withRange(f, {
+      pm: "",
+      tapPlus: plus,
+      tapMinus: minus,
+      tapRange: { plus, minus, positions, stepPercent: f.stepPercentPct > 0 ? f.stepPercentPct / 100 : null },
+      regulation: "linear",
+      plusMinusSteps: undefined,
+      positions,
+      midPositions: 0,
+      pitch: defaultPitch(positions, "linear") as Pitch,
+    });
+  }
+  // Any live range, even or uneven, keeps its steps on the Fig. 3-3 row (as commitRange).
+  if (live) {
+    const g = geometryForRange(live.plus, live.minus, reg);
+    return withRange(f, {
+      pm: "",
+      tapPlus: live.plus,
+      tapMinus: live.minus,
+      tapRange: { ...live, positions: g.positions },
+      regulation: reg,
+      plusMinusSteps: g.plusMinusSteps,
+      positions: g.positions,
+      midPositions: g.mid,
+      pitch: g.pitch,
+    });
+  }
+  // G brochure set starts at ±8; clamp small W-only steps when switching to G.
+  const allowed = pmStepOptionsFor(reg);
+  let n = Number(f.pm) > 0 ? Number(f.pm) : 8;
+  if (!allowed.includes(n)) n = allowed[0] ?? 8;
+  return {
+    ...f,
+    pm: String(n),
+    input: { ...f.input, regulation: reg, ...geometryForPm(n, reg) },
+  };
+}
+
+/** 相数 picked by hand: no longer the line's. */
+export function pickPhases(f: FormState, phases: SelectInput["phases"]): FormState {
+  return { ...f, phasesByLine: false, input: { ...f.input, phases } };
+}
+
+/**
+ * 单次调节比例 typed or picked: a stated step (ENGINE-12), and the live
+ * +/− range follows it (stepMovesRange).
+ */
+export function editStepPct(f: FormState, pct: number, custom = f.stepPctCustom): FormState {
+  const next: FormState = { ...f, stepPercentPct: pct, stepPctCustom: custom, stepStated: pct > 0 };
+  return stepMovesRange(next) ? commitRange(next, next.tapPlus, next.tapMinus, pct) : next;
 }
 
 /**
