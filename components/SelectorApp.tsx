@@ -591,6 +591,7 @@ export function SelectorApp() {
   const [lineText, setLineText] = useState("");
   const [lineRead, setLineRead] = useState(f0.lineRead);
   const [lineFailed, setLineFailed] = useState(f0.lineFailed);
+  const [everRead, setEverRead] = useState(f0.everRead);
   const [oltcRegulation, setOltcRegulation] = useState(f0.oltcRegulation);
   const [altsOpen, setAltsOpen] = useState(false);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
@@ -632,6 +633,7 @@ export function SelectorApp() {
     market,
     lineRead,
     lineFailed,
+    everRead,
     oltcRegulation,
   });
   const setters: { [K in Exclude<keyof FormState, "input">]: (v: FormState[K]) => void } = {
@@ -659,6 +661,7 @@ export function SelectorApp() {
     market: setMarket,
     lineRead: setLineRead,
     lineFailed: setLineFailed,
+    everRead: setEverRead,
     oltcRegulation: setOltcRegulation,
   };
   /** Run one transition and set only the fields it changed. */

@@ -494,3 +494,24 @@ describe("oltc CLI checker regressions, round 2", () => {
     expect(top(["--octc", "--iu", "800", "--um", "72.5", "--contact", "6×5", "--pos", "5"])).toBe("WSLIV-800Y/72.5-6x5A");
   });
 });
+
+describe("oltc CLI checker regressions, round 3", () => {
+  const top = (argv: string[]) => capture([...argv, "--no-update-check"]).out.split(/\r?\n/)[0];
+  const out = (argv: string[]) => capture([...argv, "--no-update-check"]).out;
+
+  it("joins thousands in a unit-first kVA rating", () => {
+    expect(out(["--line", "Rated power, kVA: 31 500; 33±8x1.25%/11 kV; Dyn11"])).toContain("318.2 A");
+    expect(out(["--line", "Rated power (kVA): 31,500; 33±8x1.25%/11 kV; Dyn11"])).toContain("318.2 A");
+  });
+
+  it("does not take an LV or kV-named neutral, or a bare Um figure, as the HV neutral BIL", () => {
+    expect(top(["--line", "40 MVA 132±8x1.25%/33 kV YNyn0, LV winding neutral 170 kV BIL"])).toBe("CV2III-350Y/72.5-10193W");
+    expect(top(["--line", "40 MVA 132±8x1.25%/33 kV YNyn0, 33 kV neutral 170 kV BIL"])).toBe("CV2III-350Y/72.5-10193W");
+    expect(top(["--line", "100 MVA 220±8x1.25%/33 kV YNd11, HV neutral 110 kV"])).toBe("CM2III-500Y/72.5B-10193W");
+    expect(top(["--line", "100 MVA 220±8x1.25%/22 kV YNd11, HV neutral 550 kV BIL"])).toBe("CM2III-500Y/126C-10193W");
+  });
+
+  it("does not read 'HV/LV ±8' as an LV tap", () => {
+    expect(top(["--line", "40 MVA, 132/33 kV, YNd11, HV/LV ±8x1.25%"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+});

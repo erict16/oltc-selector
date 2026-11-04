@@ -251,3 +251,13 @@ describe("UI-11: an assumed auto-junction Um is said on the card", () => {
     expect(stated.cautionsEn.some((c) => note.test(c))).toBe(false);
   });
 });
+
+describe("r3 check: a failed read in between", () => {
+  it("the next good line does not keep the previous line's coarse/fine", () => {
+    let f = readLine(INITIAL_FORM, "10 MVA, 33/11.5 kV, Dyn11, ±8x1.25% coarse/fine");
+    expect(f.input.regulation).toBe("coarse_fine");
+    f = readLine({ ...f, lineFailed: false }, "transformer for substation 3");
+    f = readLine({ ...f, lineFailed: false }, "25 MVA 110±8x1.25%/10.5 kV YNd11");
+    expect(f.input.regulation).toBe("reversing");
+  });
+});

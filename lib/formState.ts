@@ -68,6 +68,8 @@ export interface FormState {
   market: string;
   lineRead: TenderLine | null;
   lineFailed: LineFailure;
+  /** A tender line was read (or tried) in this form: its range is not the user's. */
+  everRead?: boolean;
   /** 调压方式 to put back on leaving 无载 (OCTC runs linear, as the CLI). */
   oltcRegulation: Regulation;
 }
@@ -443,13 +445,21 @@ function applyLine(f: FormState, tl: TenderLine, s: LineSettings): FormState {
 }
 
 /** The form's range and regulation came from a read (or failed) line. */
-const lineSet = (f: FormState): boolean => f.lineRead != null || f.lineFailed !== false;
+// 2026-11-04 r3 check: typing clears lineFailed and a failed read clears
+// lineRead, so neither survives to the next good read; everRead does.
+const lineSet = (f: FormState): boolean => f.lineRead != null || f.lineFailed !== false || f.everRead === true;
 
 /**
  * 读取: map the typed line onto the form for the current mode, as the CLI
  * --line (with --octc in 无载).
  */
-export function readLine(f: FormState, text: string): FormState {
+export function readLine(f0: FormState, text: string): FormState {
+  const f: FormState = f0;
+  const done = (s: FormState): FormState => ({ ...s, everRead: true });
+  return done(readLineInner(f, text));
+}
+
+function readLineInner(f: FormState, text: string): FormState {
   const tl = parseTenderLine(text);
   const r = tl ? tenderLineSettings(tl, { octc: isOctc(f) }) : null;
   if (tl && r && !r.ok && r.reason === "auto_needs_mv") {

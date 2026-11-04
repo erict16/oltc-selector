@@ -158,6 +158,12 @@ export function normalizeTenderText(raw: string): string {
       )
       // 2026-11-04: "31,500 kVA" / "2 500 kVA" is one number; read as 31.5 / 0.5 kVA
       // before, the current came out 1000× low. Not a ratio digit ("33/11 630 kVA").
+      // 2026-11-04 r3 check: unit first with thousands ("Rated power, kVA: 31 500")
+      // read 31 kVA. Join the groups after a kVA lead word as well.
+      .replace(
+        /(\b(?:rated|power|rating|capacity|S[rn])\b[^\d;]{0,20}kVA\s*\)?\s*[:=,]?\s*)(\d{1,3}(?:[,   '’]\d{3})+)(?!\d)/gi,
+        (_m: string, lead: string, n: string) => lead + n.replace(/[,   '’]/g, ""),
+      )
       // 2026-11-04 R3: "31'500 kVA" (Swiss apostrophe) and lists "25 000/31 500 kVA",
       // "20,000/25,000 kVA" read as 0.5 / 0.025 MVA, the current 80-99 % low with no note.
       .replace(
@@ -672,7 +678,8 @@ function sideAfter(text: string, end: number): { side?: string; kv?: number } | 
 function sideBefore(text: string, index: number): { side: string } | null {
   const head = text.slice(Math.max(0, index - 40), index);
   const m = head.match(
-    new RegExp(String.raw`\b${SIDE}\s*(?:side\s*)?(?:tapp\w*|regulat\w*|winding)?\s*[:\-]?\s*$`, "i"),
+    // "HV/LV ±8" names both sides; the trailing LV is not the tapped one.
+    new RegExp(String.raw`(?<!\/\s*)\b${SIDE}\s*(?:side\s*)?(?:tapp\w*|regulat\w*|winding)?\s*[:\-]?\s*$`, "i"),
   );
   return m ? { side: m[1]! } : null;
 }
@@ -1248,7 +1255,13 @@ function parseNeutralBil(text: string): number | null {
     const at = m.index ?? 0;
     // A neutral BIL is 95 kV and up; a smaller figure is an AC or a Um.
     if (Number(m[1]) < 95) continue;
-    if (/\b(?:LV|MV|tertiary|secondary)\s*$/i.test(text.slice(Math.max(0, at - 12), at))) continue;
+    // 2026-11-04 r3 check: "LV winding neutral 170 kV BIL" and "33 kV neutral …" are
+    // not the HV neutral; a bare figure under 250 kV ("HV neutral 110 kV") reads as a Um.
+    const clause = text.slice(Math.max(0, at - 40), at).split(/[,;]/).pop() ?? "";
+    if (/\b(?:LV|MV|tertiary|secondary|low[\s-]?voltage|\d+(?:\.\d+)?\s*kV)\b/i.test(clause)) continue;
+    const after = text.slice(at + m[0].length, at + m[0].length + 8);
+    const marked = /BIL|LI|kVp/i.test(m[0]) || /^\s*(?:BIL|LI|LIWL)\b/i.test(after);
+    if (!marked && Number(m[1]) < 250) continue;
     return Number(m[1]);
   }
   // "HVN 550/230": LI and AC in either order; the LI is the larger.
