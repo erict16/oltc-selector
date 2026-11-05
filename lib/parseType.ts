@@ -20,7 +20,7 @@ export function normalizeType(raw: string): string {
     .replace(/\s+/g, "")
     .replace(/(\d)_(\d)/g, "$1x$2")
     .replace(/(III|II|I)(\d)/, "$1-$2")
-    .replace(/(WSL|WDL|WSG)(VIII|VII|IV|VI|IX|V)(\d)/i, "$1$2-$3");
+    .replace(/(WSL|WDL|WSG|WDG|WLG)(VIII|VII|IV|VI|IX|V)(\d)/i, "$1$2-$3");
   if (!t.includes("/")) {
     t = t.replace(/([YD])(\d+(?:\.\d+)?)-/i, "$1/$2-");
   }
@@ -31,8 +31,9 @@ export function normalizeType(raw: string): string {
   return t;
 }
 
+// 2026-11-04: WDG/WLG are the single-phase drum OCTC Huaming sells (45 OS rows).
 const OCTC_TYPE_RE =
-  /^(?:(\d+)x)?(WSL|WDL|WSG)(VIII|VII|III|II|IV|VI|IX|V|I)-(\d+)([YD])?[/-](\d+(?:\.\d+)?)-(\d+)x(\d+)(?:\((\d+)x(\d+)\))?(?:\(([A-E])\)|([A-E]))?$/i;
+  /^(?:(\d+)x)?(WSL|WDL|WSG|WDG|WLG)(VIII|VII|III|II|IV|VI|IX|V|I)-(\d+)([YD])?[/-](\d+(?:\.\d+)?)-(\d+)x(\d+)(?:\((\d+)x(\d+)\))?(?:\(([A-E])\)|([A-E]))?$/i;
 
 /**
  * Parse a Huaming commercial type.

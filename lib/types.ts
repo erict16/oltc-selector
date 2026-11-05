@@ -53,6 +53,11 @@ export interface SelectInput {
    * 200 kV across-tap limit does not cover an autotransformer tap winding.
    */
   transformerKind?: "two_winding" | "auto";
+  /**
+   * Compound types (CV/CV2/SV) out on a two-winding job too: a tapped
+   * winding on a 220 kV-class system or above (deriveDuty sets it).
+   */
+  combinedOnly?: boolean;
   /** Required through-current (A) — engine picks next catalogue Ium ≥ this */
   throughCurrentA: number;
   /** Highest voltage for equipment Um (kV) */
@@ -85,6 +90,10 @@ export interface SelectInput {
    * OCTC form uses 接线方式 instead — leave auto.
    */
   preferStructure?: StructureKind | "auto";
+  /** Rated kV of the tapped winding's system (two-winding). Drives review notes. */
+  tapWindingKv?: number;
+  /** Buyer's country (ISO code), as `--market`. Drives buyer-practice grades (TR). */
+  market?: string;
   /** Optional transformer BIL (kV) to earth */
   bilKv?: number;
   /** Optional PF withstand to earth (kV) */
@@ -111,7 +120,19 @@ export interface SeriesDef {
   usesSelectorSize: boolean;
   umSizePairs?: string[];
   maxStepVoltageV: number;
+  /** Lower Ust ceiling for some currents (CMD 400/600 A: 3300 V). */
+  maxStepVoltageByCurrent?: Record<number, number>;
   stepCapacityByCurrent?: Record<number, number>;
+  /**
+   * Step capacity (kVA) by Iᵤ, then by contact pitch, where the brochure
+   * gives one per pitch (CV / SV Table 1). Wins over `stepCapacityByCurrent`.
+   */
+  stepCapacityByPitch?: Record<number, Record<number, number>>;
+  /**
+   * Brochure footnote: a higher step capacity, by pitch, when the duty
+   * current is at or below `currentA` (SV: 525 kVA at ≤350 A, 10 contacts).
+   */
+  stepCapacityReduced?: Record<number, { currentA: number; kva: number }>;
   connections: Connection[];
   /**
    * Connection letters that exist on the III commercial type string.

@@ -2,22 +2,38 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_WINDING_RATED_KV,
   calculatedUm,
-  deriveOltcUm,
-  RATED_TO_WINDING_UM,
   catalogueUmFromRatedKv,
   formatUmKv,
   iecUmFromRatedKv,
   isTapSideRatedKv,
   maxThroughCurrent,
-  oltcUmFromRatedKv,
-  snapRatedKv,
   stepPercentFromUst,
   stepVoltageFromPercent,
   throughCurrentFromRated,
-  windingUmFromRatedKv,
 } from "./deriveUm";
 import { FIXTURES, selectOltc } from "./engine";
+import { deriveDuty } from "./transformer";
 import type { SelectInput } from "./types";
+
+/**
+ * The one shipped Um rule (deriveDuty): Y = star neutral, D = line end.
+ * 2026-11-04 audit UM-7 removed the second rule (oltcUmFromRatedKv), which
+ * kept 220 kV star at 252 while the app gave 72.5.
+ */
+function oltcUmFromRatedKv(ratedKv: number, connection: "Y" | "D"): number {
+  return deriveDuty({
+    kind: "two_winding",
+    tapPoint: connection === "Y" ? "neutral" : "line_end",
+    winding: connection === "Y" ? "star" : "delta",
+    mva: 0,
+    tapKv: ratedKv,
+    hvKv: 0,
+    mvKv: 0,
+    minusSteps: 0,
+    stepFraction: null,
+    safetyK: 1,
+  }).umKv;
+}
 
 const duty = (
   umKv: number,
@@ -37,30 +53,6 @@ const duty = (
   selectorSize: "auto",
   mdu: "none",
   ...extra,
-});
-
-describe("snap nameplate Un", () => {
-  it("keeps menu values", () => {
-    expect(snapRatedKv(132)).toBe(132);
-    expect(snapRatedKv(138)).toBe(138);
-    expect(snapRatedKv(115)).toBe(115);
-    expect(snapRatedKv(33)).toBe(33);
-  });
-
-  it("snaps nearby OS Un onto the menu class", () => {
-    expect(snapRatedKv(135)).toBe(132);
-    expect(snapRatedKv(121)).toBe(115);
-    expect(snapRatedKv(158)).toBe(150);
-    expect(snapRatedKv(154)).toBe(150);
-    expect(snapRatedKv(225)).toBe(220);
-    expect(snapRatedKv(242)).toBe(230);
-  });
-
-  it("does not swallow far outliers", () => {
-    expect(snapRatedKv(10.5)).toBe(10.5);
-    expect(snapRatedKv(400)).toBe(400);
-    expect(snapRatedKv(725)).toBe(725);
-  });
 });
 
 describe("calculated Um on the form", () => {
@@ -126,10 +118,10 @@ describe("calculated Um on the form", () => {
     expect(low.results[0]!.model).toMatch(/\/40\.5/);
     expect(oltcUmFromRatedKv(66, "Y")).toBe(72.5);
 
-    // 220/√3 = 127 would leave 252. Star-point 220 stays 252.
+    // 220/√3 = 127 would land on 126. The neutral is 72.5, assumed.
     const high = sized("Y", 220);
     expect(high.results[0]!.model).not.toMatch(/\/252/);
-    expect(oltcUmFromRatedKv(220, "Y")).toBe(252);
+    expect(oltcUmFromRatedKv(220, "Y")).toBe(72.5);
   });
 });
 
@@ -141,19 +133,19 @@ describe("first-paint tap-side Un", () => {
 });
 
 describe("winding Un → winding Um", () => {
-  it("IEC / GB class, not OLTC catalogue yet", () => {
-    expect(windingUmFromRatedKv(33)).toBe(40.5);
-    expect(windingUmFromRatedKv(35)).toBe(40.5);
-    expect(windingUmFromRatedKv(66)).toBe(72.5);
-    expect(windingUmFromRatedKv(69)).toBe(72.5);
-    expect(windingUmFromRatedKv(110)).toBe(126);
-    expect(windingUmFromRatedKv(115)).toBe(126);
-    expect(windingUmFromRatedKv(132)).toBe(145);
-    expect(windingUmFromRatedKv(138)).toBe(145);
-    expect(windingUmFromRatedKv(150)).toBe(170);
-    expect(windingUmFromRatedKv(220)).toBe(252);
-    expect(windingUmFromRatedKv(230)).toBe(252);
-    expect(windingUmFromRatedKv(330)).toBe(363);
+  it("catalogue class of the winding system", () => {
+    expect(catalogueUmFromRatedKv(33)).toBe(40.5);
+    expect(catalogueUmFromRatedKv(35)).toBe(40.5);
+    expect(catalogueUmFromRatedKv(66)).toBe(72.5);
+    expect(catalogueUmFromRatedKv(69)).toBe(72.5);
+    expect(catalogueUmFromRatedKv(110)).toBe(126);
+    expect(catalogueUmFromRatedKv(115)).toBe(126);
+    expect(catalogueUmFromRatedKv(132)).toBe(145);
+    expect(catalogueUmFromRatedKv(138)).toBe(145);
+    expect(catalogueUmFromRatedKv(150)).toBe(170);
+    expect(catalogueUmFromRatedKv(220)).toBe(252);
+    expect(catalogueUmFromRatedKv(230)).toBe(252);
+    expect(catalogueUmFromRatedKv(330)).toBe(363);
   });
 });
 
@@ -161,7 +153,6 @@ describe("star vs line-end → OLTC Um", () => {
   it("132 / 138 kV star → 72.5 (Wilson / WEG)", () => {
     expect(oltcUmFromRatedKv(132, "Y")).toBe(72.5);
     expect(oltcUmFromRatedKv(138, "Y")).toBe(72.5);
-    expect(deriveOltcUm(145, "Y")).toBe(72.5);
   });
 
   it("132 / 138 kV delta keeps 145", () => {
@@ -189,22 +180,19 @@ describe("star vs line-end → OLTC Um", () => {
     expect(oltcUmFromRatedKv(33, "D")).toBe(40.5);
   });
 
-  it("220 / 230 kV star keeps 252 (not CV2 / 72.5)", () => {
-    expect(oltcUmFromRatedKv(220, "Y")).toBe(252);
-    expect(oltcUmFromRatedKv(230, "Y")).toBe(252);
+  it("220 / 230 / 330 kV star neutral → 72.5 assumed (Russia 18 of 20 at 220 kV)", () => {
+    expect(oltcUmFromRatedKv(220, "Y")).toBe(72.5);
+    expect(oltcUmFromRatedKv(230, "Y")).toBe(72.5);
+    expect(oltcUmFromRatedKv(330, "Y")).toBe(72.5);
   });
 
   it("220 kV delta keeps 252", () => {
     expect(oltcUmFromRatedKv(220, "D")).toBe(252);
   });
 
-  it("330 kV star keeps 363", () => {
-    expect(oltcUmFromRatedKv(330, "Y")).toBe(363);
-  });
-
-  it("any / line-end does not drop", () => {
-    expect(oltcUmFromRatedKv(132, "any")).toBe(145);
-    expect(oltcUmFromRatedKv(220, "any")).toBe(252);
+  it("line end does not drop", () => {
+    expect(oltcUmFromRatedKv(132, "D")).toBe(145);
+    expect(oltcUmFromRatedKv(330, "D")).toBe(363);
   });
 });
 
@@ -294,15 +282,14 @@ describe("same model as filling Um", () => {
     expect(out.results[0]?.model).not.toBe(FIXTURES.preset110.expectModel);
   });
 
-  it("220 kV Y is CM2 /252, not CV2 /72.5", () => {
+  it("220 kV Y neutral is combined CM2 at 72.5, not CV2", () => {
     const umKv = oltcUmFromRatedKv(220, "Y");
-    expect(umKv).toBe(252);
+    expect(umKv).toBe(72.5);
     const out = selectOltc(
-      duty(umKv, { throughCurrentA: 500, stepVoltageV: 1800 }),
+      duty(umKv, { throughCurrentA: 500, stepVoltageV: 1800, combinedOnly: true }),
     );
     expect(out.ok).toBe(true);
-    expect(out.results[0]?.model).toBe("CM2III-500Y/252D-10193W");
-    expect(out.results[0]?.model).not.toContain("/72.5");
+    expect(out.results[0]?.model).toBe("CM2III-500Y/72.5B-10193W");
   });
 });
 
@@ -357,6 +344,18 @@ describe("iecUmFromRatedKv", () => {
     for (const [un, um] of cases) expect(iecUmFromRatedKv(un)).toBe(um);
   });
 
+  // 2026-11-04 audit UM-8: 420 kV went to 550.
+  it("420 kV nameplate is the 400 kV system (Um 420); 440 kV still 550", () => {
+    expect(iecUmFromRatedKv(420)).toBe(420);
+    expect(iecUmFromRatedKv(410)).toBe(420);
+    expect(iecUmFromRatedKv(380)).toBe(420);
+    expect(iecUmFromRatedKv(440)).toBe(550);
+    expect(iecUmFromRatedKv(460)).toBe(550);
+    expect(iecUmFromRatedKv(525)).toBe(550);
+    expect(iecUmFromRatedKv(121)).toBe(123);
+    expect(iecUmFromRatedKv(161)).toBe(170);
+  });
+
   it("is NaN without a voltage", () => {
     expect(iecUmFromRatedKv(0)).toBeNaN();
   });
@@ -364,7 +363,11 @@ describe("iecUmFromRatedKv", () => {
   it("catalogue class covers the actual Um and matches the menu map", () => {
     expect(catalogueUmFromRatedKv(22)).toBe(40.5);
     expect(catalogueUmFromRatedKv(11)).toBe(12);
-    for (const [kv, um] of Object.entries(RATED_TO_WINDING_UM)) {
+    const menu: Record<number, number> = {
+      33: 40.5, 35: 40.5, 66: 72.5, 69: 72.5, 110: 126, 115: 126,
+      132: 145, 138: 145, 150: 170, 220: 252, 230: 252, 330: 363,
+    };
+    for (const [kv, um] of Object.entries(menu)) {
       expect(catalogueUmFromRatedKv(Number(kv))).toBe(um);
     }
   });

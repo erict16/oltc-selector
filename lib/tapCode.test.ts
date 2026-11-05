@@ -155,3 +155,16 @@ describe("linear ±N", () => {
     expect(resolveTapFields({ regulation: "linear" }).tapCode).toBe("10090");
   });
 });
+
+describe("coarse–fine below ±8", () => {
+  it("±7 G builds the sold 10173G, flagged non-standard (2026-11-04)", () => {
+    const t = resolveTapFields({ regulation: "coarse_fine", plusMinusSteps: 7 });
+    expect([t.tapCode, t.standard]).toEqual(["10173G", false]);
+    // a page pitch for ±7 does not change it
+    expect(resolveTapFields({ regulation: "coarse_fine", plusMinusSteps: 7, pitch: 16 }).tapCode).toBe("10173G");
+  });
+
+  it("±6 G has no sold evidence and stays as before", () => {
+    expect(resolveTapFields({ regulation: "coarse_fine", plusMinusSteps: 6 }).tapCode).toBe("10153G");
+  });
+});

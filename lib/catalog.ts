@@ -125,22 +125,29 @@ export const SELECTOR_SIZES_BY_UM: Record<number, SelectorSize[]> = {
   126: ["B", "C", "D", "DE"],
   145: ["C", "D", "DE"],
   170: ["B", "C", "D", "DE"],
-  252: ["C", "D", "DE"],
-  300: ["DE"],
+  // 252 B and 300 D: sold (3× 252B, e.g. CM2III-500Y/252B on E-CM2250216;
+  // 3xSHZVI-1200/300D on E-SHZV260102). The Um default stays the auto floor.
+  252: ["B", "C", "D", "DE"],
+  300: ["D", "DE"],
   363: ["DE"],
 };
 
 /** Rank selector sizes weakest → strongest */
 export const SIZE_ORDER: SelectorSize[] = ["B", "C", "D", "DE"];
 
+export type InternalInsulation = {
+  a_li: number;
+  a_pf: number;
+  b_li: number;
+  b_pf: number;
+};
+
 /**
  * Internal insulation withstand (kV) by selector size — SHZV Table 4-2 (a / b distances).
- * Used for across-tap winding stress → grade letter.
+ * Used for across-tap winding stress → grade letter. Default for every
+ * combined family; see INTERNAL_INSULATION_BY_FAMILY for brochure overrides.
  */
-export const INTERNAL_INSULATION: Record<
-  SelectorSize,
-  { a_li: number; a_pf: number; b_li: number; b_pf: number }
-> = {
+export const INTERNAL_INSULATION: Record<SelectorSize, InternalInsulation> = {
   "": { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
   A: { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
   B: { a_li: 265, a_pf: 50, b_li: 265, b_pf: 50 },
@@ -149,6 +156,78 @@ export const INTERNAL_INSULATION: Record<
   DE: { a_li: 550, a_pf: 120, b_li: 550, b_pf: 160 },
   E: { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
 };
+
+/**
+ * Grades where a family's own brochure table differs from SHZV Table 4-2.
+ *  - CM2 Table 2 (HM0.154.5701) and CM Table 2 (HM0.154.301): C a = 350 kV LI (SHZV 365).
+ *  - CMD Table 2 (HM0.154.1901): D a / b = 490 kV LI (SHZV 460).
+ * SHZV / SDZV / SHZVG keep the default table.
+ */
+export const INTERNAL_INSULATION_BY_FAMILY: Record<
+  string,
+  Partial<Record<SelectorSize, InternalInsulation>>
+> = {
+  cm2: { C: { a_li: 350, a_pf: 82, b_li: 350, b_pf: 82 } },
+  cm: { C: { a_li: 350, a_pf: 82, b_li: 350, b_pf: 82 } },
+  cmd: { D: { a_li: 490, a_pf: 105, b_li: 490, b_pf: 146 } },
+};
+
+/** Internal insulation of this grade on this family (default: SHZV table). */
+export function internalInsulation(
+  seriesId: string | undefined,
+  size: SelectorSize,
+): InternalInsulation {
+  const own = seriesId ? INTERNAL_INSULATION_BY_FAMILY[seriesId]?.[size] : undefined;
+  return own ?? INTERNAL_INSULATION[size];
+}
+
+/** Smallest listed pitch at or above `pitch`; past the last one, the last one. */
+function atPitch<T>(table: Record<number, T>, pitch: number): T | undefined {
+  const pitches = Object.keys(table)
+    .map(Number)
+    .sort((a, b) => a - b);
+  const at = pitches.find((p) => p >= pitch) ?? pitches[pitches.length - 1];
+  return at != null ? table[at] : undefined;
+}
+
+/**
+ * Rated step capacity (kVA) at this Iᵤ and contact pitch.
+ * A per-pitch table (CV / SV) uses the smallest listed pitch at or above
+ * the asked pitch; above the last listed pitch it keeps the last value.
+ * With `dutyA`, a brochure footnote rating for a reduced current applies
+ * (SV 525 kVA when the duty is ≤350 A). Null when the brochure gives no
+ * step capacity for this current.
+ */
+export function stepCapacityKva(
+  s: Pick<
+    SeriesDef,
+    "stepCapacityByCurrent" | "stepCapacityByPitch" | "stepCapacityReduced"
+  >,
+  current: number,
+  pitch: number,
+  dutyA?: number,
+): number | null {
+  const byPitch = s.stepCapacityByPitch?.[current];
+  const rated =
+    (byPitch ? atPitch(byPitch, pitch) : undefined) ??
+    s.stepCapacityByCurrent?.[current] ??
+    null;
+  const reduced = s.stepCapacityReduced
+    ? atPitch(s.stepCapacityReduced, pitch)
+    : undefined;
+  // Strict like a catalogue rating (engine ratingCoversDuty, 2026-11-04
+  // audit D2). 351 A at 1182 V (E-V250432-433, sold SVIII-500) is 0.3% over
+  // the ≤350 A row, so it now goes to the next family, not a silent overrun.
+  if (
+    rated != null &&
+    reduced &&
+    dutyA != null &&
+    dutyA <= reduced.currentA + 0.01
+  ) {
+    return Math.max(rated, reduced.kva);
+  }
+  return rated;
+}
 
 /**
  * Family preference when vacuum preferred / in-tank (lower = more preferred as minimum path).
@@ -184,7 +263,11 @@ export const FAMILY_MIN_RANK: Record<string, number> = {
   hwv: 15, // only wins on on-tank path
   cvt: 12,
   cz: 14,
-  wsg: 6,
+  // 2026-11-04: WDG/WLG are the drum OCTC sold (45 OS rows, none WSG), so
+  // they rank before WSG; WSG stays for the D quote QS2607203.
+  wsg: 7,
+  wdg: 5.9,
+  wlg: 5.9,
   hwdk: 80,
   wsl: 5, // OCTC-only list (never mixed into CV2→CM2→SHZV)
   wdl: 6,
@@ -418,6 +501,8 @@ export const SERIES: SeriesDef[] = [
     umKv: [72.5, 126, 170, 252],
     usesSelectorSize: true,
     maxStepVoltageV: 4000,
+    // TD-CMD Table 1: 3300 V at 400/600 A, 4000 V from 1000 A.
+    maxStepVoltageByCurrent: { 400: 3300, 600: 3300 },
     stepCapacityByCurrent: {
       400: 1320,
       600: 1600,
@@ -487,6 +572,11 @@ export const SERIES: SeriesDef[] = [
       350: 525,
       700: 660,
     },
+    // TD-CV&SV (HM0.154.001) Table 1 row 7, by contacts 10 / 12 / 14.
+    stepCapacityByPitch: {
+      350: { 10: 525, 12: 420, 14: 350 },
+      700: { 10: 660, 12: 520, 14: 450 },
+    },
     connections: ["Y", "D"],
     maxPositionsLinear: 14,
     maxPositionsWithChangeOver: 27,
@@ -511,7 +601,18 @@ export const SERIES: SeriesDef[] = [
     usesSelectorSize: false,
     maxStepVoltageV: 1500,
     stepCapacityByCurrent: {
-      500: 525,
+      500: 400,
+    },
+    // TD-CV&SV Table 1 gives SV "400~525* / 325~420*" (10 / 12 contacts, no 14).
+    // Footnote *: 525 / 420 kVA only with through-current cut to 350 / 300 A.
+    // Conservative reading: 400 / 325 kVA at any duty above 350 / 300 A
+    // (no interpolation between the two brochure points).
+    stepCapacityByPitch: {
+      500: { 10: 400, 12: 325 },
+    },
+    stepCapacityReduced: {
+      10: { currentA: 350, kva: 525 },
+      12: { currentA: 300, kva: 420 },
     },
     connections: ["Y", "D"],
     maxPositionsLinear: 12,
@@ -589,7 +690,9 @@ export const SERIES: SeriesDef[] = [
       I: [1500, 2000, 2500],
       III: [1500, 2000, 2500],
     },
-    umKv: [35, 40.5, 69],
+    // 2026-11-04: Um classes of HWDK Un 35 / 69 kV. The type carries Um
+    // (sold HWDKI-1500/40.5-17), not Un.
+    umKv: [40.5, 72.5],
     usesSelectorSize: false,
     maxStepVoltageV: 6000,
     connections: ["Y", "D", "any"],
@@ -648,14 +751,64 @@ export const SERIES: SeriesDef[] = [
     usesSelectorSize: false,
     maxStepVoltageV: 10000,
     connections: ["Y", "D"],
-    maxPositionsLinear: 12,
-    maxPositionsWithChangeOver: 12,
+    // 2026-11-04: contacts are 4x5 / 6x5 only. 12 let a 6x5 stand for 7–12
+    // positions; no WSG string was ever sold.
+    maxPositionsLinear: 6,
+    maxPositionsWithChangeOver: 6,
     defaultMdu: "CMA7",
     notesEn:
       "Drum OCTC (WG sheet). dutyKind=octc only. Wiring roman follows octcSeries (form default IV). Auto D → WSGII (Anthony WSG II-800D/40.5-4x5A).",
     notesZh:
       "鼓式无载（WG 价目表）。仅 dutyKind=octc。接线方式跟 octcSeries（页面默认 IV）。未指定时 D → WSGII。",
-    rank: 6,
+    rank: 7,
+  },
+  // 2026-11-04: the drum OCTC Huaming actually sells. Single-phase, one per
+  // phase (3xWDGIV-800/40.5-5x5A). Existence is the sold-row list in
+  // lib/listIndex.ts; every sold row is Y or blank, so no D.
+  {
+    id: "wdg",
+    code: "WDG",
+    nameEn: "WDG single-phase drum off-circuit tap changer (OCTC)",
+    nameZh: "WDG 单相鼓式无载分接开关（OCTC）",
+    mounting: ["in_tank"],
+    medium: "oil",
+    structure: "drum",
+    vacuum: false,
+    dutyKind: "octc",
+    currents: { I: [300, 400, 800, 1250] },
+    umKv: [40.5, 72.5],
+    usesSelectorSize: false,
+    maxStepVoltageV: 10000,
+    connections: ["Y"],
+    maxPositionsLinear: 6,
+    maxPositionsWithChangeOver: 6,
+    defaultMdu: "CMA7",
+    notesEn:
+      "Single-phase drum OCTC, one unit per phase. IV 5x5 up to 5 positions; V 6x5 up to 6 when V is asked.",
+    notesZh: "单相鼓式无载，每相一台。IV 5x5 至 5 档；指定 V 时 6x5 至 6 档。",
+    rank: 5.9,
+  },
+  {
+    id: "wlg",
+    code: "WLG",
+    nameEn: "WLG single-phase drum off-circuit tap changer (OCTC)",
+    nameZh: "WLG 单相鼓式无载分接开关（OCTC）",
+    mounting: ["in_tank"],
+    medium: "oil",
+    structure: "drum",
+    vacuum: false,
+    dutyKind: "octc",
+    currents: { I: [800] },
+    umKv: [40.5],
+    usesSelectorSize: false,
+    maxStepVoltageV: 10000,
+    connections: ["Y"],
+    maxPositionsLinear: 5,
+    maxPositionsWithChangeOver: 5,
+    defaultMdu: "CMA7",
+    notesEn: "Single-phase drum OCTC, series-parallel VIII 4x2 only (one sale).",
+    notesZh: "单相鼓式无载，只有串并联 VIII 4x2（一单）。",
+    rank: 5.9,
   },
 ];
 
@@ -684,12 +837,8 @@ export function nearestCurrent(
 ): number | null {
   if (!allowed?.length) return null;
   const sorted = [...allowed].sort((a, b) => a - b);
-  const ge = sorted.find((c) => c >= wanted - 0.01);
-  if (ge != null) return ge;
-  const max = sorted[sorted.length - 1];
-  // 2026 OS: 603.75 A shipped on CV2-600. 1% commercial overcurrent.
-  if (wanted <= max * 1.01 + 0.5) return max;
-  return null;
+  // No tolerance above the top rating (2026-11-04 audit D2, IEC "not less than").
+  return sorted.find((c) => c >= wanted - 0.01) ?? null;
 }
 
 export function phaseToken(p: PhaseCode): string {
@@ -702,7 +851,8 @@ export function phaseToken(p: PhaseCode): string {
  *   126 / 145 (~110–150 kV) → C
  *   170 / 252 (~170–220 kV) → D
  *   ≥300 → DE
- * Across-tap a/b stress can only raise this, never lower it.
+ * Across-tap stress raises it; a stated stress on a star point or a
+ * single-phase unit may also lower it (resolveSelectorSize, GRADE-2).
  */
 export function defaultSelectorSizeForUm(um: number): SelectorSize {
   if (um <= 72.5 + 0.1) return "B";
@@ -722,12 +872,14 @@ function firstAllowedAtOrAbove(
   return allowed[allowed.length - 1] ?? "B";
 }
 
-function coversAcrossTap(
+// 2026-11-04 final ENGINE-11: exported so the TR practice grade can test the Um default.
+export function coversAcrossTap(
   size: SelectorSize,
   needALi: number,
   needAPf: number,
+  seriesId?: string,
 ): boolean {
-  const ins = INTERNAL_INSULATION[size];
+  const ins = internalInsulation(seriesId, size);
   return ins.a_li + 0.5 >= needALi && ins.a_pf + 0.5 >= needAPf;
 }
 
@@ -736,6 +888,8 @@ export type SelectorSizePick = {
   size: SelectorSize | null;
   /** The typed grade, when the engine had to raise it. */
   raisedFrom?: SelectorSize;
+  /** The Um default, when a stated across-tap stress took the grade below it. */
+  loweredFrom?: SelectorSize;
 };
 
 /**
@@ -745,30 +899,52 @@ export type SelectorSizePick = {
  * A typed grade stays when it is legal on this Um and covers the stress.
  * Otherwise it is raised and `raisedFrom` says so.
  * Stress above DE returns null. Never hand back a grade that does not cover.
+ * `seriesId` picks that family's own withstand table (CM2 C is 350, not 365).
+ * `statedFloor`: a star point or single-phase unit with a stated across-tap
+ * stress starts from the weakest grade on the Um row, not the Um default.
+ * 2026-11-04 audit GRADE-2: A01 (PLN, OS "across tap winding AC82/LI350",
+ * Um 170) was sold 3xCM2I-600/170C; the Um map alone gave D. Only distance
+ * a is checked, so three-phase line-end / delta units keep the Um default.
+ * 2026-11-04 r2 ENGINE-1: both LI and AC must be stated to go below the Um
+ * default. A missing value read as 0 kV, so LI 260 alone gave 170B.
+ * `minSize`: an untyped floor above the Um default (ORDERS-1, 330 kV class).
  */
 export function resolveSelectorSize(
   um: number,
   requested: SelectorSize | "auto" | undefined,
   acrossTapBilKv?: number,
   acrossTapPfKv?: number,
+  seriesId?: string,
+  statedFloor = false,
+  minSize?: SelectorSize,
 ): SelectorSizePick {
   const allowed = SELECTOR_SIZES_BY_UM[um] ?? ["B", "C", "D", "DE"];
   const needALi = acrossTapBilKv ?? 0;
   const needAPf = acrossTapPfKv ?? 0;
   const typed = requested && requested !== "auto" ? requested : null;
+  const stated = statedFloor && needALi > 0 && needAPf > 0;
+  const umDefault = defaultSelectorSizeForUm(um);
+  const untyped =
+    minSize && SIZE_ORDER.indexOf(minSize) > SIZE_ORDER.indexOf(umDefault)
+      ? minSize
+      : umDefault;
 
   // Floor = typed grade, else the commercial Um default
   // (not always the weakest letter for that Um row).
   const floor = firstAllowedAtOrAbove(
-    typed ?? defaultSelectorSizeForUm(um),
+    typed ?? (stated ? allowed[0]! : untyped),
     allowed,
   );
   for (let i = SIZE_ORDER.indexOf(floor); i < SIZE_ORDER.length; i++) {
     const cand = SIZE_ORDER[i];
     if (!allowed.includes(cand)) continue;
     // Across-tap winding (a distance) — training case 2: BIL 285 → C
-    if (!coversAcrossTap(cand, needALi, needAPf)) continue;
-    return typed && cand !== typed ? { size: cand, raisedFrom: typed } : { size: cand };
+    if (!coversAcrossTap(cand, needALi, needAPf, seriesId)) continue;
+    if (typed && cand !== typed) return { size: cand, raisedFrom: typed };
+    if (!typed && SIZE_ORDER.indexOf(cand) < SIZE_ORDER.indexOf(umDefault)) {
+      return { size: cand, loweredFrom: umDefault };
+    }
+    return { size: cand };
   }
   return { size: null };
 }
@@ -779,8 +955,10 @@ export function pickSelectorSize(
   requested: SelectorSize | "auto" | undefined,
   acrossTapBilKv?: number,
   acrossTapPfKv?: number,
+  seriesId?: string,
+  statedFloor = false,
 ): SelectorSize | null {
-  return resolveSelectorSize(um, requested, acrossTapBilKv, acrossTapPfKv).size;
+  return resolveSelectorSize(um, requested, acrossTapBilKv, acrossTapPfKv, seriesId, statedFloor).size;
 }
 
 /**

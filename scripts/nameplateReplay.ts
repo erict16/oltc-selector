@@ -18,6 +18,7 @@ import {
   soldTypeInResults,
 } from "../lib/osReplay";
 import { deriveDuty, type TransformerSpec } from "../lib/transformer";
+import { osMarket, osStepFraction, truncatedTapCode, unevenTapGeometry } from "./replayTap";
 
 type Verdict = {
   serial: string;
@@ -35,6 +36,19 @@ type Verdict = {
   primary: string;
   primaryMatch: boolean;
   soldListed: boolean;
+  /** Engine #1 letter with selectorSize auto, and the sold letter. */
+  gradeEngine: string;
+  gradeSold: string;
+};
+
+// 2026-11-04 audit GRADE-3: the type verdicts feed the sold letter in, so
+// they never test the grade. A second run with selectorSize auto does.
+const GRADES = ["B", "C", "D", "DE"];
+const gradeCmp = (e: string, s: string): "match" | "weaker" | "stronger" | null => {
+  const ei = GRADES.indexOf(e);
+  const si = GRADES.indexOf(s);
+  if (ei < 0 || si < 0) return null;
+  return ei === si ? "match" : ei < si ? "weaker" : "stronger";
 };
 
 const year = process.argv[2] ?? "2026";
@@ -61,9 +75,20 @@ for (const row of rows) {
   const conn = (row.connection || parsed.connection || "").toUpperCase();
   if (conn !== "Y" && conn !== "D") { skip("no Y/D"); continue; }
 
-  const base = buildOsSelectInput(row, parsed);
-  if ("skip" in base) { skip(base.skip); continue; }
+  // 2026-11-04 r2 ORDERS-2: cut-off codes are skipped; 10181G keeps positions + mid.
+  const tapNorm = (row.tap_code || parsed.tapCode || "").toString().replace(/\s+/g, "");
+  if (truncatedTapCode(tapNorm, parsed.family)) { skip("tap code truncated"); continue; }
+  const built = buildOsSelectInput(row, parsed);
+  if ("skip" in built) { skip(built.skip); continue; }
+  const uneven = unevenTapGeometry(tapNorm);
+  const base = uneven ? { ...built, plusMinusSteps: undefined, ...uneven } : built;
 
+  // 2026-11-04 r3 ORDERS-10: minus range, step and OS Imax go in, so deriveDuty
+  // gives the lowest-tap current the app sizes on (it was the OS rated current).
+  const iMaxOs = numCell(row.i_max_a);
+  const nMinus = base.regulation !== "linear" ? (numCell(row.minus_steps) ?? base.plusMinusSteps ?? 0) : 0;
+  // The step is read by the OS letter, as a user types the nameplate step %.
+  const stepFraction = osStepFraction(kv, conn, base.stepVoltageV, nMinus) ?? 0;
   // Y = star neutral. D = line end; the OS current tells star from delta.
   const specs: TransformerSpec[] = (conn === "Y"
     ? [{ tapPoint: "neutral", winding: "star" }]
@@ -79,9 +104,10 @@ for (const row of rows) {
     tapKv: kv,
     hvKv: 0,
     mvKv: 0,
-    minusSteps: 0,
-    stepFraction: 0,
+    minusSteps: nMinus,
+    stepFraction,
     safetyK: 1,
+    ...(iMaxOs ? { statedMaxA: iMaxOs } : {}),
   }));
   // A single-phase unit carries the winding current whatever the bank.
   const duties = specs
@@ -91,10 +117,18 @@ for (const row of rows) {
   if (!duties.length) { skip("deriveDuty refused"); continue; }
   const { s, d } = duties[0]!;
 
-  const input = { ...base, umKv: d.umKv, connection: parsed.phases === "I" ? base.connection : d.connection };
+  // The app passes the tapped winding kV (FAM-2/FAM-3, the 330 kV-class grade).
+  // A rated current far from the OS one is a kV from another winding (the
+  // "current off" table): those rows keep the OS figure.
+  const fitsOs = iOs / d.ratedA >= 0.85 && iOs / d.ratedA <= 1.4;
+  const sizedA = fitsOs && ((s.stepFraction ?? 0) > 0 || iMaxOs) ? d.dutyA : base.throughCurrentA;
+  // r3 ORDERS-11: the --market a user would type (TR raises 72.5 neutrals to C).
+  const market = osMarket(row.customer);
+  const input = { ...base, throughCurrentA: sizedA, ...(market ? { market } : {}), tapWindingKv: kv, umKv: d.umKv, combinedOnly: d.combinedOnly, connection: parsed.phases === "I" ? base.connection : d.connection };
   const res = selectOltc(input);
   const models = res.results.map((r) => r.model);
   const primary = models[0] ?? "";
+  const auto = selectOltc({ ...input, selectorSize: "auto" }).results[0];
   out.push({
     serial: (row.serial ?? row.file ?? "").toString(),
     customer: (row.customer ?? "").toString(),
@@ -114,6 +148,8 @@ for (const row of rows) {
       (commercialMatch(primary.replace(/^3[x×]/, ""), sold.replace(/^3[x×]/, ""), "full") ||
         commercialMatch(primary.replace(/^3[x×]/, ""), sold.replace(/^3[x×]/, ""), "family-i-um")),
     soldListed: soldTypeInResults(sold, models),
+    gradeEngine: auto?.selectorSize ?? "",
+    gradeSold: parsed.selectorSize ?? "",
   });
 }
 
@@ -125,6 +161,23 @@ const umHigh = out.filter((v) => v.umDerived > v.umSold);
 const iOff = out.filter((v) => Math.abs(v.iDerived / v.iOs - 1) > 0.05);
 const listed = out.filter((v) => v.soldListed);
 const top = out.filter((v) => v.primaryMatch);
+const grade = { match: 0, weaker: 0, stronger: 0 };
+const gradeByUm = new Map<number, typeof grade>();
+for (const v of out) {
+  const c = gradeCmp(v.gradeEngine, v.gradeSold);
+  if (!c) continue;
+  grade[c]++;
+  const g = gradeByUm.get(v.umSold) ?? { match: 0, weaker: 0, stronger: 0 };
+  g[c]++;
+  gradeByUm.set(v.umSold, g);
+}
+const gradeRows = [...gradeByUm.keys()]
+  .sort((a, b) => a - b)
+  .map((u) => {
+    const g = gradeByUm.get(u)!;
+    return `| ${u} | ${g.match} | ${g.weaker} | ${g.stronger} |`;
+  })
+  .join("\n");
 
 const row = (v: Verdict) =>
   `| ${v.serial} | ${v.customer.slice(0, 24)} | ${v.mva} MVA ${v.kv} kV ${v.conn} | ${v.tap} | ${v.iOs} / ${v.iDerived.toFixed(1)} | ${v.umSold} / ${v.umDerived}${v.umAssumed ? "*" : ""} | \`${v.sold}\` | \`${v.primary}\` |`;
@@ -133,7 +186,7 @@ const head =
 
 const md = `# ${year} nameplate replay
 
-Generated by \`scripts/nameplateReplay.ts\`. Duty comes from MVA, rated kV and Y/D through \`deriveDuty\` (the web form and CLI path); step voltage and steps come from the OS. Y is taken as a star neutral; D as a line end, star or delta by whichever matches the OS current.
+Generated by \`scripts/nameplateReplay.ts\`. Duty comes from MVA, rated kV and Y/D through \`deriveDuty\` (the web form and CLI path); step voltage and steps come from the OS. Y is taken as a star neutral; D as a line end, star or delta by whichever matches the OS current. The rated kV is passed as the tapped-winding kV, as the app does; cut-off sold tap codes are skipped. Since r3 the current is the lowest-tap current deriveDuty gives from the OS minus steps and step (or the OS Imax), not the OS rated current; rows whose OS current does not fit the nameplate keep the OS figure. Turkish buyers go in as \`--market TR\`.
 
 Rows judged: ${n}. Skipped: ${Object.values(skipped).reduce((a, b) => a + b, 0)} (${Object.entries(skipped)
   .map(([k, v]) => `${k} ${v}`)
@@ -147,8 +200,17 @@ Rows judged: ${n}. Skipped: ${Object.values(skipped).reduce((a, b) => a + b, 0)}
 | Current off the OS by more than 5% | ${iOff.length} | ${pct(iOff.length)} |
 | Engine #1 = sold (family, I, Um) | ${top.length} | ${pct(top.length)} |
 | Sold type in the engine's list | ${listed.length} | ${pct(listed.length)} |
+| Grade (engine #1, auto) = sold letter | ${grade.match} | |
+| Grade weaker than sold | ${grade.weaker} | |
+| Grade stronger than sold | ${grade.stronger} | |
 
 \`*\` = neutral Um assumed (72.5) and flagged 待 OS 核对 in the app.
+
+## Grade by sold Um
+
+| sold Um | match | weaker than sold | stronger |
+|---:|---:|---:|---:|
+${gradeRows}
 
 ## Um derived below sold
 
@@ -182,6 +244,7 @@ console.log(
       iOff: iOff.length,
       top: top.length,
       listed: listed.length,
+      grade,
     },
     null,
     1,

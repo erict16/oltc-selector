@@ -395,6 +395,7 @@ export function KindToggle({
             role="radio"
             aria-checked={on}
             disabled={off}
+            aria-describedby={off ? "auto-octc-note" : undefined}
             onClick={() => onKind(o.id)}
             className={cx("ui-seg", on && "is-on")}
           >

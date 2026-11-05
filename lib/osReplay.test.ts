@@ -71,6 +71,22 @@ describe("OS Excel-backed replay (shipped selectOltc)", () => {
     expect(r.models.some((m) => m.includes("/72.5C-"))).toBe(true);
   });
 
+  // 2026-11-04 audit GRADE-3: a sold letter below the Um default (170B,
+  // 252B) used to be skipped as "does not cover"; 93 rows went that way.
+  it("a sold grade below the Um default is judged, not skipped", () => {
+    const rows = [...loadYear(2025), ...loadYear(2026)];
+    const weak = rows.filter((r) => /^CM2III-500Y\/170B-/.test(String(r.sold_type ?? "")));
+    expect(weak.length).toBeGreaterThan(0);
+    for (const row of weak) {
+      const r = replayOsRow(row);
+      expect(r.skip ?? "", `${r.serial} ${r.sold}`).not.toBe("sold type does not cover reconstructed duty");
+    }
+    let notCover = 0;
+    for (const row of rows) if (replayOsRow(row).skip === "sold type does not cover reconstructed duty") notCover++;
+    // 114 before the fix; 22 left are current, Ust, positions or step capacity.
+    expect(notCover).toBeLessThan(30);
+  });
+
   it("2025 OS: every emitted model exists; legal sold types stay in results", () => {
     const s = replayYear(2025);
     expect(s.rows).toBeGreaterThan(1);
