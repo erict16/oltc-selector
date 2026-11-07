@@ -196,6 +196,7 @@ const en: Dict = {
   acrossLead:
     "Optional. Leave blank to size the selector from Um only. Fill when the transformer specifies across-tap insulation.",
   acrossUnset: "Auto",
+  groupedNumber: "Type it without a separator, e.g. 1200",
   acrossBil: "Lightning impulse (BIL)",
   acrossBilPh: "e.g. 285",
   acrossBilTip: "Raises B/C/D. Leave blank to use the Um default.",
@@ -351,6 +352,7 @@ const zh: Dict = {
   acrossLead:
     "选填。空着则仅按 Um 定选择器等级；变压器给出调压绕组间绝缘时再填。",
   acrossUnset: "自动",
+  groupedNumber: "请直接输入数字，不带分隔符，例如 1200",
   acrossBil: "雷电冲击（BIL）",
   acrossBilPh: "如 285",
   acrossBilTip: "抬 B/C/D；空则按 Um",
@@ -505,6 +507,7 @@ const vi: Dict = {
   acrossLead:
     "Tùy chọn. Để trống thì chỉ theo Um. Điền khi máy biến áp cho cách điện giữa cuộn điều áp.",
   acrossUnset: "Tự động",
+  groupedNumber: "Nhập số không có dấu phân cách, ví dụ 1200",
   acrossBil: "Xung sét (BIL)",
   acrossBilPh: "vd. 285",
   acrossBilTip: "Nâng B/C/D. Để trống thì theo Um.",
@@ -661,6 +664,7 @@ const es: Dict = {
   acrossLead:
     "Opcional. En blanco se dimensiona solo con Um. Rellene si el transformador da aislamiento entre tomas.",
   acrossUnset: "Auto",
+  groupedNumber: "Escríbalo sin separador, por ejemplo 1200",
   acrossBil: "Impulso (BIL)",
   acrossBilPh: "p. ej. 285",
   acrossBilTip: "Sube B/C/D. Vacío = valor por Um.",
@@ -816,6 +820,7 @@ const tr: Dict = {
   acrossLead:
     "İsteğe bağlı. Boşsa yalnızca Um’ye göre. Transformatör sargılar arası yalıtım veriyorsa doldurun.",
   acrossUnset: "Otomatik",
+  groupedNumber: "Ayırıcı olmadan yazın, örneğin 1200",
   acrossBil: "Yıldırım darbesi (BIL)",
   acrossBilPh: "örn. 285",
   acrossBilTip: "B/C/D yükseltir. Boş bırakırsanız Um varsayılanı.",
@@ -971,6 +976,7 @@ const idn: Dict = {
   acrossLead:
     "Opsional. Kosongkan untuk menentukan selector dari Um saja. Isi bila trafo menetapkan isolasi antar-tap.",
   acrossUnset: "Otomatis",
+  groupedNumber: "Tulis tanpa pemisah, misalnya 1200",
   acrossBil: "Impuls petir (BIL)",
   acrossBilPh: "mis. 285",
   acrossBilTip: "Menaikkan B/C/D. Kosongkan untuk memakai nilai bawaan Um.",

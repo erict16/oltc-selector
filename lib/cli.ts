@@ -521,6 +521,8 @@ function applyRange(out: CliArgs, plus: number, minus: number): void {
  */
 function applyTenderLine(out: CliArgs, raw: string): void {
   const t = parseTenderLine(raw);
+  // 2026-11-07: a line that names only an off-circuit tap changer is OCTC duty.
+  if (t?.offCircuitOnly && !out.given.has("octc")) out.octc = true;
   const r = t ? tenderLineSettings(t, { octc: out.octc }) : null;
   if (r && !r.ok && r.reason === "auto_needs_mv") {
     throw new CliError(

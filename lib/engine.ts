@@ -23,13 +23,14 @@ import {
 import { catalogueUmFromRatedKv } from "./deriveUm";
 import { DRUM_SOLD_ROWS } from "./listIndex";
 import { parseTypeString } from "./parseType";
-import { resolveTapFields } from "./tapCode";
+import { buildTapCode, resolveTapFields } from "./tapCode";
 import type {
   Connection,
   ModelResult,
   OctcSeriesChoice,
   OctcSeriesRoman,
   PhaseCode,
+  Regulation,
   SelectInput,
   SelectOutput,
   SelectorSize,
@@ -193,6 +194,24 @@ function maxStepVoltageForSeries(
     return s.id === "cv2" ? 1500 : 1000;
   }
   return s.maxStepVoltageV;
+}
+
+type ResolvedTap = ReturnType<typeof resolveTapFields>;
+
+/**
+ * The tap code on a family's own contacts. A Fig. 3-3 pitch the family does
+ * not have moves to the smallest listed pitch that holds the positions
+ * (±6 mid 1: 14131W → 10131W on CV2, as sold 10151W / 10091W); null when
+ * none does. Linear and families with no pitch list keep the code.
+ */
+function seriesTap(s: SeriesDef, tap: ResolvedTap, reg: Regulation): ResolvedTap | null {
+  if (!s.pitches || reg === "linear" || s.pitches.includes(tap.pitch)) return tap;
+  const pitch = s.pitches.find((p) => tap.positions <= 2 * (p - 1) + 1);
+  if (pitch == null) return null;
+  const tapCode = buildTapCode({ pitch, positions: tap.positions, mid: tap.mid, regulation: reg });
+  // The guide lists the pitch-10 small ladder (10131W, 10151W, 10171W).
+  const guideRow = pitch === 10 && tap.mid === 1 && reg === "reversing";
+  return { ...tap, pitch, tapCode, standard: guideRow };
 }
 
 /**
@@ -470,7 +489,8 @@ function buildAttempts(s: SeriesDef, input: SelectInput, octcWide = false): Atte
         phases: "I",
         current: curI,
         um: um0,
-        unitCount: 3,
+        // 2026-11-07: one CZI per phase; a single-phase job was quoted 3×CZI.
+        unitCount: input.phases === "I" ? 1 : input.phases === "II" ? 2 : 3,
       });
     }
     return out;
@@ -511,7 +531,8 @@ function buildAttempts(s: SeriesDef, input: SelectInput, octcWide = false): Atte
   if (isOctcSeries(s)) return out;
   if (
     s.currents.I?.length &&
-    (input.phases === "III" || connIllegal)
+    // 2026-11-07: one I-unit per phase; a two-phase (II) delta job was quoted 3×.
+    (input.phases === "III" || (connIllegal && input.phases === "II"))
   ) {
     const curI = nearestCurrent(input.throughCurrentA, s.currents.I);
     if (curI != null) {
@@ -520,7 +541,7 @@ function buildAttempts(s: SeriesDef, input: SelectInput, octcWide = false): Atte
         phases: "I",
         current: curI,
         um: um0,
-        unitCount: 3,
+        unitCount: input.phases === "II" ? 2 : 3,
         deltaForced: connIllegal,
       });
     }
@@ -605,7 +626,8 @@ function familyMiss(s: SeriesDef, input: SelectInput, tap: TapFields): FamilyMis
   const ratings: { current: number; label: string }[] = [];
   // CZ is sold as 3 × phase I only.
   if (s.id === "cz") {
-    for (const c of s.currents.I ?? []) ratings.push({ current: c, label: `3×${s.code}I-${c}` });
+    const n = input.phases === "I" ? 1 : input.phases === "II" ? 2 : 3;
+    for (const c of s.currents.I ?? []) ratings.push({ current: c, label: `${n > 1 ? `${n}×` : ""}${s.code}I-${c}` });
   } else if (s.id === "wdg" || s.id === "wlg") {
     // 2026-11-04 r2 ENGINE-4: name a sold drum row (WDGIV-1250/72.5; no WDGI
     // string exists) and the unit count buildAttempts uses for the phases.
@@ -867,7 +889,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
     if (earthUm > input.umKv + 0.01) input = { ...input, umKv: earthUm };
   }
 
-  const tap = resolveTapFields({
+  const baseTap = resolveTapFields({
     regulation: input.regulation,
     positions: input.positions,
     plusMinusSteps: input.plusMinusSteps,
@@ -951,6 +973,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
   for (const wide of octcWidePass ? [false, true] : [false]) {
     if (wide && results.length) break;
     for (const s of candidates) {
+      // 2026-11-07: per family, on the contacts it has.
+      const tap = isOctcSeries(s) ? baseTap : seriesTap(s, baseTap, input.regulation);
+      if (!tap) continue;
       if (!compoundCoversAcrossTap(s, input)) {
         acrossTapShort = true;
         continue;
@@ -1534,7 +1559,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
             ? !s.vacuum
             : true,
     );
-    const why = noFitReasons(locked, input, tap);
+    const why = noFitReasons(locked, input, baseTap);
     // 2026-11-04 r2 ENGINE-2: a typed contact short of the positions is the block.
     const hinted = normOctcContact(input.octcContact);
     const asked = octcPositionsAsked(input);

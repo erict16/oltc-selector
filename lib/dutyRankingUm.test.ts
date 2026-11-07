@@ -93,10 +93,13 @@ describe("D1 OS Imax on the capacity path", () => {
     expect(cliJson(`${JOB_115} --imax 334`).model).toBe("CV2III-350Y/72.5-10191W");
   });
 
-  it("a stated Imax below rated is floored at rated, with a caution", () => {
+  it("a stated Imax below rated is not used: the full-range current stays (2026-11-07)", () => {
+    // "1.200" typed for 1200 A reached the engine as 1.2 A and sized on rated.
     const j = cliJson(`${JOB_115} --imax 300 --oil`);
-    expect(j.basis?.maxA).toBe(316.3);
-    expect(j.cautions.join()).toContain("低于额定 316.3 A");
+    const full = deriveDuty(spec({ mva: 63, tapKv: 115, minusSteps: 9, stepFraction: 0.0178 })).maxA;
+    expect(j.basis?.maxA).toBeCloseTo(full, 1);
+    expect(full).toBeGreaterThan(316.3);
+    expect(j.cautions.join()).toContain("低于额定 316.3 A：不采用");
   });
 
   it("a stated Imax far above the full range is used, with a data caution", () => {

@@ -269,7 +269,12 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
     }
   }
 
-  const phases = asPhase(row.phases, parsed.phases);
+  // 2026-11-07: CZ "I" with 3 units sold is the switch's phase on a three-phase
+  // transformer (3xCZI-500), not a single-phase one (the engine now gives one
+  // CZI per phase). Other families keep the OS phase as before.
+  const phaseRaw = asPhase(row.phases, parsed.phases);
+  const czSet = /^3x?CZ/i.test(String(row.sold_type ?? "")) || /^CZ/i.test(String(row.family_folder ?? ""));
+  const phases: PhaseCode = czSet && phaseRaw === "I" && num(row.unit_count) === 3 ? "III" : phaseRaw;
   const connection = asConn(row.connection, parsed.connection);
 
   const input: SelectInput = {

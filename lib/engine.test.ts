@@ -525,8 +525,26 @@ describe("tap codes W/G (brochure Fig. 3-3)", () => {
       midPositions: 1,
     });
     expect(out.ok).toBe(true);
-    expect(out.results[0].tapCode).toBe("18171W");
+    // 2026-11-07: CV2 has 10 and 12 contacts only; ±8 mid 1 sits on 10.
+    expect(out.results[0].model).toMatch(/^CV2/);
+    expect(out.results[0].tapCode).toBe("10171W");
     expect(out.results[0].positions).toBe(17);
+    // CM2 has pitch 18: sold CM2III-500Y/170B-18171W.
+    const cm2 = selectOltc({
+      mounting: "in_tank",
+      medium: "oil_vacuum",
+      preferVacuum: true,
+      phases: "III",
+      connection: "Y",
+      throughCurrentA: 400,
+      umKv: 72.5,
+      stepVoltageV: 1500,
+      regulation: "reversing",
+      plusMinusSteps: 8,
+      midPositions: 1,
+      preferStructure: "combined",
+    });
+    expect(cm2.results[0].model).toMatch(/^CM2.*-18171W$/);
   });
 
   it("training cases: ±9 → 10191W, ±10 → 12233W, ±13 → 14271W", () => {

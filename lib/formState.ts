@@ -445,6 +445,12 @@ function applyLine(f: FormState, tl: TenderLine, s: LineSettings): FormState {
     // typed for 59 MVA sized the next 61 MVA line (355.7 A) on a 350 A switch.
     osImaxA: 0,
     osUstV: 0,
+    // 2026-11-07 field test: the buyer's market and the safety factor belong
+    // to one enquiry too. TR from the last job turned an Indonesian 150 kV
+    // line into 72.5C; ×1.2 sized the next line. A line starts from the CLI
+    // defaults, as the CLI does on every run.
+    market: INITIAL_FORM.market,
+    safetyK: INITIAL_FORM.safetyK,
     phasesByLine: s.phases === "I",
     // A line with no step % or range takes the CLI defaults.
     stepPercentPct: step,
@@ -459,6 +465,14 @@ function applyLine(f: FormState, tl: TenderLine, s: LineSettings): FormState {
       phases,
       acrossTapBilKv: undefined,
       acrossTapPfKv: undefined,
+      // Dry-type and reactor describe the last transformer, not this line:
+      // after a dry job an oil 25 MVA line found no type, then 3xCZI.
+      ...(f.input.mounting === "dry_type" || f.input.mounting === "reactor"
+        ? {
+            mounting: DEFAULT_INPUT.mounting,
+            medium: f.input.preferVacuum ? "oil_vacuum" : "oil",
+          }
+        : {}),
     },
   };
   // 2026-11-04 (r3 UI-7): a G / linear the previous line set is not the
@@ -482,8 +496,11 @@ export function readLine(f0: FormState, text: string): FormState {
   return done(readLineInner(f, text));
 }
 
-function readLineInner(f: FormState, text: string): FormState {
+function readLineInner(f0: FormState, text: string): FormState {
   const tl = parseTenderLine(text);
+  // 2026-11-07 field test: "…, off-circuit tap changer (DETC)" read in 有载 gave
+  // a CV2 on-load switch for a 1 MVA unit. The line's duty sets 无载.
+  const f = tl?.offCircuitOnly && !isOctc(f0) ? toOctc(f0) : f0;
   const r = tl ? tenderLineSettings(tl, { octc: isOctc(f) }) : null;
   if (tl && r && !r.ok && r.reason === "auto_needs_mv") {
     // 2026-11-04 (UI-5): the error says to fill HV and MV below, so show

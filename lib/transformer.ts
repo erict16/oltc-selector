@@ -254,11 +254,15 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   if (statedMaxA > 0) {
     // 2026-11-04 audit D1: the maker's Imax is the highest tap current that
     // really occurs (IEC 60214-2, SelMan §1.11). Never below rated.
-    maxA = Number.isFinite(ratedA) ? Math.max(ratedA, statedMaxA) : statedMaxA;
+    maxA = statedMaxA;
     maxRule = "stated";
     if (Number.isFinite(ratedA) && statedMaxA < ratedA - 0.05) {
-      cautionsZh.push(`OS Imax ${fmtA(statedMaxA)} A 低于额定 ${fmtA(ratedA)} A：按额定电流选，请核对 OS。`);
-      cautionsEn.push(`OS Imax ${fmtA(statedMaxA)} A is below the rated ${fmtA(ratedA)} A: sized on the rated current. Check the OS.`);
+      // 2026-11-07: an Imax below rated is a typing slip ("1.200" read as
+      // 1.2 A), not a maker's cap. Keep the full-range current, not rated.
+      maxA = derivedMaxA;
+      maxRule = "full_range";
+      cautionsZh.push(`OS Imax ${fmtA(statedMaxA)} A 低于额定 ${fmtA(ratedA)} A：不采用，按全范围 ${fmtA(derivedMaxA)} A 选，请核对 OS。`);
+      cautionsEn.push(`OS Imax ${fmtA(statedMaxA)} A is below the rated ${fmtA(ratedA)} A: not used, sized on the full-range ${fmtA(derivedMaxA)} A. Check the OS.`);
     } else if (Number.isFinite(derivedMaxA) && statedMaxA < 0.97 * derivedMaxA) {
       const capPct = ((1 - ratedA / statedMaxA) * 100).toFixed(1);
       cautionsZh.push(`OS Imax ${fmtA(statedMaxA)} A 低于全范围 ${fmtA(derivedMaxA)} A：厂家在 −${capPct}% 以下限电流（最大电流分接）。按 OS 值选。`);

@@ -230,12 +230,12 @@ const RULES: Rule[] = [
     }),
   ],
   [
-    /^OS Imax ([\d.]+) A is below the rated ([\d.]+) A: sized on the rated current\. Check the OS\.$/,
+    /^OS Imax ([\d.]+) A is below the rated ([\d.]+) A: not used, sized on the full-range ([\d.]+) A\. Check the OS\.$/,
     (m) => ({
-      vi: `Imax trong OS ${m[1]} A thấp hơn dòng định mức ${m[2]} A: chọn theo dòng định mức. Kiểm tra OS.`,
-      es: `La Imax de la OS, ${m[1]} A, es menor que la nominal de ${m[2]} A: dimensionado a la corriente nominal. Revise la OS.`,
-      tr: `OS Imax ${m[1]} A, ${m[2]} A anma akımının altında: anma akımına göre seçildi. OS'yi kontrol edin.`,
-      id: `Imax OS ${m[1]} A di bawah arus pengenal ${m[2]} A: dipilih pada arus pengenal. Periksa OS.`,
+      vi: `Imax trong OS ${m[1]} A thấp hơn dòng định mức ${m[2]} A: không dùng, chọn theo dòng toàn dải ${m[3]} A. Kiểm tra OS.`,
+      es: `La Imax de la OS, ${m[1]} A, es menor que la nominal de ${m[2]} A: no se usa, dimensionado con los ${m[3]} A de todo el rango. Revise la OS.`,
+      tr: `OS Imax ${m[1]} A, ${m[2]} A anma akımının altında: kullanılmadı, tüm aralık akımı ${m[3]} A ile seçildi. OS'yi kontrol edin.`,
+      id: `Imax OS ${m[1]} A di bawah arus pengenal ${m[2]} A: tidak dipakai, dipilih pada arus seluruh rentang ${m[3]} A. Periksa OS.`,
     }),
   ],
   [

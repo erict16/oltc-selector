@@ -150,35 +150,51 @@ function DecimalInput({
   onBlur,
   className,
   placeholder,
+  groupedError,
 }: {
   value: number;
   onValue: (n: number) => void;
   onBlur?: () => void;
   className: string;
   placeholder?: string;
+  /** A and V fields: "1.200" / "1,200" is a thousands mark, refused with this text. */
+  groupedError?: string;
 }) {
   const labelledBy = useContext(FieldLabelContext) ?? undefined;
+  const errorId = useId();
   const [draft, setDraft] = useState(value > 0 ? String(value) : "");
+  const grouped = groupedError != null && /^\d{1,3}(\.\d{3})+$/.test(draft);
   useEffect(() => {
     // Follow outside changes (preset picked) without clobbering `1.`.
-    const held = decimalDraft(draft).value ?? 0;
+    const held = grouped ? 0 : (decimalDraft(draft).value ?? 0);
     if (held !== value) setDraft(value > 0 ? String(value) : "");
   }, [value]);
   return (
-    <input
-      inputMode="decimal"
-      className={className}
-      aria-labelledby={labelledBy}
-      placeholder={placeholder}
-      value={draft}
-      onChange={(e) => {
-        const d = decimalDraft(e.target.value);
-        if (d.draft == null) return;
-        setDraft(d.draft);
-        onValue(d.value ?? 0);
-      }}
-      onBlur={onBlur}
-    />
+    <>
+      <input
+        inputMode="decimal"
+        className={className}
+        aria-labelledby={labelledBy}
+        aria-invalid={grouped || undefined}
+        aria-describedby={grouped ? errorId : undefined}
+        placeholder={placeholder}
+        value={draft}
+        onChange={(e) => {
+          const d = decimalDraft(e.target.value);
+          if (d.draft == null) return;
+          setDraft(d.draft);
+          // 2026-11-07: "1.200" A in tr/id/es/vi meant 1200, not 1.2.
+          const isGrouped = groupedError != null && /^\d{1,3}(\.\d{3})+$/.test(d.draft);
+          onValue(isGrouped ? 0 : (d.value ?? 0));
+        }}
+        onBlur={onBlur}
+      />
+      {grouped ? (
+        <span id={errorId} role="alert" className="mt-1 block text-[0.75rem] leading-snug text-[var(--color-danger)]">
+          {groupedError}
+        </span>
+      ) : null}
+    </>
   );
 }
 
@@ -781,7 +797,14 @@ export function SelectorApp() {
    * cannot be sized as a two-winding job by a missed click. Same mapping as
    * the CLI --line (lib/formState readLine).
    */
-  const readTenderLine = () => updateForm((f) => readLine(f, lineText));
+  // The text the form was last filled from: notes of an older line hide once
+  // the box holds other text (2026-11-07 field test).
+  const [readText, setReadText] = useState("");
+  const readTenderLine = (text: string = lineText) => {
+    setReadText(text.trim());
+    updateForm((f) => readLine(f, text));
+  };
+  const lineStale = lineText.trim() !== readText;
 
   // 2026-11-04 final UI-12: lib/formState pickRegulation, so the tests reach it.
   const setRegulation = (reg: SelectInput["regulation"]) =>
@@ -1004,8 +1027,13 @@ export function SelectorApp() {
                     spellCheck={false}
                     autoComplete="off"
                     onChange={(e) => {
-                      setLineText(e.target.value);
+                      const v = e.target.value;
+                      setLineText(v);
                       setLineFailed(false);
+                      // A paste reads at once: on a phone it never sends Enter,
+                      // and the card kept the previous job's type.
+                      const kind = (e.nativeEvent as InputEvent).inputType;
+                      if (kind === "insertFromPaste" && v.trim()) readTenderLine(v);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -1018,12 +1046,12 @@ export function SelectorApp() {
                     type="button"
                     className="ui-btn"
                     disabled={!lineText.trim()}
-                    onClick={readTenderLine}
+                    onClick={() => readTenderLine()}
                   >
                     {t(lang, "lineRead")}
                   </button>
                 </div>
-                {lineFailed ? (
+                {lineStale ? null : lineFailed ? (
                   <p role="status" className="text-[0.75rem] leading-snug text-[var(--color-danger)]">
                     {t(lang, lineFailed)}
                   </p>
@@ -1039,7 +1067,7 @@ export function SelectorApp() {
                 ) : null}
                 {/* 2026-11-04: the reader's notes (percent split, single-phase,
                     tap ladder…) reached only the CLI. */}
-                {!lineFailed && lineRead?.notes.length ? (
+                {!lineStale && !lineFailed && lineRead?.notes.length ? (
                   <ul role="status" className="flex flex-col gap-1 text-[0.75rem] leading-snug text-[var(--color-warn)]">
                     {lineRead.notes.map((n, i) => (
                       <li key={`${n.key}-${i}`} className="flex gap-2">
@@ -1775,6 +1803,7 @@ export function SelectorApp() {
                             className={`${controlClass} has-suffix`}
                             value={osImaxA}
                             onValue={setOsImaxA}
+                            groupedError={t(lang, "groupedNumber")}
                           />
                           <span className="ui-affix ui-affix-end">A</span>
                         </div>
@@ -1785,6 +1814,7 @@ export function SelectorApp() {
                             className={`${controlClass} has-suffix`}
                             value={osUstV}
                             onValue={setOsUstV}
+                            groupedError={t(lang, "groupedNumber")}
                           />
                           <span className="ui-affix ui-affix-end">V</span>
                         </div>

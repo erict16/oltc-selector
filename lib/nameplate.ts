@@ -68,6 +68,8 @@ export interface TenderLine {
   regulation: Regulation | null;
   /** Ranges on other windings; the OLTC range is the one with most steps. */
   otherRanges: OtherRange[];
+  /** The line names only an off-circuit tap changer (DETC, 无载, sin carga …), no on-load one. */
+  offCircuitOnly?: boolean;
   /** Fields the line did not state; the reader chose them. */
   assumed: AssumedField[];
   /** What the reader did with the line, for the page (keys) … */
@@ -102,7 +104,8 @@ export type LineNoteKey =
   | "largest_mva"
   | "mid_winding"
   | "quantity"
-  | "earth_li";
+  | "earth_li"
+  | "off_circuit_line";
 
 export type LineNote = { key: LineNoteKey; vars?: Record<string, string | number> };
 
@@ -124,6 +127,7 @@ const NOTE_EN: Record<LineNoteKey, string> = {
   mid_winding: "tap in the middle of the winding: sized as line end; take the insulation to earth from the OS",
   quantity: "3 × {mva} MVA read as three three-phase units of {mva} MVA: confirm it is not a single-phase bank",
   earth_li: "insulation to earth LI {li} kV is not used: set the Um to earth from it",
+  off_circuit_line: "the line names only an off-circuit tap changer: sized as off-circuit (OCTC)",
 };
 
 export function lineNoteEn(n: LineNote): string {
@@ -636,6 +640,28 @@ function findRange(text: string): RangeHit | null {
 type Duty = "oltc" | "octc";
 const OLTC_WORD = /\bOLTC|on[\s-]?load|有载/gi;
 const OCTC_WORD = /\bDETC|\bOCTC|\bNLTC|off[\s-]?circuit|de-?energi[sz]ed|无载|无励磁/gi;
+
+/**
+ * 2026-11-07 field test: "1000 kVA 10±2x2.5%/0.4 kV Dyn11, off-circuit tap changer
+ * (DETC)" and "conmutador sin carga" were sized as a CV2 on-load switch. A line that
+ * names an off-circuit tap changer and no on-load one is off-circuit duty. Loss words
+ * ("no-load losses", "pérdidas sin carga", "tổn hao không tải") need a tap word.
+ */
+const ON_LOAD_ANY = /\bOLTC\b|\bon[\s-]?load\b|有载|bajo\s+carga|\bcó\s+tải|\bberbeban\b|yük\s+altında/i;
+const OFF_CIRCUIT_TAP = new RegExp(
+  [
+    String.raw`\b(?:DETC|OCTC|NLTC)\b`,
+    String.raw`\b(?:off[\s-]?(?:circuit|load)|no[\s-]?load|de-?energi[sz]ed)\s+tap`,
+    String.raw`\btap[\s-]?chang\w*\s*[(:,-]?\s*(?:off[\s-]?(?:circuit|load)|no[\s-]?load|de-?energi[sz]ed)`,
+    String.raw`(?:conmutador|cambiador)[^,;.]{0,30}(?:sin\s+carga|desenergizad)`,
+    String.raw`(?:chuyển|đổi)\s+nấc[^,;.]{0,20}không\s+tải`,
+    String.raw`(?:pengubah|perubah)\s+tap[^,;.]{0,20}tanpa\s+beban`,
+    String.raw`yüksüz\s+kademe`,
+    "无载",
+    "无励磁",
+  ].join("|"),
+  "i",
+);
 
 /**
  * OLTC or off-circuit word nearest to the range in its own clause (2026-11-04 R2:
@@ -1285,6 +1311,13 @@ export function parseTenderLine(raw: string): TenderLine | null {
         ? "reversing"
         : null;
 
+  const allTags = stated.map((_, i) => dutyTag(text, stated, i));
+  const offCircuitOnly =
+    OFF_CIRCUIT_TAP.test(text) &&
+    !ON_LOAD_ANY.test(text) &&
+    (stated.length < 2 || allTags.every((d) => d === "octc"));
+  if (offCircuitOnly) notes.push({ key: "off_circuit_line" });
+
   const base = {
     mva,
     voltagesKv,
@@ -1298,6 +1331,7 @@ export function parseTenderLine(raw: string): TenderLine | null {
     phases,
     regulation,
     otherRanges,
+    ...(offCircuitOnly ? { offCircuitOnly: true } : {}),
     assumed,
     notes,
   };
