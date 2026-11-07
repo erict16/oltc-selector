@@ -1,6 +1,23 @@
 import type { Metadata, Viewport } from "next";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { LangProvider } from "@/components/LangProvider";
 import "./globals.css";
+
+// Self-hosted at build (2026-11-07): the Google Fonts stylesheet blocked the
+// first paint and is often unreachable in mainland China. Chinese uses the
+// system face (PingFang / YaHei), so Noto Sans SC is gone.
+const plexSans = IBM_Plex_Sans({
+  subsets: ["latin", "latin-ext", "vietnamese"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-plex-sans",
+});
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-plex-mono",
+});
 
 /** Must match next.config basePath for GH Pages favicon URLs */
 const basePath = process.env.GH_PAGES === "true" ? "/oltc-selector" : "";
@@ -33,21 +50,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-CN">
-      <head>
-        <link rel="icon" href={`${basePath}/favicon.svg`} type="image/svg+xml" />
-        <link rel="shortcut icon" href={`${basePath}/favicon.svg`} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="zh-CN" className={`${plexSans.variable} ${plexMono.variable}`}>
       <body className="antialiased">
         <a
           href="#main"

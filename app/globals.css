@@ -3,13 +3,13 @@
 @import "tailwindcss";
 
 @theme {
-  /* Latin (incl. ±) from Noto Sans so the minus bar matches the plus;
-     CJK from SC. Mono only for type strings. */
-  --font-display: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
-    ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
-    ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
+  /* Latin (incl. ±) from IBM Plex, self-hosted by next/font; CJK from the
+     system face. Mono only for type strings. */
+  --font-display: var(--font-plex-sans), "IBM Plex Sans", "PingFang SC", "Microsoft YaHei",
+    "Noto Sans CJK SC", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), "IBM Plex Sans", "PingFang SC", "Microsoft YaHei",
+    "Noto Sans CJK SC", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", "JetBrains Mono", ui-monospace, monospace;
   --color-paper: #eef1f4;
   --color-field: #f6f8fa;
   --color-card-rule: #d9dfe5;

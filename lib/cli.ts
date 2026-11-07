@@ -590,6 +590,8 @@ Flags:
                      linear words are read. Flags given beside it win.
                      --line="…" keeps a line that starts with a dash.
   --mva MVA --kv kV  Capacity path: Imax from rated I, minus steps, --step-pct, --k
+                     With --iu, --kv alone gives the winding voltage (220 kV
+                     combined-only, 330 kV grade, --market) and Um if omitted.
   --kind two|auto    Transformer kind (--auto = --kind auto). Default two-winding.
   --tap P            Where the OLTC sits: neutral|line (two-winding),
                      junction|mv-line (autotransformer, series/common junction
@@ -602,7 +604,8 @@ Flags:
                      neutral ≤72.5 full else 72.5 assumed, autotransformer = HV.
   --market CC        Buyer's country for a neutral's assumed Um: IT (line
                      class up to 252), TR (126 on 220 kV class and above).
-  --um kV            Equipment Um (OLTC). With --mva/--kv, derived if omitted.
+                     Needs --kv (or --mva/--kv).
+  --um kV            Equipment Um (OLTC). With --kv, derived if omitted.
   --ust V            Step voltage. With --mva/--kv/--step-pct, derived if omitted;
                      given, it is the OS figure and a floor (never lowers Ust).
   --across-li kV --across-ac kV
@@ -716,9 +719,23 @@ function cliLinearPositions(args: CliArgs): number | undefined {
   return undefined;
 }
 
-/** Capacity path: transformer → duty. Null on the --iu path. */
+/** True when the --iu path names the winding voltage (--kv, or --hv/--mv on an auto). */
+function iuHasVoltage(args: CliArgs): boolean {
+  if (args.mva != null) return false;
+  if (args.kind === "auto") {
+    return args.hv != null && args.hv > 0 && args.mv != null && args.mv > 0;
+  }
+  return args.kv != null && args.kv > 0;
+}
+
+/**
+ * Capacity path: transformer → duty. On the --iu path the same basis with no
+ * MVA when the winding voltage is given (as the web form in current mode), so
+ * the 220 kV combined-only rule, the 330 kV grade step and the TR practice see
+ * the winding. Null on an --iu path with no voltage.
+ */
 export function cliDuty(args: CliArgs): DutyBasis | null {
-  if (args.mva == null) return null;
+  if (args.mva == null && !iuHasVoltage(args)) return null;
   const auto = args.kind === "auto";
   if (auto) {
     if (!(args.hv != null && args.hv > 0 && args.mv != null && args.mv > 0)) {
@@ -743,7 +760,7 @@ export function cliDuty(args: CliArgs): DutyBasis | null {
     kind: args.kind,
     tapPoint: tap,
     winding,
-    mva: args.mva,
+    mva: args.mva ?? 0,
     tapKv: args.kv ?? 0,
     hvKv: args.hv ?? 0,
     mvKv: args.mv ?? 0,
@@ -791,9 +808,13 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     throw new CliError("--step-pct needs --mva/--kv; give --ust on the --iu path");
   }
 
+  if (args.market && args.mva == null && !iuHasVoltage(args)) {
+    throw new CliError("--market needs the winding voltage: add --kv (or --mva/--kv)");
+  }
+
   const duty = cliDuty(args);
   let conn = args.conn;
-  if (duty) {
+  if (duty && args.mva != null) {
     if (!duty.ok) throw new CliError(duty.errorZh ?? duty.errorEn ?? "Bad transformer data");
     iu = duty.dutyA;
     if (um == null || !(um > 0)) um = duty.umKv;
@@ -802,6 +823,9 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     conn = duty.connection;
   } else {
     // --iu path: --tap, --kind auto (junction) or a delta winding set Y/D.
+    // A given --kv only adds the voltage basis; the current stays --iu.
+    if (duty && !duty.ok) throw new CliError(duty.errorZh ?? duty.errorEn ?? "Bad transformer data");
+    if (duty && (um == null || !(um > 0))) um = duty.umKv;
     conn = cliConnection(args);
   }
 

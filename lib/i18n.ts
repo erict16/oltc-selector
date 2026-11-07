@@ -504,7 +504,7 @@ const vi: Dict = {
   octcVIII: "VIII · nối tiếp-song song",
   acrossLead:
     "Tùy chọn. Để trống thì chỉ theo Um. Điền khi máy biến áp cho cách điện giữa cuộn điều áp.",
-  acrossUnset: "Auto",
+  acrossUnset: "Tự động",
   acrossBil: "Xung sét (BIL)",
   acrossBilPh: "vd. 285",
   acrossBilTip: "Nâng B/C/D. Để trống thì theo Um.",
@@ -815,7 +815,7 @@ const tr: Dict = {
   octcVIII: "VIII · seri-paralel",
   acrossLead:
     "İsteğe bağlı. Boşsa yalnızca Um’ye göre. Transformatör sargılar arası yalıtım veriyorsa doldurun.",
-  acrossUnset: "Auto",
+  acrossUnset: "Otomatik",
   acrossBil: "Yıldırım darbesi (BIL)",
   acrossBilPh: "örn. 285",
   acrossBilTip: "B/C/D yükseltir. Boş bırakırsanız Um varsayılanı.",
@@ -970,7 +970,7 @@ const idn: Dict = {
   octcVIII: "VIII · seri-paralel",
   acrossLead:
     "Opsional. Kosongkan untuk menentukan selector dari Um saja. Isi bila trafo menetapkan isolasi antar-tap.",
-  acrossUnset: "Auto",
+  acrossUnset: "Otomatis",
   acrossBil: "Impuls petir (BIL)",
   acrossBilPh: "mis. 285",
   acrossBilTip: "Menaikkan B/C/D. Kosongkan untuk memakai nilai bawaan Um.",

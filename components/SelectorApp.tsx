@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
 import {
   ArrowDownIcon,
   CheckIcon,
@@ -125,6 +125,20 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
+/** Label id of the enclosing <div> Field; null inside a <label> Field. */
+const FieldLabelContext = createContext<string | null>(null);
+
+/** A <select> that takes its name from a <div> Field's label. */
+function FieldSelect(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  const labelledBy = useContext(FieldLabelContext);
+  return (
+    <select
+      {...(labelledBy && !props["aria-label"] ? { "aria-labelledby": labelledBy } : {})}
+      {...props}
+    />
+  );
+}
+
 /**
  * Text field for a decimal the person types. Keeps the draft (`1.`, `0,`)
  * so the dot is not eaten, and reads `,` as a decimal point.
@@ -135,12 +149,15 @@ function DecimalInput({
   onValue,
   onBlur,
   className,
+  placeholder,
 }: {
   value: number;
   onValue: (n: number) => void;
   onBlur?: () => void;
   className: string;
+  placeholder?: string;
 }) {
+  const labelledBy = useContext(FieldLabelContext) ?? undefined;
   const [draft, setDraft] = useState(value > 0 ? String(value) : "");
   useEffect(() => {
     // Follow outside changes (preset picked) without clobbering `1.`.
@@ -151,6 +168,8 @@ function DecimalInput({
     <input
       inputMode="decimal"
       className={className}
+      aria-labelledby={labelledBy}
+      placeholder={placeholder}
       value={draft}
       onChange={(e) => {
         const d = decimalDraft(e.target.value);
@@ -194,10 +213,17 @@ function Field({
   as?: "label" | "div";
 }) {
   const Tag = as;
+  // A <div> Field does not name its control: the control and the group take
+  // the label by id (2026-11-07: four main dropdowns read as unnamed).
+  const labelId = useId();
+  const group = as === "div";
   return (
-    <Tag className={cx("flex min-w-0 flex-col gap-2 overflow-visible", className)}>
+    <Tag
+      className={cx("flex min-w-0 flex-col gap-2 overflow-visible", className)}
+      {...(group ? { role: "group", "aria-labelledby": labelId } : {})}
+    >
       <span className="flex min-h-[1.625rem] flex-nowrap items-center gap-2 overflow-visible">
-        <span className="min-w-0 flex-1 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]">
+        <span id={labelId} className="min-w-0 flex-1 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]">
           {label.split("ᵤ").map((part, i, arr) =>
             i < arr.length - 1 ? (
               <span key={i}>
@@ -226,7 +252,9 @@ function Field({
           </span>
         ) : null}
       </span>
-      {children}
+      <FieldLabelContext.Provider value={group ? labelId : null}>
+        {children}
+      </FieldLabelContext.Provider>
       {tip ? (
         <span className="text-[0.75rem] leading-snug text-[var(--color-muted)]">
           {tip}
@@ -475,23 +503,11 @@ function KvField({
                   !(WINDING_RATED_KV as readonly number[]).includes(
                     kvValue,
                   )) ? (
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step={0.1}
-                    className={`${controlClass} has-suffix [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                    value={kvValue > 0 ? String(kvValue) : ""}
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      if (raw === "") {
-                        onKv(0);
-                        return;
-                      }
-                      const n = Number(raw);
-                      if (!Number.isFinite(n) || n < 0) return;
-                      onKv(n);
-                    }}
+                  <DecimalInput
+                    className={`${controlClass} has-suffix`}
+                    value={kvValue}
+                    // 2026-11-07: "38,5" read as 385 in a type=number field.
+                    onValue={onKv}
                     onBlur={() => {
                       if (
                         (WINDING_RATED_KV as readonly number[]).includes(
@@ -503,7 +519,7 @@ function KvField({
                     }}
                   />
                 ) : (
-                  <select
+                  <FieldSelect
                     className={controlClass}
                     value={kvValue > 0 ? String(kvValue) : ""}
                     onChange={(e) => {
@@ -521,7 +537,7 @@ function KvField({
                         {v} kV
                       </option>
                     ))}
-                  </select>
+                  </FieldSelect>
                 )}
                 {custom ||
                 (kvValue > 0 &&
@@ -1125,7 +1141,7 @@ export function SelectorApp() {
                 <Field
                   label={t(lang, "earthUm")}
                 >
-                  <select
+                  <FieldSelect
                     className={controlClass}
                     value={String(earthUm)}
                     onChange={(e) => {
@@ -1142,12 +1158,12 @@ export function SelectorApp() {
                         {earthUmLabel(u)}
                       </option>
                     ))}
-                  </select>
+                  </FieldSelect>
                 </Field>
                 {/* Neutral Um follows country practice (2026-11-04 audit UM-2). */}
                 {kind === "two_winding" && tapPoint === "neutral" ? (
                   <Field label={t(lang, "market")}>
-                    <select
+                    <FieldSelect
                       className={controlClass}
                       value={market}
                       onChange={(e) => setMarket(e.target.value)}
@@ -1155,7 +1171,7 @@ export function SelectorApp() {
                       <option value="">{t(lang, "marketNone")}</option>
                       <option value="IT">{t(lang, "market_IT")}</option>
                       <option value="TR">{t(lang, "market_TR")}</option>
-                    </select>
+                    </FieldSelect>
                   </Field>
                 ) : null}
               </div>
@@ -1178,24 +1194,12 @@ export function SelectorApp() {
                     !(MVA_OPTIONS as readonly number[]).includes(
                       transformerMva,
                     )) ? (
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      min={0}
-                      step={0.1}
-                      className={`${controlClass} has-suffix [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
-                      value={transformerMva > 0 ? String(transformerMva) : ""}
+                    <DecimalInput
+                      className={`${controlClass} has-suffix`}
+                      value={transformerMva}
                       placeholder={t(lang, "mvaPlaceholder")}
-                      onChange={(e) => {
-                        const raw = e.target.value;
-                        if (raw === "") {
-                          setTransformerMva(0);
-                          return;
-                        }
-                        const n = Number(raw);
-                        if (!Number.isFinite(n) || n < 0) return;
-                        setTransformerMva(n);
-                      }}
+                      // 2026-11-07: "12,5" read as 125 in a type=number field.
+                      onValue={setTransformerMva}
                       onBlur={() => {
                         if (
                           (MVA_OPTIONS as readonly number[]).includes(
@@ -1207,7 +1211,7 @@ export function SelectorApp() {
                       }}
                     />
                   ) : (
-                    <select
+                    <FieldSelect
                       className={controlClass}
                       value={
                         transformerMva > 0 ? String(transformerMva) : ""
@@ -1234,7 +1238,7 @@ export function SelectorApp() {
                           {n} MVA
                         </option>
                       ))}
-                    </select>
+                    </FieldSelect>
                   )}
                   {mvaCustom ||
                   (transformerMva > 0 &&
@@ -1247,7 +1251,7 @@ export function SelectorApp() {
                   ) : null}
                 </div>
               ) : (
-                <select
+                <FieldSelect
                   className={controlClass}
                   value={String(input.throughCurrentA)}
                   onChange={(e) => {
@@ -1266,7 +1270,7 @@ export function SelectorApp() {
                       {currentLabel(lang, c.labelZh, c.labelEn)}
                     </option>
                   ))}
-                </select>
+                </FieldSelect>
               )}
             </Field>
 
@@ -1274,7 +1278,7 @@ export function SelectorApp() {
 
             {isOctc ? (
               <Field label={t(lang, "octcSeries")}>
-                <select
+                <FieldSelect
                   className={controlClass}
                   value={input.octcSeries ?? "auto"}
                   onChange={(e) =>
@@ -1299,11 +1303,11 @@ export function SelectorApp() {
                       {t(lang, `octc${r}`)}
                     </option>
                   ))}
-                </select>
+                </FieldSelect>
               </Field>
             ) : (
               <Field label={t(lang, "regulation")}>
-                <select
+                <FieldSelect
                   className={controlClass}
                   value={input.regulation}
                   onChange={(e) =>
@@ -1313,7 +1317,7 @@ export function SelectorApp() {
                   <option value="reversing">{t(lang, "regW")}</option>
                   <option value="coarse_fine">{t(lang, "regG")}</option>
                   <option value="linear">{t(lang, "regLinear")}</option>
-                </select>
+                </FieldSelect>
               </Field>
             )}
 
@@ -1322,7 +1326,7 @@ export function SelectorApp() {
                 as="div"
                 label={t(lang, "pmSteps")}
               >
-                <select
+                <FieldSelect
                   className={controlClass}
                   value={pm}
                   onChange={(e) => applyPm(e.target.value)}
@@ -1333,7 +1337,7 @@ export function SelectorApp() {
                       ±{n}
                     </option>
                   ))}
-                </select>
+                </FieldSelect>
               </Field>
             )}
 
@@ -1363,7 +1367,7 @@ export function SelectorApp() {
                     }}
                   />
                 ) : (
-                  <select
+                  <FieldSelect
                     className={controlClass}
                     value={
                       stepPercentPct > 0 ? String(stepPercentPct) : ""
@@ -1383,7 +1387,7 @@ export function SelectorApp() {
                         {n}%
                       </option>
                     ))}
-                  </select>
+                  </FieldSelect>
                 )}
                 {stepPctCustom ||
                 (stepPercentPct > 0 &&
@@ -1404,7 +1408,7 @@ export function SelectorApp() {
                   label={t(lang, "positions")}
                 >
                   <div className="grid grid-cols-2 gap-2">
-                      <select
+                      <FieldSelect
                         className={controlClass}
                         value={tapPlus > 0 ? String(tapPlus) : ""}
                         onChange={(e) => {
@@ -1412,15 +1416,15 @@ export function SelectorApp() {
                           setTapPlus(plus);
                           commitTapRange(plus, tapMinus, stepPercentPct);
                         }}
-                        aria-label="+"
+                        aria-label={`${t(lang, "positions")} +`}
                       >
                         {TAP_SIDE_OPTIONS.map((n) => (
                           <option key={`p${n}`} value={String(n)}>
                             +{n}
                           </option>
                         ))}
-                      </select>
-                      <select
+                      </FieldSelect>
+                      <FieldSelect
                         className={controlClass}
                         value={tapMinus > 0 ? String(tapMinus) : ""}
                         onChange={(e) => {
@@ -1428,14 +1432,14 @@ export function SelectorApp() {
                           setTapMinus(minus);
                           commitTapRange(tapPlus, minus, stepPercentPct);
                         }}
-                        aria-label="−"
+                        aria-label={`${t(lang, "positions")} −`}
                       >
                         {TAP_SIDE_OPTIONS.map((n) => (
                           <option key={`m${n}`} value={String(n)}>
                             −{n}
                           </option>
                         ))}
-                      </select>
+                      </FieldSelect>
                     </div>
                 </Field>
               </>
@@ -1443,7 +1447,7 @@ export function SelectorApp() {
 
             {midCtrl.show ? (
               <Field label={t(lang, "mid")}>
-                <select
+                <FieldSelect
                   className={controlClass}
                   value={String(
                     midOpts.includes((input.midPositions as 1 | 3) ?? 3)
@@ -1457,7 +1461,7 @@ export function SelectorApp() {
                       {m === 1 ? t(lang, "midOpt1") : t(lang, "midOpt3")}
                     </option>
                   ))}
-                </select>
+                </FieldSelect>
               </Field>
             ) : null}
 
@@ -1466,7 +1470,7 @@ export function SelectorApp() {
             <Field
               label={t(lang, "ust")}
             >
-              <select
+              <FieldSelect
                 className={controlClass}
                 value={
                   STEP_VOLTAGE_OPTIONS_V.includes(
@@ -1494,12 +1498,12 @@ export function SelectorApp() {
                     {currentLabel(lang, item.labelZh, item.labelEn)}
                   </option>
                 ))}
-              </select>
+              </FieldSelect>
             </Field>
             ) : null}
 
             <Field label={t(lang, "phases")}>
-              <select
+              <FieldSelect
                 className={controlClass}
                 value={input.phases}
                 onChange={(e) =>
@@ -1511,7 +1515,7 @@ export function SelectorApp() {
                 <option value="III">III</option>
                 <option value="II">{t(lang, "phaseII")}</option>
                 <option value="I">I</option>
-              </select>
+              </FieldSelect>
             </Field>
               </div>
             </section>
@@ -1581,7 +1585,7 @@ export function SelectorApp() {
                     </Field>
                   ) : null}
                   <Field label={t(lang, "specStructure")}>
-                    <select
+                    <FieldSelect
                       className={controlClass}
                       value={input.preferStructure ?? "auto"}
                       onChange={(e) =>
@@ -1607,11 +1611,11 @@ export function SelectorApp() {
                           </option>
                         </>
                       )}
-                    </select>
+                    </FieldSelect>
                   </Field>
 
                   <Field label={t(lang, "mounting")}>
-                    <select
+                    <FieldSelect
                       className={controlClass}
                       value={input.mounting}
                       onChange={(e) => {
@@ -1633,7 +1637,7 @@ export function SelectorApp() {
                       <option value="reactor">
                         {t(lang, "mountReactor")}
                       </option>
-                    </select>
+                    </FieldSelect>
                   </Field>
 
                   <Field as="div" label={t(lang, "acrossInsul")} className="col-span-2 sm:col-span-1">

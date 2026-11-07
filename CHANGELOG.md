@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- CLI: with `--iu`, a given `--kv` (or `--hv/--mv`) now sets the winding voltage, as the web form does. 230 kV neutral at 300 A gave CV2III-350Y/72.5; it is now the combined-only CM2III-500Y/72.5B. `--market` with no winding voltage is an error instead of being dropped, and `--um` is derived from `--kv` when left out.
+- Web: the custom capacity and kV boxes read a decimal comma. "12,5" MVA used to become 125 MVA with no warning.
+- Web: every dropdown has a name for screen readers; the BIL, PF and safety-factor menus are native dropdowns, so arrow keys and Tab work.
+- Web: fonts are served from the site; nothing loads from Google, which was slow or blocked in mainland China. The "Auto" choice in the BIL/PF menus is translated in Vietnamese, Turkish and Indonesian.
+
 - Star neutral → delta → star puts the neutral back. It used to stay at the line end, so 25 MVA 110 kV went from CV2III-350Y/72.5 to CV2III-350D/126 without a word. A line end the user picked stays.
 - Delta: a one-line note under the tap position says why Neutral is off (also read by screen readers).
 - Off-circuit with an autotransformer now really switches the form to two-winding. Before, the form only looked two-winding: Neutral clicks did nothing, and back on on-load the result read "Tap position does not fit the transformer kind".
