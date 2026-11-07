@@ -564,3 +564,30 @@ describe("oltc CLI --iu path with the winding voltage (review 2026-11-07)", () =
     expect(input.stepVoltageV).toBe(1000);
   });
 });
+
+describe("oltc CLI --lang en (2026-11-07 tender test)", () => {
+  const CJK = /[　-〿一-鿿＀-￯]/;
+  const run = (argv: string[]) => capture([...argv, "--lang", "en", "--no-update-check"]);
+  const cases: string[][] = [
+    ["--line", "63 MVA 115±9x1.78%/23/11 kV YNyn0d11"],
+    ["--mva", "25", "--kv", "110", "--tap", "neutral", "--reg", "W", "--pm", "8"],
+    ["--mva", "40", "--kv", "132", "--range", "4/12", "--step-pct", "1.25"],
+    ["--octc", "--iu", "800", "--um", "72.5", "--conn", "D", "--series", "II", "--contact", "6x5"],
+    ["--octc", "--iu", "300", "--um", "40.5", "--conn", "D", "--pm", "2"],
+    ["--line", "200 MVA 220/132/11 kV YNa0d11 -5% to +15% in steps of 1.25%"],
+    ["--iu", "300", "--um", "40.5", "--conn", "D", "--reg", "0", "--pos", "9", "--ust", "500", "--mount", "dry"],
+    ["--iu", "350", "--um", "40.5", "--conn", "D", "--reg", "G", "--pm", "8", "--across-li", "200"],
+  ];
+  it.each(cases)("text and JSON carry no Chinese: %s", (...argv) => {
+    const t = run(argv);
+    expect(t.code).toBe(0);
+    expect(t.out).not.toMatch(CJK);
+    const j = run([...argv, "--json"]);
+    expect(j.out).not.toMatch(CJK);
+  });
+  it("an error comes in English too, and a bad --lang is refused", () => {
+    const e = run(["--mva", "25", "--kv", "110", "--pm", "60"]);
+    expect(e.err).not.toMatch(CJK);
+    expect(capture(["--iu", "300", "--um", "40.5", "--lang", "fr"]).err).toContain("--lang must be en or zh");
+  });
+});
