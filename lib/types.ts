@@ -141,6 +141,12 @@ export interface SeriesDef {
   iiiConnections?: Connection[];
   maxPositionsLinear: number;
   maxPositionsWithChangeOver: number;
+  /**
+   * Selector contact counts (pitch) the brochure lists for W/G. Unset: any
+   * Fig. 3-3 pitch. 2026-11-07: CV2 10/12, CV 10/12/14, SV 10/12; CV2 was
+   * typed 14131W / 16151W, which it does not have.
+   */
+  pitches?: readonly number[];
   defaultMdu: string;
   notesEn: string;
   notesZh: string;

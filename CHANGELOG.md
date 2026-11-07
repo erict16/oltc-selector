@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- A line that names only an off-circuit tap changer (DETC, OCTC, "off-load tap changer", "conmutador sin carga", "yüksüz kademe", 无载) is sized off-circuit on the page and in the CLI. "1000 kVA 10±2x2.5%/0.4 kV Dyn11, off-circuit tap changer (DETC)" gave a CV2 on-load switch. Loss words ("no-load losses") do not count.
+- Page: a pasted line is read at once (a phone paste sends no Enter, and the card kept the previous job). Notes of a line hide once the box holds other text.
+- Page: a new line starts from the default market, safety factor and in-tank mounting. TR from the last job turned an Indonesian 150 kV line into 72.5C; a dry-type job left the next oil line with no type.
+- OS Imax / Ust: "1.200" or "1,200" is refused with a message (it meant 1200, not 1.2). An OS Imax below the rated current is not used; the full-range current stays.
+- CV2 and SV use only the contacts they have (10/12; CV 10/12/14). ±6 mid 1 on CV2 is 10131W, not 14131W; ±8 mid 1 is 10171W.
+- One single-phase unit per phase: a single-phase dry job is CZI-500, not 3×CZI; a two-phase delta job is 2×, not 3×.
+
 - CLI: with `--iu`, a given `--kv` (or `--hv/--mv`) now sets the winding voltage, as the web form does. 230 kV neutral at 300 A gave CV2III-350Y/72.5; it is now the combined-only CM2III-500Y/72.5B. `--market` with no winding voltage is an error instead of being dropped, and `--um` is derived from `--kv` when left out.
 - Web: the custom capacity and kV boxes read a decimal comma. "12,5" MVA used to become 125 MVA with no warning.
 - Web: every dropdown has a name for screen readers; the BIL, PF and safety-factor menus are native dropdowns, so arrow keys and Tab work.

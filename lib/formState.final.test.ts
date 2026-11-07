@@ -332,3 +332,23 @@ describe("property: reads and switches never leave a stale value in the duty", (
     expect(bad).toEqual([]);
   });
 });
+
+describe("a read line starts a new enquiry (2026-11-07 field test)", () => {
+  it("an off-circuit-only line read in 有载 switches to 无载", () => {
+    const f = readLine(INITIAL_FORM, "1000 kVA 10±2x2.5%/0.4 kV Dyn11, off-circuit tap changer (DETC)");
+    expect(f.input.dutyKind).toBe("octc");
+  });
+  it("market, safety factor and a dry or reactor mounting do not carry to the next line", () => {
+    const prev = {
+      ...INITIAL_FORM,
+      market: "TR",
+      safetyK: 1.2,
+      input: { ...INITIAL_FORM.input, mounting: "dry_type" as const, medium: "dry" as const },
+    };
+    const f = readLine(prev, "60 MVA 150±12x1.25%/20 kV YNd11");
+    expect(f.market).toBe("");
+    expect(f.safetyK).toBe(1);
+    expect(f.input.mounting).toBe("in_tank");
+    expect(f.input.medium).toBe("oil_vacuum");
+  });
+});

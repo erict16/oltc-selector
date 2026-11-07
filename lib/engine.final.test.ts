@@ -132,3 +132,20 @@ describe("ENGINE-12: a stated Ust with no step % sizes the lowest tap on the ste
     }
   });
 });
+
+describe("contacts and unit counts per family (2026-11-07 review)", () => {
+  const top = (argv: string) => {
+    const r = selectOltc(cliToSelectInput(parseCliArgs(argv.split(" "))));
+    return r.ok ? r.results[0]!.model : "";
+  };
+  it("CV2 small reversing ranges sit on 10 contacts, CV keeps 14", () => {
+    expect(top("--iu 300 --um 40.5 --conn Y --reg W --pm 6 --mid 1 --ust 800")).toBe("CV2III-350Y/40.5-10131W");
+    expect(top("--iu 300 --um 72.5 --conn D --reg W --pm 7 --mid 1 --ust 800")).toBe("CV2III-350D/72.5-10151W");
+    expect(top("--iu 300 --um 40.5 --conn D --reg W --pm 6 --mid 1 --ust 800 --oil")).toBe("CVIII-350D/40.5-14131W");
+  });
+  it("one single-phase unit per phase", () => {
+    expect(top("--iu 300 --um 40.5 --conn Y --reg 0 --pos 9 --ust 500 --mount dry --phases I")).toBe("CZI-500/40.5-9");
+    expect(top("--iu 500 --um 72.5 --conn D --reg W --pm 8 --ust 1000 --phases II")).toBe("2xCM2I-500/72.5B-10193W");
+    expect(top("--iu 300 --um 40.5 --conn D --reg 0 --pos 9 --ust 500 --mount dry")).toBe("3xCZI-500/40.5-9");
+  });
+});

@@ -537,6 +537,7 @@ export const SERIES: SeriesDef[] = [
     },
     umKv: [40.5, 72.5, 126, 145],
     usesSelectorSize: false,
+    pitches: [10, 12], // CV2 Table 1: 10 and 12 contacts
     maxStepVoltageV: 2000,
     stepCapacityByCurrent: {
       350: 700,
@@ -567,6 +568,7 @@ export const SERIES: SeriesDef[] = [
     },
     umKv: [40.5, 72.5],
     usesSelectorSize: false,
+    pitches: [10, 12, 14], // CV&SV Table 1: 10/12/14
     maxStepVoltageV: 1500,
     stepCapacityByCurrent: {
       350: 525,
@@ -599,6 +601,7 @@ export const SERIES: SeriesDef[] = [
     },
     umKv: [40.5, 72.5],
     usesSelectorSize: false,
+    pitches: [10, 12], // CV&SV Table 1: SV has no 14
     maxStepVoltageV: 1500,
     stepCapacityByCurrent: {
       500: 400,
