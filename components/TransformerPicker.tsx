@@ -395,6 +395,7 @@ export function KindToggle({
             role="radio"
             aria-checked={on}
             disabled={off}
+            aria-describedby={off ? "auto-octc-note" : undefined}
             onClick={() => onKind(o.id)}
             className={cx("ui-seg", on && "is-on")}
           >
@@ -412,12 +413,15 @@ export function TapList({
   winding,
   tapPoint,
   onTap,
+  offHintId,
 }: {
   lang: Lang;
   kind: TransformerKind;
   winding: WindingConnection;
   tapPoint: TapPoint;
   onTap: (p: TapPoint) => void;
+  /** Element that says why a disabled option is off. */
+  offHintId?: string;
 }) {
   return (
     <div
@@ -435,6 +439,7 @@ export function TapList({
             role="radio"
             aria-checked={on}
             disabled={off}
+            aria-describedby={off ? offHintId : undefined}
             onClick={() => onTap(p)}
             className={cx(
               "flex min-h-11 w-full min-w-0 items-center gap-3 px-3 py-2 text-left text-[0.875rem] leading-snug transition-colors duration-150",

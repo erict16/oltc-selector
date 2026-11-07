@@ -39,6 +39,14 @@ function collectNotes(): Set<string> {
     { transformerKind: "auto", preferStructure: "compound" },
     { throughCurrentA: 99999 },
     { mounting: "dry_type", medium: "oil", preferVacuum: false },
+    // No-result lines (engine noFitReasons)
+    { mounting: "dry_type", medium: "dry", preferVacuum: false, umKv: 126 },
+    { regulation: "linear", plusMinusSteps: undefined, midPositions: undefined, positions: 20 },
+    { throughCurrentA: 500, umKv: 126, stepVoltageV: 7000 },
+    { throughCurrentA: 2000, umKv: 126, stepVoltageV: 5000 },
+    { throughCurrentA: 500, umKv: 126, stepVoltageV: 4950, plusMinusSteps: 17, midPositions: 1 },
+    { medium: "oil", preferVacuum: false, throughCurrentA: 3000 },
+    { dutyKind: "octc", preferVacuum: false, medium: "oil", throughCurrentA: 9000 },
   ];
   for (const c of cases) {
     const out = selectOltc({ ...base, ...c });
@@ -69,6 +77,9 @@ function collectNotes(): Set<string> {
     spec({ tapKv: 0 }),
     spec({ winding: "delta" }),
     spec({ tapPoint: "line_end", tapKv: 500 }),
+    // ENGINE-12: a stated Ust above the step, with the step defaulted or stated.
+    spec({ statedStepV: 1588 }),
+    spec({ statedStepV: 1588, stepFractionStated: true }),
   ];
   for (const s of specs) {
     const d = deriveDuty(s);
@@ -91,12 +102,15 @@ describe("note translations", () => {
   });
 
   it("keeps numbers and type strings", () => {
-    const n = "Duty 354.0 A is 1.1% above the 350 A rating (1% commercial tolerance). Confirm with engineering.";
+    // The 1% over-rating note went with the tolerance (2026-11-04 audit D2).
+    const n =
+      "OS Imax 334.0 A is below the full-range 376.6 A: the maker caps the current below −5.3% (maximum-current tapping). Sized on the OS figure.";
     for (const lang of LANGS) {
       const out = localizeNote(n, lang);
-      expect(out).toContain("354.0");
-      expect(out).toContain("350");
-      expect(out).toContain("1.1");
+      expect(out).not.toBe(n);
+      expect(out).toContain("334.0");
+      expect(out).toContain("376.6");
+      expect(out).toContain("5.3");
     }
   });
 });

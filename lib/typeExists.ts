@@ -33,8 +33,14 @@ export function commercialTypeExists(
       const i = s.currents.III?.includes(parsed.currentA) ||
         s.currents.II?.includes(parsed.currentA) ||
         s.currents.I?.includes(parsed.currentA);
+      // 2026-11-04: quoted / engine romans and contacts only (no WSGVIII, no 12x12).
+      const roman = ["II", "IV", "V"].includes(parsed.phases);
+      const contact = parsed.tapCode === "4x5" || parsed.tapCode === "6x5";
       return Boolean(
-        i && s.umKv.some((u) => Math.abs(u - parsed.umKv) < 0.05),
+        i &&
+          roman &&
+          contact &&
+          s.umKv.some((u) => Math.abs(u - parsed.umKv) < 0.05),
       );
     }
     return listRowExists(model);

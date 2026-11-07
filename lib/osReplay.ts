@@ -2,9 +2,10 @@
  * OS (order spec) replay against shipped selectOltc.
  * Duty from transformer I / Ust / steps + sold Um / Y-D / phases.
  */
-import { SERIES, SIZE_ORDER, defaultSelectorSizeForUm } from "./catalog";
+import { SERIES, stepCapacityKva } from "./catalog";
 import { selectOltc } from "./engine";
 import { commercialMatch, parseTypeString } from "./orderReplay";
+import { deriveDuty } from "./transformer";
 import { commercialTypeExists } from "./typeExists";
 import type {
   Connection,
@@ -51,7 +52,9 @@ const OIL_COMBINED = new Set(["CM", "CMD"]);
 const OIL_COMPOUND = new Set(["CV", "SV"]);
 const ON_TANK = new Set(["HWV"]);
 const DRY = new Set(["CVT", "CZ"]);
-const OCTC = new Set(["WSL", "WDL", "WSG"]);
+const OCTC = new Set(["WSL", "WDL", "WSG", "WDG", "WLG"]);
+/** 2026-11-04: drum OCTC families (OS folder WG); the rest is cage (folder W). */
+const OCTC_DRUM = new Set(["WSG", "WDG", "WLG"]);
 
 export function numCell(v: unknown): number | null {
   if (v == null || v === "") return null;
@@ -250,6 +253,57 @@ export function buildOsSelectInput(
   return input;
 }
 
+/**
+ * 2026-11-04: OCTC duty without the answer fed back. The as-is input passes
+ * the sold contact, roman and Um. Here: no contact, roman auto, structure
+ * from the folder (drum / cage), ±N from the OS (default 5 positions), and
+ * Um through deriveDuty as the app does (neutral; line end for delta).
+ */
+export function buildOsHonestOctcInput(
+  row: OsSalesRow,
+  parsed: NonNullable<ReturnType<typeof parseTypeString>>,
+): SelectInput | { skip: string } {
+  const base = buildOsSelectInput(row, parsed);
+  if ("skip" in base) return base;
+  if (base.dutyKind !== "octc") return { skip: "not OCTC" };
+  const kv = numCell(row.rated_kv);
+  if (!kv || kv <= 0) return { skip: "no rated kV" };
+  const delta = base.connection === "D";
+  const d = deriveDuty({
+    kind: "two_winding",
+    tapPoint: delta ? "line_end" : "neutral",
+    winding: delta ? "delta" : "star",
+    mva: numCell(row.mva) ?? 0,
+    tapKv: kv,
+    hvKv: 0,
+    mvKv: 0,
+    minusSteps: 0,
+    stepFraction: 0,
+    safetyK: 1,
+  });
+  if (!d.ok) return { skip: "deriveDuty refused" };
+  let pm = numCell(row.plus_minus_steps);
+  if (!pm) {
+    const plus = numCell(row.plus_steps) ?? 0;
+    const minus = numCell(row.minus_steps) ?? 0;
+    pm = Math.max(plus, minus) || null;
+  }
+  const input: SelectInput = {
+    ...base,
+    umKv: d.umKv,
+    octcSeries: "auto",
+    preferStructure: OCTC_DRUM.has(parsed.family) ? "drum" : "cage",
+    selectorSize: "auto",
+    regulation: "linear",
+  };
+  delete input.octcContact;
+  delete input.positions;
+  delete input.plusMinusSteps;
+  if (pm && pm > 0) input.plusMinusSteps = Math.round(pm);
+  else input.positions = 5;
+  return input;
+}
+
 export function loadOsSales(raw: unknown): OsSalesRow[] {
   if (Array.isArray(raw)) return raw as OsSalesRow[];
   if (raw && typeof raw === "object") {
@@ -305,13 +359,8 @@ function soldCoversDuty(
   const s = SERIES.find((row) => row.code === parsed.family);
   if (!s) return false;
   if (parsed.currentA + 0.5 < input.throughCurrentA) return false;
-  if (s.usesSelectorSize && parsed.selectorSize) {
-    const min = defaultSelectorSizeForUm(parsed.umKv);
-    const soldIdx = SIZE_ORDER.indexOf(parsed.selectorSize as SelectorSize);
-    const minIdx = SIZE_ORDER.indexOf(min);
-    if (soldIdx >= 0 && minIdx >= 0 && soldIdx < minIdx) return false;
-    if (soldIdx < 0 && minIdx >= 0) return false;
-  }
+  // No selector-letter test: a letter below the Um default is a sale, not a
+  // duty violation (2026-11-04 audit GRADE-3: it dropped 93 rows).
   const tap = parsed.tapCode || "";
   if (s.dutyKind !== "octc" && !oltcTapCatalogue(tap) && !/^\d+x\d+/i.test(tap)) {
     return false;
@@ -326,6 +375,11 @@ function soldCoversDuty(
     if (positions > maxP) return false;
     const ustCap = maxUstForFamily(parsed.family, pitch);
     if (ustCap != null && input.stepVoltageV > ustCap + 0.5) return false;
+    // Step capacity, as the engine checks it. E-V250432-433 (351 A × 1182 V
+    // on SVIII-500, 400 kVA) shipped 0.3% over the ≤350 A row (audit D2).
+    const psin = stepCapacityKva(s, parsed.currentA, pitch, input.throughCurrentA);
+    const need = (input.throughCurrentA * input.stepVoltageV) / 1000;
+    if (psin != null && need > psin + 0.5) return false;
   }
   return true;
 }

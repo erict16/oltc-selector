@@ -281,3 +281,258 @@ describe("oltc CLI tap range and tap point", () => {
     expect(b.err).toContain("363");
   });
 });
+
+// 2026-11-04 tender-line and tap-range audit (track A).
+describe("oltc CLI uneven ranges and tender lines", () => {
+  const first = (argv: string[]) => capture(argv).out.trim().split(/\r?\n/)[0];
+  const json = (argv: string[]) => JSON.parse(capture(["--json", ...argv]).out);
+
+  it("an uneven line takes the Fig. 3-3 row Huaming sold (UNEVEN-1, WC-05)", () => {
+    // B01/B02 +7/−10 → 10181W; W02 +12/−8 had no type (21 linear positions).
+    expect(first(["--line", "65MVA 150+7-10x1.5%/20kV YNd11"])).toBe("CV2III-350Y/72.5-10181W");
+    expect(first(["--line", "165MVA 150+7-10x1.5%/20kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-10181W");
+    expect(first(["--line", "370MVA 275+12-8x1.25%/33kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-12233W");
+    expect(first(["--line", "120MVA 110+6-10x1.25%/33kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-10193W");
+    expect(first(["--line", "130MVA 132+6-4x2.5%/33kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-12111W");
+    expect(first(["--line", "110MVA 64+10-15x1.5%/20kV YNd11"])).toBe("SHZVGIII-1300Y/72.5B-14271W");
+    // 432 A on a 275 kV class III unit: SHZV first (FAM-3; W02 was quoted SHZV).
+    expect(first(["--line", "185 MVA, 275/33 kV, YNd11, +12/-8 x 1.25%"])).toBe("SHZVIII-600Y/72.5B-12233W");
+    // A19 and TRAEL were 3 × single-phase 18170.
+    expect(first(["--line", "7.5MVA 20+2-14x2.5%/0.4kV YNd11 line end", "--oil"])).toBe("CVIII-350D/40.5-10193W");
+    expect(first(["--line", "20MVA 69+4-12x1.25%/13.8kV Dyn1", "--oil"])).toBe("CVIII-350D/72.5-10193W");
+    // G rows
+    expect(first(["--line", "60MVA 150+8-9x1.5%/20kV YNd11", "--reg", "G"])).toBe("CV2III-350Y/72.5-10181G");
+    expect(first(["--line", "66MVA 132+8-11x2%/20kV YNd11", "--reg", "G"])).toMatch(/-12233G$/);
+    expect(first(["--line", "20MVA 34.5+4-12x1.25%/0.4kV Dyn11", "--reg", "G", "--oil"])).toBe(
+      "CVIII-350D/40.5-10193G",
+    );
+    // symmetric unchanged
+    expect(first(["--line", "25MVA 110±8x1.25%/10.5kV YNd11"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+
+  it("the lowest tap uses the real minus steps", () => {
+    const b = json(["--line", "65MVA 150+7-10x1.5%/20kV YNd11"]).basis;
+    expect([b.maxA, b.stepV]).toEqual([294.3, 1299]);
+    expect(json(["--line", "370MVA 275+12-8x1.25%/33kV YNd11"]).basis.maxA).toBe(863.1);
+    // E-CV2250412 (WEG): sold CV2III-600Y/40.5-10193W at OS 369.15 A
+    const weg = json(["--line", "7.5MVA 13.8+4-12x1.25%/0.44kV YNd11"]);
+    expect([weg.model, weg.basis.maxA]).toEqual(["CV2III-600Y/40.5-10193W", 369.1]);
+  });
+
+  it("an uneven S ≤ 9 stays linear unless --reg says otherwise (UNEVEN-6)", () => {
+    expect(first(["--line", "30MVA 22+2-6x2.5%/0.4kV Dyn11"])).toBe("CV2III-600D/40.5-10090");
+    expect(first(["--line", "30MVA 22+2-6x2.5%/0.4kV Dyn11", "--reg", "0"])).toBe("CV2III-600D/40.5-10090");
+  });
+
+  it("--pm beside an uneven line keeps the line's minus (UNEVEN-2)", () => {
+    // B05 +0/−16: −8 gave 339.6 A and a 350 A switch.
+    const a = json(["--line", "10MVA 20+0-16x1.875%/0.4kV YNd11 line end", "--pm", "8", "--oil"]);
+    expect(a.basis.maxA).toBe(412.4);
+    expect(a.model).toBe("SVIII-500D/40.5-10193W");
+    const b = json(["--line", "160MVA 120+3-17x1.5%/20kV YNd11", "--reg", "G", "--pm", "10"]);
+    expect(b.basis.maxA).toBe(1033.3);
+    expect(Number(b.model.match(/-(\d+)Y\//)[1])).toBeGreaterThanOrEqual(1033);
+  });
+
+  it("reads the range after a closed ratio and percent ranges (UNEVEN-3, UNEVEN-4)", () => {
+    expect(first(["--line", "10MVA 20/0.4kV ±8x1.875% Dyn11", "--oil"])).toBe("CVIII-350D/40.5-10193W");
+    expect(first(["--line", "10MVA 20/0.4kV +0/-30% YNd11 line end", "--oil"])).toBe("SVIII-500D/40.5-10193W");
+    expect(first(["--line", "7.5MVA 20/0.4kV +5/-35% YNd11 line end", "--oil"])).toBe("CVIII-350D/40.5-10193W");
+    const a = capture(["--line", "10MVA 20/0.4kV +0/-30% YNd11 line end", "--oil"]);
+    expect(a.out).toContain("+0/-30% read as +0/−16 × 1.875 %");
+  });
+
+  it("±7 G is 10173G, as sold (UNEVEN-5)", () => {
+    expect(first(["--iu", "525", "--um", "72.5", "--reg", "G", "--pm", "7", "--oil"])).toBe(
+      "CMIII-600Y/72.5B-10173G",
+    );
+  });
+
+  it("says when the lowest tap assumes a symmetric range (D4)", () => {
+    const flags = ["--mva", "45", "--kv", "138", "--tap", "line", "--winding", "delta", "--step-pct", "1.25"];
+    const a = capture([...flags, "--pm", "8"]);
+    expect(a.out).toContain("最低档按 −8 算（−档未指定");
+    expect(json([...flags, "--pm", "8"]).basis.maxA).toBe(120.8);
+    const b = capture([...flags, "--minus", "12"]);
+    expect(b.out).not.toContain("−档未指定");
+    expect(json([...flags, "--minus", "12"]).basis.maxA).toBe(127.9);
+    const c = capture(["--line", "45MVA 138+4-12x1.25%/13.8kV Dyn1"]);
+    expect(c.out).not.toContain("−档未指定");
+    expect(json(["--line", "45MVA 138+4-12x1.25%/13.8kV Dyn1"]).basis.maxA).toBe(127.9);
+    expect(c.out.split(/\r?\n/)[0]).toMatch(/-10193W$/);
+  });
+
+  it("--range, --minus and --mid state what the web form can (WC-10)", () => {
+    const flags = ["--mva", "40", "--kv", "66", "--tap", "line", "--winding", "delta"];
+    const a = json([...flags, "--range", "+4/-12x1.25%"]);
+    expect(a.model).toMatch(/-10193W$/);
+    expect(a.basis.maxA).toBe(237.7); // 202 A / (1 − 12 × 1.25 %)
+    expect(first(["--mva", "40", "--kv", "66", "--range", "+2/-6"])).toMatch(/-10090$/);
+    expect(first(["--iu", "300", "--um", "72.5", "--pm", "9", "--mid", "3"])).toBe("CV2III-350Y/72.5-10191W");
+    expect(first(["--iu", "300", "--um", "72.5", "--pos", "19", "--mid", "1"])).toBe("CV2III-350Y/72.5-10191W");
+    expect(capture(["--iu", "300", "--um", "72.5", "--mid", "2"]).code).toBe(1);
+  });
+
+  it("refuses an autotransformer line without MV, like the page (WC-06)", () => {
+    const a = capture(["--line", "OSFPSZ-250000/220 220±8x1.25%"]);
+    expect(a.code).toBe(1);
+    expect(a.err).toContain("--hv and --mv");
+  });
+
+  it("sizes a single-phase unit on 3 × MVA, single-phase (WC-03)", () => {
+    const a = json(["--line", "333 MVA single-phase 500/220 kV, 500 kV ±13x1.25%, regulation at the neutral point"]);
+    // 500 kV-class neutral: Um 126 assumed (UM-1, 11 of 13 orders).
+    // 2026-11-04 r2 ORDERS-1: 330 kV-class neutral one grade up, C → D (T05;
+    // E-SHZVG250001 HMR-PMTT single-phase was sold 126DE).
+    expect(a.model).toBe("SHZVI-2400/126D-14271W");
+    expect(a.basis.maxA).toBe(1377.4); // tender Imax 1377.33 A
+  });
+
+  it("reads delta words, coarse/fine and a contradicted 'auto' (WC-07, WC-13, WC-14)", () => {
+    expect(first(["--line", "15 MVA, 33/11 kV, ±8x1.25%, D connection"])).toBe("CV2III-350D/40.5-10193W");
+    expect(first(["--line", "10 MVA, 33/11.5 kV, Dyn11, ±8x1.25% coarse/fine"])).toBe("CV2III-350D/40.5-10193G");
+    expect(first(["--line", "130 MVA 132/33 kV, +15%/-10%, 11 positions (2.5% steps), linear"])).toMatch(/-12110$/);
+    // 571 A on a 225 kV class III unit: SHZV first (FAM-3; EEMC PO26-667 sold SHZVIII-1000Y).
+    expect(first(["--line", "200 MVA, 225/115 kV; Auto-transformer, vector group YNd11d11; ±8x1.25%"])).toBe(
+      "SHZVIII-600Y/72.5B-10193W",
+    );
+  });
+
+  it("reads separators and tap ladders (WC-02, WC-04, WC-09)", () => {
+    expect(json(["--line", "150,000 kVA 150±10*1,25%/11 kV Yd11"]).basis.maxA).toBe(659.8);
+    expect(json(["--line", "YNd11,66±12x1.78%/10.5 kV,40 MVA"]).basis.maxA).toBe(445);
+    const q = json(["--line", "80/100/120 MVA, 118.25/110/96.25 kV (+6/-10 x 1.25%), Y"]);
+    expect([q.model, q.basis.maxA]).toEqual(["SHZVIII-1000Y/72.5B-10193W", 719.8]);
+  });
+
+  it("±0 gives the ±8 default with a note; a line may start with a dash (WC-15)", () => {
+    const a = capture(["--line", "25 MVA 110±0x1.25%/11 kV YNd11"]);
+    expect(a.out.split(/\r?\n/)[0]).toBe("CV2III-350Y/72.5-10193W");
+    expect(a.out).toContain("range ±0 ignored");
+    expect(first(["--line", "- 25 MVA 110±8x1.25%/11 kV YNd11"])).toBe("CV2III-350Y/72.5-10193W");
+    expect(first(["--line=-25 MVA 110±8x1.25%/11 kV YNd11"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+
+  it("--octc takes the second winding's range (F4)", () => {
+    const line = "40MVA 115±8x1.25%/38.5±2x2.5%/11kV YNyn0d11";
+    const off = json(["--line", line, "--octc"]);
+    expect(off.basis.maxA).toBe(631.4);
+    expect(off.assumptions.join(" ")).toContain("38.5 kV 绕组");
+    const on = json(["--line", line]);
+    expect([on.model, on.basis.maxA]).toEqual(["CV2III-350Y/72.5-10193W", 223.1]);
+  });
+});
+
+// 2026-11-04 checker round: defects found after the three audit tracks merged.
+describe("oltc CLI checker regressions", () => {
+  const top = (argv: string[]) =>
+    capture([...argv, "--no-update-check"]).out.split(/\r?\n/)[0];
+  const errOf = (argv: string[]) => capture([...argv, "--no-update-check"]).err;
+
+  it("keeps a stated ±N × s % beside an impedance figure", () => {
+    expect(top(["--line", "20 MVA 66/11 kV Dyn1, OLTC on HV, Uz 8%, ±10x2.5%"])).toBe(
+      "3xCM2I-500/72.5B-12233W",
+    );
+    expect(top(["--line", "25 MVA YNd11 Uk 10.5% 110±8x1.25%/11 kV"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+
+  it("does not take 'highest voltage' as the tapped winding", () => {
+    const out = capture(["--line", "40 MVA YNd11 rated voltage 132 kV highest voltage 145 kV ±10x1.25%", "--no-update-check"]).out;
+    expect(out).toContain("√3×132 kV");
+  });
+
+  it("does not read an auxiliary single-phase supply as a single-phase unit", () => {
+    expect(top(["--line", "40 MVA 132±8x1.25%/33 kV YNd11, auxiliary supply 230 V single-phase"])).toBe(
+      "CV2III-350Y/72.5-10193W",
+    );
+  });
+
+  it("joins '1 600 kVA' after a vector group", () => {
+    expect(capture(["--line", "Dyn11 1 600 kVA 11±2x2.5%/0.4 kV", "--no-update-check"]).out).toContain("48.5 A");
+  });
+
+  it("refuses a --mid that does not fit the uneven range, and --iu with --imax", () => {
+    expect(errOf(["--range", "+7/-10x1.5%", "--mid", "3", "--mva", "65", "--kv", "150"])).toContain("does not fit");
+    expect(errOf(["--mva", "63", "--kv", "115", "--iu", "400", "--imax", "334"])).toContain("not both");
+  });
+
+  it("refuses a typed drum contact that covers fewer positions", () => {
+    expect(capture(["--octc", "--iu", "600", "--um", "40.5", "--structure", "drum", "--pos", "6", "--contact", "4x5", "--no-update-check"]).code).toBe(1);
+  });
+
+  it("says when a stated Ust below the derived one is not used", () => {
+    expect(capture(["--mva", "25", "--kv", "110", "--tap", "neutral", "--ust", "300", "--no-update-check"]).out).toContain(
+      "低于按容量和档距算的",
+    );
+  });
+});
+
+describe("oltc CLI checker regressions, round 2", () => {
+  const top = (argv: string[]) => capture([...argv, "--no-update-check"]).out.split(/\r?\n/)[0];
+
+  it("reads 'Grid / Network transformer N MVA' as the rating", () => {
+    expect(top(["--line", "Grid transformer 90 MVA, tertiary 30 MVA, 132±8x1.25%/33 kV YNyn0d11"])).toBe(
+      "CV2III-600Y/72.5-10193W",
+    );
+    expect(top(["--line", "Network transformer 63 MVA, 132±8x1.25%/11 kV, Dyn1"])).toMatch(/^CV2III-350D\/145/);
+  });
+
+  it("does not read an ambient temperature range as the tap range", () => {
+    expect(top(["--line", "40 MVA 132/33 kV YNd11, ambient -25/+40 deg C, OLTC ±8x1.25%"])).toBe(
+      "CV2III-350Y/72.5-10193W",
+    );
+    expect(top(["--line", "ambient -25 to +40, 40 MVA 132±8x1.25%/33 kV YNd11"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+
+  it("keeps the 330 kV-class grade raise when only one across-tap value is given", () => {
+    expect(
+      top(["--mva", "125", "--kv", "400", "--tap", "neutral", "--reg", "G", "--pm", "12", "--ust", "2886.8", "--across-li", "100"]),
+    ).toBe("SHZVIII-400Y/126D-14273G");
+  });
+
+  it("reads a contact written with ×", () => {
+    expect(top(["--octc", "--iu", "800", "--um", "72.5", "--contact", "6×5", "--pos", "5"])).toBe("WSLIV-800Y/72.5-6x5A");
+  });
+});
+
+describe("oltc CLI checker regressions, round 3", () => {
+  const top = (argv: string[]) => capture([...argv, "--no-update-check"]).out.split(/\r?\n/)[0];
+  const out = (argv: string[]) => capture([...argv, "--no-update-check"]).out;
+
+  it("joins thousands in a unit-first kVA rating", () => {
+    expect(out(["--line", "Rated power, kVA: 31 500; 33±8x1.25%/11 kV; Dyn11"])).toContain("318.2 A");
+    expect(out(["--line", "Rated power (kVA): 31,500; 33±8x1.25%/11 kV; Dyn11"])).toContain("318.2 A");
+  });
+
+  it("does not take an LV or kV-named neutral, or a bare Um figure, as the HV neutral BIL", () => {
+    expect(top(["--line", "40 MVA 132±8x1.25%/33 kV YNyn0, LV winding neutral 170 kV BIL"])).toBe("CV2III-350Y/72.5-10193W");
+    expect(top(["--line", "40 MVA 132±8x1.25%/33 kV YNyn0, 33 kV neutral 170 kV BIL"])).toBe("CV2III-350Y/72.5-10193W");
+    expect(top(["--line", "100 MVA 220±8x1.25%/33 kV YNd11, HV neutral 110 kV"])).toBe("CM2III-500Y/72.5B-10193W");
+    expect(top(["--line", "100 MVA 220±8x1.25%/22 kV YNd11, HV neutral 550 kV BIL"])).toBe("CM2III-500Y/126C-10193W");
+  });
+
+  it("does not read 'HV/LV ±8' as an LV tap", () => {
+    expect(top(["--line", "40 MVA, 132/33 kV, YNd11, HV/LV ±8x1.25%"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+});
+
+describe("oltc CLI checker regressions, final round", () => {
+  const top = (argv: string[]) => capture([...argv, "--no-update-check"]).out.split(/\r?\n/)[0];
+  const out = (argv: string[]) => capture([...argv, "--no-update-check"]).out;
+  it("keeps the HV figure before a multi-word insulation label", () => {
+    expect(out(["--line", "10 MVA, HV 132 kV lightning impulse withstand 650 kV, LV 33 kV, YNd11, OLTC ±8x1.25%"])).toContain("√3×132 kV");
+  });
+  it("reads 'HV/LV 132/33 kV' after an insulation clause", () => {
+    expect(top(["--line", "40 MVA, YNd11, BIL 650/170 kV, HV/LV 132/33 kV, OLTC ±8x1.25%"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+  it("keeps 'HV delta' after 'LV star'", () => {
+    expect(top(["--line", "40 MVA 132/33 kV ±8x1.25%, LV star and HV delta with OLTC"])).toBe("CV2III-350D/145-10193W");
+  });
+  it("does not read a surge arrester code or 'per phase impedance' as single-phase", () => {
+    expect(top(["--line", "ТДН-16000/110 110±9х1,78%/11 кВ, ОПН-110/73 в нейтрали"])).toBe("CV2III-350Y/72.5-10191W");
+    expect(top(["--line", "40 MVA, per phase impedance 10%, 132±8x1.25%/33 kV YNd11"])).toBe("CV2III-350Y/72.5-10193W");
+  });
+  it("does not take a bare N after LV as the HV neutral", () => {
+    expect(out(["--line", "100 MVA 220±8x1.25%/33 kV YNyn0, BIL (HV/LV/N) 1050/170/95 kV"])).not.toContain("17.5");
+  });
+});

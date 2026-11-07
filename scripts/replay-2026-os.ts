@@ -13,6 +13,9 @@ import {
   commercialMatch,
   parseTypeString,
 } from "../lib/orderReplay";
+import { catalogueUmFromRatedKv } from "../lib/deriveUm";
+import { buildOsHonestOctcInput } from "../lib/osReplay";
+import { osLowestTapCurrent, osMarket, truncatedTapCode, unevenTapGeometry } from "./replayTap";
 import type {
   Connection,
   Mounting,
@@ -84,7 +87,27 @@ type ReplayOut = {
   steps: number | "";
   connection: string;
   phases: string;
+  /** Selector letter of engine #1 and of the sold type ("" when none). */
+  engine_grade: string;
+  sold_grade: string;
+  /** OCTC only: no sold contact / roman / Um fed in (lib/osReplay buildOsHonestOctcInput). */
+  honest_primary: string;
+  honest_verdict: Verdict | "";
+  honest_um: number | "";
 };
+
+/**
+ * Engine #1 grade against the sold letter. 2026-11-04 audit GRADE-3: the
+ * verdicts ignore the letter, so a weaker engine grade never showed.
+ */
+type GradeCmp = "match" | "weaker" | "stronger";
+const GRADE_ORDER = ["B", "C", "D", "DE"];
+function gradeCmp(engine: string, sold: string): GradeCmp | null {
+  const e = GRADE_ORDER.indexOf(engine);
+  const s = GRADE_ORDER.indexOf(sold);
+  if (e < 0 || s < 0) return null;
+  return e === s ? "match" : e < s ? "weaker" : "stronger";
+}
 
 const VAC_COMBINED = new Set(["CM2", "SHZV", "SDZV", "SHZVG"]);
 const VAC_COMPOUND = new Set(["CV2"]);
@@ -92,7 +115,7 @@ const OIL_COMBINED = new Set(["CM", "CMD"]);
 const OIL_COMPOUND = new Set(["CV", "SV"]);
 const ON_TANK = new Set(["HWV"]);
 const DRY = new Set(["CVT", "CZ"]);
-const OCTC = new Set(["WSL", "WDL", "WSG"]);
+const OCTC = new Set(["WSL", "WDL", "WSG", "WDG", "WLG"]);
 
 function num(v: unknown): number | null {
   if (v == null || v === "") return null;
@@ -209,6 +232,11 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
   const tm = tapMeta(tap);
   const ust = num(row.ust_max_v) ?? num(row.ust_v) ?? 0;
   const nxm = tapNorm.match(/^(\d+)x(\d+)/i);
+  // 2026-11-04 r2 ORDERS-2: a cut-off code is not a linear count.
+  if (duty.dutyKind !== "octc" && truncatedTapCode(tapNorm, parsed.family)) {
+    return { skip: "tap code truncated" };
+  }
+  const uneven = duty.dutyKind === "octc" ? null : unevenTapGeometry(tapNorm);
 
   // Sold tap code beats OS ± boxes (those often pick up mid-position "12"
   // or +4/−12 leftovers). Short `7`/`9`/`17` / `0909` = linear contact count.
@@ -226,6 +254,8 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
     const stripped = tapNorm.replace(/^0+/, "") || "0";
     linearPositions =
       stripped.length >= 3 ? Number(stripped.slice(-2)) : Number(stripped);
+  } else if (uneven) {
+    // 10181G: positions + mid, as --range does (not ±9).
   } else if (tm.positions && tm.mid != null && tm.mid > 0) {
     plusMinus = (tm.positions - tm.mid) / 2;
   } else {
@@ -255,6 +285,28 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
     regulation: shortLinear ? "linear" : tm.regulation,
     mdu: "none",
   };
+  // 2026-11-04 r3 ORDERS-10: no OS Imax → size on the lowest-tap current from
+  // the nameplate, as the app does; the OS current is the floor.
+  if (num(row.i_max_a) == null && duty.dutyKind !== "octc" && input.regulation !== "linear") {
+    input.throughCurrentA = osLowestTapCurrent({
+      iOs: iDuty,
+      mva: num(row.mva),
+      kv: num(row.rated_kv),
+      conn: connection === "D" ? "D" : "Y",
+      minusSteps: num(row.minus_steps) ?? plusMinus,
+      ustV: ust,
+    });
+  }
+  // r3 ORDERS-11: the --market a user would type (TR raises 72.5 neutrals to C).
+  const market = osMarket(row.customer);
+  if (market) input.market = market;
+  // 2026-11-04 r2 ORDERS-2: the app passes the tapped winding kV (FAM-2/FAM-3,
+  // the 330 kV-class grade). No OS field marks an auto, so every row is two-winding.
+  const ratedKv = num(row.rated_kv);
+  if (ratedKv && ratedKv > 0) {
+    input.tapWindingKv = ratedKv;
+    if (catalogueUmFromRatedKv(ratedKv) >= 252) input.combinedOnly = true;
+  }
 
   if (duty.dutyKind === "octc") {
     const roman = parsed.phases;
@@ -277,6 +329,8 @@ function buildInput(row: SalesRow, parsed: NonNullable<ReturnType<typeof parseTy
   } else if (plusMinus && plusMinus > 0 && input.regulation !== "linear") {
     input.plusMinusSteps = Math.round(plusMinus);
     if (tm.mid === 1 || tm.mid === 3) input.midPositions = tm.mid;
+  } else if (uneven && input.regulation !== "linear") {
+    Object.assign(input, uneven);
   } else if (linearPositions) {
     input.positions = linearPositions;
   } else if (tm.positions) {
@@ -346,6 +400,12 @@ function identityMatch(actual: string, expected: string): boolean {
 }
 
 function classify(sold: string, models: string[]): Verdict {
+  // 2026-11-04: the OS writes WDGIV-800/40.5-5x5A for a 3-, 6- or 12-unit
+  // drum order, so the set count is not part of the drum answer.
+  if (/^(?:\d+x)?W[DL]G/i.test(sold)) {
+    sold = sold.replace(/^\d+x/i, "");
+    models = models.map((m) => m.replace(/^\d+x/i, ""));
+  }
   const primary = models[0] ?? "";
   if (identityMatch(primary, sold)) return "exact";
   if (looseMatch(primary, sold)) return "family-i-um";
@@ -421,6 +481,11 @@ for (const row of rows) {
     steps: num(row.plus_minus_steps) ?? ("" as const),
     connection: (row.connection || "").toString(),
     phases: (row.phases || "").toString(),
+    engine_grade: "",
+    sold_grade: "",
+    honest_primary: "",
+    honest_verdict: "" as const,
+    honest_um: "" as const,
   };
 
   if (!sold) {
@@ -444,8 +509,28 @@ for (const row of rows) {
   const models = result.results.map((r) => r.model);
   const verdict = classify(sold, models);
   counts[verdict]++;
+  // 2026-11-04: OCTC beside the as-is verdict, judged without the answer.
+  let honest: Pick<ReplayOut, "honest_primary" | "honest_verdict" | "honest_um"> = {
+    honest_primary: "",
+    honest_verdict: "",
+    honest_um: "",
+  };
+  if (built.dutyKind === "octc") {
+    const h = buildOsHonestOctcInput(row, parsed);
+    if ("skip" in h) {
+      honest = { ...honest, honest_verdict: "skip" };
+    } else {
+      const hm = selectOltc(h).results.map((r) => r.model);
+      honest = {
+        honest_primary: hm[0] ?? "",
+        honest_verdict: classify(sold, hm),
+        honest_um: h.umKv,
+      };
+    }
+  }
   out.push({
     ...base,
+    ...honest,
     engine_primary: models[0] ?? "",
     engine_next: models.slice(1, 4).join(" | "),
     verdict,
@@ -456,7 +541,23 @@ for (const row of rows) {
     steps: built.plusMinusSteps ?? ("" as const),
     connection: built.connection,
     phases: built.phases,
+    engine_grade: result.results[0]?.selectorSize ?? "",
+    sold_grade: parsed.selectorSize ?? "",
   });
+}
+
+// Grade: engine #1 letter (selectorSize auto) vs the sold letter, by sold Um.
+const gradeCounts: Record<GradeCmp, number> = { match: 0, weaker: 0, stronger: 0 };
+const gradeByUm = new Map<number, Record<GradeCmp, number>>();
+for (const r of out) {
+  if (r.verdict === "skip") continue;
+  const cmp = gradeCmp(r.engine_grade, r.sold_grade);
+  if (!cmp) continue;
+  gradeCounts[cmp]++;
+  const soldUm = parseTypeString(r.sold_type)?.umKv ?? 0;
+  const row = gradeByUm.get(soldUm) ?? { match: 0, weaker: 0, stronger: 0 };
+  row[cmp]++;
+  gradeByUm.set(soldUm, row);
 }
 
 const judged = out.filter((r) => r.verdict !== "skip");
@@ -484,6 +585,8 @@ const lines = [
   "",
   `Source: \`${path.basename(jsonPath)}\``,
   `Rows: ${rows.length}. Judged: ${judged.length}. Skipped: ${counts.skip}.`,
+  // 2026-11-04 r2 ORDERS-2: say what the app-side inputs are.
+  "Tapped-winding kV = OS rated kV, as the app passes it (no OS field marks an autotransformer, so every row is read as two-winding); 252 kV class and above is combined only. Cut-off sold tap codes (`1`, `12231` without W/G) are skipped; 10181G / 10183W go in as positions + mid, as `--range` does. Since 2026-11-04 r2 this changed engine #1 on 26 rows (15 in 2026, 11 in 2025, cut-off codes now skipped included), mostly CM2 → SHZV on 225–400 kV windings. Since r3: with no OS Imax, a W/G row is sized on the lowest-tap current from MVA / kV / Ust / minus steps, as the app does (the OS current is the floor), and Turkish buyers go in as `--market TR`.",
   "",
   "| verdict | n | % of judged | meaning |",
   "|---|---:|---:|---|",
@@ -496,6 +599,16 @@ const lines = [
   "",
   `**#1 family+I+Um or better:** ${(((counts.exact + counts["family-i-um"]) / n) * 100).toFixed(1)}%`,
   `**sold type or vacuum twin eligible:** ${(((counts.exact + counts["family-i-um"] + counts.family + counts.eligible + counts["oil-vs-vac"]) / n) * 100).toFixed(1)}%`,
+  `**grade (engine #1 vs sold letter):** match ${gradeCounts.match} / weaker than sold ${gradeCounts.weaker} / stronger ${gradeCounts.stronger}`,
+  "",
+  "| sold Um | match | weaker than sold | stronger |",
+  "|---:|---:|---:|---:|",
+  ...[...gradeByUm.keys()]
+    .sort((a, b) => a - b)
+    .map((um) => {
+      const g = gradeByUm.get(um)!;
+      return `| ${um} | ${g.match} | ${g.weaker} | ${g.stronger} |`;
+    }),
   "",
   "## Misses",
   "",
@@ -514,6 +627,27 @@ for (const fam of [...familyCounts.keys()].sort()) {
   const c = familyCounts.get(fam)!;
   if (!c.judged) continue;
   lines.push(`| ${fam} | ${c.judged} | ${c.exact} | ${c.miss} |`);
+}
+
+// 2026-11-04: as-is feeds the sold contact, roman and Um back in for OCTC.
+const octcRows = out.filter((r) => r.honest_verdict && r.verdict !== "skip");
+if (octcRows.length) {
+  lines.push(
+    "",
+    "## OCTC without the answer",
+    "",
+    "No sold contact, roman auto, structure from the folder (drum / cage), ±N from the OS (5 positions when blank), Um from rated kV through `deriveDuty`.",
+    "",
+    "| family | judged | exact as-is | exact honest | honest skipped |",
+    "|---|---:|---:|---:|---:|",
+  );
+  const fams = [...new Set(octcRows.map((r) => parseTypeString(r.sold_type)?.family ?? "?"))].sort();
+  for (const fam of fams) {
+    const rs = octcRows.filter((r) => (parseTypeString(r.sold_type)?.family ?? "?") === fam);
+    lines.push(
+      `| ${fam} | ${rs.length} | ${rs.filter((r) => r.verdict === "exact").length} | ${rs.filter((r) => r.honest_verdict === "exact").length} | ${rs.filter((r) => r.honest_verdict === "skip").length} |`,
+    );
+  }
 }
 
 const docs = path.join(process.cwd(), "docs", "replay");

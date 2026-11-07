@@ -415,13 +415,26 @@ export function resolveTapFields(input: {
       mid,
       tapCode: buildTapCode({ pitch, positions, mid, regulation: reg }),
       changeOver: "0",
-      standard: true,
+      // 2–4 linear positions are not a brochure diagram (r2 ORDERS-9).
+      standard: positions >= 5,
     };
   }
 
   if (input.plusMinusSteps != null && input.plusMinusSteps > 0) {
     const n = input.plusMinusSteps;
     const allowed = midOptionsFor(n, reg);
+    // 2026-11-04: ±7 G has no Fig. 3-3 row. pitchFor gave 16151G; Huaming sold
+    // 10173G (E-M260167-168, E-V260105-109, E-CV2260346). ±4…±6 G: no evidence.
+    if (reg === "coarse_fine" && n === 7 && !allowed.length) {
+      return {
+        positions: 17,
+        pitch: 10,
+        mid: 3,
+        tapCode: buildTapCode({ pitch: 10, positions: 17, mid: 3, regulation: reg }),
+        changeOver: changeOverOf(reg),
+        standard: false,
+      };
+    }
     let mid: 1 | 3;
     if (
       input.midPositions === 1 ||

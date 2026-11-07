@@ -17,8 +17,28 @@ import {
   SERIES,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
+  EARTH_INSULATION,
+  umForEarthInsulation,
 } from "@/lib/catalog";
+import {
+  INITIAL_FORM,
+  commitRange,
+  editStepPct,
+  formDiff,
+  formSelectInput,
+  formSpec,
+  geometryForPm,
+  pickKind as pickKindIn,
+  pickPhases,
+  pickPm,
+  pickRegulation,
+  readLine,
+  toOctc,
+  toOltc,
+  type FormState,
+} from "@/lib/formState";
 import { copyText } from "@/lib/clipboard";
+import { parseTypeString } from "@/lib/parseType";
 import { decimalDraft } from "@/lib/decimal";
 import { displayModel } from "@/lib/domesticModel";
 import {
@@ -37,15 +57,9 @@ import {
 import { safetyKKeepsCapacity } from "@/lib/safetyK";
 import {
   defaultMid,
-  defaultPitch,
   lookupByPositions,
-  lookupDiagram,
   midControl,
-  pitchFromPlusMinus,
   pmStepOptionsFor,
-  positionsFor,
-  preferredMid,
-  type ParsedTapRange,
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import {
@@ -56,6 +70,7 @@ import {
 import {
   TAP_POINTS_FOR,
   deriveDuty,
+  tapAfterWinding,
   type DutyBasis,
   type TransformerSpec,
   type TapPoint,
@@ -79,28 +94,14 @@ import {
   type StructureKind,
 } from "@/lib/types";
 
-/** Apply brochure (±N, mid) geometry onto a SelectInput patch. */
 function mediumFor(
   mounting: SelectInput["mounting"],
   preferVacuum: boolean,
 ): SelectInput["medium"] {
   if (mounting === "dry_type") return "dry";
+  // 2026-11-04: reactor is HWDK, oil only; the arc toggle is hidden there.
+  if (mounting === "reactor") return "oil";
   return preferVacuum ? "oil_vacuum" : "oil";
-}
-
-function geometryForPm(
-  n: number,
-  regulation: SelectInput["regulation"],
-  mid?: 1 | 3,
-): Pick<SelectInput, "plusMinusSteps" | "positions" | "midPositions" | "pitch"> {
-  const m = mid ?? preferredMid(n, regulation);
-  const row = lookupDiagram(n, m, regulation);
-  return {
-    plusMinusSteps: n,
-    midPositions: m,
-    positions: row?.positions ?? positionsFor(n, m),
-    pitch: (row?.pitch ?? pitchFromPlusMinus(n, m)) as 10 | 12 | 14 | 16 | 18,
-  };
 }
 
 const MVA_OPTIONS = [
@@ -119,27 +120,6 @@ const SAFETY_K_OPTIONS = [
 
 /** Catalogue Um classes offered when the OS states the switch insulation. */
 const EARTH_UM_OPTIONS = [40.5, 72.5, 126, 145, 170, 252, 300, 363] as const;
-
-const defaultInput: SelectInput = {
-  mounting: "in_tank",
-  medium: "oil_vacuum",
-  preferVacuum: true,
-  phases: "III",
-  connection: "Y",
-  throughCurrentA: 400,
-  umKv: 0,
-  stepVoltageV: 1500,
-  regulation: "reversing",
-  // Brochure default: ±8 mid3 → 10193W (most common); must stay in sync with `pm`
-  plusMinusSteps: 8,
-  positions: 19,
-  pitch: 10,
-  midPositions: 3,
-  selectorSize: "auto",
-  preferStructure: "auto",
-  mdu: "none",
-  dutyKind: "oltc",
-};
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -329,15 +309,12 @@ function BasisTable({
   lang,
   duty,
   dutyA,
-  ratedA,
   stepV,
   model,
 }: {
   lang: Lang;
   duty: DutyBasis;
   dutyA: number | null;
-  /** Rated current when the form works from MVA; null when typed. */
-  ratedA: number | null;
   stepV: number;
   model: ModelResult | null;
 }) {
@@ -345,28 +322,33 @@ function BasisTable({
   const a = dutyA != null && dutyA > 0 ? dutyA : null;
   const u = ok && stepV > 0 ? stepV : null;
   const kva = a != null && u != null ? (a * u) / 1000 : null;
-  const showActual =
-    ok &&
-    Number.isFinite(duty.actualUmKv) &&
-    duty.umRule !== "neutral_full" &&
-    duty.umRule !== "neutral_assumed" &&
-    duty.umRule !== "explicit";
+  // Insulation need: the system's IEC Um where the rule is the system
+  // (line end, a full-class neutral): 33 kV line end needs 36 kV, not the
+  // 40.5 class the engine then picks. An assumed or stated class is the
+  // need itself.
+  const umNeed = !ok
+    ? null
+    : (duty.umRule === "line" || duty.umRule === "neutral_full") && Number.isFinite(duty.actualUmKv)
+      ? duty.actualUmKv
+      : duty.umKv;
+  // Every row is one line: name, duty, rating, use. An assumed Um is said
+  // once, in a deriveDuty caution above the table (neutral, MV lead and,
+  // since r3 UI-11, the auto junction), not again inside it.
   const rows: Array<{
     key: string;
     label: string;
     need: string;
     unit: string;
-    sub?: string;
-    flag?: string;
     rating: string | null;
     use: number | null;
+    /** Insulation is a class, not a load: 100% is a match, not tight. */
+    plain?: boolean;
   }> = [
     {
       key: "i",
       label: t(lang, "kpiImax"),
       need: a != null ? round1(a) : "—",
       unit: "A",
-      sub: ratedA != null && ratedA > 0 ? t(lang, "kpiRated", { a: round1(ratedA) }) : undefined,
       rating: model ? `${model.currentA}` : null,
       use: useOf(a, model?.currentA),
     },
@@ -389,12 +371,11 @@ function BasisTable({
     {
       key: "um",
       label: t(lang, "kpiUm"),
-      need: ok ? round1(duty.umKv) : "—",
+      need: umNeed != null ? round1(umNeed) : "—",
       unit: "kV",
-      sub: showActual ? t(lang, "kpiActual", { um: round1(duty.actualUmKv) }) : undefined,
-      flag: ok && duty.umAssumed ? t(lang, "checkOs") : undefined,
       rating: model ? round1(model.umKv) : null,
-      use: null,
+      use: useOf(umNeed, model?.umKv),
+      plain: true,
     },
   ];
   return (
@@ -416,17 +397,14 @@ function BasisTable({
             .filter((r) => !(model && r.rating == null))
             .map((r) => {
             const pct = r.use != null ? Math.round(r.use * 100) : null;
-            const tone = r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 ? "is-tight" : "";
+            const tone =
+              r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 && !r.plain ? "is-tight" : "";
             return (
               <tr key={r.key}>
-                <th scope="row">
-                  <span className="block">{r.label}</span>
-                  {r.sub ? <span className="basis-sub">{r.sub}</span> : null}
-                </th>
+                <th scope="row">{r.label}</th>
                 <td className="r num">
                   {r.need}
                   {r.need !== "—" ? <span className="basis-unit">{r.unit}</span> : null}
-                  {r.flag ? <span className="basis-flag">{r.flag}</span> : null}
                 </td>
                 <td className="r num">
                   {r.rating != null ? (
@@ -455,6 +433,16 @@ function BasisTable({
       </table>
     </div>
   );
+}
+
+/**
+ * One spelling for an insulation class everywhere it is picked: the Um plus
+ * the AC / LI a tender states, written like the card's 对地工频/雷电 value.
+ */
+function earthUmLabel(um: number): string {
+  const e = EARTH_INSULATION[um];
+  const kv = `Um ${formatUmKv(um)} kV`;
+  return e ? `${kv} · ${e.pf} / ${e.bil} kV` : kv;
 }
 
 function round1(n: number): string {
@@ -492,7 +480,7 @@ function KvField({
                     inputMode="decimal"
                     min={0}
                     step={0.1}
-                    className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                    className={`${controlClass} has-suffix [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
                     value={kvValue > 0 ? String(kvValue) : ""}
                     onChange={(e) => {
                       const raw = e.target.value;
@@ -540,7 +528,7 @@ function KvField({
                   !(WINDING_RATED_KV as readonly number[]).includes(
                     kvValue,
                   )) ? (
-                  <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.75rem] text-[var(--color-muted)]">
+                  <span className="ui-affix ui-affix-end">
                     kV
                   </span>
                 ) : null}
@@ -567,40 +555,50 @@ function modelNodes(model: string) {
 export function SelectorApp() {
   const lang = useAppLang();
   const setLang = setAppLang;
-  const [input, setInput] = useState<SelectInput>(defaultInput);
-  const [pm, setPm] = useState("8");
+  // First paint is lib/formState INITIAL_FORM, so the tests start where the page does.
+  const f0 = INITIAL_FORM;
+  const [input, setInput] = useState<SelectInput>(f0.input);
+  const [pm, setPm] = useState(f0.pm);
   /** Default: fill transformer / tap-winding voltage; engine still gets OLTC Um. */
-  const [voltageMode, setVoltageMode] = useState<"winding" | "equipment">(
-    "winding",
-  );
-  const [windingRatedKv, setWindingRatedKv] = useState(
-    DEFAULT_WINDING_RATED_KV,
-  );
-  const [currentMode, setCurrentMode] = useState<"current" | "capacity">(
-    "capacity",
-  );
-  const [transformerMva, setTransformerMva] = useState(25);
-  const [mvaCustom, setMvaCustom] = useState(false);
-  const [tapPlus, setTapPlus] = useState(8);
-  const [tapMinus, setTapMinus] = useState(8);
-  const [stepPercentPct, setStepPercentPct] = useState(1.25);
-  const [stepPctCustom, setStepPctCustom] = useState(false);
-  const [safetyK, setSafetyK] = useState(1);
+  const [voltageMode, setVoltageMode] = useState(f0.voltageMode);
+  const [windingRatedKv, setWindingRatedKv] = useState(f0.windingRatedKv);
+  const [currentMode, setCurrentMode] = useState(f0.currentMode);
+  const [transformerMva, setTransformerMva] = useState(f0.transformerMva);
+  const [mvaCustom, setMvaCustom] = useState(f0.mvaCustom);
+  const [tapPlus, setTapPlus] = useState(f0.tapPlus);
+  const [tapMinus, setTapMinus] = useState(f0.tapMinus);
+  const [stepPercentPct, setStepPercentPct] = useState(f0.stepPercentPct);
+  const [stepPctCustom, setStepPctCustom] = useState(f0.stepPctCustom);
+  const [safetyK, setSafetyK] = useState(f0.safetyK);
   const [safetyKCustom, setSafetyKCustom] = useState(false);
-  const [tapRange, setTapRange] = useState<ParsedTapRange | null>(null);
-  const [kind, setKind] = useState<TransformerKind>("two_winding");
-  const [tapPoint, setTapPoint] = useState<TapPoint>("neutral");
-  const [winding, setWinding] = useState<WindingConnection>("star");
-  const [hvKv, setHvKv] = useState(220);
-  const [mvKv, setMvKv] = useState(110);
+  const [tapRange, setTapRange] = useState(f0.tapRange);
+  const [kind, setKind] = useState(f0.kind);
+  const [tapPoint, setTapPoint] = useState(f0.tapPoint);
+  const [winding, setWinding] = useState(f0.winding);
+  /** Line end set by delta, not by the user: star puts the neutral back. */
+  const [tapForced, setTapForced] = useState(f0.tapForced);
+  const [hvKv, setHvKv] = useState(f0.hvKv);
+  const [mvKv, setMvKv] = useState(f0.mvKv);
   /** OLTC insulation to earth stated by the OS / maker. 0 = by rule. */
-  const [earthUm, setEarthUm] = useState(0);
+  const [earthUm, setEarthUm] = useState(f0.earthUm);
+  /** OS / maker Imax (A) and Ust (V) on the capacity path. 0 = not given. */
+  const [osImaxA, setOsImaxA] = useState(f0.osImaxA);
+  const [osUstV, setOsUstV] = useState(f0.osUstV);
+  /** Buyer's country for a neutral's assumed Um ("" = voltage rule only). */
+  const [market, setMarket] = useState(f0.market);
+  /** Tender line as typed, and what was read from it (null = not read). */
+  const [lineText, setLineText] = useState("");
+  const [lineRead, setLineRead] = useState(f0.lineRead);
+  const [lineFailed, setLineFailed] = useState(f0.lineFailed);
+  const [everRead, setEverRead] = useState(f0.everRead);
+  const [phasesByLine, setPhasesByLine] = useState(f0.phasesByLine);
+  const [stepStated, setStepStated] = useState(f0.stepStated);
+  const [oltcRegulation, setOltcRegulation] = useState(f0.oltcRegulation);
   const [altsOpen, setAltsOpen] = useState(false);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [switchOpen, setSwitchOpen] = useState(false);
   const resultPaneRef = useRef<HTMLElement | null>(null);
   const resultCardRef = useRef<HTMLElement | null>(null);
   /** Phones: the dock hides while the full result card is on screen. */
@@ -609,6 +607,77 @@ export function SelectorApp() {
   const isOctc = (input.dutyKind ?? "oltc") === "octc";
   const isLinear = isOctc || input.regulation === "linear";
 
+  /** The form as one value, for the pure transitions in lib/formState. */
+  const formNow = (): FormState => ({
+    input,
+    pm,
+    tapPlus,
+    tapMinus,
+    tapRange,
+    stepPercentPct,
+    stepPctCustom,
+    currentMode,
+    voltageMode,
+    windingRatedKv,
+    transformerMva,
+    mvaCustom,
+    safetyK,
+    kind,
+    tapPoint,
+    winding,
+    tapForced,
+    hvKv,
+    mvKv,
+    earthUm,
+    osImaxA,
+    osUstV,
+    market,
+    lineRead,
+    lineFailed,
+    everRead,
+    phasesByLine,
+    stepStated,
+    oltcRegulation,
+  });
+  const setters: { [K in Exclude<keyof FormState, "input">]: (v: FormState[K]) => void } = {
+    pm: setPm,
+    tapPlus: setTapPlus,
+    tapMinus: setTapMinus,
+    tapRange: setTapRange,
+    stepPercentPct: setStepPercentPct,
+    stepPctCustom: setStepPctCustom,
+    currentMode: setCurrentMode,
+    voltageMode: setVoltageMode,
+    windingRatedKv: setWindingRatedKv,
+    transformerMva: setTransformerMva,
+    mvaCustom: setMvaCustom,
+    safetyK: setSafetyK,
+    kind: setKind,
+    tapPoint: setTapPoint,
+    winding: setWinding,
+    tapForced: setTapForced,
+    hvKv: setHvKv,
+    mvKv: setMvKv,
+    earthUm: setEarthUm,
+    osImaxA: setOsImaxA,
+    osUstV: setOsUstV,
+    market: setMarket,
+    lineRead: setLineRead,
+    lineFailed: setLineFailed,
+    everRead: setEverRead,
+    phasesByLine: setPhasesByLine,
+    stepStated: setStepStated,
+    oltcRegulation: setOltcRegulation,
+  };
+  /** Run one transition and set only the fields it changed. */
+  const updateForm = (step: (f: FormState) => FormState) => {
+    const was = formNow();
+    const { input: inputDiff, ...rest } = formDiff(was, step(was));
+    if (inputDiff) setInput((s) => ({ ...s, ...inputDiff }));
+    for (const k of Object.keys(rest) as Array<keyof typeof rest>) {
+      (setters[k] as (v: unknown) => void)(rest[k]);
+    }
+  };
 
   const commitSafetyK = (n: number) => {
     setSafetyK(n);
@@ -669,121 +738,46 @@ export function SelectorApp() {
   };
 
   const pickTap = (p: TapPoint) => {
+    if (!TAP_POINTS_FOR[kind].includes(p)) return;
     if (kind === "two_winding" && winding === "delta" && p === "neutral") return;
     setTapPoint(p);
+    setTapForced(false);
     // Engine Y = one switch on a common star point; D = no common star point.
     setInput((s) => ({ ...s, connection: p === "neutral" ? "Y" : "D" }));
   };
 
-  const pickKind = (k: TransformerKind) => {
-    if (k === kind) return;
-    setKind(k);
-    const p: TapPoint =
-      k === "auto" ? "auto_junction" : winding === "delta" ? "line_end" : "neutral";
-    setTapPoint(p);
-    setInput((s) => ({ ...s, connection: p === "neutral" ? "Y" : "D" }));
-  };
+  const pickKind = (k: TransformerKind) => updateForm((f) => pickKindIn(f, k));
 
   const pickWinding = (w: WindingConnection) => {
     setWinding(w);
-    if (w === "delta" && tapPoint === "neutral") {
-      setTapPoint("line_end");
-      setInput((s) => ({ ...s, connection: "D" }));
+    if (kind !== "two_winding") return;
+    const next = tapAfterWinding(w, tapPoint, tapForced);
+    setTapForced(next.forced);
+    if (next.tapPoint !== tapPoint) {
+      setTapPoint(next.tapPoint);
+      setInput((s) => ({ ...s, connection: next.tapPoint === "neutral" ? "Y" : "D" }));
     }
   };
 
-  const setRegulation = (reg: SelectInput["regulation"]) => {
-    if (reg === "linear") {
-      setPm("");
-      const plus = tapPlus > 0 ? tapPlus : 4;
-      const minus = tapMinus > 0 ? tapMinus : 4;
-      setTapPlus(plus);
-      setTapMinus(minus);
-      const range: ParsedTapRange = {
-        plus,
-        minus,
-        positions: plus + minus + 1,
-        stepPercent: stepPercentPct > 0 ? stepPercentPct / 100 : null,
-      };
-      setTapRange(range);
-      setInput((s) => ({
-        ...s,
-        regulation: reg,
-        plusMinusSteps: undefined,
-        positions: range.positions,
-        midPositions: 0,
-        pitch: defaultPitch(range.positions, "linear") as
-          | 10
-          | 12
-          | 14
-          | 16
-          | 18,
-      }));
-      return;
-    }
-    // G brochure set starts at ±8; clamp small W-only steps when switching to G
-    const allowed = pmStepOptionsFor(reg);
-    let n = pm && Number(pm) > 0 ? Number(pm) : 8;
-    if (!allowed.includes(n)) n = allowed[0] ?? 8;
-    setPm(String(n));
-    setInput((s) => ({
-      ...s,
-      regulation: reg,
-      ...geometryForPm(n, reg),
-    }));
-  };
+  /**
+   * Fill the transformer and range fields from one tender line. The kind,
+   * tap point and winding come from the vector group, so a YNa0d11 line
+   * cannot be sized as a two-winding job by a missed click. Same mapping as
+   * the CLI --line (lib/formState readLine).
+   */
+  const readTenderLine = () => updateForm((f) => readLine(f, lineText));
 
-  const commitTapRange = (
-    plus: number,
-    minus: number,
-    pct: number,
-  ) => {
-    if (!(plus > 0) || !(minus > 0)) {
-      setTapRange(null);
-      return;
-    }
-    const range: ParsedTapRange = {
-      plus,
-      minus,
-      positions: plus + minus + 1,
-      stepPercent: pct > 0 ? pct / 100 : null,
-    };
-    setTapRange(range);
-    setInput((s) => ({
-      ...s,
-      positions: range.positions,
-      plusMinusSteps: undefined,
-      midPositions: s.regulation === "linear" ? 0 : 1,
-      pitch: defaultPitch(range.positions, s.regulation) as
-        | 10
-        | 12
-        | 14
-        | 16
-        | 18,
-    }));
-  };
+  // 2026-11-04 final UI-12: lib/formState pickRegulation, so the tests reach it.
+  const setRegulation = (reg: SelectInput["regulation"]) =>
+    updateForm((f) => pickRegulation(f, reg));
 
-  const applyPm = (raw: string) => {
-    setPm(raw);
-    if (!raw) {
-      const n = Number(pm) > 0 ? Number(pm) : 8;
-      setTapPlus(n);
-      setTapMinus(n);
-      setStepPercentPct(1.25);
-      commitTapRange(n, n, 1.25);
-      return;
-    }
-    setTapRange(null);
-    const n = Number(raw);
-    if (!Number.isFinite(n) || n <= 0) return;
-    // Always snap to brochure preferred mid for this ±N.
-    // Carrying mid=1 from ±4…±7 onto ±8 would silently emit 18171W
-    // instead of commercial 10193W (P=19, mid3).
-    setInput((s) => ({
-      ...s,
-      ...geometryForPm(n, s.regulation),
-    }));
-  };
+  // 2026-11-04: a W/G custom +a/−b takes the Fig. 3-3 row Huaming sells
+  // (+4/−12 → 10193W), not plus + minus + 1 positions on mid 1 (18171W).
+  const commitTapRange = (plus: number, minus: number, pct: number) =>
+    updateForm((f) => commitRange(f, plus, minus, pct));
+
+  // 2026-11-04 (r3 UI-6): lib/formState pickPm; 自定义 keeps the step %.
+  const applyPm = (raw: string) => updateForm((f) => pickPm(f, raw));
 
   const applyMid = (raw: string) => {
     const mid = (Number(raw) === 1 ? 1 : 3) as 1 | 3;
@@ -804,39 +798,8 @@ export function SelectorApp() {
     });
   };
 
-  // The +/− range only drives the duty while its selects are on screen.
-  // A range left from OCTC or linear used to override the ±N preset and step %.
-  const rangeLive = isLinear || !pm;
-
-  const stepFraction = (): number | null => {
-    if (rangeLive && tapRange?.stepPercent && tapRange.stepPercent > 0) {
-      return tapRange.stepPercent;
-    }
-    if (stepPercentPct > 0) return stepPercentPct / 100;
-    return null;
-  };
-
-  const minusSteps = (): number => {
-    if (rangeLive && tapRange && tapRange.minus > 0) return tapRange.minus;
-    const n = pm && Number(pm) > 0 ? Number(pm) : input.plusMinusSteps;
-    if (n != null && n > 0) return n;
-    return 0;
-  };
-
-  /** Transformer → duty. The one place current, Ust and Um come from. */
-  const transformerSpec = (): TransformerSpec => ({
-      kind: isOctc ? "two_winding" : kind,
-      tapPoint: isOctc && kind === "auto" ? "line_end" : tapPoint,
-      winding,
-      mva: currentMode === "capacity" ? transformerMva : 0,
-      tapKv: windingRatedKv,
-      hvKv,
-      mvKv,
-      minusSteps: minusSteps(),
-      stepFraction: stepFraction(),
-      safetyK,
-      ...(earthUm > 0 ? { earthUmKv: earthUm } : {}),
-    });
+  /** Transformer → duty (lib/formState formSpec: minus steps, step %, OS figures). */
+  const transformerSpec = (): TransformerSpec => formSpec(formNow());
   const transformerDuty = (): DutyBasis => deriveDuty(transformerSpec());
 
   const capacityThroughA = (): number | null => {
@@ -849,47 +812,16 @@ export function SelectorApp() {
     return d.ok && d.stepV != null && d.stepV > 0 ? d.stepV : null;
   };
 
-  const withOctcSeries = (duty: SelectInput): SelectInput => {
-    if ((duty.dutyKind ?? "oltc") !== "octc") return duty;
-    const series =
-      duty.octcSeries && duty.octcSeries !== "auto"
-        ? duty.octcSeries
-        : "IV";
-    return {
-      ...duty,
-      octcSeries: series,
-      preferVacuum: false,
-      medium: "oil",
-    };
-  };
-
   const dutyForSelect = ():
     | SelectInput
     | { error: true; msgKey?: string; msg?: string } => {
-    if (currentMode === "capacity") {
-      if (safetyK > 0 && safetyK < 1) return { error: true, msgKey: "kBelowOne" };
-      if (!(transformerMva > 0)) return { error: true, msgKey: "needMva" };
-    }
-    const d = transformerDuty();
-    if (!d.ok) {
-      return {
-        error: true,
-        msg: lang === "zh" ? d.errorZh : localizeNote(d.errorEn ?? "", lang),
-      };
-    }
-    const ust = d.stepV != null && d.stepV > 0 ? d.stepV : null;
-    const sized: SelectInput = {
-      ...input,
-      connection: d.connection,
-      transformerKind: isOctc ? "two_winding" : kind,
-      umKv: d.umKv,
-      ...(ust != null ? { stepVoltageV: ust } : {}),
+    const r = formSelectInput(formNow());
+    if (r.ok) return r.input;
+    if ("msgKey" in r) return { error: true, msgKey: r.msgKey };
+    return {
+      error: true,
+      msg: lang === "zh" ? r.duty.errorZh : localizeNote(r.duty.errorEn ?? "", lang),
     };
-    if (currentMode === "capacity") {
-      if (!(d.dutyA > 0)) return { error: true, msgKey: "needMva" };
-      return withOctcSeries({ ...sized, throughCurrentA: d.dutyA });
-    }
-    return withOctcSeries(sized);
   };
 
   // The engine is synchronous and cheap, so the answer is computed on every
@@ -997,37 +929,20 @@ export function SelectorApp() {
   const ustV = computedStepVoltage();
   const duty = transformerDuty();
   const ruleDuty = deriveDuty({ ...transformerSpec(), earthUmKv: undefined });
-  const kindEff: TransformerKind = isOctc ? "two_winding" : kind;
-  const tapEff: TapPoint = isOctc && kind === "auto" ? "line_end" : tapPoint;
   const listSep = lang === "zh" ? "，" : ", ";
   const transformerLine = (
-    kindEff === "auto"
-      ? [t(lang, "kindAuto"), `${round1(hvKv)}/${round1(mvKv)} kV`]
+    kind === "auto"
+      ? [t(lang, "kindAuto"), `${round1(hvKv)}/${round1(mvKv)}\u00a0kV`]
       : [
           t(lang, "kindTwo"),
           t(lang, winding === "star" ? "windingStar" : "windingDelta"),
-          `${round1(windingRatedKv)} kV`,
+          `${round1(windingRatedKv)}\u00a0kV`,
         ]
   ).join(listSep);
   const cautions = [
     ...(primary ? notesFor(lang, primary.cautionsZh, primary.cautionsEn) : []),
     ...(duty.ok ? notesFor(lang, duty.cautionsZh, duty.cautionsEn) : []),
   ].filter((c, i, all) => all.indexOf(c) === i);
-  // Folded switch section: one line that says what the hidden fields hold.
-  // Settings that change the result lead, so a clamped line still shows them.
-  const switchSummary = [
-    ...(input.acrossTapBilKv ? [`LI ${input.acrossTapBilKv} kV`] : []),
-    ...(input.acrossTapPfKv ? [`PF ${input.acrossTapPfKv} kV`] : []),
-    ...(safetyK > 1 ? [`${t(lang, "safetyK")} ×${safetyK}`] : []),
-    t(lang, isOctc ? "dutyOctc" : "dutyOltc"),
-    ...(input.mounting !== "dry_type" && input.mounting !== "reactor"
-      ? [t(lang, isOctc || !input.preferVacuum ? "arcOil" : "arcVac")]
-      : []),
-    input.preferStructure && input.preferStructure !== "auto"
-      ? t(lang, structureLabelKey(input.preferStructure))
-      : `${t(lang, "specStructure")} ${t(lang, "auto")}`,
-    t(lang, mountLabelKey(input.mounting)),
-  ].join(listSep);
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col">
       <header className="topbar sticky top-0 z-30">
@@ -1055,24 +970,78 @@ export function SelectorApp() {
 
           <div className="sheet">
             <section aria-label={t(lang, "transformer")} className="sheet-section">
-              <CardHead
-                title={t(lang, "transformer")}
-                right={
-                  kindEff === "auto" ? (
-                    <span className="shrink-0 text-[0.75rem] font-medium text-[var(--color-accent)]">
-                      {t(lang, "combinedOnly")}
+              <CardHead title={t(lang, "transformer")} />
+              <div className="mb-4 flex flex-col gap-2">
+                <label
+                  htmlFor="tender-line"
+                  className="flex min-h-[1.625rem] items-center text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]"
+                >
+                  {t(lang, "lineLabel")}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    id="tender-line"
+                    type="text"
+                    className={cx(controlClass, "min-w-0 flex-1")}
+                    value={lineText}
+                    placeholder={t(lang, "linePlaceholder")}
+                    spellCheck={false}
+                    autoComplete="off"
+                    onChange={(e) => {
+                      setLineText(e.target.value);
+                      setLineFailed(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        readTenderLine();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="ui-btn"
+                    disabled={!lineText.trim()}
+                    onClick={readTenderLine}
+                  >
+                    {t(lang, "lineRead")}
+                  </button>
+                </div>
+                {lineFailed ? (
+                  <p role="status" className="text-[0.75rem] leading-snug text-[var(--color-danger)]">
+                    {t(lang, lineFailed)}
+                  </p>
+                ) : lineRead?.assumed.length ? (
+                  <p role="status" className="flex gap-2 text-[0.75rem] leading-snug text-[var(--color-warn)]">
+                    <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+                    <span>
+                      {t(lang, "lineCheck")}
+                      {lang === "zh" ? "：" : ": "}
+                      {lineRead.assumed.map((f) => t(lang, `lineF_${f}`)).join(listSep)}
                     </span>
-                  ) : undefined
-                }
-              />
+                  </p>
+                ) : null}
+                {/* 2026-11-04: the reader's notes (percent split, single-phase,
+                    tap ladder…) reached only the CLI. */}
+                {!lineFailed && lineRead?.notes.length ? (
+                  <ul role="status" className="flex flex-col gap-1 text-[0.75rem] leading-snug text-[var(--color-warn)]">
+                    {lineRead.notes.map((n, i) => (
+                      <li key={`${n.key}-${i}`} className="flex gap-2">
+                        <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+                        <span>{t(lang, `lineW_${n.key}`, n.vars)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
               <KindToggle
                 lang={lang}
-                kind={kindEff}
+                kind={kind}
                 onKind={pickKind}
                 autoDisabled={isOctc}
               />
               {isOctc ? (
-                <p className="mt-2 text-[0.75rem] leading-snug text-[var(--color-muted)]">
+                <p id="auto-octc-note" className="sr-only">
                   {t(lang, "autoOctcNote")}
                 </p>
               ) : null}
@@ -1080,8 +1049,8 @@ export function SelectorApp() {
                 <div className="sketch-stage flex justify-center px-3 py-2 sm:py-4">
                   <TransformerSketch
                     lang={lang}
-                    kind={kindEff}
-                    tapPoint={isOctc && kind === "auto" ? "line_end" : tapPoint}
+                    kind={kind}
+                    tapPoint={tapPoint}
                     winding={winding}
                     tapKv={windingRatedKv}
                     hvKv={hvKv}
@@ -1093,13 +1062,19 @@ export function SelectorApp() {
                   <Field as="div" label={t(lang, "tapPoint")}>
                     <TapList
                       lang={lang}
-                      kind={kindEff}
+                      kind={kind}
                       winding={winding}
-                      tapPoint={isOctc && kind === "auto" ? "line_end" : tapPoint}
+                      tapPoint={tapPoint}
                       onTap={pickTap}
+                      offHintId="delta-no-neutral"
                     />
+                    {kind === "two_winding" && winding === "delta" ? (
+                      <p id="delta-no-neutral" className="sr-only">
+                        {t(lang, "deltaNoNeutral")}
+                      </p>
+                    ) : null}
                   </Field>
-                  {kindEff === "two_winding" ? (
+                  {kind === "two_winding" ? (
                     <Field as="div" label={t(lang, "winding")}>
                       <div role="radiogroup" aria-label={t(lang, "winding")} className="ui-track">
                         {(["star", "delta"] as const).map((w) => (
@@ -1120,7 +1095,7 @@ export function SelectorApp() {
                 </div>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
-                {kindEff === "auto" ? (
+                {kind === "auto" ? (
                   <>
                     <KvField
                       lang={lang}
@@ -1159,16 +1134,30 @@ export function SelectorApp() {
                   >
                     <option value="0">
                       {ruleDuty.ok
-                        ? t(lang, "earthRule", { um: `Um ${formatUmKv(ruleDuty.umKv)} kV` })
+                        ? t(lang, "earthRule", { um: earthUmLabel(ruleDuty.umKv) })
                         : t(lang, "earthRuleNone")}
                     </option>
                     {EARTH_UM_OPTIONS.map((u) => (
                       <option key={u} value={String(u)}>
-                        Um {u} kV
+                        {earthUmLabel(u)}
                       </option>
                     ))}
                   </select>
                 </Field>
+                {/* Neutral Um follows country practice (2026-11-04 audit UM-2). */}
+                {kind === "two_winding" && tapPoint === "neutral" ? (
+                  <Field label={t(lang, "market")}>
+                    <select
+                      className={controlClass}
+                      value={market}
+                      onChange={(e) => setMarket(e.target.value)}
+                    >
+                      <option value="">{t(lang, "marketNone")}</option>
+                      <option value="IT">{t(lang, "market_IT")}</option>
+                      <option value="TR">{t(lang, "market_TR")}</option>
+                    </select>
+                  </Field>
+                ) : null}
               </div>
             </section>
             <section aria-label={t(lang, "cardDuty")} className="sheet-section">
@@ -1194,7 +1183,7 @@ export function SelectorApp() {
                       inputMode="decimal"
                       min={0}
                       step={0.1}
-                      className={`${controlClass} pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
+                      className={`${controlClass} has-suffix [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`}
                       value={transformerMva > 0 ? String(transformerMva) : ""}
                       placeholder={t(lang, "mvaPlaceholder")}
                       onChange={(e) => {
@@ -1252,7 +1241,7 @@ export function SelectorApp() {
                     !(MVA_OPTIONS as readonly number[]).includes(
                       transformerMva,
                     )) ? (
-                    <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.75rem] text-[var(--color-muted)]">
+                    <span className="ui-affix ui-affix-end">
                       MVA
                     </span>
                   ) : null}
@@ -1287,11 +1276,7 @@ export function SelectorApp() {
               <Field label={t(lang, "octcSeries")}>
                 <select
                   className={controlClass}
-                  value={
-                    input.octcSeries && input.octcSeries !== "auto"
-                      ? input.octcSeries
-                      : "IV"
-                  }
+                  value={input.octcSeries ?? "auto"}
                   onChange={(e) =>
                     patch(
                       "octcSeries",
@@ -1299,6 +1284,16 @@ export function SelectorApp() {
                     )
                   }
                 >
+                  <option value="auto">
+                    {(() => {
+                      const roman = primary
+                        ? parseTypeString(primary.model)?.phases
+                        : undefined;
+                      return roman
+                        ? `${t(lang, "auto")} · ${roman}`
+                        : t(lang, "auto");
+                    })()}
+                  </option>
                   {OCTC_SERIES_ROMANS.map((r) => (
                     <option key={r} value={r}>
                       {t(lang, `octc${r}`)}
@@ -1336,7 +1331,6 @@ export function SelectorApp() {
                   {pmOptions.map((n) => (
                     <option key={n} value={String(n)}>
                       ±{n}
-                      {lang === "zh" ? " 级" : ""}
                     </option>
                   ))}
                 </select>
@@ -1354,12 +1348,10 @@ export function SelectorApp() {
                     stepPercentPct,
                   )) ? (
                   <DecimalInput
-                    className={`${controlClass} pr-8`}
+                    className={`${controlClass} has-suffix`}
                     value={stepPercentPct}
-                    onValue={(n) => {
-                      setStepPercentPct(n);
-                      if (isLinear || !pm) commitTapRange(tapPlus, tapMinus, n);
-                    }}
+                    // 2026-11-04: the untouched 无载 ±2 is a display; the duty keeps −8.
+                    onValue={(n) => updateForm((f) => editStepPct(f, n))}
                     onBlur={() => {
                       if (
                         (STEP_PERCENT_OPTIONS as readonly number[]).includes(
@@ -1382,11 +1374,7 @@ export function SelectorApp() {
                         return;
                       }
                       const n = Number(e.target.value);
-                      setStepPercentPct(n);
-                      setStepPctCustom(false);
-                      if (isLinear || !pm) {
-                        commitTapRange(tapPlus, tapMinus, n);
-                      }
+                      updateForm((f) => editStepPct(f, n, false));
                     }}
                   >
                     <option value="__custom__">{t(lang, "custom")}</option>
@@ -1402,7 +1390,7 @@ export function SelectorApp() {
                   !(STEP_PERCENT_OPTIONS as readonly number[]).includes(
                     stepPercentPct,
                   )) ? (
-                  <span className="pointer-events-none absolute top-0 right-3 flex h-11 items-center text-[0.9rem] text-[var(--color-ink)]">
+                  <span className="ui-affix ui-affix-end">
                     %
                   </span>
                 ) : null}
@@ -1515,7 +1503,9 @@ export function SelectorApp() {
                 className={controlClass}
                 value={input.phases}
                 onChange={(e) =>
-                  patch("phases", e.target.value as SelectInput["phases"])
+                  updateForm((f) =>
+                    pickPhases(f, e.target.value as SelectInput["phases"]),
+                  )
                 }
               >
                 <option value="III">III</option>
@@ -1525,33 +1515,9 @@ export function SelectorApp() {
             </Field>
               </div>
             </section>
-            <section aria-label={t(lang, "cardSwitch")} className="sheet-section sheet-section-fold">
-              <button
-                type="button"
-                aria-expanded={switchOpen}
-                aria-controls="switch-fields"
-                onClick={() => setSwitchOpen((o) => !o)}
-                className="fold-head"
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[0.9375rem] leading-tight font-semibold text-[var(--color-ink)]">
-                    {t(lang, "cardSwitch")}
-                  </span>
-                  <span className="mt-1 line-clamp-2 text-[0.8125rem] leading-snug text-[var(--color-muted)]">
-                    {switchSummary}
-                  </span>
-                </span>
-                <ChevronDownIcon
-                  className={cx(
-                    "h-5 w-5 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
-                    switchOpen && "rotate-180",
-                  )}
-                  aria-hidden
-                />
-              </button>
-              <div className={cx("more-drop", switchOpen && "more-drop-open")}>
-              <div className="-mx-1 min-h-0 overflow-hidden px-1" {...(switchOpen ? {} : { inert: true })}>
-              <div id="switch-fields" className="grid grid-cols-2 gap-x-3 gap-y-5 pt-5 sm:gap-x-4">
+            <section aria-label={t(lang, "cardSwitch")} className="sheet-section">
+              <CardHead title={t(lang, "cardSwitch")} />
+              <div id="switch-fields" className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
                   <Field label={t(lang, "dutyKind")} as="div">
                     <div
                       className="ui-track"
@@ -1565,32 +1531,9 @@ export function SelectorApp() {
                             key={k}
                             type="button"
                             aria-pressed={on}
-                            onClick={() => {
-                              if (k === "octc") {
-                                setInput((s) => ({
-                                  ...s,
-                                  dutyKind: "octc",
-                                  preferStructure: "auto",
-                                  octcSeries:
-                                    s.octcSeries && s.octcSeries !== "auto"
-                                      ? s.octcSeries
-                                      : "IV",
-                                }));
-                                return;
-                              }
-                              setInput((s) => {
-                                const n = Number(pm);
-                                // OCTC +/− edits rewrote positions; put the ±N preset back.
-                                return s.regulation !== "linear" && n > 0
-                                  ? {
-                                      ...s,
-                                      dutyKind: "oltc",
-                                      preferStructure: "auto",
-                                      ...geometryForPm(n, s.regulation),
-                                    }
-                                  : { ...s, dutyKind: "oltc", preferStructure: "auto" };
-                              });
-                            }}
+                            // 2026-11-04 (r2 UI-2…4): a switch re-maps the read line
+                            // for the new mode and leaves no ±2 or winding behind.
+                            onClick={() => updateForm(k === "octc" ? toOctc : toOltc)}
                             className={segBtn(on)}
                           >
                             {t(lang, k === "oltc" ? "dutyOltc" : "dutyOctc")}
@@ -1602,7 +1545,7 @@ export function SelectorApp() {
                   {input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
                     <Field label={t(lang, "arcMode")} as="div">
                       <div
-                        className={cx("ui-track", isOctc && "opacity-45")}
+                        className="ui-track"
                         role="group"
                         aria-label={t(lang, "arcMode")}
                         aria-disabled={isOctc || undefined}
@@ -1773,7 +1716,7 @@ export function SelectorApp() {
                           safetyK,
                         )) ? (
                         <DecimalInput
-                          className={`${controlClass} pl-7`}
+                          className={`${controlClass} has-prefix`}
                           value={safetyK}
                           onValue={commitSafetyK}
                           onBlur={() => {
@@ -1812,14 +1755,38 @@ export function SelectorApp() {
                         !(SAFETY_K_OPTIONS as readonly number[]).includes(
                           safetyK,
                         )) ? (
-                        <span className="pointer-events-none absolute top-0 left-3 flex h-11 items-center text-[0.9rem] text-[var(--color-ink)]">
+                        <span className="ui-affix ui-affix-start">
                           ×
                         </span>
                       ) : null}
                     </div>
                   </Field>
-              </div>
-              </div>
+                  {/* The maker's own figures: Imax replaces the full-range
+                      current, Ust is a floor (2026-11-04 audit D1, D3). */}
+                  {currentMode === "capacity" ? (
+                    <>
+                      <Field label={t(lang, "osImax")}>
+                        <div className="relative">
+                          <DecimalInput
+                            className={`${controlClass} has-suffix`}
+                            value={osImaxA}
+                            onValue={setOsImaxA}
+                          />
+                          <span className="ui-affix ui-affix-end">A</span>
+                        </div>
+                      </Field>
+                      <Field label={t(lang, "osUst")}>
+                        <div className="relative">
+                          <DecimalInput
+                            className={`${controlClass} has-suffix`}
+                            value={osUstV}
+                            onValue={setOsUstV}
+                          />
+                          <span className="ui-affix ui-affix-end">V</span>
+                        </div>
+                      </Field>
+                    </>
+                  ) : null}
               </div>
             </section>
           </div>
@@ -1876,7 +1843,7 @@ export function SelectorApp() {
                     />
                   </div>
                   <p className="mt-2 text-[0.8125rem] leading-snug text-[var(--color-muted)]">
-                    {[t(lang, `tapShort_${tapEff}`), transformerLine].join(listSep)}
+                    {[t(lang, `tapShort_${tapPoint}`), transformerLine].join(listSep)}
                   </p>
                 </>
               )}
@@ -1901,14 +1868,13 @@ export function SelectorApp() {
               lang={lang}
               duty={duty}
               dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
-              ratedA={currentMode === "capacity" && duty.ok ? duty.ratedA : null}
               stepV={pickedStepV}
               model={primary}
             />
 
             {primary ? (
               <div className="plate-rule">
-                <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} hideRatings />
+                <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} />
               </div>
             ) : null}
 
@@ -2129,7 +2095,7 @@ function ModelSpec({
     <dl
       className={cx(
         "grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3",
-        compact ? "pt-1 pr-5 pb-3 pl-11" : "px-5 py-4 sm:px-6",
+        compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-6 sm:pl-12" : "px-5 py-4 sm:px-6",
       )}
     >
       {items.map((item) => (

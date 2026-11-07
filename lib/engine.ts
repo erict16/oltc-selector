@@ -1,13 +1,17 @@
 import {
   EARTH_INSULATION,
   FAMILY_MIN_RANK,
-  INTERNAL_INSULATION,
   SERIES,
   coveringUms,
+  coversAcrossTap,
+  defaultSelectorSizeForUm,
+  internalInsulation,
   nearestCurrent,
   nearestUm,
   phaseToken,
   resolveSelectorSize,
+  SIZE_ORDER,
+  stepCapacityKva,
   umForEarthInsulation,
 } from "./catalog";
 import {
@@ -16,6 +20,9 @@ import {
   phaseConnectionLegal,
   resolveOctcListModel,
 } from "./typeExists";
+import { catalogueUmFromRatedKv } from "./deriveUm";
+import { DRUM_SOLD_ROWS } from "./listIndex";
+import { parseTypeString } from "./parseType";
 import { resolveTapFields } from "./tapCode";
 import type {
   Connection,
@@ -30,10 +37,26 @@ import type {
 } from "./types";
 
 function normOctcContact(raw: string | undefined): string {
-  const t = (raw ?? "").replace(/\s+/g, "").toLowerCase();
-  const m = t.match(/^(\d+)x(\d+)$/);
+  // "6×5" and "6*5" are written in OS sheets too.
+  const t = (raw ?? "").replace(/\s+/g, "").replace(/[×*✕]/g, "x").toLowerCase();
+  // 2026-11-04 r3 ENGINE-5: the OS writes the grade letter too (12x11D, 6x5B);
+  // it was dropped and 6x5 came out. The list lookup still picks the letter.
+  const m = t.match(/^(\d+)x(\d+)[a-e]?$/);
   if (!m) return "";
   return `${Number(m[1])}x${Number(m[2])}`;
+}
+
+/** Positions a DETC contact covers: the first number; 4x5 / 5x5 / 4x2 / 5x2 cover 5. */
+export function octcContactPositions(contact: string): number {
+  const c = normOctcContact(contact);
+  if (c === "4x5" || c === "5x5" || c === "4x2" || c === "5x2") return 5;
+  return Number(c.split("x")[0]) || 0;
+}
+
+/** Position count the OCTC duty asks for: ±N → 2N+1, else positions. */
+function octcPositionsAsked(input: SelectInput): number | undefined {
+  if (input.plusMinusSteps != null && input.plusMinusSteps > 0) return 2 * input.plusMinusSteps + 1;
+  return input.positions;
 }
 
 /**
@@ -46,15 +69,45 @@ export function octcContactCode(
   seriesId?: string,
 ): string {
   const hinted = normOctcContact(input.octcContact);
-  if (hinted) return hinted;
   let pos = input.positions;
   if (input.plusMinusSteps != null && input.plusMinusSteps > 0) {
     pos = 2 * input.plusMinusSteps + 1;
   }
+  // 2026-11-04: drum contacts must cover the positions; "" = no type. A 6x5
+  // used to stand for 7–12 positions and a 12x12 hint made WSGVII strings.
   if (seriesId === "wsg") {
+    if (pos != null && pos > 6) return "";
+    // A typed contact must cover the positions too (4x5 → 5, 6x5 → 6).
+    if (hinted === "4x5") return pos == null || pos <= 5 ? hinted : "";
+    if (hinted === "6x5") return hinted;
+    if (hinted) return "";
     if (pos == null || pos <= 5) return "4x5";
     return "6x5";
   }
+  if (seriesId === "wdg" || seriesId === "wlg") {
+    const roman = input.octcSeries ?? "auto";
+    // 2026-11-04 r3 ENGINE-9: each sold drum contact has one roman (WDG 6x5 = V,
+    // WLG 4x2 = VIII), so a typed contact on auto settles it. It gave no type.
+    const hintRoman = roman === "auto" && hinted === "6x5" && seriesId === "wdg";
+    let drum = "";
+    if (seriesId === "wlg") {
+      if ((roman === "VIII" || (roman === "auto" && hinted === "4x2")) && (pos == null || pos <= 5)) {
+        drum = "4x2";
+      }
+    } else if (roman === "V" || hintRoman) {
+      if (pos == null || pos <= 6) drum = "6x5";
+    } else if (roman === "auto" || roman === "IV") {
+      if (pos == null || pos <= 5) drum = "5x5";
+    }
+    return hinted && hinted !== drum ? "" : drum;
+  }
+  // 2026-11-04 r2 ENGINE-2: a typed cage contact must cover the positions too
+  // (6x5 for 17 positions gave WSLIV-800D/72.5-6x5A).
+  if (hinted && pos != null && octcContactPositions(hinted) < pos) return "";
+  if (hinted) return hinted;
+  // 2026-11-04: every sold WSLVIII is 5x2 (web has no contact field). More
+  // positions keep the derivation, so the list decides.
+  if (input.octcSeries === "VIII" && (pos == null || pos <= 5)) return "5x2";
   if (pos == null || pos <= 6) return "6x5";
   if (pos <= 7) return "7x6";
   if (pos <= 8) return "8x7";
@@ -70,6 +123,7 @@ export function octcSizeLetter(
   um: number,
   contact: string,
   requested?: SelectorSize | "auto",
+  acrossTapGiven = false,
 ): SelectorSize {
   if (requested && requested !== "auto") {
     if (requested === "DE") return "E";
@@ -78,8 +132,10 @@ export function octcSizeLetter(
   const c = contact.toLowerCase();
   if (c === "18x17" || c === "16x15") return "E";
   if (c === "12x11" || c === "10x9" || c === "12x12") return "D";
+  // 2026-11-04: sales write A up to 145 kV (126-6x5A ×5). The letter may be
+  // an inner-insulation size, so a stated across-tap stress keeps B above 72.5.
   if (
-    um <= 72.5 + 0.1 &&
+    um <= (acrossTapGiven ? 72.5 : 145) + 0.1 &&
     ["6x5", "4x5", "5x4", "5x2", "4x3", "3x2", "7x6"].includes(c)
   ) {
     return "A";
@@ -100,11 +156,15 @@ export function octcRoman(
   familyCode?: string,
 ): OctcSeriesRoman {
   if (series && series !== "auto") return series;
-  const c = (contact ?? "").toLowerCase();
+  // r3 ENGINE-5: a typed contact may carry its grade letter (5x2B).
+  const c = normOctcContact(contact);
   if (c === "5x2" || c === "12x2") return "VIII";
   if (c === "3x2" || c === "6x2") return "VI";
   if (c === "5x4" || c === "4x3") return "V";
   if (c === "12x12") return "VII";
+  // r3 ENGINE-9: the sold drum rows tie the contact to the roman.
+  if (familyCode === "WDG" && c === "6x5") return "V";
+  if (familyCode === "WLG" && c === "4x2") return "VIII";
   if (familyCode === "WSG" && connection === "D") return "II";
   return "IV";
 }
@@ -113,11 +173,20 @@ function isOctcSeries(s: SeriesDef): boolean {
   return s.dutyKind === "octc";
 }
 
+/** 2026-11-04: single-phase drum OCTC. A 3x set is the normal product, ranked as one unit. */
+const DRUM_SINGLE = new Set(["wdg", "wlg"]);
+function rankUnits(seriesId: string, unitCount: number): number {
+  return DRUM_SINGLE.has(seriesId) ? 1 : unitCount;
+}
+
 /** CV2 brochure: 2000 V @ 10 contacts, 1500 V @ 12 contacts (approx by pitch). */
 function maxStepVoltageForSeries(
   s: SeriesDef,
   pitch: number,
+  current?: number,
 ): number {
+  const byCurrent = current != null ? s.maxStepVoltageByCurrent?.[current] : undefined;
+  if (byCurrent != null) return byCurrent;
   if (s.id === "cv2" || s.id === "cv" || s.id === "sv") {
     if (pitch <= 10) return s.id === "cv2" ? 2000 : 1500;
     if (pitch <= 12) return s.id === "cv2" ? 1500 : 1400;
@@ -186,7 +255,9 @@ function buildModelString(
       octcSeries,
       series.code,
     );
-    core = `${series.code}${roman}-${current}${yd}/${umToken}-${tapCode}`;
+    // 2026-11-04: single-phase drum strings carry no Y/D (WDGIV-800/40.5-5x5A).
+    const ydToken = DRUM_SINGLE.has(series.id) ? "" : yd;
+    core = `${series.code}${roman}-${current}${ydToken}/${umToken}-${tapCode}`;
   } else if (series.code === "HWDK") {
     core = `${series.code}${phases}-${current}/${umToken}`;
     if (tapCode && /^\d+$/.test(tapCode)) core += `-${tapCode}`;
@@ -250,6 +321,7 @@ function adequacyScore(
   current: number,
   um: number,
   unitCount: number,
+  pitch: number,
 ): number {
   let score = 10000;
 
@@ -273,6 +345,38 @@ function adequacyScore(
   }
   if (input.mounting === "in_tank" && s.id === "hwv") score -= 4000;
 
+  // Sales-practice exceptions to the family order (2026-11-04 audit, OS
+  // 2025–2026). Each moves the primary only; the other family stays listed.
+  // FAM-1: oil CV/SV past the 90% Ust line. Promotes the insurance card
+  // (CM) to primary: CM sold on 8 of 9 such rows. Counter-case: ELIZ
+  // E-V250092 bought CVIII-350Y at 1368 V (91%).
+  if (
+    (s.id === "cv" || s.id === "sv") &&
+    input.stepVoltageV > STEP_VOLTAGE_LINE * maxStepVoltageForSeries(s, pitch)
+  ) {
+    score -= 3500;
+  }
+  // FAM-4: single-phase duty takes combined CM2I, not compound CV2I
+  // (E-CM2250006, E-CM2250242, E-CM2260142-143). Oil CVI stays: Sanaky.
+  if (input.phases === "I" && s.id === "cv2") score -= 3500;
+  // FAM-2: tapped winding of 400 kV class: SHZV on 15 of 17 orders (HMT,
+  // TAMINI, Brazil); EFACEC bought CM2 twice.
+  // FAM-3 (low confidence, fitted on 3 rows: E-SHZV250020-023 453 A,
+  // E-SHZV260095-098 571 A, E-SHZV260105 446 A): 220–275 kV class, one III
+  // unit above 430 A went SHZV. E-CM2260140 at 423 A stayed CM2. One III
+  // unit only: 3× moved R02 to 3xSHZVI-1500, not in the SHZV data.
+  const windUm = input.tapWindingKv ? catalogueUmFromRatedKv(input.tapWindingKv) : 0;
+  if (
+    s.id === "shzv" &&
+    (windUm >= 420 ||
+      (unitCount === 1 &&
+        input.phases === "III" &&
+        windUm >= 252 &&
+        input.throughCurrentA > 430))
+  ) {
+    score += 1700;
+  }
+
   // Multi-unit is last resort commercially (see post-sort hard rule too).
   // Soft penalty only ranks among multi options when no single exists.
   if (unitCount > 1) {
@@ -287,7 +391,7 @@ function adequacyScore(
   score -= overshootUm * 3;
 
   // Mild step-capacity tightness
-  const psin = s.stepCapacityByCurrent?.[current];
+  const psin = stepCapacityKva(s, current, pitch, input.throughCurrentA);
   if (psin && input.stepVoltageV > 0) {
     const need = (input.throughCurrentA * input.stepVoltageV) / 1000;
     if (need > 0 && psin >= need) {
@@ -308,13 +412,17 @@ type Attempt = {
   deltaForced?: boolean;
 };
 
-/** Catalogue I covers duty, with 1% commercial overcurrent (2026 OS: 603.75 on CV2-600). */
+/**
+ * Catalogue I covers duty: not less than the duty (IEC 60214-2, SelMan).
+ * 2026-11-04 audit D2: the 1% tolerance put 351–353 A on 350 A units where
+ * Huaming sold the next size 4 times; only 2 sales (603.75 / 603.86 A on
+ * CV2-600) ever used it.
+ */
 function ratingCoversDuty(wanted: number, rating: number): boolean {
-  if (wanted <= rating + 0.01) return true;
-  return wanted <= rating * 1.01 + 0.5;
+  return wanted <= rating + 0.01;
 }
 
-function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
+function buildAttempts(s: SeriesDef, input: SelectInput, octcWide = false): Attempt[] {
   const out: Attempt[] = [];
   const covering = coveringUms(input.umKv, s.umKv).filter(
     (u) => u >= input.umKv - 0.1,
@@ -324,10 +432,33 @@ function buildAttempts(s: SeriesDef, input: SelectInput): Attempt[] {
   // 126 twin only on the min-adequate families (CV2/CM2/…). SHZV extra Ums
   // crowd the ranked list and hide customer-locked oil CM rows (QS2607197).
   // OCTC never takes the twin: WSL @72.5 used to beat WSG @40.5 by 4 points.
+  // 2026-11-04: except a cage lock. The list has 5 WSL rows at 40.5; the 35 kV
+  // class cage sales are all WSL @72.5. The Um overshoot keeps 40.5 first.
   const ums =
     !isOctcSeries(s) && (FAMILY_MIN_RANK[s.id] ?? s.rank) < 40
       ? covering
-      : [um0];
+      : s.id === "wsl" && (input.preferStructure === "cage" || octcWide)
+        ? covering
+        : [um0];
+
+  // 2026-11-04: single-phase drum, one unit per phase. A drum lock takes the
+  // next Um too, as the cage lock does: the sold rows are the list, and 19 of
+  // 36 drum sales on 35 kV windings are @72.5 (no WDGIV-1250/40.5 row).
+  if (DRUM_SINGLE.has(s.id)) {
+    const curI = nearestCurrent(input.throughCurrentA, s.currents.I ?? []);
+    if (curI != null && ratingCoversDuty(input.throughCurrentA, curI)) {
+      for (const um of input.preferStructure === "drum" || octcWide ? covering : [um0]) {
+        out.push({
+          series: s,
+          phases: "I",
+          current: curI,
+          um,
+          unitCount: input.phases === "I" ? 1 : input.phases === "II" ? 2 : 3,
+        });
+      }
+    }
+    return out;
+  }
 
   // CZ dry: 2025 list + 2026 OS are 3×CZI only (no CZIII / CZI row).
   // Do not emit a single-unit CZIII — ranking would put it first.
@@ -445,6 +576,248 @@ function diversifyResults(ranked: ModelResult[]): ModelResult[] {
   return [primary, ...rest];
 }
 
+type TapFields = ReturnType<typeof resolveTapFields>;
+type LimitAxis = "um" | "current" | "positions" | "ust" | "kva";
+/** One catalogue limit a family misses: what the duty needs, what it has. */
+type LimitBlock = { axis: LimitAxis; need: number; limit: number; label: string };
+type FamilyMiss = { s: SeriesDef; blocks: LimitBlock[]; worst: number };
+
+const LIMIT_AXES: LimitAxis[] = ["um", "current", "positions", "ust", "kva"];
+
+/** Mounting + arc medium words for a no-result line (noteI18n translates them). */
+function limitScope(input: SelectInput): { en: string; zh: string } {
+  if (input.dutyKind === "octc") return { en: "OCTC", zh: "无载" };
+  if (input.mounting === "dry_type") return { en: "dry-type", zh: "干式" };
+  if (input.mounting === "reactor") return { en: "reactor", zh: "电抗式" };
+  const on =
+    input.mounting === "on_tank" || input.mounting === "external_compartment";
+  const vac = input.preferVacuum || input.medium === "oil_vacuum";
+  const oil = !vac && input.medium === "oil";
+  return {
+    en: `${on ? "on-tank" : "in-tank"}${vac ? " vacuum" : oil ? " oil" : ""}`,
+    zh: `${on ? "箱外" : "箱内"}${vac ? "真空" : oil ? "油浸" : ""}`,
+  };
+}
+
+/** Every limit this family misses for the duty. Null when no type of it exists for the phase / connection. */
+function familyMiss(s: SeriesDef, input: SelectInput, tap: TapFields): FamilyMiss | null {
+  const octc = isOctcSeries(s);
+  const ratings: { current: number; label: string }[] = [];
+  // CZ is sold as 3 × phase I only.
+  if (s.id === "cz") {
+    for (const c of s.currents.I ?? []) ratings.push({ current: c, label: `3×${s.code}I-${c}` });
+  } else if (s.id === "wdg" || s.id === "wlg") {
+    // 2026-11-04 r2 ENGINE-4: name a sold drum row (WDGIV-1250/72.5; no WDGI
+    // string exists) and the unit count buildAttempts uses for the phases.
+    const n = input.phases === "I" ? 1 : input.phases === "II" ? 2 : 3;
+    for (const c of s.currents.I ?? []) {
+      const row = DRUM_SOLD_ROWS.filter((r) => r.startsWith(s.code) && r.includes(`-${c}/`)).pop();
+      const name = row ? row.replace(/-[^-]+$/, "") : `${s.code}-${c}`;
+      ratings.push({ current: c, label: `${n > 1 ? `${n}×` : ""}${name}` });
+    }
+  } else {
+    const legal = phaseConnectionLegal(s, input.phases, input.connection);
+    if (legal) {
+      for (const c of s.currents[input.phases] ?? []) {
+        ratings.push({ current: c, label: `${s.code}${input.phases}-${c}` });
+      }
+    }
+    if (!octc && (input.phases === "III" || !legal)) {
+      for (const c of s.currents.I ?? []) ratings.push({ current: c, label: `3×${s.code}I-${c}` });
+    }
+  }
+  if (!ratings.length) return null;
+
+  const blocks: LimitBlock[] = [];
+  if (!s.umKv.some((u) => u >= input.umKv - 0.1)) {
+    blocks.push({ axis: "um", need: input.umKv, limit: Math.max(...s.umKv), label: s.code });
+  }
+  const top = ratings.reduce((a, b) => (b.current > a.current ? b : a));
+  const covering = ratings.filter((r) => ratingCoversDuty(input.throughCurrentA, r.current));
+  if (!covering.length) {
+    blocks.push({ axis: "current", need: input.throughCurrentA, limit: top.current, label: top.label });
+  }
+  const pool = covering.length ? covering : [top];
+
+  if (octc) {
+    let pos = input.positions;
+    if (input.plusMinusSteps != null && input.plusMinusSteps > 0) pos = 2 * input.plusMinusSteps + 1;
+    if (pos != null && pos > s.maxPositionsLinear) {
+      blocks.push({ axis: "positions", need: pos, limit: s.maxPositionsLinear, label: s.code });
+    }
+  } else {
+    const maxPos =
+      input.regulation === "linear" ? s.maxPositionsLinear : s.maxPositionsWithChangeOver;
+    if (tap.positions > maxPos) {
+      blocks.push({ axis: "positions", need: tap.positions, limit: maxPos, label: s.code });
+    }
+    if (input.stepVoltageV > 0) {
+      const ust = Math.max(
+        ...pool.map((r) => maxStepVoltageForSeries(s, tap.pitch, r.current)),
+      );
+      if (input.stepVoltageV > ust + 0.5) {
+        blocks.push({ axis: "ust", need: input.stepVoltageV, limit: ust, label: s.code });
+      }
+      const caps = pool.map((r) => ({
+        r,
+        kva: stepCapacityKva(s, r.current, tap.pitch, input.throughCurrentA),
+      }));
+      const needKva = (input.throughCurrentA * input.stepVoltageV) / 1000;
+      if (caps.every((c) => c.kva != null)) {
+        const best = caps.reduce((a, b) => ((b.kva ?? 0) > (a.kva ?? 0) ? b : a));
+        if (needKva > (best.kva ?? 0) + 0.5) {
+          blocks.push({ axis: "kva", need: needKva, limit: best.kva ?? 0, label: best.r.label });
+        }
+      }
+    }
+  }
+  const worst = Math.max(0, ...blocks.map((b) => (b.limit > 0 ? b.need / b.limit : Infinity)));
+  return { s, blocks, worst };
+}
+
+function fmtNeed(axis: LimitAxis, v: number): string {
+  if (axis === "um") return String(v);
+  if (axis === "current" && v < 100) return String(Math.round(v * 10) / 10);
+  return String(Math.round(v));
+}
+
+/** A limit that blocks every family: the duty against the catalogue ceiling. */
+function everyFamilyLine(
+  b: LimitBlock,
+  scope: { en: string; zh: string },
+  pitch: number,
+): { en: string; zh: string } {
+  const n = fmtNeed(b.axis, b.need);
+  const max = fmtNeed(b.axis, b.limit);
+  switch (b.axis) {
+    case "um":
+      return {
+        en: `Um ${n} kV is above the highest ${scope.en} class (${max} kV, ${b.label}).`,
+        zh: `Um ${n} kV 超出${scope.zh}最高等级（${max} kV，${b.label}）。`,
+      };
+    case "current":
+      return {
+        en: `Through-current ${n} A is above the largest ${scope.en} rating (${max} A, ${b.label}).`,
+        zh: `通过电流 ${n} A 超出${scope.zh}最大额定（${max} A，${b.label}）。`,
+      };
+    case "positions":
+      return {
+        en: `${n} positions are above every ${scope.en} family (max ${max}, ${b.label}).`,
+        zh: `${n} 个工作位置超出${scope.zh}所有系列（最多 ${max}，${b.label}）。`,
+      };
+    case "ust":
+      return {
+        en: `Step voltage ${n} V is above every ${scope.en} family at pitch ${pitch} (max ${max} V, ${b.label}).`,
+        zh: `级电压 ${n} V 超出节距 ${pitch} 下${scope.zh}所有系列（最高 ${max} V，${b.label}）。`,
+      };
+    case "kva":
+      return {
+        en: `Step capacity ${n} kVA is above every ${scope.en} family at pitch ${pitch} (max ${max} kVA, ${b.label}).`,
+        zh: `级容量 ${n} kVA 超出节距 ${pitch} 下${scope.zh}所有系列（最大 ${max} kVA，${b.label}）。`,
+      };
+  }
+}
+
+/** One family's own limit, when no single limit blocks every family. */
+function familyLine(code: string, b: LimitBlock, pitch: number): { en: string; zh: string } {
+  const n = fmtNeed(b.axis, b.need);
+  const max = fmtNeed(b.axis, b.limit);
+  switch (b.axis) {
+    case "um":
+      return {
+        en: `${code}: Um ${n} kV is above its ${max} kV.`,
+        zh: `${code}：Um ${n} kV 超出其 ${max} kV。`,
+      };
+    case "current":
+      return {
+        en: `${code}: through-current ${n} A is above its ${max} A.`,
+        zh: `${code}：通过电流 ${n} A 超出其 ${max} A。`,
+      };
+    case "positions":
+      return {
+        en: `${code}: ${n} positions are above its ${max}.`,
+        zh: `${code}：${n} 个工作位置超出其 ${max}。`,
+      };
+    case "ust":
+      return {
+        en: `${code}: step voltage ${n} V is above its ${max} V at pitch ${pitch}.`,
+        zh: `${code}：级电压 ${n} V 超出其节距 ${pitch} 下的 ${max} V。`,
+      };
+    case "kva":
+      return {
+        en: `${code}: step capacity ${n} kVA is above its ${max} kVA at pitch ${pitch}.`,
+        zh: `${code}：级容量 ${n} kVA 超出其节距 ${pitch} 下的 ${max} kVA。`,
+      };
+  }
+}
+
+/**
+ * Why nothing fits, in one or two lines. A limit that blocks every family is
+ * reported against the catalogue ceiling. Otherwise the family closest to
+ * fitting (fewest misses, smallest overshoot) and the nearest family that
+ * clears its limit each name what stops them. Null when some family clears
+ * every limit here (type existence, selector grade): the caller keeps its
+ * own message.
+ */
+function noFitReasons(
+  families: SeriesDef[],
+  input: SelectInput,
+  tap: TapFields,
+): { en: string[]; zh: string[] } | null {
+  const misses = families
+    .map((s) => familyMiss(s, input, tap))
+    .filter((m): m is FamilyMiss => m != null);
+  if (!misses.length || misses.some((m) => !m.blocks.length)) return null;
+  const pitch = tap.pitch;
+  const en: string[] = [];
+  const zh: string[] = [];
+
+  const everywhere = LIMIT_AXES.filter((ax) =>
+    misses.every((m) => m.blocks.some((b) => b.axis === ax)),
+  ).filter((ax, _, all) => !(ax === "kva" && all.includes("current"))); // kVA follows from I
+  if (everywhere.length) {
+    const scope = limitScope(input);
+    for (const ax of everywhere.slice(0, 2)) {
+      const blocks = misses
+        .map((m) => ({ m, b: m.blocks.find((b) => b.axis === ax)! }))
+        .sort((x, y) => y.b.limit - x.b.limit || x.m.s.rank - y.m.s.rank);
+      const ceiling = blocks[0].b;
+      // Families that share a code-level ceiling (35 positions) are listed together.
+      const label =
+        ax === "current" || ax === "kva"
+          ? ceiling.label
+          : [...new Set(blocks.filter((x) => x.b.limit === ceiling.limit).map((x) => x.m.s.code))]
+              .slice(0, 3)
+              .join("/");
+      const line = everyFamilyLine({ ...ceiling, label }, scope, pitch);
+      en.push(line.en);
+      zh.push(line.zh);
+    }
+    return { en, zh };
+  }
+
+  const ranked = [...misses].sort(
+    (a, b) => a.blocks.length - b.blocks.length || a.worst - b.worst || a.s.rank - b.s.rank,
+  );
+  const ratio = (b: LimitBlock) => (b.limit > 0 ? b.need / b.limit : Infinity);
+  const worstBlock = (m: FamilyMiss) =>
+    m.blocks.reduce((a, b) => (ratio(b) > ratio(a) ? b : a));
+  const closest = ranked[0];
+  const bind = worstBlock(closest);
+  const first = familyLine(closest.s.code, bind, pitch);
+  en.push(first.en);
+  zh.push(first.zh);
+  const clears = ranked.find(
+    (m) => m !== closest && !m.blocks.some((b) => b.axis === bind.axis),
+  );
+  if (clears) {
+    const second = familyLine(clears.s.code, worstBlock(clears), pitch);
+    en.push(second.en);
+    zh.push(second.zh);
+  }
+  return { en, zh };
+}
+
 export function selectOltc(input: SelectInput): SelectOutput {
   const errorsEn: string[] = [];
   const errorsZh: string[] = [];
@@ -462,6 +835,14 @@ export function selectOltc(input: SelectInput): SelectOutput {
   if (!Number.isFinite(input.stepVoltageV) || input.stepVoltageV < 0) {
     errorsEn.push("Step voltage must be a number ≥ 0 (0 = not given).");
     errorsZh.push("级电压须为 ≥ 0 的数字（0 表示未给）。");
+  }
+  // 2026-11-04 r2 ORDERS-9: 1 position gave CV2III-350D/40.5-10010 (no regulation).
+  if (
+    input.positions != null &&
+    !(Number.isInteger(input.positions) && input.positions >= 2)
+  ) {
+    errorsEn.push("Positions must be a whole number of at least 2.");
+    errorsZh.push("档位数须为不小于 2 的整数。");
   }
 
   if (errorsEn.length) {
@@ -507,18 +888,29 @@ export function selectOltc(input: SelectInput): SelectOutput {
       s.connections.includes("any")
     );
   });
+  // 2026-11-04: WSG is quoted as II only and never sold; VI–VIII gave invented strings.
+  candidates = candidates.filter(
+    (s) =>
+      s.id !== "wsg" ||
+      ["auto", "II", "IV", "V"].includes(input.octcSeries ?? "auto"),
+  );
 
   const wantStruct = input.preferStructure;
-  if (input.transformerKind === "auto" && !wantOctc) {
+  const autoKind = input.transformerKind === "auto";
+  if ((autoKind || input.combinedOnly) && !wantOctc) {
     if (wantStruct === "compound") {
       return {
         ok: false,
         results: [],
         errorsEn: [
-          "Autotransformers take combined types only: compound types (CV/CV2/SV) stop at 200 kV across the tap winding.",
+          autoKind
+            ? "Autotransformers take combined types only: compound types (CV/CV2/SV) stop at 200 kV across the tap winding."
+            : "Tapped windings of 220 kV class and above take combined types only: compound types (CV/CV2/SV) stop at 200 kV across the tap winding.",
         ],
         errorsZh: [
-          "自耦变只用组合式：复合式（CV/CV2/SV）跨调压绕组冲击上限 200 kV。",
+          autoKind
+            ? "自耦变只用组合式：复合式（CV/CV2/SV）跨调压绕组冲击上限 200 kV。"
+            : "220 kV 级及以上调压绕组只用组合式：复合式（CV/CV2/SV）跨调压绕组冲击上限 200 kV。",
         ],
       };
     }
@@ -549,8 +941,16 @@ export function selectOltc(input: SelectInput): SelectOutput {
   const seen = new Set<string>();
   /** A family fit on current/Um/Ust but no grade covered the across-tap stress. */
   let acrossTapShort = false;
+  /** r3 ORDERS-11: results raised by the TR practice, with the Um-default letter. */
+  const trRaised = new Map<ModelResult, SelectorSize>();
 
-  for (const s of candidates) {
+  // 2026-11-04 r3 ENGINE-6: OCTC auto takes the duty Um first (WSG @40.5 ranks
+  // ahead of WSL @72.5). When that finds nothing, a second pass takes the Ums
+  // the cage and drum locks use: the list has only 5 WSL rows at 40.5.
+  const octcWidePass = wantOctc && (wantStruct ?? "auto") === "auto";
+  for (const wide of octcWidePass ? [false, true] : [false]) {
+    if (wide && results.length) break;
+    for (const s of candidates) {
       if (!compoundCoversAcrossTap(s, input)) {
         acrossTapShort = true;
         continue;
@@ -576,7 +976,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
         if (octcPos != null && octcPos > s.maxPositionsLinear) continue;
       }
 
-      for (const att of buildAttempts(s, input)) {
+      for (const att of buildAttempts(s, input, wide)) {
         const phaseCurrents = s.currents[att.phases] ?? s.currents.I ?? [];
 
         // Covering catalogue I: smallest first, then the next step so a
@@ -587,8 +987,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
             ? (input.throughCurrentA * input.stepVoltageV) / 1000
             : 0;
         const capacityOk = (c: number) => {
-          const psin = s.stepCapacityByCurrent?.[c];
+          const psin = stepCapacityKva(s, c, tap.pitch, input.throughCurrentA);
           if (psin != null && need > psin + 0.5) return false;
+          if (input.stepVoltageV > maxStepVoltageForSeries(s, tap.pitch, c) + 0.5) return false;
           return true;
         };
         // Nameplate current already includes short-time overload.
@@ -618,6 +1019,41 @@ export function selectOltc(input: SelectInput): SelectOutput {
         for (const current of currentsToEmit) {
         const octc = isOctcSeries(s);
         const contact = octc ? octcContactCode(input, s.id) : "";
+        if (octc && !contact) continue;
+        // 2026-11-04 r2 ORDERS-1: a 330 kV-class neutral at Um ≤ 126 was sold one
+        // grade above the Um default on 5 of 6 designs (HMT 400 kV 126D ×9 groups,
+        // Siemens Brazil 440 kV and HMR 330 kV 72.5C; EFACEC bought 126C). Held
+        // out: fit on 2025 it gains 8 / loses 0 on 2026; fit on 2026 it nets +1 on 2025.
+        const umDefault = defaultSelectorSizeForUm(att.um);
+        const classBump =
+          !octc &&
+          s.usesSelectorSize &&
+          input.transformerKind !== "auto" &&
+          (input.tapWindingKv ?? 0) >= 330 &&
+          att.um <= 126 + 0.1 &&
+          // One stated value alone does not settle the grade (ENGINE-1).
+          !((input.acrossTapBilKv ?? 0) > 0 && (input.acrossTapPfKv ?? 0) > 0)
+            ? SIZE_ORDER[SIZE_ORDER.indexOf(umDefault) + 1]
+            : undefined;
+        // 2026-11-04 r3 ORDERS-11: Turkish buyers take 72.5C on star neutrals of
+        // 110 kV class and up (sold 25 of 26 row groups; HMT-Green E-M250149 took B).
+        // Buyer practice, not a limit: the B string stays in the alternatives.
+        const trBump =
+          !octc &&
+          !classBump &&
+          s.usesSelectorSize &&
+          (input.market ?? "").trim().toUpperCase() === "TR" &&
+          input.connection === "Y" &&
+          input.transformerKind !== "auto" &&
+          (input.tapWindingKv ?? 0) >= 110 &&
+          att.um <= 72.5 + 0.1 &&
+          !((input.acrossTapBilKv ?? 0) > 0 && (input.acrossTapPfKv ?? 0) > 0) &&
+          // 2026-11-04 final ENGINE-11: one stated value above what B withstands
+          // (LI 350 > 265) sets C from the stress, not from practice: no
+          // "B also fits" caution and no B copy.
+          coversAcrossTap(umDefault, input.acrossTapBilKv ?? 0, input.acrossTapPfKv ?? 0, s.id)
+            ? SIZE_ORDER[SIZE_ORDER.indexOf(umDefault) + 1]
+            : undefined;
         const gradePick =
           !octc && s.usesSelectorSize
             ? resolveSelectorSize(
@@ -625,6 +1061,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
                 input.selectorSize ?? "auto",
                 input.acrossTapBilKv,
                 input.acrossTapPfKv,
+                s.id,
+                // Only a, not b, is checked: the stated stress may lower the
+                // grade where no phase-to-phase gap matters (2026-11-04 GRADE-2).
+                att.phases === "I" || (att.phases === "III" && input.connection === "Y"),
+                classBump ?? trBump,
               )
             : null;
         if (gradePick && gradePick.size == null) {
@@ -632,15 +1073,30 @@ export function selectOltc(input: SelectInput): SelectOutput {
           acrossTapShort = true;
           continue;
         }
-        const selectorSize: SelectorSize = octc
-          ? octcSizeLetter(att.um, contact, input.selectorSize ?? "auto")
+        let selectorSize: SelectorSize = octc
+          ? octcSizeLetter(
+              att.um,
+              contact,
+              input.selectorSize ?? "auto",
+              (input.acrossTapBilKv ?? 0) > 0 || (input.acrossTapPfKv ?? 0) > 0,
+            )
           : (gradePick?.size ?? "");
         const tapCode = octc ? contact : tap.tapCode;
+        // 2026-11-04: HWDK writes 2N+1 (sold HWDKI-1500/40.5-17 for ±8, not
+        // Fig. 3-3's 19). CVT writes pitch 09 + positions (brochure 0909).
         const modelTap = octc
           ? `${contact}${selectorSize}`
-          : s.id === "cz" || s.id === "hwdk"
+          : s.id === "cz"
             ? String(tap.positions)
-            : tap.tapCode;
+            : s.id === "hwdk"
+              ? String(
+                  input.plusMinusSteps != null && input.plusMinusSteps > 0
+                    ? 2 * input.plusMinusSteps + 1
+                    : tap.positions,
+                )
+              : s.id === "cvt"
+                ? `09${String(tap.positions).padStart(2, "0")}`
+                : tap.tapCode;
 
         const umToken = formatUmToken(att.um, selectorSize, s.usesSelectorSize);
         const phases = phaseToken(att.phases);
@@ -692,6 +1148,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
           const listed = resolveOctcListModel(finalModel);
           if (!listed) continue;
           finalModel = listed;
+          // 2026-11-04: the list row's letter wins when the resolver fell back.
+          const listedSize = parseTypeString(listed)?.selectorSize;
+          if (listedSize) selectorSize = listedSize as SelectorSize;
         } else if (!commercialTypeExists(finalModel, s)) {
           continue;
         }
@@ -700,7 +1159,14 @@ export function selectOltc(input: SelectInput): SelectOutput {
         seen.add(finalModel);
 
         const modelWithMdu = mduStr ? `${finalModel}+${mduStr}` : finalModel;
-        const score = adequacyScore(s, input, current, att.um, att.unitCount);
+        const score = adequacyScore(
+          s,
+          input,
+          current,
+          att.um,
+          rankUnits(s.id, att.unitCount),
+          tap.pitch,
+        );
 
         const reasonsEn: string[] = [];
         const reasonsZh: string[] = [];
@@ -709,15 +1175,6 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const cautionsEn: string[] = [];
         const cautionsZh: string[] = [];
 
-        if (input.throughCurrentA > current + 0.01) {
-          const pct = ((input.throughCurrentA / current - 1) * 100).toFixed(1);
-          cautionsEn.push(
-            `Duty ${input.throughCurrentA.toFixed(1)} A is ${pct}% above the ${current} A rating (1% commercial tolerance). Confirm with engineering.`,
-          );
-          cautionsZh.push(
-            `需求 ${input.throughCurrentA.toFixed(1)} A 超出额定 ${current} A 的 ${pct}%（按 1% 商务容差放行），须工程确认。`,
-          );
-        }
         if (!octc && !(input.stepVoltageV > 0)) {
           cautionsEn.push(
             "Step voltage not given: step-voltage and step-capacity limits were not checked.",
@@ -732,12 +1189,98 @@ export function selectOltc(input: SelectInput): SelectOutput {
             `分接代码 ${tap.tapCode} 不在样本图 3-3 标准接线内，须工程确认接线。`,
           );
         }
+        if (!octc) {
+          // Huaming 选型培训 (JL 2024-05): these go to technical special review.
+          const review: string[] = [];
+          const reviewZh: string[] = [];
+          if (s.id === "cm2" && input.stepVoltageV > 2500 + 0.5) {
+            review.push("CM2 step voltage above 2500 V");
+            reviewZh.push("CM2 级电压超过 2500 V");
+          }
+          if (s.id === "shzv" && input.stepVoltageV > 3300 + 0.5) {
+            review.push("SHZV step voltage above 3300 V");
+            reviewZh.push("SHZV 级电压超过 3300 V");
+          }
+          if (selectorSize === "DE" || selectorSize === "E") {
+            review.push(`selector grade ${selectorSize}`);
+            reviewZh.push(`选择器 ${selectorSize} 级`);
+          }
+          if (att.um >= 300) {
+            review.push(`Um ${att.um} kV`);
+            reviewZh.push(`Um ${att.um} kV`);
+          }
+          if (review.length) {
+            cautionsEn.push(`Needs Huaming technical review: ${review.join(", ")}.`);
+            cautionsZh.push(`须华明技术特别评审：${reviewZh.join("，")}。`);
+          }
+          // Change-over selector recovery voltage: 35 kV combined, 15 kV CV2.
+          if (
+            tap.changeOver !== "0" &&
+            input.transformerKind !== "auto" &&
+            (input.tapWindingKv ?? 0) > 121
+          ) {
+            cautionsEn.push(
+              "Change-over selector above 110 kV: check the recovery voltage and quote the tie-in resistor as an option (maker's Cw/Ce needed).",
+            );
+            cautionsZh.push("110 kV 以上正反调/粗细调：核恢复电压，束缚电阻作为可选项报价（需变压器厂 Cw/Ce）。");
+          }
+        }
+        if (wide) {
+          const from = nearestUm(input.umKv, s.umKv);
+          if (from != null && att.um > from + 0.1) {
+            cautionsEn.push(`No ${from} kV list row covers this duty: next class ${att.um} kV.`);
+            cautionsZh.push(`${from} kV 价目表没有满足此工况的型号：上靠至 ${att.um} kV。`);
+          }
+        }
         if (gradePick?.raisedFrom) {
           cautionsEn.push(
             `Selector grade raised from ${gradePick.raisedFrom} to ${selectorSize} (Um ${att.um} kV / across-tap stress).`,
           );
           cautionsZh.push(
             `选择器等级已由 ${gradePick.raisedFrom} 升为 ${selectorSize}（Um ${att.um} kV 或调压绕组间绝缘要求）。`,
+          );
+        }
+        // 2026-11-04 r3 ENGINE-10: the class caution only for the class step; a
+        // grade above it comes from the stated stress (LI 500 gave DE, not D).
+        const gradeAuto =
+          !gradePick?.raisedFrom && (input.selectorSize ?? "auto") === "auto";
+        if (gradeAuto && classBump && selectorSize === classBump) {
+          cautionsEn.push(
+            `Selector grade raised one step to ${selectorSize}: winding of 330 kV class or above (sold practice).`,
+          );
+          cautionsZh.push(`选择器等级上调一级为 ${selectorSize}：330 kV 级及以上绕组（按已售订单）。`);
+        } else if (
+          gradeAuto &&
+          classBump &&
+          ((input.acrossTapBilKv ?? 0) > 0 || (input.acrossTapPfKv ?? 0) > 0) &&
+          SIZE_ORDER.indexOf(selectorSize) > SIZE_ORDER.indexOf(classBump)
+        ) {
+          // Without the class step the reason line already names the stress.
+          const li = input.acrossTapBilKv ?? 0;
+          const ac = input.acrossTapPfKv ?? 0;
+          const en = [li > 0 ? `LI ${li}` : "", ac > 0 ? `AC ${ac}` : ""].filter(Boolean).join(" / ");
+          const zh = [li > 0 ? `雷电 ${li}` : "", ac > 0 ? `工频 ${ac}` : ""].filter(Boolean).join(" / ");
+          cautionsEn.push(
+            `Selector grade ${selectorSize} from the stated across-tap ${en} kV (330 kV-class step gives ${classBump}).`,
+          );
+          cautionsZh.push(`选择器等级 ${selectorSize} 依据给定的调压绕组间 ${zh} kV（330 kV 级上调为 ${classBump}）。`);
+        }
+        const trRaise = gradeAuto && trBump != null && selectorSize === trBump;
+        if (trRaise) {
+          cautionsEn.push(
+            `Selector grade raised to ${selectorSize}: Turkish buyers take ${selectorSize} on 110 kV-class neutrals (sold 25 of 26 orders; ${umDefault} also fits).`,
+          );
+          cautionsZh.push(
+            `选择器等级上调为 ${selectorSize}：土耳其客户 110 kV 级中性点取 ${selectorSize}（已售 26 组中 25 组；${umDefault} 也满足）。`,
+          );
+        }
+        // 2026-11-04 r2 ENGINE-1: a grade below the Um default rests on the stated values.
+        if (gradePick?.loweredFrom) {
+          cautionsEn.push(
+            `Selector grade ${selectorSize} is below the Um ${att.um} kV default ${gradePick.loweredFrom}, from the stated across-tap LI ${input.acrossTapBilKv} / AC ${input.acrossTapPfKv} kV.`,
+          );
+          cautionsZh.push(
+            `选择器等级 ${selectorSize} 低于 Um ${att.um} kV 的默认 ${gradePick.loweredFrom}，依据给定的调压绕组间 雷电 ${input.acrossTapBilKv} / 工频 ${input.acrossTapPfKv} kV。`,
           );
         }
         if (
@@ -809,7 +1352,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           );
         }
 
-        if (att.unitCount > 1) {
+        if (rankUnits(s.id, att.unitCount) > 1) {
           if (att.deltaForced) {
             reasonsEn.push(
               `${att.unitCount}× single-phase — no brochure III type for this connection (e.g. CM2III-…D does not exist).`,
@@ -865,11 +1408,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
         const maxStepVoltageV = octc
           ? null
-          : maxStepVoltageForSeries(s, tap.pitch);
-        const stepCapacityKva = s.stepCapacityByCurrent?.[current] ?? null;
+          : maxStepVoltageForSeries(s, tap.pitch, current);
+        const stepCapacity = stepCapacityKva(s, current, tap.pitch, input.throughCurrentA);
 
         let confidence = 0.88;
-        if (att.unitCount > 1) confidence -= 0.08;
+        if (rankUnits(s.id, att.unitCount) > 1) confidence -= 0.08;
         confidence -= 0.05 * cautionsEn.length;
         if (warningsEn.length > 2) confidence -= 0.03;
         confidence = Math.max(0.45, Math.min(0.96, confidence));
@@ -899,7 +1442,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           mdu: mduStr,
           unitCount: att.unitCount,
           maxStepVoltageV,
-          stepCapacityKva,
+          stepCapacityKva: stepCapacity,
           earthPfKv: earth?.pf ?? null,
           earthBilKv: earth?.bil ?? null,
           reasonsEn,
@@ -911,9 +1454,38 @@ export function selectOltc(input: SelectInput): SelectOutput {
           confidence,
           adequacyScore: score,
         });
+        if (trRaise) trRaised.set(results[results.length - 1]!, umDefault);
         }
       }
     }
+  }
+
+  // 2026-11-04 r3 ORDERS-11: the TR letter is practice, not a limit, so the
+  // Um-default string (72.5B) stays in the list, just after the raised one.
+  for (const [r, from] of trRaised) {
+    const s = SERIES.find((x) => x.id === r.seriesId);
+    if (!s) continue;
+    const umToken = formatUmToken(r.umKv, from, true);
+    const model = r.model.replace(`/${r.umToken}-`, `/${umToken}-`);
+    if (model === r.model || seen.has(model) || !commercialTypeExists(model, s)) continue;
+    // ENGINE-11 second guard: never a copy below the stated across-tap stress.
+    if (!coversAcrossTap(from, input.acrossTapBilKv ?? 0, input.acrossTapPfKv ?? 0, r.seriesId)) continue;
+    seen.add(model);
+    const keep = r.cautionsEn.map((c) => !c.startsWith("Selector grade raised to "));
+    results.push({
+      ...r,
+      model,
+      modelWithMdu: r.mdu ? `${model}+${r.mdu}` : model,
+      selectorSize: from,
+      umToken,
+      reasonsEn: r.reasonsEn.map((x) => x.replace(`grade ${r.selectorSize} (`, `grade ${from} (`)),
+      reasonsZh: r.reasonsZh.map((x) => x.replace(`等级 ${r.selectorSize}（`, `等级 ${from}（`)),
+      cautionsEn: r.cautionsEn.filter((_, i) => keep[i]),
+      cautionsZh: r.cautionsZh.filter((_, i) => keep[i]),
+      confidence: Math.min(0.96, r.confidence + 0.05),
+      adequacyScore: r.adequacyScore - 1e-6,
+    });
+  }
 
   // Vacuum / oil are hard locks. Do not fall back across the arc mode
   // (oil 2915 A used to leak 3xSHZVGI; on-tank vacuum used to leak HWDK).
@@ -925,6 +1497,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
       const s = SERIES.find((x) => x.id === r.seriesId);
       return s != null && s.medium === "oil" && !s.vacuum;
     });
+    // 2026-11-04 r3 ENGINE-9: WSG is never sold; on a drum lock a sold WDG/WLG
+    // row goes first (WSGIV-800Y/40.5-6x5A outranked WDGV-800/40.5-6x5B).
+    if (wantStruct === "drum" && final.some((r) => DRUM_SINGLE.has(r.seriesId))) {
+      final = final.filter((r) => r.seriesId !== "wsg");
+    }
   } else if (input.preferVacuum) {
     final = results.filter(
       (r) => SERIES.find((s) => s.id === r.seriesId)?.vacuum,
@@ -937,13 +1514,88 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
   final.sort((a, b) => {
     // Hard rule: any brochure-legal single-unit outranks any multi.
-    if (a.unitCount !== b.unitCount) return a.unitCount - b.unitCount;
+    const ua = rankUnits(a.seriesId, a.unitCount);
+    const ub = rankUnits(b.seriesId, b.unitCount);
+    if (ua !== ub) return ua - ub;
     if (b.adequacyScore !== a.adequacyScore)
       return b.adequacyScore - a.adequacyScore;
     return b.confidence - a.confidence;
   });
 
   if (!final.length) {
+    // Name the limit that blocks. Arc medium is a hard lock, so only the
+    // families the result filter keeps count.
+    const locked = candidates.filter((s) =>
+      wantOctc
+        ? s.medium === "oil" && !s.vacuum
+        : input.preferVacuum
+          ? s.vacuum
+          : input.medium === "oil"
+            ? !s.vacuum
+            : true,
+    );
+    const why = noFitReasons(locked, input, tap);
+    // 2026-11-04 r2 ENGINE-2: a typed contact short of the positions is the block.
+    const hinted = normOctcContact(input.octcContact);
+    const asked = octcPositionsAsked(input);
+    if (wantOctc && hinted && asked != null && octcContactPositions(hinted) < asked) {
+      const cov = octcContactPositions(hinted);
+      return {
+        ok: false,
+        results: [],
+        errorsEn: [`Contact ${hinted} covers ${cov} positions; ${asked} were asked.`, ...(why?.en ?? [])],
+        errorsZh: [`触头 ${hinted} 只覆盖 ${cov} 个工作位置，要求 ${asked} 个。`, ...(why?.zh ?? [])],
+      };
+    }
+    // 2026-11-04 r2 ENGINE-3: WDG/WLG left by the Y/D filter used to read as
+    // "Um above the highest OCTC class". Name the connection when that family
+    // would fit on its own connection. Only the drum families are Y-only.
+    if (wantOctc && input.connection === "D") {
+      const conn = input.connection;
+      const dropped = SERIES.filter(
+        (s) =>
+          isOctcSeries(s) &&
+          s.medium === "oil" &&
+          !s.vacuum &&
+          seriesMatchesMounting(s, input) &&
+          seriesMatchesMedium(s, input) &&
+          !s.connections.includes(conn) &&
+          !s.connections.includes("any") &&
+          (!wantStruct || wantStruct === "auto" || s.structure === wantStruct),
+      );
+      // 2026-11-04 r3 ENGINE-7: run Y for real. familyMiss skipped the roman, the
+      // contact and the sold row's Um, so the line showed when the drum did not
+      // fit on Y either, and it sent users to a cage type that did not fit. The Y
+      // run skips this branch and the cage run drops the drums: no loop.
+      const onY = dropped.length ? selectOltc({ ...input, connection: "Y" }) : null;
+      const fitY = dropped.filter((s) => onY?.ok && onY.results.some((r) => r.seriesId === s.id));
+      if (fitY.length) {
+        const codes = fitY.map((s) => s.code).join("/");
+        if (selectOltc({ ...input, preferStructure: "cage" }).ok) {
+          return {
+            ok: false,
+            results: [],
+            errorsEn: [`${codes} drum OCTC is sold for star (Y) points only; for delta (D) use a cage type.`],
+            errorsZh: [`${codes} 鼓式无载只用于星点（Y）；角接（D）请用笼式。`],
+          };
+        }
+        return {
+          ok: false,
+          results: [],
+          errorsEn: [
+            `${codes} drum OCTC is sold for star (Y) points only.`,
+            ...(why?.en ?? ["Parameters out of catalogue range (current, Um, step voltage, or positions)."]),
+          ],
+          errorsZh: [
+            `${codes} 鼓式无载只用于星点（Y）。`,
+            ...(why?.zh ?? ["参数超出目录范围（电流、Um、级电压或档位数）。"]),
+          ],
+        };
+      }
+    }
+    if (why) {
+      return { ok: false, results: [], errorsEn: why.en, errorsZh: why.zh };
+    }
     return {
       ok: false,
       results: [],
@@ -1133,7 +1785,7 @@ function insulationUse(row: ModelResult, need?: MarginNeed): number {
     aLi = 200;
     aPf = 50;
   } else if (row.selectorSize) {
-    const ins = INTERNAL_INSULATION[row.selectorSize];
+    const ins = internalInsulation(row.seriesId, row.selectorSize);
     aLi = ins?.a_li ?? 0;
     aPf = ins?.a_pf ?? 0;
   }

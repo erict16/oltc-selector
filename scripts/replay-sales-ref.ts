@@ -28,7 +28,7 @@ const VAC = new Set(["CM2", "SHZV", "SDZV", "SHZVG", "CV2", "HWV", "HWDK", "CVT"
 const OIL = new Set(["CM", "CMD", "CV", "SV"]);
 const ON_TANK = new Set(["HWV", "HWDK"]);
 const DRY = new Set(["CVT", "CZ"]);
-const OCTC = new Set(["WSL", "WDL", "WSG"]);
+const OCTC = new Set(["WSL", "WDL", "WSG", "WDG", "WLG"]);
 
 function seriesOf(family: string) {
   return SERIES.find((s) => s.code === family);
