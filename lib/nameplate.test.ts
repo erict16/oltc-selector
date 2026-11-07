@@ -476,3 +476,34 @@ describe("off-circuit-only lines (2026-11-07 field test)", () => {
     expect(off("40 MVA 132±8x1.25%/33 kV YNd11, on-load tap changer")).toBe(false);
   });
 });
+
+describe("tender wordings (2026-11-07 tender test)", () => {
+  it("reads the letter O as 0 and Yo as YN in vector groups", () => {
+    expect(parseVectorGroup("YNaOd11")?.group).toBe("YNa0d11");
+    expect(parseVectorGroup("YNyno")?.group).toBe("YNyn0");
+    expect(parseVectorGroup("Δ/Yo-11")?.windings).toEqual(["D", "Y"]);
+    expect(parseVectorGroup("Do not use")).toBeNull();
+    expect(parseTenderLine("500 MVA 400/220/33 kV YNaOd11 +10% to -10% in 1.25% steps")?.kind).toBe("auto");
+  });
+  it("reads '± 1.25% in ± 12 steps' as 12 steps of 1.25 %", () => {
+    const t = parseTenderLine("150 MVA 220/132/33 kV YNyn0d1, ± 1.25% in ± 12 steps");
+    expect([t?.plus, t?.minus, t?.stepPct]).toEqual([12, 12, 1.25]);
+    const u = parseTenderLine("40 MVA 132/33 kV YNd11 ±10 % in ±8 steps");
+    expect([u?.plus, u?.stepPct]).toEqual([8, 1.25]);
+  });
+  it("reads a 5/8 % step", () => {
+    const t = parseTenderLine("56 MVA 138±16x5/8%/26.18 kV Dyn1");
+    expect([t?.plus, t?.stepPct]).toEqual([16, 0.625]);
+  });
+  it("reads mid-winding, line-end and terminal wordings", () => {
+    expect(parseTenderLine("40 MVA 132/33 kV YNd1, OLTC in the electrical centre of the higher winding ±8x1.25%")?.notes.map((n) => n.key)).toContain("mid_winding");
+    expect(parseTenderLine("200 MVA 220/132/11 kV YNa0d11 -5% to +15% in steps of 1.25% for 132 kV variation On the 132 kV line end")?.tapPoint).toBe("auto_mv_line");
+    expect(parseTenderLine("56 MVA 138/26.18 kV Dyn1, ±16x5/8% at the low voltage transformer terminals")?.tapKv).toBe(26.18);
+    expect(parseTenderLine("40 MVA 132±8x1.25%/33 kV YNd11, insulation on the 132 kV line end LI 650 kV")?.tapPoint).toBe("neutral");
+  });
+  it("reads dry-type words, not a dry air breather", () => {
+    expect(parseTenderLine("1600 kVA 10±4x2.5%/0.4 kV Dyn11 cast resin dry-type transformer")?.dryType).toBe(true);
+    expect(parseTenderLine("2500 kVA 20±2x2.5%/0.4 kV Dyn11 transformador seco")?.dryType).toBe(true);
+    expect(parseTenderLine("1600 kVA 10±4x2.5%/0.4 kV Dyn11, oil immersed, dry air breather")?.dryType).toBeUndefined();
+  });
+});

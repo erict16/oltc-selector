@@ -467,12 +467,14 @@ function applyLine(f: FormState, tl: TenderLine, s: LineSettings): FormState {
       acrossTapPfKv: undefined,
       // Dry-type and reactor describe the last transformer, not this line:
       // after a dry job an oil 25 MVA line found no type, then 3xCZI.
-      ...(f.input.mounting === "dry_type" || f.input.mounting === "reactor"
-        ? {
-            mounting: DEFAULT_INPUT.mounting,
-            medium: f.input.preferVacuum ? "oil_vacuum" : "oil",
-          }
-        : {}),
+      ...(tl.dryType
+        ? { mounting: "dry_type" as const, medium: "dry" as const }
+        : f.input.mounting === "dry_type" || f.input.mounting === "reactor"
+          ? {
+              mounting: DEFAULT_INPUT.mounting,
+              medium: f.input.preferVacuum ? ("oil_vacuum" as const) : ("oil" as const),
+            }
+          : {}),
     },
   };
   // 2026-11-04 (r3 UI-7): a G / linear the previous line set is not the

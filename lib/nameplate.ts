@@ -70,6 +70,8 @@ export interface TenderLine {
   otherRanges: OtherRange[];
   /** The line names only an off-circuit tap changer (DETC, 无载, sin carga …), no on-load one. */
   offCircuitOnly?: boolean;
+  /** The line says dry-type / cast resin (干式, seco, kuru tip, khô, kering). */
+  dryType?: boolean;
   /** Fields the line did not state; the reader chose them. */
   assumed: AssumedField[];
   /** What the reader did with the line, for the page (keys) … */
@@ -142,6 +144,11 @@ const NUM = String.raw`\d+(?:\.\d+)?`;
 export function normalizeTenderText(raw: string): string {
   return (
     raw
+      // 2026-11-07 tender test (US LTC): "±16x5/8%" read 8 % per step. A fraction
+      // right before % is one figure.
+      .replace(/(?<![\d./])([1-9])\s*\/\s*([2-9]|1[0-6])\s*%/g, (_m: string, a: string, b: string) =>
+        `${Math.round((Number(a) / Number(b)) * 10000) / 10000}%`,
+      )
       // 2026-11-04 R3: Rosseti "16 МВА", "11 кВ", "кВА" were refused (Latin units only).
       .replace(/(?<![А-Яа-яЁё])[мМ][вВ][аА](?![А-Яа-яЁё])/g, "MVA")
       .replace(/(?<![А-Яа-яЁё])[кК][вВ][аА](?![А-Яа-яЁё])/g, "kVA")
@@ -263,7 +270,14 @@ export function parseVectorGroup(raw: string): { group: string; windings: Windin
   // "DYN11" / "YNYN0D11" gave no group, so an HV delta was sized as a star neutral.
   // 2026-11-04 R3: "DYn11", "DYn 11", "D-yn11", "Δ/Y", "△/Y-11" gave no group either; a
   // 132 kV HV delta was sized as a star neutral at Um 72.5.
+  // 2026-11-07 tender test: PGCIL writes "YNaOd11" / "YNyno" (letter O for 0), and
+  // Vietnamese sheets "Δ/Yo-11" (Yo = star with neutral). The auto was read as a
+  // two-winding star neutral; the HV delta as a star.
   const text = raw
+    .replace(/\b(?:YN|Yn|Y|D|ZN|Z)(?:(?:yn|y|d|zn|z|a)[0-9Oo]{0,2}){1,3}(?![A-Za-z0-9])/g, (g: string) =>
+      g.replace(/(?<=(?:yn|y|d|zn|z|a)\d?)[Oo]/g, "0"),
+    )
+    .replace(/(?<![A-Za-z])Y[oO0](?![A-Za-z0-9])/g, "YN")
     .replace(/[Δ△]/g, "D")
     .replace(/\b(YN|Yn|Y|D|ZN|Z)\s*-\s*(?=(?:yn|y|d|zn|z|YN|Yn|Y|D)\s*\d)/g, "$1")
     .replace(/\b(YN|Y|D|ZN|Z)\s*\/\s*(YN|Y|D|ZN|Z)(?:\s*-\s*(\d{1,2}))?\b/g, (m: string, h: string, l: string, c?: string) =>
@@ -499,7 +513,17 @@ function percentHit(
     total = Number(nx[1]);
   } else if (xs) step = Number(xs[1]);
   else if (stepWord != null) step = stepWord;
-  else if (pmCount) step = (h.plusPct === h.minusPct ? minusPct : span / 2) / pmCount;
+  else if (
+    pmCount &&
+    pmCount >= 2 &&
+    h.plusPct === h.minusPct &&
+    minusPct <= 3 &&
+    COMMON_STEPS.some((c) => Math.abs(minusPct - c) <= c * 0.01)
+  ) {
+    // 2026-11-07 tender test (KETRACO): "± 1.25% in ± 12 steps" is 12 steps of
+    // 1.25 %, not ±1.25 % in all (0.104 % per step, Ust 132 V for 1588 V).
+    return { plus: pmCount, minus: pmCount, stepPct: minusPct, index, end, pct: { text: pctText, stated: true } };
+  } else if (pmCount) step = (h.plusPct === h.minusPct ? minusPct : span / 2) / pmCount;
   else if (positions != null && positions > 2) step = span / (positions - 1);
   else if (countM) total = Number(countM[1]);
 
@@ -648,6 +672,9 @@ const OCTC_WORD = /\bDETC|\bOCTC|\bNLTC|off[\s-]?circuit|de-?energi[sz]ed|无载
  * ("no-load losses", "pérdidas sin carga", "tổn hao không tải") need a tap word.
  */
 const ON_LOAD_ANY = /\bOLTC\b|\bon[\s-]?load\b|有载|bajo\s+carga|\bcó\s+tải|\bberbeban\b|yük\s+altında/i;
+const DRY_TYPE =
+  /\bdry[\s-]?type\b|\bcast[\s-]?resin\b|\bresin[\s-]?(?:cast|encapsulated|insulated)\b|干式|\btransformador(?:es)?\s+(?:tipo\s+)?seco|\bkuru\s+tip|\bmáy\s+biến\s+(?:áp|thế)\s+khô|\btrafo\s+kering|\btransformator\s+kering/i;
+
 const OFF_CIRCUIT_TAP = new RegExp(
   [
     String.raw`\b(?:DETC|OCTC|NLTC)\b`,
@@ -756,6 +783,23 @@ function tapWindingFromWords(text: string, range: RangeHit | null, kv: number[],
   if (m) {
     const k = m[3] ?? m[5];
     return at(k != null ? { kv: Number(k) } : { side: m[1] ?? m[2] ?? m[4] });
+  }
+  // 2026-11-07 tender test: PGCIL "for 132 kV variation On the 132 kV line end", "IV line
+  // end", Bluebonnet "at the low voltage transformer terminals" were not read; the auto's
+  // junction (HV current, 40 % low) and the HV were taken. Not an insulation figure.
+  const site = text.match(
+    new RegExp(
+      String.raw`\b(?:on|at|in)\s+(?:the\s+)?(${NUM})\s*kV\s+(?:line[\s-]?end|side|terminals?)\b(?!\s*(?:LI|BIL|AC|insulation|[:=]?\s*\d))` +
+        String.raw`|\bfor\s+(${NUM})\s*kV\s+(?:voltage\s+)?variation` +
+        String.raw`|\b(IV|intermediate[\s-]voltage)\s+(?:line[\s-]?end|side|terminals?)\b` +
+        String.raw`|\b(?:at|on)\s+(?:the\s+)?(LV|low[\s-]voltage)\s+(?:transformer\s+)?terminals?\b`,
+      "i",
+    ),
+  );
+  if (site) {
+    const k = site[1] ?? site[2];
+    if (k != null) return at({ kv: Number(k) });
+    return at({ side: site[3] ? "MV" : "LV" });
   }
   const cn = text.match(/([低中高])压侧(?:有载)?(?:调压|分接)|(?:调压|分接)[^,;，；]{0,6}?([低中高])压侧/);
   if (!cn) return null;
@@ -1007,7 +1051,10 @@ const DELTA_OTHER =
 const STAR_TAP =
   /(?:regulat\w*|tapp\w*|OLTC|tap[\s-]?changer)[^;.,]{0,40}?(?<!\b(?:LV|MV|secondary|tertiary|kV)\s+)(?<!\bnot\s+(?:in|at)?\s*(?:the\s+)?)\b(?:star[\s-]?point|neutral)\b(?![\s-]*(?:point\s+)?(?:is\s+)?(?:solidly\s+)?(?:earthed|grounded))|(?<!\b(?:LV|MV|secondary|tertiary|kV)\s+)\bstar neutral\b(?![\s-]*(?:point\s+)?(?:is\s+)?(?:solidly\s+)?(?:earthed|grounded))|\bneutral[\s-]end\s+(?:tapp\w*|regulat\w*|OLTC)|(?<!\bnot\s+)\bin neutral\b|中性点调压/i;
 /** Tap in the middle of a (star) winding: line end for the current, OS for the Um. */
-const MID_WINDING = /middle of (?:the )?(?:HV )?winding|mid[\s-]winding/i;
+// 2026-11-07 tender test: KPLC "in the electrical centre of the higher winding", ADMIE
+// "Middle of the high voltage winding" were missed (star neutral at Um 72.5).
+const MID_WINDING =
+  /(?:middle|(?:electrical\s+)?cent(?:re|er))\s+of\s+(?:the\s+)?(?:(?:HV|higher|high[\s-]voltage|primary)\s+)?winding|mid[\s-]winding/i;
 
 /**
  * 2026-11-04 R2: "line end" in an insulation clause ("LI line end 650 kV",
@@ -1168,6 +1215,12 @@ export function parseTenderLine(raw: string): TenderLine | null {
   const voltagesKv = flipped ? [...kv].reverse() : kv;
   const at = (i: number) => (flipped ? kv.length - 1 - i : i);
   let tapIndex = rangeIndex != null ? at(rangeIndex) : null;
+  // 2026-11-07 tender test: a percent range ("-5% to +15% in steps of 1.25%") sits on no
+  // kV figure, so words that name the tapped winding ("On the 132 kV line end") win.
+  if (tapIndex != null && range?.pct && voltagesKv.length > 1) {
+    const named = tapWindingFromWords(text, range, voltagesKv, auto);
+    if (named != null) tapIndex = named;
+  }
   if (tapIndex == null && voltagesKv.length) {
     tapIndex = tapWindingFromWords(text, range, voltagesKv, auto);
     if (tapIndex == null) {
@@ -1317,6 +1370,9 @@ export function parseTenderLine(raw: string): TenderLine | null {
     !ON_LOAD_ANY.test(text) &&
     (stated.length < 2 || allTags.every((d) => d === "octc"));
   if (offCircuitOnly) notes.push({ key: "off_circuit_line" });
+  // 2026-11-07 field and tender tests: "cast resin dry-type transformer" stayed in tank
+  // (an oil CV2 for a dry unit).
+  const dryType = DRY_TYPE.test(text);
 
   const base = {
     mva,
@@ -1332,6 +1388,7 @@ export function parseTenderLine(raw: string): TenderLine | null {
     regulation,
     otherRanges,
     ...(offCircuitOnly ? { offCircuitOnly: true } : {}),
+    ...(dryType ? { dryType: true } : {}),
     assumed,
     notes,
   };

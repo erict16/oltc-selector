@@ -30,6 +30,8 @@ import type {
 } from "./types";
 
 export type CliArgs = {
+  /** Output language: zh (default) or en (2026-11-07: overseas engineers). */
+  lang?: "zh" | "en";
   iu?: number;
   mva?: number;
   kv?: number;
@@ -102,7 +104,9 @@ function num(raw: string, flag: string): number {
 }
 
 export function parseCliArgs(argv: string[]): CliArgs {
+  const envLang = typeof process !== "undefined" ? process.env?.OLTC_LANG?.toLowerCase() : undefined;
   const out: CliArgs = {
+    ...(envLang === "en" ? { lang: "en" as const } : {}),
     conn: "Y",
     kind: "two_winding",
     reg: "reversing",
@@ -143,6 +147,13 @@ export function parseCliArgs(argv: string[]): CliArgs {
     }
     if (a === "--json") {
       out.json = true;
+      continue;
+    }
+    if (a === "--lang" || a.startsWith("--lang=")) {
+      const v = a.includes("=") ? a.slice(7) : argv[++i];
+      const l = (v ?? "").toLowerCase();
+      if (l !== "en" && l !== "zh") throw new CliError("--lang must be en or zh");
+      out.lang = l;
       continue;
     }
     // Read by scripts/oltc.ts before the update check; nothing to select on.
@@ -523,6 +534,7 @@ function applyTenderLine(out: CliArgs, raw: string): void {
   const t = parseTenderLine(raw);
   // 2026-11-07: a line that names only an off-circuit tap changer is OCTC duty.
   if (t?.offCircuitOnly && !out.given.has("octc")) out.octc = true;
+  if (t?.dryType && !out.given.has("mount")) out.mount = "dry_type";
   const r = t ? tenderLineSettings(t, { octc: out.octc }) : null;
   if (r && !r.ok && r.reason === "auto_needs_mv") {
     throw new CliError(
@@ -632,6 +644,7 @@ Flags:
   --contact          OCTC contact e.g. 6x5.
   --phases           I|II|III. Default III.
   --json             Machine-readable result (still no prices).
+  --lang en|zh       Output language (default zh; OLTC_LANG=en also works).
   --no-update-check  Skip the daily check for a newer version. The check only
                      prints a notice on stderr; it never installs anything.
                      OLTC_NO_UPDATE_CHECK=1 or CI=1 also turn it off.
@@ -817,7 +830,7 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
   const duty = cliDuty(args);
   let conn = args.conn;
   if (duty && args.mva != null) {
-    if (!duty.ok) throw new CliError(duty.errorZh ?? duty.errorEn ?? "Bad transformer data");
+    if (!duty.ok) throw new CliError((args.lang === "en" ? duty.errorEn : duty.errorZh) ?? duty.errorEn ?? "Bad transformer data");
     iu = duty.dutyA;
     if (um == null || !(um > 0)) um = duty.umKv;
     // duty.stepV already holds max(derived, --ust).
@@ -826,7 +839,7 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
   } else {
     // --iu path: --tap, --kind auto (junction) or a delta winding set Y/D.
     // A given --kv only adds the voltage basis; the current stays --iu.
-    if (duty && !duty.ok) throw new CliError(duty.errorZh ?? duty.errorEn ?? "Bad transformer data");
+    if (duty && !duty.ok) throw new CliError((args.lang === "en" ? duty.errorEn : duty.errorZh) ?? duty.errorEn ?? "Bad transformer data");
     if (duty && (um == null || !(um > 0))) um = duty.umKv;
     conn = cliConnection(args);
   }
@@ -1048,6 +1061,79 @@ export function assumptionsLine(args: CliArgs, family?: string): string | null {
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
+/** --lang en: the 假定 items in English (same facts, same order). */
+const ASSUMPTION_EN: Array<[RegExp | string, string]> = [
+  ["（默认，招标行未写全）", " (default; the line does not give it all)"],
+  ["（默认）", " (default)"],
+  ["（未指定）", " (not stated)"],
+  ["（待 OS 核对）", " (check the OS)"],
+  [/（只给一项：等级不低于 Um 默认）/, " (one value only: grade not below the Um default)"],
+  [/^最低档按 −(\d+) 算（−档未指定，\+a\/−b 用 --range 或 --minus）$/, "lowest tap at −$1 (minus not stated; give +a/−b with --range or --minus)"],
+  [/^无载开关取 ([\d.]+) kV 绕组的范围（(默认，)?招标行有两个调压范围）$/, "off-circuit range from the $1 kV winding (two ranges on the line)"],
+  [/^对地 Um ([\d.]+)（招标行中性点 BIL ([\d.]+) kV）$/, "Um to earth $1 (line neutral BIL $2 kV)"],
+  ["Ust 未指定（级电压、级容量未校验）", "Ust not stated (step voltage and capacity not checked)"],
+  ["串联/公共绕组连接点", "series/common junction"],
+  ["中压出线", "MV line lead"],
+  ["开关在中性点", "tap at neutral"],
+  ["开关在线端", "tap at line end"],
+  ["开关在", "tap at "],
+  ["自耦变", "autotransformer"],
+  ["双绕组", "two-winding"],
+  [/^容量 /, "power "],
+  ["星形绕组", "star winding"],
+  ["角形绕组", "delta winding"],
+  [/^调压绕组间 /, "across tap winding "],
+  [/^调压绕组 /, "tapped winding "],
+  [/^调压范围 /, "range "],
+  ["对地 Um", "Um to earth"],
+  ["市场=", "market="],
+  ["星点", "star point"],
+  ["线端", "line end"],
+  ["中性点", "neutral"],
+  ["相数=", "phases="],
+  ["接线=自动", "wiring=auto"],
+  ["接线=", "wiring="],
+  [/（由 ±([\d.]+) 推）/, " (from ±$1)"],
+  [/（最低档按 −(\d+)）/, " (lowest tap at −$1)"],
+  ["档数未指定", "positions not stated"],
+  [/^±([\d.]+) 档/, "±$1 steps"],
+  [/ 档/g, " positions"],
+  ["W 正反调", "W reversing"],
+  ["G 粗细调", "G coarse/fine"],
+  ["0 线性调", "0 linear"],
+  ["油浸", "oil"],
+  ["真空", "vacuum"],
+  ["箱内", "in tank"],
+  ["箱顶", "on tank"],
+  ["干式", "dry-type"],
+  ["外置隔室", "external compartment"],
+  ["电抗器", "reactor"],
+  ["未指定", "not stated"],
+  ["（", " ("],
+  ["）", ")"],
+  ["，", ", "],
+];
+
+export function assumptionEn(item: string): string {
+  let s = item;
+  for (const [from, to] of ASSUMPTION_EN) s = typeof from === "string" ? s.split(from).join(to) : s.replace(from, to);
+  return s;
+}
+
+/** --lang en form of basisLineZh. */
+export function basisLineEn(d: DutyBasis): string {
+  const div = d.currentDivisor === "three" ? "3" : "√3";
+  const um =
+    d.umRule === "explicit"
+      ? `Um to earth ${d.umKv} (stated)`
+      : d.umRule === "neutral_assumed" || d.umRule === "neutral_full"
+        ? `neutral Um ${d.umKv}${d.umAssumed ? " (check the OS)" : ""}`
+        : `${d.umSystemKv} kV system Um ${d.actualUmKv} → class ${d.umKv}`;
+  const ust = d.stepV == null ? "" : ` · Ust ${round1(d.stepV)} V`;
+  const max = d.maxRule === "stated" ? "OS Imax" : "lowest tap";
+  return `I = S/(${div}×${d.currentKv} kV) = ${round1(d.ratedA)} A, ${max} ${round1(d.maxA)} A${ust} · ${um}`;
+}
+
 /** One line: where the current, Ust and Um came from. */
 export function basisLineZh(d: DutyBasis): string {
   const div = d.currentDivisor === "three" ? "3" : "√3";
@@ -1064,8 +1150,9 @@ export function basisLineZh(d: DutyBasis): string {
 
 export function formatCliText(input: SelectInput, args?: CliArgs): string {
   const out = selectOltc(input);
+  const en = args?.lang === "en";
   if (!out.ok || !out.results.length) {
-    const err = [...out.errorsZh, ...out.errorsEn].join("\n") || "No type found.";
+    const err = (en ? out.errorsEn : [...out.errorsZh, ...out.errorsEn]).join("\n") || "No type found.";
     throw new CliError(err);
   }
   const primary = out.results[0]!;
@@ -1084,35 +1171,41 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
   );
   const lines = [
     primary.model,
-    primary.reasonsZh[0] || primary.reasonsEn[0] || "最低满足",
+    en
+      ? primary.reasonsEn[0] || "Lowest type that meets the duty"
+      : primary.reasonsZh[0] || primary.reasonsEn[0] || "最低满足",
   ];
   const duty = args ? cliDuty(args) : null;
-  if (duty?.ok) lines.push(`依据：${basisLineZh(duty)}`);
-  for (const c of primary.cautionsZh) lines.push(`注意：${c}`);
-  for (const c of duty?.cautionsZh ?? []) lines.push(`注意：${c}`);
+  const note = en ? "Note: " : "注意：";
+  if (duty?.ok) lines.push(en ? `Basis: ${basisLineEn(duty)}` : `依据：${basisLineZh(duty)}`);
+  for (const c of en ? primary.cautionsEn : primary.cautionsZh) lines.push(`${note}${c}`);
+  for (const c of (en ? duty?.cautionsEn : duty?.cautionsZh) ?? []) lines.push(`${note}${c}`);
   const choices = args && duty?.ok ? umChoicesFor(args, input) : [];
   if (choices.length > 1) {
+    const list = choices.map((c) => `Um ${c.um} → ${c.model ?? (en ? "none" : "无")}`).join(" · ");
     lines.push(
-      `对地绝缘未定：${choices.map((c) => `Um ${c.um} → ${c.model ?? "无"}`).join(" · ")}（按招标的中性点/调压绕组绝缘取，用 --earth-um）`,
+      en
+        ? `Insulation to earth open: ${list} (take it from the tender's neutral / tap-winding insulation; use --earth-um)`
+        : `对地绝缘未定：${list}（按招标的中性点/调压绕组绝缘取，用 --earth-um）`,
     );
   }
   if (args?.line) {
     const t = args.line;
-    lines.push(
-      `招标行：${t.kind === "auto" ? "自耦变" : "双绕组"} · ${t.mva} MVA · ${t.voltagesKv.join("/")} kV${t.vectorGroup ? ` · ${t.vectorGroup}` : " · 无联结组"}`,
-    );
-    for (const w of t.warnings) lines.push(`注意：招标行 ${w}`);
+    const kind = t.kind === "auto" ? (en ? "autotransformer" : "自耦变") : en ? "two-winding" : "双绕组";
+    const vg = t.vectorGroup ? ` · ${t.vectorGroup}` : en ? " · no vector group" : " · 无联结组";
+    lines.push(`${en ? "Line: " : "招标行："}${kind} · ${t.mva} MVA · ${t.voltagesKv.join("/")} kV${vg}`);
+    for (const w of t.warnings) lines.push(en ? `Note: line ${w}` : `注意：招标行 ${w}`);
   }
   if (alts.length) {
     lines.push("");
-    lines.push("其他");
+    lines.push(en ? "Other" : "其他");
     for (const a of alts) lines.push(a.model);
   }
   if (args) {
     const assumed = assumptionsLine(args, primary.seriesCode);
     if (assumed) {
       lines.push("");
-      lines.push(assumed);
+      lines.push(en ? `Assumed: ${assumptionsFromArgs(args, primary.seriesCode).map(assumptionEn).join(" · ")}` : assumed);
     }
   }
   return lines.join("\n") + "\n";
@@ -1135,15 +1228,16 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
       acrossTapPfKv: input.acrossTapPfKv,
     },
   ).map((r) => r.model);
+  const en = args?.lang === "en";
+  const dutyJ = args ? cliDuty(args) : null;
   const payload = {
     ok: out.ok,
     model: primary?.model ?? null,
-    why: primary?.reasonsZh[0] ?? primary?.reasonsEn[0] ?? null,
+    why: en ? (primary?.reasonsEn[0] ?? null) : (primary?.reasonsZh[0] ?? primary?.reasonsEn[0] ?? null),
     alts,
-    cautions: [
-      ...(primary?.cautionsZh ?? []),
-      ...((args ? cliDuty(args) : null)?.cautionsZh ?? []),
-    ],
+    cautions: en
+      ? [...(primary?.cautionsEn ?? []), ...(dutyJ?.cautionsEn ?? [])]
+      : [...(primary?.cautionsZh ?? []), ...(dutyJ?.cautionsZh ?? [])],
     basis: (() => {
       const d = args ? cliDuty(args) : null;
       return d?.ok
@@ -1162,8 +1256,10 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
         : null;
     })(),
     umChoices: args ? umChoicesFor(args, input) : [],
-    assumptions: args ? assumptionsFromArgs(args, primary?.seriesCode) : [],
-    errors: out.errorsZh.length ? out.errorsZh : out.errorsEn,
+    assumptions: args
+      ? assumptionsFromArgs(args, primary?.seriesCode).map((a) => (en ? assumptionEn(a) : a))
+      : [],
+    errors: en ? out.errorsEn : out.errorsZh.length ? out.errorsZh : out.errorsEn,
   };
   return JSON.stringify(payload, null, 2) + "\n";
 }

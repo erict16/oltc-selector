@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Tender lines: vector groups with the letter O ("YNaOd11", "YNyno") and Vietnamese "Δ/Yo-11" are read; a 400/220 kV auto was sized as a two-winding star neutral, and a 35 kV HV delta as a star.
+- Tender lines: "± 1.25% in ± 12 steps" is 12 steps of 1.25 % (it was 0.104 % per step, Ust 132 V for 1588 V); "5/8 %" is 0.625 %.
+- Tender lines: "On the 132 kV line end", "for 132 kV variation", "IV line end", "at the low voltage transformer terminals", "electrical centre of the higher winding" and "middle of the high voltage winding" set the tapped winding. PGCIL 200 MVA 220/132 kV: 3×CM2I-600/252D on 552 A → 3×CM2I-1200/170D on 921 A.
+- Tender lines: dry-type / cast resin / 干式 / seco / kuru tip / khô / kering set the dry-type mounting.
+- CLI: `--lang en` (or `OLTC_LANG=en`) prints the result, basis, notes, assumptions and JSON in English.
+
 - A line that names only an off-circuit tap changer (DETC, OCTC, "off-load tap changer", "conmutador sin carga", "yüksüz kademe", 无载) is sized off-circuit on the page and in the CLI. "1000 kVA 10±2x2.5%/0.4 kV Dyn11, off-circuit tap changer (DETC)" gave a CV2 on-load switch. Loss words ("no-load losses") do not count.
 - Page: a pasted line is read at once (a phone paste sends no Enter, and the card kept the previous job). Notes of a line hide once the box holds other text.
 - Page: a new line starts from the default market, safety factor and in-tank mounting. TR from the last job turned an Indonesian 150 kV line into 72.5C; a dry-type job left the next oil line with no type.
