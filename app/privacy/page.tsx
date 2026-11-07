@@ -88,15 +88,13 @@ export default function PrivacyPage() {
         title="4. Third parties / 第三方"
         en={
           <p>
-            Fonts or scripts may load from third-party CDNs (for example Google
-            Fonts). Those providers process requests under their own privacy
-            policies.
+            Fonts and scripts are served from this site. The page loads
+            nothing from third-party servers.
           </p>
         }
         zh={
           <p>
-            字体或脚本可能来自第三方 CDN（如 Google
-            Fonts），适用其隐私政策。
+            字体和脚本都由本站提供，页面不从第三方服务器加载内容。
           </p>
         }
       />

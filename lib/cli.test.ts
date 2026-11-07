@@ -536,3 +536,31 @@ describe("oltc CLI checker regressions, final round", () => {
     expect(out(["--line", "100 MVA 220±8x1.25%/33 kV YNyn0, BIL (HV/LV/N) 1050/170/95 kV"])).not.toContain("17.5");
   });
 });
+
+describe("oltc CLI --iu path with the winding voltage (review 2026-11-07)", () => {
+  const top = (argv: string[]) => capture([...argv, "--no-update-check"]).out.split(/\r?\n/)[0];
+  const base = ["--um", "72.5", "--conn", "Y", "--reg", "W"];
+  it("230 kV neutral takes the combined-only rule, as the web form", () => {
+    expect(top(["--iu", "300", ...base, "--kv", "230", "--pm", "10", "--ust", "1300"])).toBe("CM2III-500Y/72.5B-12233W");
+  });
+  it("400 kV combined neutral steps to SHZV grade C", () => {
+    expect(top(["--iu", "300", ...base, "--kv", "400", "--pm", "10", "--ust", "1300", "--structure", "combined"])).toBe("SHZVIII-400Y/72.5C-12233W");
+  });
+  it("--market TR with --kv sets the TR grade practice", () => {
+    const argv = ["--iu", "400", ...base, "--kv", "132", "--pm", "8", "--ust", "1000", "--structure", "combined"];
+    expect(top([...argv, "--market", "TR"])).toBe("CM2III-500Y/72.5C-10193W");
+    expect(top(argv)).toBe("CM2III-500Y/72.5B-10193W");
+  });
+  it("refuses --market with no winding voltage instead of dropping it", () => {
+    const r = capture(["--iu", "400", ...base, "--pm", "8", "--ust", "1000", "--market", "TR", "--no-update-check"]);
+    expect(r.code).not.toBe(0);
+    expect(r.err).toContain("--market needs the winding voltage");
+  });
+  it("--kv on the --iu path derives Um when --um is left out; the current stays --iu", () => {
+    const input = cliToSelectInput(parseCliArgs(["--iu", "400", "--conn", "Y", "--kv", "132", "--reg", "W", "--pm", "8", "--ust", "1000"]));
+    expect(input.throughCurrentA).toBe(400);
+    expect(input.umKv).toBe(72.5);
+    expect(input.tapWindingKv).toBe(132);
+    expect(input.stepVoltageV).toBe(1000);
+  });
+});

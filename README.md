@@ -38,14 +38,14 @@ oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
 |------|---------|---------|
 | `--line "text"` | Tender line: MVA, kV ratio with ±N×x%, vector group. Flags given beside it win. | |
 | `--iu` / `--imax` | Max through-current Imax (A). **No** safety factor. | required unless `--mva` |
-| `--mva` `--kv` | Transformer MVA + tap-side kV → Imax (min tap + `--k`) | |
+| `--mva` `--kv` | Transformer MVA + tap-side kV → Imax (min tap + `--k`). With `--iu`, `--kv` alone sets the winding voltage for the 220/330 kV and `--market` rules | |
 | `--k` | Safety factor ≥ 1, **capacity path only** | 1.0 |
 | `--kind two\|auto` | Transformer kind (`--auto` = `--kind auto`) | two-winding |
 | `--tap` | Where the OLTC sits: `neutral` / `line` (two-winding), `junction` / `mv-line` (autotransformer). Sets current, Ust and Um. | neutral |
 | `--winding star\|delta` | Tapped winding connection (two-winding) | star |
 | `--hv` `--mv` | Autotransformer HV / MV rated kV | |
 | `--earth-um` | OLTC insulation to earth from the OS; overrides the rule | |
-| `--um` | Equipment Um (kV) | derived from `--kv` on MVA path |
+| `--um` | Equipment Um (kV) | derived from `--kv` if omitted |
 | `--ust` | Step voltage (V) | 0, or derived on MVA path |
 | `--conn Y\|D` | Switch star / delta on the `--iu` path (with `--mva`, use `--tap`) | Y |
 | `--reg W\|G\|0` | Reversing / coarse-fine / linear | W |
