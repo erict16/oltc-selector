@@ -47,7 +47,7 @@ export default function PrivacyPage() {
               project.
             </p>
             <p>
-              Hosting (e.g. GitHub Pages) may automatically log standard
+              Hosting (Vercel) may automatically log standard
               technical data such as IP address, user agent, and request time.
               That data is controlled by the host’s policies, not by a separate
               analytics product of this project.
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
               选型在浏览器本地完成；您输入的工况参数不会被本项目故意上传至自有后端服务器。
             </p>
             <p>
-              托管方（如 GitHub Pages）可能自动记录
+              托管方（Vercel）可能自动记录
               IP、浏览器类型、访问时间等常规技术日志，适用托管方政策。
             </p>
           </>

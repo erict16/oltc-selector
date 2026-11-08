@@ -1,41 +1,29 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { LangProvider } from "@/components/LangProvider";
+// IBM Plex from npm files, bundled at build: the build never fetches
+// Google Fonts (it failed CI on 2026-11-07 and is blocked in mainland
+// China). Chinese uses the system face (PingFang / YaHei).
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource/ibm-plex-sans/700.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
+import "@fontsource/ibm-plex-mono/600.css";
 import "./globals.css";
-
-// Self-hosted at build (2026-11-07): the Google Fonts stylesheet blocked the
-// first paint and is often unreachable in mainland China. Chinese uses the
-// system face (PingFang / YaHei), so Noto Sans SC is gone.
-const plexSans = IBM_Plex_Sans({
-  subsets: ["latin", "latin-ext", "vietnamese"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-plex-sans",
-});
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-  variable: "--font-plex-mono",
-});
-
-/** Must match next.config basePath for GH Pages favicon URLs */
-const basePath = process.env.GH_PAGES === "true" ? "/oltc-selector" : "";
 
 export const metadata: Metadata = {
   title: "OLTC Selector · 有载开关选型",
   description:
     "Private OLTC type-designation helper. Indicative only — not an official manufacturer tool or OS.",
   metadataBase: new URL(
-    basePath
-      ? "https://erict16.github.io/oltc-selector"
-      : process.env.VERCEL_PROJECT_PRODUCTION_URL
-        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-        : "http://127.0.0.1:3000",
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "http://127.0.0.1:3000",
   ),
   icons: {
-    icon: [{ url: `${basePath}/favicon.svg`, type: "image/svg+xml" }],
-    shortcut: `${basePath}/favicon.svg`,
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
   },
 };
 
@@ -50,7 +38,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-CN" className={`${plexSans.variable} ${plexMono.variable}`}>
+    <html lang="zh-CN">
       <body className="antialiased">
         <a
           href="#main"

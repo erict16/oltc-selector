@@ -3,7 +3,7 @@
 填工况，给出 2025 目录里**最低满足**的型号。网页和 `oltc` CLI 共用同一份 `selectOltc` 引擎。
 
 **CLI：** `npx -y oltc-selector@2.2.0`，命令是 `oltc`。Agent 技能包另放，不在这个仓库里。  
-**网页：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) · [GitHub Pages](https://erict16.github.io/oltc-selector/)
+**网页：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/)
 
 私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。
 
@@ -89,7 +89,7 @@ npm test
 npm run pack:cli
 ```
 
-GitHub Pages：`npm run build:gh`（`GH_PAGES=true`）。Vercel 根路径，不要设 `GH_PAGES`。
+部署：Vercel（每次 push 先跑 `npm test` 再 build）。仓库是私有的，免费版 GitHub Pages 不可用，已停用。
 
 语言：中文、English、Tiếng Việt、Español、Türkçe、Bahasa Indonesia。
 
@@ -105,4 +105,4 @@ python scripts/os-to-excel.py
 
 ## 许可
 
-[条款](https://erict16.github.io/oltc-selector/terms/) · [隐私](https://erict16.github.io/oltc-selector/privacy/)。仅供参考。
+[条款](https://oltc-selector.vercel.app/terms/) · [隐私](https://oltc-selector.vercel.app/privacy/)。仅供参考。
