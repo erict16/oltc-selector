@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Build: IBM Plex comes from npm (@fontsource), so `next build` no longer downloads Google Fonts. A Google reply without a file extension broke the build on 2026-11-07.
+- Deploy: Vercel only. The GitHub Pages workflow is gone: the repo is private, and free GitHub Pages and its artifact storage do not work for private repos.
+
 - Tender lines: vector groups with the letter O ("YNaOd11", "YNyno") and Vietnamese "Δ/Yo-11" are read; a 400/220 kV auto was sized as a two-winding star neutral, and a 35 kV HV delta as a star.
 - Tender lines: "± 1.25% in ± 12 steps" is 12 steps of 1.25 % (it was 0.104 % per step, Ust 132 V for 1588 V); "5/8 %" is 0.625 %.
 - Tender lines: "On the 132 kV line end", "for 132 kV variation", "IV line end", "at the low voltage transformer terminals", "electrical centre of the higher winding" and "middle of the high voltage winding" set the tapped winding. PGCIL 200 MVA 220/132 kV: 3×CM2I-600/252D on 552 A → 3×CM2I-1200/170D on 921 A.
