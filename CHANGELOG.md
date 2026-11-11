@@ -3,6 +3,9 @@
 ## Unreleased
 
 - Form: every field is one row, the name on the left and a dropdown on the right. The form is about half as tall on a phone and fits one laptop screen. Tap position, winding, on-load / off-circuit and arc mode are dropdowns too.
+- Page: the form is a plain list on the left, the result is the one framed sheet on the right, with the winding sketch inside it. The language switch is a dropdown.
+- Result: the insulation row shows a tick, not a bar. Need and rating are the same Um class, so the bar always read 100 %. Max step voltage and step capacity are no longer repeated under the table.
+- Form: the tender-line box is removed from the page (the CLI still reads lines).
 - Form: "Custom" in a dropdown opens a typed field with the old value selected; the list button beside it brings the dropdown back.
 
 - Build: IBM Plex comes from npm (@fontsource), so `next build` no longer downloads Google Fonts. A Google reply without a file extension broke the build on 2026-11-07.

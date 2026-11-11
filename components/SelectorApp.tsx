@@ -64,7 +64,6 @@ import {
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import {
-  KindToggle,
   TransformerSketch,
 } from "@/components/TransformerPicker";
 import {
@@ -378,8 +377,8 @@ function CardHead({
   right?: React.ReactNode;
 }) {
   return (
-    <div className="mb-4 flex min-h-6 items-center gap-3">
-      <h2 className="min-w-0 flex-1 text-[0.9375rem] leading-tight font-semibold text-[var(--color-ink)]">
+    <div className="mb-1 flex min-h-6 items-center gap-3">
+      <h2 className="min-w-0 flex-1 text-[0.75rem] leading-tight font-semibold text-[var(--color-caption)]">
         {title}
       </h2>
       {right}
@@ -513,7 +512,7 @@ function BasisTable({
     },
   ];
   return (
-    <div className="plate-rule px-5 pt-4 pb-3 sm:px-6">
+    <div className="min-w-0 px-5 pt-4 pb-3 sm:px-7">
       <table className="basis-table">
         <thead>
           <tr>
@@ -551,7 +550,15 @@ function BasisTable({
                   )}
                 </td>
                 <td className="r">
-                  {pct != null ? (
+                  {pct != null && r.plain ? (
+                    <span className={cx("basis-use", r.use! > 1 ? "is-over" : "is-ok")}>
+                      {r.use! > 1 ? (
+                        <ExclamationTriangleIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                      ) : (
+                        <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+                      )}
+                    </span>
+                  ) : pct != null ? (
                     <span className={cx("basis-use", tone)} title={`${t(lang, "colUse")} ${pct}%`}>
                       <span className="basis-bar" aria-hidden>
                         <i style={{ transform: `scaleX(${Math.min(100, pct) / 100})` }} />
@@ -1026,9 +1033,9 @@ export function SelectorApp() {
     ...(duty.ok ? notesFor(lang, duty.cautionsZh, duty.cautionsEn) : []),
   ].filter((c, i, all) => all.indexOf(c) === i);
   return (
-    <div className="flex w-full min-w-0 flex-1 flex-col">
+    <div className="page flex w-full min-w-0 flex-1 flex-col">
       <header className="topbar sticky top-0 z-30">
-        <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
+        <div className="mx-auto flex h-14 w-full max-w-[1200px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
           <div className="min-w-0 leading-tight">
             <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-ink)]">
               {t(lang, "title")}
@@ -1043,7 +1050,7 @@ export function SelectorApp() {
           </div>
         </div>
       </header>
-      <div className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-3 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:gap-8 sm:px-8 sm:pt-6 lg:grid-cols-[minmax(0,1fr)_27rem] lg:gap-10 lg:pt-8 lg:pb-8 xl:grid-cols-[minmax(0,1fr)_30rem] xl:gap-14">
+      <div className="mx-auto grid w-full max-w-[1200px] flex-1 items-start gap-8 px-0 pt-5 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-8 lg:grid-cols-[21rem_minmax(0,1fr)] lg:gap-12 lg:pt-10 lg:pb-10 xl:grid-cols-[24rem_minmax(0,1fr)] xl:gap-16">
         <form
           className="flex min-w-0 flex-col"
           onSubmit={(e) => e.preventDefault()}
@@ -1052,105 +1059,25 @@ export function SelectorApp() {
 
           <div className="sheet">
             <section aria-label={t(lang, "transformer")} className="sheet-section">
-              <CardHead
-                title={t(lang, "transformer")}
-                right={
-                  <KindToggle
-                    lang={lang}
-                    kind={kind}
-                    onKind={pickKind}
-                    autoDisabled={isOctc}
-                    small
-                  />
-                }
-              />
-              <div className="mb-4 flex flex-col gap-2">
-                <label
-                  htmlFor="tender-line"
-                  className="flex min-h-[1.625rem] items-center text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]"
-                >
-                  {t(lang, "lineLabel")}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    id="tender-line"
-                    type="text"
-                    className="ui-control min-w-0 flex-1"
-                    value={lineText}
-                    placeholder={t(lang, "linePlaceholder")}
-                    spellCheck={false}
-                    autoComplete="off"
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setLineText(v);
-                      setLineFailed(false);
-                      // A paste reads at once: on a phone it never sends Enter,
-                      // and the card kept the previous job's type.
-                      const kind = (e.nativeEvent as InputEvent).inputType;
-                      if (kind === "insertFromPaste" && v.trim()) readTenderLine(v);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        readTenderLine();
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="ui-btn"
-                    disabled={!lineText.trim()}
-                    onClick={() => readTenderLine()}
-                  >
-                    {t(lang, "lineRead")}
-                  </button>
-                </div>
-                {lineStale ? null : lineFailed ? (
-                  <p role="status" className="text-[0.75rem] leading-snug text-[var(--color-danger)]">
-                    {t(lang, lineFailed)}
-                  </p>
-                ) : lineRead?.assumed.length ? (
-                  <p role="status" className="flex gap-2 text-[0.75rem] leading-snug text-[var(--color-warn)]">
-                    <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
-                    <span>
-                      {t(lang, "lineCheck")}
-                      {lang === "zh" ? "：" : ": "}
-                      {lineRead.assumed.map((f) => t(lang, `lineF_${f}`)).join(listSep)}
-                    </span>
-                  </p>
-                ) : null}
-                {/* 2026-11-04: the reader's notes (percent split, single-phase,
-                    tap ladder…) reached only the CLI. */}
-                {!lineStale && !lineFailed && lineRead?.notes.length ? (
-                  <ul role="status" className="flex flex-col gap-1 text-[0.75rem] leading-snug text-[var(--color-warn)]">
-                    {lineRead.notes.map((n, i) => (
-                      <li key={`${n.key}-${i}`} className="flex gap-2">
-                        <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
-                        <span>{t(lang, `lineW_${n.key}`, n.vars)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
               {isOctc ? (
                 <p id="auto-octc-note" className="sr-only">
                   {t(lang, "autoOctcNote")}
                 </p>
               ) : null}
-              <div className="grid items-start gap-x-8 gap-y-3 sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]">
-                <div className="sketch-stage flex justify-center px-3 py-2 sm:py-4">
-                  <TransformerSketch
-                    lang={lang}
-                    kind={kind}
-                    tapPoint={tapPoint}
-                    winding={winding}
-                    tapKv={windingRatedKv}
-                    hvKv={hvKv}
-                    mvKv={mvKv}
-                    onTap={pickTap}
-                  />
-                </div>
-                <div className="rows">
+              <div className="rows rows-2">
+                  <Field label={t(lang, "transformer")}>
+                    <FieldSelect
+                      className={controlClass}
+                      value={kind}
+                      aria-describedby={isOctc ? "auto-octc-note" : undefined}
+                      onChange={(e) => pickKind(e.target.value as TransformerKind)}
+                    >
+                      <option value="two_winding">{t(lang, "kindTwo")}</option>
+                      <option value="auto" disabled={isOctc}>
+                        {t(lang, "kindAuto")}
+                      </option>
+                    </FieldSelect>
+                  </Field>
                   <Field label={t(lang, "tapPoint")}>
                     <FieldSelect
                       className={controlClass}
@@ -1253,7 +1180,6 @@ export function SelectorApp() {
                       </FieldSelect>
                     </Field>
                   ) : null}
-                </div>
               </div>
             </section>
             <section aria-label={t(lang, "cardDuty")} className="sheet-section">
@@ -1730,7 +1656,7 @@ export function SelectorApp() {
             <p className="sr-only" aria-live="polite">
               {announced}
             </p>
-            <div className="px-5 pt-5 pb-4 sm:px-6">
+            <div className="px-5 pt-5 pb-5 sm:px-7 sm:pt-6">
               {!primary ? (
                 <div>
                   <p
@@ -1756,7 +1682,7 @@ export function SelectorApp() {
                     <p
                       key={primary.model}
                       translate="no"
-                      className="plate-type plate-in min-w-0 flex-1 text-[clamp(1.25rem,5.6vw,1.75rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.375rem,1.8vw,1.75rem)]"
+                      className="plate-type plate-in min-w-0 flex-1 text-[clamp(1.25rem,5.6vw,1.75rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.5rem,2.3vw,2rem)]"
                     >
                       {modelNodes(displayModel(primary.model, lang))}
                     </p>
@@ -1766,9 +1692,6 @@ export function SelectorApp() {
                       onCopy={() => copyModel(displayModel(primary.model, lang))}
                     />
                   </div>
-                  <p className="mt-2 text-[0.8125rem] leading-snug text-[var(--color-muted)]">
-                    {[t(lang, `tapShort_${tapPoint}`), transformerLine].join(listSep)}
-                  </p>
                 </>
               )}
             </div>
@@ -1788,17 +1711,31 @@ export function SelectorApp() {
               </ul>
             ) : null}
 
-            <BasisTable
-              lang={lang}
-              duty={duty}
-              dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
-              stepV={pickedStepV}
-              model={primary}
-            />
+            <div className="plate-rule grid sm:grid-cols-[minmax(0,1fr)_13rem]">
+              <BasisTable
+                lang={lang}
+                duty={duty}
+                dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
+                stepV={pickedStepV}
+                model={primary}
+              />
+              <div className="stage-sketch">
+                <TransformerSketch
+                  lang={lang}
+                  kind={kind}
+                  tapPoint={tapPoint}
+                  winding={winding}
+                  tapKv={windingRatedKv}
+                  hvKv={hvKv}
+                  mvKv={mvKv}
+                  onTap={pickTap}
+                />
+              </div>
+            </div>
 
             {primary ? (
               <div className="plate-rule">
-                <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} />
+                <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} hideRatings />
               </div>
             ) : null}
 
@@ -1807,7 +1744,7 @@ export function SelectorApp() {
                 <button
                   type="button"
                   onClick={() => setAltsOpen((o) => !o)}
-                  className="flex h-12 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:px-6"
+                  className="flex h-12 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:px-7"
                   aria-expanded={altsOpen}
                 >
                   <span>{t(lang, "otherOpts", { n: alts.length })}</span>
@@ -2018,8 +1955,9 @@ function ModelSpec({
   return (
     <dl
       className={cx(
-        "grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3",
-        compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-6 sm:pl-12" : "px-5 py-4 sm:px-6",
+        "grid grid-cols-2 gap-x-5 gap-y-3",
+        hideRatings ? "sm:grid-cols-4" : "sm:grid-cols-3",
+        compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-7 sm:pl-12" : "px-5 py-4 sm:px-7",
       )}
     >
       {items.map((item) => (
