@@ -1602,7 +1602,7 @@ export function SelectorApp() {
 
         <aside
           ref={resultPaneRef}
-          className="flex min-w-0 scroll-mt-16 flex-col gap-3 quiet-scroll lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto lg:pb-2"
+          className="result-pane flex min-w-0 scroll-mt-16 flex-col gap-3 quiet-scroll lg:sticky lg:top-[4.5rem] lg:max-h-[calc(100dvh-4.5rem)] lg:overflow-y-auto"
         >
           <section
             ref={resultCardRef}
@@ -1671,7 +1671,7 @@ export function SelectorApp() {
               </ul>
             ) : null}
 
-            <div className="grid gap-x-8 gap-y-5 px-5 py-6 sm:grid-cols-[minmax(0,1fr)_14.5rem] sm:px-8">
+            <div className="plate-mid px-5 py-6 sm:px-8">
               <BasisTable
                 hideUm={tapPoint === "neutral"}
                 lang={lang}
@@ -1853,14 +1853,16 @@ function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; shown: s
   ];
   if (family !== head) cells.push({ code: r.phases, says: t(lang, "phases") });
   cells.push({ code: String(r.currentA), says: "A" });
-  if (r.connection === "Y" || r.connection === "D") {
-    cells.push({
-      code: r.connection,
-      says: t(lang, r.connection === "Y" ? "windingStar" : "windingDelta"),
-    });
+  // The rest is cut from the string as shown: a single-phase type has no
+  // Y/D after the current, and a reactor type ends in its own step count.
+  const rest = shown.slice(at + 1 + String(r.currentA).length);
+  const m = rest.match(/^([YD])?\/([^-]+)-(.+)$/);
+  if (!m) return null;
+  if (m[1]) {
+    cells.push({ code: m[1], says: t(lang, m[1] === "Y" ? "windingStar" : "windingDelta") });
   }
-  cells.push({ code: r.umToken, says: "Um kV" });
-  cells.push({ code: r.tapCode, says: `${t(lang, "positions")} ${r.positions}` });
+  cells.push({ code: m[2], says: "Um kV" });
+  cells.push({ code: m[3], says: `${t(lang, "positions")} ${r.positions}` });
   return (
     <dl className="type-segs" translate="no">
       {cells.map((c, i) => (

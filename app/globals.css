@@ -1997,3 +1997,39 @@ select.row-control {
 .page .stage-sketch {
   background: #fcfcfd radial-gradient(circle, #d8dce3 1px, transparent 1.2px) 0 0 / 16px 16px;
 }
+
+/* The result column scrolls on its own, which clips at its edge. Padding
+   (pulled back by the same margin) leaves room for the card's shadow. */
+@media (min-width: 1024px) {
+  .result-pane {
+    margin: -1rem -1.5rem -2.5rem;
+    padding: 1rem 1.5rem 3rem;
+  }
+}
+
+/* Loads beside the sketch only when the card itself is wide enough
+   (found at 1024 px: the load names ran under their own numbers). */
+.page .plate {
+  container-type: inline-size;
+}
+.plate-mid {
+  display: grid;
+  gap: 1.25rem 2rem;
+}
+@container (min-width: 40rem) {
+  .plate-mid {
+    grid-template-columns: minmax(0, 1fr) 14.5rem;
+  }
+}
+/* A long load name wraps above its numbers instead of colliding. */
+.basis-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.basis-row dd {
+  margin-left: auto;
+}
+.basis-row .basis-bar {
+  flex: 0 0 100%;
+}
