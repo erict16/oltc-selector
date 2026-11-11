@@ -8,6 +8,8 @@
 - Result: insulation to earth is the equipment's level, not a load. It is listed with the type's data as "Um 72.5 · 140 / 350 kV". At a star neutral it is no longer compared with the duty; elsewhere the row shows system Um / switch Um with a tick and no bar. The bar always read 100 %.
 - Form: the tender-line box, the market row and the two OS figure rows are removed from the page (the CLI still takes them).
 - Top bar: language is an icon button that opens the menu.
+- Colour: neutral greys and one clear blue replace the steel blue and grey-green. Load bars use the blue.
+- Icon: a drawn mark (tap contacts and the selector arm) replaces the emoji, in the top bar and the browser tab.
 - Chinese notes: the resistor on the change-over selector is 电位电阻 (the page said 束缚电阻). The two notes that name it are rewritten in plain words.
 - Form: "Custom" in a dropdown opens a typed field with the old value selected; the list button beside it brings the dropdown back.
 

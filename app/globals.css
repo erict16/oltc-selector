@@ -1963,3 +1963,37 @@ select.row-control {
 .page .plate {
   flex-shrink: 0;
 }
+
+/* Colour (2026-11-11): clean neutral greys and one clear blue. The old
+   steel blue and grey-green read as dull. Loads use the accent; green is
+   only the tick, amber and red only warn. */
+.page,
+.result-dock {
+  --color-accent: #2563eb;
+  --color-ink: #0f172a;
+  --color-ink-2: #334155;
+  --color-muted: #64748b;
+  --color-caption: #94a3b8;
+  --color-ok: #16a34a;
+  --color-page: #f6f7f9;
+  --color-line: #e6e8ec;
+  --color-line-2: #d5d9e0;
+}
+.page .plate-hero {
+  background: #fafbfc;
+}
+.page .basis-bar {
+  background: #eceef2;
+}
+.page .basis-bar i {
+  background: var(--color-accent);
+}
+.page .basis-row.is-tight .basis-bar i {
+  background: #d97706;
+}
+.page .basis-row.is-over .basis-bar i {
+  background: var(--color-danger);
+}
+.page .stage-sketch {
+  background: #fcfcfd radial-gradient(circle, #d8dce3 1px, transparent 1.2px) 0 0 / 16px 16px;
+}
