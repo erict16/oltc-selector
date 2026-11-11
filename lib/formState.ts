@@ -292,7 +292,7 @@ function lineRangeFields(s: LineSettings, octc: boolean, baseReg: Regulation, st
   }
   const keepReg: Regulation = baseReg === "linear" ? "reversing" : baseReg;
   if ((s.plus != null && s.minus != null && s.plus !== s.minus) || s.regulation === "linear") {
-    // An uneven +a/−b keeps W/G on the Fig. 3-3 row Huaming sold (+4/−12 →
+    // An uneven +a/−b keeps W/G on the Fig. 3-3 row the maker sold (+4/−12 →
     // 10193W) with the real minus steps.
     const plus = s.plus ?? 8;
     const minus = s.minus ?? 8;
@@ -654,7 +654,7 @@ export function commitRange(f: FormState, plus: number, minus: number, pct: numb
   if (!(plus > 0) || !(minus > 0)) return { ...f, tapRange: null };
   const octc = isOctc(f);
   const reg = f.input.regulation;
-  // A W/G custom +a/−b takes the Fig. 3-3 row Huaming sells (+4/−12 → 10193W).
+  // A W/G custom +a/−b takes the Fig. 3-3 row the maker sells (+4/−12 → 10193W).
   const g = !octc && reg !== "linear" ? geometryForRange(plus, minus, reg) : null;
   const range: ParsedTapRange = {
     plus,

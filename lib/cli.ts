@@ -484,7 +484,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
 
 /**
  * A stated +a/−b (--range or --line). 2026-11-04: an uneven W/G range takes
- * the Fig. 3-3 row Huaming sold (+4/−12 → ±8, 10193W; +7/−10 → 10181W) and
+ * the Fig. 3-3 row the maker sold (+4/−12 → ±8, 10193W; +7/−10 → 10181W) and
  * keeps the real minus steps for the lowest-tap current, also when --pm or
  * --pos picks the diagram. It used to become linear S + 1 positions (17
  * positions put CV2 out of reach) or, beside --pm, size with −8 instead of −12.
@@ -632,7 +632,7 @@ Flags:
   --reg W|G|0        Reversing / coarse-fine / linear. Default W.
   --pm N             ± steps. Default 8.
   --range +a/-b[xs%] Uneven range, e.g. +4/-12x1.25%. W/G takes the Fig. 3-3
-                     row Huaming sells (+4/-12 → 10193W); the lowest tap uses −b.
+                     row the maker sells (+4/-12 → 10193W); the lowest tap uses −b.
   --minus N          Minus steps for the lowest-tap current (beside --pm/--pos).
   --mid 1|3          Mid positions of the W/G diagram, when Fig. 3-3 has the pair.
   --pos, --positions Linear / OCTC positions.

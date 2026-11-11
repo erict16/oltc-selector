@@ -186,7 +186,7 @@ export const ANTHONY_FILES: AnthonyFileRow[] = [
   { file: "QS2607196-R1-CVIII350D-40.5-14271W-CMA7_HAVEC_Cambodia_edit 22.07.26.pdf", qsNo: "QS2607196", revision: "R1" },
   { file: "QS2607201-R0_SVIII-500D-40.5-12231W-CMA7-SHM-KX_HAVEC_15MVA_Cambodia.pdf", qsNo: "QS2607201", revision: "R0", superseded: true },
   { file: "QS2607201-R0_edit 06.08.26.pdf", qsNo: "QS2607201", revision: "R0" },
-  { file: "Quotation Huaming - QS2602101R0- 3xCZI-500-40.5-17 -CMA7 ( 25.02.2026 ) Approved.PDF", qsNo: "QS2602101", revision: "R0" },
+  { file: "Quotation - QS2602101R0- 3xCZI-500-40.5-17 -CMA7 ( 25.02.2026 ) Approved.PDF", qsNo: "QS2602101", revision: "R0" },
 ];
 
 export const ANTHONY_REPLAY: ReplayCase[] = [

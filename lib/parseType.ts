@@ -31,12 +31,12 @@ export function normalizeType(raw: string): string {
   return t;
 }
 
-// 2026-11-04: WDG/WLG are the single-phase drum OCTC Huaming sells (45 OS rows).
+// 2026-11-04: WDG/WLG are the single-phase drum OCTC the maker sells (45 OS rows).
 const OCTC_TYPE_RE =
   /^(?:(\d+)x)?(WSL|WDL|WSG|WDG|WLG)(VIII|VII|III|II|IV|VI|IX|V|I)-(\d+)([YD])?[/-](\d+(?:\.\d+)?)-(\d+)x(\d+)(?:\((\d+)x(\d+)\))?(?:\(([A-E])\)|([A-E]))?$/i;
 
 /**
- * Parse a Huaming commercial type.
+ * Parse a commercial type.
  *   SHZVIII-1000Y/72.5C-12233W
  *   3xSHZVI-2400/72.5C-10193W
  *   CV2III-350D/40.5-10193W

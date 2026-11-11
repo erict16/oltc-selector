@@ -287,7 +287,7 @@ describe("oltc CLI uneven ranges and tender lines", () => {
   const first = (argv: string[]) => capture(argv).out.trim().split(/\r?\n/)[0];
   const json = (argv: string[]) => JSON.parse(capture(["--json", ...argv]).out);
 
-  it("an uneven line takes the Fig. 3-3 row Huaming sold (UNEVEN-1, WC-05)", () => {
+  it("an uneven line takes the Fig. 3-3 row the maker sold (UNEVEN-1, WC-05)", () => {
     // B01/B02 +7/−10 → 10181W; W02 +12/−8 had no type (21 linear positions).
     expect(first(["--line", "65MVA 150+7-10x1.5%/20kV YNd11"])).toBe("CV2III-350Y/72.5-10181W");
     expect(first(["--line", "165MVA 150+7-10x1.5%/20kV YNd11"])).toBe("SHZVIII-1000Y/72.5B-10181W");

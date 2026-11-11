@@ -9,9 +9,9 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SRC = Path(
-    r"C:\Users\TYM\OneDrive - 上海华明电力设备制造有限公司"
-    r"\Attachments\Excel\Sales\HM reference list -2019-2025.xlsx"
+DEFAULT_SRC = (
+    next(Path.home().glob("OneDrive - *"), Path.home())
+    / "Attachments" / "Excel" / "Sales" / "HM reference list -2019-2025.xlsx"
 )
 SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_SRC
 OUT = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "docs" / "sales" / "sales-2025-ref.json"

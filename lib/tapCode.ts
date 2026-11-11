@@ -423,7 +423,7 @@ export function resolveTapFields(input: {
   if (input.plusMinusSteps != null && input.plusMinusSteps > 0) {
     const n = input.plusMinusSteps;
     const allowed = midOptionsFor(n, reg);
-    // 2026-11-04: ±7 G has no Fig. 3-3 row. pitchFor gave 16151G; Huaming sold
+    // 2026-11-04: ±7 G has no Fig. 3-3 row. pitchFor gave 16151G; the maker sold
     // 10173G (E-M260167-168, E-V260105-109, E-CV2260346). ±4…±6 G: no evidence.
     if (reg === "coarse_fine" && n === 7 && !allowed.length) {
       return {

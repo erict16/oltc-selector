@@ -445,7 +445,7 @@ export function splitPercentRange(plusPct: number, minusPct: number, total?: num
  * 2026-11-04: +0/-30 %, ±10 %, +15 %/-10 % (20 x 1.25 %) are percent ranges.
  * They used to be read as 30 or 10 steps. The step size comes from the line
  * ("x 1.25 %", "2.5 % steps", "±8 positions", "17 positions"); else the
- * smallest whole split with ≥ 16 steps, as Huaming sold (B05 +0/-30 % →
+ * smallest whole split with ≥ 16 steps, as the maker sold (B05 +0/-30 % →
  * 16 × 1.875 %), marked assumed. The lowest-tap current depends only on the
  * minus percent, so it is exact either way.
  */
@@ -1518,7 +1518,7 @@ function neutralFromList(text: string): number | null {
 // ------------------------------------------------------------ line → form
 
 /**
- * W/G geometry for an uneven +a/−b range (2026-11-04). Huaming sells the
+ * W/G geometry for an uneven +a/−b range (2026-11-04). The maker sells the
  * Fig. 3-3 row for ±⌈S/2⌉ (S = a + b steps) and skips the unused positions on
  * the motor drive: +4/−12 → 10193W, +12/−8 → 12233W, +5/−7 → 14131W. An odd S
  * on a pitch-10 row drops one position: +7/−10 → 10181W, +8/−7 → 10183W.

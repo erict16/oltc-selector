@@ -19,9 +19,9 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "lib" / "listIndex.data.json"
+# Work OneDrive under ~/Library/CloudStorage (first OneDrive-* folder).
 ONEDRIVE = (
-    Path.home()
-    / "Library/CloudStorage/OneDrive-上海华明电力设备制造有限公司"
+    next(Path.home().glob("Library/CloudStorage/OneDrive-*"), Path.home())
     / "QS"
     / "a. Base Price List 2025.xlsx"
 )

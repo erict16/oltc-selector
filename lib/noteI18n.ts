@@ -394,12 +394,12 @@ const RULES: Rule[] = [
     }),
   ],
   [
-    /^Needs Huaming technical review: (.+)\.$/,
+    /^Needs the maker's technical review: (.+)\.$/,
     (m) => ({
-      vi: `Cần Huaming xét duyệt kỹ thuật riêng: ${m[1]}.`,
-      es: `Requiere revisión técnica de Huaming: ${m[1]}.`,
-      tr: `Huaming teknik incelemesi gerekli: ${m[1]}.`,
-      id: `Perlu tinjauan teknis Huaming: ${m[1]}.`,
+      vi: `Cần nhà sản xuất xét duyệt kỹ thuật riêng: ${m[1]}.`,
+      es: `Requiere revisión técnica del fabricante: ${m[1]}.`,
+      tr: `Üretici teknik incelemesi gerekli: ${m[1]}.`,
+      id: `Perlu tinjauan teknis pabrikan: ${m[1]}.`,
     }),
   ],
   [

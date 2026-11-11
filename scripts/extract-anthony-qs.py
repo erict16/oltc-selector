@@ -15,9 +15,10 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
-SRC = Path(
-    "/Users/youming/Library/CloudStorage/"
-    "OneDrive-上海华明电力设备制造有限公司/QS/Anthony"
+SRC = (
+    next(Path.home().glob("Library/CloudStorage/OneDrive-*"), Path.home())
+    / "QS"
+    / "Anthony"
 )
 OUT = Path("/tmp/anthony-extract")
 RAW = OUT / "raw"

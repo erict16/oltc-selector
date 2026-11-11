@@ -765,7 +765,7 @@ export const SERIES: SeriesDef[] = [
       "鼓式无载（WG 价目表）。仅 dutyKind=octc。接线方式跟 octcSeries（页面默认 IV）。未指定时 D → WSGII。",
     rank: 7,
   },
-  // 2026-11-04: the drum OCTC Huaming actually sells. Single-phase, one per
+  // 2026-11-04: the drum OCTC the maker actually sells. Single-phase, one per
   // phase (3xWDGIV-800/40.5-5x5A). Existence is the sold-row list in
   // lib/listIndex.ts; every sold row is Y or blank, so no D.
   {

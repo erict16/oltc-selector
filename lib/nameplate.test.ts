@@ -389,7 +389,7 @@ describe("geometryForRange (UNEVEN-1, UNEVEN-6, WC-05)", () => {
       pitch: g.pitch,
     }).tapCode;
   };
-  it("takes the Fig. 3-3 row Huaming sold", () => {
+  it("takes the Fig. 3-3 row the maker sold", () => {
     expect(geometryForRange(4, 12, "reversing")).toEqual({ plusMinusSteps: 8, positions: 19, mid: 3, pitch: 10 });
     expect(code(4, 12, "reversing")).toBe("10193W");
     expect(code(0, 16, "reversing")).toBe("10193W");

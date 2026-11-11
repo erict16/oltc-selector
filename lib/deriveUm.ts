@@ -47,7 +47,7 @@ const IEC_UM = [
   362, 420, 550, 800,
 ] as const;
 
-/** Huaming catalogue Um classes (kV). */
+/** Catalogue Um classes (kV). */
 const CATALOGUE_UM = [12, 17.5, 40.5, 72.5, 126, 145, 170, 252, 300, 363] as const;
 
 /**
@@ -67,7 +67,7 @@ function nominalSystemKv(ratedKv: number): number {
 
 /**
  * Actual Um of the system the tap side sits on, before any snap to a
- * Huaming catalogue class: the lowest IEC Um at least 4% above the
+ * Catalogue class: the lowest IEC Um at least 4% above the
  * system nominal. 22 → 24, 35 → 40.5, 110/115/121 → 123, 225/230/242 → 245.
  */
 export function iecUmFromRatedKv(ratedKv: number): number {

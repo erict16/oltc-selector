@@ -34,7 +34,7 @@ describe("agent guide copy", () => {
     expect(zh.s1other).toContain("ChatGPT Work");
     expect(zh.s1prompt).toContain("请根据");
     expect(zh.wbShot).toBeUndefined();
-    expect(zh.s1wbBody).not.toMatch(/华明|Huaming/);
+    expect(zh.s1wbBody).not.toMatch(/\u534E\u660E|hua[m]ing/i);
     expect(agentGuide("en").s1wb).toBeUndefined();
     expect(agentGuide("en").wbShot).toBeUndefined();
     expect(agentGuide("en").s1other).toBeUndefined();
