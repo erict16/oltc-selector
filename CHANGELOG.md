@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Repository: `docs/replay` (sold-order sheets with buyer names and serials) is no longer tracked; it stays on the maintainer's disk and is git-ignored. The tests that replay it skip when it is absent.
 - Notes: buyer names, order counts and "sold" wording are gone from the page and the CLI. The technical rule stays.
 - Notes: "OS" is written out once as 订货规范（OS） / order specification (OS), in all six languages.
 - Chinese page: a note names families as the type above it does (VCV-G, VCM, CHVT), not CV2 / CM2 / SHZVG.

@@ -148,12 +148,12 @@ const RULES: Rule[] = [
     }),
   ],
   [
-    /^Selector grade raised to (\S+): Turkish buyers take (\S+) on 110 kV-class neutrals \(sold 25 of 26 orders; (\S+) also fits\)\.$/,
+    /^Selector grade raised to (\S+): (\S+) is usual on Turkish 110 kV-class neutrals \((\S+) also fits\)\.$/,
     (m) => ({
-      vi: `Cấp bộ chọn nấc nâng lên ${m[1]}: khách Thổ Nhĩ Kỳ chọn ${m[2]} cho trung tính cấp 110 kV (25/26 đơn đã bán; ${m[3]} cũng đáp ứng).`,
-      es: `Grado del selector elevado a ${m[1]}: los compradores turcos eligen ${m[2]} en neutros de clase 110 kV (25 de 26 pedidos vendidos; ${m[3]} también sirve).`,
-      tr: `Seçici sınıfı ${m[1]}'ye yükseltildi: Türk alıcılar 110 kV sınıfı nötrlerde ${m[2]} alıyor (satılan 26 siparişin 25'i; ${m[3]} de uygun).`,
-      id: `Kelas selektor dinaikkan ke ${m[1]}: pembeli Turki mengambil ${m[2]} pada netral kelas 110 kV (25 dari 26 pesanan terjual; ${m[3]} juga memenuhi).`,
+      vi: `Cấp bộ chọn nấc nâng lên ${m[1]}: trung tính cấp 110 kV ở Thổ Nhĩ Kỳ thường dùng ${m[2]} (${m[3]} cũng đáp ứng).`,
+      es: `Grado del selector elevado a ${m[1]}: en neutros de clase 110 kV en Turquía es habitual ${m[2]} (${m[3]} también sirve).`,
+      tr: `Seçici sınıfı ${m[1]}'ye yükseltildi: Türkiye'de 110 kV sınıfı nötrlerde genellikle ${m[2]} kullanılır (${m[3]} de uygun).`,
+      id: `Kelas selektor dinaikkan ke ${m[1]}: netral kelas 110 kV di Turki biasanya memakai ${m[2]} (${m[3]} juga memenuhi).`,
     }),
   ],
   [

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { HAS_REPLAY_DATA, readSalesJson } from "./replayData";
 import { describe, expect, it } from "vitest";
 import { isTapSideRatedKv } from "./deriveUm";
 import { deriveDuty } from "./transformer";
@@ -20,11 +20,10 @@ function num(v: unknown): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+const HAS_SALES = HAS_REPLAY_DATA;
+
 function loadSales(year: "2025" | "2026"): OsRow[] {
-  const raw = JSON.parse(
-    readFileSync(new URL(`../docs/replay/${year}-os-sales.json`, import.meta.url), "utf8"),
-  ) as { sales: OsRow[] };
-  return raw.sales;
+  return readSalesJson(year).sales as OsRow[];
 }
 
 function tapSideRows(sales: OsRow[]): Array<OsRow & { rated: number; soldUm: number; conn: "Y" | "D" }> {
@@ -82,7 +81,7 @@ function matchRate(
   return { n: rows.length, ok, pct: rows.length ? (ok / rows.length) * 100 : 0 };
 }
 
-describe("2026 OS: only tap-side Un (I matches S/U)", () => {
+describe.skipIf(!HAS_SALES)("2026 OS: only tap-side Un (I matches S/U)", () => {
   const rows = tapSideRows(loadSales("2026"));
 
   it("has a usable confirmed set", () => {
@@ -135,7 +134,7 @@ describe("2026 OS: only tap-side Un (I matches S/U)", () => {
   });
 });
 
-describe("2025 + 2026 OS: shipped Um rule", () => {
+describe.skipIf(!HAS_SALES)("2025 + 2026 OS: shipped Um rule", () => {
   const rows = [...tapSideRows(loadSales("2025")), ...tapSideRows(loadSales("2026"))];
 
   it("110 / 115 kV star → sold 72.5 at ≥85% (88% measured)", () => {
