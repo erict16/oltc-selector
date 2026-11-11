@@ -1,5 +1,7 @@
 "use client";
 
+import { LanguageIcon } from "@heroicons/react/24/outline";
+
 import { LANG_OPTIONS, type Lang } from "@/lib/i18n";
 
 function cx(...parts: Array<string | false | null | undefined>) {
@@ -18,17 +20,20 @@ export function LangSwitcher({
   tone?: "light" | "dark";
 }) {
   return (
-    <select
-      aria-label={ariaLabel}
-      value={lang}
-      onChange={(e) => onChange(e.target.value as Lang)}
-      className="row-control lang-select"
-    >
-      {LANG_OPTIONS.map((opt) => (
-        <option key={opt.id} value={opt.id}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
+    <span className="lang-btn">
+      <LanguageIcon className="h-5 w-5" strokeWidth={1.6} aria-hidden />
+      {/* The native menu sits invisibly over the icon, so a tap opens it. */}
+      <select
+        aria-label={ariaLabel}
+        value={lang}
+        onChange={(e) => onChange(e.target.value as Lang)}
+      >
+        {LANG_OPTIONS.map((opt) => (
+          <option key={opt.id} value={opt.id}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </span>
   );
 }

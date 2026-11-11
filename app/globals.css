@@ -1931,3 +1931,35 @@ select.row-control {
     transform: none;
   }
 }
+
+/* Language: an icon button; the native menu is laid over it. */
+.lang-btn {
+  position: relative;
+  display: grid;
+  height: 2.5rem;
+  width: 2.5rem;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--color-ink-2);
+  transition: background-color 150ms ease;
+}
+.lang-btn:hover {
+  background-color: #eef1f5;
+}
+.lang-btn:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+.lang-btn select {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+  opacity: 0;
+}
+/* The card clips its corners (overflow hidden), which lets a flex parent
+   squash it: opening an alternative cut the card off with no scroll. */
+.page .plate {
+  flex-shrink: 0;
+}

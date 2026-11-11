@@ -1165,20 +1165,6 @@ export function SelectorApp() {
                       ))}
                     </FieldSelect>
                   </Field>
-                  {/* Neutral Um follows country practice (2026-11-04 audit UM-2). */}
-                  {kind === "two_winding" && tapPoint === "neutral" ? (
-                    <Field label={t(lang, "market")}>
-                      <FieldSelect
-                        className={controlClass}
-                        value={market}
-                        onChange={(e) => setMarket(e.target.value)}
-                      >
-                        <option value="">{t(lang, "marketNone")}</option>
-                        <option value="IT">{t(lang, "market_IT")}</option>
-                        <option value="TR">{t(lang, "market_TR")}</option>
-                      </FieldSelect>
-                    </Field>
-                  ) : null}
               </div>
             </section>
             <section aria-label={t(lang, "cardDuty")} className="sheet-section">
@@ -1610,32 +1596,6 @@ export function SelectorApp() {
                       onValue={(n) => commitSafetyK(n)}
                     />
                   </Field>
-                  {/* The maker's own figures: Imax replaces the full-range
-                      current, Ust is a floor (2026-11-04 audit D1, D3). */}
-                  {currentMode === "capacity" ? (
-                    <>
-                      <Field label={t(lang, "osImax")}>
-                        <DecimalInput
-                          className="row-control"
-                          value={osImaxA}
-                          placeholder="—"
-                          onValue={setOsImaxA}
-                          groupedError={t(lang, "groupedNumber")}
-                        />
-                        <span className="row-unit">A</span>
-                      </Field>
-                      <Field label={t(lang, "osUst")}>
-                        <DecimalInput
-                          className="row-control"
-                          value={osUstV}
-                          placeholder="—"
-                          onValue={setOsUstV}
-                          groupedError={t(lang, "groupedNumber")}
-                        />
-                        <span className="row-unit">V</span>
-                      </Field>
-                    </>
-                  ) : null}
               </div>
             </section>
           </div>
