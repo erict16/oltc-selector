@@ -373,18 +373,21 @@ export function KindToggle({
   kind,
   onKind,
   autoDisabled,
+  small,
 }: {
   lang: Lang;
   kind: TransformerKind;
   onKind: (k: TransformerKind) => void;
   autoDisabled?: boolean;
+  /** Compact track for a section head. */
+  small?: boolean;
 }) {
   const opts: Array<{ id: TransformerKind; title: string }> = [
     { id: "two_winding", title: t(lang, "kindTwo") },
     { id: "auto", title: t(lang, "kindAuto") },
   ];
   return (
-    <div role="radiogroup" aria-label={t(lang, "transformer")} className="ui-track">
+    <div role="radiogroup" aria-label={t(lang, "transformer")} className={cx("ui-track", small && "ui-track-sm shrink-0")}>
       {opts.map((o) => {
         const on = o.id === kind;
         const off = o.id === "auto" && autoDisabled;

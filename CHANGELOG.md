@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Form: every field is one row, the name on the left and a dropdown on the right. The form is about half as tall on a phone and fits one laptop screen. Tap position, winding, on-load / off-circuit and arc mode are dropdowns too.
+- Form: "Custom" in a dropdown opens a typed field with the old value selected; the list button beside it brings the dropdown back.
+
 - Build: IBM Plex comes from npm (@fontsource), so `next build` no longer downloads Google Fonts. A Google reply without a file extension broke the build on 2026-11-07.
 - Deploy: Vercel only. The GitHub Pages workflow is gone: the repo is private, and free GitHub Pages and its artifact storage do not work for private repos.
 

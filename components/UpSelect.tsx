@@ -2,7 +2,7 @@
 
 type Opt = { value: string; label: string };
 
-const controlClass = "ui-control";
+const controlClass = "row-control";
 
 /**
  * The insulation-row menus. A native <select> since 2026-11-07: the custom

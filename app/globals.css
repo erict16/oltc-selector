@@ -1565,3 +1565,110 @@ select.ui-control-sm {
     transition: none;
   }
 }
+
+/* ── Spec rows (2026-11-11) ─────────────────────────────────────────────
+   One line per field: the name on the left, a quiet menu on the right.
+   Replaces the label-over-box grid, which doubled the form's height. */
+.rows {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 2.5rem;
+}
+@media (min-width: 640px) {
+  .rows-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.5rem;
+  min-height: 2.75rem;
+  border-bottom: 1px solid var(--color-rule);
+}
+.row-label {
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  line-height: 1.3;
+  color: var(--color-muted);
+}
+.row-value {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+  align-items: center;
+  gap: 0.25rem;
+}
+.row-control {
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 4rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 6px;
+  background-color: transparent;
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  transition: background-color 150ms ease;
+}
+select.row-control {
+  cursor: pointer;
+  padding-right: 1.625rem;
+  background-position: right 0.5rem center;
+}
+input.row-control {
+  background-color: var(--color-field);
+}
+.row-control:hover {
+  background-color: var(--color-field);
+}
+.row-control:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+  background-color: #fff;
+}
+.row-control:disabled {
+  cursor: not-allowed;
+  color: var(--color-caption);
+  background-image: none;
+}
+.row-control:disabled:hover {
+  background-color: transparent;
+}
+.row-unit {
+  flex-shrink: 0;
+  min-width: 1.625rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+.row-back {
+  display: inline-flex;
+  height: 2.5rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--color-caption);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.row-back:hover {
+  background-color: var(--color-field);
+  color: var(--color-ink);
+}
+.row-back:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .row-control,
+  .row-back {
+    transition: none;
+  }
+}
