@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Deploy: the GitHub Pages workflow is back (the repo is public again). The page also runs at erict16.github.io/oltc-selector.
+- README rewritten for the new page, with a new screenshot.
 - Form: every field is one row, the name on the left and a dropdown on the right. The form is about half as tall on a phone and fits one laptop screen. Tap position, winding, on-load / off-circuit and arc mode are dropdowns too.
 - Page: three white cards of rows on the left (name, framed dropdown), one result card on the right. The language switch is a dropdown.
 - Result: under the type, one cell per coded part says what it means (family, phases, current, connection, Um, tap code). Loads are bars: duty / rating and the share used. The winding sketch sits beside them.

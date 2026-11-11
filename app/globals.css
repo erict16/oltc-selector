@@ -1676,7 +1676,7 @@ select.row-control {
 .row-control:focus-visible {
   outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-accent) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
 }
 .row-control:disabled {
   cursor: not-allowed;
@@ -1713,7 +1713,7 @@ select.row-control {
 .row-back:focus-visible {
   outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-accent) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
 }
 .lang-select {
   width: auto;
@@ -1760,7 +1760,8 @@ select.row-control {
   align-items: center;
   gap: 0.375rem;
   border-radius: 999px;
-  background: color-mix(in oklch, var(--color-accent) 11%, white);
+  /* srgb: an oklch mix with white drifts pink in Chromium. */
+  background: color-mix(in srgb, var(--color-accent) 10%, white);
   padding: 0 0.625rem 0 0.5rem;
   font-size: 0.8125rem;
   font-weight: 600;
@@ -1794,7 +1795,7 @@ select.row-control {
 .copy-btn:focus-visible {
   outline: none;
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-accent) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
 }
 .type-segs {
   display: grid;

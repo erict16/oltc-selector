@@ -1,17 +1,42 @@
 # OLTC Selector / 有载开关选型
 
-填工况，给出 2025 目录里**最低满足**的型号。网页和 `oltc` CLI 共用同一份 `selectOltc` 引擎。
+Enter the transformer duty and get the smallest tap-changer type in the 2025 catalogue that covers it. The web page and the `oltc` command use the same engine (`selectOltc`).
 
-**CLI：** `npx -y oltc-selector@2.2.0`，命令是 `oltc`。Agent 技能包另放，不在这个仓库里。  
-**网页：** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/)
+- **Web:** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) (mirror: [erict16.github.io/oltc-selector](https://erict16.github.io/oltc-selector/))
+- **CLI:** `npx -y oltc-selector@2.2.0`. The command is `oltc`.
 
-私人辅助，不是厂家官网。型号是起点，出 OS 前要工程确认。
+This is a private helper, not a manufacturer's site. The type is a starting point. Get engineering confirmation before an order.
 
-![工作台](docs/assets/readme.png)
+![The page: the form on the left, the result card on the right](docs/assets/readme.png)
+
+## Web page
+
+The page works on a phone and on a laptop. Every field is a dropdown; "Custom" in a dropdown opens a typed field.
+
+**Form (left).** Three cards:
+
+| Card | Fields |
+|------|--------|
+| Transformer | Type (two-winding / autotransformer), where the switch sits, winding connection, rated voltage, insulation to earth |
+| Duty | Capacity or through-current, regulation, ± steps, step size, mid positions, phases |
+| Switch | On-load / off-circuit, arc medium, structure, mounting, impulse and power-frequency levels, safety factor |
+
+**Result (right).** The type updates as you change a field.
+
+- The type string, with a button to copy it.
+- One cell for each coded part of the type: family, phases, current, connection, Um, tap code.
+- Loads as bars: duty / rating and the share used, for through-current, step voltage and step capacity.
+- Insulation to earth as the type's own level, for example `Um 72.5 · 140 / 350 kV`. It is not compared with the duty at a star neutral.
+- Notes you must act on, in a yellow band.
+- Other types that also cover the duty.
+
+On a phone the type stays in a bar at the bottom; the arrow jumps to the full result.
+
+Languages: 中文, English, Tiếng Việt, Español, Türkçe, Bahasa Indonesia.
 
 ## CLI
 
-不需要 clone 本仓库。
+You do not need to clone this repository.
 
 ```bash
 npm i -g oltc-selector
@@ -50,7 +75,7 @@ oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
 | `--conn Y\|D` | Switch star / delta on the `--iu` path (with `--mva`, use `--tap`) | Y |
 | `--reg W\|G\|0` | Reversing / coarse-fine / linear | W |
 | `--pm` | ± steps | 8 |
-| `--range +a/-b[xs%]` | Uneven range. W/G takes the Fig. 3-3 row Huaming sells (+4/-12 → 10193W); the lowest tap uses −b | |
+| `--range +a/-b[xs%]` | Uneven range. W/G takes the Fig. 3-3 row the maker sells (+4/-12 → 10193W); the lowest tap uses −b | |
 | `--minus` | Minus steps for the lowest-tap current, beside `--pm` / `--pos` | ± steps |
 | `--mid 1\|3` | Mid positions of the W/G diagram, when Fig. 3-3 has the pair | brochure |
 | `--octc` | Off-circuit 无载 (WSL cage; WDG/WLG/WSG drum) | on-load |
@@ -78,20 +103,24 @@ oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
 10. **Tapped windings on 220 kV class and above take combined types only.** 2025–2026 OS: 67 of 67 were CM / CM2 / SHZV.
 11. **An open Um is shown as a choice.** Star points above 72.5 and autotransformers list the type at each Um class; the tender's insulation picks one (`--earth-um`, or a row on the card).
 
-## Web app
-
-预选 66 / 110 / 220 kV 带常用工况。默认真变压器容量，星/角推出 Imax（最低分接和安全系数）。调压侧电压推出 Um。型号随参数实时更新，结果卡把工况和型号额定并排列出（电流、级电压、级容量、开关绝缘）。开关一组始终展开。手机上型号固定在底栏，点箭头跳到完整结果。
+## Develop
 
 ```bash
 npm install
 npm run dev      # http://127.0.0.1:3000
 npm test
+npm run build    # static export to out/
 npm run pack:cli
 ```
 
-部署：Vercel（每次 push 先跑 `npm test` 再 build）。仓库是私有的，免费版 GitHub Pages 不可用，已停用。
+| Path | What it holds |
+|------|---------------|
+| `lib/` | The engine, catalogue data, tap codes, translations, tests |
+| `components/SelectorApp.tsx` | The page |
+| `app/globals.css` | Styles |
+| `scripts/oltc.ts` | CLI entry |
 
-语言：中文、English、Tiếng Việt、Español、Türkçe、Bahasa Indonesia。
+Every push to `master` deploys to Vercel and to GitHub Pages. Both run `npm test` before the build.
 
 ## OS regression
 
@@ -103,6 +132,6 @@ python scripts/os-to-excel.py
 
 `npm test` runs shipped `selectOltc` on every complete row: no illegal type out; a legal sold type that covers the duty must appear in ranked results.
 
-## 许可
+## Terms
 
-[条款](https://oltc-selector.vercel.app/terms/) · [隐私](https://oltc-selector.vercel.app/privacy/)。仅供参考。
+[Terms](https://oltc-selector.vercel.app/terms/) · [Privacy](https://oltc-selector.vercel.app/privacy/). For reference only.
