@@ -22,3 +22,14 @@ export function displayModel(model: string, lang: string): string {
   const count = (m[1] ?? "") + (m[2] ?? "");
   return count + hit[1] + m[4] + model.slice(m[0].length);
 }
+
+const NOTE_FAMILY = /(?<![A-Za-z0-9])(SHZVG|CV2|CM2)(?=(?:III|II|I)?(?![A-Za-z0-9]))/g;
+
+/**
+ * A note on the Chinese screen names families as the type above it does
+ * (2026-11-11: the card read VCV-G while its notes said CV2).
+ */
+export function displayNote(text: string, lang: string): string {
+  if (lang !== "zh") return text;
+  return text.replace(NOTE_FAMILY, (code) => ZH_FAMILY.find(([from]) => from === code)?.[1] ?? code);
+}

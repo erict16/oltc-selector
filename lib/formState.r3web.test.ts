@@ -233,9 +233,9 @@ describe("UI-11: an assumed auto-junction Um is said on the card", () => {
     expect(d.ok).toBe(true);
     expect(d.umKv).toBe(um);
     expect(d.umAssumed).toBe(true);
-    const en = `Autotransformer junction sized at the HV class, Um ${um} kV; the OS decides.`;
+    const en = `Autotransformer junction sized at the HV class, Um ${um} kV; the order specification (OS) decides.`;
     expect(d.cautionsEn).toContain(en);
-    expect(d.cautionsZh).toContain(`自耦变串联-公共连接点先按高压等级 Um ${um} kV 选，以 OS 为准。`);
+    expect(d.cautionsZh).toContain(`自耦变串联-公共连接点先按高压等级 Um ${um} kV 选，以订货规范（OS）为准。`);
     for (const lang of ["vi", "es", "tr", "id"] as const) {
       const out = localizeNote(en, lang);
       expect(out).not.toBe(en);

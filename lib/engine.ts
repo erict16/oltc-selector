@@ -1271,9 +1271,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
           !gradePick?.raisedFrom && (input.selectorSize ?? "auto") === "auto";
         if (gradeAuto && classBump && selectorSize === classBump) {
           cautionsEn.push(
-            `Selector grade raised one step to ${selectorSize}: winding of 330 kV class or above (sold practice).`,
+            `Selector grade raised one step to ${selectorSize}: winding of 330 kV class or above.`,
           );
-          cautionsZh.push(`选择器等级上调一级为 ${selectorSize}：330 kV 级及以上绕组（按已售订单）。`);
+          cautionsZh.push(`选择器等级上调一级为 ${selectorSize}：330 kV 级及以上绕组。`);
         } else if (
           gradeAuto &&
           classBump &&

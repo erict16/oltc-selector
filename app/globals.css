@@ -1733,6 +1733,19 @@ select.row-control {
   .row-value {
     width: 11rem;
   }
+  /* Phones: 44 px touch targets. */
+  .row-control,
+  .row-back,
+  .copy-btn,
+  .lang-btn {
+    height: 2.75rem;
+  }
+  .lang-btn {
+    width: 2.75rem;
+  }
+  .row-back {
+    width: 2.75rem;
+  }
 }
 
 /* Result card */
