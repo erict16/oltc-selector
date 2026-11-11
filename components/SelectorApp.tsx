@@ -3,8 +3,10 @@
 import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
 import {
   ArrowDownIcon,
+  ShieldCheckIcon,
   CheckIcon,
   ChevronDownIcon,
+  ListBulletIcon,
   Square2StackIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
@@ -63,8 +65,6 @@ import {
 } from "@/lib/tapCode";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import {
-  KindToggle,
-  TapList,
   TransformerSketch,
 } from "@/components/TransformerPicker";
 import {
@@ -151,7 +151,9 @@ function DecimalInput({
   className,
   placeholder,
   groupedError,
+  autoFocus,
 }: {
+  autoFocus?: boolean;
   value: number;
   onValue: (n: number) => void;
   onBlur?: () => void;
@@ -173,6 +175,9 @@ function DecimalInput({
     <>
       <input
         inputMode="decimal"
+        autoFocus={autoFocus}
+        // Opened from the menu: typing replaces the old value.
+        onFocus={autoFocus ? (e) => e.currentTarget.select() : undefined}
         className={className}
         aria-labelledby={labelledBy}
         aria-invalid={grouped || undefined}
@@ -190,7 +195,7 @@ function DecimalInput({
         onBlur={onBlur}
       />
       {grouped ? (
-        <span id={errorId} role="alert" className="mt-1 block text-[0.75rem] leading-snug text-[var(--color-danger)]">
+        <span id={errorId} role="alert" className="block w-full pb-2 pl-2 text-[0.75rem] leading-snug text-[var(--color-danger)]">
           {groupedError}
         </span>
       ) : null}
@@ -199,33 +204,20 @@ function DecimalInput({
 }
 
 /** Shared field and segment styles live in globals.css (UI kit). */
-const controlClass = "ui-control";
-
-function segBtn(on: boolean) {
-  return cx("ui-seg", on && "is-on");
-}
+const controlClass = "row-control";
 
 function Field({
   label,
   tip,
-  meta,
   children,
   className,
-  action,
-  actionKind = "caption",
   as = "label",
 }: {
   label: string;
   tip?: string;
-  /** Same-row note (e.g. 最大 251 A) — does not add a second line. */
-  meta?: string;
   children: React.ReactNode;
   className?: string;
-  /** Far-right of the label row */
-  action?: React.ReactNode;
-  /** caption = Imax/Um/Ust; plain = capacity/current pills */
-  actionKind?: "caption" | "plain";
-  /** Button groups must not use <label> — a click on the tip would fire the first button. */
+  /** Rows with two controls must not use <label>: it would name only the first. */
   as?: "label" | "div";
 }) {
   const Tag = as;
@@ -235,48 +227,146 @@ function Field({
   const group = as === "div";
   return (
     <Tag
-      className={cx("flex min-w-0 flex-col gap-2 overflow-visible", className)}
+      className={cx("row", className)}
       {...(group ? { role: "group", "aria-labelledby": labelId } : {})}
     >
-      <span className="flex min-h-[1.625rem] flex-nowrap items-center gap-2 overflow-visible">
-        <span id={labelId} className="min-w-0 flex-1 text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]">
-          {label.split("ᵤ").map((part, i, arr) =>
-            i < arr.length - 1 ? (
-              <span key={i}>
-                {part}
-                <sub className="text-[0.7em]">u</sub>
-              </span>
-            ) : (
-              part
-            ),
-          )}
-        </span>
-        {meta ? (
-          <span className="min-w-0 truncate text-[0.75rem] leading-none tabular-nums text-[var(--color-muted)]">
-            {meta}
-          </span>
-        ) : null}
-        {action ? (
-          <span
-            className={cx(
-              "shrink-0",
-              actionKind === "caption" &&
-                "whitespace-nowrap text-[0.75rem] leading-none tabular-nums text-[var(--color-caption)]",
-            )}
-          >
-            {action}
-          </span>
-        ) : null}
+      <span id={labelId} className="row-label">
+        {label.split("ᵤ").map((part, i, arr) =>
+          i < arr.length - 1 ? (
+            <span key={i}>
+              {part}
+              <sub className="text-[0.7em]">u</sub>
+            </span>
+          ) : (
+            part
+          ),
+        )}
       </span>
-      <FieldLabelContext.Provider value={group ? labelId : null}>
-        {children}
-      </FieldLabelContext.Provider>
+      <span className="row-value">
+        <FieldLabelContext.Provider value={group ? labelId : null}>
+          {children}
+        </FieldLabelContext.Provider>
+      </span>
       {tip ? (
-        <span className="text-[0.75rem] leading-snug text-[var(--color-muted)]">
+        <span className="col-span-2 pb-2 text-[0.75rem] leading-snug text-[var(--color-muted)]">
           {tip}
         </span>
       ) : null}
     </Tag>
+  );
+}
+
+/**
+ * A menu of the usual values with a typed entry behind "Custom". The list
+ * button brings the menu back, so a phone user is never stuck in the keyboard.
+ */
+function PickOrType({
+  lang,
+  value,
+  onValue,
+  options,
+  optionLabel,
+  unit,
+  prefix,
+  placeholder,
+  custom,
+  onCustom,
+  extra,
+}: {
+  lang: Lang;
+  value: number;
+  /** fromList: picked in the menu, not typed. */
+  onValue: (n: number, fromList: boolean) => void;
+  options: readonly number[];
+  optionLabel: (n: number) => string;
+  unit?: string;
+  prefix?: string;
+  placeholder?: string;
+  /** Controlled "typing" flag when the form keeps it; local otherwise. */
+  custom?: boolean;
+  onCustom?: (on: boolean) => void;
+  /** Menu entries that are actions, not values. */
+  extra?: Array<{ value: string; label: string; onPick: () => void }>;
+}) {
+  const [own, setOwn] = useState(false);
+  const [focusNext, setFocusNext] = useState(false);
+  const isCustom = custom ?? own;
+  const setCustom = onCustom ?? setOwn;
+  const listed = options.includes(value);
+  if (isCustom || (value > 0 && !listed)) {
+    return (
+      <>
+        {prefix ? <span className="row-unit pl-2">{prefix}</span> : null}
+        <DecimalInput
+          className="row-control"
+          value={value}
+          placeholder={placeholder}
+          autoFocus={focusNext}
+          onValue={(n) => onValue(n, false)}
+          onBlur={() => {
+            if (listed) setCustom(false);
+          }}
+        />
+        {unit ? <span className="row-unit">{unit}</span> : null}
+        <button
+          type="button"
+          className="row-back"
+          title={t(lang, "pickFromList")}
+          aria-label={t(lang, "pickFromList")}
+          onClick={() => {
+            setFocusNext(false);
+            setCustom(false);
+            if (!listed && value > 0) {
+              // The menu needs a listed value: take the nearest one.
+              const near = options.reduce((a, b) =>
+                Math.abs(b - value) < Math.abs(a - value) ? b : a,
+              );
+              onValue(near, true);
+            }
+          }}
+        >
+          <ListBulletIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+        </button>
+      </>
+    );
+  }
+  return (
+    <FieldSelect
+      className="row-control"
+      value={value > 0 ? String(value) : ""}
+      onChange={(e) => {
+        const v = e.target.value;
+        if (v === "__custom__") {
+          setFocusNext(true);
+          setCustom(true);
+          return;
+        }
+        const action = extra?.find((x) => x.value === v);
+        if (action) {
+          action.onPick();
+          return;
+        }
+        setCustom(false);
+        onValue(Number(v), true);
+      }}
+    >
+      {value > 0 ? null : (
+        <option value="" disabled hidden>
+          —
+        </option>
+      )}
+      {options.map((n) => (
+        <option key={n} value={String(n)}>
+          {optionLabel(n)}
+        </option>
+      ))}
+      {extra?.map((x) => (
+        <option key={x.value} value={x.value}>
+          {x.label}
+        </option>
+      ))}
+      <option value="__custom__">{t(lang, "custom")}</option>
+    </FieldSelect>
   );
 }
 
@@ -288,7 +378,7 @@ function CardHead({
   right?: React.ReactNode;
 }) {
   return (
-    <div className="mb-4 flex min-h-6 items-center gap-3">
+    <div className="card-head">
       <h2 className="min-w-0 flex-1 text-[0.9375rem] leading-tight font-semibold text-[var(--color-ink)]">
         {title}
       </h2>
@@ -304,7 +394,10 @@ function CopyButton({
   onCopy,
   small,
   touch,
+  labelled,
 }: {
+  /** Framed button with the words beside the icon. */
+  labelled?: boolean;
   lang: Lang;
   copied: boolean;
   onCopy: () => void;
@@ -312,6 +405,18 @@ function CopyButton({
   /** 44 px target for the phone dock. */
   touch?: boolean;
 }) {
+  if (labelled) {
+    return (
+      <button type="button" onClick={onCopy} className={cx("copy-btn", copied && "is-done")}>
+        {copied ? (
+          <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+        ) : (
+          <Square2StackIcon className="h-4 w-4" strokeWidth={1.7} aria-hidden />
+        )}
+        <span aria-live="polite">{t(lang, copied ? "copied" : "copyType")}</span>
+      </button>
+    );
+  }
   return (
     <button
       type="button"
@@ -355,7 +460,9 @@ function BasisTable({
   dutyA,
   stepV,
   model,
+  hideUm,
 }: {
+  hideUm?: boolean;
   lang: Lang;
   duty: DutyBasis;
   dutyA: number | null;
@@ -423,59 +530,43 @@ function BasisTable({
     },
   ];
   return (
-    <div className="plate-rule px-5 pt-4 pb-3 sm:px-6">
-      <table className="basis-table">
-        <thead>
-          <tr>
-            <th scope="col">{t(lang, "basisTitle")}</th>
-            <th scope="col" className="r">{t(lang, "cardDuty")}</th>
-            <th scope="col" className="r">{t(lang, "colRating")}</th>
-            <th scope="col" className="r">
-              <span className="sr-only">{t(lang, "colUse")}</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows
-            // Off-circuit types carry no step rating; a row of dashes says nothing.
-            .filter((r) => !(model && r.rating == null))
-            .map((r) => {
-            const pct = r.use != null ? Math.round(r.use * 100) : null;
-            const tone =
-              r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 && !r.plain ? "is-tight" : "";
-            return (
-              <tr key={r.key}>
-                <th scope="row">{r.label}</th>
-                <td className="r num">
-                  {r.need}
-                  {r.need !== "—" ? <span className="basis-unit">{r.unit}</span> : null}
-                </td>
-                <td className="r num">
-                  {r.rating != null ? (
-                    <>
-                      {r.rating}
-                      <span className="basis-unit">{r.unit}</span>
-                    </>
+    <dl className="basis">
+      {rows
+        // Off-circuit types carry no step rating; a row of dashes says nothing.
+        .filter((r) => !(model && r.rating == null))
+        // Um is the equipment's insulation level, not a load. At a star
+        // neutral nothing on the duty side sets it, so the row is left out;
+        // elsewhere it is a class check with no bar (2026-11-11 Eric).
+        .filter((r) => !(r.plain && hideUm))
+        .map((r) => {
+          const pct = r.use != null ? Math.round(r.use * 100) : null;
+          const tone =
+            r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 && !r.plain ? "is-tight" : "";
+          return (
+            <div key={r.key} className={cx("basis-row", tone)}>
+              <dt>{r.label}</dt>
+              <dd className="num">
+                <b>{r.need}</b>
+                {r.rating != null ? <span> / {r.rating}</span> : null}
+                <span className="basis-unit">{r.unit}</span>
+                {pct != null && !r.plain ? <span className="basis-pct">{pct}%</span> : null}
+                {pct != null && r.plain ? (
+                  r.use! > 1 ? (
+                    <ExclamationTriangleIcon className="basis-mark" strokeWidth={1.75} aria-hidden />
                   ) : (
-                    <span className="text-[var(--color-caption)]">—</span>
-                  )}
-                </td>
-                <td className="r">
-                  {pct != null ? (
-                    <span className={cx("basis-use", tone)} title={`${t(lang, "colUse")} ${pct}%`}>
-                      <span className="basis-bar" aria-hidden>
-                        <i style={{ transform: `scaleX(${Math.min(100, pct) / 100})` }} />
-                      </span>
-                      <span className="num">{pct}%</span>
-                    </span>
-                  ) : null}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+                    <CheckIcon className="basis-mark" strokeWidth={2.4} aria-hidden />
+                  )
+                ) : null}
+              </dd>
+              {pct != null && !r.plain ? (
+                <span className="basis-bar" aria-hidden>
+                  <i style={{ transform: `scaleX(${Math.min(100, pct) / 100})` }} />
+                </span>
+              ) : null}
+            </div>
+          );
+        })}
+    </dl>
   );
 }
 
@@ -485,8 +576,8 @@ function BasisTable({
  */
 function earthUmLabel(um: number): string {
   const e = EARTH_INSULATION[um];
-  const kv = `Um ${formatUmKv(um)} kV`;
-  return e ? `${kv} · ${e.pf} / ${e.bil} kV` : kv;
+  const kv = `${formatUmKv(um)} kV`;
+  return e ? `${kv} · ${e.pf} / ${e.bil}` : kv;
 }
 
 function round1(n: number): string {
@@ -507,65 +598,18 @@ function KvField({
   kvValue: number;
   onKv: (kv: number) => void;
 }) {
-  const [custom, setCustom] = useState(false);
   return (
-            <Field
-              as="div"
-              label={label}
-            >
-              <div className="relative">
-                {custom ||
-                (kvValue > 0 &&
-                  !(WINDING_RATED_KV as readonly number[]).includes(
-                    kvValue,
-                  )) ? (
-                  <DecimalInput
-                    className={`${controlClass} has-suffix`}
-                    value={kvValue}
-                    // 2026-11-07: "38,5" read as 385 in a type=number field.
-                    onValue={onKv}
-                    onBlur={() => {
-                      if (
-                        (WINDING_RATED_KV as readonly number[]).includes(
-                          kvValue,
-                        )
-                      ) {
-                        setCustom(false);
-                      }
-                    }}
-                  />
-                ) : (
-                  <FieldSelect
-                    className={controlClass}
-                    value={kvValue > 0 ? String(kvValue) : ""}
-                    onChange={(e) => {
-                      if (e.target.value === "__custom__") {
-                        setCustom(true);
-                        return;
-                      }
-                      setCustom(false);
-                      onKv(Number(e.target.value));
-                    }}
-                  >
-                    <option value="__custom__">{t(lang, "custom")}</option>
-                    {WINDING_RATED_KV.map((v) => (
-                      <option key={v} value={v}>
-                        {v} kV
-                      </option>
-                    ))}
-                  </FieldSelect>
-                )}
-                {custom ||
-                (kvValue > 0 &&
-                  !(WINDING_RATED_KV as readonly number[]).includes(
-                    kvValue,
-                  )) ? (
-                  <span className="ui-affix ui-affix-end">
-                    kV
-                  </span>
-                ) : null}
-              </div>
-            </Field>
+    <Field label={label}>
+      <PickOrType
+        lang={lang}
+        value={kvValue}
+        options={WINDING_RATED_KV}
+        optionLabel={(v) => `${v} kV`}
+        unit="kV"
+        // 2026-11-07: "38,5" read as 385 in a type=number field.
+        onValue={(kv) => onKv(kv)}
+      />
+    </Field>
   );
 }
 
@@ -810,7 +854,7 @@ export function SelectorApp() {
   const setRegulation = (reg: SelectInput["regulation"]) =>
     updateForm((f) => pickRegulation(f, reg));
 
-  // 2026-11-04: a W/G custom +a/−b takes the Fig. 3-3 row Huaming sells
+  // 2026-11-04: a W/G custom +a/−b takes the Fig. 3-3 row the maker sells
   // (+4/−12 → 10193W), not plus + minus + 1 positions on mid 1 (18171W).
   const commitTapRange = (plus: number, minus: number, pct: number) =>
     updateForm((f) => commitRange(f, plus, minus, pct));
@@ -983,9 +1027,11 @@ export function SelectorApp() {
     ...(duty.ok ? notesFor(lang, duty.cautionsZh, duty.cautionsEn) : []),
   ].filter((c, i, all) => all.indexOf(c) === i);
   return (
-    <div className="flex w-full min-w-0 flex-1 flex-col">
+    <div className="page flex w-full min-w-0 flex-1 flex-col">
       <header className="topbar sticky top-0 z-30">
         <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
+          {/* The app's own mark (app/icon.svg): tap contacts and the selector arm. */}
+          <img src="/favicon.svg" alt="" width={28} height={28} className="h-7 w-7 shrink-0" />
           <div className="min-w-0 leading-tight">
             <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-ink)]">
               {t(lang, "title")}
@@ -1000,7 +1046,7 @@ export function SelectorApp() {
           </div>
         </div>
       </header>
-      <div className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-3 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:gap-8 sm:px-8 sm:pt-6 lg:grid-cols-[minmax(0,1fr)_27rem] lg:gap-10 lg:pt-8 lg:pb-8 xl:grid-cols-[minmax(0,1fr)_30rem] xl:gap-14">
+      <div className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:gap-6 sm:px-8 sm:pt-8 lg:grid-cols-[25rem_minmax(0,1fr)] lg:gap-8 lg:pb-10 xl:grid-cols-[28rem_minmax(0,1fr)]">
         <form
           className="flex min-w-0 flex-col"
           onSubmit={(e) => e.preventDefault()}
@@ -1009,206 +1055,120 @@ export function SelectorApp() {
 
           <div className="sheet">
             <section aria-label={t(lang, "transformer")} className="sheet-section">
-              <CardHead title={t(lang, "transformer")} />
-              <div className="mb-4 flex flex-col gap-2">
-                <label
-                  htmlFor="tender-line"
-                  className="flex min-h-[1.625rem] items-center text-[0.8125rem] leading-snug font-medium text-[var(--color-ink-2)]"
-                >
-                  {t(lang, "lineLabel")}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    id="tender-line"
-                    type="text"
-                    className={cx(controlClass, "min-w-0 flex-1")}
-                    value={lineText}
-                    placeholder={t(lang, "linePlaceholder")}
-                    spellCheck={false}
-                    autoComplete="off"
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setLineText(v);
-                      setLineFailed(false);
-                      // A paste reads at once: on a phone it never sends Enter,
-                      // and the card kept the previous job's type.
-                      const kind = (e.nativeEvent as InputEvent).inputType;
-                      if (kind === "insertFromPaste" && v.trim()) readTenderLine(v);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        readTenderLine();
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="ui-btn"
-                    disabled={!lineText.trim()}
-                    onClick={() => readTenderLine()}
-                  >
-                    {t(lang, "lineRead")}
-                  </button>
-                </div>
-                {lineStale ? null : lineFailed ? (
-                  <p role="status" className="text-[0.75rem] leading-snug text-[var(--color-danger)]">
-                    {t(lang, lineFailed)}
-                  </p>
-                ) : lineRead?.assumed.length ? (
-                  <p role="status" className="flex gap-2 text-[0.75rem] leading-snug text-[var(--color-warn)]">
-                    <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
-                    <span>
-                      {t(lang, "lineCheck")}
-                      {lang === "zh" ? "：" : ": "}
-                      {lineRead.assumed.map((f) => t(lang, `lineF_${f}`)).join(listSep)}
-                    </span>
-                  </p>
-                ) : null}
-                {/* 2026-11-04: the reader's notes (percent split, single-phase,
-                    tap ladder…) reached only the CLI. */}
-                {!lineStale && !lineFailed && lineRead?.notes.length ? (
-                  <ul role="status" className="flex flex-col gap-1 text-[0.75rem] leading-snug text-[var(--color-warn)]">
-                    {lineRead.notes.map((n, i) => (
-                      <li key={`${n.key}-${i}`} className="flex gap-2">
-                        <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
-                        <span>{t(lang, `lineW_${n.key}`, n.vars)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-              <KindToggle
-                lang={lang}
-                kind={kind}
-                onKind={pickKind}
-                autoDisabled={isOctc}
-              />
               {isOctc ? (
                 <p id="auto-octc-note" className="sr-only">
                   {t(lang, "autoOctcNote")}
                 </p>
               ) : null}
-              <div className="mt-5 grid items-center gap-6 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
-                <div className="sketch-stage flex justify-center px-3 py-2 sm:py-4">
-                  <TransformerSketch
-                    lang={lang}
-                    kind={kind}
-                    tapPoint={tapPoint}
-                    winding={winding}
-                    tapKv={windingRatedKv}
-                    hvKv={hvKv}
-                    mvKv={mvKv}
-                    onTap={pickTap}
-                  />
-                </div>
-                <div className="flex min-w-0 flex-col gap-3">
-                  <Field as="div" label={t(lang, "tapPoint")}>
-                    <TapList
-                      lang={lang}
-                      kind={kind}
-                      winding={winding}
-                      tapPoint={tapPoint}
-                      onTap={pickTap}
-                      offHintId="delta-no-neutral"
-                    />
+              <CardHead title={t(lang, "transformer")} />
+              <div className="rows rows-2">
+                  <Field label={t(lang, "kindLabel")}>
+                    <FieldSelect
+                      className={controlClass}
+                      value={kind}
+                      aria-describedby={isOctc ? "auto-octc-note" : undefined}
+                      onChange={(e) => pickKind(e.target.value as TransformerKind)}
+                    >
+                      <option value="two_winding">{t(lang, "kindTwo")}</option>
+                      <option value="auto" disabled={isOctc}>
+                        {t(lang, "kindAuto")}
+                      </option>
+                    </FieldSelect>
+                  </Field>
+                  <Field label={t(lang, "tapPoint")}>
+                    <FieldSelect
+                      className={controlClass}
+                      value={tapPoint}
+                      aria-describedby={
+                        kind === "two_winding" && winding === "delta"
+                          ? "delta-no-neutral"
+                          : undefined
+                      }
+                      onChange={(e) => pickTap(e.target.value as TapPoint)}
+                    >
+                      {TAP_POINTS_FOR[kind].map((p) => (
+                        <option
+                          key={p}
+                          value={p}
+                          disabled={
+                            kind === "two_winding" && winding === "delta" && p === "neutral"
+                          }
+                        >
+                          {t(lang, `tap_${p}`)}
+                        </option>
+                      ))}
+                    </FieldSelect>
                     {kind === "two_winding" && winding === "delta" ? (
-                      <p id="delta-no-neutral" className="sr-only">
+                      <span id="delta-no-neutral" className="sr-only">
                         {t(lang, "deltaNoNeutral")}
-                      </p>
+                      </span>
                     ) : null}
                   </Field>
                   {kind === "two_winding" ? (
-                    <Field as="div" label={t(lang, "winding")}>
-                      <div role="radiogroup" aria-label={t(lang, "winding")} className="ui-track">
-                        {(["star", "delta"] as const).map((w) => (
-                          <button
-                            key={w}
-                            type="button"
-                            role="radio"
-                            aria-checked={winding === w}
-                            className={segBtn(winding === w)}
-                            onClick={() => pickWinding(w)}
-                          >
-                            {t(lang, w === "star" ? "windingStar" : "windingDelta")}
-                          </button>
-                        ))}
-                      </div>
+                    <Field label={t(lang, "winding")}>
+                      <FieldSelect
+                        className={controlClass}
+                        value={winding}
+                        onChange={(e) => pickWinding(e.target.value as WindingConnection)}
+                      >
+                        <option value="star">{t(lang, "windingStar")}</option>
+                        <option value="delta">{t(lang, "windingDelta")}</option>
+                      </FieldSelect>
                     </Field>
                   ) : null}
-                </div>
-              </div>
-              <div className="mt-6 grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
-                {kind === "auto" ? (
-                  <>
+                  {kind === "auto" ? (
+                    <>
+                      <KvField
+                        lang={lang}
+                        label={t(lang, "hvKv")}
+                        kvValue={hvKv}
+                        onKv={(kv) => {
+                          setHvKv(kv);
+                        }}
+                      />
+                      <KvField
+                        lang={lang}
+                        label={t(lang, "mvKv")}
+                        kvValue={mvKv}
+                        onKv={(kv) => {
+                          setMvKv(kv);
+                        }}
+                      />
+                    </>
+                  ) : (
                     <KvField
                       lang={lang}
-                      label={t(lang, "hvKv")}
-                      kvValue={hvKv}
-                      onKv={(kv) => {
-                        setHvKv(kv);
-                      }}
+                      label={t(lang, "umWinding")}
+                      kvValue={windingRatedKv}
+                      onKv={setVoltageKv}
                     />
-                    <KvField
-                      lang={lang}
-                      label={t(lang, "mvKv")}
-                      kvValue={mvKv}
-                      onKv={(kv) => {
-                        setMvKv(kv);
-                      }}
-                    />
-                  </>
-                ) : (
-                  <KvField
-                    lang={lang}
-                    label={t(lang, "umWinding")}
-                    kvValue={windingRatedKv}
-                    onKv={setVoltageKv}
-                  />
-                )}
-                <Field
-                  label={t(lang, "earthUm")}
-                >
-                  <FieldSelect
-                    className={controlClass}
-                    value={String(earthUm)}
-                    onChange={(e) => {
-                      setEarthUm(Number(e.target.value));
-                    }}
-                  >
-                    <option value="0">
-                      {ruleDuty.ok
-                        ? t(lang, "earthRule", { um: earthUmLabel(ruleDuty.umKv) })
-                        : t(lang, "earthRuleNone")}
-                    </option>
-                    {EARTH_UM_OPTIONS.map((u) => (
-                      <option key={u} value={String(u)}>
-                        {earthUmLabel(u)}
-                      </option>
-                    ))}
-                  </FieldSelect>
-                </Field>
-                {/* Neutral Um follows country practice (2026-11-04 audit UM-2). */}
-                {kind === "two_winding" && tapPoint === "neutral" ? (
-                  <Field label={t(lang, "market")}>
+                  )}
+                  <Field label={t(lang, "earthUm")}>
                     <FieldSelect
                       className={controlClass}
-                      value={market}
-                      onChange={(e) => setMarket(e.target.value)}
+                      value={String(earthUm)}
+                      onChange={(e) => {
+                        setEarthUm(Number(e.target.value));
+                      }}
                     >
-                      <option value="">{t(lang, "marketNone")}</option>
-                      <option value="IT">{t(lang, "market_IT")}</option>
-                      <option value="TR">{t(lang, "market_TR")}</option>
+                      <option value="0">
+                        {ruleDuty.ok
+                          ? t(lang, "earthRule", { um: `${formatUmKv(ruleDuty.umKv)} kV` })
+                          : t(lang, "earthRuleNone")}
+                      </option>
+                      {EARTH_UM_OPTIONS.map((u) => (
+                        <option key={u} value={String(u)}>
+                          {earthUmLabel(u)}
+                        </option>
+                      ))}
                     </FieldSelect>
                   </Field>
-                ) : null}
               </div>
             </section>
             <section aria-label={t(lang, "cardDuty")} className="sheet-section">
               <CardHead title={t(lang, "cardDuty")} />
-              <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
+              <div className="rows rows-2">
             <Field
-              as="div"
               label={
                 currentMode === "capacity"
                   ? t(lang, "transformerMva")
@@ -1216,68 +1176,25 @@ export function SelectorApp() {
               }
             >
               {currentMode === "capacity" ? (
-                <div className="relative">
-                  {mvaCustom ||
-                  (transformerMva > 0 &&
-                    !(MVA_OPTIONS as readonly number[]).includes(
-                      transformerMva,
-                    )) ? (
-                    <DecimalInput
-                      className={`${controlClass} has-suffix`}
-                      value={transformerMva}
-                      placeholder={t(lang, "mvaPlaceholder")}
-                      // 2026-11-07: "12,5" read as 125 in a type=number field.
-                      onValue={setTransformerMva}
-                      onBlur={() => {
-                        if (
-                          (MVA_OPTIONS as readonly number[]).includes(
-                            transformerMva,
-                          )
-                        ) {
-                          setMvaCustom(false);
-                        }
-                      }}
-                    />
-                  ) : (
-                    <FieldSelect
-                      className={controlClass}
-                      value={
-                        transformerMva > 0 ? String(transformerMva) : ""
-                      }
-                      onChange={(e) => {
-                        if (e.target.value === "__custom__") {
-                          setMvaCustom(true);
-                          return;
-                        }
-                        if (e.target.value === "__current__") {
-                          setCurrentEntry("current");
-                          return;
-                        }
-                        setTransformerMva(Number(e.target.value));
-                        setMvaCustom(false);
-                      }}
-                    >
-                      <option value="__custom__">{t(lang, "custom")}</option>
-                      <option value="__current__">
-                        {t(lang, "switchToCurrent")}
-                      </option>
-                      {MVA_OPTIONS.map((n) => (
-                        <option key={n} value={String(n)}>
-                          {n} MVA
-                        </option>
-                      ))}
-                    </FieldSelect>
-                  )}
-                  {mvaCustom ||
-                  (transformerMva > 0 &&
-                    !(MVA_OPTIONS as readonly number[]).includes(
-                      transformerMva,
-                    )) ? (
-                    <span className="ui-affix ui-affix-end">
-                      MVA
-                    </span>
-                  ) : null}
-                </div>
+                <PickOrType
+                  lang={lang}
+                  value={transformerMva}
+                  options={MVA_OPTIONS}
+                  optionLabel={(n) => `${n} MVA`}
+                  unit="MVA"
+                  placeholder={t(lang, "mvaPlaceholder")}
+                  custom={mvaCustom}
+                  onCustom={setMvaCustom}
+                  // 2026-11-07: "12,5" read as 125 in a type=number field.
+                  onValue={(n) => setTransformerMva(n)}
+                  extra={[
+                    {
+                      value: "__current__",
+                      label: t(lang, "switchToCurrent"),
+                      onPick: () => setCurrentEntry("current"),
+                    },
+                  ]}
+                />
               ) : (
                 <FieldSelect
                   className={controlClass}
@@ -1350,10 +1267,7 @@ export function SelectorApp() {
             )}
 
             {isLinear ? null : (
-              <Field
-                as="div"
-                label={t(lang, "pmSteps")}
-              >
+              <Field label={t(lang, "pmSteps")}>
                 <FieldSelect
                   className={controlClass}
                   value={pm}
@@ -1369,64 +1283,20 @@ export function SelectorApp() {
               </Field>
             )}
 
-            <Field
-              as="div"
-              label={t(lang, "stepPercent")}
-            >
-              <div className="relative">
-                {stepPctCustom ||
-                (stepPercentPct > 0 &&
-                  !(STEP_PERCENT_OPTIONS as readonly number[]).includes(
-                    stepPercentPct,
-                  )) ? (
-                  <DecimalInput
-                    className={`${controlClass} has-suffix`}
-                    value={stepPercentPct}
-                    // 2026-11-04: the untouched 无载 ±2 is a display; the duty keeps −8.
-                    onValue={(n) => updateForm((f) => editStepPct(f, n))}
-                    onBlur={() => {
-                      if (
-                        (STEP_PERCENT_OPTIONS as readonly number[]).includes(
-                          stepPercentPct,
-                        )
-                      ) {
-                        setStepPctCustom(false);
-                      }
-                    }}
-                  />
-                ) : (
-                  <FieldSelect
-                    className={controlClass}
-                    value={
-                      stepPercentPct > 0 ? String(stepPercentPct) : ""
-                    }
-                    onChange={(e) => {
-                      if (e.target.value === "__custom__") {
-                        setStepPctCustom(true);
-                        return;
-                      }
-                      const n = Number(e.target.value);
-                      updateForm((f) => editStepPct(f, n, false));
-                    }}
-                  >
-                    <option value="__custom__">{t(lang, "custom")}</option>
-                    {STEP_PERCENT_OPTIONS.map((n) => (
-                      <option key={n} value={String(n)}>
-                        {n}%
-                      </option>
-                    ))}
-                  </FieldSelect>
-                )}
-                {stepPctCustom ||
-                (stepPercentPct > 0 &&
-                  !(STEP_PERCENT_OPTIONS as readonly number[]).includes(
-                    stepPercentPct,
-                  )) ? (
-                  <span className="ui-affix ui-affix-end">
-                    %
-                  </span>
-                ) : null}
-              </div>
+            <Field label={t(lang, "stepPercent")}>
+              <PickOrType
+                lang={lang}
+                value={stepPercentPct}
+                options={STEP_PERCENT_OPTIONS}
+                optionLabel={(n) => `${n}%`}
+                unit="%"
+                custom={stepPctCustom}
+                onCustom={setStepPctCustom}
+                // 2026-11-04: the untouched 无载 ±2 is a display; the duty keeps −8.
+                onValue={(n, fromList) =>
+                  updateForm((f) => (fromList ? editStepPct(f, n, false) : editStepPct(f, n)))
+                }
+              />
             </Field>
 
             {isLinear || !pm ? (
@@ -1435,7 +1305,7 @@ export function SelectorApp() {
                   as="div"
                   label={t(lang, "positions")}
                 >
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="flex min-w-0 flex-1 gap-1">
                       <FieldSelect
                         className={controlClass}
                         value={tapPlus > 0 ? String(tapPlus) : ""}
@@ -1549,67 +1419,39 @@ export function SelectorApp() {
             </section>
             <section aria-label={t(lang, "cardSwitch")} className="sheet-section">
               <CardHead title={t(lang, "cardSwitch")} />
-              <div id="switch-fields" className="grid grid-cols-2 gap-x-3 gap-y-5 sm:gap-x-4">
-                  <Field label={t(lang, "dutyKind")} as="div">
-                    <div
-                      className="ui-track"
-                      role="group"
-                      aria-label={t(lang, "dutyKind")}
+              <div id="switch-fields" className="rows rows-2">
+                  <Field label={t(lang, "dutyKind")}>
+                    <FieldSelect
+                      className={controlClass}
+                      value={input.dutyKind ?? "oltc"}
+                      // 2026-11-04 (r2 UI-2…4): a switch re-maps the read line
+                      // for the new mode and leaves no ±2 or winding behind.
+                      onChange={(e) =>
+                        updateForm(e.target.value === "octc" ? toOctc : toOltc)
+                      }
                     >
-                      {(["oltc", "octc"] as const).map((k) => {
-                        const on = (input.dutyKind ?? "oltc") === k;
-                        return (
-                          <button
-                            key={k}
-                            type="button"
-                            aria-pressed={on}
-                            // 2026-11-04 (r2 UI-2…4): a switch re-maps the read line
-                            // for the new mode and leaves no ±2 or winding behind.
-                            onClick={() => updateForm(k === "octc" ? toOctc : toOltc)}
-                            className={segBtn(on)}
-                          >
-                            {t(lang, k === "oltc" ? "dutyOltc" : "dutyOctc")}
-                          </button>
-                        );
-                      })}
-                    </div>
+                      <option value="oltc">{t(lang, "dutyOltc")}</option>
+                      <option value="octc">{t(lang, "dutyOctc")}</option>
+                    </FieldSelect>
                   </Field>
                   {input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
-                    <Field label={t(lang, "arcMode")} as="div">
-                      <div
-                        className="ui-track"
-                        role="group"
-                        aria-label={t(lang, "arcMode")}
-                        aria-disabled={isOctc || undefined}
+                    <Field label={t(lang, "arcMode")}>
+                      <FieldSelect
+                        className={controlClass}
+                        value={!isOctc && input.preferVacuum ? "vac" : "oil"}
+                        disabled={isOctc}
+                        onChange={(e) => {
+                          const vac = e.target.value === "vac";
+                          setInput((s) => ({
+                            ...s,
+                            preferVacuum: vac,
+                            medium: mediumFor(s.mounting, vac),
+                          }));
+                        }}
                       >
-                        {(
-                          [
-                            [true, "arcVac"],
-                            [false, "arcOil"],
-                          ] as const
-                        ).map(([vac, key]) => {
-                          const on = isOctc ? !vac : input.preferVacuum === vac;
-                          return (
-                            <button
-                              key={key}
-                              type="button"
-                              aria-pressed={on}
-                              disabled={isOctc}
-                              onClick={() => {
-                                if (isOctc) return;
-                                setInput((s) => ({
-                                  ...s,
-                                  preferVacuum: vac,
-                                  medium: mediumFor(s.mounting, vac),
-                                }));
-                              }}
-                              className={segBtn(on)}
-                            >
-                              {t(lang, key)}
-                            </button>
-                          );
-                        })}
-                      </div>
+                        <option value="vac">{t(lang, "arcVac")}</option>
+                        <option value="oil">{t(lang, "arcOil")}</option>
+                      </FieldSelect>
                     </Field>
                   ) : null}
                   <Field label={t(lang, "specStructure")}>
@@ -1668,8 +1510,8 @@ export function SelectorApp() {
                     </FieldSelect>
                   </Field>
 
-                  <Field as="div" label={t(lang, "acrossInsul")} className="col-span-2 sm:col-span-1">
-                    <div className="grid grid-cols-2 gap-2">
+                  <Field as="div" label={t(lang, "acrossInsul")}>
+                    <div className="flex min-w-0 flex-1 gap-1">
                       <UpSelect
                         label={t(lang, "acrossBil")}
                         value={
@@ -1740,87 +1582,18 @@ export function SelectorApp() {
                       />
                     </div>
                   </Field>
-                  <Field as="div" label={t(lang, "safetyK")}>
-                    <div className="relative">
-                      {safetyKCustom ||
-                      (safetyK > 0 &&
-                        !(SAFETY_K_OPTIONS as readonly number[]).includes(
-                          safetyK,
-                        )) ? (
-                        <DecimalInput
-                          className={`${controlClass} has-prefix`}
-                          value={safetyK}
-                          onValue={commitSafetyK}
-                          onBlur={() => {
-                            if (
-                              (SAFETY_K_OPTIONS as readonly number[]).includes(
-                                safetyK,
-                              )
-                            ) {
-                              setSafetyKCustom(false);
-                            }
-                          }}
-                        />
-                      ) : (
-                        <UpSelect
-                          label={t(lang, "safetyK")}
-                          value={safetyK > 0 ? String(safetyK) : "1"}
-                          onChange={(raw) => {
-                            if (raw === "__custom__") {
-                              setSafetyKCustom(true);
-                              return;
-                            }
-                            setSafetyKCustom(false);
-                            commitSafetyK(Number(raw));
-                          }}
-                          options={[
-                            { value: "__custom__", label: t(lang, "custom") },
-                            ...SAFETY_K_OPTIONS.map((n) => ({
-                              value: String(n),
-                              label: `×${n}`,
-                            })),
-                          ]}
-                        />
-                      )}
-                      {safetyKCustom ||
-                      (safetyK > 0 &&
-                        !(SAFETY_K_OPTIONS as readonly number[]).includes(
-                          safetyK,
-                        )) ? (
-                        <span className="ui-affix ui-affix-start">
-                          ×
-                        </span>
-                      ) : null}
-                    </div>
+                  <Field label={t(lang, "safetyK")}>
+                    <PickOrType
+                      lang={lang}
+                      value={safetyK > 0 ? safetyK : 1}
+                      options={SAFETY_K_OPTIONS}
+                      optionLabel={(n) => `×${n}`}
+                      prefix="×"
+                      custom={safetyKCustom}
+                      onCustom={setSafetyKCustom}
+                      onValue={(n) => commitSafetyK(n)}
+                    />
                   </Field>
-                  {/* The maker's own figures: Imax replaces the full-range
-                      current, Ust is a floor (2026-11-04 audit D1, D3). */}
-                  {currentMode === "capacity" ? (
-                    <>
-                      <Field label={t(lang, "osImax")}>
-                        <div className="relative">
-                          <DecimalInput
-                            className={`${controlClass} has-suffix`}
-                            value={osImaxA}
-                            onValue={setOsImaxA}
-                            groupedError={t(lang, "groupedNumber")}
-                          />
-                          <span className="ui-affix ui-affix-end">A</span>
-                        </div>
-                      </Field>
-                      <Field label={t(lang, "osUst")}>
-                        <div className="relative">
-                          <DecimalInput
-                            className={`${controlClass} has-suffix`}
-                            value={osUstV}
-                            onValue={setOsUstV}
-                            groupedError={t(lang, "groupedNumber")}
-                          />
-                          <span className="ui-affix ui-affix-end">V</span>
-                        </div>
-                      </Field>
-                    </>
-                  ) : null}
               </div>
             </section>
           </div>
@@ -1829,7 +1602,7 @@ export function SelectorApp() {
 
         <aside
           ref={resultPaneRef}
-          className="flex min-w-0 scroll-mt-16 flex-col gap-3 quiet-scroll lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto lg:pb-2"
+          className="result-pane flex min-w-0 scroll-mt-16 flex-col gap-3 quiet-scroll lg:sticky lg:top-[4.5rem] lg:max-h-[calc(100dvh-4.5rem)] lg:overflow-y-auto"
         >
           <section
             ref={resultCardRef}
@@ -1840,7 +1613,7 @@ export function SelectorApp() {
             <p className="sr-only" aria-live="polite">
               {announced}
             </p>
-            <div className="px-5 pt-5 pb-4 sm:px-6">
+            <div className={cx("px-5 pt-5 sm:px-8 sm:pt-7", primary ? "plate-hero" : "pb-5")}>
               {!primary ? (
                 <div>
                   <p
@@ -1859,26 +1632,26 @@ export function SelectorApp() {
                 </div>
               ) : (
                 <>
-                  <p className="text-[0.8125rem] font-medium text-[var(--color-accent)]">
-                    {t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")}
-                  </p>
-                  <div className="mt-1.5 flex items-start gap-2">
-                    <p
-                      key={primary.model}
-                      translate="no"
-                      className="plate-type plate-in min-w-0 flex-1 text-[clamp(1.25rem,5.6vw,1.75rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.375rem,1.8vw,1.75rem)]"
-                    >
-                      {modelNodes(displayModel(primary.model, lang))}
-                    </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="plate-badge">
+                      <ShieldCheckIcon className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden />
+                      {t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")}
+                    </span>
                     <CopyButton
                       lang={lang}
+                      labelled
                       copied={copiedModel === displayModel(primary.model, lang)}
                       onCopy={() => copyModel(displayModel(primary.model, lang))}
                     />
                   </div>
-                  <p className="mt-2 text-[0.8125rem] leading-snug text-[var(--color-muted)]">
-                    {[t(lang, `tapShort_${tapPoint}`), transformerLine].join(listSep)}
+                  <p
+                    key={primary.model}
+                    translate="no"
+                    className="plate-type plate-in mt-4 text-[clamp(1.375rem,6vw,1.875rem)] leading-[1.15] font-semibold tracking-[-0.025em] text-[var(--color-ink)] lg:text-[clamp(1.625rem,2.6vw,2.375rem)]"
+                  >
+                    {modelNodes(displayModel(primary.model, lang))}
                   </p>
+                  <TypeSegments lang={lang} r={primary} shown={displayModel(primary.model, lang)} />
                 </>
               )}
             </div>
@@ -1898,17 +1671,32 @@ export function SelectorApp() {
               </ul>
             ) : null}
 
-            <BasisTable
-              lang={lang}
-              duty={duty}
-              dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
-              stepV={pickedStepV}
-              model={primary}
-            />
+            <div className="plate-mid px-5 py-6 sm:px-8">
+              <BasisTable
+                hideUm={tapPoint === "neutral"}
+                lang={lang}
+                duty={duty}
+                dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
+                stepV={pickedStepV}
+                model={primary}
+              />
+              <div className="stage-sketch">
+                <TransformerSketch
+                  lang={lang}
+                  kind={kind}
+                  tapPoint={tapPoint}
+                  winding={winding}
+                  tapKv={windingRatedKv}
+                  hvKv={hvKv}
+                  mvKv={mvKv}
+                  onTap={pickTap}
+                />
+              </div>
+            </div>
 
             {primary ? (
               <div className="plate-rule">
-                <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} />
+                <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} hideRatings />
               </div>
             ) : null}
 
@@ -1917,7 +1705,7 @@ export function SelectorApp() {
                 <button
                   type="button"
                   onClick={() => setAltsOpen((o) => !o)}
-                  className="flex h-12 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:px-6"
+                  className="flex h-12 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:px-8"
                   aria-expanded={altsOpen}
                 >
                   <span>{t(lang, "otherOpts", { n: alts.length })}</span>
@@ -2047,6 +1835,46 @@ export function SelectorApp() {
   );
 }
 
+/**
+ * The type string read aloud: one cell per coded part, with what it means.
+ * Cut from the shown string, so the domestic spelling keeps its own letters.
+ */
+function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; shown: string }) {
+  const series = SERIES.find((s) => s.id === r.seriesId);
+  const at = shown.lastIndexOf(`-${r.currentA}`);
+  if (at < 0) return null;
+  const head = shown.slice(0, at);
+  const family = head.endsWith(r.phases) ? head.slice(0, -r.phases.length) : head;
+  const cells: Array<{ code: string; says: string }> = [
+    {
+      code: family,
+      says: `${t(lang, series?.vacuum ? "specVac" : "specOil")} · ${t(lang, structureLabelKey(series?.structure))}`,
+    },
+  ];
+  if (family !== head) cells.push({ code: r.phases, says: t(lang, "phases") });
+  cells.push({ code: String(r.currentA), says: "A" });
+  // The rest is cut from the string as shown: a single-phase type has no
+  // Y/D after the current, and a reactor type ends in its own step count.
+  const rest = shown.slice(at + 1 + String(r.currentA).length);
+  const m = rest.match(/^([YD])?\/([^-]+)-(.+)$/);
+  if (!m) return null;
+  if (m[1]) {
+    cells.push({ code: m[1], says: t(lang, m[1] === "Y" ? "windingStar" : "windingDelta") });
+  }
+  cells.push({ code: m[2], says: "Um kV" });
+  cells.push({ code: m[3], says: `${t(lang, "positions")} ${r.positions}` });
+  return (
+    <dl className="type-segs" translate="no">
+      {cells.map((c, i) => (
+        <div key={i}>
+          <dt>{c.code}</dt>
+          <dd>{c.says}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 function mountLabelKey(m: SelectInput["mounting"]): string {
   switch (m) {
     case "on_tank":
@@ -2117,7 +1945,7 @@ function ModelSpec({
   if (r.earthPfKv != null && r.earthBilKv != null) {
     items.push({
       key: "specEarth",
-      value: `${r.earthPfKv}${nb}/${nb}${r.earthBilKv}${nb}kV`,
+      value: `Um${nb}${formatUmKv(r.umKv)} · ${r.earthPfKv}${nb}/${nb}${r.earthBilKv}${nb}kV`,
     });
   }
   items.push({
@@ -2128,8 +1956,9 @@ function ModelSpec({
   return (
     <dl
       className={cx(
-        "grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3",
-        compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-6 sm:pl-12" : "px-5 py-4 sm:px-6",
+        "grid grid-cols-2 gap-x-5 gap-y-3",
+        hideRatings ? "sm:grid-cols-4" : "sm:grid-cols-3",
+        compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-7 sm:pl-12" : "px-5 py-4 sm:px-8",
       )}
     >
       {items.map((item) => (

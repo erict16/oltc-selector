@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Form: every field is one row, the name on the left and a dropdown on the right. The form is about half as tall on a phone and fits one laptop screen. Tap position, winding, on-load / off-circuit and arc mode are dropdowns too.
+- Page: three white cards of rows on the left (name, framed dropdown), one result card on the right. The language switch is a dropdown.
+- Result: under the type, one cell per coded part says what it means (family, phases, current, connection, Um, tap code). Loads are bars: duty / rating and the share used. The winding sketch sits beside them.
+- Result: insulation to earth is the equipment's level, not a load. It is listed with the type's data as "Um 72.5 · 140 / 350 kV". At a star neutral it is no longer compared with the duty; elsewhere the row shows system Um / switch Um with a tick and no bar. The bar always read 100 %.
+- Form: the tender-line box, the market row and the two OS figure rows are removed from the page (the CLI still takes them).
+- Top bar: language is an icon button that opens the menu.
+- Colour: neutral greys and one clear blue replace the steel blue and grey-green. Load bars use the blue.
+- Icon: a drawn mark (tap contacts and the selector arm) replaces the emoji, in the top bar and the browser tab.
+- Chinese notes: the resistor on the change-over selector is 电位电阻 (the page said 束缚电阻). The two notes that name it are rewritten in plain words.
+- Form: "Custom" in a dropdown opens a typed field with the old value selected; the list button beside it brings the dropdown back.
+
 - Build: IBM Plex comes from npm (@fontsource), so `next build` no longer downloads Google Fonts. A Google reply without a file extension broke the build on 2026-11-07.
 - Deploy: Vercel only. The GitHub Pages workflow is gone: the repo is private, and free GitHub Pages and its artifact storage do not work for private repos.
 

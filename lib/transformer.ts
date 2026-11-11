@@ -5,7 +5,7 @@
  * transformer kind and where the tap changer sits; the kV on the tapped
  * winding alone is not enough. 2026-10-27: a 225/115/35 kV autotransformer
  * tapped at the series/common junction was sized from 115 kV as
- * CV2III-600D/126. Huaming quoted 3×SHZVI-600/252D-10193W: the switch takes
+ * CV2III-600D/126. The maker quoted 3×SHZVI-600/252D-10193W: the switch takes
  * the HV system's insulation, and compound types are out.
  */
 import {
@@ -85,7 +85,7 @@ export interface TransformerSpec {
   /**
    * Max through-current the OS / maker states (A). Russian OS forms stop at
    * about −5/−6% (maximum-current tapping): 63 MVA 115 kV ±9×1.78% says
-   * 334 A, not the full-range 376.6 A, and Huaming sold CVIII-350Y ten
+   * 334 A, not the full-range 376.6 A, and the maker sold CVIII-350Y ten
    * times (2026-11-04 audit D1). Floored at the rated current.
    */
   statedMaxA?: number;
@@ -453,7 +453,7 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     }
     cautionsZh.push("自耦变只用组合式（复合式跨调压绕组冲击上限 200 kV）。");
     cautionsEn.push("Autotransformer: combined types only (compound types stop at 200 kV across the tap winding).");
-    cautionsZh.push("未核：跨调压绕组冲击（a 值）、束缚电阻。");
+    cautionsZh.push("还没核：调压绕组两端的冲击电压（a 值），以及要不要加电位电阻。");
     cautionsEn.push("Not checked: impulse across the tap winding (a), tie-in resistor.");
     // 2026-11-04 audit D5 (IEC 60214-2 §7.2.1.4.2): HMR MV-line OS Ust ran
     // −3.6…+5.7% around nominal. A stated Ust is the floor; else say so.
