@@ -434,7 +434,7 @@ type Attempt = {
 /**
  * Catalogue I covers duty: not less than the duty (IEC 60214-2, SelMan).
  * 2026-11-04 audit D2: the 1% tolerance put 351–353 A on 350 A units where
- * Huaming sold the next size 4 times; only 2 sales (603.75 / 603.86 A on
+ * The maker sold the next size 4 times; only 2 sales (603.75 / 603.86 A on
  * CV2-600) ever used it.
  */
 function ratingCoversDuty(wanted: number, rating: number): boolean {
@@ -1215,7 +1215,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           );
         }
         if (!octc) {
-          // Huaming 选型培训 (JL 2024-05): these go to technical special review.
+          // 厂家选型培训 (JL 2024-05): these go to technical special review.
           const review: string[] = [];
           const reviewZh: string[] = [];
           if (s.id === "cm2" && input.stepVoltageV > 2500 + 0.5) {
@@ -1235,8 +1235,8 @@ export function selectOltc(input: SelectInput): SelectOutput {
             reviewZh.push(`Um ${att.um} kV`);
           }
           if (review.length) {
-            cautionsEn.push(`Needs Huaming technical review: ${review.join(", ")}.`);
-            cautionsZh.push(`须华明技术特别评审：${reviewZh.join("，")}。`);
+            cautionsEn.push(`Needs the maker's technical review: ${review.join(", ")}.`);
+            cautionsZh.push(`须厂家技术特别评审：${reviewZh.join("，")}。`);
           }
           // Change-over selector recovery voltage: 35 kV combined, 15 kV CV2.
           if (
@@ -1247,7 +1247,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
             cautionsEn.push(
               "Change-over selector above 110 kV: check the recovery voltage and quote the tie-in resistor as an option (maker's Cw/Ce needed).",
             );
-            cautionsZh.push("110 kV 以上正反调/粗细调：核恢复电压，束缚电阻作为可选项报价（需变压器厂 Cw/Ce）。");
+            cautionsZh.push("110 kV 以上的正反调/粗细调：要核恢复电压，可能要加电位电阻。请变压器厂提供 Cw、Ce，报价时把电位电阻列为可选项。");
           }
         }
         if (wide) {
