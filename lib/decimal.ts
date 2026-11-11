@@ -37,3 +37,14 @@ export function decimalDraft(raw: string): {
   const n = Number(d);
   return Number.isFinite(n) ? { draft: d, value: n } : { draft: null, value: null };
 }
+
+/**
+ * Pasted text: "25 MVA", "38,5 kV" and "1.25%" keep their number and drop
+ * the unit. Typing stays strict (decimalDraft). Null: not a number + unit.
+ */
+export function pastedDecimal(raw: string): { draft: string; value: number } | null {
+  const m = raw.trim().match(/^([\d.,，\s]*\d[\d.,，]*)\s*(?:[A-Za-zΩ]{1,4}|%)?$/);
+  if (!m) return null;
+  const d = decimalDraft(m[1]);
+  return d.draft != null && d.value != null ? { draft: d.draft, value: d.value } : null;
+}

@@ -1,6 +1,7 @@
 // 2026-11-04: off-circuit (drum WDG/WLG, WSG gate, cage Um), dry CVT and
 // reactor HWDK fixes from the OS audit (track C: F1–F3, F5–F12).
 import { readFileSync } from "node:fs";
+import { HAS_REPLAY_DATA, readSalesJson } from "./replayData";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { cliToSelectInput, parseCliArgs, runCli } from "./cli";
@@ -39,12 +40,7 @@ function cliFirst(argv: string[]): string {
 
 function osRow(year: string, serial: string) {
   const rows = loadOsSales(
-    JSON.parse(
-      readFileSync(
-        path.join(process.cwd(), "docs", "replay", `${year}-os-sales.json`),
-        "utf8",
-      ),
-    ),
+    readSalesJson(year),
   );
   const row = rows.find((r) => r.serial === serial);
   if (!row) throw new Error(`no OS row ${serial}`);
@@ -170,7 +166,7 @@ describe("F3 cage lock on a 35 kV class winding", () => {
   });
 });
 
-describe("F5 OS replay judges drum rows without the answer", () => {
+describe.skipIf(!HAS_REPLAY_DATA)("F5 OS replay judges drum rows without the answer", () => {
   it("E-WG250021-026 is judged, not skipped", () => {
     const r = replayOsRow(osRow("2025", "E-WG250021-026"));
     expect(r.skip).toBeUndefined();

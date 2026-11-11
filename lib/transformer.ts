@@ -406,22 +406,22 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   if (umRule === "neutral_full" && umAssumed) {
     // 2026-11-04 audit UM-5: Turkey's 72.5 orders were CM/CM2/SHZV, whose
     // lowest class is 72.5. Where a 40.5 type existed, Russia split 19/17.
-    cautionsZh.push("35 kV 级中性点先按 Um 40.5 kV 选；俄罗斯/独联体客户在 CV/SV 上约一半买 72.5，以 OS 为准。CM/CM2/SHZV 最低就是 72.5。");
-    cautionsEn.push("35 kV-class neutral sized at Um 40.5 kV; Russian/CIS buyers chose 72.5 on about half of CV/SV orders; the OS decides. CM/CM2/SHZV start at 72.5.");
+    cautionsZh.push("35 kV 级中性点先按 Um 40.5 kV 选；不少项目要求 72.5，以订货规范（OS）为准。CM/CM2/SHZV 最低就是 72.5。");
+    cautionsEn.push("35 kV-class neutral sized at Um 40.5 kV; many projects specify 72.5; the order specification (OS) decides. CM/CM2/SHZV start at 72.5.");
   }
   if (umRule === "neutral_assumed") {
     if (neutralMarket === "IT") {
-      cautionsZh.push(`意大利中性点先按线端等级 Um ${umKv} kV 选（TERNA/GETRA 250 MVA 订单买 72.5），以 OS 为准。`);
-      cautionsEn.push(`Italy: neutral sized at the line class, Um ${umKv} kV (TERNA/GETRA 250 MVA orders bought 72.5); the OS decides.`);
+      cautionsZh.push(`意大利中性点先按线端等级 Um ${umKv} kV 选（部分项目用 72.5），以订货规范（OS）为准。`);
+      cautionsEn.push(`Italy: neutral sized at the line class, Um ${umKv} kV (some projects use 72.5); the order specification (OS) decides.`);
     } else if (neutralMarket === "TR") {
-      cautionsZh.push(`土耳其 220 kV 级及以上中性点先按 Um ${umKv} kV 选（订单 126 ×11、170 ×4、72.5 ×0），以 OS 为准。`);
-      cautionsEn.push(`Turkey: 220 kV-class and above neutral sized at Um ${umKv} kV (orders 126 ×11, 170 ×4, 72.5 ×0); the OS decides.`);
+      cautionsZh.push(`土耳其 220 kV 级及以上中性点先按 Um ${umKv} kV 选（通常 126 或 170，不用 72.5），以订货规范（OS）为准。`);
+      cautionsEn.push(`Turkey: 220 kV-class and above neutral sized at Um ${umKv} kV (126 or 170 is usual, not 72.5); the order specification (OS) decides.`);
     } else if (umKv === NEUTRAL_400KV_UM) {
-      cautionsZh.push(`400 kV 级绕组中性点先按 Um ${umKv} kV 选（土耳其、葡萄牙订单买 126；巴西 440/500 kV 买 72.5），以 OS 为准。`);
-      cautionsEn.push(`Neutral of a 400 kV-class winding sized at Um ${umKv} kV (Turkey and Portugal orders bought 126; Brazil 440/500 kV bought 72.5); the OS decides.`);
+      cautionsZh.push(`400 kV 级绕组中性点先按 Um ${umKv} kV 选（土耳其、葡萄牙常用 126；巴西 440/500 kV 常用 72.5），以订货规范（OS）为准。`);
+      cautionsEn.push(`Neutral of a 400 kV-class winding sized at Um ${umKv} kV (126 is usual in Turkey and Portugal; 72.5 in Brazil at 440/500 kV); the order specification (OS) decides.`);
     } else {
-      cautionsZh.push(`中性点绝缘未给，先按 Um ${umKv} kV 选，以 OS 为准。`);
-      cautionsEn.push(`Neutral insulation not given: sized at Um ${umKv} kV; the OS decides.`);
+      cautionsZh.push(`中性点绝缘未给，先按 Um ${umKv} kV 选，以订货规范（OS）为准。`);
+      cautionsEn.push(`Neutral insulation not given: sized at Um ${umKv} kV; the order specification (OS) decides.`);
     }
   }
   // 2025–2026 OS: 67 tapped windings on 220 kV class and above, every one
@@ -429,27 +429,27 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   // cover a 220 kV regulating winding, neutral end included.
   const highWinding = !auto && catalogueUmFromRatedKv(spec.tapKv) >= 252;
   if (highWinding) {
-    cautionsZh.push("220 kV 级及以上调压绕组只用组合式（2025–2026 订单无复合式）。");
-    cautionsEn.push("220 kV-class tapped winding: combined types only (no compound in 2025–2026 orders).");
+    cautionsZh.push("220 kV 级及以上调压绕组只用组合式。");
+    cautionsEn.push("220 kV-class tapped winding: combined types only.");
   }
   if (auto) {
     if (spec.tapPoint === "auto_mv_line" && umRule === "auto_hv") {
       // 2026-11-04 audit UM-4: the HMR note printed on 400/220 at Um 252.
       if (umKv === 170) {
-        cautionsZh.push("HMR 230/121 kV 先例按厂家数据用 Um 170 kV。");
-        cautionsEn.push("HMR 230/121 kV orders used Um 170 kV on the maker's data.");
+        cautionsZh.push("230/121 kV 自耦变中压出线通常用 Um 170 kV，请按厂家数据核对。");
+        cautionsEn.push("230/121 kV autotransformer MV line lead: Um 170 kV is usual; check the maker's data.");
       } else {
-        cautionsZh.push(`中压出线先按中压等级 Um ${umKv} kV 选，以 OS 为准。`);
-        cautionsEn.push(`MV line lead sized at the MV class, Um ${umKv} kV; the OS decides.`);
+        cautionsZh.push(`中压出线先按中压等级 Um ${umKv} kV 选，以订货规范（OS）为准。`);
+        cautionsEn.push(`MV line lead sized at the MV class, Um ${umKv} kV; the order specification (OS) decides.`);
       }
     } else if (spec.tapPoint === "auto_junction" && umKv === 252 && umRule === "auto_hv") {
-      cautionsZh.push("先例：125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W（2026-10-27）。");
-      cautionsEn.push("Precedent: 125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W (27 Oct 2026).");
+      cautionsZh.push("参考：125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W。");
+      cautionsEn.push("Reference: 125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W.");
     } else if (spec.tapPoint === "auto_junction" && umRule === "auto_hv") {
       // 2026-11-04 (r3 UI-11): 132/33 at Um 145 is assumed, but the card
       // said so nowhere since the basis-row flag went (8b4bc64).
-      cautionsZh.push(`自耦变串联-公共连接点先按高压等级 Um ${umKv} kV 选，以 OS 为准。`);
-      cautionsEn.push(`Autotransformer junction sized at the HV class, Um ${umKv} kV; the OS decides.`);
+      cautionsZh.push(`自耦变串联-公共连接点先按高压等级 Um ${umKv} kV 选，以订货规范（OS）为准。`);
+      cautionsEn.push(`Autotransformer junction sized at the HV class, Um ${umKv} kV; the order specification (OS) decides.`);
     }
     cautionsZh.push("自耦变只用组合式（复合式跨调压绕组冲击上限 200 kV）。");
     cautionsEn.push("Autotransformer: combined types only (compound types stop at 200 kV across the tap winding).");

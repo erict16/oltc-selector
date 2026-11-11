@@ -124,7 +124,7 @@ Every push to `master` deploys to Vercel and to GitHub Pages. Both run `npm test
 
 ## OS regression
 
-`docs/replay/2025-os-sales.xlsx` and `2026-os-sales.xlsx` hold sold type plus duty (Imax, Um, Ust, ±, Y/D, phases, serial). Rebuild from JSON:
+`docs/replay/` is not in the repository: it holds sold-order data (buyer names, serials) and stays on the maintainer's disk. The tests that read it skip when it is absent. There, `2025-os-sales.xlsx` and `2026-os-sales.xlsx` hold sold type plus duty (Imax, Um, Ust, ±, Y/D, phases, serial). Rebuild from JSON:
 
 ```bash
 python scripts/os-to-excel.py

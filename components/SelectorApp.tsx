@@ -15,7 +15,7 @@ import {
   ACROSS_BIL_OPTIONS_KV,
   ACROSS_PF_MENU,
   ACROSS_PF_OPTIONS_KV,
-  CURRENT_MENU,
+  CURRENT_OPTIONS_A,
   SERIES,
   STEP_VOLTAGE_MENU,
   STEP_VOLTAGE_OPTIONS_V,
@@ -41,8 +41,8 @@ import {
 } from "@/lib/formState";
 import { copyText } from "@/lib/clipboard";
 import { parseTypeString } from "@/lib/parseType";
-import { decimalDraft } from "@/lib/decimal";
-import { displayModel } from "@/lib/domesticModel";
+import { decimalDraft, pastedDecimal } from "@/lib/decimal";
+import { displayModel, displayNote } from "@/lib/domesticModel";
 import {
   DEFAULT_WINDING_RATED_KV,
   WINDING_RATED_KV,
@@ -171,6 +171,12 @@ function DecimalInput({
     const held = grouped ? 0 : (decimalDraft(draft).value ?? 0);
     if (held !== value) setDraft(value > 0 ? String(value) : "");
   }, [value]);
+  const take = (next: string, n: number | null) => {
+    setDraft(next);
+    // 2026-11-07: "1.200" A in tr/id/es/vi meant 1200, not 1.2.
+    const isGrouped = groupedError != null && /^\d{1,3}(\.\d{3})+$/.test(next);
+    onValue(isGrouped ? 0 : (n ?? 0));
+  };
   return (
     <>
       <input
@@ -187,10 +193,14 @@ function DecimalInput({
         onChange={(e) => {
           const d = decimalDraft(e.target.value);
           if (d.draft == null) return;
-          setDraft(d.draft);
-          // 2026-11-07: "1.200" A in tr/id/es/vi meant 1200, not 1.2.
-          const isGrouped = groupedError != null && /^\d{1,3}(\.\d{3})+$/.test(d.draft);
-          onValue(isGrouped ? 0 : (d.value ?? 0));
+          take(d.draft, d.value);
+        }}
+        // A pasted "25 MVA" keeps its number; typing a letter is still refused.
+        onPaste={(e) => {
+          const d = pastedDecimal(e.clipboardData.getData("text"));
+          if (!d) return;
+          e.preventDefault();
+          take(d.draft, d.value);
         }}
         onBlur={onBlur}
       />
@@ -272,6 +282,7 @@ function PickOrType({
   custom,
   onCustom,
   extra,
+  groupedError,
 }: {
   lang: Lang;
   value: number;
@@ -287,6 +298,8 @@ function PickOrType({
   onCustom?: (on: boolean) => void;
   /** Menu entries that are actions, not values. */
   extra?: Array<{ value: string; label: string; onPick: () => void }>;
+  /** A and V fields: refuse "1.200" with this text. */
+  groupedError?: string;
 }) {
   const [own, setOwn] = useState(false);
   const [focusNext, setFocusNext] = useState(false);
@@ -302,6 +315,7 @@ function PickOrType({
           value={value}
           placeholder={placeholder}
           autoFocus={focusNext}
+          groupedError={groupedError}
           onValue={(n) => onValue(n, false)}
           onBlur={() => {
             if (listed) setCustom(false);
@@ -426,7 +440,7 @@ function CopyButton({
       className={cx(
         "inline-flex shrink-0 items-center justify-center gap-1 rounded-[6px] transition-colors duration-150",
         "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-accent)]",
-        small ? "h-8 min-w-8" : touch ? "h-11 min-w-11" : "h-9 min-w-9",
+        small ? "h-11 min-w-11 lg:h-8 lg:min-w-8" : touch ? "h-11 min-w-11" : "h-9 min-w-9",
         copied
           ? "px-2 text-[0.75rem] font-medium text-[var(--color-accent)]"
           : "text-[var(--color-caption)] hover:bg-[var(--color-field)] hover:text-[var(--color-ink)]",
@@ -670,7 +684,8 @@ export function SelectorApp() {
   const [phasesByLine, setPhasesByLine] = useState(f0.phasesByLine);
   const [stepStated, setStepStated] = useState(f0.stepStated);
   const [oltcRegulation, setOltcRegulation] = useState(f0.oltcRegulation);
-  const [altsOpen, setAltsOpen] = useState(false);
+  /** null: follow the default (open when a roomier type is offered). */
+  const [altsPick, setAltsPick] = useState<boolean | null>(null);
   const [openAlts, setOpenAlts] = useState<string[]>([]);
   const [copiedModel, setCopiedModel] = useState<string | null>(null);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -795,6 +810,11 @@ export function SelectorApp() {
 
   const setCurrentEntry = (mode: "current" | "capacity") => {
     if (mode === currentMode) return;
+    if (mode === "current") {
+      // Carry the current the capacity gave, not the last menu pick.
+      const a = capacityThroughA();
+      if (a != null) patch("throughCurrentA", Math.round(a * 10) / 10);
+    }
     setCurrentMode(mode);
     if (mode === "capacity" && voltageMode !== "winding") {
       setVoltageEntry("winding");
@@ -929,6 +949,8 @@ export function SelectorApp() {
 
   useEffect(() => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : lang;
+    const name = t(lang, "title");
+    document.title = name === "OLTC Selector" ? name : `${name} · OLTC Selector`;
   }, [lang]);
 
   useEffect(() => {
@@ -997,6 +1019,9 @@ export function SelectorApp() {
       ? insuranceModel(result.results, pickedDutyA, pickedStepV, marginNeed)
       : null;
 
+  const altsOpen = altsPick ?? insuranceId != null;
+  const setAltsOpen = (next: (open: boolean) => boolean) => setAltsPick(next(altsOpen));
+
   const pmOptions = pmStepOptionsFor(input.regulation);
   const pmN =
     pm && Number(pm) > 0
@@ -1022,10 +1047,25 @@ export function SelectorApp() {
           `${round1(windingRatedKv)}\u00a0kV`,
         ]
   ).join(listSep);
-  const cautions = [
-    ...(primary ? notesFor(lang, primary.cautionsZh, primary.cautionsEn) : []),
-    ...(duty.ok ? notesFor(lang, duty.cautionsZh, duty.cautionsEn) : []),
-  ].filter((c, i, all) => all.indexOf(c) === i);
+  // Notes belong to a type: with no type the card says only why there is none.
+  const cautions = (
+    primary
+      ? [
+          ...(earthUm > 0 && ruleDuty.ok && earthUm < ruleDuty.umKv
+            ? [
+                t(lang, "earthBelowRule", {
+                  um: formatUmKv(earthUm),
+                  rule: formatUmKv(ruleDuty.umKv),
+                }),
+              ]
+            : []),
+          ...notesFor(lang, primary.cautionsZh, primary.cautionsEn),
+          ...(duty.ok ? notesFor(lang, duty.cautionsZh, duty.cautionsEn) : []),
+        ]
+      : []
+  )
+    .map((c) => displayNote(c, lang))
+    .filter((c, i, all) => all.indexOf(c) === i);
   return (
     <div className="page flex w-full min-w-0 flex-1 flex-col">
       <header className="topbar sticky top-0 z-30">
@@ -1196,26 +1236,22 @@ export function SelectorApp() {
                   ]}
                 />
               ) : (
-                <FieldSelect
-                  className={controlClass}
-                  value={String(input.throughCurrentA)}
-                  onChange={(e) => {
-                    if (e.target.value === "__capacity__") {
-                      setCurrentEntry("capacity");
-                      return;
-                    }
-                    patch("throughCurrentA", Number(e.target.value));
-                  }}
-                >
-                  <option value="__capacity__">
-                    {t(lang, "switchToCapacity")}
-                  </option>
-                  {CURRENT_MENU.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {currentLabel(lang, c.labelZh, c.labelEn)}
-                    </option>
-                  ))}
-                </FieldSelect>
+                <PickOrType
+                  lang={lang}
+                  value={input.throughCurrentA}
+                  options={CURRENT_OPTIONS_A}
+                  optionLabel={(n) => `${n} A`}
+                  unit="A"
+                  groupedError={t(lang, "groupedNumber")}
+                  onValue={(n) => patch("throughCurrentA", n)}
+                  extra={[
+                    {
+                      value: "__capacity__",
+                      label: t(lang, "switchToCapacity"),
+                      onPick: () => setCurrentEntry("capacity"),
+                    },
+                  ]}
+                />
               )}
             </Field>
 
@@ -1434,12 +1470,11 @@ export function SelectorApp() {
                       <option value="octc">{t(lang, "dutyOctc")}</option>
                     </FieldSelect>
                   </Field>
-                  {input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
+                  {!isOctc && input.mounting !== "dry_type" && input.mounting !== "reactor" ? (
                     <Field label={t(lang, "arcMode")}>
                       <FieldSelect
                         className={controlClass}
-                        value={!isOctc && input.preferVacuum ? "vac" : "oil"}
-                        disabled={isOctc}
+                        value={input.preferVacuum ? "vac" : "oil"}
                         onChange={(e) => {
                           const vac = e.target.value === "vac";
                           setInput((s) => ({
@@ -1626,7 +1661,7 @@ export function SelectorApp() {
                   </p>
                   <ul className="mt-2 list-disc space-y-1 pl-5 text-[0.8125rem] leading-snug text-[var(--color-ink-2)]">
                     {notesFor(lang, result.errorsZh, result.errorsEn).map((e) => (
-                      <li key={e}>{e}</li>
+                      <li key={e}>{displayNote(e, lang)}</li>
                     ))}
                   </ul>
                 </div>
@@ -1634,7 +1669,9 @@ export function SelectorApp() {
                 <>
                   <div className="flex items-center justify-between gap-3">
                     <span className="plate-badge">
-                      <ShieldCheckIcon className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden />
+                      {showsMinimumLabel(loose) ? null : (
+                        <ShieldCheckIcon className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden />
+                      )}
                       {t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")}
                     </span>
                     <CopyButton
@@ -1690,6 +1727,7 @@ export function SelectorApp() {
                   hvKv={hvKv}
                   mvKv={mvKv}
                   onTap={pickTap}
+                  octc={isOctc}
                 />
               </div>
             </div>
@@ -1844,14 +1882,25 @@ function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; shown: s
   const at = shown.lastIndexOf(`-${r.currentA}`);
   if (at < 0) return null;
   const head = shown.slice(0, at);
-  const family = head.endsWith(r.phases) ? head.slice(0, -r.phases.length) : head;
+  // Off-circuit types carry a wiring roman (WSLIV), not a phase count,
+  // and switch no arc: the family cell says the construction only.
+  const offCircuit = series?.structure === "cage" || series?.structure === "drum";
+  const wiring = offCircuit ? head.match(/^(.*?)(VIII|VII|VI|IV|IX|V|III|II|I)$/) : null;
+  const family = wiring
+    ? wiring[1]
+    : head.endsWith(r.phases)
+      ? head.slice(0, -r.phases.length)
+      : head;
   const cells: Array<{ code: string; says: string }> = [
     {
       code: family,
-      says: `${t(lang, series?.vacuum ? "specVac" : "specOil")} · ${t(lang, structureLabelKey(series?.structure))}`,
+      says: offCircuit
+        ? t(lang, structureLabelKey(series?.structure))
+        : `${t(lang, series?.vacuum ? "specVac" : "specOil")} · ${t(lang, structureLabelKey(series?.structure))}`,
     },
   ];
-  if (family !== head) cells.push({ code: r.phases, says: t(lang, "phases") });
+  if (wiring) cells.push({ code: wiring[2], says: t(lang, "octcSeries") });
+  else if (family !== head) cells.push({ code: r.phases, says: t(lang, "phases") });
   cells.push({ code: String(r.currentA), says: "A" });
   // The rest is cut from the string as shown: a single-phase type has no
   // Y/D after the current, and a reactor type ends in its own step count.
@@ -1862,7 +1911,10 @@ function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; shown: s
     cells.push({ code: m[1], says: t(lang, m[1] === "Y" ? "windingStar" : "windingDelta") });
   }
   cells.push({ code: m[2], says: "Um kV" });
-  cells.push({ code: m[3], says: `${t(lang, "positions")} ${r.positions}` });
+  // A type that ends in a bare count (reactor HWDK …-17, dry CZ) states its
+  // own positions; the caption must not print another number under it.
+  const count = /^\d+$/.test(m[3]) ? Number(m[3]) : r.positions;
+  cells.push({ code: m[3], says: `${t(lang, "positions")} ${count}` });
   return (
     <dl className="type-segs" translate="no">
       {cells.map((c, i) => (
@@ -1926,12 +1978,15 @@ function ModelSpec({
     series?.mounting.includes(dutyMounting)
       ? dutyMounting
       : (series?.mounting[0] ?? dutyMounting);
-  const items: Array<{ key: string; value: string }> = [
-    {
-      key: "specArc",
-      value: t(lang, vacuum ? "specVac" : "specOil"),
-    },
-  ];
+  const offCircuit = series?.structure === "cage" || series?.structure === "drum";
+  const items: Array<{ key: string; value: string }> = offCircuit
+    ? []
+    : [
+        {
+          key: "specArc",
+          value: t(lang, vacuum ? "specVac" : "specOil"),
+        },
+      ];
   if (!hideRatings && r.maxStepVoltageV != null) {
     items.push({ key: "specUst", value: `${r.maxStepVoltageV}${nb}V` });
   }

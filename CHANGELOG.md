@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Repository: `docs/replay` (sold-order sheets with buyer names and serials) is no longer tracked; it stays on the maintainer's disk and is git-ignored. The tests that replay it skip when it is absent.
+- Notes: buyer names, order counts and "sold" wording are gone from the page and the CLI. The technical rule stays.
+- Notes: "OS" is written out once as 订货规范（OS） / order specification (OS), in all six languages.
+- Chinese page: a note names families as the type above it does (VCV-G, VCM, CHVT), not CV2 / CM2 / SHZVG.
+- Result: the badge reads 余量充足 / With margin, or 接近额定上限 / Close to the rating (was 综合保险方案 / 满足最低要求方案). Beside a type close to its rating, the roomier type is shown open, not folded.
+- Result: with no type, the card says only why; the assumed-Um note no longer shows there.
+- Insulation to earth picked below what the winding voltage gives now carries a warning (110 kV neutral at 40.5 kV gave a type without a word).
+- Off-circuit: no arc row in the form or the result, the sketch says OCTC, and the type reads WSL + IV (wiring) instead of one cell "WSLIV".
+- Reactor: the positions caption follows the type (HWDK …-17 read "positions 19").
+- Current entry: switching from capacity keeps the computed current (25 MVA 110 kV → 145.8 A, was 400 A), and a current can be typed, not only picked from the ratings.
+- A pasted "25 MVA", "38,5 kV" or "1.25%" keeps its number.
+- Phones: dropdowns, the copy buttons and the language button are 44 px tall.
+- The browser tab title follows the language.
 - Deploy: the GitHub Pages workflow is back (the repo is public again). The page also runs at erict16.github.io/oltc-selector.
 - README rewritten for the new page, with a new screenshot.
 - Form: every field is one row, the name on the left and a dropdown on the right. The form is about half as tall on a phone and fits one laptop screen. Tap position, winding, on-load / off-circuit and arc mode are dropdowns too.

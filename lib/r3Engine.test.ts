@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { HAS_REPLAY_DATA, readSalesJson } from "./replayData";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { runCli } from "./cli";
@@ -250,7 +251,7 @@ describe("ORDERS-11 Turkish 110 kV-class star neutrals take 72.5C (buyer practic
   it("--market TR on a 154 kV neutral gives 72.5C with the practice caution", () => {
     const r = cli(args(`${tr154} --market TR`));
     expect(r.out.split(/\r?\n/)[0]).toBe("CM2III-500Y/72.5C-14273G");
-    expect(r.out).toContain("选择器等级上调为 C：土耳其客户 110 kV 级中性点取 C（已售 26 组中 25 组；B 也满足）。");
+    expect(r.out).toContain("选择器等级上调为 C：土耳其 110 kV 级中性点通常取 C（B 也满足）。");
   });
 
   it("no market stays 72.5B", () => {
@@ -288,15 +289,15 @@ describe("ORDERS-11 Turkish 110 kV-class star neutrals take 72.5C (buyer practic
   it("the caution has every translation", () => {
     expect(
       translated(
-        "Selector grade raised to C: Turkish buyers take C on 110 kV-class neutrals (sold 25 of 26 orders; B also fits).",
+        "Selector grade raised to C: C is usual on Turkish 110 kV-class neutrals (B also fits).",
       ),
     ).toBe(true);
   });
 });
 
-describe("ORDERS-10 replays size on the lowest-tap current when the OS has no Imax", () => {
+describe.skipIf(!HAS_REPLAY_DATA)("ORDERS-10 replays size on the lowest-tap current when the OS has no Imax", () => {
   const rows = loadOsSales(
-    JSON.parse(readFileSync(path.join(process.cwd(), "docs", "replay", "2025-os-sales.json"), "utf8")),
+    readSalesJson(2025),
   );
   const row = (serial: string) => rows.find((r) => r.serial === serial)!;
   const n = (v: unknown) => (v == null || v === "" ? null : Number(v));

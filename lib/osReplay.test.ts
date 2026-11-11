@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { HAS_REPLAY_DATA, readSalesJson } from "./replayData";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { commercialTypeExists } from "./typeExists";
@@ -10,12 +11,7 @@ import {
 } from "./osReplay";
 
 function loadYear(year: 2025 | 2026): OsSalesRow[] {
-  const raw = JSON.parse(
-    readFileSync(
-      path.join(process.cwd(), "docs", "replay", `${year}-os-sales.json`),
-      "utf8",
-    ),
-  );
+  const raw = readSalesJson(year);
   return loadOsSales(raw);
 }
 
@@ -48,7 +44,7 @@ function replayYear(year: 2025 | 2026) {
   return { rows: rows.length, skip, outOfCat, judged: judged.length, missingSold, illegal };
 }
 
-describe("OS Excel-backed replay (shipped selectOltc)", () => {
+describe.skipIf(!HAS_REPLAY_DATA)("OS Excel-backed replay (shipped selectOltc)", () => {
   it("does not treat a weaker selector grade as the sold type", () => {
     expect(
       soldTypeInResults("CMIII-600Y/72.5C-10193G", [

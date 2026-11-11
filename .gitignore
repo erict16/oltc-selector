@@ -14,3 +14,5 @@ pack
 lib/basePrices.data.json
 **/Base Price List*.xlsx
 .icon-work/
+# Sold-order data (buyer names, serials): local only.
+docs/replay/

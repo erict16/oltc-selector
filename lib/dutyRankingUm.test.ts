@@ -315,7 +315,7 @@ describe("UM-2 market (optional, off by default)", () => {
     expect(n(230, "IT").umKv).toBe(252);
     expect(n(400, "IT").umKv).toBe(126);
     expect(n(150, "IT").umAssumed).toBe(true);
-    expect(n(150, "IT").cautionsEn.join()).toContain("TERNA/GETRA");
+    expect(n(150, "IT").cautionsEn.join()).toContain("some projects use 72.5");
   });
 
   it("Turkey 225 → 126; Russia 220 → 72.5; no market = today", () => {
@@ -357,20 +357,20 @@ describe("UM-4 400 kV-class autotransformer junction", () => {
   it("HMR 170 note only where Um is 170", () => {
     const mv400 = auto({ tapPoint: "auto_mv_line" });
     expect(mv400.umKv).toBe(252);
-    expect(mv400.cautionsEn.join()).not.toContain("HMR");
+    expect(mv400.cautionsEn.join()).not.toContain("230/121");
     const mv230 = auto({ tapPoint: "auto_mv_line", hvKv: 230, mvKv: 121, mva: 250 });
     expect(mv230.umKv).toBe(170);
-    expect(mv230.cautionsEn.join()).toContain("HMR 230/121");
+    expect(mv230.cautionsEn.join()).toContain("230/121 kV autotransformer");
   });
 });
 
 describe("UM-5 35 kV neutral caution", () => {
-  it("names Russia/CIS, not Turkey; choices 40.5 and 72.5", () => {
+  it("names no market or buyer; choices 40.5 and 72.5", () => {
     const s = spec({ tapKv: 35, mva: 20 });
     const d = deriveDuty(s);
     expect(d.umKv).toBe(40.5);
     expect(d.umAssumed).toBe(true);
-    expect(d.cautionsEn.join()).toContain("Russian/CIS");
+    expect(d.cautionsEn.join()).toContain("many projects specify 72.5");
     expect(d.cautionsEn.join()).not.toContain("Turkey");
     expect(umChoices(d, s)).toEqual([40.5, 72.5]);
   });

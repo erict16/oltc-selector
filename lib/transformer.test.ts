@@ -106,7 +106,7 @@ describe("autotransformer tapped in the MV line lead", () => {
     expect(d.ratedA).toBeCloseTo((250e3 / (Math.sqrt(3) * 121)), 1);
     expect(d.umKv).toBe(170);
     expect(d.umAssumed).toBe(true);
-    expect(d.cautionsZh.join()).toContain("HMR");
+    expect(d.cautionsZh.join()).toContain("230/121 kV");
   });
 
   it("does not refuse a 330/158 kV MV-lead tap on the HV class", () => {

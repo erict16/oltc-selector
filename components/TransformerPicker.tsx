@@ -229,7 +229,10 @@ export function TransformerSketch({
   hvKv,
   mvKv,
   onTap,
+  octc,
 }: {
+  /** Off-circuit tap changer: the switch is labelled OCTC. */
+  octc?: boolean;
   lang: Lang;
   kind: TransformerKind;
   tapPoint: TapPoint;
@@ -360,7 +363,7 @@ export function TransformerSketch({
             textAnchor={at.anchor}
             className="pointer-events-none fill-[var(--color-accent)] text-[10px] font-semibold tracking-[0.04em]"
           >
-            OLTC
+            {octc ? "OCTC" : "OLTC"}
           </text>
         );
       })()}

@@ -1271,9 +1271,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
           !gradePick?.raisedFrom && (input.selectorSize ?? "auto") === "auto";
         if (gradeAuto && classBump && selectorSize === classBump) {
           cautionsEn.push(
-            `Selector grade raised one step to ${selectorSize}: winding of 330 kV class or above (sold practice).`,
+            `Selector grade raised one step to ${selectorSize}: winding of 330 kV class or above.`,
           );
-          cautionsZh.push(`选择器等级上调一级为 ${selectorSize}：330 kV 级及以上绕组（按已售订单）。`);
+          cautionsZh.push(`选择器等级上调一级为 ${selectorSize}：330 kV 级及以上绕组。`);
         } else if (
           gradeAuto &&
           classBump &&
@@ -1293,10 +1293,10 @@ export function selectOltc(input: SelectInput): SelectOutput {
         const trRaise = gradeAuto && trBump != null && selectorSize === trBump;
         if (trRaise) {
           cautionsEn.push(
-            `Selector grade raised to ${selectorSize}: Turkish buyers take ${selectorSize} on 110 kV-class neutrals (sold 25 of 26 orders; ${umDefault} also fits).`,
+            `Selector grade raised to ${selectorSize}: ${selectorSize} is usual on Turkish 110 kV-class neutrals (${umDefault} also fits).`,
           );
           cautionsZh.push(
-            `选择器等级上调为 ${selectorSize}：土耳其客户 110 kV 级中性点取 ${selectorSize}（已售 26 组中 25 组；${umDefault} 也满足）。`,
+            `选择器等级上调为 ${selectorSize}：土耳其 110 kV 级中性点通常取 ${selectorSize}（${umDefault} 也满足）。`,
           );
         }
         // 2026-11-04 r2 ENGINE-1: a grade below the Um default rests on the stated values.

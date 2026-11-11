@@ -134,7 +134,7 @@ describe("ORDERS-1 330 kV-class neutral one grade above the Um default", () => {
     expect(low.model).toBe("CM2III-500Y/72.5B-10193W");
     const high = selectOltc({ ...duty, tapWindingKv: 400 }).results[0]!;
     expect(high.selectorSize).toBe("C");
-    expect(high.cautionsEn).toContain("Selector grade raised one step to C: winding of 330 kV class or above (sold practice).");
+    expect(high.cautionsEn).toContain("Selector grade raised one step to C: winding of 330 kV class or above.");
     // An autotransformer, a typed grade or a stated stress is left alone.
     expect(selectOltc({ ...duty, tapWindingKv: 400, transformerKind: "auto" }).results[0]!.selectorSize).toBe("B");
     expect(selectOltc({ ...duty, tapWindingKv: 400, selectorSize: "B" }).results[0]!.selectorSize).toBe("B");
