@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>选型页 · 3 个方向</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#131c2b;--ink2:#34405a;--muted:#5d6b82;--cap:#8793a6;--rule:#e3e8ef;--rule2:#d3dae4;
+  --paper:#f4f6f9;--accent:#2457c5;--accent-soft:#e9f0fd;--ok:#12855a;--ok-soft:#e3f5ec;
+  --warn:#8a5300;--warn-soft:#fff4dc;--navy:#0f1b33;
+}
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.45 "IBM Plex Sans","PingFang SC",-apple-system,system-ui,sans-serif;color:var(--ink);background:#dfe4ea;padding:36px 28px 96px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.page-title{font-size:22px;font-weight:600;margin-bottom:6px}
+.page-sub{color:var(--muted);margin-bottom:36px}
+.dir{margin-bottom:72px}
+.dir>h2{font-size:19px;font-weight:600}
+.dir>p{color:var(--muted);margin:2px 0 16px}
+.frames{display:flex;gap:28px;align-items:flex-start}
+.lap,.ph{flex:none;border-radius:14px;overflow:hidden;box-shadow:0 2px 4px rgb(15 27 51/.08),0 24px 48px -20px rgb(15 27 51/.35);zoom:.62}
+.lap{width:1320px}.ph{width:390px;height:844px}
+svg{display:block}
+
+/* shared bits */
+.top{display:flex;align-items:center;gap:12px;height:60px;padding:0 32px;background:#fff;border-bottom:1px solid var(--rule)}
+.logo{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:#fff}
+.top b{font-weight:600;font-size:16px}
+.top .lang{margin-left:auto}
+select{appearance:none;font:inherit;font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;min-width:0;
+  height:38px;border-radius:9px;padding:0 34px 0 12px;border:1px solid var(--rule2);
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%235d6b82'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9'/%3E%3C/svg%3E") no-repeat right 9px center/16px;
+  box-shadow:0 1px 2px rgb(15 27 51/.06)}
+.card{background:#fff;border:1px solid var(--rule);border-radius:14px;box-shadow:0 1px 2px rgb(15 27 51/.04)}
+.card h3{font-size:15px;font-weight:600;padding:16px 20px 12px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:54px;padding:0 20px;border-top:1px solid var(--rule)}
+.row label{color:var(--ink2);font-size:14px}
+.row select{width:208px}
+.badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 8px;border-radius:13px;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:600}
+.copy{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--rule2);background:#fff;font:inherit;font-size:14px;font-weight:500;color:var(--ink);box-shadow:0 1px 2px rgb(15 27 51/.06)}
+.type{font-weight:600;letter-spacing:-.025em;line-height:1.1}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
+.seg div{padding:12px 14px;border-left:1px solid var(--rule)}
+.seg div:first-child{border-left:0;padding-left:0}
+.seg b{display:block;font-size:17px;font-weight:600}
+.seg span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.caution{display:flex;gap:10px;align-items:flex-start;background:var(--warn-soft);color:#5f3d05;border-radius:10px;padding:11px 14px;font-size:14px}
+.caution svg{flex:none;margin-top:2px;color:var(--warn)}
+.g{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:baseline;padding:13px 0;border-top:1px solid var(--rule)}
+.g:first-child{border-top:0}
+.g .n{font-size:14px;color:var(--ink2)}
+.g .v{font-size:14px;color:var(--muted)}.g .v b{color:var(--ink);font-weight:600;font-size:16px}
+.g .bar{grid-column:1/-1;height:6px;border-radius:3px;background:#edf0f4;overflow:hidden;margin-top:4px}
+.g .bar i{display:block;height:100%;border-radius:3px;background:var(--ok)}
+.g .pass{display:inline-flex;align-items:center;gap:5px;color:var(--ok);font-weight:600;font-size:13px;background:var(--ok-soft);border-radius:11px;padding:2px 9px 2px 6px}
+.spec{display:grid;grid-template-columns:repeat(4,1fr)}
+.spec div span{display:block;font-size:12px;color:var(--muted)}
+.spec div b{font-weight:500;font-size:15px}
+
+/* ── 1 · 精致卡片 ── */
+.d1{background:var(--paper)}
+.d1 .body{display:grid;grid-template-columns:470px 1fr;gap:32px;padding:32px}
+.d1 .form{display:grid;gap:16px}
+.d1 .res{align-self:start;border-radius:18px;box-shadow:0 1px 2px rgb(15 27 51/.05),0 20px 40px -24px rgb(15 27 51/.22);overflow:hidden}
+.d1 .hero{padding:28px 32px 0;background:#f7f9fc;border-bottom:1px solid var(--rule)}
+.d1 .hero-top{display:flex;justify-content:space-between;align-items:center}
+.d1 .type{font-size:38px;margin:16px 0 18px}
+.d1 .seg{border-top:1px solid var(--rule)}
+.d1 .mid{display:grid;grid-template-columns:1fr 250px;gap:32px;padding:24px 32px}
+.d1 .draw{border:1px solid var(--rule);border-radius:12px;display:grid;place-items:center;padding:16px;
+  background:#fbfcfe radial-gradient(circle,#d9e0ea 1px,transparent 1.2px) 0 0/16px 16px}
+.d1 .res .caution{margin:20px 32px 0}
+.d1 .spec{padding:18px 32px;border-top:1px solid var(--rule)}
+.d1 .alt{display:flex;justify-content:space-between;padding:16px 32px;border-top:1px solid var(--rule);font-weight:500;color:var(--ink2)}
+
+/* ── 2 · 深色仪表 ── */
+.d2{background:#eef1f5}
+.d2 .body{display:grid;grid-template-columns:440px 1fr;gap:28px;padding:28px}
+.d2 .form .card+.card{margin-top:14px}
+.d2 .res{align-self:start;border-radius:22px;background:var(--navy);color:#fff;padding:32px 36px;
+  box-shadow:0 30px 60px -30px rgb(15 27 51/.7)}
+.d2 .badge{background:rgb(120 165 255/.16);color:#a9c5ff}
+.d2 .copy{background:rgb(255 255 255/.08);border-color:rgb(255 255 255/.16);color:#fff;box-shadow:none}
+.d2 .hero-top{display:flex;justify-content:space-between;align-items:center}
+.d2 .type{font-size:40px;margin:18px 0 20px}
+.d2 .seg{border-top:1px solid rgb(255 255 255/.12);border-bottom:1px solid rgb(255 255 255/.12)}
+.d2 .seg div{border-color:rgb(255 255 255/.12)}
+.d2 .seg span{color:rgb(255 255 255/.6)}
+.d2 .caution{background:rgb(255 196 87/.12);color:#ffdc9a;margin-top:20px}.d2 .caution svg{color:#ffc457}
+.d2 .mid{display:grid;grid-template-columns:1fr 230px;gap:28px;margin-top:26px;align-items:center}
+.d2 .rings{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.d2 .ring{display:flex;align-items:center;gap:14px;background:rgb(255 255 255/.05);border:1px solid rgb(255 255 255/.09);border-radius:14px;padding:14px 16px}
+.d2 .ring .n{font-size:13px;color:rgb(255 255 255/.62)}
+.d2 .ring .v{font-size:17px;font-weight:600}
+.d2 .ring .v small{font-weight:400;font-size:13px;color:rgb(255 255 255/.55)}
+.d2 .draw{color:#cfdcff;--dim:rgb(255 255 255/.4);--hi:#7fb0ff;display:grid;place-items:center}
+.d2 .spec{margin-top:24px;padding-top:20px;border-top:1px solid rgb(255 255 255/.12)}
+.d2 .spec div span{color:rgb(255 255 255/.55)}
+
+/* ── 3 · 工程图纸 ── */
+.d3{background:#f1f3f6}
+.d3 .body{display:grid;grid-template-columns:440px 1fr;gap:28px;padding:28px}
+.d3 .form .card+.card{margin-top:14px}
+.d3 .sheet{align-self:start;background:#fff;border:1.5px solid var(--ink);border-radius:4px;padding:6px;
+  box-shadow:0 20px 40px -24px rgb(15 27 51/.3)}
+.d3 .inner{border:1px solid var(--ink);display:grid;grid-template-rows:1fr auto;min-height:640px;
+  background:#fff linear-gradient(#eef2f7 1px,transparent 1px) 0 0/100% 20px,linear-gradient(90deg,#eef2f7 1px,transparent 1px) 0 0/20px 100%;background-blend-mode:normal}
+.d3 .inner{background:linear-gradient(#eef2f7 1px,transparent 1px) 0 0/100% 20px,linear-gradient(90deg,#eef2f7 1px,transparent 1px) 0 0/20px 100%,#fff}
+.d3 .field{display:grid;grid-template-columns:300px 1fr;gap:20px;padding:28px 32px;align-items:center}
+.d3 .draw{--hi:var(--accent)}
+.d3 .notes{background:rgb(255 255 255/.92);border:1px solid var(--rule2);border-radius:10px;padding:6px 18px}
+.d3 .caution{margin:0 32px 20px}
+.d3 .tb{display:grid;grid-template-columns:1.9fr 1fr 1fr 1fr;border-top:1.5px solid var(--ink);background:#fff}
+.d3 .tb>div{padding:10px 16px;border-left:1px solid var(--ink)}
+.d3 .tb>div:first-child{border-left:0;grid-row:span 2;display:flex;flex-direction:column;justify-content:center}
+.d3 .tb>div:nth-child(n+5){border-top:1px solid var(--ink)}
+.d3 .tb span{display:block;font-size:11px;color:var(--muted)}
+.d3 .tb b{font-weight:600;font-size:15px}
+.d3 .tb .type{font-size:27px;margin-top:4px}
+.d3 .tb .copy{margin-top:10px;align-self:flex-start;height:32px}
+
+/* phone */
+.ph .top{padding:0 16px;height:54px}
+.ph .body{grid-template-columns:1fr!important;padding:14px!important;gap:14px!important}
+.ph .row select{width:168px}
+.ph .type{font-size:23px!important}
+.ph .mid,.ph .field{grid-template-columns:1fr!important;padding-inline:18px!important}
+.ph .d2 .mid{padding-inline:0!important}
+.ph .seg{grid-auto-flow:row;grid-template-columns:repeat(3,1fr)}
+.ph .seg div{padding:10px 10px 10px 0;border-left:0}
+.ph .seg b{font-size:15px}
+.ph .hero,.ph .d1 .spec,.ph .d1 .alt{padding-inline:18px!important}
+.ph .d1 .res .caution,.ph .d3 .caution{margin-inline:18px}
+.ph .d2 .res{padding:22px 18px;border-radius:18px}
+.ph .d2 .rings{grid-template-columns:1fr}
+.ph .spec{grid-template-columns:1fr 1fr;gap:12px}
+.ph .res,.ph .sheet{order:-1}
+.ph .draw{display:none!important}
+.ph .d3 .tb{grid-template-columns:1fr 1fr}
+.ph .d3 .tb>div:first-child{grid-column:1/-1;grid-row:auto}
+.ph .d3 .tb>div{border-top:1px solid var(--ink);border-left:0}
+.ph .d3 .inner{min-height:0}
+.ph .copy span{display:none}.ph .copy{padding:0 10px}
+</style>
+</head>
+<body>
+<p class="page-title">选型页 · 3 个方向</p>
+<p class="page-sub">同一组数据。每个方向左边是电脑，右边是手机。</p>
+<div id="out"></div>
+<script>
+const G=[
+ ["变压器",[["变压器","双绕组"],["开关位置","中性点"],["调压绕组接法","星形"],["调压侧额定电压","110 kV"],["开关对地绝缘","自动 · Um 72.5 kV"]]],
+ ["工况",[["变压器容量","25 MVA"],["调压方式","正反调（W）"],["± 级数","±8"],["单次调节比例","1.25%"],["中间位","3"],["相数","III"]]],
+ ["开关",[["有载 / 无载","有载"],["灭弧方式","真空"],["开关结构","自动"],["安装方式","箱内"],["安全系数","×1"]]]];
+const TYPE="VCV-GIII-350Y/72.5-10193W";
+const SEG=[["VCV-G","真空 · 复合式"],["III","三相"],["350","额定电流 A"],["Y","星形中性点"],["72.5","Um kV"],["10193W","19 位 · 正反调"]];
+const R=[["最大通过电流","145.8","350","A",42],["级电压","793.9","2000","V",40],["级容量","115.7","700","kVA",17],["开关对地绝缘","72.5","72.5","kV",null]];
+const SPEC=[["灭弧方式","真空"],["开关结构","复合式"],["对地工频 / 雷电","140 / 350 kV"],["安装方式","箱内"]];
+const CAUTION="中性点绝缘未给，先按 Um 72.5 kV 选，以 OS 为准。";
+const I={
+ warn:`<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>`,
+ check:`<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>`,
+ shield:`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>`,
+ copy:`<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 0 0-2.25-2.25H6A2.25 2.25 0 0 0 3.75 6v8.25A2.25 2.25 0 0 0 6 16.5h2.25m8.25-8.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-7.5A2.25 2.25 0 0 1 8.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 0 0-2.25 2.25v6"/></svg>`,
+ bolt:`<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"/></svg>`};
+const draw=(w=210)=>`<svg class="draw-svg" width="${w}" viewBox="0 0 220 270" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" font-family="IBM Plex Sans,PingFang SC,sans-serif">
+ <circle cx="96" cy="20" r="5"/><text x="84" y="24" text-anchor="end" font-size="12" font-weight="600" fill="currentColor" stroke="none">A 110 kV</text>
+ <path d="M96 25v20"/><path d="M96 45${"a9 9 0 0 1 0 15".repeat(7)}"/>
+ <path d="M96 150v8"/>
+ <g stroke="var(--hi,#2457c5)"><path d="M96 158${"a9 9 0 0 1 0 14".repeat(4)}"/>
+ ${[158,172,186,200,214].map(y=>`<path d="M105 ${y}h20"/><circle cx="128" cy="${y}" r="2.6" fill="var(--hi,#2457c5)"/>`).join("")}
+ <path d="M164 196 132 174" stroke-width="2"/><circle cx="164" cy="196" r="4"/>
+ <text x="174" y="200" font-size="11" font-weight="600" fill="var(--hi,#2457c5)" stroke="none">OLTC</text>
+ <text x="82" y="190" text-anchor="end" font-size="12" font-weight="600" fill="var(--hi,#2457c5)" stroke="none">中性点</text></g>
+ <path d="M164 200v48H96"/><circle cx="96" cy="248" r="3" fill="currentColor"/><text x="84" y="252" text-anchor="end" font-size="12" font-weight="600" fill="currentColor" stroke="none">N</text>
+</svg>`;
+const row=([l,v])=>`<div class="row"><label>${l}</label><select><option>${v}</option></select></div>`;
+const form=()=>`<div class="form">${G.map(([t,fs])=>`<div class="card"><h3>${t}</h3>${fs.map(row).join("")}</div>`).join("")}</div>`;
+const topBar=`<div class="top"><span class="logo">${I.bolt}</span><b>有载开关选型</b><select class="lang"><option>中文</option></select></div>`;
+const seg=`<div class="seg mono">${SEG.map(([a,b])=>`<div><b>${a}</b><span style="font-family:'IBM Plex Sans','PingFang SC',sans-serif">${b}</span></div>`).join("")}</div>`;
+const caution=`<p class="caution">${I.warn}<span>${CAUTION}</span></p>`;
+const gauges=`<div>${R.map(([n,a,b,u,p])=>`<div class="g"><span class="n">${n}</span><span class="v mono"><b>${a}</b> / ${b} ${u}</span>${p==null?`<span style="grid-column:1/-1"><span class="pass">${I.check}满足</span></span>`:`<span class="bar"><i style="width:${p}%"></i></span>`}</div>`).join("")}</div>`;
+const spec=`<div class="spec">${SPEC.map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join("")}</div>`;
+const heroTop=`<div class="hero-top"><span class="badge">${I.shield}综合保险方案</span><button class="copy">${I.copy}<span>复制型号</span></button></div>`;
+const ring=([n,a,b,u,p])=>{const c=2*Math.PI*20,ok=p==null;return `<div class="ring"><svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="20" fill="none" stroke="rgb(255 255 255/.12)" stroke-width="5"/><circle cx="26" cy="26" r="20" fill="none" stroke="#4fd39b" stroke-width="5" stroke-linecap="round" stroke-dasharray="${c*(ok?1:p/100)} ${c}" transform="rotate(-90 26 26)"/>${ok?`<path d="m18.5 26.5 5 5 9.5-11" fill="none" stroke="#4fd39b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`:`<text x="26" y="30.5" text-anchor="middle" font-size="12" font-weight="600" fill="#fff" font-family="IBM Plex Mono,monospace">${p}%</text>`}</svg><div><div class="n">${n}</div><div class="v mono">${a} <small>/ ${b} ${u}</small></div></div></div>`};
+const V={
+ d1:()=>`${topBar}<div class="body">${form()}<div class="res card"><div class="hero">${heroTop}<p class="type mono">${TYPE}</p>${seg}</div>${caution}<div class="mid">${gauges}<div class="draw">${draw(190)}</div></div><div style="padding:0 32px 4px"></div><div style="border-top:0">${spec.replace('class="spec"','class="spec"')}</div><div class="alt"><span>其他可选（1）</span><span>⌄</span></div></div></div>`,
+ d2:()=>`${topBar}<div class="body">${form()}<div class="res">${heroTop}<p class="type mono">${TYPE}</p>${seg}${caution}<div class="mid"><div class="rings">${R.map(ring).join("")}</div><div class="draw">${draw(200)}</div></div>${spec}</div></div>`,
+ d3:()=>`${topBar}<div class="body">${form()}<div class="sheet"><div class="inner"><div><div class="field"><div class="draw" style="display:grid;place-items:center">${draw(260)}</div><div class="notes">${gauges}</div></div>${caution}</div><div class="tb"><div><span>型号 · 综合保险方案</span><b class="type mono">${TYPE}</b><button class="copy">${I.copy}<span>复制型号</span></button></div>${SPEC.map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join("")}<div><span>调压</span><b>±8 × 1.25%</b></div><div><span>容量 / 电压</span><b>25 MVA · 110 kV</b></div></div></div></div></div>`};
+const INFO={
+ d1:["1 · 精致卡片","白卡片、清楚的下拉框。型号下面把每一段拆开说明，占用率是粗条。像 Stripe。"],
+ d2:["2 · 深色仪表","结果是一块深色面板，四个圆环表。左边表单保持浅色。对比最强。"],
+ d3:["3 · 工程图纸","结果是一张图纸：接线图最大，右下角是图签，型号写在图签里。最有行业味。"]};
+document.getElementById("out").innerHTML=Object.keys(V).map(k=>`<section class="dir"><h2>${INFO[k][0]}</h2><p>${INFO[k][1]}</p><div class="frames"><div class="lap"><div class="${k}">${V[k]()}</div></div><div class="ph"><div class="${k}" style="min-height:844px">${V[k]()}</div></div></div></section>`).join("");
+</script>
+</body>
+</html>

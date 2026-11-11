@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
 import {
   ArrowDownIcon,
+  BoltIcon,
+  ShieldCheckIcon,
   CheckIcon,
   ChevronDownIcon,
   ListBulletIcon,
@@ -377,8 +379,8 @@ function CardHead({
   right?: React.ReactNode;
 }) {
   return (
-    <div className="mb-1 flex min-h-6 items-center gap-3">
-      <h2 className="min-w-0 flex-1 text-[0.75rem] leading-tight font-semibold text-[var(--color-caption)]">
+    <div className="card-head">
+      <h2 className="min-w-0 flex-1 text-[0.9375rem] leading-tight font-semibold text-[var(--color-ink)]">
         {title}
       </h2>
       {right}
@@ -393,7 +395,10 @@ function CopyButton({
   onCopy,
   small,
   touch,
+  labelled,
 }: {
+  /** Framed button with the words beside the icon. */
+  labelled?: boolean;
   lang: Lang;
   copied: boolean;
   onCopy: () => void;
@@ -401,6 +406,18 @@ function CopyButton({
   /** 44 px target for the phone dock. */
   touch?: boolean;
 }) {
+  if (labelled) {
+    return (
+      <button type="button" onClick={onCopy} className={cx("copy-btn", copied && "is-done")}>
+        {copied ? (
+          <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+        ) : (
+          <Square2StackIcon className="h-4 w-4" strokeWidth={1.7} aria-hidden />
+        )}
+        <span aria-live="polite">{t(lang, copied ? "copied" : "copyType")}</span>
+      </button>
+    );
+  }
   return (
     <button
       type="button"
@@ -444,7 +461,9 @@ function BasisTable({
   dutyA,
   stepV,
   model,
+  hideUm,
 }: {
+  hideUm?: boolean;
   lang: Lang;
   duty: DutyBasis;
   dutyA: number | null;
@@ -512,67 +531,43 @@ function BasisTable({
     },
   ];
   return (
-    <div className="min-w-0 px-5 pt-4 pb-3 sm:px-7">
-      <table className="basis-table">
-        <thead>
-          <tr>
-            <th scope="col">{t(lang, "basisTitle")}</th>
-            <th scope="col" className="r">{t(lang, "cardDuty")}</th>
-            <th scope="col" className="r">{t(lang, "colRating")}</th>
-            <th scope="col" className="r">
-              <span className="sr-only">{t(lang, "colUse")}</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows
-            // Off-circuit types carry no step rating; a row of dashes says nothing.
-            .filter((r) => !(model && r.rating == null))
-            .map((r) => {
-            const pct = r.use != null ? Math.round(r.use * 100) : null;
-            const tone =
-              r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 && !r.plain ? "is-tight" : "";
-            return (
-              <tr key={r.key}>
-                <th scope="row">{r.label}</th>
-                <td className="r num">
-                  {r.need}
-                  {r.need !== "—" ? <span className="basis-unit">{r.unit}</span> : null}
-                </td>
-                <td className="r num">
-                  {r.rating != null ? (
-                    <>
-                      {r.rating}
-                      <span className="basis-unit">{r.unit}</span>
-                    </>
+    <dl className="basis">
+      {rows
+        // Off-circuit types carry no step rating; a row of dashes says nothing.
+        .filter((r) => !(model && r.rating == null))
+        // Um is the equipment's insulation level, not a load. At a star
+        // neutral nothing on the duty side sets it, so the row is left out;
+        // elsewhere it is a class check with no bar (2026-11-11 Eric).
+        .filter((r) => !(r.plain && hideUm))
+        .map((r) => {
+          const pct = r.use != null ? Math.round(r.use * 100) : null;
+          const tone =
+            r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 && !r.plain ? "is-tight" : "";
+          return (
+            <div key={r.key} className={cx("basis-row", tone)}>
+              <dt>{r.label}</dt>
+              <dd className="num">
+                <b>{r.need}</b>
+                {r.rating != null ? <span> / {r.rating}</span> : null}
+                <span className="basis-unit">{r.unit}</span>
+                {pct != null && !r.plain ? <span className="basis-pct">{pct}%</span> : null}
+                {pct != null && r.plain ? (
+                  r.use! > 1 ? (
+                    <ExclamationTriangleIcon className="basis-mark" strokeWidth={1.75} aria-hidden />
                   ) : (
-                    <span className="text-[var(--color-caption)]">—</span>
-                  )}
-                </td>
-                <td className="r">
-                  {pct != null && r.plain ? (
-                    <span className={cx("basis-use", r.use! > 1 ? "is-over" : "is-ok")}>
-                      {r.use! > 1 ? (
-                        <ExclamationTriangleIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                      ) : (
-                        <CheckIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
-                      )}
-                    </span>
-                  ) : pct != null ? (
-                    <span className={cx("basis-use", tone)} title={`${t(lang, "colUse")} ${pct}%`}>
-                      <span className="basis-bar" aria-hidden>
-                        <i style={{ transform: `scaleX(${Math.min(100, pct) / 100})` }} />
-                      </span>
-                      <span className="num">{pct}%</span>
-                    </span>
-                  ) : null}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+                    <CheckIcon className="basis-mark" strokeWidth={2.4} aria-hidden />
+                  )
+                ) : null}
+              </dd>
+              {pct != null && !r.plain ? (
+                <span className="basis-bar" aria-hidden>
+                  <i style={{ transform: `scaleX(${Math.min(100, pct) / 100})` }} />
+                </span>
+              ) : null}
+            </div>
+          );
+        })}
+    </dl>
   );
 }
 
@@ -582,8 +577,8 @@ function BasisTable({
  */
 function earthUmLabel(um: number): string {
   const e = EARTH_INSULATION[um];
-  const kv = `Um ${formatUmKv(um)} kV`;
-  return e ? `${kv} · ${e.pf} / ${e.bil} kV` : kv;
+  const kv = `${formatUmKv(um)} kV`;
+  return e ? `${kv} · ${e.pf} / ${e.bil}` : kv;
 }
 
 function round1(n: number): string {
@@ -1035,7 +1030,10 @@ export function SelectorApp() {
   return (
     <div className="page flex w-full min-w-0 flex-1 flex-col">
       <header className="topbar sticky top-0 z-30">
-        <div className="mx-auto flex h-14 w-full max-w-[1200px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
+        <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
+          <span className="app-mark" aria-hidden>
+            <BoltIcon className="h-4 w-4" strokeWidth={2} />
+          </span>
           <div className="min-w-0 leading-tight">
             <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-ink)]">
               {t(lang, "title")}
@@ -1050,7 +1048,7 @@ export function SelectorApp() {
           </div>
         </div>
       </header>
-      <div className="mx-auto grid w-full max-w-[1200px] flex-1 items-start gap-8 px-0 pt-5 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-8 lg:grid-cols-[21rem_minmax(0,1fr)] lg:gap-12 lg:pt-10 lg:pb-10 xl:grid-cols-[24rem_minmax(0,1fr)] xl:gap-16">
+      <div className="mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:gap-6 sm:px-8 sm:pt-8 lg:grid-cols-[25rem_minmax(0,1fr)] lg:gap-8 lg:pb-10 xl:grid-cols-[28rem_minmax(0,1fr)]">
         <form
           className="flex min-w-0 flex-col"
           onSubmit={(e) => e.preventDefault()}
@@ -1064,8 +1062,9 @@ export function SelectorApp() {
                   {t(lang, "autoOctcNote")}
                 </p>
               ) : null}
+              <CardHead title={t(lang, "transformer")} />
               <div className="rows rows-2">
-                  <Field label={t(lang, "transformer")}>
+                  <Field label={t(lang, "kindLabel")}>
                     <FieldSelect
                       className={controlClass}
                       value={kind}
@@ -1156,7 +1155,7 @@ export function SelectorApp() {
                     >
                       <option value="0">
                         {ruleDuty.ok
-                          ? t(lang, "earthRule", { um: earthUmLabel(ruleDuty.umKv) })
+                          ? t(lang, "earthRule", { um: `${formatUmKv(ruleDuty.umKv)} kV` })
                           : t(lang, "earthRuleNone")}
                       </option>
                       {EARTH_UM_OPTIONS.map((u) => (
@@ -1656,7 +1655,7 @@ export function SelectorApp() {
             <p className="sr-only" aria-live="polite">
               {announced}
             </p>
-            <div className="px-5 pt-5 pb-5 sm:px-7 sm:pt-6">
+            <div className={cx("px-5 pt-5 sm:px-8 sm:pt-7", primary ? "plate-hero" : "pb-5")}>
               {!primary ? (
                 <div>
                   <p
@@ -1675,23 +1674,26 @@ export function SelectorApp() {
                 </div>
               ) : (
                 <>
-                  <p className="text-[0.8125rem] font-medium text-[var(--color-accent)]">
-                    {t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")}
-                  </p>
-                  <div className="mt-1.5 flex items-start gap-2">
-                    <p
-                      key={primary.model}
-                      translate="no"
-                      className="plate-type plate-in min-w-0 flex-1 text-[clamp(1.25rem,5.6vw,1.75rem)] leading-[1.2] font-semibold tracking-[-0.02em] text-[var(--color-ink)] lg:text-[clamp(1.5rem,2.3vw,2rem)]"
-                    >
-                      {modelNodes(displayModel(primary.model, lang))}
-                    </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="plate-badge">
+                      <ShieldCheckIcon className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden />
+                      {t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")}
+                    </span>
                     <CopyButton
                       lang={lang}
+                      labelled
                       copied={copiedModel === displayModel(primary.model, lang)}
                       onCopy={() => copyModel(displayModel(primary.model, lang))}
                     />
                   </div>
+                  <p
+                    key={primary.model}
+                    translate="no"
+                    className="plate-type plate-in mt-4 text-[clamp(1.375rem,6vw,1.875rem)] leading-[1.15] font-semibold tracking-[-0.025em] text-[var(--color-ink)] lg:text-[clamp(1.625rem,2.6vw,2.375rem)]"
+                  >
+                    {modelNodes(displayModel(primary.model, lang))}
+                  </p>
+                  <TypeSegments lang={lang} r={primary} shown={displayModel(primary.model, lang)} />
                 </>
               )}
             </div>
@@ -1711,8 +1713,9 @@ export function SelectorApp() {
               </ul>
             ) : null}
 
-            <div className="plate-rule grid sm:grid-cols-[minmax(0,1fr)_13rem]">
+            <div className="grid gap-x-8 gap-y-5 px-5 py-6 sm:grid-cols-[minmax(0,1fr)_14.5rem] sm:px-8">
               <BasisTable
+                hideUm={tapPoint === "neutral"}
                 lang={lang}
                 duty={duty}
                 dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
@@ -1744,7 +1747,7 @@ export function SelectorApp() {
                 <button
                   type="button"
                   onClick={() => setAltsOpen((o) => !o)}
-                  className="flex h-12 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:px-7"
+                  className="flex h-12 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:px-8"
                   aria-expanded={altsOpen}
                 >
                   <span>{t(lang, "otherOpts", { n: alts.length })}</span>
@@ -1874,6 +1877,44 @@ export function SelectorApp() {
   );
 }
 
+/**
+ * The type string read aloud: one cell per coded part, with what it means.
+ * Cut from the shown string, so the domestic spelling keeps its own letters.
+ */
+function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; shown: string }) {
+  const series = SERIES.find((s) => s.id === r.seriesId);
+  const at = shown.lastIndexOf(`-${r.currentA}`);
+  if (at < 0) return null;
+  const head = shown.slice(0, at);
+  const family = head.endsWith(r.phases) ? head.slice(0, -r.phases.length) : head;
+  const cells: Array<{ code: string; says: string }> = [
+    {
+      code: family,
+      says: `${t(lang, series?.vacuum ? "specVac" : "specOil")} · ${t(lang, structureLabelKey(series?.structure))}`,
+    },
+  ];
+  if (family !== head) cells.push({ code: r.phases, says: t(lang, "phases") });
+  cells.push({ code: String(r.currentA), says: "A" });
+  if (r.connection === "Y" || r.connection === "D") {
+    cells.push({
+      code: r.connection,
+      says: t(lang, r.connection === "Y" ? "windingStar" : "windingDelta"),
+    });
+  }
+  cells.push({ code: r.umToken, says: "Um kV" });
+  cells.push({ code: r.tapCode, says: `${t(lang, "positions")} ${r.positions}` });
+  return (
+    <dl className="type-segs" translate="no">
+      {cells.map((c, i) => (
+        <div key={i}>
+          <dt>{c.code}</dt>
+          <dd>{c.says}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 function mountLabelKey(m: SelectInput["mounting"]): string {
   switch (m) {
     case "on_tank":
@@ -1944,7 +1985,7 @@ function ModelSpec({
   if (r.earthPfKv != null && r.earthBilKv != null) {
     items.push({
       key: "specEarth",
-      value: `${r.earthPfKv}${nb}/${nb}${r.earthBilKv}${nb}kV`,
+      value: `Um${nb}${formatUmKv(r.umKv)} · ${r.earthPfKv}${nb}/${nb}${r.earthBilKv}${nb}kV`,
     });
   }
   items.push({
@@ -1957,7 +1998,7 @@ function ModelSpec({
       className={cx(
         "grid grid-cols-2 gap-x-5 gap-y-3",
         hideRatings ? "sm:grid-cols-4" : "sm:grid-cols-3",
-        compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-7 sm:pl-12" : "px-5 py-4 sm:px-7",
+        compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-7 sm:pl-12" : "px-5 py-4 sm:px-8",
       )}
     >
       {items.map((item) => (
