@@ -1743,6 +1743,9 @@ select.row-control {
   .lang-btn {
     width: 2.75rem;
   }
+  .lang-item {
+    height: 2.75rem;
+  }
   .row-back {
     width: 2.75rem;
   }
@@ -1898,13 +1901,6 @@ select.row-control {
   text-align: right;
   font-size: 0.8125rem;
 }
-.basis-mark {
-  align-self: center;
-  margin-left: 0.625rem;
-  height: 1rem;
-  width: 1rem;
-  color: var(--color-ok);
-}
 .basis-row .basis-bar {
   grid-column: 1 / -1;
   display: block;
@@ -1922,8 +1918,7 @@ select.row-control {
 .basis-row.is-over .basis-bar i {
   background: var(--color-danger);
 }
-.basis-row.is-over .basis-pct,
-.basis-row.is-over .basis-mark {
+.basis-row.is-over .basis-pct {
   color: var(--color-danger);
   font-weight: 600;
 }
@@ -1946,31 +1941,85 @@ select.row-control {
   }
 }
 
-/* Language: an icon button; the native menu is laid over it. */
-.lang-btn {
+/* Language: an icon button that opens a small menu. */
+.lang-switch {
   position: relative;
+}
+.lang-btn {
   display: grid;
   height: 2.5rem;
   width: 2.5rem;
   place-items: center;
   border-radius: 9px;
   color: var(--color-ink-2);
-  transition: background-color 150ms ease;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
 }
-.lang-btn:hover {
+.lang-btn:hover,
+.lang-btn[data-open] {
   background-color: #eef1f5;
+  color: var(--color-ink);
 }
-.lang-btn:focus-within {
+.lang-btn:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 1px;
 }
-.lang-btn select {
+.lang-menu {
   position: absolute;
-  inset: 0;
-  height: 100%;
-  width: 100%;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 40;
+  display: flex;
+  min-width: 12.5rem;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0.3125rem;
+  border: 1px solid var(--color-line, #e3e8ef);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px oklch(24% 0.02 258 / 0.06),
+    0 12px 32px oklch(24% 0.02 258 / 0.14);
+  transform-origin: top right;
+  animation: lang-menu-in 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes lang-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+}
+.lang-item {
+  display: flex;
+  height: 2.25rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.625rem 0 0.75rem;
+  border-radius: 8px;
+  color: var(--color-ink-2);
+  font-size: 0.875rem;
+  text-align: left;
   cursor: pointer;
-  opacity: 0;
+}
+.lang-item:hover,
+.lang-item:focus-visible {
+  background: #f1f4f8;
+  color: var(--color-ink);
+  outline: none;
+}
+.lang-item[aria-checked="true"] {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+.lang-tick {
+  height: 1rem;
+  width: 1rem;
+  flex: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lang-menu {
+    animation: none;
+  }
 }
 /* The card clips its corners (overflow hidden), which lets a flex parent
    squash it: opening an alternative cut the card off with no scroll. */
