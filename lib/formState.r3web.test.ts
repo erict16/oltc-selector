@@ -243,9 +243,10 @@ describe("UI-11: an assumed auto-junction Um is said on the card", () => {
     }
   });
 
-  it("the 252 junction keeps its precedent note only; a stated Um has none", () => {
+  it("the 252 junction says its Um is assumed too; a stated Um has no such note", () => {
     const note = /^Autotransformer junction sized at the HV class/;
-    expect(deriveDuty(auto(225, 115)).cautionsEn.some((c) => note.test(c))).toBe(false);
+    // 2026-11-13: 252 used to carry a reference type of another family instead.
+    expect(deriveDuty(auto(225, 115)).cautionsEn.some((c) => note.test(c))).toBe(true);
     const stated = deriveDuty(auto(132, 33, { earthUmKv: 145 }));
     expect(stated.umAssumed).toBe(false);
     expect(stated.cautionsEn.some((c) => note.test(c))).toBe(false);

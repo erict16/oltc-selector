@@ -144,6 +144,18 @@ const NUM = String.raw`\d+(?:\.\d+)?`;
 export function normalizeTenderText(raw: string): string {
   return (
     raw
+      // 2026-11-13: a full-width slash ("110±8×1.25%／10.5 kV") hid the kV ratio
+      // and the LV winding was sized. Full-width forms become ASCII; the
+      // full-width comma, colon and semicolon stay separators.
+      .replace(/[\uFF01-\uFF5E]/g, (c: string) =>
+        "，：；".includes(c) ? c : String.fromCharCode(c.charCodeAt(0) - 0xfee0),
+      )
+      .replace(/\u3000/g, " ")
+      // "110+8x1.25%-8x1.25%" is ±8×1.25 %; uneven counts become +a/−b.
+      .replace(
+        /\+\s*(\d{1,2})\s*[x×*]\s*(\d+(?:[.,]\d+)?)\s*%\s*[-−–]\s*(\d{1,2})\s*[x×*]\s*\2\s*%/g,
+        (_m: string, a: string, st: string, b: string) => (a === b ? `±${a}x${st}%` : `+${a}/-${b}x${st}%`),
+      )
       // 2026-11-07 tender test (US LTC): "±16x5/8%" read 8 % per step. A fraction
       // right before % is one figure.
       .replace(/(?<![\d./])([1-9])\s*\/\s*([2-9]|1[0-6])\s*%/g, (_m: string, a: string, b: string) =>

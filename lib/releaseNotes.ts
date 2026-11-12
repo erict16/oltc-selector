@@ -19,6 +19,33 @@ export type Release = {
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
     {
+      version: "2.3.0",
+      date: "2026-11",
+      groups: [
+        {
+          kind: "new",
+          items: [
+            "页面：把铭牌或招标行粘贴进表单顶部即可自动填表；「复制链接」把当前选型发给同事，刷新也不丢；首次打开按浏览器语言显示。",
+            "命令行：新增 --version，所有参数支持 --flag=value，不带参数显示帮助，拼错的参数给出建议；--json 新增 resolved、line、version，出错时也输出 JSON，选不到型号时退出码为 1。",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "无载：清单里有型号却提示超出目录的情况已修正（800 A、D 接、Um 72.5 kV 现给出 WSLIV-2000D/72.5-18x17E）；没有尺寸字母的清单型号现在可以选到。",
+            "不在样本接线图里的档位码一律带提醒；± 级数须为整数；干式 CVT 最多 9 档，用于 ± 调压范围时会提示它是线性调型号。",
+            "命令行：铭牌行里的全角符号现在能读对（全角斜杠曾按低压侧选型）；不起作用的参数改为报错，不再悄悄忽略。",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "页面：页脚加入更新记录、AI 选型、条款和隐私链接；打印只出结果卡；文字和输入框边线更清晰；读屏会念出没有型号的原因。",
+          ],
+        },
+      ],
+    },
+    {
       version: "2.2.0",
       date: "2026-10",
       groups: [{ kind: "new", items: ["命令行每天最多查一次 npm，有新版本时在输出末尾提示并给出更新命令，不会自动更新；--no-update-check 或 OLTC_NO_UPDATE_CHECK=1 可关闭。"] }],
@@ -224,6 +251,33 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.3.0",
+      date: "2026-11",
+      groups: [
+        {
+          kind: "new",
+          items: [
+            "Page: paste a nameplate or tender line at the top of the form to fill it in; Copy link sends the current selection to a colleague and a reload keeps it; the first visit follows the browser language.",
+            "CLI: new --version, --flag=value for every flag, help when no flag is given, and a suggestion for a mistyped flag; --json adds resolved, line and version, an error is JSON too, and the exit code is 1 when there is no type.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "Off-circuit: a duty no longer reads out of catalogue range while a list row covers it (800 A, D, Um 72.5 kV now gives WSLIV-2000D/72.5-18x17E); list rows with no size letter can be chosen.",
+            "A tap code that is not a brochure diagram always carries its note; ± steps must be a whole number; dry-type CVT stops at 9 positions and says it is a linear-regulation type when given for a ± range.",
+            "CLI: full-width punctuation in a tender line is read correctly (a full-width slash used to size the LV winding); a flag that cannot take effect is an error, not a silent default.",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "Page: footer links to the release notes, AI selection, terms and privacy; printing gives only the result card; text and field borders are easier to see; a screen reader says why there is no type.",
+          ],
+        },
+      ],
+    },
     {
       version: "2.2.0",
       date: "2026-10",
@@ -435,6 +489,33 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.3.0",
+      date: "2026-11",
+      groups: [
+        {
+          kind: "new",
+          items: [
+            "Trang: dán dòng nhãn máy hoặc dòng thầu vào đầu biểu mẫu để tự điền; nút Sao chép liên kết gửi lựa chọn hiện tại cho đồng nghiệp và tải lại trang vẫn giữ; lần mở đầu theo ngôn ngữ trình duyệt.",
+            "CLI: thêm --version, mọi tham số nhận --flag=value, không có tham số thì hiện trợ giúp, gõ sai tham số có gợi ý; --json thêm resolved, line và version, lỗi cũng là JSON, mã thoát là 1 khi không có kiểu.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "Không tải: không còn báo ngoài danh mục khi bảng giá có dòng đáp ứng (800 A, D, Um 72.5 kV nay cho WSLIV-2000D/72.5-18x17E); chọn được các dòng không có chữ kích cỡ.",
+            "Mã nấc không có trong sơ đồ catalogue luôn kèm ghi chú; số nấc ± phải là số nguyên; CVT loại khô tối đa 9 vị trí và có ghi chú là kiểu điều chỉnh tuyến tính khi dùng cho dải ±.",
+            "CLI: đọc đúng dấu toàn chiều rộng trong dòng thầu (dấu gạch chéo toàn chiều rộng từng làm chọn theo cuộn hạ áp); tham số không có tác dụng nay báo lỗi, không còn bị bỏ qua âm thầm.",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "Trang: chân trang có liên kết ghi chú phát hành, chọn bằng AI, điều khoản và quyền riêng tư; in chỉ ra thẻ kết quả; chữ và viền ô rõ hơn; trình đọc màn hình đọc lý do không có kiểu.",
+          ],
+        },
+      ],
+    },
+    {
       version: "2.2.0",
       date: "2026-10",
       groups: [{ kind: "new", items: ["CLI kiểm tra npm tối đa mỗi ngày một lần và, khi có phiên bản mới, in thông báo kèm lệnh cập nhật ở cuối; nó không tự cập nhật. Tắt bằng --no-update-check hoặc OLTC_NO_UPDATE_CHECK=1."] }],
@@ -642,6 +723,33 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.3.0",
+      date: "2026-11",
+      groups: [
+        {
+          kind: "new",
+          items: [
+            "Página: pegue la línea de la placa o de la licitación arriba del formulario para rellenarlo; Copiar enlace envía la selección actual a un colega y se conserva al recargar; la primera visita sigue el idioma del navegador.",
+            "CLI: nuevo --version, --flag=value en todas las opciones, ayuda cuando no se da ninguna opción y una sugerencia para una opción mal escrita; --json añade resolved, line y version, un error también es JSON y el código de salida es 1 cuando no hay tipo.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "Sin carga: ya no se indica fuera de catálogo cuando una fila de la lista cubre el servicio (800 A, D, Um 72.5 kV da ahora WSLIV-2000D/72.5-18x17E); se pueden elegir las filas sin letra de tamaño.",
+            "Un código de tomas que no es un esquema del catálogo siempre lleva su nota; los pasos ± deben ser un número entero; el CVT seco llega a 9 posiciones y avisa de que es un tipo de regulación lineal cuando se da para un rango ±.",
+            "CLI: la puntuación de ancho completo en una línea de licitación se lee bien (una barra de ancho completo dimensionaba el devanado de BT); una opción que no puede tener efecto es un error, no un valor por defecto silencioso.",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "Página: el pie enlaza a las notas de versión, la selección con IA, los términos y la privacidad; al imprimir sale solo la tarjeta de resultado; el texto y los bordes de los campos se ven mejor; el lector de pantalla dice por qué no hay tipo.",
+          ],
+        },
+      ],
+    },
     {
       version: "2.2.0",
       date: "2026-10",
@@ -853,6 +961,33 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.3.0",
+      date: "2026-11",
+      groups: [
+        {
+          kind: "new",
+          items: [
+            "Sayfa: etiket veya ihale satırını formun üstüne yapıştırın, form dolar; Bağlantıyı kopyala geçerli seçimi iş arkadaşınıza gönderir ve sayfa yenilenince kaybolmaz; ilk açılış tarayıcı dilini izler.",
+            "CLI: yeni --version, her bayrak için --flag=value, bayrak verilmezse yardım ve yanlış yazılan bayrak için öneri; --json çıktısına resolved, line ve version eklendi, hata da JSON olarak verilir ve tip yoksa çıkış kodu 1 olur.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "Yüksüz: listede karşılayan bir satır varken artık katalog dışı denmiyor (800 A, D, Um 72.5 kV şimdi WSLIV-2000D/72.5-18x17E verir); boyut harfi olmayan liste satırları seçilebilir.",
+            "Katalog şemasında olmayan kademe kodu her zaman notuyla gelir; ± adım sayısı tam sayı olmalıdır; kuru tip CVT en çok 9 konumludur ve ± aralık için verildiğinde doğrusal ayar tipi olduğunu belirtir.",
+            "CLI: ihale satırındaki tam genişlikli noktalama doğru okunur (tam genişlikli eğik çizgi AG sargısını boyutlandırıyordu); etkisi olamayacak bayrak artık sessizce atlanmaz, hata verir.",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "Sayfa: alt bilgide sürüm notları, yapay zekâ ile seçim, koşullar ve gizlilik bağlantıları var; yazdırma yalnız sonuç kartını verir; metin ve alan kenarlıkları daha net; ekran okuyucu tip olmamasının nedenini söyler.",
+          ],
+        },
+      ],
+    },
+    {
       version: "2.2.0",
       date: "2026-10",
       groups: [{ kind: "new", items: ["CLI, npm'i günde en fazla bir kez kontrol eder ve daha yeni bir sürüm varsa sonunda güncelleme komutuyla bir uyarı yazar; kendini asla güncellemez. --no-update-check veya OLTC_NO_UPDATE_CHECK=1 ile kapatılır."] }],
@@ -1060,6 +1195,33 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.3.0",
+      date: "2026-11",
+      groups: [
+        {
+          kind: "new",
+          items: [
+            "Halaman: tempel baris pelat nama atau baris tender di bagian atas formulir untuk mengisinya; Salin tautan mengirim pilihan saat ini ke rekan dan tetap ada setelah dimuat ulang; kunjungan pertama mengikuti bahasa peramban.",
+            "CLI: --version baru, --flag=value untuk semua opsi, bantuan saat tidak ada opsi, dan saran untuk opsi yang salah ketik; --json menambah resolved, line, dan version, galat juga berupa JSON, dan kode keluar 1 bila tidak ada tipe.",
+          ],
+        },
+        {
+          kind: "fix",
+          items: [
+            "Tanpa beban: tidak lagi disebut di luar katalog saat ada baris daftar yang memenuhi (800 A, D, Um 72.5 kV kini memberi WSLIV-2000D/72.5-18x17E); baris daftar tanpa huruf ukuran dapat dipilih.",
+            "Kode tap yang bukan diagram katalog selalu membawa catatannya; langkah ± harus bilangan bulat; CVT tipe kering paling banyak 9 posisi dan diberi catatan bahwa itu tipe regulasi linear bila dipakai untuk rentang ±.",
+            "CLI: tanda baca lebar penuh pada baris tender dibaca dengan benar (garis miring lebar penuh dulu mengukur belitan TR); opsi yang tidak dapat berlaku kini menjadi galat, tidak lagi diabaikan diam-diam.",
+          ],
+        },
+        {
+          kind: "imp",
+          items: [
+            "Halaman: bagian bawah memuat tautan catatan rilis, pemilihan dengan AI, ketentuan, dan privasi; cetak hanya menghasilkan kartu hasil; teks dan garis tepi kolom lebih jelas; pembaca layar menyebutkan alasan tidak ada tipe.",
+          ],
+        },
+      ],
+    },
     {
       version: "2.2.0",
       date: "2026-10",

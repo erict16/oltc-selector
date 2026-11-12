@@ -1,6 +1,34 @@
 # Changelog
 
-## Unreleased
+## 2.3.0 (2026-11)
+
+Full review, 2026-11-13. Selection:
+
+- Off-circuit: a duty no longer reads "out of catalogue range" while a list row covers it (800 A, D, Um 72.5 now gives `WSLIV-2000D/72.5-18x17E`, as 1001 A did). When the first currents find no list row, every covering current is tried. Where there was an answer before, it is unchanged.
+- Off-circuit: list rows with no size letter can be chosen (900 A, Y, Um 252, 5 positions gives `WSLIV-1000Y/252-6x5`, was the 1200 A row).
+- A tap code that is not a brochure diagram always carries its note. CV2 at ±3 (`10071W`) had none.
+- ± steps must be a whole number of at least 1. ±2.5 gave `10061W`; 0 and a negative fell back to ±8.
+- Dry-type CVT follows its brochure: up to 9 positions (10 now goes to CZ). On a ± range it is still given, as sold, with a note that it is a linear-regulation type.
+- Reactor and off-circuit duties are treated as oil inside the engine, so the page and the CLI cannot disagree.
+- An autotransformer above the catalogue on both sides (765/400 kV) gets a plain refusal; the message used to end with an empty list.
+- The note "Reference: 125 MVA 225/115/35 kV → 3×SHZVI-600/252D" is removed. It printed on every 252 kV autotransformer and named a family other than the answer.
+
+CLI:
+
+- `--line` reads full-width punctuation. A full-width slash (`110±8×1.25%／10.5 kV`) used to size the 10.5 kV winding.
+- `--line` reads `110+8x1.25%-8x1.25%/10.5kV` and full-width brackets. When it cannot read a line it says which part.
+- A flag that cannot take effect is an error: `--series` / `--contact` / `--structure cage|drum` without `--octc`, `--structure combined|compound` or `--vacuum` with `--octc`, `--conn D` with `--tap neutral`, `--pm` and `--pos` that disagree, `--oil` with `--mount dry`, a flag given twice.
+- `--earth-um` on the `--iu` path with no winding voltage is the Um (it was dropped).
+- New: `--version`, `--flag=value` for every flag, help when no flag is given, a suggestion for a mistyped flag.
+- Numbers: a negative or zero value names the flag ("--iu must be greater than 0"); it used to read "Missing value".
+- `--json`: exit code 1 when there is no type; an error is JSON too; new keys `version`, `resolved` (the duty as numbers) and `line`.
+- Notes the page already had: a stated Um below what the winding voltage gives; a Um that is not a class says which class was used; a `--market` with no rule says it is not used.
+- `--iu` with `--kv`: the basis line no longer prints `NaN A`.
+- Three voltages on a line read back as three-winding. Dry-type with the ±8 default says to try `--mid 1`.
+- The update notice is in Chinese and English.
+- npm package: its own short README, a LICENSE file, one version number (`lib/appVersion.ts`).
+
+Page and repository (from "Unreleased"):
 
 - Result: at the line end (D, or Y line end) 开关对地绝缘 / Insulation to earth has the same bar and % as the load rows; it turns red only when over. Still hidden at a star neutral.
 - Language menu: a small card with each language in its own name and a tick on the current one, in place of the browser's plain list.

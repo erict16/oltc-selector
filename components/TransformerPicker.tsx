@@ -171,19 +171,39 @@ function Spot({
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onPick(point);
+      return;
     }
+    // Radio group: the arrows move the choice, and focus goes with it.
+    const step =
+      e.key === "ArrowDown" || e.key === "ArrowRight"
+        ? 1
+        : e.key === "ArrowUp" || e.key === "ArrowLeft"
+          ? -1
+          : 0;
+    if (!step) return;
+    const all = Array.from(
+      e.currentTarget.parentElement?.querySelectorAll<SVGGElement>('[role="radio"]') ?? [],
+    );
+    const next = all[(all.indexOf(e.currentTarget) + step + all.length) % all.length];
+    const to = next?.dataset.point as TapPoint | undefined;
+    if (!next || !to || to === point) return;
+    e.preventDefault();
+    onPick(to);
+    next.focus();
   };
   return (
     <g
       role="radio"
       aria-checked={selected}
       aria-label={label}
-      tabIndex={0}
+      data-point={point}
+      // One tab stop for the group: the picked point.
+      tabIndex={selected ? 0 : -1}
       onClick={() => onPick(point)}
       onKeyDown={key}
       className="tap-spot cursor-pointer outline-none"
     >
-      <rect x={m.x - 22} y={m.y - 22} width={44} height={44} fill="transparent" />
+      <rect x={m.x - 22} y={m.y - 22} width={44} height={44} rx={8} fill="transparent" className="tap-spot-ring" />
       {!selected ? (
         <circle
           cx={m.x}
@@ -368,105 +388,5 @@ export function TransformerSketch({
         );
       })()}
     </svg>
-  );
-}
-
-export function KindToggle({
-  lang,
-  kind,
-  onKind,
-  autoDisabled,
-  small,
-}: {
-  lang: Lang;
-  kind: TransformerKind;
-  onKind: (k: TransformerKind) => void;
-  autoDisabled?: boolean;
-  /** Compact track for a section head. */
-  small?: boolean;
-}) {
-  const opts: Array<{ id: TransformerKind; title: string }> = [
-    { id: "two_winding", title: t(lang, "kindTwo") },
-    { id: "auto", title: t(lang, "kindAuto") },
-  ];
-  return (
-    <div role="radiogroup" aria-label={t(lang, "transformer")} className={cx("ui-track", small && "ui-track-sm shrink-0")}>
-      {opts.map((o) => {
-        const on = o.id === kind;
-        const off = o.id === "auto" && autoDisabled;
-        return (
-          <button
-            key={o.id}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            disabled={off}
-            aria-describedby={off ? "auto-octc-note" : undefined}
-            onClick={() => onKind(o.id)}
-            className={cx("ui-seg", on && "is-on")}
-          >
-            {o.title}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-export function TapList({
-  lang,
-  kind,
-  winding,
-  tapPoint,
-  onTap,
-  offHintId,
-}: {
-  lang: Lang;
-  kind: TransformerKind;
-  winding: WindingConnection;
-  tapPoint: TapPoint;
-  onTap: (p: TapPoint) => void;
-  /** Element that says why a disabled option is off. */
-  offHintId?: string;
-}) {
-  return (
-    <div
-      role="radiogroup"
-      aria-label={t(lang, "tapPoint")}
-      className="divide-y divide-[var(--color-rule)] overflow-hidden rounded-[var(--radius-sm)] border border-[var(--color-rule-2)] bg-white"
-    >
-      {TAP_POINTS_FOR[kind].map((p) => {
-        const on = p === tapPoint;
-        const off = kind === "two_winding" && winding === "delta" && p === "neutral";
-        return (
-          <button
-            key={p}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            disabled={off}
-            aria-describedby={off ? offHintId : undefined}
-            onClick={() => onTap(p)}
-            className={cx(
-              "flex min-h-11 w-full min-w-0 items-center gap-3 px-3 py-2 text-left text-[0.875rem] leading-snug transition-colors duration-150",
-              "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)]",
-              on
-                ? "bg-[color-mix(in_oklch,var(--color-accent)_6%,white)] font-semibold text-[var(--color-ink)]"
-                : "text-[var(--color-ink-2)] hover:bg-[var(--color-field)]",
-              off && "cursor-not-allowed text-[var(--color-caption)] hover:bg-white",
-            )}
-          >
-            <span
-              className={cx(
-                "h-4 w-4 shrink-0 rounded-full border bg-white transition-[border-color,border-width] duration-150",
-                on ? "border-[5px] border-[var(--color-accent)]" : "border-[var(--color-rule-2)]",
-              )}
-              aria-hidden
-            />
-            <span className="min-w-0">{t(lang, `tap_${p}`)}</span>
-          </button>
-        );
-      })}
-    </div>
   );
 }

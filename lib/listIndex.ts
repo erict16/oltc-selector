@@ -194,6 +194,11 @@ export function resolveOctcListKey(model: string): string | null {
       add(stripped.replace(new RegExp(`${sizeNow}$`), sz));
     }
   }
+  // 2026-11-13: 21 of 451 list rows carry no size letter (WSLIV-1000Y/252-6x5).
+  if (sizeNow) {
+    add(model.replace(new RegExp(`${sizeNow}$`), ""));
+    add(stripped.replace(new RegExp(`${sizeNow}$`), ""));
+  }
   for (const c of candidates) {
     if (listRowExists(c)) {
       const hits = lookupOctcRows(parseTypeString(c) ?? parsed);

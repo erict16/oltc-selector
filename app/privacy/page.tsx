@@ -74,12 +74,16 @@ export default function PrivacyPage() {
           <p>
             This site does not use advertising or tracking cookies. The browser
             may store temporary state needed for the page to work. You can clear
-            site data in your browser settings at any time.
+            site data in your browser settings at any time. The values in the
+            form, and a tender line you paste, are kept in the page address
+            (the part after #) so a reload or a shared link opens the same
+            selection. That part is not sent to the server, but it stays in
+            your browser history and goes to anyone you send the link to.
           </p>
         }
         zh={
           <p>
-            本站不使用广告或追踪 Cookie。浏览器可能保存页面运行所需的临时状态；您可随时在浏览器中清除本站数据。
+            本站不使用广告或追踪 Cookie。浏览器可能保存页面运行所需的临时状态；您可随时在浏览器中清除本站数据。表单里的数值以及您粘贴的招标行会保存在网址里（# 之后的部分），这样刷新或分享链接时能打开同一选型。这部分不会发送到服务器，但会留在浏览器历史记录里，也会随链接发给对方。
           </p>
         }
       />

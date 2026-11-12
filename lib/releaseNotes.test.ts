@@ -1,9 +1,20 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { APP_VERSION } from "./appVersion";
 import { LANG_OPTIONS } from "./i18n";
 import { RELEASES } from "./releaseNotes";
+
+/** The page: SelectorApp plus the parts it was split into (2026-11-13). */
+function selectorSource(): string {
+  const dir = resolve(__dirname, "../components/selector");
+  return [
+    resolve(__dirname, "../components/SelectorApp.tsx"),
+    ...readdirSync(dir).sort().map((f) => resolve(dir, f)),
+  ]
+    .map((f) => readFileSync(f, "utf8"))
+    .join("\n");
+}
 
 describe("release notes", () => {
   it("starts with the app version and keeps zh items as full sentences", () => {
@@ -63,19 +74,13 @@ describe("release notes", () => {
   });
 
   it("keeps the Ust volt picker behind ustV == null in SelectorApp", () => {
-    const src = readFileSync(
-      resolve(__dirname, "../components/SelectorApp.tsx"),
-      "utf8",
-    );
+    const src = selectorSource();
     expect(src).toContain('label={t(lang, "stepPercent")}');
     expect(src).toMatch(/ustV == null \?[\s\S]{0,80}label=\{t\(lang, "ust"\)\}/);
   });
 
   it("prints 综合保险 on the insurance row, not only on the primary card", () => {
-    const src = readFileSync(
-      resolve(__dirname, "../components/SelectorApp.tsx"),
-      "utf8",
-    );
+    const src = selectorSource();
     expect(src).toContain("insuranceModel");
     expect(src).toMatch(/insuranceId === r\.model[\s\S]{0,320}allRound/);
   });

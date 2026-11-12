@@ -1,15 +1,30 @@
 import type { Metadata, Viewport } from "next";
-import { LangProvider } from "@/components/LangProvider";
+import { LangProvider, SkipLink } from "@/components/LangProvider";
 // IBM Plex from npm files, bundled at build: the build never fetches
 // Google Fonts (it failed CI on 2026-11-07 and is blocked in mainland
 // China). Chinese uses the system face (PingFang / YaHei).
-import "@fontsource/ibm-plex-sans/400.css";
-import "@fontsource/ibm-plex-sans/500.css";
-import "@fontsource/ibm-plex-sans/600.css";
-import "@fontsource/ibm-plex-sans/700.css";
-import "@fontsource/ibm-plex-mono/400.css";
-import "@fontsource/ibm-plex-mono/500.css";
-import "@fontsource/ibm-plex-mono/600.css";
+// Latin, Latin Extended (tr) and Vietnamese only: no Cyrillic or Greek text here.
+import "@fontsource/ibm-plex-sans/latin-400.css";
+import "@fontsource/ibm-plex-sans/latin-ext-400.css";
+import "@fontsource/ibm-plex-sans/vietnamese-400.css";
+import "@fontsource/ibm-plex-sans/latin-500.css";
+import "@fontsource/ibm-plex-sans/latin-ext-500.css";
+import "@fontsource/ibm-plex-sans/vietnamese-500.css";
+import "@fontsource/ibm-plex-sans/latin-600.css";
+import "@fontsource/ibm-plex-sans/latin-ext-600.css";
+import "@fontsource/ibm-plex-sans/vietnamese-600.css";
+import "@fontsource/ibm-plex-sans/latin-700.css";
+import "@fontsource/ibm-plex-sans/latin-ext-700.css";
+import "@fontsource/ibm-plex-sans/vietnamese-700.css";
+import "@fontsource/ibm-plex-mono/latin-400.css";
+import "@fontsource/ibm-plex-mono/latin-ext-400.css";
+import "@fontsource/ibm-plex-mono/vietnamese-400.css";
+import "@fontsource/ibm-plex-mono/latin-500.css";
+import "@fontsource/ibm-plex-mono/latin-ext-500.css";
+import "@fontsource/ibm-plex-mono/vietnamese-500.css";
+import "@fontsource/ibm-plex-mono/latin-600.css";
+import "@fontsource/ibm-plex-mono/latin-ext-600.css";
+import "@fontsource/ibm-plex-mono/vietnamese-600.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,10 +36,6 @@ export const metadata: Metadata = {
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : "http://127.0.0.1:3000",
   ),
-  icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    shortcut: "/favicon.svg",
-  },
 };
 
 export const viewport: Viewport = {
@@ -40,14 +51,9 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className="antialiased">
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-[var(--radius-sm)] focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:shadow"
-        >
-          Skip to content
-        </a>
         {/* Document scrolls. main is a column so the selector can fill the viewport. */}
         <LangProvider initial="zh">
+          <SkipLink />
           <div className="flex min-h-dvh flex-col">
             <main id="main" className="flex min-w-0 flex-1 flex-col">
               {children}

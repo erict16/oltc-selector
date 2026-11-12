@@ -210,7 +210,11 @@ function seriesTap(s: SeriesDef, tap: ResolvedTap, reg: Regulation): ResolvedTap
   if (pitch == null) return null;
   const tapCode = buildTapCode({ pitch, positions: tap.positions, mid: tap.mid, regulation: reg });
   // The guide lists the pitch-10 small ladder (10131W, 10151W, 10171W).
-  const guideRow = pitch === 10 && tap.mid === 1 && reg === "reversing";
+  const guideRow =
+    pitch === 10 &&
+    tap.mid === 1 &&
+    reg === "reversing" &&
+    (tap.positions === 13 || tap.positions === 15 || tap.positions === 17 || tap.positions === 19);
   return { ...tap, pitch, tapCode, standard: guideRow };
 }
 
@@ -227,8 +231,8 @@ function compoundCoversAcrossTap(
   const needPf = input.acrossTapPfKv ?? 0;
   if (needBil <= 0 && needPf <= 0) return true;
   // Conservative compound internal a-distance (CV/CV2 family)
-  const aLi = s.id === "cv2" ? 200 : 200;
-  const aPf = s.id === "cv2" ? 50 : 50;
+  const aLi = 200;
+  const aPf = 50;
   return aLi + 0.5 >= needBil && aPf + 0.5 >= needPf;
 }
 
@@ -237,7 +241,7 @@ function formatUmToken(
   size: string,
   usesSelectorSize: boolean,
 ): string {
-  const umStr = Number.isInteger(um) ? String(um) : String(um);
+  const umStr = String(um);
   if (!usesSelectorSize || !size) return umStr;
   return `${umStr}${size}`;
 }
@@ -867,8 +871,41 @@ export function selectOltc(input: SelectInput): SelectOutput {
     errorsZh.push("档位数须为不小于 2 的整数。");
   }
 
+  // 2026-11-13: a NaN stress read as "above every selector grade".
+  for (const [name, v] of [
+    ["Across-tap LI", input.acrossTapBilKv],
+    ["Across-tap AC", input.acrossTapPfKv],
+    ["Earth LI", input.bilKv],
+    ["Earth AC", input.pfKv],
+  ] as const) {
+    if (v != null && !(Number.isFinite(v) && v >= 0)) {
+      errorsEn.push(`${name} must be a number ≥ 0 (kV).`);
+      errorsZh.push(`${name} 须为 ≥ 0 的数字（kV）。`);
+    }
+  }
+  // 2026-11-13: ±2.5 gave 10061W and ±0 / NaN / −3 fell back to ±8 unseen.
+  if (
+    input.plusMinusSteps != null &&
+    !(Number.isInteger(input.plusMinusSteps) && input.plusMinusSteps >= 1)
+  ) {
+    errorsEn.push("± steps must be a whole number of at least 1.");
+    errorsZh.push("± 级数须为不小于 1 的整数。");
+  }
+
   if (errorsEn.length) {
     return { ok: false, results: [], errorsEn, errorsZh };
+  }
+
+  // 2026-11-13: one place for the medium rule. Off-circuit switches and the
+  // reactor switch (HWDK) are oil; the page and the CLI each patched this, and
+  // a caller that did not got "no family" for a reactor on the vacuum default.
+  if (input.dutyKind === "octc" || input.mounting === "reactor") {
+    input = {
+      ...input,
+      medium: "oil",
+      preferVacuum: false,
+      ...(input.dutyKind === "octc" ? { octcSeries: input.octcSeries ?? "auto" } : {}),
+    };
   }
 
   // Earth BIL / PF above the Um class is a higher Um, not a stronger grade.
@@ -970,8 +1007,25 @@ export function selectOltc(input: SelectInput): SelectOutput {
   // ahead of WSL @72.5). When that finds nothing, a second pass takes the Ums
   // the cage and drum locks use: the list has only 5 WSL rows at 40.5.
   const octcWidePass = wantOctc && (wantStruct ?? "auto") === "auto";
-  for (const wide of octcWidePass ? [false, true] : [false]) {
-    if (wide && results.length) break;
+  // 2026-11-13: the list gates every OCTC type. The first passes try the two
+  // smallest covering currents (and the next step), as before; only when they
+  // find nothing do the last passes walk every covering current. Walking all
+  // at once put WSLIV-1600Y/145 ahead of the 600 A row one class up.
+  const passes: Array<{ wide: boolean; all: boolean }> = !wantOctc
+    ? [{ wide: false, all: false }]
+    : octcWidePass
+      ? [
+          { wide: false, all: false },
+          { wide: true, all: false },
+          { wide: false, all: true },
+          { wide: true, all: true },
+        ]
+      : [
+          { wide: false, all: false },
+          { wide: false, all: true },
+        ];
+  for (const { wide, all } of passes) {
+    if ((wide || all) && results.length) break;
     for (const s of candidates) {
       // 2026-11-07: per family, on the contacts it has.
       const tap = isOctcSeries(s) ? baseTap : seriesTap(s, baseTap, input.regulation);
@@ -1027,7 +1081,12 @@ export function selectOltc(input: SelectInput): SelectOutput {
         // Two covering ratings, plus the next catalogue step in this family.
         // The later family stays in the full list for replay. 综合保险 picks
         // it only when this current step does not raise the tight limit.
-        const currentsToEmit = covering.slice(0, 2);
+        // 2026-11-13: an OCTC type exists only as a list row. Two currents
+        // missed WSLIV-2000D/72.5 for 800 A; the fallback pass walks every
+        // covering current and stops after three list rows.
+        const listGated = isOctcSeries(s) && all;
+        let listRowsEmitted = 0;
+        const currentsToEmit = listGated ? [...covering] : covering.slice(0, 2);
         const topEmitted = Math.max(...currentsToEmit);
         const stepUpCurrent = [...phaseCurrents]
           .sort((a, b) => a - b)
@@ -1042,6 +1101,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
         }
 
         for (const current of currentsToEmit) {
+        if (listGated && listRowsEmitted >= 3) break;
         const octc = isOctcSeries(s);
         const contact = octc ? octcContactCode(input, s.id) : "";
         if (octc && !contact) continue;
@@ -1182,6 +1242,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
 
         if (seen.has(finalModel)) continue;
         seen.add(finalModel);
+        listRowsEmitted += 1;
 
         const modelWithMdu = mduStr ? `${finalModel}+${mduStr}` : finalModel;
         const score = adequacyScore(
@@ -1213,6 +1274,12 @@ export function selectOltc(input: SelectInput): SelectOutput {
           cautionsZh.push(
             `分接代码 ${tap.tapCode} 不在样本图 3-3 标准接线内，须工程确认接线。`,
           );
+        }
+        // 2026-11-13: the CVT brochure is linear only (…-0909). A ± range on a
+        // dry transformer still gets it, as sold, but says so.
+        if (s.id === "cvt" && input.regulation !== "linear") {
+          cautionsEn.push("CVT is a linear-regulation type (brochure). Engineering must confirm it for this range.");
+          cautionsZh.push("CVT 样本只有线性调，此调压范围请工程确认。");
         }
         if (!octc) {
           // 厂家选型培训 (JL 2024-05): these go to technical special review.
@@ -2006,271 +2073,3 @@ export function optionsWithInsurance(
   const step = stepUpOf(primary, results);
   return step ? [step].slice(0, n) : [];
 }
-
-/** Regression helpers + training-case fixtures */
-export const FIXTURES = {
-  ueHwv: {
-    input: {
-      mounting: "on_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "Y" as const,
-      throughCurrentA: 400,
-      umKv: 72.5,
-      stepVoltageV: 1500,
-      regulation: "reversing" as const,
-      positions: 19,
-      midPositions: 3 as const,
-      pitch: 10 as const,
-      mdu: "none" as const,
-    },
-    expectModel: "HWVIII-400Y/72.5-10193W",
-  },
-  wilsonShzv: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "Y" as const,
-      throughCurrentA: 1000,
-      umKv: 170,
-      stepVoltageV: 2000,
-      regulation: "reversing" as const,
-      positions: 23,
-      midPositions: 3 as const,
-      pitch: 12 as const,
-      selectorSize: "D" as const,
-      mdu: "none" as const,
-    },
-    expectContains: "SHZVIII-1000Y/170D-12233W",
-  },
-  cv2NoSelectorSize: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "Y" as const,
-      throughCurrentA: 350,
-      umKv: 40.5,
-      stepVoltageV: 1000,
-      regulation: "reversing" as const,
-      positions: 19,
-      mdu: "none" as const,
-    },
-  },
-  /** UI chips: 66 / 110 star → 72.5; 220 star → 252. Fixtures keep explicit Um for the fill-Um path. */
-  preset66: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "Y" as const,
-      throughCurrentA: 350,
-      umKv: 72.5,
-      stepVoltageV: 1000,
-      regulation: "reversing" as const,
-      plusMinusSteps: 8,
-      positions: 19,
-      midPositions: 3 as const,
-      pitch: 10 as const,
-      mdu: "none" as const,
-    },
-    expectModel: "CV2III-350Y/72.5-10193W",
-  },
-  preset110: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "Y" as const,
-      throughCurrentA: 400,
-      umKv: 126,
-      stepVoltageV: 1400,
-      regulation: "reversing" as const,
-      plusMinusSteps: 8,
-      positions: 19,
-      midPositions: 3 as const,
-      pitch: 10 as const,
-      mdu: "none" as const,
-    },
-    expectModel: "CV2III-600Y/126-10193W",
-  },
-  preset220: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "Y" as const,
-      throughCurrentA: 500,
-      umKv: 252,
-      stepVoltageV: 1800,
-      regulation: "reversing" as const,
-      plusMinusSteps: 8,
-      positions: 19,
-      midPositions: 3 as const,
-      pitch: 10 as const,
-      mdu: "none" as const,
-    },
-    expectModel: "CM2III-500Y/252D-10193W",
-  },
-  /** Training case 1 — 10 MVA 33 kV Δ coarse-fine → CV2-350 not SHZV */
-  case1Cv2: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "D" as const,
-      throughCurrentA: 112.24,
-      umKv: 40.5,
-      stepVoltageV: 412.5,
-      regulation: "coarse_fine" as const,
-      positions: 19,
-      midPositions: 3 as const,
-      pitch: 10 as const,
-      mdu: "none" as const,
-    },
-    expectModel: "CV2III-350D/40.5-10193G",
-  },
-  /** Training case 2 — 489.7 A stays on CM2-500; 600 is the insurance step. Grade C from across-tap BIL 285. */
-  case2Cm2: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "Y" as const,
-      throughCurrentA: 489.7,
-      umKv: 72.5,
-      stepVoltageV: 1195.2,
-      regulation: "reversing" as const,
-      positions: 19,
-      midPositions: 3 as const,
-      pitch: 10 as const,
-      bilKv: 350,
-      pfKv: 140,
-      acrossTapBilKv: 285,
-      acrossTapPfKv: 65,
-      mdu: "none" as const,
-    },
-    expectModel: "CM2III-500Y/72.5C-10193W",
-  },
-  /** Training case 5 — CV2-600D/145 */
-  /**
-   * Training case 5 — CV2 @ 145 kV Δ, 12-contact path.
-   * Brochure: max Ust 1500 V @ 12 contacts (not 1650). Use 1500 so CV2 remains valid.
-   */
-  case5Cv2_145: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "D" as const,
-      throughCurrentA: 346.34,
-      umKv: 145,
-      stepVoltageV: 1500,
-      regulation: "reversing" as const,
-      positions: 23,
-      midPositions: 3 as const,
-      pitch: 12 as const,
-      acrossTapBilKv: 200,
-      acrossTapPfKv: 50,
-      mdu: "none" as const,
-    },
-    expectModel: "CV2III-350D/145-12233W",
-  },
-  /**
-   * Training sheet: 220 MVA Δ, I≈626 → 3×CM2I-800.
-   * Combined III is star-point only — do not emit SHZVIII-1000D.
-   */
-  case7Cm2I800: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "D" as const,
-      throughCurrentA: 626.01,
-      umKv: 72.5,
-      stepVoltageV: 1650,
-      regulation: "reversing" as const,
-      positions: 19,
-      midPositions: 1 as const,
-      pitch: 10 as const,
-      acrossTapBilKv: 320,
-      acrossTapPfKv: 80,
-      mdu: "none" as const,
-    },
-    expectModel: "3xCM2I-800/72.5C-10191W",
-  },
-  /**
-   * 2025 shipment volume anchors (sales reference year=2025).
-   * CV2-600D/145 is among top vacuum compound models.
-   */
-  sales2025Cv2_145: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "D" as const,
-      throughCurrentA: 350,
-      umKv: 145,
-      stepVoltageV: 1500,
-      regulation: "reversing" as const,
-      positions: 19,
-      midPositions: 3 as const,
-      pitch: 10 as const,
-      mdu: "none" as const,
-    },
-    expectModel: "CV2III-350D/145-10193W",
-  },
-  /**
-   * 2025: CM2-500 before SHZV when I≤500 and Um 72.5.
-   * Ust 2200 V exceeds CV2 step envelope → combined path; CM2 beats SHZV.
-   */
-  sales2025Cm2_500: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "Y" as const,
-      throughCurrentA: 480,
-      umKv: 72.5,
-      stepVoltageV: 2200,
-      regulation: "reversing" as const,
-      positions: 19,
-      midPositions: 3 as const,
-      pitch: 10 as const,
-      mdu: "none" as const,
-    },
-    expectContains: "CM2III-500Y/72.5",
-  },
-  /** 2025: SHZVG when III current > SHZV 1000 */
-  sales2025Shzvg: {
-    input: {
-      mounting: "in_tank" as const,
-      medium: "oil_vacuum" as const,
-      preferVacuum: true,
-      phases: "III" as const,
-      connection: "Y" as const,
-      throughCurrentA: 1200,
-      umKv: 72.5,
-      stepVoltageV: 2000,
-      regulation: "reversing" as const,
-      positions: 23,
-      midPositions: 3 as const,
-      pitch: 12 as const,
-      mdu: "none" as const,
-    },
-    expectContains: "SHZVGIII-1300Y",
-  },
-};
