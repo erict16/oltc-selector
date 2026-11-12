@@ -2,11 +2,13 @@
 
 ## Unreleased
 
+- Result: at the line end (D, or Y line end) 开关对地绝缘 / Insulation to earth has the same bar and % as the load rows; it turns red only when over. Still hidden at a star neutral.
+- Language menu: a small card with each language in its own name and a tick on the current one, in place of the browser's plain list.
 - Repository: `docs/replay` (sold-order sheets with buyer names and serials) is no longer tracked; it stays on the maintainer's disk and is git-ignored. The tests that replay it skip when it is absent.
 - Notes: buyer names, order counts and "sold" wording are gone from the page and the CLI. The technical rule stays.
 - Notes: "OS" is written out once as 订货规范（OS） / order specification (OS), in all six languages.
 - Chinese page: a note names families as the type above it does (VCV-G, VCM, CHVT), not CV2 / CM2 / SHZVG.
-- Result: the badge reads 余量充足 / With margin, or 接近额定上限 / Close to the rating (was 综合保险方案 / 满足最低要求方案). Beside a type close to its rating, the roomier type is shown open, not folded.
+- Result: the badge reads 安全选项 / Safe choice, or 接近额定上限 / Close to the rating (was 综合保险方案 / 满足最低要求方案). Beside a type close to its rating, the roomier type is shown open, not folded.
 - Result: with no type, the card says only why; the assumed-Um note no longer shows there.
 - Insulation to earth picked below what the winding voltage gives now carries a warning (110 kV neutral at 40.5 kV gave a type without a word).
 - Off-circuit: no arc row in the form or the result, the sketch says OCTC, and the type reads WSL + IV (wiring) instead of one cell "WSLIV".
