@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { useAppLang } from "@/components/LangProvider";
 import { copyText } from "@/lib/clipboard";
-import { setAppLang } from "@/lib/i18n";
+import { setAppLang, t } from "@/lib/i18n";
 import { agentGuide } from "@/lib/i18nAgents";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -67,7 +67,7 @@ export function AgentsGuide() {
           <ArrowLeftIcon className="h-4 w-4 shrink-0" aria-hidden />
           {c.back}
         </Link>
-        <LangSwitcher lang={lang} onChange={setAppLang} ariaLabel="Language" />
+        <LangSwitcher lang={lang} onChange={setAppLang} ariaLabel={t(lang, "langAria")} />
       </div>
 
       <h1 className="guide-title font-[family-name:var(--font-display)] text-[2.05rem] font-semibold leading-[1.18] text-[var(--color-ink)] sm:text-[2.35rem]">

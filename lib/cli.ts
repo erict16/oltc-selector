@@ -1,3 +1,4 @@
+import { APP_VERSION } from "./appVersion";
 import { parseDecimal } from "./decimal";
 import { octcRoman, optionsWithInsurance, selectOltc } from "./engine";
 import {
@@ -8,10 +9,11 @@ import {
   type TransformerKind,
   type WindingConnection,
 } from "./transformer";
-import { lookupByPositions, parseTapRange, plusMinusFromPositions } from "./tapCode";
+import { lookupByPositions, parseTapRange, plusMinusFromPositions, resolveTapFields } from "./tapCode";
 import {
   defaultRegulationForRange,
   geometryForRange,
+  normalizeTenderText,
   parseTenderLine,
   tenderLineSettings,
   type TenderLine,
@@ -61,6 +63,7 @@ export type CliArgs = {
   phases: PhaseCode;
   json: boolean;
   help: boolean;
+  version?: boolean;
   /** --line: the tender line as read. Flags given beside it win. */
   line?: TenderLine;
   /** Minus steps of an asymmetric range (+4-12): sizes the lowest-tap current. */
@@ -82,6 +85,8 @@ export type CliArgs = {
   lineRangeAssumed?: boolean;
   /** flags the user actually passed; everything else is a silent default */
   given: Set<string>;
+  /** Flag names as typed on the command line (not what --line filled in). */
+  typed?: Set<string>;
 };
 
 export class CliError extends Error {
@@ -91,9 +96,27 @@ export class CliError extends Error {
   }
 }
 
-function num(raw: string, flag: string): number {
+type Bound = "positive" | "nonNegative" | "any";
+
+function num(raw: string, flag: string, bound: Bound = "positive"): number {
+  if (bound !== "any" && /^\s*-\s*[\d.]/.test(raw)) {
+    throw new CliError(
+      bound === "positive"
+        ? `${flag} must be greater than 0 (got ${raw})`
+        : `${flag} must not be negative (got ${raw})`,
+    );
+  }
   const p = parseDecimal(raw);
-  if (p.ok) return p.value;
+  if (p.ok) {
+    // 2026-11-13: --iu -400 used to answer "Missing value for --iu".
+    if (bound === "positive" && !(p.value > 0)) {
+      throw new CliError(`${flag} must be greater than 0 (got ${raw})`);
+    }
+    if (bound === "nonNegative" && p.value < 0) {
+      throw new CliError(`${flag} must not be negative (got ${raw})`);
+    }
+    return p.value;
+  }
   if (p.reason === "ambiguous") {
     // 1,200 used to become 1.2 A.
     throw new CliError(
@@ -103,7 +126,72 @@ function num(raw: string, flag: string): number {
   throw new CliError(`Invalid number for ${flag}: ${raw}`);
 }
 
-export function parseCliArgs(argv: string[]): CliArgs {
+/** Every flag the parser reads, for "did you mean". */
+const KNOWN_FLAGS = [
+  "--help", "--version", "--json", "--lang", "--no-update-check", "--octc", "--oil",
+  "--vacuum", "--iu", "--imax", "--os-imax", "--market", "--across-li", "--across-ac",
+  "--mva", "--kv", "--um", "--ust", "--step-pct", "--k", "--conn", "--connection",
+  "--kind", "--auto", "--tap", "--winding", "--hv", "--mv", "--earth-um", "--reg",
+  "--pm", "--positions", "--pos", "--structure", "--series", "--mount", "--contact",
+  "--phases", "--line", "--nameplate", "--minus", "--range", "--mid", "--duty",
+];
+
+/** Flags that take no value: a repeat is harmless. */
+const SWITCH_FLAGS = new Set([
+  "--help", "-h", "--version", "-v", "-V", "--json", "--no-update-check", "--octc",
+  "--oil", "--vacuum", "--auto",
+]);
+
+/** Two spellings of one flag. */
+const FLAG_ALIAS: Record<string, string> = {
+  "--connection": "--conn",
+  "--positions": "--pos",
+  "--nameplate": "--line",
+};
+
+function editDistance(a: string, b: string): number {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array<number>(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0]![j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      d[i]![j] = Math.min(
+        d[i - 1]![j]! + 1,
+        d[i]![j - 1]! + 1,
+        d[i - 1]![j - 1]! + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+  }
+  return d[a.length]![b.length]!;
+}
+
+function unknownFlag(a: string): CliError {
+  const name = a.replace(/=.*$/s, "");
+  const best = KNOWN_FLAGS.map((f) => [f, editDistance(name, f)] as const).sort((x, y) => x[1] - y[1])[0];
+  const hint = best && best[1] <= 2 ? ` Did you mean ${best[0]}?` : "";
+  return new CliError(`Unknown flag: ${name}.${hint} Run oltc --help for the list.`);
+}
+
+/** `--iu=400` → `--iu 400`. A --line value is never split. */
+function splitEquals(argv: string[]): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i]!;
+    const prev = argv[i - 1];
+    const m = /^(--[a-z][a-z-]*)=(.*)$/s.exec(a);
+    if (m && SWITCH_FLAGS.has(m[1]!) && prev !== "--line" && prev !== "--nameplate") {
+      throw new CliError(`${m[1]} takes no value`);
+    }
+    if (prev === "--line" || prev === "--nameplate" || !m || /^--(line|nameplate|lang)$/.test(m[1]!)) {
+      out.push(a);
+    } else {
+      out.push(m[1]!, m[2]!);
+    }
+  }
+  return out;
+}
+
+export function parseCliArgs(rawArgv: string[]): CliArgs {
+  const argv = splitEquals(rawArgv);
   const envLang = typeof process !== "undefined" ? process.env?.OLTC_LANG?.toLowerCase() : undefined;
   const out: CliArgs = {
     ...(envLang === "en" ? { lang: "en" as const } : {}),
@@ -124,16 +212,25 @@ export function parseCliArgs(argv: string[]): CliArgs {
 
   const take = (i: number, flag: string): [string, number] => {
     const v = argv[i + 1];
-    if (v == null || v.startsWith("-")) {
+    // A negative figure is a value (the range check names it), not a flag.
+    if (v == null || (v.startsWith("-") && !/^-[\d.]/.test(v))) {
       throw new CliError(`Missing value for ${flag}`);
     }
     return [v, i + 1];
   };
+  const seenFlags = new Set<string>();
 
   let lineRaw: string | null = null;
   let rangeRaw: string | null = null;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]!;
+    // 2026-11-13: "--iu 400 … --iu 500" used to take the last one unseen.
+    if (a.startsWith("--") && !SWITCH_FLAGS.has(a)) {
+      const name = a.replace(/=.*$/s, "");
+      const key = FLAG_ALIAS[name] ?? name;
+      if (seenFlags.has(key)) throw new CliError(`${key} is given twice`);
+      seenFlags.add(key);
+    }
     // --line=… keeps a pasted line that starts with a dash.
     const eq = a.match(/^--(line|nameplate)=(.*)$/s);
     if (eq) {
@@ -143,6 +240,10 @@ export function parseCliArgs(argv: string[]): CliArgs {
     }
     if (a === "-h" || a === "--help") {
       out.help = true;
+      continue;
+    }
+    if (a === "--version" || a === "-v" || a === "-V") {
+      out.version = true;
       continue;
     }
     if (a === "--json") {
@@ -210,7 +311,8 @@ export function parseCliArgs(argv: string[]): CliArgs {
       const key = a === "--across-li" ? "acrossLi" : "acrossAc";
       out.given.add(key);
       const [v, n] = take(i, a);
-      out[key] = num(v, a);
+      // 0 means not stated, as before.
+      out[key] = num(v, a, "nonNegative");
       i = n;
       continue;
     }
@@ -238,7 +340,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
     if (a === "--ust") {
       out.given.add("ust");
       const [v, n] = take(i, a);
-      out.ust = num(v, a);
+      out.ust = num(v, a, "nonNegative");
       i = n;
       continue;
     }
@@ -331,13 +433,17 @@ export function parseCliArgs(argv: string[]): CliArgs {
       out.given.add("pm");
       const [v, n] = take(i, a);
       out.pm = num(v, a);
+      // 2026-11-13: --pm 8.5 gave 10181W and --pm 0 printed "±0".
+      if (!Number.isInteger(out.pm) || out.pm < 1) {
+        throw new CliError("--pm must be a whole number of at least 1");
+      }
       i = n;
       continue;
     }
     if (a === "--positions" || a === "--pos") {
       out.given.add("positions");
       const [v, n] = take(i, a);
-      out.positions = num(v, a);
+      out.positions = num(v, a, "nonNegative");
       // 2026-11-04 r2 ORDERS-9: --pos 1 gave tap code 10010 (no regulation).
       if (!Number.isInteger(out.positions) || out.positions < 2) {
         throw new CliError(`${a} must be a whole number of at least 2`);
@@ -429,7 +535,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
     if (a === "--minus") {
       out.given.add("minus");
       const [v, n] = take(i, a);
-      const m = num(v, a);
+      const m = num(v, a, "nonNegative");
       if (!(m >= 0) || !Number.isInteger(m)) throw new CliError(`--minus must be a whole number of steps`);
       out.minus = m;
       i = n;
@@ -459,8 +565,9 @@ export function parseCliArgs(argv: string[]): CliArgs {
       i = n;
       continue;
     }
-    throw new CliError(`Unknown flag: ${a}`);
+    throw unknownFlag(a);
   }
+  out.typed = seenFlags;
   if (rangeRaw != null) {
     const r = parseTapRange(rangeRaw);
     if (!r) throw new CliError(`--range must look like +4/-12 or +4/-12x1.25%`);
@@ -542,8 +649,18 @@ function applyTenderLine(out: CliArgs, raw: string): void {
     );
   }
   if (!t || !r || !r.ok) {
+    const text = normalizeTenderText(raw);
+    const hasMva = /\d\s*(?:MVA|kVA)/i.test(text);
+    const hasKv = /\d\s*kV(?!A)/i.test(text);
+    const what = !hasMva && !hasKv
+      ? "MVA and kV"
+      : !hasMva
+        ? "the MVA rating"
+        : !hasKv
+          ? "the kV ratio"
+          : "the kV ratio and range";
     throw new CliError(
-      `Could not read MVA and kV from --line: ${raw}. Give --mva/--kv (or --hv/--mv) instead.`,
+      `Could not read ${what} from --line: ${raw}. Write it like "25MVA 110±8x1.25%/10.5kV YNd11", or give --mva/--kv (or --hv/--mv) instead.`,
     );
   }
   const s = r.s;
@@ -597,7 +714,7 @@ Flags:
                      Beside --mva, --imax means --os-imax.
   --os-imax A        Capacity path: the OS / maker Imax at the lowest tap.
                      Replaces the full-range current, floored at rated I.
-  --line "text"      Tender line: MVA, kV ratio with ±N×x%, vector group.
+  --line "text"      (also --nameplate) Tender line: MVA, kV ratio with ±N×x%, vector group.
                      Reads autotransformer from YNa0 / auto / OSFPSZ, delta
                      line end from D, star neutral from Y (asked in 假定).
                      Percent ranges (+0/-30%), single-phase, coarse/fine and
@@ -636,19 +753,26 @@ Flags:
   --minus N          Minus steps for the lowest-tap current (beside --pm/--pos).
   --mid 1|3          Mid positions of the W/G diagram, when Fig. 3-3 has the pair.
   --pos, --positions Linear / OCTC positions.
-  --octc             Off-circuit (无载). Default on-load.
+  --octc             Off-circuit (无载). Default on-load. (--duty octc|oltc is the same.)
   --structure        auto|combined|compound|cage|drum  (组合式/复合式/笼式/鼓式)
   --series           II|IV|V|VI|VII|VIII  OCTC wiring. Default auto is linear IV (Y and D).
   --mount            in-tank|on-tank|dry|reactor. Default in-tank. Reactor is oil (HWDK).
   --oil / --vacuum   Switching medium. Default vacuum (on-load).
   --contact          OCTC contact e.g. 6x5.
   --phases           I|II|III. Default III.
-  --json             Machine-readable result (still no prices).
+  --json             Machine-readable result (still no prices). Keys: ok, version,
+                     model, why, alts, cautions, resolved (the duty as numbers),
+                     line, basis, umChoices, assumptions, errors. Errors are JSON too.
   --lang en|zh       Output language (default zh; OLTC_LANG=en also works).
+  --version, -v      Print the version.
   --no-update-check  Skip the daily check for a newer version. The check only
                      prints a notice on stderr; it never installs anything.
                      OLTC_NO_UPDATE_CHECK=1 or CI=1 also turn it off.
-  -h, --help         This text.
+  -h, --help         This text. Also shown when no flag is given.
+
+Every flag with a value also takes --flag=value. A flag that cannot take effect (--series
+without --octc, --conn D with --tap neutral, a flag given twice) is an error.
+Exit code: 0 a type was found, 1 no type or bad input.
 
 Defaults match the web first paint: on-load, in-tank vacuum, structure auto,
 ±8 mid-3 reversing. Omitting --octc and --structure auto is minimum-adequate.
@@ -749,7 +873,16 @@ function iuHasVoltage(args: CliArgs): boolean {
  * the 220 kV combined-only rule, the 330 kV grade step and the TR practice see
  * the winding. Null on an --iu path with no voltage.
  */
+const dutyCache = new WeakMap<CliArgs, DutyBasis | null>();
+
 export function cliDuty(args: CliArgs): DutyBasis | null {
+  if (dutyCache.has(args)) return dutyCache.get(args)!;
+  const d = computeCliDuty(args);
+  dutyCache.set(args, d);
+  return d;
+}
+
+function computeCliDuty(args: CliArgs): DutyBasis | null {
   if (args.mva == null && !iuHasVoltage(args)) return null;
   const auto = args.kind === "auto";
   if (auto) {
@@ -793,7 +926,62 @@ export function cliDuty(args: CliArgs): DutyBasis | null {
   });
 }
 
+/**
+ * 2026-11-13: flags that used to be dropped without a word. A flag that
+ * cannot take effect is an error, so a wrong assumption never hides behind
+ * a confident type string.
+ */
+function checkConflicts(args: CliArgs): void {
+  const g = (k: string) => args.given.has(k);
+  if (!args.octc) {
+    if (g("series")) throw new CliError("--series is off-circuit wiring: add --octc");
+    if (g("contact")) throw new CliError("--contact is an off-circuit contact: add --octc");
+    if (args.structure === "cage" || args.structure === "drum") {
+      throw new CliError(
+        `--structure ${args.structure} is off-circuit: add --octc (on-load takes combined or compound)`,
+      );
+    }
+  } else {
+    if (args.structure === "combined" || args.structure === "compound") {
+      throw new CliError(
+        `--structure ${args.structure} is on-load only: with --octc use cage or drum`,
+      );
+    }
+    if (g("medium") && args.vacuum) {
+      throw new CliError("--vacuum does not apply with --octc (off-circuit switches do not break current)");
+    }
+  }
+  if (g("medium") && args.oil && args.mount === "dry_type") {
+    throw new CliError("--oil does not apply with --mount dry");
+  }
+  if (g("medium") && args.vacuum && args.mount === "reactor") {
+    throw new CliError("--vacuum does not apply with --mount reactor (the reactor switch is oil)");
+  }
+  // Both typed: a tap point that --line read does not make a typed --conn an error.
+  if (args.typed?.has("--conn") && args.typed.has("--tap") && args.conn === "D" && args.tap === "neutral") {
+    throw new CliError("--conn D conflicts with --tap neutral: a neutral tap point is star (Y). Drop one.");
+  }
+  if (g("pm") && g("positions") && args.pm != null && args.positions != null) {
+    // W/G: ±N has a mid-1 and a mid-3 diagram (±9 is 19 or 21 positions), and
+    // ±7 G is sold on 17. Any of them agrees.
+    const wg = () =>
+      plusMinusFromPositions(args.positions!, args.reg) === args.pm ||
+      ([1, 3] as const).some(
+        (mid) =>
+          resolveTapFields({ regulation: args.reg, plusMinusSteps: args.pm, midPositions: mid }).positions ===
+          args.positions,
+      );
+    const fromPm = args.octc || args.reg === "linear" ? args.positions === 2 * args.pm + 1 : wg();
+    if (!fromPm) {
+      throw new CliError(
+        `--pm ${args.pm} and --pos ${args.positions} disagree. Give one of them.`,
+      );
+    }
+  }
+}
+
 export function cliToSelectInput(args: CliArgs): SelectInput {
+  checkConflicts(args);
   const dutyKind: DutyKind = args.octc ? "octc" : "oltc";
   const oil = args.octc || args.oil || !args.vacuum || args.mount === "reactor";
   const medium: SwitchingMedium = args.mount === "dry_type"
@@ -842,6 +1030,13 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     if (duty && !duty.ok) throw new CliError((args.lang === "en" ? duty.errorEn : duty.errorZh) ?? duty.errorEn ?? "Bad transformer data");
     if (duty && (um == null || !(um > 0))) um = duty.umKv;
     conn = cliConnection(args);
+    // 2026-11-13: with no winding voltage --earth-um was dropped. It is the Um.
+    if (!duty && args.earthUm != null && args.earthUm > 0) {
+      if (um != null && um > 0 && Math.abs(um - args.earthUm) > 0.01) {
+        throw new CliError("Give --um or --earth-um, not both, when no winding voltage (--kv) is given");
+      }
+      um = args.earthUm;
+    }
   }
 
   if (iu == null || !(iu > 0)) {
@@ -1131,6 +1326,8 @@ export function basisLineEn(d: DutyBasis): string {
         : `${d.umSystemKv} kV system Um ${d.actualUmKv} → class ${d.umKv}`;
   const ust = d.stepV == null ? "" : ` · Ust ${round1(d.stepV)} V`;
   const max = d.maxRule === "stated" ? "OS Imax" : "lowest tap";
+  // --iu with --kv: the current is typed, only the voltage basis is derived.
+  if (!(d.ratedA > 0)) return `Imax as given · ${um}`;
   return `I = S/(${div}×${d.currentKv} kV) = ${round1(d.ratedA)} A, ${max} ${round1(d.maxA)} A${ust} · ${um}`;
 }
 
@@ -1145,14 +1342,79 @@ export function basisLineZh(d: DutyBasis): string {
         : `${d.umSystemKv} kV 系统 Um ${d.actualUmKv} → ${d.umKv} 级`;
   const ust = d.stepV == null ? "" : ` · Ust ${round1(d.stepV)} V`;
   const max = d.maxRule === "stated" ? "OS Imax" : "最低档";
+  if (!(d.ratedA > 0)) return `Imax 按给定值 · ${um}`;
   return `I = S/(${div}×${d.currentKv} kV) = ${round1(d.ratedA)} A，${max} ${round1(d.maxA)} A${ust} · ${um}`;
+}
+
+/**
+ * Notes the CLI adds beside the engine's: a stated Um below the rule, a Um
+ * that is not a catalogue class, a market with no rule.
+ */
+export function cliNotes(
+  args: CliArgs | undefined,
+  input: SelectInput,
+  primaryUmKv: number | null,
+  en: boolean,
+  engineNotes: string[] = [],
+): string[] {
+  if (!args) return [];
+  const notes: string[] = [];
+  const duty = cliDuty(args);
+  if (duty?.ok && duty.ruleUmKv != null && duty.umKv < duty.ruleUmKv - 0.01) {
+    const already = duty.cautionsEn.some((c) => c.startsWith("Stated Um"));
+    if (!already) {
+      notes.push(
+        en
+          ? `Stated insulation to earth, Um ${duty.umKv} kV, is below the ${duty.ruleUmKv} kV the winding voltage gives. Check the order specification (OS).`
+          : `指定对地绝缘 Um ${duty.umKv} kV 低于按绕组电压得出的 ${duty.ruleUmKv} kV，请核对订货规范（OS）。`,
+      );
+    }
+  }
+  // The engine already says so when it moved an off-circuit duty one class up.
+  const classSaid = engineNotes.some((c) => /next class|上一级|下一级/.test(c));
+  if (primaryUmKv != null && primaryUmKv > input.umKv + 0.01 && !classSaid) {
+    notes.push(
+      en
+        ? `Um ${input.umKv} kV is not a class of this type: sized at Um ${primaryUmKv} kV.`
+        : `Um ${input.umKv} kV 不是该型号的电压等级，按 Um ${primaryUmKv} kV 选。`,
+    );
+  }
+  if (args.market && args.market !== "IT" && args.market !== "TR") {
+    notes.push(
+      en
+        ? `--market ${args.market} has no rule (IT and TR only): not used.`
+        : `--market ${args.market} 没有对应规则（只有 IT、TR），未使用。`,
+    );
+  }
+  return notes;
+}
+
+/** The --line read-back, for text and JSON. */
+function lineKindLabel(t: TenderLine, en: boolean): string {
+  if (t.kind === "auto") return en ? "autotransformer" : "自耦变";
+  if (t.voltagesKv.length >= 3) return en ? "three-winding" : "三绕组";
+  return en ? "two-winding" : "双绕组";
+}
+
+/** What to try next when nothing fits. */
+function noTypeHint(args: CliArgs | undefined, en: boolean): string | null {
+  if (!args) return null;
+  if (args.mount === "dry_type" && !args.octc && args.reg !== "linear" && !args.given.has("mid")) {
+    return en
+      ? "Dry-type switches stop at 17 positions: try --mid 1 (±8 → 17 positions) or fewer steps."
+      : "干式开关最多 17 档：试 --mid 1（±8 为 17 档）或减少级数。";
+  }
+  return null;
 }
 
 export function formatCliText(input: SelectInput, args?: CliArgs): string {
   const out = selectOltc(input);
   const en = args?.lang === "en";
   if (!out.ok || !out.results.length) {
-    const err = (en ? out.errorsEn : [...out.errorsZh, ...out.errorsEn]).join("\n") || "No type found.";
+    const hint = noTypeHint(args, en);
+    const err =
+      [...(en ? out.errorsEn : [...out.errorsZh, ...out.errorsEn]), ...(hint ? [hint] : [])].join("\n") ||
+      "No type found.";
     throw new CliError(err);
   }
   const primary = out.results[0]!;
@@ -1180,6 +1442,9 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
   if (duty?.ok) lines.push(en ? `Basis: ${basisLineEn(duty)}` : `依据：${basisLineZh(duty)}`);
   for (const c of en ? primary.cautionsEn : primary.cautionsZh) lines.push(`${note}${c}`);
   for (const c of (en ? duty?.cautionsEn : duty?.cautionsZh) ?? []) lines.push(`${note}${c}`);
+  for (const c of cliNotes(args, input, primary.umKv, en, [...primary.cautionsEn, ...primary.cautionsZh])) {
+    lines.push(`${note}${c}`);
+  }
   const choices = args && duty?.ok ? umChoicesFor(args, input) : [];
   if (choices.length > 1) {
     const list = choices.map((c) => `Um ${c.um} → ${c.model ?? (en ? "none" : "无")}`).join(" · ");
@@ -1191,7 +1456,7 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
   }
   if (args?.line) {
     const t = args.line;
-    const kind = t.kind === "auto" ? (en ? "autotransformer" : "自耦变") : en ? "two-winding" : "双绕组";
+    const kind = lineKindLabel(t, en);
     const vg = t.vectorGroup ? ` · ${t.vectorGroup}` : en ? " · no vector group" : " · 无联结组";
     lines.push(`${en ? "Line: " : "招标行："}${kind} · ${t.mva} MVA · ${t.voltagesKv.join("/")} kV${vg}`);
     for (const w of t.warnings) lines.push(en ? `Note: line ${w}` : `注意：招标行 ${w}`);
@@ -1230,21 +1495,46 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
   ).map((r) => r.model);
   const en = args?.lang === "en";
   const dutyJ = args ? cliDuty(args) : null;
+  const hint = out.ok ? null : noTypeHint(args, en);
   const payload = {
-    ok: out.ok,
+    ok: out.ok && primary != null,
+    version: APP_VERSION,
     model: primary?.model ?? null,
     why: en ? (primary?.reasonsEn[0] ?? null) : (primary?.reasonsZh[0] ?? primary?.reasonsEn[0] ?? null),
     alts,
     cautions: en
-      ? [...(primary?.cautionsEn ?? []), ...(dutyJ?.cautionsEn ?? [])]
-      : [...(primary?.cautionsZh ?? []), ...(dutyJ?.cautionsZh ?? [])],
+      ? [...(primary?.cautionsEn ?? []), ...(dutyJ?.cautionsEn ?? []), ...cliNotes(args, input, primary?.umKv ?? null, true, primary?.cautionsEn)]
+      : [...(primary?.cautionsZh ?? []), ...(dutyJ?.cautionsZh ?? []), ...cliNotes(args, input, primary?.umKv ?? null, false, primary?.cautionsZh)],
+    // What the engine was asked, as numbers: no prose to parse.
+    resolved: {
+      dutyKind: input.dutyKind,
+      throughCurrentA: round1(input.throughCurrentA),
+      umKv: input.umKv,
+      stepVoltageV: round1(input.stepVoltageV),
+      connection: input.connection,
+      phases: input.phases,
+      regulation: input.regulation,
+      plusMinusSteps: input.plusMinusSteps ?? null,
+      positions: input.positions ?? null,
+      mounting: input.mounting,
+      medium: input.medium,
+    },
+    line: args?.line
+      ? {
+          kind: lineKindLabel(args.line, true),
+          mva: args.line.mva,
+          voltagesKv: args.line.voltagesKv,
+          vectorGroup: args.line.vectorGroup ?? null,
+          warnings: args.line.warnings,
+        }
+      : null,
     basis: (() => {
-      const d = args ? cliDuty(args) : null;
+      const d = dutyJ;
       return d?.ok
         ? {
             connection: d.connection,
-            ratedA: round1(d.ratedA),
-            maxA: round1(d.maxA),
+            ratedA: d.ratedA > 0 ? round1(d.ratedA) : null,
+            maxA: d.maxA > 0 ? round1(d.maxA) : null,
             maxRule: d.maxRule,
             stepV: d.stepV == null ? null : round1(d.stepV),
             umSystemKv: d.umSystemKv,
@@ -1259,7 +1549,7 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
     assumptions: args
       ? assumptionsFromArgs(args, primary?.seriesCode).map((a) => (en ? assumptionEn(a) : a))
       : [],
-    errors: en ? out.errorsEn : out.errorsZh.length ? out.errorsZh : out.errorsEn,
+    errors: [...(en ? out.errorsEn : out.errorsZh.length ? out.errorsZh : out.errorsEn), ...(hint ? [hint] : [])],
   };
   return JSON.stringify(payload, null, 2) + "\n";
 }
@@ -1290,6 +1580,7 @@ export function umChoicesFor(
   }));
 }
 
+/** Exit codes: 0 a type was found (or help / version), 1 no type or bad input. */
 export function runCli(
   argv: string[],
   io: { stdout: (s: string) => void; stderr: (s: string) => void } = {
@@ -1297,17 +1588,38 @@ export function runCli(
     stderr: (s) => process.stderr.write(s),
   },
 ): number {
+  // The value of --line may itself be "-h"; anything else asking for help gets it.
+  const asksHelp = argv.some(
+    (a, i) => (a === "-h" || a === "--help") && argv[i - 1] !== "--line" && argv[i - 1] !== "--nameplate",
+  );
+  const selecting = argv.filter((a) => a !== "--no-update-check");
+  if (asksHelp || selecting.length === 0) {
+    io.stdout(CLI_HELP);
+    return 0;
+  }
+  const wantsJson = argv.includes("--json");
   try {
     const args = parseCliArgs(argv);
-    if (args.help) {
-      io.stdout(CLI_HELP);
+    if (args.version) {
+      io.stdout(`oltc-selector ${APP_VERSION}\n`);
       return 0;
     }
     const input = cliToSelectInput(args);
-    io.stdout(args.json ? formatCliJson(input, args) : formatCliText(input, args));
+    if (args.json) {
+      const text = formatCliJson(input, args);
+      io.stdout(text);
+      return (JSON.parse(text) as { ok: boolean }).ok ? 0 : 1;
+    }
+    io.stdout(formatCliText(input, args));
     return 0;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
+    // 2026-11-13: under --json an error is JSON too, so a caller never parses prose.
+    if (wantsJson) {
+      io.stdout(
+        JSON.stringify({ ok: false, version: APP_VERSION, model: null, errors: msg.split("\n") }, null, 2) + "\n",
+      );
+    }
     io.stderr(msg.endsWith("\n") ? msg : msg + "\n");
     return 1;
   }

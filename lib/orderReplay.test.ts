@@ -138,7 +138,6 @@ describe("order-replay: shipped selectOltc on real QS/OS", () => {
     const rows = runOrderReplay();
     const s = replaySummary(rows);
     // Printed for CORRECTNESS.md — fail must stay 0.
-    // eslint-disable-next-line no-console
     console.log("replaySummary", s);
     expect(s.fail).toBe(0);
     expect(s.total).toBe(ORDER_REPLAY.length);

@@ -49,9 +49,13 @@ for (const needle of FORBIDDEN) {
   }
 }
 
-// CLI version lives here. The agent skill is a separate repo
+// One version number: lib/appVersion.ts. The agent skill is a separate repo
 // (private) and must pin this same number.
-const VERSION = "2.2.0";
+const versionMatch = /APP_VERSION = "(\d+\.\d+\.\d+)"/.exec(
+  readFileSync(path.join(root, "lib", "appVersion.ts"), "utf8"),
+);
+if (!versionMatch) throw new Error("pack: APP_VERSION not found in lib/appVersion.ts");
+const VERSION = versionMatch[1];
 
 const pkg = {
   name: "oltc-selector",
@@ -60,7 +64,7 @@ const pkg = {
     "OLTC/OCTC type selection CLI. No prices. Same engine as the web app.",
   bin: { oltc: "bin/oltc.js" },
   type: "module",
-  files: ["bin", "README.md"],
+  files: ["bin", "README.md", "LICENSE"],
   engines: { node: ">=20" },
   license: "MIT",
   repository: {
@@ -75,7 +79,20 @@ writeFileSync(
   JSON.stringify(pkg, null, 2) + "\n",
 );
 
+// The npm page gets the CLI part only: no screenshot link that breaks there,
+// no develop notes for a repository the reader has not cloned.
 const readme = readFileSync(path.join(root, "README.md"), "utf8");
-writeFileSync(path.join(packDir, "README.md"), readme);
+const from = readme.indexOf("## CLI");
+const to = readme.indexOf("## Develop");
+if (from < 0 || to < from) throw new Error("pack: README needs ## CLI before ## Develop");
+const cliReadme =
+  "# oltc-selector\n\n" +
+  "Tap-changer type selection from the command line. The command is `oltc`. " +
+  "No prices. Same engine as the web page: https://oltc-selector.vercel.app/\n\n" +
+  "The type is a starting point. Get engineering confirmation before an order.\n\n" +
+  readme.slice(from, to).trimEnd() +
+  "\n";
+writeFileSync(path.join(packDir, "README.md"), cliReadme);
+writeFileSync(path.join(packDir, "LICENSE"), readFileSync(path.join(root, "LICENSE"), "utf8"));
 
 console.log("packed", packDir);

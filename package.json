@@ -1,16 +1,16 @@
 {
   "name": "oltc-selector",
   "private": true,
-  "version": "2.2.0",
+  "version": "2.3.0",
   "engines": {
     "node": ">=22.12.0"
   },
   "scripts": {
     "dev": "next dev -H 127.0.0.1 -p 3000",
     "build": "next build",
-    "start": "npx serve out -l 3000",
+    "start": "npx --yes serve out -l 3000",
     "test": "vitest run",
-    "lint": "next lint",
+    "lint": "eslint .",
     "oltc": "npx vite-node scripts/oltc.ts",
     "pack:cli": "node scripts/pack-cli.mjs",
     "gen:list-index": "python scripts/gen-list-index.py",
@@ -25,11 +25,14 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.29",
     "postcss": "^8.5.0",
     "tailwindcss": "^4.1.0",
     "typescript": "~5.8.3",

@@ -37,19 +37,42 @@ function persistLang(l: Lang) {
   }
 }
 
-function readStoredLang(): Lang {
+/** First supported language in the browser's list; `en` when none is. */
+export function detectLang(languages: readonly string[] | null | undefined): Lang {
+  for (const raw of languages ?? []) {
+    const tag = String(raw).toLowerCase().split(/[-_]/)[0];
+    // "in" is the old code some Android browsers still send for Indonesian.
+    const id = tag === "in" ? "id" : tag;
+    if (isLang(id)) return id;
+  }
+  return "en";
+}
+
+/** Stored choice, else the browser's language, else English. */
+export function firstLang(): Lang {
   try {
     const v = localStorage.getItem(LANG_STORAGE_KEY);
     if (isLang(v)) return v;
   } catch {
     /* ignore */
   }
-  return readCookieLang() ?? "zh";
+  const cookie = readCookieLang();
+  if (cookie) return cookie;
+  try {
+    if (typeof navigator !== "undefined") {
+      return detectLang(navigator.languages?.length ? navigator.languages : [navigator.language]);
+    }
+  } catch {
+    /* ignore */
+  }
+  return "en";
 }
 
+// The static page is rendered in zh (getServerLang); the browser switches
+// after hydration through useSyncExternalStore, so the markup never mismatches.
 let appLang: Lang = "zh";
 if (typeof window !== "undefined") {
-  appLang = readStoredLang();
+  appLang = firstLang();
 }
 const langSubs = new Set<() => void>();
 
@@ -83,12 +106,7 @@ type Dict = Record<string, string>;
 const en: Dict = {
   title: "OLTC Selector",
   subtitle: "Enter the duty, then Select.",
-  agentTitle: "Let an AI assistant pick the type",
-  agentBody: "Send it the transformer data, it picks the type.",
-  agentCta: "See how",
-  agentClose: "Close",
   agentChip: "Selection assistant",
-  agentOpen: "Open selection assistant",
   footerNote: "Reference only",
   changelogNow: "current",
   changelogAll: "All release notes",
@@ -237,17 +255,24 @@ const en: Dict = {
   specVac: "Vacuum",
   specOil: "Oil",
   langAria: "Language",
+  navTerms: "Terms",
+  navPrivacy: "Privacy",
+  copyLink: "Copy link",
+  skipLink: "Skip to content",
+  errorTitle: "Something went wrong",
+  reload: "Reload",
+  notFoundTitle: "Page not found",
+  calcFailed: "Could not calculate",
+  calcFailedHint: "Change a value and try again.",
+  cautionCount: "Cautions: {n}",
+  umOk: "OK",
+  umLow: "Too low",
 };
 
 const zh: Dict = {
   title: "有载开关选型",
   subtitle: "填工况，点选型。",
-  agentTitle: "把选型交给 AI 助手",
-  agentBody: "把变压器参数发给它，它选型号。",
-  agentCta: "看看怎么用",
-  agentClose: "关闭",
   agentChip: "选型助手",
-  agentOpen: "打开选型助手",
   footerNote: "仅供参考",
   changelogNow: "当前",
   changelogAll: "全部更新记录",
@@ -395,17 +420,24 @@ const zh: Dict = {
   specVac: "真空",
   specOil: "油灭弧",
   langAria: "语言",
+  navTerms: "使用条款",
+  navPrivacy: "隐私",
+  copyLink: "复制链接",
+  skipLink: "跳到正文",
+  errorTitle: "页面出错了",
+  reload: "重新加载",
+  notFoundTitle: "找不到页面",
+  calcFailed: "无法计算",
+  calcFailedHint: "请改一个参数再试。",
+  cautionCount: "{n} 条注意事项",
+  umOk: "满足",
+  umLow: "不足",
 };
 
 const vi: Dict = {
   title: "Chọn OLTC",
   subtitle: "Nhập thông số, bấm Chọn.",
-  agentTitle: "Để trợ lý AI chọn kiểu",
-  agentBody: "Gửi số liệu máy biến áp cho nó, nó chọn kiểu.",
-  agentCta: "Xem cách làm",
-  agentClose: "Đóng",
   agentChip: "Trợ lý chọn kiểu",
-  agentOpen: "Mở trợ lý chọn kiểu",
   footerNote: "Chỉ tham khảo",
   changelogNow: "hiện tại",
   changelogAll: "Tất cả ghi chú",
@@ -530,7 +562,7 @@ const vi: Dict = {
   earthBelowRule: "Cách điện với đất đã chọn, Um {um} kV, thấp hơn mức {rule} kV theo điện áp cuộn dây. Kiểm tra quy cách đặt hàng (OS).",
   stepUp: "Cao hơn một cấp",
   copyType: "Sao chép kiểu",
-  copied: "Đã chép",
+  copied: "Đã sao chép",
   disclaimer:
     "Chỉ tham khảo. Xác nhận kỹ thuật trước khi lập quy cách đặt hàng (OS).",
   otherOpts: "Lựa chọn khác ({n})",
@@ -554,18 +586,25 @@ const vi: Dict = {
   specVac: "Chân không",
   specOil: "Dầu",
   langAria: "Ngôn ngữ",
+  navTerms: "Điều khoản",
+  navPrivacy: "Quyền riêng tư",
+  copyLink: "Sao chép liên kết",
+  skipLink: "Đến nội dung chính",
+  errorTitle: "Đã xảy ra lỗi",
+  reload: "Tải lại",
+  notFoundTitle: "Không tìm thấy trang",
+  calcFailed: "Không tính được",
+  calcFailedHint: "Hãy đổi một giá trị rồi thử lại.",
+  cautionCount: "{n} lưu ý",
+  umOk: "Đạt",
+  umLow: "Không đủ",
 };
 
 // Spanish UI chrome is kept short (≈ EN length) so the form grid doesn’t reflow vs other locales.
 const es: Dict = {
   title: "Selector OLTC",
   subtitle: "Introduzca el régimen y pulse Seleccionar.",
-  agentTitle: "Que un asistente de IA elija el tipo",
-  agentBody: "Envíele los datos del transformador y él elige el tipo.",
-  agentCta: "Cómo hacerlo",
-  agentClose: "Cerrar",
   agentChip: "Asistente de selección",
-  agentOpen: "Abrir asistente de selección",
   footerNote: "Solo referencia",
   changelogNow: "actual",
   changelogAll: "Todas las notas",
@@ -714,17 +753,24 @@ const es: Dict = {
   specVac: "Vacío",
   specOil: "Aceite",
   langAria: "Idioma",
+  navTerms: "Términos",
+  navPrivacy: "Privacidad",
+  copyLink: "Copiar enlace",
+  skipLink: "Saltar al contenido",
+  errorTitle: "Algo salió mal",
+  reload: "Recargar",
+  notFoundTitle: "Página no encontrada",
+  calcFailed: "No se pudo calcular",
+  calcFailedHint: "Cambie un valor e inténtelo de nuevo.",
+  cautionCount: "Avisos: {n}",
+  umOk: "Cumple",
+  umLow: "Insuficiente",
 };
 
 const tr: Dict = {
   title: "OLTC Seçici",
   subtitle: "İşletme verilerini girin, Seç’e basın.",
-  agentTitle: "Seçimi bir AI asistana bırakın",
-  agentBody: "Trafo verilerini gönderin, o tipi seçsin.",
-  agentCta: "Nasıl yapılır",
-  agentClose: "Kapat",
   agentChip: "Seçim asistanı",
-  agentOpen: "Seçim asistanını aç",
   footerNote: "Yalnızca referans",
   changelogNow: "güncel",
   changelogAll: "Tüm sürüm notları",
@@ -873,17 +919,24 @@ const tr: Dict = {
   specVac: "Vakum",
   specOil: "Yağ",
   langAria: "Dil",
+  navTerms: "Koşullar",
+  navPrivacy: "Gizlilik",
+  copyLink: "Bağlantıyı kopyala",
+  skipLink: "İçeriğe geç",
+  errorTitle: "Bir sorun oluştu",
+  reload: "Yeniden yükle",
+  notFoundTitle: "Sayfa bulunamadı",
+  calcFailed: "Hesaplanamadı",
+  calcFailedHint: "Bir değeri değiştirip yeniden deneyin.",
+  cautionCount: "{n} uyarı",
+  umOk: "Uygun",
+  umLow: "Yetersiz",
 };
 
 const idn: Dict = {
   title: "Pemilih OLTC",
   subtitle: "Isi kondisi kerja, lalu klik Pilih.",
-  agentTitle: "Biarkan asisten AI memilih tipenya",
-  agentBody: "Kirim data trafo, asisten memilihkan tipenya.",
-  agentCta: "Lihat caranya",
-  agentClose: "Tutup",
   agentChip: "Asisten pemilihan",
-  agentOpen: "Buka asisten pemilihan",
   footerNote: "Hanya referensi",
   changelogNow: "saat ini",
   changelogAll: "Semua catatan rilis",
@@ -1032,6 +1085,18 @@ const idn: Dict = {
   specVac: "Vakum",
   specOil: "Minyak",
   langAria: "Bahasa",
+  navTerms: "Ketentuan",
+  navPrivacy: "Privasi",
+  copyLink: "Salin tautan",
+  skipLink: "Lewati ke konten",
+  errorTitle: "Terjadi kesalahan",
+  reload: "Muat ulang",
+  notFoundTitle: "Halaman tidak ditemukan",
+  calcFailed: "Tidak dapat dihitung",
+  calcFailedHint: "Ubah satu nilai lalu coba lagi.",
+  cautionCount: "{n} catatan",
+  umOk: "Memenuhi",
+  umLow: "Tidak cukup",
 };
 
 const X = TRANSFORMER_STRINGS;

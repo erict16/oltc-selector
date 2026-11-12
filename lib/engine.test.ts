@@ -7,9 +7,9 @@ import {
   insuranceModel,
   optionsWithInsurance,
   showsMinimumLabel,
-  FIXTURES,
   octcRoman,
 } from "./engine";
+import { FIXTURES } from "./engine.fixtures";
 import { maxThroughCurrent, throughCurrentFromRated } from "./deriveUm";
 import { parseTypeString } from "./orderReplay";
 import {

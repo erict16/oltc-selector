@@ -1,8 +1,6 @@
 // 2026-11-04: off-circuit (drum WDG/WLG, WSG gate, cage Um), dry CVT and
 // reactor HWDK fixes from the OS audit (track C: F1–F3, F5–F12).
-import { readFileSync } from "node:fs";
 import { HAS_REPLAY_DATA, readSalesJson } from "./replayData";
-import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { cliToSelectInput, parseCliArgs, runCli } from "./cli";
 import { octcSizeLetter, selectOltc } from "./engine";

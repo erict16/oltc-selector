@@ -1,0 +1,321 @@
+"use client";
+
+import { CheckIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { SERIES } from "@/lib/catalog";
+import { formatUmKv } from "@/lib/deriveUm";
+import { t, type Lang } from "@/lib/i18n";
+import type { DutyBasis } from "@/lib/transformer";
+import type { ModelResult, SelectInput, StructureKind } from "@/lib/types";
+import { cx } from "./fields";
+
+/** Share of a rating the duty uses; null when either side is missing. */
+function useOf(need: number | null, rating: number | null | undefined): number | null {
+  if (need == null || rating == null || !(need > 0) || !(rating > 0)) return null;
+  return need / rating;
+}
+
+/**
+ * Duty beside the chosen type's rating, one row per axis the engine checks.
+ * The bar shows how much of the rating the duty takes.
+ */
+export function BasisTable({
+  lang,
+  duty,
+  dutyA,
+  stepV,
+  model,
+  hideUm,
+}: {
+  hideUm?: boolean;
+  lang: Lang;
+  duty: DutyBasis;
+  dutyA: number | null;
+  stepV: number;
+  model: ModelResult | null;
+}) {
+  const ok = duty.ok;
+  const a = dutyA != null && dutyA > 0 ? dutyA : null;
+  const u = ok && stepV > 0 ? stepV : null;
+  const kva = a != null && u != null ? (a * u) / 1000 : null;
+  // Insulation need: the system's IEC Um where the rule is the system
+  // (line end, a full-class neutral): 33 kV line end needs 36 kV, not the
+  // 40.5 class the engine then picks. An assumed or stated class is the
+  // need itself.
+  const umNeed = !ok
+    ? null
+    : (duty.umRule === "line" || duty.umRule === "neutral_full") && Number.isFinite(duty.actualUmKv)
+      ? duty.actualUmKv
+      : duty.umKv;
+  // Every row is one line: name, duty, rating, use. An assumed Um is said
+  // once, in a deriveDuty caution above the table (neutral, MV lead and,
+  // since r3 UI-11, the auto junction), not again inside it.
+  const rows: Array<{
+    key: string;
+    label: string;
+    need: string;
+    unit: string;
+    rating: string | null;
+    use: number | null;
+    /** Insulation is a class, not a load: 100% is a match, not tight. */
+    plain?: boolean;
+  }> = [
+    {
+      key: "i",
+      label: t(lang, "kpiImax"),
+      need: a != null ? round1(a) : "—",
+      unit: "A",
+      rating: model ? `${model.currentA}` : null,
+      use: useOf(a, model?.currentA),
+    },
+    {
+      key: "u",
+      label: t(lang, "kpiUst"),
+      need: u != null ? round1(u) : "—",
+      unit: "V",
+      rating: model?.maxStepVoltageV != null ? `${model.maxStepVoltageV}` : null,
+      use: useOf(u, model?.maxStepVoltageV),
+    },
+    {
+      key: "p",
+      label: t(lang, "specPsin"),
+      need: kva != null ? round1(kva) : "—",
+      unit: "kVA",
+      rating: model?.stepCapacityKva != null ? `${model.stepCapacityKva}` : null,
+      use: useOf(kva, model?.stepCapacityKva),
+    },
+    {
+      key: "um",
+      label: t(lang, "kpiUm"),
+      need: umNeed != null ? round1(umNeed) : "—",
+      unit: "kV",
+      rating: model ? round1(model.umKv) : null,
+      use: useOf(umNeed, model?.umKv),
+      plain: true,
+    },
+  ];
+  return (
+    <dl className="basis">
+      {rows
+        // Off-circuit types carry no step rating; a row of dashes says nothing.
+        .filter((r) => !(model && r.rating == null))
+        // Um is the equipment's insulation level, not a load. At a star
+        // neutral nothing on the duty side sets it, so the row is left out;
+        // elsewhere it is a class check with no bar (2026-11-11 Eric).
+        .filter((r) => !(r.plain && hideUm))
+        .map((r) => {
+          const pct = r.use != null ? Math.round(r.use * 100) : null;
+          const tone =
+            r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 && !r.plain ? "is-tight" : "";
+          return (
+            <div key={r.key} className={cx("basis-row", tone)}>
+              <dt>{r.label}</dt>
+              <dd className="num">
+                <b>{r.need}</b>
+                {r.rating != null ? <span> / {r.rating}</span> : null}
+                <span className="basis-unit">{r.unit}</span>
+                {pct != null && !r.plain ? <span className="basis-pct">{pct}%</span> : null}
+                {pct != null && r.plain ? (
+                  r.use! > 1 ? (
+                    <>
+                      <ExclamationTriangleIcon className="basis-mark" strokeWidth={1.75} aria-hidden />
+                      <span className="sr-only">{t(lang, "umLow")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckIcon className="basis-mark" strokeWidth={2.4} aria-hidden />
+                      <span className="sr-only">{t(lang, "umOk")}</span>
+                    </>
+                  )
+                ) : null}
+              </dd>
+              {pct != null && !r.plain ? (
+                <span className="basis-bar" aria-hidden>
+                  <i style={{ transform: `scaleX(${Math.min(100, pct) / 100})` }} />
+                </span>
+              ) : null}
+            </div>
+          );
+        })}
+    </dl>
+  );
+}
+
+export function round1(n: number): string {
+  if (!Number.isFinite(n)) return "—";
+  const r = Math.round(n * 10) / 10;
+  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+}
+
+/** Break a type string after "-" and "/", never in the middle of a token. */
+export function modelNodes(model: string) {
+  return model.split(/([-/])/).map((part, i) =>
+    part === "-" || part === "/" ? (
+      <span key={i}>
+        {part}
+        <wbr />
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
+
+/**
+ * The type string read aloud: one cell per coded part, with what it means.
+ * Cut from the shown string, so the domestic spelling keeps its own letters.
+ */
+export function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; shown: string }) {
+  const series = SERIES.find((s) => s.id === r.seriesId);
+  const at = shown.lastIndexOf(`-${r.currentA}`);
+  if (at < 0) return null;
+  const head = shown.slice(0, at);
+  // Off-circuit types carry a wiring roman (WSLIV), not a phase count,
+  // and switch no arc: the family cell says the construction only.
+  const offCircuit = series?.structure === "cage" || series?.structure === "drum";
+  const wiring = offCircuit ? head.match(/^(.*?)(VIII|VII|VI|IV|IX|V|III|II|I)$/) : null;
+  const family = wiring
+    ? wiring[1]
+    : head.endsWith(r.phases)
+      ? head.slice(0, -r.phases.length)
+      : head;
+  const cells: Array<{ code: string; says: string }> = [
+    {
+      code: family,
+      says: offCircuit
+        ? t(lang, structureLabelKey(series?.structure))
+        : `${t(lang, series?.vacuum ? "specVac" : "specOil")} · ${t(lang, structureLabelKey(series?.structure))}`,
+    },
+  ];
+  if (wiring) cells.push({ code: wiring[2], says: t(lang, "octcSeries") });
+  else if (family !== head) cells.push({ code: r.phases, says: t(lang, "phases") });
+  cells.push({ code: String(r.currentA), says: "A" });
+  // The rest is cut from the string as shown: a single-phase type has no
+  // Y/D after the current, and a reactor type ends in its own step count.
+  const rest = shown.slice(at + 1 + String(r.currentA).length);
+  const m = rest.match(/^([YD])?\/([^-]+)-(.+)$/);
+  if (!m) return null;
+  if (m[1]) {
+    cells.push({ code: m[1], says: t(lang, m[1] === "Y" ? "windingStar" : "windingDelta") });
+  }
+  cells.push({ code: m[2], says: "Um kV" });
+  // A type that ends in a bare count (reactor HWDK …-17, dry CZ) states its
+  // own positions; the caption must not print another number under it.
+  const count = /^\d+$/.test(m[3]) ? Number(m[3]) : r.positions;
+  cells.push({ code: m[3], says: `${t(lang, "positions")} ${count}` });
+  return (
+    <dl className="type-segs" translate="no">
+      {cells.map((c, i) => (
+        <div key={i}>
+          <dt>{c.code}</dt>
+          <dd>{c.says}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function mountLabelKey(m: SelectInput["mounting"]): string {
+  switch (m) {
+    case "on_tank":
+      return "mountOn";
+    case "external_compartment":
+      return "mountExt";
+    case "dry_type":
+      return "mountDry";
+    case "reactor":
+      return "mountReactor";
+    default:
+      return "mountIn";
+  }
+}
+
+function structureLabelKey(structure: StructureKind | undefined): string {
+  switch (structure) {
+    case "combined":
+      return "specCombined";
+    case "compound":
+      return "specCompound";
+    case "cage":
+      return "specCage";
+    case "drum":
+      return "specDrum";
+    default:
+      return "specCompound";
+  }
+}
+
+export function ModelSpec({
+  lang,
+  r,
+  dutyMounting,
+  compact,
+  hideRatings,
+}: {
+  lang: Lang;
+  r: ModelResult;
+  dutyMounting: SelectInput["mounting"];
+  compact?: boolean;
+  /** The basis table already shows max Ust and step capacity. */
+  hideRatings?: boolean;
+}) {
+  const nb = "\u00a0";
+  const series = SERIES.find((s) => s.id === r.seriesId);
+  const vacuum = series?.vacuum === true;
+  const mount =
+    series?.mounting.includes(dutyMounting)
+      ? dutyMounting
+      : (series?.mounting[0] ?? dutyMounting);
+  const offCircuit = series?.structure === "cage" || series?.structure === "drum";
+  const items: Array<{ key: string; value: string }> = offCircuit
+    ? []
+    : [
+        {
+          key: "specArc",
+          value: t(lang, vacuum ? "specVac" : "specOil"),
+        },
+      ];
+  if (!hideRatings && r.maxStepVoltageV != null) {
+    items.push({ key: "specUst", value: `${r.maxStepVoltageV}${nb}V` });
+  }
+  if (!hideRatings && r.stepCapacityKva != null) {
+    items.push({ key: "specPsin", value: `${r.stepCapacityKva}${nb}kVA` });
+  }
+  items.push({
+    key: "specStructure",
+    value: t(lang, structureLabelKey(series?.structure)),
+  });
+  if (r.earthPfKv != null && r.earthBilKv != null) {
+    items.push({
+      key: "specEarth",
+      value: `Um${nb}${formatUmKv(r.umKv)} · ${r.earthPfKv}${nb}/${nb}${r.earthBilKv}${nb}kV`,
+    });
+  }
+  items.push({
+    key: "mounting",
+    value: t(lang, mountLabelKey(mount)),
+  });
+
+  return (
+    <dl
+      className={cx(
+        "grid grid-cols-2 gap-x-5 gap-y-3",
+        hideRatings ? "sm:grid-cols-4" : "sm:grid-cols-3",
+        compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-7 sm:pl-12" : "px-5 py-4 sm:px-8",
+      )}
+    >
+      {items.map((item) => (
+        <div key={item.key} className="min-w-0">
+          <dt className="text-[0.75rem] leading-snug break-words text-[var(--color-muted)]">
+            {t(lang, item.key)}
+          </dt>
+          <dd
+            className="mt-0.5 text-[0.875rem] leading-snug tabular-nums text-[var(--color-ink)]"
+            translate="no"
+          >
+            {item.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}

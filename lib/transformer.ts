@@ -123,6 +123,8 @@ export interface DutyBasis {
   /** Catalogue Um class sent to the engine. */
   umKv: number;
   umRule: UmRule;
+  /** With a stated Um: the class the winding voltage alone would give. */
+  ruleUmKv?: number;
   /** True when Um rests on an assumption the user must confirm. */
   umAssumed: boolean;
   /** Rated current through the tap changer (A). */
@@ -367,6 +369,7 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     umKv = catalogueUmFromRatedKv(spec.tapKv);
     umRule = "line";
   }
+  let ruleUmKv: number | undefined;
   // The OS / maker figure wins before the range check: a 400/220 kV auto
   // whose switch is stated at Um 252 must not be refused on the HV rule.
   if (spec.earthUmKv != null && spec.earthUmKv > 0) {
@@ -382,6 +385,7 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
       cautionsZh.push(`指定 Um ${spec.earthUmKv} kV 低于该点系统 Um ${floor} kV，请核对 OS。`);
       cautionsEn.push(`Stated Um ${spec.earthUmKv} kV is below the system class Um ${floor} kV at this point. Check the OS.`);
     }
+    ruleUmKv = umKv;
     umKv = spec.earthUmKv;
     umRule = "explicit";
     umAssumed = false;
@@ -391,6 +395,13 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     // but the user needs the way forward, not a bare refusal.
     const mvClass = catalogueUmFromRatedKv(spec.mvKv);
     const open = [72.5, 126, 170, 252, 300, 363].filter((u) => u >= mvClass - 0.01);
+    // 2026-11-13: 765/400 kV printed an empty list ("…--earth-um):  kV.").
+    if (!open.length) {
+      return fail(
+        `自耦变高压 Um ${umKv} kV、中压 Um ${mvClass} kV 都超出目录（最高 363 kV）。请联系工程。`,
+        `Autotransformer HV class Um ${umKv} kV and MV class Um ${mvClass} kV are both above the catalogue (top 363 kV). Contact engineering.`,
+      );
+    }
     return fail(
       `自耦变高压 Um ${umKv} kV 超出目录（最高 363 kV）。请按 OS 填开关对地绝缘（CLI：--earth-um），可选 ${open.join("、")} kV。`,
       `Autotransformer HV class Um ${umKv} kV is above the catalogue (top 363 kV). Give the switch's insulation to earth from the OS (CLI: --earth-um): ${open.join(", ")} kV.`,
@@ -442,9 +453,6 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
         cautionsZh.push(`中压出线先按中压等级 Um ${umKv} kV 选，以订货规范（OS）为准。`);
         cautionsEn.push(`MV line lead sized at the MV class, Um ${umKv} kV; the order specification (OS) decides.`);
       }
-    } else if (spec.tapPoint === "auto_junction" && umKv === 252 && umRule === "auto_hv") {
-      cautionsZh.push("参考：125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W。");
-      cautionsEn.push("Reference: 125 MVA 225/115/35 kV ±8×1.25% → 3×SHZVI-600/252D-10193W.");
     } else if (spec.tapPoint === "auto_junction" && umRule === "auto_hv") {
       // 2026-11-04 (r3 UI-11): 132/33 at Um 145 is assumed, but the card
       // said so nowhere since the basis-row flag went (8b4bc64).
@@ -470,6 +478,7 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     actualUmKv: iecUmFromRatedKv(umSystemKv),
     umKv,
     umRule,
+    ...(ruleUmKv != null ? { ruleUmKv } : {}),
     umAssumed,
     ratedA,
     maxA,
@@ -519,7 +528,3 @@ function fmtA(a: number): string {
   return (Math.round(a * 10) / 10).toFixed(1);
 }
 
-function fmtKv(kv: number): string {
-  const r = Math.round(kv * 10) / 10;
-  return Number.isInteger(r) ? String(r) : r.toFixed(1);
-}

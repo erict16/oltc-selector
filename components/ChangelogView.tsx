@@ -95,7 +95,7 @@ export function ChangelogView() {
           <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
           {t(lang, "backToSelector")}
         </Link>
-        <LangSwitcher lang={lang} onChange={setAppLang} ariaLabel="Language" />
+        <LangSwitcher lang={lang} onChange={setAppLang} ariaLabel={t(lang, "langAria")} />
       </div>
       <h1 className="mt-4 text-[1.375rem] font-bold tracking-[-0.02em] text-[var(--color-ink)]">
         {t(lang, "changelogTitle")}

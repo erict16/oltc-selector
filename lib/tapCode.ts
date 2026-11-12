@@ -464,8 +464,8 @@ export function resolveTapFields(input: {
   }
 
   // Positions-only path (custom)
-  let positions = input.positions ?? 19;
-  let mid: 0 | 1 | 3 =
+  const positions = input.positions ?? 19;
+  const mid: 0 | 1 | 3 =
     input.midPositions === 1 || input.midPositions === 3
       ? input.midPositions
       : defaultMid(positions, reg);

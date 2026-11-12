@@ -26,6 +26,15 @@ const SCOPE_RE = Object.keys(SCOPE)
 const sc = (en: string) => SCOPE[en];
 
 const RULES: Rule[] = [
+  [
+    /^CVT is a linear-regulation type \(brochure\)\. Engineering must confirm it for this range\.$/,
+    () => ({
+      vi: "CVT là kiểu điều chỉnh tuyến tính (catalogue). Kỹ thuật phải xác nhận cho dải này.",
+      es: "CVT es un tipo de regulación lineal (catálogo). Ingeniería debe confirmarlo para este rango.",
+      tr: "CVT doğrusal ayar tipidir (katalog). Bu aralık için mühendislik onaylamalıdır.",
+      id: "CVT adalah tipe regulasi linear (katalog). Teknik harus mengonfirmasi untuk rentang ini.",
+    }),
+  ],
   // Engine cautions. The 1% over-rating note went with the tolerance
   // (2026-11-04 audit D2: IEC 60214-2 says "not less than").
   [

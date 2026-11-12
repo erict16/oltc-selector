@@ -11,7 +11,8 @@ import {
   stepVoltageFromPercent,
   throughCurrentFromRated,
 } from "./deriveUm";
-import { FIXTURES, selectOltc } from "./engine";
+import { selectOltc } from "./engine";
+import { FIXTURES } from "./engine.fixtures";
 import { deriveDuty } from "./transformer";
 import type { SelectInput } from "./types";
 

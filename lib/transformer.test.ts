@@ -85,7 +85,9 @@ describe("autotransformer tapped at the series/common junction", () => {
   it("flags the unchecked tap-winding impulse and tie-in resistor", () => {
     const d = deriveDuty(tonight);
     expect(d.cautionsZh.join()).toContain("电位电阻");
-    expect(d.cautionsZh.join()).toContain("3×SHZVI-600/252D-10193W");
+    // 2026-11-13: the stray reference type (a different family) is gone.
+    expect(d.cautionsZh.join()).not.toContain("3×SHZVI-600/252D-10193W");
+    expect(d.cautionsZh.join()).toContain("Um 252 kV");
   });
 
   it("even a 126 kV-class autotransformer gets no CV2", () => {

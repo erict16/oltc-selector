@@ -30,7 +30,9 @@ export function isNewer(latest: string, current: string): boolean {
 export function updateNotice(latest: string, current: string): string {
   return (
     `\n有新版本 oltc-selector ${latest}（当前 ${current}），不会自动更新。` +
-    `\n需要时运行：npm i -g oltc-selector@latest，或用 npx -y oltc-selector@latest。\n`
+    `\n需要时运行：npm i -g oltc-selector@latest，或用 npx -y oltc-selector@latest。` +
+    `\nNew version oltc-selector ${latest} (you have ${current}). Nothing is installed for you.` +
+    `\nTo update: npm i -g oltc-selector@latest, or run npx -y oltc-selector@latest.\n`
   );
 }
 
