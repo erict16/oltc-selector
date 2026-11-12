@@ -1,6 +1,5 @@
 "use client";
 
-import { CheckIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { SERIES } from "@/lib/catalog";
 import { formatUmKv } from "@/lib/deriveUm";
 import { t, type Lang } from "@/lib/i18n";
@@ -98,9 +97,10 @@ export function BasisTable({
       {rows
         // Off-circuit types carry no step rating; a row of dashes says nothing.
         .filter((r) => !(model && r.rating == null))
-        // Um is the equipment's insulation level, not a load. At a star
-        // neutral nothing on the duty side sets it, so the row is left out;
-        // elsewhere it is a class check with no bar (2026-11-11 Eric).
+        // At a star neutral nothing on the duty side sets Um, so the row is
+        // left out. At the line end (D, or Y line end) the switch sees the
+        // system Um, so it gets the same bar as the loads (2026-11-12 Eric);
+        // only the amber "tight" tone is skipped, as 123 of 126 is a match.
         .filter((r) => !(r.plain && hideUm))
         .map((r) => {
           const pct = r.use != null ? Math.round(r.use * 100) : null;
@@ -113,22 +113,9 @@ export function BasisTable({
                 <b>{r.need}</b>
                 {r.rating != null ? <span> / {r.rating}</span> : null}
                 <span className="basis-unit">{r.unit}</span>
-                {pct != null && !r.plain ? <span className="basis-pct">{pct}%</span> : null}
-                {pct != null && r.plain ? (
-                  r.use! > 1 ? (
-                    <>
-                      <ExclamationTriangleIcon className="basis-mark" strokeWidth={1.75} aria-hidden />
-                      <span className="sr-only">{t(lang, "umLow")}</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckIcon className="basis-mark" strokeWidth={2.4} aria-hidden />
-                      <span className="sr-only">{t(lang, "umOk")}</span>
-                    </>
-                  )
-                ) : null}
+                {pct != null ? <span className="basis-pct">{pct}%</span> : null}
               </dd>
-              {pct != null && !r.plain ? (
+              {pct != null ? (
                 <span className="basis-bar" aria-hidden>
                   <i style={{ transform: `scaleX(${Math.min(100, pct) / 100})` }} />
                 </span>

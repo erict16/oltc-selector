@@ -89,7 +89,7 @@ describe("lang persist", () => {
 
   it("names the new page strings in every UI language", () => {
     for (const { id } of LANG_OPTIONS) {
-      for (const k of ["navTerms", "navPrivacy", "copyLink", "skipLink", "errorTitle", "reload", "notFoundTitle", "calcFailed", "calcFailedHint", "cautionCount", "umOk", "umLow", "agentChip", "changelogTitle"]) {
+      for (const k of ["navTerms", "navPrivacy", "copyLink", "skipLink", "errorTitle", "reload", "notFoundTitle", "calcFailed", "calcFailedHint", "cautionCount", "agentChip", "changelogTitle"]) {
         expect(t(id, k), `${id}.${k}`).not.toBe(k);
         if (id !== "en") expect(t(id, k), `${id}.${k}`).not.toBe(t("en", k));
       }

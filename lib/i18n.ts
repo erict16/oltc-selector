@@ -227,7 +227,7 @@ const en: Dict = {
   auto: "Auto",
   noMatch: "No matching type",
   recommended: "Close to the rating",
-  allRound: "With margin",
+  allRound: "Safe choice",
   earthBelowRule: "Chosen insulation to earth, Um {um} kV, is below the {rule} kV the winding voltage gives. Check the order specification (OS).",
   stepUp: "One step up",
   copyType: "Copy type",
@@ -265,8 +265,6 @@ const en: Dict = {
   calcFailed: "Could not calculate",
   calcFailedHint: "Change a value and try again.",
   cautionCount: "Cautions: {n}",
-  umOk: "OK",
-  umLow: "Too low",
 };
 
 const zh: Dict = {
@@ -393,7 +391,7 @@ const zh: Dict = {
   auto: "自动",
   noMatch: "没有合规格型号",
   recommended: "接近额定上限",
-  allRound: "余量充足",
+  allRound: "安全选项",
   earthBelowRule: "所选对地绝缘 Um {um} kV 低于按绕组电压得出的 {rule} kV，请核对订货规范（OS）。",
   stepUp: "高一档",
   copyType: "复制型号",
@@ -430,8 +428,6 @@ const zh: Dict = {
   calcFailed: "无法计算",
   calcFailedHint: "请改一个参数再试。",
   cautionCount: "{n} 条注意事项",
-  umOk: "满足",
-  umLow: "不足",
 };
 
 const vi: Dict = {
@@ -558,7 +554,7 @@ const vi: Dict = {
   auto: "Tự động",
   noMatch: "Không có kiểu phù hợp",
   recommended: "Sát định mức",
-  allRound: "Có dự phòng",
+  allRound: "Lựa chọn an toàn",
   earthBelowRule: "Cách điện với đất đã chọn, Um {um} kV, thấp hơn mức {rule} kV theo điện áp cuộn dây. Kiểm tra quy cách đặt hàng (OS).",
   stepUp: "Cao hơn một cấp",
   copyType: "Sao chép kiểu",
@@ -596,8 +592,6 @@ const vi: Dict = {
   calcFailed: "Không tính được",
   calcFailedHint: "Hãy đổi một giá trị rồi thử lại.",
   cautionCount: "{n} lưu ý",
-  umOk: "Đạt",
-  umLow: "Không đủ",
 };
 
 // Spanish UI chrome is kept short (≈ EN length) so the form grid doesn’t reflow vs other locales.
@@ -725,7 +719,7 @@ const es: Dict = {
   auto: "Auto",
   noMatch: "Ningún tipo compatible",
   recommended: "Cerca del valor nominal",
-  allRound: "Con margen",
+  allRound: "Opción segura",
   earthBelowRule: "El aislamiento a tierra elegido, Um {um} kV, es inferior a los {rule} kV que da la tensión del devanado. Revise la especificación de pedido (OS).",
   stepUp: "Un calibre más",
   copyType: "Copiar tipo",
@@ -763,8 +757,6 @@ const es: Dict = {
   calcFailed: "No se pudo calcular",
   calcFailedHint: "Cambie un valor e inténtelo de nuevo.",
   cautionCount: "Avisos: {n}",
-  umOk: "Cumple",
-  umLow: "Insuficiente",
 };
 
 const tr: Dict = {
@@ -891,7 +883,7 @@ const tr: Dict = {
   auto: "Otomatik",
   noMatch: "Uygun tip yok",
   recommended: "Anma değerine yakın",
-  allRound: "Paylı",
+  allRound: "Güvenli seçim",
   earthBelowRule: "Seçilen toprağa yalıtım, Um {um} kV, sargı geriliminin verdiği {rule} kV değerinin altında. Sipariş şartnamesini (OS) kontrol edin.",
   stepUp: "Bir kademe üst",
   copyType: "Tipi kopyala",
@@ -929,8 +921,6 @@ const tr: Dict = {
   calcFailed: "Hesaplanamadı",
   calcFailedHint: "Bir değeri değiştirip yeniden deneyin.",
   cautionCount: "{n} uyarı",
-  umOk: "Uygun",
-  umLow: "Yetersiz",
 };
 
 const idn: Dict = {
@@ -1057,7 +1047,7 @@ const idn: Dict = {
   auto: "Otomatis",
   noMatch: "Tidak ada tipe yang cocok",
   recommended: "Mendekati nilai pengenal",
-  allRound: "Ada margin",
+  allRound: "Pilihan aman",
   earthBelowRule: "Isolasi ke tanah yang dipilih, Um {um} kV, di bawah {rule} kV menurut tegangan belitan. Periksa spesifikasi pesanan (OS).",
   stepUp: "Satu tingkat di atas",
   copyType: "Salin tipe",
@@ -1095,8 +1085,6 @@ const idn: Dict = {
   calcFailed: "Tidak dapat dihitung",
   calcFailedHint: "Ubah satu nilai lalu coba lagi.",
   cautionCount: "{n} catatan",
-  umOk: "Memenuhi",
-  umLow: "Tidak cukup",
 };
 
 const X = TRANSFORMER_STRINGS;

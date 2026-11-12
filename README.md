@@ -29,7 +29,7 @@ The page works on a phone and on a laptop. Every field is a dropdown; "Custom" i
 - **Copy link**: the form is kept in the address (after `#`), so the link opens the same selection on another computer. A reload keeps it too. A pasted line is part of the link.
 - One cell for each coded part of the type: family, phases, current, connection, Um, tap code.
 - Loads as bars: duty / rating and the share used, for through-current, step voltage and step capacity.
-- Insulation to earth as the type's own level, for example `Um 72.5 · 140 / 350 kV`. It is not compared with the duty at a star neutral.
+- Insulation to earth as the type's own level, for example `Um 72.5 · 140 / 350 kV`. At the line end it also has a bar, system Um against the type's Um; at a star neutral it is not compared with the duty.
 - Notes you must act on, in a yellow band.
 - Other types that also cover the duty.
 
