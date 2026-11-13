@@ -2004,3 +2004,66 @@ select.row-control,
 .plate-alts {
   border-bottom: 1px solid var(--color-line);
 }
+
+/* Second detail pass (2026-11-14), from 2x WebKit screenshots. */
+
+/* A menu's list is drawn on <body>, outside .page: give it the page's
+   colours, or its selected option takes the old steel blue. */
+.menu-list {
+  --color-accent: #2563eb;
+  --color-ink: #0f172a;
+  --color-ink-2: #334155;
+  --color-caption: #5b6b80;
+  --color-line-2: #d5d9e0;
+}
+
+/* Header: solid, so the form does not show through as it scrolls under
+   (the 8 px blur did not hide text in Safari). The language icon ends on
+   the cards' right edge, not 10 px inside it. */
+.page .topbar {
+  background: #fff;
+  backdrop-filter: none;
+}
+@media (min-width: 640px) {
+  .topbar-lang {
+    margin-right: -0.625rem;
+  }
+}
+
+/* Form cards: 24 px at the sides, 20 px above the title and under the
+   last control. */
+.card-head {
+  padding-top: 1.25rem;
+  padding-bottom: 0.25rem;
+}
+.rows {
+  padding-bottom: 0.75rem;
+}
+
+/* Result card, on a 4 px grid: 18 -> 20 above the coded parts, 14 -> 16
+   inside them and inside a note, 13 -> 12 around a load. */
+.type-segs {
+  margin-top: 1.25rem;
+}
+@media (min-width: 640px) {
+  .type-segs > div {
+    padding-inline: 1rem;
+  }
+}
+.page .caution-list {
+  padding: 0.75rem 1rem;
+}
+.basis-row {
+  padding-block: 0.75rem;
+}
+.basis-row:first-child {
+  padding-top: 0;
+}
+/* The type's data follows the loads at the loads' own rhythm: 20 px on
+   each side of its rule (it was 37 above and 20 below). */
+.plate-facts {
+  gap: 0;
+}
+.basis-row:last-child {
+  padding-bottom: 1.25rem;
+}

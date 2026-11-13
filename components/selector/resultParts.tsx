@@ -272,7 +272,7 @@ export function ModelSpec({
           : cx(
               "gap-y-3",
               hideRatings ? "sm:grid-cols-4" : "sm:grid-cols-3",
-              compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-7 sm:pl-12" : "px-5 py-4 sm:px-8",
+              compact ? "pt-1 pr-5 pb-4 pl-11 sm:pr-8 sm:pl-14" : "px-5 py-4 sm:px-8",
             ),
       )}
     >

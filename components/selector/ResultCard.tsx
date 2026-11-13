@@ -164,7 +164,7 @@ export function ResultCard({
                     const shown = displayModel(r.model, lang);
                     return (
                       <li key={r.model}>
-                        <div className="flex items-center gap-1 pr-3 pl-3 sm:pl-4">
+                        <div className="flex items-center gap-1 pr-1.5 pl-3 sm:pr-[1.125rem] sm:pl-6 lg:pr-6">
                           <button
                             type="button"
                             aria-expanded={open}
