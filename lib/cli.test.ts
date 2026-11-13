@@ -81,7 +81,7 @@ describe("oltc CLI", () => {
 
   it("MVA path derives Imax and Um", () => {
     const input = cliToSelectInput(
-      parseCliArgs(["--mva", "25", "--kv", "110", "--conn", "Y", "--reg", "W", "--pm", "8"]),
+      parseCliArgs(["--mva", "25", "--kv", "110", "--tap", "neutral", "--reg", "W", "--pm", "8"]),
     );
     expect(input.throughCurrentA).toBeGreaterThan(130);
     expect(input.umKv).toBe(72.5);
@@ -125,8 +125,9 @@ describe("oltc CLI", () => {
   it("says when Ust was not given, and prints the engine cautions", () => {
     const a = capture(["--iu", "400", "--um", "72.5"]);
     expect(a.code).toBe(0);
-    expect(a.out).toContain("Ust 未指定");
+    // Said once, by the note; the 假定 line does not repeat it (2026-11-14).
     expect(a.out).toContain("注意：未给级电压");
+    expect(a.out.match(/级电压/g)?.length).toBe(2);
     const j = JSON.parse(capture(["--json", "--iu", "400", "--um", "72.5"]).out);
     expect(j.cautions.join(" ")).toContain("未给级电压");
   });
@@ -135,13 +136,14 @@ describe("oltc CLI", () => {
     // minimal input: everything high/medium-risk is defaulted
     const a = capture(["--iu", "350", "--um", "40.5"]);
     expect(a.code).toBe(0);
-    expect(a.out).toContain("假定：");
-    expect(a.out).toContain("conn=Y 星点（默认）");
-    expect(a.out).toContain("reg=W 正反调（默认）");
-    expect(a.out).toContain("±8 档（默认）");
-    expect(a.out).toContain("真空（默认）");
-    expect(a.out).toContain("箱内（默认）");
-    expect(a.out).toContain("相数=III（默认）");
+    // 2026-11-14: the text names what could change the type; the full list,
+    // with every default marked, is in --json.
+    expect(a.out).toContain("假定：Y 星点 · W 正反调 · ±8 档");
+    expect(a.out).not.toContain("（默认）");
+    const all = JSON.parse(capture(["--json", "--iu", "350", "--um", "40.5"]).out).assumptions.join(" · ");
+    for (const item of ["Y 星点（默认）", "W 正反调（默认）", "±8 档（默认）", "真空（默认）", "箱内（默认）", "相数=III（默认）"]) {
+      expect(all).toContain(item);
+    }
     // first line stays the bare model
     expect(a.out.trim().split(/\r?\n/)[0]).toBe("CV2III-350Y/40.5-10193W");
   });
@@ -160,17 +162,21 @@ describe("oltc CLI", () => {
   });
 
   it("capacity path defaults k to 1.0 like the web app and says so", () => {
-    const a = capture(["--mva", "60", "--kv", "110", "--conn", "Y", "--reg", "W", "--pm", "8", "--step-pct", "1.25"]);
+    const given = ["--mva", "60", "--kv", "110", "--tap", "neutral", "--reg", "W", "--pm", "8", "--step-pct", "1.25"];
+    const a = capture(given);
     expect(a.code).toBe(0);
     // k=1.0: 60 MVA 110 kV Y ≈ 350 A duty → CV2-350, not CV2-600
     expect(a.out.trim().split(/\r?\n/)[0]).toBe("CV2III-350Y/72.5-10193W");
-    expect(a.out).toContain("k=1.0（默认）");
+    const list = (argv: string[]) => JSON.parse(capture(["--json", ...argv]).out).assumptions.join(" · ");
+    expect(list(given)).toContain("k=1.0（默认）");
     // step-pct was given here, so no default mark on it
-    expect(a.out).toContain("step=1.25%");
-    expect(a.out).not.toContain("step=1.25%（默认）");
-    // silent step-pct gets marked
-    const b = capture(["--mva", "60", "--kv", "110", "--conn", "Y", "--reg", "W", "--pm", "8"]);
-    expect(b.out).toContain("step=1.25%（默认）");
+    expect(list(given)).toContain("每级 1.25%");
+    expect(list(given)).not.toContain("每级 1.25%（默认）");
+    expect(a.out).not.toContain("每级");
+    // a silent step-pct is marked in --json and named in the text
+    const silent = given.slice(0, -2);
+    expect(list(silent)).toContain("每级 1.25%（默认）");
+    expect(capture(silent).out).toContain("每级 1.25%");
   });
 
   it("drops the （默认） mark for explicitly given flags", () => {
@@ -178,11 +184,15 @@ describe("oltc CLI", () => {
       "--iu", "350", "--um", "40.5",
       "--conn", "D", "--reg", "W", "--pm", "8",
     ]);
-    expect(a.out).toContain("conn=D 线端");
-    expect(a.out).not.toContain("conn=D 线端（默认）");
-    expect(a.out).not.toContain("reg=W 正反调（默认）");
-    // mount and medium still defaulted, so the block stays
-    expect(a.out).toContain("真空（默认）");
+    const all = JSON.parse(
+      capture(["--json", "--iu", "350", "--um", "40.5", "--conn", "D", "--reg", "W", "--pm", "8"]).out,
+    ).assumptions.join(" · ");
+    expect(all).toContain("D 线端");
+    expect(all).not.toContain("D 线端（默认）");
+    expect(all).not.toContain("W 正反调（默认）");
+    expect(all).toContain("真空（默认）");
+    // The text does not repeat what was typed.
+    expect(a.out).not.toContain("D 线端");
   });
 
   it("omits the 假定 block when every watched input is explicit", () => {
@@ -198,17 +208,16 @@ describe("oltc CLI", () => {
   it("--json carries the assumptions array", () => {
     const a = capture(["--json", "--iu", "350", "--um", "40.5"]);
     const j = JSON.parse(a.out);
-    expect(j.assumptions.join(" ")).toContain("conn=Y");
+    expect(j.assumptions.join(" ")).toContain("Y 星点");
     expect(j.assumptions.join(" ")).toContain("（默认）");
   });
 
   it("octc echo shows wiring and mount, not reg or phantom positions", () => {
     const a = capture(["--octc", "--iu", "800", "--um", "72.5", "--conn", "D", "--contact", "6x5"]);
     expect(a.code).toBe(0);
-    expect(a.out).toContain("conn=D 线端");
-    expect(a.out).toContain("接线=自动（IV）（默认）");
+    expect(a.out).toContain("接线=自动（IV）");
     expect(a.out.trim().split(/\r?\n/)[0]).toBe("WSLIV-800D/72.5-6x5A");
-    expect(a.out).not.toContain("reg=");
+    expect(a.out).not.toContain("正反调");
     expect(a.out).not.toContain("17 档");
   });
 });
@@ -255,13 +264,13 @@ describe("oltc CLI tap range and tap point", () => {
   it("--kind auto on the --iu path defaults to the junction and echoes D", () => {
     const a = capture(["--iu", "600", "--um", "252", "--kind", "auto"]);
     expect(a.out.split(/\r?\n/)[0]).toBe("3xCM2I-600/252D-10193W");
-    expect(a.out).toContain("conn=D 线端");
-    expect(a.out).not.toContain("conn=Y");
-    expect(a.out).toContain("开关在串联/公共绕组连接点（默认）");
+    expect(a.out).toContain("D 线端");
+    expect(a.out).not.toContain("Y 星点");
+    expect(a.out).toContain("开关在串联/公共绕组连接点");
     const b = capture(["--iu", "600", "--um", "252", "--kind", "auto", "--tap", "junction"]);
     expect(b.out.split(/\r?\n/)[0]).toBe("3xCM2I-600/252D-10193W");
-    expect(b.out).toContain("conn=D 线端");
-    expect(b.out).not.toContain("（默认） · 自耦变");
+    expect(b.out).toContain("D 线端");
+    expect(b.out).not.toContain("开关在");
   });
 
   it("--winding delta without --tap sits at the line end", () => {
@@ -269,7 +278,7 @@ describe("oltc CLI tap range and tap point", () => {
     expect(a.code).toBe(0);
     expect(a.out.split(/\r?\n/)[0]).toBe("CV2III-350D/40.5-10193W");
     expect(a.out).toContain("I = S/(3×33 kV)");
-    expect(a.out).toContain("开关在线端 ");
+    expect(a.out).toContain("开关在线端");
   });
 
   it("--earth-um rescues a duty whose rule Um is above 363", () => {
@@ -351,13 +360,13 @@ describe("oltc CLI uneven ranges and tender lines", () => {
   it("says when the lowest tap assumes a symmetric range (D4)", () => {
     const flags = ["--mva", "45", "--kv", "138", "--tap", "line", "--winding", "delta", "--step-pct", "1.25"];
     const a = capture([...flags, "--pm", "8"]);
-    expect(a.out).toContain("最低档按 −8 算（−档未指定");
+    expect(a.out).toContain("最低档按 −8（未指定）");
     expect(json([...flags, "--pm", "8"]).basis.maxA).toBe(120.8);
     const b = capture([...flags, "--minus", "12"]);
-    expect(b.out).not.toContain("−档未指定");
+    expect(b.out).not.toContain("（未指定）");
     expect(json([...flags, "--minus", "12"]).basis.maxA).toBe(127.9);
     const c = capture(["--line", "45MVA 138+4-12x1.25%/13.8kV Dyn1"]);
-    expect(c.out).not.toContain("−档未指定");
+    expect(c.out).not.toContain("（未指定）");
     expect(json(["--line", "45MVA 138+4-12x1.25%/13.8kV Dyn1"]).basis.maxA).toBe(127.9);
     expect(c.out.split(/\r?\n/)[0]).toMatch(/-10193W$/);
   });

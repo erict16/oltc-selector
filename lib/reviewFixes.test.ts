@@ -170,8 +170,18 @@ describe("CLI: flags that used to be dropped are errors", () => {
     expect(r.out.split("\n")[0]).toContain(code);
   });
 
-  it("a tap point that --line read does not make --conn an error", () => {
-    expect(cli("--line", "25MVA 110±8x1.25%/10.5kV YNd11", "--conn", "D").code).toBe(0);
+  it("--conn beside --mva or --line is refused: it used to swap the current formula unseen", () => {
+    // 2026-11-14: a YN line with --conn D was sized as a delta, I = S/(3U).
+    for (const argv of [
+      ["--line", "25MVA 110±8x1.25%/10.5kV YNd11", "--conn", "D"],
+      ["--mva", "25", "--kv", "110", "--conn", "D"],
+    ]) {
+      const r = cli(...argv);
+      expect(r.code).toBe(1);
+      expect(r.err).toContain("--conn does not apply with --mva");
+      expect(r.err).toContain("--tap line");
+    }
+    expect(first("--mva", "25", "--kv", "110", "--tap", "line", "--winding", "delta")).toBe("CV2III-350D/126-10193W");
   });
 
   it("a switch flag with a value is named", () => {
@@ -263,11 +273,38 @@ describe("CLI: --json", () => {
     expect(j.errors.length).toBeGreaterThan(0);
   });
 
-  it("a bad flag: the error is JSON on stdout and text on stderr", () => {
+  it("a bad flag: the error is JSON on stdout, in both languages, and stderr stays empty", () => {
+    // The helper above runs in English; Chinese is the default.
     const r = cli("--iu", "abc", "--json");
     expect(r.code).toBe(1);
-    expect(JSON.parse(r.out)).toMatchObject({ ok: false, model: null });
-    expect(r.err).toContain("--iu");
+    const j = JSON.parse(r.out);
+    expect(j).toMatchObject({ ok: false, model: null });
+    expect(j.errors).toEqual(["Invalid number for --iu: abc"]);
+    expect(r.err).toBe("");
+    let zhOut = "";
+    let zhErr = "";
+    runCli(["--iu", "abc", "--json"], { stdout: (t) => (zhOut += t), stderr: (t) => (zhErr += t) });
+    expect(JSON.parse(zhOut).errors).toEqual(["--iu 的数字无效：abc", "Invalid number for --iu: abc"]);
+    expect(zhErr).toBe("");
+  });
+
+  it("--line reads an all-lowercase vector group", () => {
+    // 2026-11-14: "ynd11" printed "no vector group".
+    const r = cli("--line", "transformer 40 mva, 132/33 kv, ynd11, ±8x1.25%");
+    expect(r.out).toContain("YNd11");
+    expect(r.out).not.toContain("no vector group");
+    expect(cli("--line", "16 mva 22±8x1.25%/0.4 kv dyn11").out).toContain("Dyn11");
+    expect(cli("--line", "125mva 225±8x1.25%/115/35kv yna0d11").out).toContain("autotransformer");
+  });
+
+  it("--line with a bare 'off-circuit' is off-circuit duty; 'no-load losses' is not", () => {
+    // 2026-11-14: "Dyn11 off-circuit ±2x2.5%" was sized as an on-load CV2.
+    expect(first("--line", "31.5MVA 33/11 kV Dyn11 off-circuit ±2x2.5%")).toBe("WSGII-600D/40.5-4x5A");
+    expect(first("--line", "31.5MVA 33±8x1.25%/11 kV Dyn11, no-load losses 18 kW")).toMatch(/^CV2III-/);
+  });
+
+  it("--version --json is JSON too", () => {
+    expect(JSON.parse(cli("--version", "--json").out)).toMatchObject({ ok: true });
   });
 
   it("carries the resolved duty as numbers and the line read-back", () => {

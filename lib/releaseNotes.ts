@@ -19,6 +19,11 @@ export type Release = {
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
     {
+      version: "2.4.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["命令行：输出更短。「假定」一行只列可能改变型号的项（完整清单仍在 --json 里），对地绝缘不再重复说三遍，「其他」改为「其他可选」。", "命令行：报错先给中文再给英文（--lang en 只给英文）；--json 出错时只输出 JSON，--version --json 也输出 JSON。"] }, { kind: "fix", items: ["命令行：--line 能读小写联结组（如 ynd11）；只写 off-circuit 的行按无载选，不再选成有载；--mva 或 --line 旁边的 --conn 现在报错（以前会悄悄把电流公式换成 S/(3U)），请改用 --tap line 或 --winding delta。"] }],
+    },
+    {
       version: "2.4.0",
       date: "2026-11",
       groups: [{ kind: "imp", items: ["命令行：删除 --market 参数。它只认意大利和土耳其，多数情况下不起作用；开关对地绝缘请直接用 --earth-um，跨调压绕组的耐压用 --across-li / --across-ac。", "页面：结果卡高度重做，滚到底时和表单底部对齐，中间不再留空白，窗口矮时型号始终可见；去掉总是接近 100% 的对地绝缘进度条；页头不再放图标；下拉框边线调淡。"] }],
@@ -266,6 +271,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.4.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: shorter output. The Assumed line names only what could change the type (the full list stays in --json), the insulation to earth is no longer said three times, and Other is now Other types that cover the duty.", "CLI: on a Chinese run an error prints in Chinese, then English (--lang en prints English alone); under --json an error is JSON only, and --version --json is JSON too."] }, { kind: "fix", items: ["CLI: --line reads a lowercase vector group (ynd11); a line that says only off-circuit is sized as off-circuit, not on-load; --conn beside --mva or --line is now an error (it used to swap the current formula to S/(3U) unseen); use --tap line or --winding delta."] }],
+    },
     {
       version: "2.4.0",
       date: "2026-11",
@@ -519,6 +529,11 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.4.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: kết quả ngắn hơn. Dòng Giả định chỉ nêu những mục có thể đổi mã kiểu (danh sách đầy đủ vẫn có trong --json), cách điện đối với đất không còn nói ba lần, và mục Khác nay là các kiểu khác đáp ứng được.", "CLI: khi chạy tiếng Trung, lỗi in tiếng Trung rồi tiếng Anh (--lang en chỉ in tiếng Anh); với --json lỗi chỉ là JSON, và --version --json cũng là JSON."] }, { kind: "fix", items: ["CLI: --line đọc được tổ đấu dây viết thường (ynd11); dòng chỉ ghi off-circuit được chọn theo không tải, không phải có tải; --conn đi cùng --mva hoặc --line nay báo lỗi (trước đây âm thầm đổi công thức dòng sang S/(3U)); hãy dùng --tap line hoặc --winding delta."] }],
+    },
+    {
       version: "2.4.0",
       date: "2026-11",
       groups: [{ kind: "imp", items: ["CLI: bỏ tham số --market. Nó chỉ biết Ý và Thổ Nhĩ Kỳ và phần lớn trường hợp không có tác dụng; hãy nêu cách điện đối với đất bằng --earth-um và mức chịu đựng ngang cuộn điều chỉnh bằng --across-li / --across-ac.", "Trang: chiều cao thẻ kết quả được làm lại, nên ở cuối trang thẻ kết thúc ngang với biểu mẫu, không còn dải trống, và mã kiểu luôn hiện trên cửa sổ thấp; bỏ thanh cách điện luôn gần 100 %; đầu trang không còn biểu tượng; viền ô chọn nhạt hơn."] }],
@@ -768,6 +783,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.4.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: salida más corta. La línea de supuestos nombra solo lo que puede cambiar el tipo (la lista completa sigue en --json), el aislamiento a tierra ya no se dice tres veces, y Otros pasa a ser otros tipos que cubren el servicio.", "CLI: en una ejecución en chino el error sale en chino y luego en inglés (--lang en solo en inglés); con --json el error es solo JSON, y --version --json también es JSON."] }, { kind: "fix", items: ["CLI: --line lee un grupo de conexión en minúsculas (ynd11); una línea que solo dice off-circuit se dimensiona sin carga, no en carga; --conn junto a --mva o --line ahora es un error (antes cambiaba la fórmula de corriente a S/(3U) sin avisar); use --tap line o --winding delta."] }],
+    },
     {
       version: "2.4.0",
       date: "2026-11",
@@ -1021,6 +1041,11 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.4.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: çıktı daha kısa. Varsayılanlar satırı yalnızca tipi değiştirebilecek kalemleri adlandırır (tam liste --json içinde kalır), toprağa yalıtım artık üç kez söylenmez ve Diğer başlığı artık görevi karşılayan diğer tipler.", "CLI: Çince çalıştırmada hata önce Çince, sonra İngilizce yazılır (--lang en yalnızca İngilizce); --json ile hata yalnızca JSON olur, --version --json da JSON verir."] }, { kind: "fix", items: ["CLI: --line küçük harfli bağlantı grubunu okur (ynd11); yalnızca off-circuit yazan satır yük altında değil yüksüz olarak boyutlandırılır; --mva veya --line yanındaki --conn artık hatadır (eskiden akım formülünü sessizce S/(3U) yapıyordu); --tap line veya --winding delta kullanın."] }],
+    },
+    {
       version: "2.4.0",
       date: "2026-11",
       groups: [{ kind: "imp", items: ["CLI: --market parametresi kaldırıldı. Yalnızca İtalya ve Türkiye'yi biliyordu ve çoğu durumda hiçbir şey yapmıyordu; toprağa yalıtımı --earth-um ile, ayar sargısı üzerindeki dayanım seviyelerini --across-li / --across-ac ile verin.", "Sayfa: sonuç kartının yüksekliği yeniden yapıldı; sayfanın sonunda formla aynı hizada biter, boş şerit kalmaz ve alçak pencerede tip görünür kalır; hep yaklaşık %100 gösteren yalıtım çubuğu kaldırıldı; üst çubukta simge yok; açılır kutu kenarlıkları daha açık."] }],
@@ -1270,6 +1295,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.4.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: keluaran lebih pendek. Baris asumsi hanya menyebut hal yang dapat mengubah tipe (daftar lengkap tetap ada di --json), isolasi ke tanah tidak lagi disebut tiga kali, dan Lainnya kini menjadi tipe lain yang memenuhi tugas.", "CLI: pada keluaran bahasa Mandarin, galat dicetak dalam bahasa Mandarin lalu Inggris (--lang en hanya Inggris); dengan --json galat hanya berupa JSON, dan --version --json juga JSON."] }, { kind: "fix", items: ["CLI: --line membaca grup vektor huruf kecil (ynd11); baris yang hanya menyebut off-circuit dihitung sebagai tanpa beban, bukan berbeban; --conn di samping --mva atau --line kini menjadi galat (dulu diam-diam mengubah rumus arus menjadi S/(3U)); pakai --tap line atau --winding delta."] }],
+    },
     {
       version: "2.4.0",
       date: "2026-11",

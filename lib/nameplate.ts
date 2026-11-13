@@ -285,7 +285,14 @@ export function parseVectorGroup(raw: string): { group: string; windings: Windin
   // 2026-11-07 tender test: PGCIL writes "YNaOd11" / "YNyno" (letter O for 0), and
   // Vietnamese sheets "Δ/Yo-11" (Yo = star with neutral). The auto was read as a
   // two-winding star neutral; the HV delta as a star.
+  // 2026-11-14 CLI review: an all-lowercase group ("ynd11", "dyn11", "yna0d11")
+  // gave no group. Every part must carry its clock number, so a plain word
+  // cannot match.
   const text = raw
+    .replace(
+      /(?<![A-Za-z0-9])(yn|zn|y|d|z)((?:(?:yn|zn|y|d|z|a)\d{1,2}){1,3})(?![A-Za-z0-9])/g,
+      (_m: string, head: string, rest: string) => head.toUpperCase() + rest,
+    )
     .replace(/\b(?:YN|Yn|Y|D|ZN|Z)(?:(?:yn|y|d|zn|z|a)[0-9Oo]{0,2}){1,3}(?![A-Za-z0-9])/g, (g: string) =>
       g.replace(/(?<=(?:yn|y|d|zn|z|a)\d?)[Oo]/g, "0"),
     )
@@ -690,6 +697,9 @@ const DRY_TYPE =
 const OFF_CIRCUIT_TAP = new RegExp(
   [
     String.raw`\b(?:DETC|OCTC|NLTC)\b`,
+    // 2026-11-14: "Dyn11 off-circuit ±2x2.5%" names no tap word. "Off-circuit"
+    // and "de-energized" are never loss words; "no-load" is, so it still needs one.
+    String.raw`\b(?:off[\s-]?circuit|de-?energi[sz]ed)\b`,
     String.raw`\b(?:off[\s-]?(?:circuit|load)|no[\s-]?load|de-?energi[sz]ed)\s+tap`,
     String.raw`\btap[\s-]?chang\w*\s*[(:,-]?\s*(?:off[\s-]?(?:circuit|load)|no[\s-]?load|de-?energi[sz]ed)`,
     String.raw`(?:conmutador|cambiador)[^,;.]{0,30}(?:sin\s+carga|desenergizad)`,
