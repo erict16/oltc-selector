@@ -19,6 +19,11 @@ export type Release = {
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
     {
+      version: "2.3.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["命令行：每次运行都会查 npm 有没有新版本，有就在输出末尾提示，不会自动更新。", "页面：去掉表单顶部的粘贴框和「复制链接」；自耦变的提示改成更直白的说法；AI 选型页改为直接用 npm 上的 oltc-selector。"] }],
+    },
+    {
       version: "2.3.0",
       date: "2026-11",
       groups: [
@@ -251,6 +256,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.3.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: every run checks npm for a newer version and prints a notice at the end when there is one; it never updates itself.", "Page: the paste box above the form and Copy link are removed; the Chinese autotransformer notes are in plainer words; the AI page now uses oltc-selector from npm directly."] }],
+    },
     {
       version: "2.3.0",
       date: "2026-11",
@@ -489,6 +499,11 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.3.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: mỗi lần chạy đều kiểm tra npm xem có bản mới không và báo ở cuối kết quả nếu có; không tự cập nhật.", "Trang: bỏ ô dán ở đầu biểu mẫu và nút Sao chép liên kết; các ghi chú tiếng Trung cho máy biến áp tự ngẫu viết dễ hiểu hơn; trang AI nay dùng thẳng oltc-selector trên npm."] }],
+    },
+    {
       version: "2.3.0",
       date: "2026-11",
       groups: [
@@ -723,6 +738,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.3.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: cada ejecución comprueba en npm si hay una versión nueva y avisa al final cuando la hay; nunca se actualiza sola.", "Página: se quitan el cuadro para pegar encima del formulario y Copiar enlace; las notas en chino del autotransformador están en palabras más simples; la página de IA usa ahora oltc-selector de npm directamente."] }],
+    },
     {
       version: "2.3.0",
       date: "2026-11",
@@ -961,6 +981,11 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.3.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: her çalıştırmada npm'de yeni sürüm olup olmadığına bakar ve varsa çıktının sonunda bildirir; kendini güncellemez.", "Sayfa: formun üstündeki yapıştırma kutusu ve Bağlantıyı kopyala kaldırıldı; ototransformatör için Çince notlar daha sade yazıldı; AI sayfası artık doğrudan npm'deki oltc-selector'ı kullanıyor."] }],
+    },
+    {
       version: "2.3.0",
       date: "2026-11",
       groups: [
@@ -1195,6 +1220,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.3.1",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: setiap dijalankan memeriksa npm untuk versi baru dan memberi tahu di akhir keluaran bila ada; tidak memperbarui dirinya sendiri.", "Halaman: kotak tempel di atas formulir dan Salin tautan dihapus; catatan autotransformator dalam bahasa Mandarin ditulis lebih sederhana; halaman AI kini langsung memakai oltc-selector dari npm."] }],
+    },
     {
       version: "2.3.0",
       date: "2026-11",
