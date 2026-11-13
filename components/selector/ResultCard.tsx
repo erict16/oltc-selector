@@ -118,14 +118,19 @@ export function ResultCard({
                   />
                 </span>
               </div>
-              <p
-                key={primary.model}
-                translate="no"
-                className="plate-type plate-in mt-4 text-[clamp(1.375rem,6vw,1.875rem)] leading-[1.15] font-semibold tracking-[-0.025em] text-[var(--color-ink)] lg:text-[clamp(1.625rem,2.6vw,2.375rem)]"
+              <div
+                className="type-block"
+                style={{ "--len": displayModel(primary.model, lang).length } as React.CSSProperties}
               >
-                {modelNodes(displayModel(primary.model, lang))}
-              </p>
-              <TypeSegments lang={lang} r={primary} shown={displayModel(primary.model, lang)} />
+                <p
+                  key={primary.model}
+                  translate="no"
+                  className="plate-type plate-in type-hero"
+                >
+                  {modelNodes(displayModel(primary.model, lang))}
+                </p>
+                <TypeSegments lang={lang} r={primary} shown={displayModel(primary.model, lang)} />
+              </div>
             </>
           )}
         </div>
