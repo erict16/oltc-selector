@@ -201,7 +201,7 @@ Output is in Chinese by default; `--lang en` gives English. Every run asks npm f
 |------|---------|---------|
 | `--line "text"` | Tender line: MVA, kV ratio with ±N×x%, vector group. Flags given beside it win. | |
 | `--iu` / `--imax` | Max through-current Imax (A). **No** safety factor. | required unless `--mva` |
-| `--mva` `--kv` | Transformer MVA + tap-side kV → Imax (min tap + `--k`). With `--iu`, `--kv` alone sets the winding voltage for the 220/330 kV and `--market` rules | |
+| `--mva` `--kv` | Transformer MVA + tap-side kV → Imax (min tap + `--k`). With `--iu`, `--kv` alone sets the winding voltage for the 220/330 kV rules | |
 | `--k` | Safety factor ≥ 1, **capacity path only** | 1.0 |
 | `--step-pct` | Step as a percent (1.25 means 1.25 %), capacity path only | 1.25 |
 | `--os-imax` | Capacity path: the Imax the OS or maker states at the lowest tap (`--imax` beside `--mva` means this) | |
@@ -210,7 +210,6 @@ Output is in Chinese by default; `--lang en` gives English. Every run asks npm f
 | `--winding star\|delta` | Tapped winding connection (two-winding) | star |
 | `--hv` `--mv` | Autotransformer HV / MV rated kV | |
 | `--earth-um` | OLTC insulation to earth from the OS; overrides the rule | |
-| `--market` | Buyer's country for a neutral's assumed Um. Rules exist for `IT` and `TR`; another code prints a note and is not used | |
 | `--across-li` `--across-ac` | Stated LI / AC withstand across the tap winding (kV): sets the selector grade B/C/D/DE | |
 | `--um` | Equipment Um (kV) | derived from `--kv` if omitted |
 | `--ust` | Step voltage (V) | 0, or derived on MVA path |

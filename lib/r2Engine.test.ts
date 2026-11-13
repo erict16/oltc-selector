@@ -69,7 +69,7 @@ describe("ENGINE-1 half-given across-tap stress keeps the Um default", () => {
   });
 
   it("CLI: AC 50 alone on a 220 kV neutral stays 252D", () => {
-    const argv = ["--mva", "100", "--kv", "220", "--tap", "neutral", "--winding", "star", "--pm", "8", "--step-pct", "1.25", "--market", "IT"];
+    const argv = ["--mva", "100", "--kv", "220", "--tap", "neutral", "--winding", "star", "--pm", "8", "--step-pct", "1.25", "--earth-um", "252"];
     expect(first([...argv, "--across-ac", "50"])).toBe(first(argv));
     expect(first([...argv, "--across-ac", "50"])).toMatch(/\/252D-/);
   });

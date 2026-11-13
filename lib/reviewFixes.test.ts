@@ -298,12 +298,6 @@ describe("CLI: notes", () => {
     expect(cli("--iu", "400", "--um", "73").out).toContain("sized at Um 126 kV");
   });
 
-  it("a market with no rule is named, not swallowed", () => {
-    expect(cli("--iu", "400", "--um", "72.5", "--kv", "110", "--market", "XX").out).toContain(
-      "--market XX has no rule",
-    );
-  });
-
   it("an autotransformer no longer carries a reference type of another family", () => {
     const r = cli("--line", "240MVA 220/110/35kV YNa0d11");
     expect(r.out).not.toContain("Reference:");

@@ -1,6 +1,6 @@
 import { HAS_REPLAY_DATA, readSalesJson } from "./replayData";
 import { describe, expect, it } from "vitest";
-import { runCli } from "./cli";
+import { cliToSelectInput, parseCliArgs, runCli } from "./cli";
 import { maxThroughCurrent } from "./deriveUm";
 import { octcContactCode, octcRoman, selectOltc } from "./engine";
 import { localizeNote } from "./noteI18n";
@@ -246,10 +246,12 @@ describe("ENGINE-10 a stress step above the 330 kV-class step is named", () => {
 
 describe("ORDERS-11 Turkish 110 kV-class star neutrals take 72.5C (buyer practice)", () => {
   const tr154 = "--mva 100 --kv 154 --tap neutral --reg G --pm 12 --ust 1111.4";
-  it("--market TR on a 154 kV neutral gives 72.5C with the practice caution", () => {
-    const r = cli(args(`${tr154} --market TR`));
-    expect(r.out.split(/\r?\n/)[0]).toBe("CM2III-500Y/72.5C-14273G");
-    expect(r.out).toContain("选择器等级上调为 C：土耳其 110 kV 级中性点通常取 C（B 也满足）。");
+  it("market TR on a 154 kV neutral gives 72.5C with the practice caution", () => {
+    // Engine input: the CLI has no --market since 2.4.0.
+    const input = cliToSelectInput(parseCliArgs([...args(tr154), "--no-update-check"]));
+    const top = selectOltc({ ...input, market: "TR" }).results[0]!;
+    expect(top.model).toBe("CM2III-500Y/72.5C-14273G");
+    expect(top.cautionsZh.join("\n")).toContain("选择器等级上调为 C：土耳其 110 kV 级中性点通常取 C（B 也满足）。");
   });
 
   it("no market stays 72.5B", () => {

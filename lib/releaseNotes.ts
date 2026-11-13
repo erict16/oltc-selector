@@ -19,6 +19,11 @@ export type Release = {
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
     {
+      version: "2.4.0",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["命令行：删除 --market 参数。它只认意大利和土耳其，多数情况下不起作用；开关对地绝缘请直接用 --earth-um，跨调压绕组的耐压用 --across-li / --across-ac。", "页面：结果卡高度重做，滚到底时和表单底部对齐，中间不再留空白，窗口矮时型号始终可见；去掉总是接近 100% 的对地绝缘进度条；页头不再放图标；下拉框边线调淡。"] }],
+    },
+    {
       version: "2.3.2",
       date: "2026-11",
       groups: [{ kind: "fix", items: ["命令行：互相矛盾或不起作用的参数现在会报错，不再悄悄选一个：--oil 和 --vacuum 同时给、--octc 和 --duty oltc、--conn Y 配 --tap line、双绕组却给了 --hv / --mv、--iu 路径上的 --minus、--um 和 --earth-um 数值不同、--step-pct 小于 0.1。"] }, { kind: "imp", items: ["页面：结果栏和表单一样高，滚到底两边对齐；页头加了版本号、选型助手和更新记录；换了新图标；对地工频/雷电耐压写在 Um 下面；提示里的「订货规范」不再带（OS）。"] }],
@@ -261,6 +266,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.4.0",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: the --market flag is removed. It knew Italy and Turkey only and did nothing in most cases; state the insulation to earth with --earth-um and the across-tap levels with --across-li / --across-ac.", "Page: the result card's height is rebuilt, so it ends level with the form at the end of the page with no empty band, and the type stays in view on a short window; the insulation bar that always read about 100 % is removed; no mark in the header; lighter dropdown borders."] }],
+    },
     {
       version: "2.3.2",
       date: "2026-11",
@@ -509,6 +519,11 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.4.0",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: bỏ tham số --market. Nó chỉ biết Ý và Thổ Nhĩ Kỳ và phần lớn trường hợp không có tác dụng; hãy nêu cách điện đối với đất bằng --earth-um và mức chịu đựng ngang cuộn điều chỉnh bằng --across-li / --across-ac.", "Trang: chiều cao thẻ kết quả được làm lại, nên ở cuối trang thẻ kết thúc ngang với biểu mẫu, không còn dải trống, và mã kiểu luôn hiện trên cửa sổ thấp; bỏ thanh cách điện luôn gần 100 %; đầu trang không còn biểu tượng; viền ô chọn nhạt hơn."] }],
+    },
+    {
       version: "2.3.2",
       date: "2026-11",
       groups: [{ kind: "fix", items: ["CLI: các tham số mâu thuẫn nhau hoặc không có tác dụng nay báo lỗi thay vì âm thầm chọn một: --oil cùng --vacuum, --octc cùng --duty oltc, --conn Y cùng --tap line, --hv / --mv với máy hai cuộn dây, --minus trên đường --iu, --um và --earth-um khác giá trị, --step-pct nhỏ hơn 0.1."] }, { kind: "imp", items: ["Trang: cột kết quả cao bằng biểu mẫu nên hai cột kết thúc trên cùng một đường; đầu trang có số phiên bản và liên kết tới hướng dẫn trợ lý và ghi chú phát hành; biểu tượng mới; mức chịu đựng đối với đất nằm dưới Um."] }],
@@ -753,6 +768,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.4.0",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: se elimina el parámetro --market. Solo conocía Italia y Turquía y en la mayoría de los casos no hacía nada; indique el aislamiento a tierra con --earth-um y los niveles a través del devanado de regulación con --across-li / --across-ac.", "Página: se rehízo la altura de la tarjeta de resultado, de modo que al final de la página termina a la par del formulario, sin franja vacía, y el tipo sigue visible en una ventana baja; se quita la barra de aislamiento que siempre marcaba cerca del 100 %; sin icono en la cabecera; bordes de los desplegables más claros."] }],
+    },
     {
       version: "2.3.2",
       date: "2026-11",
@@ -1001,6 +1021,11 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.4.0",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: --market parametresi kaldırıldı. Yalnızca İtalya ve Türkiye'yi biliyordu ve çoğu durumda hiçbir şey yapmıyordu; toprağa yalıtımı --earth-um ile, ayar sargısı üzerindeki dayanım seviyelerini --across-li / --across-ac ile verin.", "Sayfa: sonuç kartının yüksekliği yeniden yapıldı; sayfanın sonunda formla aynı hizada biter, boş şerit kalmaz ve alçak pencerede tip görünür kalır; hep yaklaşık %100 gösteren yalıtım çubuğu kaldırıldı; üst çubukta simge yok; açılır kutu kenarlıkları daha açık."] }],
+    },
+    {
       version: "2.3.2",
       date: "2026-11",
       groups: [{ kind: "fix", items: ["CLI: birbiriyle çelişen veya etkisi olmayan parametreler artık sessizce biri seçilmek yerine hata verir: --oil ile --vacuum, --octc ile --duty oltc, --conn Y ile --tap line, iki sargılı trafoda --hv / --mv, --iu yolunda --minus, farklı değerli --um ve --earth-um, 0.1'den küçük --step-pct."] }, { kind: "imp", items: ["Sayfa: sonuç sütunu form kadar yüksek, böylece ikisi aynı çizgide biter; üst çubukta sürüm numarası ile asistan kılavuzu ve sürüm notları bağlantıları var; yeni simge; toprağa dayanım seviyeleri Um'un altında."] }],
@@ -1245,6 +1270,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.4.0",
+      date: "2026-11",
+      groups: [{ kind: "imp", items: ["CLI: parameter --market dihapus. Parameter itu hanya mengenal Italia dan Turki dan pada kebanyakan kasus tidak berpengaruh; nyatakan isolasi ke tanah dengan --earth-um dan tingkat ketahanan melintasi belitan pengatur dengan --across-li / --across-ac.", "Halaman: tinggi kartu hasil dibuat ulang, sehingga di akhir halaman kartu berakhir sejajar dengan formulir tanpa pita kosong, dan tipe tetap terlihat pada jendela pendek; batang isolasi yang selalu menunjukkan sekitar 100 % dihapus; tidak ada ikon di kepala halaman; garis tepi dropdown lebih terang."] }],
+    },
     {
       version: "2.3.2",
       date: "2026-11",

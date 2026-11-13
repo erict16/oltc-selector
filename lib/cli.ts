@@ -71,7 +71,6 @@ export type CliArgs = {
   /** OS / maker Imax on the --mva path (--os-imax, or --imax beside --mva). */
   osImax?: number;
   /** Buyer's country (ISO code) for the neutral Um practice. */
-  market?: string;
   /** Stated across-tap-winding LI / AC (kV). */
   acrossLi?: number;
   acrossAc?: number;
@@ -303,12 +302,11 @@ export function parseCliArgs(rawArgv: string[]): CliArgs {
       continue;
     }
     if (a === "--market") {
-      out.given.add("market");
-      const [v, n] = take(i, a);
-      if (!/^[A-Za-z]{2}$/.test(v)) throw new CliError(`--market must be a 2-letter country code (IT, TR, RU…)`);
-      out.market = v.toUpperCase();
-      i = n;
-      continue;
+      // Removed 2026-11-14: it knew two countries, mostly did nothing, and its
+      // Um effect was --earth-um under another name.
+      throw new CliError(
+        "--market is removed. State the insulation to earth with --earth-um, and the across-tap levels with --across-li / --across-ac.",
+      );
     }
     if (a === "--across-li" || a === "--across-ac") {
       const key = a === "--across-li" ? "acrossLi" : "acrossAc";
@@ -727,7 +725,7 @@ Flags:
                      --line="…" keeps a line that starts with a dash.
   --mva MVA --kv kV  Capacity path: Imax from rated I, minus steps, --step-pct, --k
                      With --iu, --kv alone gives the winding voltage (220 kV
-                     combined-only, 330 kV grade, --market) and Um if omitted.
+                     combined-only, 330 kV grade) and Um if omitted.
   --kind two|auto    Transformer kind (--auto = --kind auto). Default two-winding.
   --tap P            Where the OLTC sits: neutral|line (two-winding),
                      junction|mv-line (autotransformer, series/common junction
@@ -739,9 +737,6 @@ Flags:
   --earth-um kV      OLTC insulation to earth from the OS or maker (catalogue
                      class). Overrides the rule: line end = winding system,
                      neutral ≤72.5 full else 72.5 assumed, autotransformer = HV.
-  --market CC        Buyer's country for a neutral's assumed Um: IT (line
-                     class up to 252), TR (126 on 220 kV class and above).
-                     Needs --kv (or --mva/--kv).
   --um kV            Equipment Um (OLTC). With --kv, derived if omitted.
   --ust V            Step voltage. With --mva/--kv/--step-pct, derived if omitted;
                      given, it is the OS figure and a floor (never lowers Ust).
@@ -928,7 +923,6 @@ function computeCliDuty(args: CliArgs): DutyBasis | null {
     ...(args.osImax != null && args.osImax > 0 ? { statedMaxA: args.osImax } : {}),
     // --ust used to replace Ust after deriveDuty: basis.stepV disagreed (D3).
     ...(args.ust != null && args.ust > 0 ? { statedStepV: args.ust } : {}),
-    ...(args.market ? { market: args.market } : {}),
   });
 }
 
@@ -1034,10 +1028,6 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     throw new CliError("--step-pct needs --mva/--kv; give --ust on the --iu path");
   }
 
-  if (args.market && args.mva == null && !iuHasVoltage(args)) {
-    throw new CliError("--market needs the winding voltage: add --kv (or --mva/--kv)");
-  }
-
   const duty = cliDuty(args);
   let conn = args.conn;
   if (duty && args.mva != null) {
@@ -1080,7 +1070,6 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     ...(duty?.combinedOnly ? { combinedOnly: true } : {}),
     ...(duty?.ok && args.kind !== "auto" ? { tapWindingKv: duty.umSystemKv } : {}),
     // 2026-11-04 r3 ORDERS-11: buyer practice on the grade (TR 72.5C neutrals).
-    ...(args.market ? { market: args.market } : {}),
     throughCurrentA: iu,
     umKv: um,
     stepVoltageV: ust,
@@ -1161,7 +1150,6 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
       items.push(`对地 Um ${args.earthUm}（招标行中性点 BIL ${args.line.neutralBilKv} kV）`);
     }
     if (duty?.umAssumed) items.push(`对地 Um ${duty.umKv}（未指定）`);
-    if (args.market) items.push(`市场=${args.market}`);
   } else {
     // Echo the Y/D the engine got, not the --conn default it replaced.
     const conn = cliConnection(args);
@@ -1304,7 +1292,6 @@ const ASSUMPTION_EN: Array<[RegExp | string, string]> = [
   [/^调压绕组 /, "tapped winding "],
   [/^调压范围 /, "range "],
   ["对地 Um", "Um to earth"],
-  ["市场=", "market="],
   ["星点", "star point"],
   ["线端", "line end"],
   ["中性点", "neutral"],
@@ -1371,7 +1358,7 @@ export function basisLineZh(d: DutyBasis): string {
 
 /**
  * Notes the CLI adds beside the engine's: a stated Um below the rule, a Um
- * that is not a catalogue class, a market with no rule.
+ * that is not a catalogue class.
  */
 export function cliNotes(
   args: CliArgs | undefined,
@@ -1400,13 +1387,6 @@ export function cliNotes(
       en
         ? `Um ${input.umKv} kV is not a class of this type: sized at Um ${primaryUmKv} kV.`
         : `Um ${input.umKv} kV 不是该型号的电压等级，按 Um ${primaryUmKv} kV 选。`,
-    );
-  }
-  if (args.market && args.market !== "IT" && args.market !== "TR") {
-    notes.push(
-      en
-        ? `--market ${args.market} has no rule (IT and TR only): not used.`
-        : `--market ${args.market} 没有对应规则（只有 IT、TR），未使用。`,
     );
   }
   return notes;
