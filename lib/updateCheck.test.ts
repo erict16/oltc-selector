@@ -4,7 +4,6 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { runCli } from "./cli";
 import {
-  UPDATE_TTL_MS,
   checkForUpdate,
   isNewer,
   updateCheckEnabled,
@@ -47,30 +46,24 @@ describe("update check", () => {
     }
   });
 
-  it("asks the registry at most once a day", async () => {
+  it("asks the registry on every run; offline it uses the last answer", async () => {
     const file = cacheFile();
     let calls = 0;
     const fetchLatest = async () => {
       calls++;
       return "2.2.0";
     };
-    const t0 = 1_800_000_000_000;
-    await checkForUpdate({ current: "2.1.0", cacheFile: file, now: t0, fetchLatest });
-    const again = await checkForUpdate({
-      current: "2.1.0",
-      cacheFile: file,
-      now: t0 + 60_000,
-      fetchLatest,
-    });
-    expect(calls).toBe(1);
-    expect(again).toContain("2.2.0");
-    await checkForUpdate({
-      current: "2.1.0",
-      cacheFile: file,
-      now: t0 + UPDATE_TTL_MS + 1,
-      fetchLatest,
-    });
+    await checkForUpdate({ current: "2.1.0", cacheFile: file, fetchLatest });
+    await checkForUpdate({ current: "2.1.0", cacheFile: file, fetchLatest });
     expect(calls).toBe(2);
+    const offline = await checkForUpdate({
+      current: "2.1.0",
+      cacheFile: file,
+      fetchLatest: async () => {
+        throw new Error("offline");
+      },
+    });
+    expect(offline).toContain("2.2.0");
   });
 
   it("survives a corrupt cache file", async () => {

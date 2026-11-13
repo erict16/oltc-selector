@@ -101,7 +101,7 @@ oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
 | `--lang en\|zh` | Output language. `OLTC_LANG=en` also works | zh |
 | `--version` / `-v` | Print the version | |
 | `--help` / `-h` | The flag list. Also shown when no flag is given | |
-| `--no-update-check` | Skip the daily npm check. A newer version only prints a notice on stderr; nothing is installed. `OLTC_NO_UPDATE_CHECK=1` or `CI=1` also skip it. | check on |
+| `--no-update-check` | Skip the npm check made on every run. A newer version only prints a notice on stderr; nothing is installed. `OLTC_NO_UPDATE_CHECK=1` or `CI=1` also skip it. | check on |
 
 `--structure auto` and omitting `--octc` match the web first paint: on-load, in-tank vacuum, minimum-adequate ranking.
 

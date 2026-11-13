@@ -1,13 +1,13 @@
 /**
  * The CLI tells the user when npm has a newer oltc-selector. It never
  * installs anything: the notice names the command and stops there.
- * One registry call a day at most; the answer is cached on disk.
+ * Every run asks the registry (2026-11-14 Eric); the last answer is kept on
+ * disk and used only when the registry cannot be reached.
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 
-export const UPDATE_TTL_MS = 24 * 60 * 60 * 1000;
 const REGISTRY_LATEST = "https://registry.npmjs.org/oltc-selector/latest";
 
 type Cache = { checkedAt: number; latest: string | null };
@@ -80,8 +80,8 @@ function writeCache(file: string, c: Cache): void {
 }
 
 /**
- * The notice to print, or null. Uses the cached answer while it is fresh;
- * otherwise asks the registry once, with a short timeout. Never throws.
+ * The notice to print, or null. Asks the registry on every run, with a
+ * short timeout; offline, the last answer on disk is used. Never throws.
  */
 export async function checkForUpdate(opts: {
   current: string;
@@ -92,16 +92,10 @@ export async function checkForUpdate(opts: {
 }): Promise<string | null> {
   const now = opts.now ?? Date.now();
   try {
-    let latest: string | null;
     const cached = readCache(opts.cacheFile);
-    if (cached && now - cached.checkedAt < UPDATE_TTL_MS) {
-      latest = cached.latest;
-    } else {
-      latest = await (opts.fetchLatest ?? fetchLatest)(opts.timeoutMs ?? 1500).catch(
-        () => cached?.latest ?? null,
-      );
-      writeCache(opts.cacheFile, { checkedAt: now, latest });
-    }
+    const asked = await (opts.fetchLatest ?? fetchLatest)(opts.timeoutMs ?? 1500).catch(() => null);
+    const latest = asked ?? cached?.latest ?? null;
+    if (asked) writeCache(opts.cacheFile, { checkedAt: now, latest: asked });
     return latest && isNewer(latest, opts.current)
       ? updateNotice(latest, opts.current)
       : null;

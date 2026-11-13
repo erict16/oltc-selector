@@ -1,8 +1,11 @@
 # Changelog
 
-## Unreleased
+## 2.3.1 (2026-11-14)
 
-Page, 2026-11-14:
+- CLI: every run asks npm for a newer version (it was once a day). Offline, the last answer is used. It still only prints a notice.
+- `/agents/`: rewritten around the npm package. One line for the assistant (`npx -y oltc-selector@latest`); the WorkBuddy and SkillHub parts are gone.
+
+Page:
 
 - The paste box above the transformer rows and the "Copy link" button are removed. A shared link still opens with its form filled.
 - 雷电冲击 / 工频耐压: the two menus share the width one menu has, so the column edge is straight.

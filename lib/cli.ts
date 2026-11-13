@@ -765,7 +765,7 @@ Flags:
                      line, basis, umChoices, assumptions, errors. Errors are JSON too.
   --lang en|zh       Output language (default zh; OLTC_LANG=en also works).
   --version, -v      Print the version.
-  --no-update-check  Skip the daily check for a newer version. The check only
+  --no-update-check  Skip the check for a newer version on each run. The check only
                      prints a notice on stderr; it never installs anything.
                      OLTC_NO_UPDATE_CHECK=1 or CI=1 also turn it off.
   -h, --help         This text. Also shown when no flag is given.

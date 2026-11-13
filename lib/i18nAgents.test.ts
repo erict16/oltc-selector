@@ -13,7 +13,7 @@ describe("agent guide copy", () => {
       expect(c.s1b.length).toBeGreaterThan(4);
       expect(c.s2q.length).toBeGreaterThan(10);
       expect(c.s3note.length).toBeGreaterThan(4);
-      expect(c.dl.length).toBeGreaterThan(2);
+      expect(c.npm.length).toBeGreaterThan(2);
       expect(c.cli.length).toBeGreaterThan(2);
       expect(c.cliBody.length).toBeGreaterThan(10);
     }
@@ -26,27 +26,16 @@ describe("agent guide copy", () => {
     }
   });
 
-  it("step 1: WorkBuddy block is Chinese-only, prompt is localized", () => {
+  it("step 1: one localized line that runs the npm package, no skill platform", () => {
     const zh = agentGuide("zh");
-    expect(zh.s1b).toContain("WorkBuddy");
-    expect(zh.s1b).toContain("技能");
-    expect(zh.s1wb).toBe("WorkBuddy");
-    expect(zh.s1other).toContain("ChatGPT Work");
-    expect(zh.s1prompt).toContain("请根据");
-    expect(zh.wbShot).toBeUndefined();
-    expect(zh.s1wbBody).not.toMatch(/\u534E\u660E|hua[m]ing/i);
-    expect(agentGuide("en").s1wb).toBeUndefined();
-    expect(agentGuide("en").wbShot).toBeUndefined();
-    expect(agentGuide("en").s1other).toBeUndefined();
-    expect(agentGuide("en").s1prompt).toMatch(/^Follow /);
+    expect(zh.s1prompt).toContain("请用");
     expect(zh.s1prompt).not.toBe(agentGuide("en").s1prompt);
     expect(zh.s2q).toContain("一拖二");
     expect(zh.s2q).toMatch(/无载 5 档/);
     for (const { id } of LANG_OPTIONS) {
       const c = agentGuide(id);
-      expect(c.s1prompt).toContain("skillhub.cn/install/skillhub.md");
-      expect(c.s1prompt).toContain("@indiv-erict16/huaming-oltc-selector");
-      if (id !== "zh") expect(c.s1wb).toBeUndefined();
+      expect(c.s1prompt).toContain("npx -y oltc-selector@latest --help");
+      expect(Object.values(c).join("\n"), id).not.toMatch(/skillhub|workbuddy/i);
     }
     const blob = LANG_OPTIONS.map(({ id }) =>
       Object.values(agentGuide(id)).join("\n"),
@@ -79,15 +68,13 @@ describe("agent guide copy", () => {
     expect(blob).not.toMatch(/CZIII|三相真空上限|vacuum ceiling/);
   });
 
-  it("step 1 zip and hub links go to the SkillHub skill page", () => {
+  it("the page links to npm and pins no version", () => {
     const src = readFileSync(
       resolve(__dirname, "../components/AgentsGuide.tsx"),
       "utf8",
     );
-    expect(src).toContain(
-      "https://skillhub.cn/skills/indiv-erict16/huaming-oltc-selector",
-    );
-    expect(src).not.toContain("skillhub.cn/@indiv");
-    expect(src).not.toContain("archive/refs/heads/main.zip");
+    expect(src).toContain("https://www.npmjs.com/package/oltc-selector");
+    expect(src).not.toMatch(/skillhub|workbuddy/i);
+    expect(src).not.toMatch(/oltc-selector@\d/);
   });
 });
