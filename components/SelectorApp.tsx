@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { useAppLang } from "@/components/LangProvider";
-import { ResultCard, LINK_COPIED } from "@/components/selector/ResultCard";
+import { ResultCard } from "@/components/selector/ResultCard";
 import { ResultDock } from "@/components/selector/ResultDock";
 import { DutySection } from "@/components/selector/DutySection";
 import { SwitchSection } from "@/components/selector/SwitchSection";
@@ -23,19 +23,11 @@ export function SelectorApp() {
   const actions = useFormActions(setForm);
   const sel = useSelection(form, lang);
 
-  /** Tender line as typed, and the text the form was last filled from. */
-  const [lineText, setLineText] = useState("");
+  /** The tender line a shared link was filled from; it stays in the link. */
   const [readText, setReadText] = useState("");
-  const readTenderLine = (text: string) => {
-    setReadText(text.trim());
-    actions.readLine(text);
-  };
-  // Notes of an older line hide once the box holds other text (2026-11-07 field test).
-  const lineShown = lineText.trim() !== "" && lineText.trim() === readText;
 
-  const linkNow = useFormUrl(form, readText, (d) => {
+  useFormUrl(form, readText, (d) => {
     actions.replace(d.form);
-    setLineText(d.line);
     setReadText(d.line);
   });
 
@@ -125,10 +117,6 @@ export function SelectorApp() {
               form={form}
               actions={actions}
               sel={sel}
-              lineText={lineText}
-              setLineText={setLineText}
-              lineShown={lineShown}
-              readTenderLine={readTenderLine}
             />
             <DutySection lang={lang} form={form} actions={actions} sel={sel} />
             <SwitchSection lang={lang} form={form} actions={actions} />
@@ -148,7 +136,6 @@ export function SelectorApp() {
             onTap={actions.pickTap}
             copiedModel={copiedModel}
             copyModel={copyModel}
-            copyLink={() => copyModel(linkNow(), LINK_COPIED)}
           />
         </aside>
       </div>

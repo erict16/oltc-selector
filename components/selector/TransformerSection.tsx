@@ -1,6 +1,5 @@
 "use client";
 
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { EARTH_INSULATION } from "@/lib/catalog";
 import { formatUmKv } from "@/lib/deriveUm";
 import { isOctc as formIsOctc, type FormState } from "@/lib/formState";
@@ -28,33 +27,22 @@ function earthUmLabel(um: number): string {
   return e ? `${kv} · ${e.pf} / ${e.bil}` : kv;
 }
 
-/** Card 1: the tender line, then what the transformer is and where the switch sits. */
+/** Card 1: what the transformer is and where the switch sits. */
 export function TransformerSection({
   lang,
   form,
   actions,
   sel,
-  lineText,
-  setLineText,
-  lineShown,
-  readTenderLine,
 }: {
   lang: Lang;
   form: FormState;
   actions: FormActions;
   sel: Selection;
-  /** Tender line as typed. */
-  lineText: string;
-  setLineText: (text: string) => void;
-  /** Notes and errors of a read show only while the box still holds that text. */
-  lineShown: boolean;
-  readTenderLine: (text: string) => void;
 }) {
-  const { kind, tapPoint, winding, hvKv, mvKv, windingRatedKv, earthUm, lineRead, lineFailed } = form;
-  const { pickKind, pickTap, pickWinding, setHvKv, setMvKv, setVoltageKv, setEarthUm, clearLineFailed } = actions;
+  const { kind, tapPoint, winding, hvKv, mvKv, windingRatedKv, earthUm } = form;
+  const { pickKind, pickTap, pickWinding, setHvKv, setMvKv, setVoltageKv, setEarthUm } = actions;
   const { ruleDuty } = sel;
   const isOctc = formIsOctc(form);
-  const listSep = lang === "zh" ? "，" : ", ";
   return (
     <section aria-label={t(lang, "transformer")} className="sheet-section">
       {isOctc ? (
@@ -63,61 +51,6 @@ export function TransformerSection({
         </p>
       ) : null}
       <CardHead title={t(lang, "transformer")} />
-      <div className="line-box">
-        <input
-          type="text"
-          className="row-control"
-          aria-label={t(lang, "lineLabel")}
-          aria-invalid={lineShown && lineFailed ? true : undefined}
-          aria-describedby={lineShown && lineFailed ? "tender-line-error" : undefined}
-          value={lineText}
-          placeholder={t(lang, "linePlaceholder")}
-          spellCheck={false}
-          autoComplete="off"
-          enterKeyHint="go"
-          onChange={(e) => {
-            const v = e.target.value;
-            setLineText(v);
-            clearLineFailed();
-            // A paste reads at once: a phone never sends Enter.
-            const how = (e.nativeEvent as InputEvent).inputType;
-            // Only a whole line: a pasted fragment ("110") waits for Enter.
-            if (how === "insertFromPaste" && /\d/.test(v) && /kV|MVA|kVA|кВ|МВА/i.test(v)) {
-              readTenderLine(v);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              if (lineText.trim()) readTenderLine(lineText);
-            }
-          }}
-        />
-        {!lineShown ? null : lineFailed ? (
-          <p id="tender-line-error" role="alert" className="line-note text-[var(--color-danger)]">
-            {t(lang, lineFailed)}
-          </p>
-        ) : lineRead?.assumed.length ? (
-          <p role="status" className="line-note text-[var(--color-warn)]">
-            <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
-            <span>
-              {t(lang, "lineCheck")}
-              {lang === "zh" ? "：" : ": "}
-              {lineRead.assumed.map((f) => t(lang, `lineF_${f}`)).join(listSep)}
-            </span>
-          </p>
-        ) : null}
-        {lineShown && !lineFailed && lineRead?.notes.length ? (
-          <ul role="status" className="flex flex-col gap-1">
-            {lineRead.notes.map((n, i) => (
-              <li key={`${n.key}-${i}`} className="line-note text-[var(--color-warn)]">
-                <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
-                <span>{t(lang, `lineW_${n.key}`, n.vars)}</span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </div>
       <div className="rows rows-2">
           <Field label={t(lang, "kindLabel")}>
             <FieldSelect

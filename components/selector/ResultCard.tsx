@@ -18,7 +18,6 @@ import { BasisTable, ModelSpec, TypeSegments, modelNodes } from "./resultParts";
 import type { Selection } from "./useSelection";
 
 /** Marks the link button as the one just copied. */
-export const LINK_COPIED = "\u0000link";
 
 /** The result: type, its coded parts, cautions, loads, sketch, ratings, alternatives. */
 export function ResultCard({
@@ -29,7 +28,6 @@ export function ResultCard({
   onTap,
   copiedModel,
   copyModel,
-  copyLink,
 }: {
   lang: Lang;
   form: FormState;
@@ -39,7 +37,6 @@ export function ResultCard({
   /** What shows 已复制 just now. */
   copiedModel: string | null;
   copyModel: (text: string) => void;
-  copyLink: () => void;
 }) {
   const { input, kind, tapPoint, winding, windingRatedKv, hvKv, mvKv, currentMode } = form;
   const {
@@ -117,13 +114,6 @@ export function ResultCard({
                     labelled
                     copied={copiedModel === displayModel(primary.model, lang)}
                     onCopy={() => copyModel(displayModel(primary.model, lang))}
-                  />
-                  <CopyButton
-                    lang={lang}
-                    labelled
-                    link
-                    copied={copiedModel === LINK_COPIED}
-                    onCopy={copyLink}
                   />
                 </span>
               </div>

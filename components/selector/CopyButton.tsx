@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, LinkIcon, Square2StackIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, Square2StackIcon } from "@heroicons/react/24/outline";
 import { t, type Lang } from "@/lib/i18n";
 import { cx } from "./fields";
 
@@ -12,12 +12,9 @@ export function CopyButton({
   small,
   touch,
   labelled,
-  link,
 }: {
   /** Framed button with the words beside the icon. */
   labelled?: boolean;
-  /** Copies the page link, not the type. */
-  link?: boolean;
   lang: Lang;
   copied: boolean;
   onCopy: () => void;
@@ -26,7 +23,7 @@ export function CopyButton({
   touch?: boolean;
 }) {
   if (labelled) {
-    const Idle = link ? LinkIcon : Square2StackIcon;
+    const Idle = Square2StackIcon;
     return (
       <button type="button" onClick={onCopy} className={cx("copy-btn", copied && "is-done")}>
         {copied ? (
@@ -34,7 +31,7 @@ export function CopyButton({
         ) : (
           <Idle className="h-4 w-4" strokeWidth={1.7} aria-hidden />
         )}
-        <span aria-live="polite">{t(lang, copied ? "copied" : link ? "copyLink" : "copyType")}</span>
+        <span aria-live="polite">{t(lang, copied ? "copied" : "copyType")}</span>
       </button>
     );
   }
