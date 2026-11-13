@@ -85,8 +85,12 @@ export function BasisTable({
               <dt>{r.label}</dt>
               <dd className="num">
                 <b>{r.need}</b>
-                {r.rating != null ? <span> / {r.rating}</span> : null}
-                <span className="basis-unit">{r.unit}</span>
+                {/* Rating and unit are one cell, so every "/ rating unit"
+                    starts on the same line. */}
+                <span className="basis-of">
+                  {r.rating != null ? ` / ${r.rating}` : null}
+                  <span className="basis-unit">{r.unit}</span>
+                </span>
                 {pct != null ? <span className="basis-pct">{pct}%</span> : null}
               </dd>
               {pct != null ? (
@@ -139,7 +143,9 @@ export function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; s
     : head.endsWith(r.phases)
       ? head.slice(0, -r.phases.length)
       : head;
-  const cells: Array<{ code: string; says: string }> = [
+  // `says` is the short caption of the table; `key` the fuller one of the
+  // leader key, always a name with its value.
+  const cells: Array<{ code: string; says: string; key?: string }> = [
     {
       code: family,
       says: offCircuit
@@ -148,8 +154,14 @@ export function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; s
     },
   ];
   if (wiring) cells.push({ code: wiring[2], says: t(lang, "octcSeries") });
-  else if (family !== head) cells.push({ code: r.phases, says: t(lang, "phases") });
-  cells.push({ code: String(r.currentA), says: "A" });
+  else if (family !== head) {
+    cells.push({ code: r.phases, says: t(lang, "phases"), key: `${t(lang, "phases")} ${r.phases}` });
+  }
+  cells.push({
+    code: String(r.currentA),
+    says: "A",
+    key: `${t(lang, "specCurrent")} ${r.currentA} A`,
+  });
   // The rest is cut from the string as shown: a single-phase type has no
   // Y/D after the current, and a reactor type ends in its own step count.
   const rest = shown.slice(at + 1 + String(r.currentA).length);
@@ -162,7 +174,11 @@ export function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; s
   // spelled as the form's own insulation menu spells them (2026-11-14).
   const withstand =
     r.earthPfKv != null && r.earthBilKv != null ? ` · ${r.earthPfKv} / ${r.earthBilKv}` : "";
-  cells.push({ code: m[2], says: `Um kV${withstand}` });
+  cells.push({
+    code: m[2],
+    says: `Um kV${withstand}`,
+    key: `Um ${m[2]} kV${withstand ? `${withstand} kV` : ""}`,
+  });
   // A type that ends in a bare count (reactor HWDK …-17, dry CZ) states its
   // own positions; the caption must not print another number under it.
   const count = /^\d+$/.test(m[3]) ? Number(m[3]) : r.positions;
@@ -210,13 +226,10 @@ export function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; s
                 } as React.CSSProperties
               }
             >
-              <i className="tk-bracket" />
-              <i className="tk-leader" />
+              <span className="tk-bracket" />
+              <span className="tk-leader" />
               <span className="tk-row">
-                {/* A bare unit reads better with its number: "350 A". */}
-                <span className="tk-says">
-                  {/^[A-Za-z]{1,3}$/.test(c.says) ? `${c.code} ${c.says}` : c.says}
-                </span>
+                <span className="tk-says">{c.key ?? c.says}</span>
               </span>
             </div>
           ))}

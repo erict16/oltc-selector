@@ -102,14 +102,14 @@ export function ResultCard({
             </div>
           ) : (
             <>
-              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+              <div className="hero-top flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
                 <span className="plate-badge">
                   {showsMinimumLabel(loose) ? null : (
                     <ShieldCheckIcon className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden />
                   )}
                   {t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")}
                 </span>
-                <span className="no-print flex flex-wrap items-center gap-2">
+                <span className="hero-copy no-print flex flex-wrap items-center gap-2">
                   <CopyButton
                     lang={lang}
                     labelled
