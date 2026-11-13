@@ -139,6 +139,16 @@ describe("CLI: flags that used to be dropped are errors", () => {
     [["--pm", "8", "--pos", "23", "--iu", "400", "--um", "72.5"], /disagree/],
     [["--iu", "400", "--um", "72.5", "--iu", "500"], /given twice/],
     [["--iu", "400", "--um", "72.5", "--earth-um", "126"], /not both/],
+    // 2026-11-14 CLI review
+    [["--mva", "25", "--kv", "110", "--um", "126", "--earth-um", "72.5"], /not both/],
+    [["--iu", "400", "--um", "72.5", "--oil", "--vacuum"], /--oil or --vacuum, not both/],
+    [["--iu", "400", "--um", "72.5", "--vacuum", "--oil"], /--oil or --vacuum, not both/],
+    [["--iu", "800", "--um", "72.5", "--duty", "oltc", "--octc"], /conflicts with --duty oltc/],
+    [["--iu", "800", "--um", "72.5", "--octc", "--duty", "oltc"], /conflicts with --duty oltc/],
+    [["--iu", "400", "--um", "72.5", "--conn", "Y", "--tap", "line"], /--conn Y conflicts with --tap line/],
+    [["--mva", "25", "--kv", "110", "--hv", "220"], /add --kind auto/],
+    [["--iu", "400", "--um", "72.5", "--minus", "12"], /--minus sets the lowest-tap current/],
+    [["--mva", "25", "--kv", "110", "--step-pct", "0.0125"], /--step-pct is a percent/],
   ] as const)("%j", (argv, message) => {
     const r = cli(...argv);
     expect(r.code).toBe(1);

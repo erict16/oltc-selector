@@ -12,6 +12,7 @@ import { TransformerSection } from "@/components/selector/TransformerSection";
 import { useFormActions } from "@/components/selector/useFormActions";
 import { useFormUrl } from "@/components/selector/useFormUrl";
 import { useSelection } from "@/components/selector/useSelection";
+import { APP_VERSION } from "@/lib/appVersion";
 import { copyText } from "@/lib/clipboard";
 import { INITIAL_FORM, type FormState } from "@/lib/formState";
 import { setAppLang, t } from "@/lib/i18n";
@@ -88,14 +89,21 @@ export function SelectorApp() {
     <div className="page flex w-full min-w-0 flex-1 flex-col">
       <header className="topbar sticky top-0 z-30">
         <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
-          {/* The app's own mark (app/icon.svg): tap contacts and the selector arm. */}
+          {/* The app's own mark (app/icon.svg): a tapped winding and its contact. */}
           <img src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`} alt="" width={28} height={28} className="h-7 w-7 shrink-0" />
-          <div className="min-w-0 leading-tight">
+          <div className="flex min-w-0 items-baseline gap-2 leading-tight">
             <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-ink)]">
               {t(lang, "title")}
             </h1>
+            <Link href="/changelog/" className="topbar-version num">
+              v{APP_VERSION}
+            </Link>
           </div>
-          <div className="ml-auto">
+          <nav className="topbar-nav ml-auto" aria-label={t(lang, "title")}>
+            <Link href="/agents/">{t(lang, "agentChip")}</Link>
+            <Link href="/changelog/">{t(lang, "changelogTitle")}</Link>
+          </nav>
+          <div className="topbar-lang">
             <LangSwitcher
               lang={lang}
               onChange={setAppLang}
@@ -126,7 +134,7 @@ export function SelectorApp() {
 
         <aside
           ref={resultPaneRef}
-          className="result-pane flex min-w-0 scroll-mt-16 flex-col gap-3 quiet-scroll lg:sticky lg:top-[4.5rem] lg:max-h-[calc(100dvh-4.5rem)] lg:overflow-y-auto"
+          className="result-pane flex min-w-0 scroll-mt-16 flex-col lg:self-stretch"
         >
           <ResultCard
             lang={lang}
@@ -142,8 +150,8 @@ export function SelectorApp() {
 
       <footer className="page-foot">
         <nav aria-label={t(lang, "title")}>
-          <Link href="/changelog/">{t(lang, "changelogTitle")}</Link>
-          <Link href="/agents/">{t(lang, "agentChip")}</Link>
+          <Link href="/changelog/" className="foot-dup">{t(lang, "changelogTitle")}</Link>
+          <Link href="/agents/" className="foot-dup">{t(lang, "agentChip")}</Link>
           <Link href="/terms/">{t(lang, "navTerms")}</Link>
           <Link href="/privacy/">{t(lang, "navPrivacy")}</Link>
         </nav>

@@ -1,14 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="8" fill="#0f172a"/>
-  <!-- tap contacts on an arc; the selector arm rests on the live one -->
-  <g fill="#fff" opacity=".42">
-    <circle cx="6.5" cy="15.5" r="1.7"/>
-    <circle cx="10.5" cy="11.5" r="1.7"/>
-    <circle cx="16" cy="10" r="1.7"/>
-    <circle cx="25.5" cy="15.5" r="1.7"/>
-  </g>
-  <path d="M16 21 21.5 11.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
-  <circle cx="21.5" cy="11.5" r="2.6" fill="#4d8dff"/>
-  <circle cx="16" cy="21" r="3" fill="#fff"/>
-  <circle cx="16" cy="21" r="1.2" fill="#0f172a"/>
+  <!-- a tapped winding: the coil, and one tap led out to its contact -->
+  <path d="M10.5 5.5a3.5 3.5 0 0 1 0 7a3.5 3.5 0 0 1 0 7a3.5 3.5 0 0 1 0 7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M10.5 12.5H20" stroke="#4d8dff" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="22.5" cy="12.5" r="3.2" fill="#4d8dff"/>
 </svg>
