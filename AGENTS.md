@@ -25,7 +25,7 @@ Result card **开关结构** (not 工作位置): CV/CV2/SV/CVT/CZ → 复合式;
 
 ## CLI
 
-CLI: `npm run oltc -- <args>` in this repo (published pack: `npx -y oltc-selector@2.3.1`). Same engine as the web app. `--kind auto --tap junction --hv 225 --mv 115` for autotransformers; the tap point, not a typed Y/D, sets current, Ust and Um (`lib/transformer.ts`). No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only). Do not commit list RMB, coefficients, or the 2025 xlsx.
+CLI: `npm run oltc -- <args>` in this repo (published pack: `npx -y oltc-selector@2.3.2`). Same engine as the web app. `--kind auto --tap junction --hv 225 --mv 115` for autotransformers; the tap point, not a typed Y/D, sets current, Ust and Um (`lib/transformer.ts`). No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only). Do not commit list RMB, coefficients, or the 2025 xlsx.
 
 No agent dock on `/` (removed 2026-11-13); the footer links to the tutorial `/agents/`. Agent skill is a separate private repo (not in this tree). Selection only; after `oltc`, check brochure existence and explain why the type is correct.
 

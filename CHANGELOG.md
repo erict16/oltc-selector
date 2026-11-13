@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.3.2 (2026-11-14)
+
+CLI, from a review of every flag:
+
+- Flags that contradict each other, or cannot take effect, are errors. Before, one was picked and nothing was said: `--oil` with `--vacuum` (the last one won), `--octc` with `--duty oltc`, `--conn Y` with `--tap line`, `--hv` / `--mv` on a two-winding transformer, `--minus` on the `--iu` path, `--um` and `--earth-um` with different values (the type used one, the basis line printed the other), `--step-pct` below 0.1 (0.0125 gave Ust 7.9 V).
+- Help and README: `--tap` defaults to the junction with `--kind auto`.
+
+Page:
+
+- The result is a panel as tall as the form, so both columns end on one line. Its content stays under the header while the form scrolls.
+- Header: the version, and links to the assistant guide and the release notes. New icon: a tapped winding with one tap led out.
+- The withstand levels to earth sit under the Um cell of the type.
+- Chinese notes say 订货规范 without （OS）.
+- README rewritten from checked facts, with a Chinese version.
+
 ## 2.3.1 (2026-11-14)
 
 - CLI: every run asks npm for a newer version (it was once a day). Offline, the last answer is used. It still only prints a notice.

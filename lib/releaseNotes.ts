@@ -19,6 +19,11 @@ export type Release = {
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
     {
+      version: "2.3.2",
+      date: "2026-11",
+      groups: [{ kind: "fix", items: ["命令行：互相矛盾或不起作用的参数现在会报错，不再悄悄选一个：--oil 和 --vacuum 同时给、--octc 和 --duty oltc、--conn Y 配 --tap line、双绕组却给了 --hv / --mv、--iu 路径上的 --minus、--um 和 --earth-um 数值不同、--step-pct 小于 0.1。"] }, { kind: "imp", items: ["页面：结果栏和表单一样高，滚到底两边对齐；页头加了版本号、选型助手和更新记录；换了新图标；对地工频/雷电耐压写在 Um 下面；提示里的「订货规范」不再带（OS）。"] }],
+    },
+    {
       version: "2.3.1",
       date: "2026-11",
       groups: [{ kind: "imp", items: ["命令行：每次运行都会查 npm 有没有新版本，有就在输出末尾提示，不会自动更新。", "页面：去掉表单顶部的粘贴框和「复制链接」；自耦变的提示改成更直白的说法；AI 选型页改为直接用 npm 上的 oltc-selector。"] }],
@@ -256,6 +261,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.3.2",
+      date: "2026-11",
+      groups: [{ kind: "fix", items: ["CLI: flags that contradict each other or cannot take effect are now errors instead of one being picked silently: --oil with --vacuum, --octc with --duty oltc, --conn Y with --tap line, --hv / --mv on a two-winding transformer, --minus on the --iu path, --um and --earth-um with different values, --step-pct below 0.1."] }, { kind: "imp", items: ["Page: the result column is as tall as the form, so both end on one line; the header shows the version and links to the assistant guide and the release notes; a new icon; the withstand levels to earth sit under Um."] }],
+    },
     {
       version: "2.3.1",
       date: "2026-11",
@@ -499,6 +509,11 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.3.2",
+      date: "2026-11",
+      groups: [{ kind: "fix", items: ["CLI: các tham số mâu thuẫn nhau hoặc không có tác dụng nay báo lỗi thay vì âm thầm chọn một: --oil cùng --vacuum, --octc cùng --duty oltc, --conn Y cùng --tap line, --hv / --mv với máy hai cuộn dây, --minus trên đường --iu, --um và --earth-um khác giá trị, --step-pct nhỏ hơn 0.1."] }, { kind: "imp", items: ["Trang: cột kết quả cao bằng biểu mẫu nên hai cột kết thúc trên cùng một đường; đầu trang có số phiên bản và liên kết tới hướng dẫn trợ lý và ghi chú phát hành; biểu tượng mới; mức chịu đựng đối với đất nằm dưới Um."] }],
+    },
+    {
       version: "2.3.1",
       date: "2026-11",
       groups: [{ kind: "imp", items: ["CLI: mỗi lần chạy đều kiểm tra npm xem có bản mới không và báo ở cuối kết quả nếu có; không tự cập nhật.", "Trang: bỏ ô dán ở đầu biểu mẫu và nút Sao chép liên kết; các ghi chú tiếng Trung cho máy biến áp tự ngẫu viết dễ hiểu hơn; trang AI nay dùng thẳng oltc-selector trên npm."] }],
@@ -738,6 +753,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.3.2",
+      date: "2026-11",
+      groups: [{ kind: "fix", items: ["CLI: los parámetros que se contradicen o que no pueden tener efecto ahora dan error en lugar de elegirse uno en silencio: --oil con --vacuum, --octc con --duty oltc, --conn Y con --tap line, --hv / --mv en un transformador de dos devanados, --minus en la ruta --iu, --um y --earth-um con valores distintos, --step-pct menor que 0.1."] }, { kind: "imp", items: ["Página: la columna del resultado es tan alta como el formulario, así que ambas terminan en la misma línea; la cabecera muestra la versión y enlaces a la guía del asistente y a las notas de versión; icono nuevo; los niveles soportados a tierra están bajo Um."] }],
+    },
     {
       version: "2.3.1",
       date: "2026-11",
@@ -981,6 +1001,11 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.3.2",
+      date: "2026-11",
+      groups: [{ kind: "fix", items: ["CLI: birbiriyle çelişen veya etkisi olmayan parametreler artık sessizce biri seçilmek yerine hata verir: --oil ile --vacuum, --octc ile --duty oltc, --conn Y ile --tap line, iki sargılı trafoda --hv / --mv, --iu yolunda --minus, farklı değerli --um ve --earth-um, 0.1'den küçük --step-pct."] }, { kind: "imp", items: ["Sayfa: sonuç sütunu form kadar yüksek, böylece ikisi aynı çizgide biter; üst çubukta sürüm numarası ile asistan kılavuzu ve sürüm notları bağlantıları var; yeni simge; toprağa dayanım seviyeleri Um'un altında."] }],
+    },
+    {
       version: "2.3.1",
       date: "2026-11",
       groups: [{ kind: "imp", items: ["CLI: her çalıştırmada npm'de yeni sürüm olup olmadığına bakar ve varsa çıktının sonunda bildirir; kendini güncellemez.", "Sayfa: formun üstündeki yapıştırma kutusu ve Bağlantıyı kopyala kaldırıldı; ototransformatör için Çince notlar daha sade yazıldı; AI sayfası artık doğrudan npm'deki oltc-selector'ı kullanıyor."] }],
@@ -1220,6 +1245,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.3.2",
+      date: "2026-11",
+      groups: [{ kind: "fix", items: ["CLI: parameter yang saling bertentangan atau tidak berpengaruh kini menjadi galat, bukan dipilih salah satu secara diam-diam: --oil dengan --vacuum, --octc dengan --duty oltc, --conn Y dengan --tap line, --hv / --mv pada trafo dua belitan, --minus pada jalur --iu, --um dan --earth-um dengan nilai berbeda, --step-pct di bawah 0.1."] }, { kind: "imp", items: ["Halaman: kolom hasil setinggi formulir sehingga keduanya berakhir pada satu garis; kepala halaman menampilkan versi serta tautan ke panduan asisten dan catatan rilis; ikon baru; tingkat ketahanan ke tanah berada di bawah Um."] }],
+    },
     {
       version: "2.3.1",
       date: "2026-11",

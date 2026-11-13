@@ -262,17 +262,20 @@ export function parseCliArgs(rawArgv: string[]): CliArgs {
       continue;
     }
     if (a === "--octc") {
+      if (out.given.has("octc") && !out.octc) throw new CliError("--octc conflicts with --duty oltc. Drop one.");
       out.given.add("octc");
       out.octc = true;
       continue;
     }
     if (a === "--oil") {
+      if (out.given.has("medium") && out.vacuum) throw new CliError("Give --oil or --vacuum, not both");
       out.given.add("medium");
       out.oil = true;
       out.vacuum = false;
       continue;
     }
     if (a === "--vacuum") {
+      if (out.given.has("medium") && out.oil) throw new CliError("Give --oil or --vacuum, not both");
       out.given.add("medium");
       out.vacuum = true;
       out.oil = false;
@@ -559,9 +562,11 @@ export function parseCliArgs(rawArgv: string[]): CliArgs {
       out.given.add("octc");
       const [v, n] = take(i, a);
       const d = v.toLowerCase();
+      const had = out.octc;
       if (d === "octc" || d === "off" || d === "detc") out.octc = true;
       else if (d === "oltc" || d === "on") out.octc = false;
       else throw new CliError(`--duty must be oltc or octc`);
+      if (had && !out.octc) throw new CliError("--octc conflicts with --duty oltc. Drop one.");
       i = n;
       continue;
     }
@@ -726,7 +731,8 @@ Flags:
   --kind two|auto    Transformer kind (--auto = --kind auto). Default two-winding.
   --tap P            Where the OLTC sits: neutral|line (two-winding),
                      junction|mv-line (autotransformer, series/common junction
-                     or MV line lead). Capacity path; replaces --conn there.
+                     or MV line lead). Default neutral; junction with
+                     --kind auto. With --mva it replaces --conn.
   --winding star|delta  Tapped winding connection (two-winding). Sets the current
                      formula: star I = S/(√3U), delta I = S/(3U).
   --hv kV --mv kV    Autotransformer HV / MV rated voltage (with --kind auto).
@@ -960,6 +966,23 @@ function checkConflicts(args: CliArgs): void {
   // Both typed: a tap point that --line read does not make a typed --conn an error.
   if (args.typed?.has("--conn") && args.typed.has("--tap") && args.conn === "D" && args.tap === "neutral") {
     throw new CliError("--conn D conflicts with --tap neutral: a neutral tap point is star (Y). Drop one.");
+  }
+  // 2026-11-14 review: more flags that were dropped or silently overridden.
+  const typed = (...flags: string[]) => flags.some((f) => args.typed?.has(f));
+  if (typed("--conn", "--connection") && typed("--tap") && args.conn === "Y" && args.tap === "line_end") {
+    throw new CliError("--conn Y conflicts with --tap line: a line-end tap point is delta (D). Drop one.");
+  }
+  if (args.kind !== "auto" && (typed("--hv") || typed("--mv"))) {
+    throw new CliError("--hv and --mv are autotransformer voltages: add --kind auto (a two-winding transformer takes --kv)");
+  }
+  if (typed("--minus") && args.mva == null) {
+    throw new CliError("--minus sets the lowest-tap current on the --mva path; with --iu give the current itself");
+  }
+  if (typed("--um") && typed("--earth-um") && args.um != null && args.earthUm != null && args.um !== args.earthUm) {
+    throw new CliError(`Give --um or --earth-um, not both: ${args.um} and ${args.earthUm} disagree.`);
+  }
+  if (args.stepPct != null && args.stepPct < 0.1) {
+    throw new CliError(`--step-pct is a percent: 1.25 means 1.25 %. ${args.stepPct} is too small.`);
   }
   if (g("pm") && g("positions") && args.pm != null && args.positions != null) {
     // W/G: ±N has a mid-1 and a mid-3 diagram (±9 is 19 or 21 positions), and

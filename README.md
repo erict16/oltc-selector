@@ -206,7 +206,7 @@ Output is in Chinese by default; `--lang en` gives English. Every run asks npm f
 | `--step-pct` | Step as a percent (1.25 means 1.25 %), capacity path only | 1.25 |
 | `--os-imax` | Capacity path: the Imax the OS or maker states at the lowest tap (`--imax` beside `--mva` means this) | |
 | `--kind two\|auto` | Transformer kind (`--auto` = `--kind auto`) | two-winding |
-| `--tap` | Where the OLTC sits: `neutral` / `line` (two-winding), `junction` / `mv-line` (autotransformer). Sets current, Ust and Um. | neutral |
+| `--tap` | Where the OLTC sits: `neutral` / `line` (two-winding), `junction` / `mv-line` (autotransformer). Sets current, Ust and Um. | neutral; junction with `--kind auto` |
 | `--winding star\|delta` | Tapped winding connection (two-winding) | star |
 | `--hv` `--mv` | Autotransformer HV / MV rated kV | |
 | `--earth-um` | OLTC insulation to earth from the OS; overrides the rule | |
