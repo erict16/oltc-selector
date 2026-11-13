@@ -7,6 +7,8 @@
 
 Page:
 
+- Result card: the row of four under the sketch (arc, structure, withstand, mounting) is removed; the withstand levels are a row beside the bars, and the notes come after the numbers.
+- README: new banner, badges, phone screenshots, type anatomy and a flow chart.
 - The paste box above the transformer rows and the "Copy link" button are removed. A shared link still opens with its form filled.
 - 雷电冲击 / 工频耐压: the two menus share the width one menu has, so the column edge is straight.
 - Autotransformer: no 开关对地绝缘 bar. The class is assumed there, so the bar compared 252 with 252.
