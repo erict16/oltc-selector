@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+Page, 2026-11-14:
+
+- The paste box above the transformer rows and the "Copy link" button are removed. A shared link still opens with its form filled.
+- 雷电冲击 / 工频耐压: the two menus share the width one menu has, so the column edge is straight.
+- Autotransformer: no 开关对地绝缘 bar. The class is assumed there, so the bar compared 252 with 252.
+- Autotransformer cautions in Chinese are reworded in plain words. English is unchanged.
+
 ## 2.3.0 (2026-11)
 
 Full review, 2026-11-13. Selection:

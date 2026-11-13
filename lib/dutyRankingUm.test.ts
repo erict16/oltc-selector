@@ -168,13 +168,13 @@ describe("D3 OS Ust is a floor and the basis shows it", () => {
 describe("D5 variable flux on autotransformers", () => {
   const AUTO = "--mva 250 --kind auto --hv 230 --mv 121 --tap mv-line --pm 6 --step-pct 2 --oil";
   it("caution present when Ust is derived", () => {
-    expect(cliJson(AUTO).cautions.join()).toContain("变磁通");
+    expect(cliJson(AUTO).cautions.join()).toContain("要分接表");
   });
 
   it("--ust 1477 is the maker's Ust_max (E-M250131-132): used, caution gone", () => {
     const j = cliJson(`${AUTO} --ust 1477`);
     expect(j.basis?.stepV).toBe(1477);
-    expect(j.cautions.join()).not.toContain("变磁通");
+    expect(j.cautions.join()).not.toContain("要分接表");
   });
 
   it("two-winding neutral has no variable-flux caution", () => {

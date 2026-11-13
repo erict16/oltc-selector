@@ -450,23 +450,23 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
         cautionsZh.push("230/121 kV 自耦变中压出线通常用 Um 170 kV，请按厂家数据核对。");
         cautionsEn.push("230/121 kV autotransformer MV line lead: Um 170 kV is usual; check the maker's data.");
       } else {
-        cautionsZh.push(`中压出线先按中压等级 Um ${umKv} kV 选，以订货规范（OS）为准。`);
+        cautionsZh.push(`开关对地绝缘暂按 ${umKv} kV 选，订货前请按订货规范（OS）确认。`);
         cautionsEn.push(`MV line lead sized at the MV class, Um ${umKv} kV; the order specification (OS) decides.`);
       }
     } else if (spec.tapPoint === "auto_junction" && umRule === "auto_hv") {
       // 2026-11-04 (r3 UI-11): 132/33 at Um 145 is assumed, but the card
       // said so nowhere since the basis-row flag went (8b4bc64).
-      cautionsZh.push(`自耦变串联-公共连接点先按高压等级 Um ${umKv} kV 选，以订货规范（OS）为准。`);
+      cautionsZh.push(`开关对地绝缘暂按 ${umKv} kV 选，订货前请按订货规范（OS）确认。`);
       cautionsEn.push(`Autotransformer junction sized at the HV class, Um ${umKv} kV; the order specification (OS) decides.`);
     }
-    cautionsZh.push("自耦变只用组合式（复合式跨调压绕组冲击上限 200 kV）。");
+    cautionsZh.push("自耦变只能用组合式开关。");
     cautionsEn.push("Autotransformer: combined types only (compound types stop at 200 kV across the tap winding).");
-    cautionsZh.push("还没核：调压绕组两端的冲击电压（a 值），以及要不要加电位电阻。");
+    cautionsZh.push("调压绕组两端的冲击电压、要不要加电位电阻，这里没有算，请向变压器厂确认。");
     cautionsEn.push("Not checked: impulse across the tap winding (a), tie-in resistor.");
     // 2026-11-04 audit D5 (IEC 60214-2 §7.2.1.4.2): HMR MV-line OS Ust ran
     // −3.6…+5.7% around nominal. A stated Ust is the floor; else say so.
     if (!(statedStepV > 0 && statedStepV >= (derivedStepV ?? 0) - 0.5)) {
-      cautionsZh.push("变磁通：各档 Ust 和电流不同，极限档 Ust 未校验。请向厂家要分接表。");
+      cautionsZh.push("各档的级电压和电流不一样，这里只按额定档算。请向变压器厂要分接表再核对。");
       cautionsEn.push("Variable flux: Ust and current differ per tap; Ust at the extreme tap is not checked. Get the maker's per-tap table.");
     }
   }

@@ -87,7 +87,7 @@ describe("autotransformer tapped at the series/common junction", () => {
     expect(d.cautionsZh.join()).toContain("电位电阻");
     // 2026-11-13: the stray reference type (a different family) is gone.
     expect(d.cautionsZh.join()).not.toContain("3×SHZVI-600/252D-10193W");
-    expect(d.cautionsZh.join()).toContain("Um 252 kV");
+    expect(d.cautionsZh.join()).toContain("暂按 252 kV");
   });
 
   it("even a 126 kV-class autotransformer gets no CV2", () => {

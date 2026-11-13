@@ -101,7 +101,9 @@ export function BasisTable({
         // left out. At the line end (D, or Y line end) the switch sees the
         // system Um, so it gets the same bar as the loads (2026-11-12 Eric);
         // only the amber "tight" tone is skipped, as 123 of 126 is a match.
-        .filter((r) => !(r.plain && hideUm))
+        // An assumed class (autotransformer) would only be compared with
+        // itself, 252 / 252 = 100%: no row (2026-11-14 Eric).
+        .filter((r) => !(r.plain && (hideUm || (ok && duty.umRule === "auto_hv"))))
         .map((r) => {
           const pct = r.use != null ? Math.round(r.use * 100) : null;
           const tone =
