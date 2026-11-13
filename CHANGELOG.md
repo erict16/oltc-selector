@@ -1,5 +1,17 @@
 # Changelog
 
+## Page, after 2.4.1 (2026-11-14)
+
+No new version: the CLI pack is unchanged.
+
+- Menus open under their control, at its width, and above it when there is no room below. Safari on macOS drew the system menu over the control and to its left. The list takes arrows, Home, End, typing to find, Enter and Escape, and Tab takes the highlighted option; a screen reader hears the field's name, its value and the option (`components/selector/MenuSelect.tsx`). A touch screen keeps the system picker.
+- The form is wider: two parts in five of the page instead of a fixed 28rem (448 px to 474 px on a 1440 px window; 25rem is still the least). The controls take 52 % of a row, so they grow with it.
+- Control borders are lighter (#aab3c1 to #c6cdd8, 1.6:1 on white). The chevron and the shadow still mark a control.
+- The chosen type's own data is back on the card: arc quenching, structure, insulation to earth and mounting, in the room under the loads. The band was removed at 2.3.2 as a repeat and was missed.
+- "Other types that cover the duty" sits right under the type and opens downward. At the foot of a window-high card it took its room from the sketch above, so its own title moved up under the pointer.
+- One radius scale: card 12 px, control and button 8, menu 10 with 6 px items. Nine radii from 4 to 18 px were in use.
+- Form rows: hairlines stop short of the card's edge and none sits under the card title; 24 px side padding; controls 36 px high in a 52 px row; 20 px between cards; a quieter chevron and hover border.
+
 ## 2.4.1 (2026-11-14)
 
 CLI, the rest of the flag review:
