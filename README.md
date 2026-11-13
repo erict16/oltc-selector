@@ -1,45 +1,166 @@
-# OLTC Selector / 有载开关选型
+<div align="center">
 
-Enter the transformer duty and get the smallest tap-changer type in the 2025 catalogue that covers it. The web page and the `oltc` command use the same engine (`selectOltc`).
+<img src="docs/assets/hero.svg" alt="OLTC Selector: the type string CV2III-350Y/72.5-10193W with each coded part named" width="100%">
 
-- **Web:** [oltc-selector.vercel.app](https://oltc-selector.vercel.app/) (mirror: [erict16.github.io/oltc-selector](https://erict16.github.io/oltc-selector/))
-- **CLI:** `npx -y oltc-selector@2.3.0`. The command is `oltc`.
+# OLTC Selector · 有载开关选型
 
-This is a private helper, not a manufacturer's site. The type is a starting point. Get engineering confirmation before an order.
+**Enter the transformer duty. Get the smallest tap-changer type in the 2025 catalogue that covers it.**
 
-![The page: the form on the left, the result card on the right](docs/assets/readme.png)
+[![npm](https://img.shields.io/npm/v/oltc-selector?color=2f6bff&label=npm)](https://www.npmjs.com/package/oltc-selector)
+[![downloads](https://img.shields.io/npm/dm/oltc-selector?color=2f6bff)](https://www.npmjs.com/package/oltc-selector)
+[![tests](https://github.com/erict16/oltc-selector/actions/workflows/test.yml/badge.svg)](https://github.com/erict16/oltc-selector/actions/workflows/test.yml)
+[![pages](https://github.com/erict16/oltc-selector/actions/workflows/deploy-pages.yml/badge.svg)](https://erict16.github.io/oltc-selector/)
+![node](https://img.shields.io/badge/node-%E2%89%A5%2020-0f172a)
+![languages](https://img.shields.io/badge/languages-6-0f172a)
+[![license](https://img.shields.io/badge/license-MIT-0f172a)](LICENSE)
 
-## Web page
+[**Open the web page**](https://oltc-selector.vercel.app/) &nbsp;·&nbsp; [Mirror](https://erict16.github.io/oltc-selector/) &nbsp;·&nbsp; [npm](https://www.npmjs.com/package/oltc-selector) &nbsp;·&nbsp; [AI assistant guide](https://erict16.github.io/oltc-selector/agents/) &nbsp;·&nbsp; [Changelog](CHANGELOG.md)
 
-The page works on a phone and on a laptop. Every field is a dropdown; "Custom" in a dropdown opens a typed field.
+</div>
 
-**Paste a line.** The box at the top of the form takes a nameplate or tender line, for example `220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11`, and fills the form from it. Full-width punctuation is read too.
+> [!NOTE]
+> This is a private helper, not a manufacturer's site. The type is a starting point. Get engineering confirmation before an order. No prices anywhere.
 
-**Form (left).** Three cards:
+## Try it in ten seconds
+
+```bash
+npx -y oltc-selector@latest --lang en --mva 125 --kind auto --hv 225 --mv 115 --tap junction
+```
+
+```text
+3xCM2I-500/252D-10193W
+Minimum-adequate path: CM2 in-tank vacuum OLTC (combined), Ium 500 A ≥ 356 A, Um 252 kV.
+Basis: I = S/(√3×225 kV) = 320.8 A, lowest tap 356.4 A · Ust 1623.8 V · 225 kV system Um 245 → class 252
+Insulation to earth open: Um 126 → 3xCM2I-500/126C-10193W · Um 170 → 3xCM2I-500/170D-10193W · Um 252 → 3xCM2I-500/252D-10193W
+
+Other
+3xCM2I-600/252D-10193W
+```
+
+The first line is the type. The rest says why. The real output also lists the notes you must act on and every default that was assumed; they are cut here.
+
+## Three ways in, one engine
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### Web page
+
+Every field is a dropdown. The type updates as you change one.
+
+Phone and laptop. Six languages.
+
+[Open it](https://oltc-selector.vercel.app/)
+
+</td>
+<td width="33%" valign="top">
+
+### Command line
+
+`oltc` reads flags or a pasted tender line and prints the type. `--json` for scripts.
+
+It tells you when npm has a newer version.
+
+[Flags](#cli)
+
+</td>
+<td width="33%" valign="top">
+
+### AI assistant
+
+Send your assistant one line. It runs the same command and asks you for missing data.
+
+Claude, ChatGPT, Codex.
+
+[The line to send](#with-an-ai-assistant)
+
+</td>
+</tr>
+</table>
+
+The page, the command and the assistant all call `selectOltc`, so they give the same type.
+
+## The page
+
+<table>
+<tr>
+<td width="34%"><img src="docs/assets/phone-form.png" alt="The form on a phone: transformer and duty cards, the type in a bar at the bottom"></td>
+<td width="34%"><img src="docs/assets/phone-result.png" alt="The result on a phone: type, coded parts, loads as bars, the winding sketch"></td>
+<td valign="top">
+
+**Form.** Three cards.
 
 | Card | Fields |
 |------|--------|
-| Transformer | Type (two-winding / autotransformer), where the switch sits, winding connection, rated voltage, insulation to earth |
+| Transformer | Type, where the switch sits, connection, rated voltage, insulation to earth |
 | Duty | Capacity or through-current, regulation, ± steps, step size, mid positions, phases |
-| Switch | On-load / off-circuit, arc medium, structure, mounting, impulse and power-frequency levels, safety factor |
+| Switch | On-load or off-circuit, arc medium, structure, mounting, impulse and power-frequency levels, safety factor |
 
-**Result (right).** The type updates as you change a field.
+**Result.**
 
-- The type string, with a button to copy it.
-- **Copy link**: the form is kept in the address (after `#`), so the link opens the same selection on another computer. A reload keeps it too. A pasted line is part of the link.
-- One cell for each coded part of the type: family, phases, current, connection, Um, tap code.
-- Loads as bars: duty / rating and the share used, for through-current, step voltage and step capacity.
-- Insulation to earth as the type's own level, for example `Um 72.5 · 140 / 350 kV`. At the line end it also has a bar, system Um against the type's Um; at a star neutral it is not compared with the duty.
-- Notes you must act on, in a yellow band.
-- Other types that also cover the duty.
+- The type, with a button to copy it
+- One cell for each coded part
+- Loads as bars: duty / rating and the share used
+- The type's withstand levels to earth
+- The winding, with the tap point you can click
+- Notes you must act on
+- Other types that also cover the duty
 
-On a phone the type stays in a bar at the bottom; the arrow jumps to the full result.
+</td>
+</tr>
+</table>
 
-Printing the page gives the result card only.
+- "Custom" in a dropdown opens a typed field.
+- The form is kept in the address (after `#`), so a copied address opens the same selection on another computer.
+- On a phone the type stays in a bar at the bottom; the arrow jumps to the full result.
+- Printing gives the result card only.
+- Languages: 中文, English, Tiếng Việt, Español, Türkçe, Bahasa Indonesia. The first visit follows the browser language.
 
-Languages: 中文, English, Tiếng Việt, Español, Türkçe, Bahasa Indonesia. The first visit follows the browser language (English when it is none of the six); after that the page remembers your choice.
+## Read a type string
 
-The links under the form open the release notes, the guide for AI assistants, the terms and the privacy page.
+```text
+CV2  III  -  350  Y  /  72.5  -  10193W
+ │    │       │   │      │        │
+ │    │       │   │      │        └─ tap code: 19 positions, 3 mid, reversing (W)
+ │    │       │   │      └────────── Um, kV
+ │    │       │   └───────────────── star (Y) or delta (D)
+ │    │       └───────────────────── rated through-current, A
+ │    └───────────────────────────── phases
+ └────────────────────────────────── family: vacuum, compound
+```
+
+| Family | Kind | Used for |
+|--------|------|----------|
+| `CV2` | Vacuum, compound | First choice. III at 350 and 600 A |
+| `CM2` | Vacuum, combined | Higher current, 220 kV class and autotransformers |
+| `SHZV` · `SDZV` | Vacuum, combined | Large step voltage or step capacity |
+| `WSL` · `WDG` · `WLG` | Off-circuit, cage or drum | De-energised tap changers |
+| `CZ` · `CVT` | Dry-type | Dry transformers |
+
+## How it picks
+
+```mermaid
+flowchart LR
+  A["Transformer<br/>MVA, kV, tap point"] --> B["Duty<br/>Imax · Ust · Um"]
+  B --> CCatalogue axes<br/>current, Um, step voltage,<br/>step capacity, positions
+  C --> D["Rank<br/>CV2 → CM2 → SHZV → SDZV"]
+  D --> EDoes this type<br/>exist?
+  E -- yes --> F["Type + reasons<br/>+ notes to act on"]
+  E -- no --> D
+```
+
+The tap point, not a typed Y or D, sets current, step voltage and Um. A type is given only when it exists in the brochure or the 2025 list. The full rules are [below](#selection-rules).
+
+## With an AI assistant
+
+Send this line to an assistant that can run commands:
+
+```text
+Use oltc-selector from npm to pick a tap-changer type for me. Run npx -y oltc-selector@latest --help first, then ask me for any missing data.
+```
+
+Then send the transformer data as you would to a colleague. The [guide](https://erict16.github.io/oltc-selector/agents/) has examples in six languages.
 
 ## CLI
 
@@ -65,6 +186,13 @@ oltc --mva 125 --kind auto --hv 225 --mv 115 --tap junction
 oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
 # 3xCM2I-500/252D-10193W, plus the type at Um 126 / 170 / 252
 ```
+
+Every run asks npm for a newer version and prints a notice when there is one. Nothing is installed for you.
+
+<details>
+<summary><b>All flags</b></summary>
+
+<br>
 
 | Flag | Meaning | Default |
 |------|---------|---------|
@@ -109,6 +237,13 @@ Every flag with a value also takes `--flag=value`. A flag that cannot take effec
 
 **Exit code:** `0` a type was found (or help / version); `1` no type, or bad input.
 
+</details>
+
+<details>
+<summary><b><code>--json</code> keys</b></summary>
+
+<br>
+
 **`--json`** prints one object. For bad input (a flag that cannot be read) the object holds only `ok`, `version`, `model` and `errors`.
 
 | Key | Holds |
@@ -124,7 +259,14 @@ Every flag with a value also takes `--flag=value`. A flag that cannot take effec
 | `assumptions` | Every default that was applied, as text |
 | `errors` | Why there is no type |
 
+</details>
+
 ## Selection rules
+
+<details>
+<summary><b>The eleven rules the engine follows</b></summary>
+
+<br>
 
 1. **Minimum-adequate, not SHZV-by-default.** Rank **CV2 → CM2 → SHZV → SDZV → SHZVG**. SDZV (dual-break, Ust 6000 V) only when SHZV step voltage or step capacity is short. Prefer one three-phase unit over `3×` singles when a brochure III type exists.
 2. **OLTC existence comes from brochure / catalogue axes** (`lib/catalog.ts`), **not price-list Y/D twins**. A 2025 list row that prices `CM2III-…D` the same as Y does **not** make `CM2III-…D` a type.
@@ -137,6 +279,8 @@ Every flag with a value also takes `--flag=value`. A flag that cannot take effec
 9. **Um is set where the tap changer sits** (`lib/transformer.ts`). Line end: the winding system's class (132 kV → 145, 220 kV → 252). Neutral: the full class up to 72.5; above that 72.5 is assumed and flagged. Autotransformer: the HV system's class, combined types only (no CV / CV2 / SV).
 10. **Tapped windings on 220 kV class and above take combined types only.** 2025–2026 OS: 67 of 67 were CM / CM2 / SHZV.
 11. **An open Um is shown as a choice.** Star points above 72.5 and autotransformers list the type at each Um class; the tender's insulation picks one (`--earth-um`, or a row on the card).
+
+</details>
 
 ## Develop
 
