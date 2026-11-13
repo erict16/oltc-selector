@@ -131,46 +131,11 @@ export function ResultCard({
         </div>
 
         <div className="plate-body">
-        <div className="plate-mid px-5 py-6 sm:px-8">
-          <BasisTable
-            lang={lang}
-            duty={duty}
-            dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
-            stepV={pickedStepV}
-            model={primary}
-          />
-          <div className="stage-sketch">
-            <TransformerSketch
-              lang={lang}
-              kind={kind}
-              tapPoint={tapPoint}
-              winding={winding}
-              tapKv={windingRatedKv}
-              hvKv={hvKv}
-              mvKv={mvKv}
-              onTap={onTap}
-              octc={isOctc}
-            />
-          </div>
-        </div>
-
-        {cautions.length > 0 ? (
-          <ul className="caution-list">
-            {cautions.map((c) => (
-              <li key={c} className="flex gap-2">
-                <ExclamationTriangleIcon
-                  className="mt-px h-4 w-4 shrink-0 text-[var(--color-warn)]"
-                  strokeWidth={1.75}
-                  aria-hidden
-                />
-                <span>{c}</span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
+        {/* Right under the type, so the list opens downward. At the foot of a
+            window-high card it took its room from the sketch above it, and
+            its own title moved up under the pointer (2026-11-14 Eric). */}
         {primary && alts.length > 0 ? (
-          <div className="plate-rule">
+          <div className="plate-alts">
             <button
               type="button"
               onClick={() => setAltsOpen((o) => !o)}
@@ -251,6 +216,52 @@ export function ResultCard({
             </div>
           </div>
         ) : null}
+        <div className="plate-mid px-5 py-6 sm:px-8">
+          <div className="plate-facts">
+            <BasisTable
+              lang={lang}
+              duty={duty}
+              dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
+              stepV={pickedStepV}
+              model={primary}
+            />
+            {/* The type's own data. It was a band under the sketch until
+                2026-11-14 01:24 and was taken out as clutter; Eric missed it
+                the same day. It sits in the room under the loads now. */}
+            {primary ? (
+              <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} hideRatings inline />
+            ) : null}
+          </div>
+          <div className="stage-sketch">
+            <TransformerSketch
+              lang={lang}
+              kind={kind}
+              tapPoint={tapPoint}
+              winding={winding}
+              tapKv={windingRatedKv}
+              hvKv={hvKv}
+              mvKv={mvKv}
+              onTap={onTap}
+              octc={isOctc}
+            />
+          </div>
+        </div>
+
+        {cautions.length > 0 ? (
+          <ul className="caution-list">
+            {cautions.map((c) => (
+              <li key={c} className="flex gap-2">
+                <ExclamationTriangleIcon
+                  className="mt-px h-4 w-4 shrink-0 text-[var(--color-warn)]"
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+                <span>{c}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
         </div>
         <div className="plate-foot">
           <p>{t(lang, "disclaimer")}</p>

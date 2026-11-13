@@ -1,13 +1,14 @@
 "use client";
 
+import { MenuSelect } from "@/components/selector/MenuSelect";
+
 type Opt = { value: string; label: string };
 
 const controlClass = "row-control";
 
 /**
- * The insulation-row menus. A native <select> since 2026-11-07: the custom
- * up-opening list did not take arrow keys, stayed open on Tab and hid the
- * value from screen readers. Browsers keep native menus on screen.
+ * The insulation-row menus. The list opens above the control when there is
+ * no room under it (MenuSelect).
  */
 export function UpSelect({
   label,
@@ -21,7 +22,7 @@ export function UpSelect({
   options: Opt[];
 }) {
   return (
-    <select
+    <MenuSelect
       aria-label={label}
       className={controlClass}
       value={value}
@@ -32,6 +33,6 @@ export function UpSelect({
           {o.label}
         </option>
       ))}
-    </select>
+    </MenuSelect>
   );
 }

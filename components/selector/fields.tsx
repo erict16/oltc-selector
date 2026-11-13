@@ -5,6 +5,7 @@ import { ListBulletIcon } from "@heroicons/react/24/outline";
 import { decimalDraft, pastedDecimal } from "@/lib/decimal";
 import { WINDING_RATED_KV } from "@/lib/deriveUm";
 import { t, type Lang } from "@/lib/i18n";
+import { MenuSelect } from "./MenuSelect";
 
 export function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -13,15 +14,14 @@ export function cx(...parts: Array<string | false | null | undefined>) {
 /** Label id of the enclosing <div> Field; null inside a <label> Field. */
 const FieldLabelContext = createContext<string | null>(null);
 
-/** A <select> that takes its name from a <div> Field's label. */
+/** Label id of the enclosing Field, <label> or <div>. */
+const RowLabelContext = createContext<string | null>(null);
+
+/** A menu that takes its name from the Field's label. */
 export function FieldSelect(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  const labelledBy = useContext(FieldLabelContext);
-  return (
-    <select
-      {...(labelledBy && !props["aria-label"] ? { "aria-labelledby": labelledBy } : {})}
-      {...props}
-    />
-  );
+  const groupLabel = useContext(FieldLabelContext);
+  const rowLabel = useContext(RowLabelContext);
+  return <MenuSelect {...props} labelId={groupLabel} ownLabelId={rowLabel} />;
 }
 
 /**
@@ -139,7 +139,7 @@ export function Field({
       </span>
       <span className="row-value">
         <FieldLabelContext.Provider value={group ? labelId : null}>
-          {children}
+          <RowLabelContext.Provider value={labelId}>{children}</RowLabelContext.Provider>
         </FieldLabelContext.Provider>
       </span>
     </Tag>

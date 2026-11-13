@@ -215,6 +215,7 @@ export function ModelSpec({
   dutyMounting,
   compact,
   hideRatings,
+  inline,
 }: {
   lang: Lang;
   r: ModelResult;
@@ -222,6 +223,8 @@ export function ModelSpec({
   compact?: boolean;
   /** The basis table already shows max Ust and step capacity. */
   hideRatings?: boolean;
+  /** Under the loads of the chosen type: two columns, no padding of its own. */
+  inline?: boolean;
 }) {
   const nb = "\u00a0";
   const series = SERIES.find((s) => s.id === r.seriesId);
@@ -263,9 +266,14 @@ export function ModelSpec({
   return (
     <dl
       className={cx(
-        "grid grid-cols-2 gap-x-5 gap-y-3",
-        hideRatings ? "sm:grid-cols-4" : "sm:grid-cols-3",
-        compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-7 sm:pl-12" : "px-5 py-4 sm:px-8",
+        "grid grid-cols-2 gap-x-5",
+        inline
+          ? "spec-inline gap-y-4"
+          : cx(
+              "gap-y-3",
+              hideRatings ? "sm:grid-cols-4" : "sm:grid-cols-3",
+              compact ? "pt-1 pr-5 pb-3 pl-11 sm:pr-7 sm:pl-12" : "px-5 py-4 sm:px-8",
+            ),
       )}
     >
       {items.map((item) => (

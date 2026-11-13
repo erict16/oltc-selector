@@ -924,7 +924,7 @@ select:open {
   --color-page: #f4f6f9;
   --color-line: #e3e8ef;
   --color-line-2: #d3dae4;
-  --color-control-line: #aab3c1;
+  --color-control-line: #c6cdd8;
   --color-accent-strong: var(--color-accent);
   --shadow-control: 0 1px 2px rgb(15 27 51 / 0.06);
 }
@@ -1004,9 +1004,11 @@ select:open {
   text-overflow: ellipsis;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
-select.row-control {
+select.row-control,
+.row-control.menu-btn {
   cursor: pointer;
   padding-right: 2rem;
+  background-repeat: no-repeat;
   /* heroicons 24/outline chevron-up-down */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%235d6b82'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9'/%3E%3C/svg%3E");
   background-size: 1rem;
@@ -1015,7 +1017,94 @@ select.row-control {
 .row-control:hover {
   border-color: var(--color-muted);
 }
-.row-control:focus-visible {
+.row-control.menu-btn {
+  display: flex;
+  align-items: center;
+  text-align: left;
+}
+.row-control.menu-btn:disabled {
+  cursor: not-allowed;
+}
+.menu-value {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The list of a menu: under its control, at the control's width. */
+.menu-list {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-width: calc(100vw - 1.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.3125rem;
+  border: 1px solid var(--color-line-2, #d3dae4);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgb(15 27 51 / 0.06),
+    0 12px 28px -8px rgb(15 27 51 / 0.2);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  transform-origin: top;
+  animation: menu-list-in 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.menu-list[data-side="top"] {
+  transform-origin: bottom;
+  animation-name: menu-list-in-up;
+}
+@keyframes menu-list-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+@keyframes menu-list-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+.menu-item {
+  display: flex;
+  flex: none;
+  min-height: 2.125rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.5rem 0 0.625rem;
+  border-radius: 8px;
+  color: var(--color-ink-2);
+  cursor: pointer;
+}
+.menu-item[data-active] {
+  background: #f1f4f8;
+  color: var(--color-ink);
+}
+.menu-item[aria-selected="true"] {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+.menu-item[aria-disabled] {
+  color: var(--color-caption);
+  cursor: not-allowed;
+}
+.menu-tick {
+  height: 1rem;
+  width: 1rem;
+  flex: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-list {
+    animation: none;
+  }
+}
+.row-control:focus-visible,
+.row-control.menu-btn[data-open] {
   outline: none;
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
@@ -1058,6 +1147,14 @@ select.row-control {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
 }
 
+/* Two columns: the form takes two parts in five, and the controls take
+   half of a row, so both grow with the window (2026-11-14: a fixed 28rem
+   form read as narrow beside the result). */
+@media (min-width: 1024px) {
+  .row-value {
+    width: 52%;
+  }
+}
 @media (max-width: 639px) {
   .page .sheet {
     padding: 0 0.75rem;
@@ -1378,7 +1475,9 @@ select.row-control {
   /* Contrast (2026-11-13), measured on white / on the page grey:
      muted and caption 5.44 / 5.08 (caption was #94a3b8, 2.56);
      ok 5.02 (was #16a34a, 3.3); badge text 5.82 on its tint (was 4.49);
-     control border 3.23 (was #d5d9e0, 1.42). Card hairlines stay light. */
+     Card hairlines stay light.
+     Control border (2026-11-14, Eric): #c6cdd8, 1.6. At 3.23 and then 2.1
+     the thirteen boxes read as black; the chevron and shadow mark a control. */
   --color-muted: #5b6b80;
   --color-caption: #5b6b80;
   --color-ok: #15803d;
@@ -1386,7 +1485,7 @@ select.row-control {
   --color-page: #f6f7f9;
   --color-line: #e6e8ec;
   --color-line-2: #d5d9e0;
-  --color-control-line: #aab3c1;
+  --color-control-line: #c6cdd8;
 }
 .page .plate-hero {
   background: #fafbfc;
@@ -1459,7 +1558,8 @@ select.row-control {
 .row-wide .row-value > div {
   gap: 0.375rem;
 }
-.row-wide select.row-control {
+.row-wide select.row-control,
+.row-wide .row-control.menu-btn {
   padding-left: 0.625rem;
   padding-right: 1.5rem;
   background-position: right 0.3125rem center;
@@ -1666,7 +1766,7 @@ select.row-control {
     flex: 1 0 auto;
   }
   /* The loads stay under the type; the sketch takes the spare height. */
-  .plate-body .basis {
+  .plate-body .plate-facts {
     align-self: start;
   }
   /* The drawing fills its box but never sets the box's size, so it cannot
@@ -1786,4 +1886,121 @@ select.row-control {
 .page .plate {
   border-radius: 16px;
   box-shadow: 0 1px 2px rgb(15 27 51 / 0.04);
+}
+
+/* The loads, then the type's own data, in one column beside the sketch. */
+.plate-facts {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 1.5rem;
+}
+.spec-inline {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-line);
+}
+
+/* Detail pass (2026-11-14, Eric: the corners and the spacing did not look
+   right). Nine radii from 4 to 18 px were in use, and a 16 px card around
+   9 px controls read as bubbly. One scale now: card 12, control and button
+   8, menu 10 with 6 px items. */
+.page .sheet-section,
+.page .plate {
+  border-radius: 12px;
+}
+.row-control,
+.row-back,
+.copy-btn,
+.lang-btn,
+.topbar-nav a,
+.page .stage-sketch,
+.page .caution-list {
+  border-radius: 8px;
+}
+.menu-list,
+.lang-menu {
+  padding: 0.25rem;
+  border-radius: 10px;
+}
+.menu-item,
+.lang-item {
+  border-radius: 6px;
+}
+.menu-item {
+  min-height: 2rem;
+}
+/* Rows: hairlines stop short of the card's edge and none sits under the
+   title, so the card reads as one group, not a ruled table. Controls are
+   36 px in a 52 px row: 8 px above and below, 16 px between two. */
+.page .sheet {
+  gap: 1.25rem;
+}
+.rows {
+  padding-bottom: 0.5rem;
+}
+.row {
+  position: relative;
+  border-top: 0;
+}
+.row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 1.25rem;
+  left: 1.25rem;
+  height: 1px;
+  background: var(--color-line);
+}
+.rows > .row:first-child::before {
+  display: none;
+}
+.card-head {
+  padding-bottom: 0.375rem;
+}
+.row-control,
+.row-back {
+  height: 2.25rem;
+}
+.row-back {
+  width: 2.25rem;
+}
+.row-control:hover,
+.row-back:hover {
+  border-color: #aab3c1;
+}
+select.row-control,
+.row-control.menu-btn {
+  /* heroicons 24/outline chevron-up-down, quieter */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%238793a6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9'/%3E%3C/svg%3E");
+  background-size: 0.875rem;
+  background-position: right 0.625rem center;
+}
+@media (min-width: 640px) {
+  .row,
+  .card-head {
+    padding-inline: 1.5rem;
+  }
+  .row::before {
+    right: 1.5rem;
+    left: 1.5rem;
+  }
+}
+@media (max-width: 639px) {
+  .row::before {
+    right: 1rem;
+    left: 1rem;
+  }
+  /* Phones keep 44 px touch targets. */
+  .row-control,
+  .row-back {
+    height: 2.75rem;
+  }
+  .row-back {
+    width: 2.75rem;
+  }
+}
+
+/* Other types, right under the chosen type: it opens downward. */
+.plate-alts {
+  border-bottom: 1px solid var(--color-line);
 }

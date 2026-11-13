@@ -110,7 +110,7 @@ export function SelectorApp() {
           </div>
         </div>
       </header>
-      <div className="page-grid mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-4 pb-6 sm:gap-6 sm:px-8 sm:pt-8 lg:grid-cols-[25rem_minmax(0,1fr)] lg:gap-8 lg:pb-10 xl:grid-cols-[28rem_minmax(0,1fr)]">
+      <div className="page-grid mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-4 pb-6 sm:gap-6 sm:px-8 sm:pt-8 lg:grid-cols-[minmax(25rem,2fr)_minmax(0,3fr)] lg:gap-8 lg:pb-10">
         <form
           className="flex min-w-0 flex-col"
           onSubmit={(e) => e.preventDefault()}
