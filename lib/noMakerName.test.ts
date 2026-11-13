@@ -11,7 +11,7 @@ const MAKER = /\u534E\u660E|hua[m]ing/i;
 const SKILL_SLUG = new RegExp(["hua", "ming-oltc-selector"].join(""), "g");
 
 const ROOT = process.cwd();
-const FILES = ["README.md", "AGENTS.md", "next.config.ts", "package.json"];
+const FILES = ["README.md", "README.zh-CN.md", "AGENTS.md", "next.config.ts", "package.json"];
 const DIRS = ["app", "components", "lib", "scripts"];
 const CODE = /\.(ts|tsx|js|mjs|cjs|py|css|md)$/;
 

@@ -1,170 +1,168 @@
 <div align="center">
 
+**English** · [简体中文](README.zh-CN.md)
+
 <img src="docs/assets/hero.svg" alt="OLTC Selector: the type string CV2III-350Y/72.5-10193W with each coded part named" width="100%">
 
-# OLTC Selector · 有载开关选型
+# OLTC Selector
 
 **Enter the transformer duty. Get the smallest tap-changer type in the 2025 catalogue that covers it.**
 
 [![npm](https://img.shields.io/npm/v/oltc-selector?color=2f6bff&label=npm)](https://www.npmjs.com/package/oltc-selector)
 [![downloads](https://img.shields.io/npm/dm/oltc-selector?color=2f6bff)](https://www.npmjs.com/package/oltc-selector)
-[![tests](https://github.com/erict16/oltc-selector/actions/workflows/test.yml/badge.svg)](https://github.com/erict16/oltc-selector/actions/workflows/test.yml)
-[![pages](https://github.com/erict16/oltc-selector/actions/workflows/deploy-pages.yml/badge.svg)](https://erict16.github.io/oltc-selector/)
+[![build](https://github.com/erict16/oltc-selector/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/erict16/oltc-selector/actions/workflows/deploy-pages.yml)
 ![node](https://img.shields.io/badge/node-%E2%89%A5%2020-0f172a)
-![languages](https://img.shields.io/badge/languages-6-0f172a)
 [![license](https://img.shields.io/badge/license-MIT-0f172a)](LICENSE)
 
-[**Open the web page**](https://oltc-selector.vercel.app/) &nbsp;·&nbsp; [Mirror](https://erict16.github.io/oltc-selector/) &nbsp;·&nbsp; [npm](https://www.npmjs.com/package/oltc-selector) &nbsp;·&nbsp; [AI assistant guide](https://erict16.github.io/oltc-selector/agents/) &nbsp;·&nbsp; [Changelog](CHANGELOG.md)
+[**Open the web page**](https://oltc-selector.vercel.app/) · [Mirror](https://erict16.github.io/oltc-selector/) · [npm](https://www.npmjs.com/package/oltc-selector) · [AI assistant guide](https://erict16.github.io/oltc-selector/agents/) · [Changelog](CHANGELOG.md)
 
 </div>
 
 > [!NOTE]
-> This is a private helper, not a manufacturer's site. The type is a starting point. Get engineering confirmation before an order. No prices anywhere.
+> This is a private helper, not a manufacturer's site. It gives no prices. The type is a starting point: get engineering confirmation before an order.
 
-## Try it in ten seconds
+## Try it
+
+A 25 MVA transformer, 110 kV, tapped at the star neutral:
 
 ```bash
-npx -y oltc-selector@latest --lang en --mva 125 --kind auto --hv 225 --mv 115 --tap junction
+npx -y oltc-selector@latest --lang en --mva 25 --kv 110 --tap neutral
 ```
 
 ```text
-3xCM2I-500/252D-10193W
-Minimum-adequate path: CM2 in-tank vacuum OLTC (combined), Ium 500 A ≥ 356 A, Um 252 kV.
-Basis: I = S/(√3×225 kV) = 320.8 A, lowest tap 356.4 A · Ust 1623.8 V · 225 kV system Um 245 → class 252
-Insulation to earth open: Um 126 → 3xCM2I-500/126C-10193W · Um 170 → 3xCM2I-500/170D-10193W · Um 252 → 3xCM2I-500/252D-10193W
+CV2III-350Y/72.5-10193W
+Minimum-adequate path: CV2 in-tank vacuum compound OLTC (selector switch), Ium 350 A ≥ 146 A, Um 72.5 kV.
+Basis: I = S/(√3×110 kV) = 131.2 A, lowest tap 145.8 A · Ust 793.9 V · neutral Um 72.5 (check the OS)
+Note: Neutral insulation not given: sized at Um 72.5 kV; the order specification (OS) decides.
+Insulation to earth open: Um 72.5 → CV2III-350Y/72.5-10193W · Um 126 → CV2III-350Y/126-10193W (take it from the tender's neutral / tap-winding insulation; use --earth-um)
 
 Other
-3xCM2I-600/252D-10193W
+CV2III-600Y/72.5-10193W
+
+Assumed: two-winding (default) · tap at neutral · star winding (default) · Um to earth 72.5 (not stated) · k=1.0 (default) · step=1.25% (default) · lowest tap at −8 (minus not stated; give +a/−b with --range or --minus) · reg=W reversing (default) · ±8 steps (default) · vacuum (default) · in tank (default) · phases=III (default)
 ```
 
-The first line is the type. The rest says why. The real output also lists the notes you must act on and every default that was assumed; they are cut here.
+The first line is the type. The lines after it say why, what you must still check, which other types cover the duty, and every default that was assumed.
 
 ## Three ways in, one engine
 
 <table>
 <tr>
 <td width="33%" valign="top">
-
-### Web page
-
-Every field is a dropdown. The type updates as you change one.
-
-Phone and laptop. Six languages.
-
-[Open it](https://oltc-selector.vercel.app/)
-
+<h3>Web page</h3>
+Every field is a dropdown, and the type updates as you change one. It works on a phone and on a laptop, in six languages.
+<br><br>
+<a href="https://oltc-selector.vercel.app/">Open the page</a>
 </td>
 <td width="33%" valign="top">
-
-### Command line
-
-`oltc` reads flags or a pasted tender line and prints the type. `--json` for scripts.
-
-It tells you when npm has a newer version.
-
-[Flags](#cli)
-
+<h3>Command line</h3>
+<code>oltc</code> reads flags or a pasted tender line and prints the type. <code>--json</code> is for scripts. Each run tells you when npm has a newer version.
+<br><br>
+<a href="#cli">Flags and examples</a>
 </td>
 <td width="33%" valign="top">
-
-### AI assistant
-
-Send your assistant one line. It runs the same command and asks you for missing data.
-
-Claude, ChatGPT, Codex.
-
-[The line to send](#with-an-ai-assistant)
-
+<h3>AI assistant</h3>
+Send your assistant one line. It runs the same command and asks you for the data it does not have.
+<br><br>
+<a href="#with-an-ai-assistant">The line to send</a>
 </td>
 </tr>
 </table>
 
-The page, the command and the assistant all call `selectOltc`, so they give the same type.
+All three call the same function, `selectOltc`, so they give the same type.
 
 ## The page
 
-<table>
-<tr>
-<td width="34%"><img src="docs/assets/phone-form.png" alt="The form on a phone: transformer and duty cards, the type in a bar at the bottom"></td>
-<td width="34%"><img src="docs/assets/phone-result.png" alt="The result on a phone: type, coded parts, loads as bars, the winding sketch"></td>
-<td valign="top">
+<p align="center">
+<img src="docs/assets/phone-form.png" alt="The form on a phone: the transformer and duty cards, with the type in a bar at the bottom" width="300">
+&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="docs/assets/phone-result.png" alt="The result on a phone: the type, its coded parts, the loads as bars and the winding sketch" width="300">
+</p>
 
-**Form.** Three cards.
+**The form** has three cards.
 
 | Card | Fields |
 |------|--------|
-| Transformer | Type, where the switch sits, connection, rated voltage, insulation to earth |
+| Transformer | Type, where the tap changer sits, winding connection, rated voltage, insulation to earth |
 | Duty | Capacity or through-current, regulation, ± steps, step size, mid positions, phases |
 | Switch | On-load or off-circuit, arc medium, structure, mounting, impulse and power-frequency levels, safety factor |
 
-**Result.**
+**The result** shows, from top to bottom:
 
-- The type, with a button to copy it
-- One cell for each coded part
-- Loads as bars: duty / rating and the share used
-- The type's withstand levels to earth
-- The winding, with the tap point you can click
-- Notes you must act on
-- Other types that also cover the duty
+1. The type, with a button to copy it.
+2. One cell for each coded part of the type.
+3. The loads as bars: duty against rating for through-current, step voltage and step capacity.
+4. The withstand levels to earth of the type.
+5. A sketch of the winding. Click a point on it to move the tap changer there.
+6. Notes you must act on.
+7. Other types that also cover the duty.
 
-</td>
-</tr>
-</table>
+Good to know:
 
 - "Custom" in a dropdown opens a typed field.
-- The form is kept in the address (after `#`), so a copied address opens the same selection on another computer.
-- On a phone the type stays in a bar at the bottom; the arrow jumps to the full result.
+- The form is kept in the address, after `#`. Copy the address to open the same selection on another computer.
+- On a phone the type stays in a bar at the bottom. The arrow jumps to the full result.
 - Printing gives the result card only.
 - Languages: 中文, English, Tiếng Việt, Español, Türkçe, Bahasa Indonesia. The first visit follows the browser language.
 
 ## Read a type string
 
-```text
-CV2  III  -  350  Y  /  72.5  -  10193W
- │    │       │   │      │        │
- │    │       │   │      │        └─ tap code: 19 positions, 3 mid, reversing (W)
- │    │       │   │      └────────── Um, kV
- │    │       │   └───────────────── star (Y) or delta (D)
- │    │       └───────────────────── rated through-current, A
- │    └───────────────────────────── phases
- └────────────────────────────────── family: vacuum, compound
-```
+| Part | In `CV2III-350Y/72.5-10193W` | Meaning |
+|------|------|---------|
+| Family | `CV2` | Vacuum, compound (selector switch), in tank |
+| Phases | `III` | Three-phase unit. `3x…I` is three single-phase units |
+| Current | `350` | Rated through-current, A |
+| Connection | `Y` | Star point. `D` is delta |
+| Um | `72.5` | Highest voltage for equipment, kV |
+| Tap code | `10193W` | 19 positions, 3 mid positions, reversing (`W`) |
 
-| Family | Kind | Used for |
+<details>
+<summary><b>Families the selector knows</b></summary>
+
+<br>
+
+| Family | Kind | Mounting |
 |--------|------|----------|
-| `CV2` | Vacuum, compound | First choice. III at 350 and 600 A |
-| `CM2` | Vacuum, combined | Higher current, 220 kV class and autotransformers |
-| `SHZV` · `SDZV` | Vacuum, combined | Large step voltage or step capacity |
-| `WSL` · `WDG` · `WLG` | Off-circuit, cage or drum | De-energised tap changers |
-| `CZ` · `CVT` | Dry-type | Dry transformers |
+| `CV2` | Vacuum, compound | In tank |
+| `CM2` · `SHZV` · `SDZV` · `SHZVG` | Vacuum, combined | In tank |
+| `HWV` | Vacuum, combined | On tank |
+| `CV` · `SV` | Oil, compound | In tank |
+| `CM` · `CMD` | Oil, combined | In tank |
+| `CVT` · `CZ` | Vacuum, for dry-type transformers | Dry-type |
+| `HWDK` | Oil, for reactors | Reactor |
+| `WSL` | Off-circuit, cage | In tank |
+| `WDG` · `WLG` · `WSG` | Off-circuit, drum | In tank |
+
+</details>
 
 ## How it picks
 
 ```mermaid
 flowchart LR
-  A["Transformer<br/>MVA, kV, tap point"] --> B["Duty<br/>Imax · Ust · Um"]
-  B --> CCatalogue axes<br/>current, Um, step voltage,<br/>step capacity, positions
-  C --> D["Rank<br/>CV2 → CM2 → SHZV → SDZV"]
-  D --> EDoes this type<br/>exist?
-  E -- yes --> F["Type + reasons<br/>+ notes to act on"]
-  E -- no --> D
+  A["Transformer: MVA, kV, tap point"] --> B["Duty: Imax, Ust, Um"]
+  B --> C["Types whose ratings cover the duty"]
+  C --> D["Rank: CV2, CM2, SHZV, SDZV, SHZVG"]
+  D --> E{"In the brochure or the 2025 list?"}
+  E -- yes --> F["Type, reasons, notes to act on"]
+  E -- no --> G["Next type in the ranking"]
+  G --> E
 ```
 
-The tap point, not a typed Y or D, sets current, step voltage and Um. A type is given only when it exists in the brochure or the 2025 list. The full rules are [below](#selection-rules).
+The tap point sets the current, the step voltage and Um. A typed Y or D does not. The full rules are in [Selection rules](#selection-rules).
 
 ## With an AI assistant
 
-Send this line to an assistant that can run commands:
+Send this line to an assistant that can run shell commands:
 
 ```text
 Use oltc-selector from npm to pick a tap-changer type for me. Run npx -y oltc-selector@latest --help first, then ask me for any missing data.
 ```
 
-Then send the transformer data as you would to a colleague. The [guide](https://erict16.github.io/oltc-selector/agents/) has examples in six languages.
+Then send the transformer data. The [guide](https://erict16.github.io/oltc-selector/agents/) has example questions in six languages.
 
 ## CLI
 
-You do not need to clone this repository.
+You do not need to clone this repository. Node.js 20 or later is needed.
 
 ```bash
 npm i -g oltc-selector
@@ -173,8 +171,14 @@ oltc --iu 350 --um 40.5 --conn D --reg W --pm 8
 # CV2III-350D/40.5-10193W
 
 oltc --octc --iu 800 --um 72.5 --conn D --series II --contact 6x5
+# WSLII-800D/72.5-6x5A
+
 oltc --iu 600 --um 72.5 --conn Y --reg W --pm 8 --structure combined
+# CM2III-600Y/72.5B-10193W
+
 oltc --mva 25 --kv 110 --tap neutral --reg W --pm 8
+# CV2III-350Y/72.5-10193W
+
 oltc --mva 16 --kv 22 --tap line --winding star
 # CV2III-600D/40.5-10193W
 
@@ -187,7 +191,7 @@ oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
 # 3xCM2I-500/252D-10193W, plus the type at Um 126 / 170 / 252
 ```
 
-Every run asks npm for a newer version and prints a notice when there is one. Nothing is installed for you.
+Output is in Chinese by default; `--lang en` gives English. Every run asks npm for a newer version and prints a notice when there is one. Nothing is installed for you.
 
 <details>
 <summary><b>All flags</b></summary>
