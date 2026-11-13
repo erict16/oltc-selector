@@ -9,8 +9,10 @@ CLI, from a review of every flag:
 
 Page:
 
-- The result is a panel as tall as the form, so both columns end on one line. Its content stays under the header while the form scrolls.
-- Header: the version, and links to the assistant guide and the release notes. New icon: a tapped winding with one tap led out.
+- The result card is as tall as the window leaves room for (never taller than the form, never shorter than its content), so both columns end on one line at the end of the page. Spare height makes the winding sketch larger. The type stays under the header on a short window. Checked at 640 to 1300 px high and 1024 to 1440 px wide, both default and autotransformer cases, alternatives open and closed. A first version stretched the card to the form's height and left an empty band; that is gone.
+- The insulation bar is removed: a class is not a load, and it always read 97 to 100 % (145 / 145).
+- Header: the version, and links to the assistant guide and the release notes. No mark in the header; the tab icon is the lightning bolt again. Terms and privacy sit in the card's foot on wide screens.
+- Dropdown borders are lighter.
 - The withstand levels to earth sit under the Um cell of the type.
 - Chinese notes say 订货规范 without （OS）.
 - README rewritten from checked facts, with a Chinese version.

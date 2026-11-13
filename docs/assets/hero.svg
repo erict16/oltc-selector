@@ -6,14 +6,8 @@
   <rect width="1280" height="440" rx="28" fill="#0f172a"/>
   <rect width="1280" height="440" rx="28" fill="url(#dots)"/>
   <rect width="1280" height="440" rx="28" fill="url(#glow)"/>
-  <g transform="translate(56 48) scale(1.5)">
-    <rect width="32" height="32" rx="8" fill="#1b2740"/>
-    <path d="M10.5 5.5a3.5 3.5 0 0 1 0 7a3.5 3.5 0 0 1 0 7a3.5 3.5 0 0 1 0 7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M10.5 12.5H20" stroke="#4d8dff" stroke-width="2.4" stroke-linecap="round"/>
-    <circle cx="22.5" cy="12.5" r="3.2" fill="#4d8dff"/>
-  </g>
-  <text x="122" y="70" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="24" font-weight="600" fill="#ffffff">OLTC Selector</text>
-  <text x="122" y="94" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#9fb0c9">有载开关选型</text>
+  <text x="56" y="70" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="24" font-weight="600" fill="#ffffff">OLTC Selector</text>
+  <text x="56" y="94" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#9fb0c9">有载开关选型</text>
   <text x="1224" y="80" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" fill="#9fb0c9">npx oltc-selector</text>
   <text x="640.0" y="158" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="20" fill="#c7d3e6">Transformer duty in, the smallest catalogue type that covers it out.</text>
   <text x="249.0" y="236" textLength="782" lengthAdjust="spacing" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="56" font-weight="600"><tspan fill="#ffffff">C</tspan><tspan fill="#ffffff">V</tspan><tspan fill="#ffffff">2</tspan><tspan fill="#ffffff">I</tspan><tspan fill="#ffffff">I</tspan><tspan fill="#ffffff">I</tspan><tspan fill="#5b6b85">-</tspan><tspan fill="#ffffff">3</tspan><tspan fill="#ffffff">5</tspan><tspan fill="#ffffff">0</tspan><tspan fill="#ffffff">Y</tspan><tspan fill="#5b6b85">/</tspan><tspan fill="#ffffff">7</tspan><tspan fill="#ffffff">2</tspan><tspan fill="#ffffff">.</tspan><tspan fill="#ffffff">5</tspan><tspan fill="#5b6b85">-</tspan><tspan fill="#ffffff">1</tspan><tspan fill="#ffffff">0</tspan><tspan fill="#ffffff">1</tspan><tspan fill="#ffffff">9</tspan><tspan fill="#ffffff">3</tspan><tspan fill="#ffffff">W</tspan></text>
