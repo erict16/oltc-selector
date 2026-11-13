@@ -23,9 +23,7 @@ export function BasisTable({
   dutyA,
   stepV,
   model,
-  hideUm,
 }: {
-  hideUm?: boolean;
   lang: Lang;
   duty: DutyBasis;
   dutyA: number | null;
@@ -36,18 +34,10 @@ export function BasisTable({
   const a = dutyA != null && dutyA > 0 ? dutyA : null;
   const u = ok && stepV > 0 ? stepV : null;
   const kva = a != null && u != null ? (a * u) / 1000 : null;
-  // Insulation need: the system's IEC Um where the rule is the system
-  // (line end, a full-class neutral): 33 kV line end needs 36 kV, not the
-  // 40.5 class the engine then picks. An assumed or stated class is the
-  // need itself.
-  const umNeed = !ok
-    ? null
-    : (duty.umRule === "line" || duty.umRule === "neutral_full") && Number.isFinite(duty.actualUmKv)
-      ? duty.actualUmKv
-      : duty.umKv;
-  // Every row is one line: name, duty, rating, use. An assumed Um is said
-  // once, in a deriveDuty caution above the table (neutral, MV lead and,
-  // since r3 UI-11, the auto junction), not again inside it.
+  // Every row is one line: name, duty, rating, use. Insulation is not here:
+  // it is a class, not a load, so its bar always read 97–100 % (145 / 145)
+  // and looked like a limit reached (2026-11-14 Eric). The class and its
+  // withstand levels are in the type's Um cell.
   const rows: Array<{
     key: string;
     label: string;
@@ -55,8 +45,6 @@ export function BasisTable({
     unit: string;
     rating: string | null;
     use: number | null;
-    /** Insulation is a class, not a load: 100% is a match, not tight. */
-    plain?: boolean;
   }> = [
     {
       key: "i",
@@ -82,32 +70,16 @@ export function BasisTable({
       rating: model?.stepCapacityKva != null ? `${model.stepCapacityKva}` : null,
       use: useOf(kva, model?.stepCapacityKva),
     },
-    {
-      key: "um",
-      label: t(lang, "kpiUm"),
-      need: umNeed != null ? round1(umNeed) : "—",
-      unit: "kV",
-      rating: model ? round1(model.umKv) : null,
-      use: useOf(umNeed, model?.umKv),
-      plain: true,
-    },
   ];
   return (
     <dl className="basis">
       {rows
         // Off-circuit types carry no step rating; a row of dashes says nothing.
         .filter((r) => !(model && r.rating == null))
-        // At a star neutral nothing on the duty side sets Um, so the row is
-        // left out. At the line end (D, or Y line end) the switch sees the
-        // system Um, so it gets the same bar as the loads (2026-11-12 Eric);
-        // only the amber "tight" tone is skipped, as 123 of 126 is a match.
-        // An assumed class (autotransformer) would only be compared with
-        // itself, 252 / 252 = 100%: no row (2026-11-14 Eric).
-        .filter((r) => !(r.plain && (hideUm || (ok && duty.umRule === "auto_hv"))))
         .map((r) => {
           const pct = r.use != null ? Math.round(r.use * 100) : null;
           const tone =
-            r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 && !r.plain ? "is-tight" : "";
+            r.use == null ? "" : r.use > 1 ? "is-over" : r.use >= 0.95 ? "is-tight" : "";
           return (
             <div key={r.key} className={cx("basis-row", tone)}>
               <dt>{r.label}</dt>

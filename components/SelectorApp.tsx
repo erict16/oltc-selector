@@ -89,8 +89,6 @@ export function SelectorApp() {
     <div className="page flex w-full min-w-0 flex-1 flex-col">
       <header className="topbar sticky top-0 z-30">
         <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
-          {/* The app's own mark (app/icon.svg): a tapped winding and its contact. */}
-          <img src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`} alt="" width={28} height={28} className="h-7 w-7 shrink-0" />
           <div className="flex min-w-0 items-baseline gap-2 leading-tight">
             <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-ink)]">
               {t(lang, "title")}

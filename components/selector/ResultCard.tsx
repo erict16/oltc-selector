@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, type RefObject } from "react";
 import {
   ChevronDownIcon,
@@ -82,7 +83,6 @@ export function ResultCard({
         <p className="sr-only" aria-live="polite" aria-atomic="true">
           {announced}
         </p>
-        <div className="plate-stick quiet-scroll">
         <div className={cx("px-5 pt-5 sm:px-8 sm:pt-7", primary ? "plate-hero" : "pb-5")}>
           {!primary ? (
             <div>
@@ -130,9 +130,9 @@ export function ResultCard({
           )}
         </div>
 
+        <div className="plate-body">
         <div className="plate-mid px-5 py-6 sm:px-8">
           <BasisTable
-            hideUm={tapPoint === "neutral"}
             lang={lang}
             duty={duty}
             dutyA={pickedDutyA ?? (currentMode === "capacity" ? derivedA : input.throughCurrentA)}
@@ -252,7 +252,13 @@ export function ResultCard({
           </div>
         ) : null}
         </div>
-        <p className="plate-foot">{t(lang, "disclaimer")}</p>
+        <div className="plate-foot">
+          <p>{t(lang, "disclaimer")}</p>
+          <nav className="no-print" aria-label={t(lang, "navTerms")}>
+            <Link href="/terms/">{t(lang, "navTerms")}</Link>
+            <Link href="/privacy/">{t(lang, "navPrivacy")}</Link>
+          </nav>
+        </div>
       </section>
     </>
   );

@@ -924,7 +924,7 @@ select:open {
   --color-page: #f4f6f9;
   --color-line: #e3e8ef;
   --color-line-2: #d3dae4;
-  --color-control-line: #8590a1;
+  --color-control-line: #aab3c1;
   --color-accent-strong: var(--color-accent);
   --shadow-control: 0 1px 2px rgb(15 27 51 / 0.06);
 }
@@ -1386,7 +1386,7 @@ select.row-control {
   --color-page: #f6f7f9;
   --color-line: #e6e8ec;
   --color-line-2: #d5d9e0;
-  --color-control-line: #8590a1;
+  --color-control-line: #aab3c1;
 }
 .page .plate-hero {
   background: #fafbfc;
@@ -1419,7 +1419,9 @@ select.row-control {
 }
 @container (min-width: 40rem) {
   .plate-mid {
-    grid-template-columns: minmax(0, 1fr) 14.5rem;
+    /* The sketch column widens as the window gets taller, so the box that
+       takes the spare height keeps a sane shape and the drawing grows. */
+    grid-template-columns: minmax(0, 1fr) clamp(14.5rem, calc((100dvh - 34rem) * 0.8), 20rem);
   }
 }
 /* A long load name wraps above its numbers instead of colliding. */
@@ -1544,10 +1546,18 @@ select.row-control {
     max-width: none !important;
     padding: 0 !important;
   }
-  .plate-stick {
+  .page .plate,
+  .plate-hero {
     position: static !important;
-    max-height: none !important;
-    overflow: visible !important;
+  }
+  .page .plate {
+    flex: none !important;
+  }
+  .result-pane {
+    height: auto !important;
+  }
+  .plate-foot nav {
+    display: none !important;
   }
   .result-pane {
     position: static !important;
@@ -1591,8 +1601,7 @@ select.row-control {
 }
 
 /* ── Polish pass (2026-11-14) ───────────────────────────────────────────
-   The result is a panel as tall as the form, so both columns end on one
-   line; its content stays under the header while the form scrolls. */
+   The result card and the form end on one line at the end of the page. */
 .page .plate {
   overflow: clip;
   display: flex;
@@ -1611,15 +1620,99 @@ select.row-control {
     padding-inline: 2rem;
   }
 }
+/* Wide screens: the card stays under the header and is as tall as the
+   window leaves room for, never taller than the form and never shorter
+   than its own content. So the two columns end on one line at the end of
+   the page. Spare height makes the sketch larger instead of leaving an
+   empty band. Nothing scrolls inside the card: a card taller than the
+   window rides up with the page at the very end, held by its column
+   (2026-11-14: a stretched panel left a gap; an inner scroll hid 其他可选). */
 @media (min-width: 1024px) {
-  .page .plate {
-    flex: 1;
+  .page {
+    /* the grid's bottom padding: what is left under the two columns */
+    --below-columns: 2.5rem;
   }
-  .plate-stick {
+  /* On a window taller than the page the row must not stretch past the form. */
+  .page-grid {
+    align-content: start;
+  }
+  /* The column takes the form's height and adds none of its own. */
+  .result-pane {
+    height: 0;
+    min-height: 100%;
+  }
+  .page .plate {
+    position: sticky;
+    top: 4.5rem;
+    /* max(content, min(window room, form height)) */
+    flex: 0 1 calc(100dvh - 4.5rem - var(--below-columns));
+  }
+  /* On a short window the card rides up at the end of the page; the type
+     and its coded parts stay under the header, over the card's body. */
+  .plate-hero {
     position: sticky;
     top: 3.5rem;
-    max-height: calc(100dvh - 3.5rem);
-    overflow-y: auto;
+    z-index: 1;
+  }
+  .plate-body {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+  }
+  .plate-body > * {
+    flex: none;
+  }
+  .plate-body > .plate-mid {
+    flex: 1 0 auto;
+  }
+  /* The loads stay under the type; the sketch takes the spare height. */
+  .plate-body .basis {
+    align-self: start;
+  }
+  /* The drawing fills its box but never sets the box's size, so it cannot
+     push the card taller than the form. */
+  .plate-body .stage-sketch {
+    position: relative;
+    min-height: 15rem;
+  }
+  .plate-body .stage-sketch svg {
+    position: absolute;
+    inset: 1rem;
+    margin: auto;
+    width: calc(100% - 2rem);
+    height: calc(100% - 2rem);
+    max-width: 26rem;
+    max-height: 30rem;
+  }
+  /* Terms and privacy sit in the card's foot here, so no row is left
+     under the columns. */
+  .page-foot {
+    display: none;
+  }
+}
+.plate-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+.plate-foot nav {
+  display: none;
+  gap: 1rem;
+}
+.plate-foot a:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+.plate-foot a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+@media (min-width: 1024px) {
+  .plate-foot nav {
+    display: flex;
   }
 }
 

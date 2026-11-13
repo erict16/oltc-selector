@@ -9,13 +9,6 @@ export default function NotFound() {
   const lang = useAppLang();
   return (
     <div className="mx-auto flex w-full max-w-[30rem] flex-1 flex-col items-start justify-center gap-5 px-6 py-16">
-      <img
-        src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/favicon.svg`}
-        alt=""
-        width={36}
-        height={36}
-        className="h-9 w-9"
-      />
       <h1 className="text-[1.375rem] font-semibold text-[var(--color-ink)]">
         {t(lang, "notFoundTitle")}
       </h1>
