@@ -140,8 +140,7 @@ Good to know:
 ```mermaid
 flowchart LR
   A["Transformer: MVA, kV, tap point"] --> B["Duty: Imax, Ust, Um"]
-  B --> C["Types whose ratings cover the duty"]
-  C --> D["Rank: CV2, CM2, SHZV, SDZV, SHZVG"]
+  B --> D["Rank the types that cover it: CV2, CM2, SHZV, SDZV, SHZVG"]
   D --> E{"In the brochure or the 2025 list?"}
   E -- yes --> F["Type, reasons, notes to act on"]
   E -- no --> G["Next type in the ranking"]
