@@ -1407,14 +1407,6 @@ select.row-control {
   background: #fcfcfd radial-gradient(circle, #d8dce3 1px, transparent 1.2px) 0 0 / 16px 16px;
 }
 
-/* The result column scrolls on its own, which clips at its edge. Padding
-   (pulled back by the same margin) leaves room for the card's shadow. */
-@media (min-width: 1024px) {
-  .result-pane {
-    margin: -1rem -1.5rem -2.5rem;
-    padding: 1rem 1.5rem 3rem;
-  }
-}
 
 /* Loads beside the sketch only when the card itself is wide enough
    (found at 1024 px: the load names ran under their own numbers). */
@@ -1552,6 +1544,11 @@ select.row-control {
     max-width: none !important;
     padding: 0 !important;
   }
+  .plate-stick {
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
   .result-pane {
     position: static !important;
     max-height: none !important;
@@ -1591,4 +1588,109 @@ select.row-control {
   .tap-spot-dot {
     display: none;
   }
+}
+
+/* ── Polish pass (2026-11-14) ───────────────────────────────────────────
+   The result is a panel as tall as the form, so both columns end on one
+   line; its content stays under the header while the form scrolls. */
+.page .plate {
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+}
+.plate-foot {
+  margin-top: auto;
+  border-top: 1px solid var(--color-line);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+@media (min-width: 640px) {
+  .plate-foot {
+    padding-inline: 2rem;
+  }
+}
+@media (min-width: 1024px) {
+  .page .plate {
+    flex: 1;
+  }
+  .plate-stick {
+    position: sticky;
+    top: 3.5rem;
+    max-height: calc(100dvh - 3.5rem);
+    overflow-y: auto;
+  }
+}
+
+/* Header: the two pages people go to, beside the language menu. */
+.topbar-version {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+.topbar-version:hover {
+  color: var(--color-ink);
+}
+.topbar-nav {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+}
+.topbar-nav a {
+  display: inline-flex;
+  height: 2.25rem;
+  align-items: center;
+  border-radius: 9px;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-ink-2);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.topbar-nav a:hover {
+  background-color: #eef1f5;
+  color: var(--color-ink);
+}
+.topbar-nav a:focus-visible,
+.topbar-version:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+  border-radius: 6px;
+}
+.topbar-lang {
+  margin-left: auto;
+}
+@media (min-width: 640px) {
+  .topbar-nav {
+    display: flex;
+  }
+  .topbar-lang {
+    margin-left: 0.25rem;
+  }
+  /* The header already carries these two. */
+  .page-foot .foot-dup {
+    display: none;
+  }
+}
+
+/* Coded parts: each cell as wide as what it says, so "Um kV · 140 / 350"
+   stays on one line beside short cells like "Y". */
+@media (min-width: 640px) {
+  .type-segs {
+    display: flex;
+  }
+  .type-segs > div {
+    flex: 1 1 auto;
+  }
+  .type-segs dd {
+    white-space: nowrap;
+  }
+}
+
+/* Both columns are the same kind of card: one radius, one quiet shadow. */
+.page .sheet-section,
+.page .plate {
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgb(15 27 51 / 0.04);
 }

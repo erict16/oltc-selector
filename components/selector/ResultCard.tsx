@@ -82,6 +82,7 @@ export function ResultCard({
         <p className="sr-only" aria-live="polite" aria-atomic="true">
           {announced}
         </p>
+        <div className="plate-stick quiet-scroll">
         <div className={cx("px-5 pt-5 sm:px-8 sm:pt-7", primary ? "plate-hero" : "pb-5")}>
           {!primary ? (
             <div>
@@ -250,10 +251,9 @@ export function ResultCard({
             </div>
           </div>
         ) : null}
+        </div>
+        <p className="plate-foot">{t(lang, "disclaimer")}</p>
       </section>
-      <p className="px-4 text-[0.75rem] leading-snug text-[var(--color-muted)] sm:px-1">
-        {t(lang, "disclaimer")}
-      </p>
     </>
   );
 }

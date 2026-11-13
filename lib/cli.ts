@@ -1366,7 +1366,7 @@ export function cliNotes(
       notes.push(
         en
           ? `Stated insulation to earth, Um ${duty.umKv} kV, is below the ${duty.ruleUmKv} kV the winding voltage gives. Check the order specification (OS).`
-          : `指定对地绝缘 Um ${duty.umKv} kV 低于按绕组电压得出的 ${duty.ruleUmKv} kV，请核对订货规范（OS）。`,
+          : `指定对地绝缘 Um ${duty.umKv} kV 低于按绕组电压得出的 ${duty.ruleUmKv} kV，请核对订货规范。`,
       );
     }
   }

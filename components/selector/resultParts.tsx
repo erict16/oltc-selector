@@ -57,8 +57,6 @@ export function BasisTable({
     use: number | null;
     /** Insulation is a class, not a load: 100% is a match, not tight. */
     plain?: boolean;
-    /** A rating printed as it is, with nothing to compare. */
-    fact?: boolean;
   }> = [
     {
       key: "i",
@@ -93,28 +91,12 @@ export function BasisTable({
       use: useOf(umNeed, model?.umKv),
       plain: true,
     },
-    // The withstand levels are a fact of the type, not a load: no bar. They
-    // sat in a row of four under the sketch that repeated the type's own
-    // coded parts (2026-11-14 Eric: the right side read as clutter).
-    ...(model?.earthPfKv != null && model.earthBilKv != null
-      ? [
-          {
-            key: "earth",
-            label: t(lang, "specEarth"),
-            need: `${model.earthPfKv} / ${model.earthBilKv}`,
-            unit: "kV",
-            rating: null,
-            use: null,
-            fact: true,
-          },
-        ]
-      : []),
   ];
   return (
     <dl className="basis">
       {rows
         // Off-circuit types carry no step rating; a row of dashes says nothing.
-        .filter((r) => r.fact || !(model && r.rating == null))
+        .filter((r) => !(model && r.rating == null))
         // At a star neutral nothing on the duty side sets Um, so the row is
         // left out. At the line end (D, or Y line end) the switch sees the
         // system Um, so it gets the same bar as the loads (2026-11-12 Eric);
@@ -133,11 +115,7 @@ export function BasisTable({
                 <b>{r.need}</b>
                 {r.rating != null ? <span> / {r.rating}</span> : null}
                 <span className="basis-unit">{r.unit}</span>
-                {pct != null ? (
-                  <span className="basis-pct">{pct}%</span>
-                ) : r.fact ? (
-                  <span className="basis-pct" aria-hidden />
-                ) : null}
+                {pct != null ? <span className="basis-pct">{pct}%</span> : null}
               </dd>
               {pct != null ? (
                 <span className="basis-bar" aria-hidden>
@@ -208,7 +186,11 @@ export function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; s
   if (m[1]) {
     cells.push({ code: m[1], says: t(lang, m[1] === "Y" ? "windingStar" : "windingDelta") });
   }
-  cells.push({ code: m[2], says: "Um kV" });
+  // The withstand levels belong to the Um class, so they sit under it,
+  // spelled as the form's own insulation menu spells them (2026-11-14).
+  const withstand =
+    r.earthPfKv != null && r.earthBilKv != null ? ` · ${r.earthPfKv} / ${r.earthBilKv}` : "";
+  cells.push({ code: m[2], says: `Um kV${withstand}` });
   // A type that ends in a bare count (reactor HWDK …-17, dry CZ) states its
   // own positions; the caption must not print another number under it.
   const count = /^\d+$/.test(m[3]) ? Number(m[3]) : r.positions;
