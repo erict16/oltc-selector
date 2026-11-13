@@ -1790,6 +1790,22 @@ select.row-control,
     display: none;
   }
 }
+/* Safari: a flex item that clips its overflow lost its content-based
+   minimum height, so on a short window the card was cut at the window's
+   height (656 px of 988 at 1024 x 768) and the rest could not be reached.
+   Chromium kept the minimum. The card no longer clips: its first and last
+   bands round their own outer corners instead (2026-11-14). */
+@media (min-width: 1024px) {
+  .page .plate {
+    overflow: visible;
+  }
+  .page .plate-hero {
+    border-radius: 11px 11px 0 0;
+  }
+  .page .plate-foot {
+    border-radius: 0 0 11px 11px;
+  }
+}
 .plate-foot {
   display: flex;
   flex-wrap: wrap;
