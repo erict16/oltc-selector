@@ -11,6 +11,10 @@ No new version: the CLI pack is unchanged.
 - "Other types that cover the duty" sits right under the type and opens downward. At the foot of a window-high card it took its room from the sketch above, so its own title moved up under the pointer.
 - One radius scale: card 12 px, control and button 8, menu 10 with 6 px items. Nine radii from 4 to 18 px were in use.
 - Form rows: hairlines stop short of the card's edge and none sits under the card title; 24 px side padding; controls 36 px high in a 52 px row; 20 px between cards; a quieter chevron and hover border.
+- Fixed, both from the first version of the new menus: a long menu could not be scrolled with the wheel or trackpad (each step threw the list back to its top), and in Safari a second click on an open menu opened it again instead of closing it.
+- A menu's selected option is the page's blue, not the old steel blue (the list is drawn outside the page element and missed its colours).
+- The header is solid white; the form showed through it in Safari. The language icon ends on the cards' right edge.
+- Result card on a 4 px grid; the type's data sits 20 px from the loads on both sides of its rule; the copy icon and the chevron of an alternative end on the card's content edge.
 
 ## 2.4.1 (2026-11-14)
 

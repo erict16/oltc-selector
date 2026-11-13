@@ -108,6 +108,8 @@ function OwnMenu({
   const btnRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const typed = useRef({ text: "", at: 0 });
+  /** Was the list open when the pointer went down on the control? */
+  const downOpen = useRef(false);
   const listId = useId();
   const optId = (i: number) => `${listId}-${i}`;
 
@@ -142,14 +144,18 @@ function OwnMenu({
   // Under the control, at its width; above it when the room below is short.
   useLayoutEffect(() => {
     if (!open) return;
-    const place = () => {
+    const place = (e?: Event) => {
       const btn = btnRef.current;
       const list = listRef.current;
       if (!btn || !list) return;
+      // The list's own scroll moves nothing on the page. (The first version
+      // also cleared max-height here to measure, which threw the list back
+      // to its top on every wheel step: a long list could not be scrolled.)
+      if (e?.target === list) return;
       const r = btn.getBoundingClientRect();
       const below = window.innerHeight - r.bottom - GAP - EDGE;
       const above = r.top - GAP - EDGE;
-      list.style.maxHeight = "";
+      // scrollHeight is the full content height, whatever max-height is.
       const want = Math.min(list.scrollHeight + 2, MAX_HEIGHT);
       const up = below < want && above > below;
       list.style.left = `${r.left}px`;
@@ -273,7 +279,16 @@ function OwnMenu({
         aria-labelledby={ariaLabel ? undefined : (labelId ?? undefined)}
         aria-describedby={describedBy}
         data-open={open || undefined}
-        onClick={() => (open ? setOpen(false) : show())}
+        // Safari blurs the control on pointer-down, which closes the list
+        // before the click arrives: without this the click opened it again.
+        onPointerDown={() => {
+          downOpen.current = open;
+        }}
+        onClick={() => {
+          if (open || downOpen.current) setOpen(false);
+          else show();
+          downOpen.current = false;
+        }}
         onKeyDown={onKeyDown}
         onBlur={() => setOpen(false)}
       >
