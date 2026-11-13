@@ -8,8 +8,11 @@ Avoid unnecessary secondary labels and descriptions. Let the layout do the expla
 
 One object on the page: the result plate. Decisions, so they are not undone by accident:
 
-- The form has no cards. It sits on the page: a muted 13 px group title, rows of label and control, a hairline between groups.
+- The form has no cards. It sits on the page: a 13 px group title in ink, rows of label and control, a hairline between groups.
 - The plate is the only white card. On a card 40rem or wider the type is explained by the key under it (`.type-key` in `resultParts.tsx`): a bracket under each coded part and a leader down to its caption, as in the catalogue's 型号说明 figure. Narrower cards and phones show the same parts as a table (`.type-segs`); both are in the DOM, one for the eye and one for screen readers.
+- Copying the type is the page's one action: the only filled (ink) button, on the type's own line on a wide card.
+- The key is measured in em (one Plex Mono character is 0.6em), not ch: WebKit took ch from a fallback face.
+- The plate does not clip its overflow at 1024 px and wider: in WebKit a clipping flex item has no content-based minimum height and the card was cut on a short window.
 - Depth is hairlines only. No shadows on cards or controls; a shadow only on what floats (menus).
 - Radii: card 12, control and button 8, menu 10 with 6 px items. Spacing on a 4 px grid.
 - Menus are `MenuSelect`, not the system `<select>`, on a mouse or trackpad; touch keeps the system picker.

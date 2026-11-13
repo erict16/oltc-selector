@@ -4,7 +4,7 @@
 
 No new version: the CLI pack is unchanged.
 
-- A design direction, not only fixes. The result plate is the one white card; the form sits on the page with no cards of its own, a small muted title per group and a hairline between groups. No shadows on cards or controls.
+- A design direction, not only fixes. The result plate is the one white card; the form sits on the page with no cards of its own, a small title per group and a hairline between groups. No shadows on cards or controls.
 - The type explains itself the way the catalogue's 型号说明 figure does: a bracket under each coded part and a leader down to what it says. On a narrow card or a phone the parts stay a table.
 - After an independent review of screenshots: the key is measured in em, not ch (Safari set every bracket 4 px per character short); copying the type is the one filled button, on the type's own line; the three loads sit on one grid, so duties end and ratings start on one line, with no rules between them; key captions are a name with its value ("额定电流 350 A", "Um 72.5 kV · 140 / 350 kV"); group titles are ink, field names follow; on a phone the type never breaks and the coded parts go two to a row.
 - Safari, short window: the card is no longer cut at the window's height (it lost its content-based minimum height because it clipped its overflow).
