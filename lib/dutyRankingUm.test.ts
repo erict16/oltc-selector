@@ -329,13 +329,6 @@ describe("UM-2 market (optional, off by default)", () => {
     const s = spec({ tapKv: 150, mva: 40, market: "IT" });
     expect(umChoices(deriveDuty(s), s)).toEqual([72.5, 126, 170]);
   });
-
-  it("CLI --market shows in 假定", () => {
-    const j = cliJson("--mva 40 --kv 150 --tap neutral --market IT");
-    expect(j.basis?.umKv).toBe(170);
-    expect(j.assumptions).toContain("市场=IT");
-    expect(cli("--mva 40 --kv 150 --tap neutral --market Italy").code).toBe(1);
-  });
 });
 
 describe("UM-4 400 kV-class autotransformer junction", () => {

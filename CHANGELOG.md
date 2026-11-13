@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.4.0 (2026-11-14)
+
+CLI:
+
+- `--market` is removed. It had rules for Italy and Turkey only, did nothing in most cases, and its Um effect was `--earth-um` under another name (`--mva 100 --kv 220 --tap neutral --market IT` gave the same type as `--earth-um 252`). Giving it now is an error that names `--earth-um` and `--across-li` / `--across-ac`. The one thing it alone did, grade C on Turkish 110 kV-class neutrals, is reached with `--across-li`.
+
+Page: the result card height, the insulation bar, the header mark and the dropdown borders, listed under 2.3.2 below, went live between 2.3.2 and this version.
+
 ## 2.3.2 (2026-11-14)
 
 CLI, from a review of every flag:

@@ -10,10 +10,13 @@ import { deriveDuty, type TransformerSpec } from "./transformer";
 
 const args = (s: string) => parseCliArgs([...s.split(/\s+/).filter(Boolean), "--no-update-check"]);
 
+// The CLI has no --market since 2.4.0; the buyer practice is engine input.
 function run(s: string) {
-  const input = cliToSelectInput(args(s));
+  const tr = s.includes(" --market TR");
+  const a = () => args(s.replace(" --market TR", ""));
+  const input = { ...cliToSelectInput(a()), ...(tr ? { market: "TR" } : {}) };
   const out = selectOltc(input);
-  const duty = cliDuty(args(s));
+  const duty = cliDuty(a());
   return {
     I: input.throughCurrentA,
     model: out.results[0]?.model ?? null,
