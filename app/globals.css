@@ -1188,9 +1188,11 @@ select.row-control {
     padding-left: 0;
   }
 }
+/* Notes come after the numbers, on the card's own gutters. */
 .page .caution-list {
-  margin: 1.25rem 1.25rem 0;
+  margin: 0 1.25rem 1.5rem;
   border-radius: 10px;
+  padding: 0.75rem 0.875rem;
 }
 @media (min-width: 640px) {
   .page .caution-list {

@@ -129,21 +129,6 @@ export function ResultCard({
           )}
         </div>
 
-        {cautions.length > 0 ? (
-          <ul className="caution-list">
-            {cautions.map((c) => (
-              <li key={c} className="flex gap-2">
-                <ExclamationTriangleIcon
-                  className="mt-px h-4 w-4 shrink-0 text-[var(--color-warn)]"
-                  strokeWidth={1.75}
-                  aria-hidden
-                />
-                <span>{c}</span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
         <div className="plate-mid px-5 py-6 sm:px-8">
           <BasisTable
             hideUm={tapPoint === "neutral"}
@@ -168,10 +153,19 @@ export function ResultCard({
           </div>
         </div>
 
-        {primary ? (
-          <div className="plate-rule">
-            <ModelSpec lang={lang} r={primary} dutyMounting={input.mounting} hideRatings />
-          </div>
+        {cautions.length > 0 ? (
+          <ul className="caution-list">
+            {cautions.map((c) => (
+              <li key={c} className="flex gap-2">
+                <ExclamationTriangleIcon
+                  className="mt-px h-4 w-4 shrink-0 text-[var(--color-warn)]"
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+                <span>{c}</span>
+              </li>
+            ))}
+          </ul>
         ) : null}
 
         {primary && alts.length > 0 ? (
