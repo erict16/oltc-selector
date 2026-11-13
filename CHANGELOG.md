@@ -4,6 +4,7 @@
 
 No new version: the CLI pack is unchanged.
 
+- Safari, short window: the result card is no longer cut at the window's height. It lost its content-based minimum height because it clipped its overflow; Chromium did not. Found with Playwright WebKit at 1024 x 768 and 1280 x 720.
 - Menus open under their control, at its width, and above it when there is no room below. Safari on macOS drew the system menu over the control and to its left. The list takes arrows, Home, End, typing to find, Enter and Escape, and Tab takes the highlighted option; a screen reader hears the field's name, its value and the option (`components/selector/MenuSelect.tsx`). A touch screen keeps the system picker.
 - The form is wider: two parts in five of the page instead of a fixed 28rem (448 px to 474 px on a 1440 px window; 25rem is still the least). The controls take 52 % of a row, so they grow with it.
 - Control borders are lighter (#aab3c1 to #c6cdd8, 1.6:1 on white). The chevron and the shadow still mark a control.
