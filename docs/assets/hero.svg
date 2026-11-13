@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 440" width="1280" height="440" role="img" aria-label="OLTC Selector: a tap-changer type string, CV2III-350Y/72.5-10193W, with each coded part named">
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#ffffff" opacity=".07"/></pattern>
+    <radialGradient id="glow" cx="50%" cy="46%" r="55%"><stop offset="0" stop-color="#4d8dff" stop-opacity=".20"/><stop offset="1" stop-color="#4d8dff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1280" height="440" rx="28" fill="#0f172a"/>
+  <rect width="1280" height="440" rx="28" fill="url(#dots)"/>
+  <rect width="1280" height="440" rx="28" fill="url(#glow)"/>
+  <g transform="translate(56 48) scale(1.5)">
+    <rect width="32" height="32" rx="8" fill="#1b2740"/>
+    <g fill="#fff" opacity=".42"><circle cx="6.5" cy="15.5" r="1.7"/><circle cx="10.5" cy="11.5" r="1.7"/><circle cx="16" cy="10" r="1.7"/><circle cx="25.5" cy="15.5" r="1.7"/></g>
+    <path d="M16 21 21.5 11.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="21.5" cy="11.5" r="2.6" fill="#4d8dff"/><circle cx="16" cy="21" r="3" fill="#fff"/><circle cx="16" cy="21" r="1.2" fill="#0f172a"/>
+  </g>
+  <text x="122" y="70" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="24" font-weight="600" fill="#ffffff">OLTC Selector</text>
+  <text x="122" y="94" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#9fb0c9">有载开关选型</text>
+  <text x="1224" y="80" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16" fill="#9fb0c9">npx oltc-selector</text>
+  <text x="640.0" y="158" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="20" fill="#c7d3e6">Transformer duty in, the smallest catalogue type that covers it out.</text>
+  <text x="249.0" y="236" textLength="782" lengthAdjust="spacing" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="56" font-weight="600"><tspan fill="#ffffff">C</tspan><tspan fill="#ffffff">V</tspan><tspan fill="#ffffff">2</tspan><tspan fill="#ffffff">I</tspan><tspan fill="#ffffff">I</tspan><tspan fill="#ffffff">I</tspan><tspan fill="#5b6b85">-</tspan><tspan fill="#ffffff">3</tspan><tspan fill="#ffffff">5</tspan><tspan fill="#ffffff">0</tspan><tspan fill="#ffffff">Y</tspan><tspan fill="#5b6b85">/</tspan><tspan fill="#ffffff">7</tspan><tspan fill="#ffffff">2</tspan><tspan fill="#ffffff">.</tspan><tspan fill="#ffffff">5</tspan><tspan fill="#5b6b85">-</tspan><tspan fill="#ffffff">1</tspan><tspan fill="#ffffff">0</tspan><tspan fill="#ffffff">1</tspan><tspan fill="#ffffff">9</tspan><tspan fill="#ffffff">3</tspan><tspan fill="#ffffff">W</tspan></text>
+    <path d="M252.0 258 v8 H348.0 v-8" fill="none" stroke="#4d8dff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+  <text x="300.0" y="294" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="17" fill="#9fb0c9">family</text>
+  <path d="M354.0 258 v8 H450.0 v-8" fill="none" stroke="#4d8dff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+  <text x="402.0" y="294" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="17" fill="#9fb0c9">phases</text>
+  <path d="M490.0 258 v8 H586.0 v-8" fill="none" stroke="#4d8dff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+  <text x="538.0" y="294" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="17" fill="#9fb0c9">A</text>
+  <path d="M592.0 258 v8 H620.0 v-8" fill="none" stroke="#4d8dff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+  <text x="606.0" y="294" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="17" fill="#9fb0c9">star</text>
+  <path d="M660.0 258 v8 H790.0 v-8" fill="none" stroke="#4d8dff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+  <text x="725.0" y="294" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="17" fill="#9fb0c9">Um kV</text>
+  <path d="M830.0 258 v8 H1028.0 v-8" fill="none" stroke="#4d8dff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+  <text x="929.0" y="294" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="17" fill="#9fb0c9">19 positions</text>
+    <text x="150.0" y="352" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#9fb0c9">Through-current</text>
+  <text x="450.0" y="352" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" fill="#e6edf7">145.8 / 350 A</text>
+  <rect x="150.0" y="366" width="300" height="6" rx="3" fill="#22304a"/>
+  <rect x="150.0" y="366" width="126" height="6" rx="3" fill="#4d8dff"/>
+  <text x="490.0" y="352" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#9fb0c9">Step voltage</text>
+  <text x="790.0" y="352" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" fill="#e6edf7">793.9 / 2000 V</text>
+  <rect x="490.0" y="366" width="300" height="6" rx="3" fill="#22304a"/>
+  <rect x="490.0" y="366" width="120" height="6" rx="3" fill="#4d8dff"/>
+  <text x="830.0" y="352" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" fill="#9fb0c9">Step capacity</text>
+  <text x="1130.0" y="352" text-anchor="end" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="15" fill="#e6edf7">115.7 / 700 kVA</text>
+  <rect x="830.0" y="366" width="300" height="6" rx="3" fill="#22304a"/>
+  <rect x="830.0" y="366" width="51" height="6" rx="3" fill="#4d8dff"/>
+</svg>
