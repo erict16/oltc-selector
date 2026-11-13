@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.4.1 (2026-11-14)
+
+CLI, the rest of the flag review:
+
+- Shorter text output. The 假定 / Assumed line names only what could change the type: a default tap point, Y or D, ± steps, step size, regulation, anything worked out from another flag. Defaults nobody questions (two-winding, star, k = 1.0, vacuum, in tank, three-phase) are in `--json` `assumptions` only, which still lists everything. Items lose their `conn=` / `reg=` / `step=` prefixes.
+- The insulation to earth is said once per job: the basis line gives the value, the note says it was assumed, and the per-class line lists the alternatives. It was also in the Assumed line, and the basis line and the per-class line both said "check".
+- "Other" is "Other types that cover the duty" (其他可选).
+- Errors: on a Chinese run every error prints in Chinese, then English (`lib/cliErrorsZh.ts`; a test fails for a message with no row). `--lang en` prints English alone, also when the error is in the flags themselves.
+- `--json`: an error is JSON on stdout and nothing on stderr; `errors` holds the same lines as the text output. `--version --json` is JSON.
+- `--line` reads an all-lowercase vector group (`ynd11`, `dyn11`, `yna0d11`).
+- `--line` with a bare "off-circuit" or "de-energized" is off-circuit duty ("31.5MVA 33/11 kV Dyn11 off-circuit ±2x2.5%" gave an on-load CV2). "No-load" still needs a tap word, so "no-load losses" is not read as one.
+- `--conn` beside `--mva` or `--line` is an error. It used to change the current formula to S/(3U) without a word. Use `--tap line` or `--winding delta`.
+
 ## 2.4.0 (2026-11-14)
 
 CLI:

@@ -1,3 +1,4 @@
+import { cliErrorLines } from "./cliErrorsZh";
 import { APP_VERSION } from "./appVersion";
 import { parseDecimal } from "./decimal";
 import { octcRoman, optionsWithInsurance, selectOltc } from "./engine";
@@ -746,7 +747,7 @@ Flags:
   --step-pct %       Step as percent (1.25 means 1.25%). Capacity path only.
   --k n              Safety factor on capacity path only (default 1.0, same as the web app).
   --conn Y|D         Switch connection (star point / line end). Default Y.
-                     On the capacity path, legacy: Y = star neutral, D = delta line end.
+                     --iu path only. With --mva or --line it is an error: use --tap.
   --reg W|G|0        Reversing / coarse-fine / linear. Default W.
   --pm N             ± steps. Default 8.
   --range +a/-b[xs%] Uneven range, e.g. +4/-12x1.25%. W/G takes the Fig. 3-3
@@ -963,6 +964,12 @@ function checkConflicts(args: CliArgs): void {
   }
   // 2026-11-14 review: more flags that were dropped or silently overridden.
   const typed = (...flags: string[]) => flags.some((f) => args.typed?.has(f));
+  // --mva … --conn D used to swap the current formula to S/(3U) without a word.
+  if (typed("--conn", "--connection") && args.mva != null) {
+    throw new CliError(
+      "--conn does not apply with --mva: the tap point sets Y or D. Use --tap line for a line end, --winding delta for a delta winding.",
+    );
+  }
   if (typed("--conn", "--connection") && typed("--tap") && args.conn === "Y" && args.tap === "line_end") {
     throw new CliError("--conn Y conflicts with --tap line: a line-end tap point is delta (D). Drop one.");
   }
@@ -1155,7 +1162,7 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     const conn = cliConnection(args);
     const derived = tapSetsConnection(args);
     items.push(
-      `conn=${conn} ${conn === "Y" ? "星点" : "线端"}${derived ? "" : mark("conn")}`,
+      `${conn} ${conn === "Y" ? "星点" : "线端"}${derived ? "" : mark("conn")}`,
     );
     if (args.kind === "auto") items.push("自耦变");
     if (derived) {
@@ -1168,12 +1175,12 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
   if (args.mva != null) {
     items.push(args.given.has("k") ? `k=${args.k}` : "k=1.0（默认）");
     items.push(
-      args.given.has("stepPct") ? `step=${args.stepPct}%` : "step=1.25%（默认）",
+      args.given.has("stepPct") ? `每级 ${args.stepPct}%` : "每级 1.25%（默认）",
     );
     // 2026-11-04: +4/−12 sold on 17 positions was sized as ±8; say the
     // lowest tap assumes a symmetric range when no minus was stated.
     if (!args.given.has("minus") && !args.given.has("range")) {
-      items.push(`最低档按 −${cliMinusSteps(args)} 算（−档未指定，+a/−b 用 --range 或 --minus）`);
+      items.push(`最低档按 −${cliMinusSteps(args)}（未指定）`);
     }
     if (args.lineRangeAssumed && args.range) {
       const { plus, minus } = args.range;
@@ -1213,7 +1220,7 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     return items;
   }
   items.push(
-    `reg=${
+    `${
       args.reg === "reversing"
         ? "W 正反调"
         : args.reg === "coarse_fine"
@@ -1256,25 +1263,56 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
   return items;
 }
 
-/** One-line 假定 block; null when every watched input was given explicitly. */
+/**
+ * Defaults nobody questions, and items another line already says. They stay
+ * in --json `assumptions`; the text line names only what could change the
+ * type (2026-11-14 review: the line ran to twelve items).
+ */
+const QUIET_ASSUMPTIONS: RegExp[] = [
+  /^(双绕组|自耦变)（默认）$/,
+  /^(星形|角形)绕组（默认）$/,
+  /^k=1\.0（默认）$/,
+  /^(真空|油浸)（默认）$/,
+  /^相数=.+（默认）$/,
+  // The note and the per-class line under the type already say it.
+  /^对地 Um [\d.]+（未指定）$/,
+  // The engine's own note says the step voltage was not given.
+  /^Ust 未指定/,
+  new RegExp(`^(${Object.values(MOUNT_ZH).map((m) => m.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")).join("|")})（默认）$`),
+];
+
+/** The assumed items worth a line of text, without the （默认） mark the title already carries. */
+export function assumptionsShown(args: CliArgs, family?: string): string[] {
+  // Assumed (a default, not stated, guessed from the line) or worked out
+  // from another flag (a tap point from --winding, positions from ±N). What
+  // the user typed as it stands is not repeated.
+  const assumed = (i: string) => i.includes("（默认") || i.includes("未指定") || i.includes("招标行");
+  const workedOut = (i: string) =>
+    /（由 |（±|→/.test(i) ||
+    (i.startsWith("开关在") && !args.given.has("tap")) ||
+    (/^[YD] (星点|线端)$/.test(i) && args.mva == null && !args.given.has("conn"));
+  return assumptionsFromArgs(args, family)
+    .filter((i) => assumed(i) || workedOut(i))
+    .filter((i) => !QUIET_ASSUMPTIONS.some((re) => re.test(i)))
+    .map((i) => i.replace(/（默认）$/, ""));
+}
+
+/** One-line 假定 block; null when nothing worth saying was assumed. */
 export function assumptionsLine(args: CliArgs, family?: string): string | null {
-  const items = assumptionsFromArgs(args, family);
-  if (items.every((i) => !i.includes("（默认）") && !i.includes("未指定"))) {
-    return null;
-  }
-  return `假定：${items.join(" · ")}`;
+  const shown = assumptionsShown(args, family);
+  return shown.length ? `假定：${shown.join(" · ")}` : null;
 }
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
 /** --lang en: the 假定 items in English (same facts, same order). */
 const ASSUMPTION_EN: Array<[RegExp | string, string]> = [
+  [/^最低档按 −(\d+)（未指定）$/, "lowest tap at −$1 (not stated)"],
   ["（默认，招标行未写全）", " (default; the line does not give it all)"],
   ["（默认）", " (default)"],
   ["（未指定）", " (not stated)"],
   ["（待 OS 核对）", " (check the OS)"],
   [/（只给一项：等级不低于 Um 默认）/, " (one value only: grade not below the Um default)"],
-  [/^最低档按 −(\d+) 算（−档未指定，\+a\/−b 用 --range 或 --minus）$/, "lowest tap at −$1 (minus not stated; give +a/−b with --range or --minus)"],
   [/^无载开关取 ([\d.]+) kV 绕组的范围（(默认，)?招标行有两个调压范围）$/, "off-circuit range from the $1 kV winding (two ranges on the line)"],
   [/^对地 Um ([\d.]+)（招标行中性点 BIL ([\d.]+) kV）$/, "Um to earth $1 (line neutral BIL $2 kV)"],
   ["Ust 未指定（级电压、级容量未校验）", "Ust not stated (step voltage and capacity not checked)"],
@@ -1286,6 +1324,7 @@ const ASSUMPTION_EN: Array<[RegExp | string, string]> = [
   ["自耦变", "autotransformer"],
   ["双绕组", "two-winding"],
   [/^容量 /, "power "],
+  [/^每级 /, "step "],
   ["星形绕组", "star winding"],
   ["角形绕组", "delta winding"],
   [/^调压绕组间 /, "across tap winding "],
@@ -1332,7 +1371,7 @@ export function basisLineEn(d: DutyBasis): string {
     d.umRule === "explicit"
       ? `Um to earth ${d.umKv} (stated)`
       : d.umRule === "neutral_assumed" || d.umRule === "neutral_full"
-        ? `neutral Um ${d.umKv}${d.umAssumed ? " (check the OS)" : ""}`
+        ? `neutral Um ${d.umKv}`
         : `${d.umSystemKv} kV system Um ${d.actualUmKv} → class ${d.umKv}`;
   const ust = d.stepV == null ? "" : ` · Ust ${round1(d.stepV)} V`;
   const max = d.maxRule === "stated" ? "OS Imax" : "lowest tap";
@@ -1348,7 +1387,7 @@ export function basisLineZh(d: DutyBasis): string {
     d.umRule === "explicit"
       ? `对地 Um ${d.umKv}（指定）`
       : d.umRule === "neutral_assumed" || d.umRule === "neutral_full"
-        ? `中性点 Um ${d.umKv}${d.umAssumed ? "（待 OS 核对）" : ""}`
+        ? `中性点 Um ${d.umKv}`
         : `${d.umSystemKv} kV 系统 Um ${d.actualUmKv} → ${d.umKv} 级`;
   const ust = d.stepV == null ? "" : ` · Ust ${round1(d.stepV)} V`;
   const max = d.maxRule === "stated" ? "OS Imax" : "最低档";
@@ -1453,8 +1492,8 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
     const list = choices.map((c) => `Um ${c.um} → ${c.model ?? (en ? "none" : "无")}`).join(" · ");
     lines.push(
       en
-        ? `Insulation to earth open: ${list} (take it from the tender's neutral / tap-winding insulation; use --earth-um)`
-        : `对地绝缘未定：${list}（按招标的中性点/调压绕组绝缘取，用 --earth-um）`,
+        ? `By insulation class: ${list} (set it with --earth-um)`
+        : `各绝缘等级对应型号：${list}（用 --earth-um 指定）`,
     );
   }
   if (args?.line) {
@@ -1466,14 +1505,14 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
   }
   if (alts.length) {
     lines.push("");
-    lines.push(en ? "Other" : "其他");
+    lines.push(en ? "Other types that cover the duty" : "其他可选");
     for (const a of alts) lines.push(a.model);
   }
   if (args) {
-    const assumed = assumptionsLine(args, primary.seriesCode);
-    if (assumed) {
+    const shown = assumptionsShown(args, primary.seriesCode);
+    if (shown.length) {
       lines.push("");
-      lines.push(en ? `Assumed: ${assumptionsFromArgs(args, primary.seriesCode).map(assumptionEn).join(" · ")}` : assumed);
+      lines.push(en ? `Assumed: ${shown.map(assumptionEn).join(" · ")}` : `假定：${shown.join(" · ")}`);
     }
   }
   return lines.join("\n") + "\n";
@@ -1552,7 +1591,8 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
     assumptions: args
       ? assumptionsFromArgs(args, primary?.seriesCode).map((a) => (en ? assumptionEn(a) : a))
       : [],
-    errors: [...(en ? out.errorsEn : out.errorsZh.length ? out.errorsZh : out.errorsEn), ...(hint ? [hint] : [])],
+    // Same lines as the text output: Chinese then English, or English alone.
+    errors: [...(en ? out.errorsEn : [...out.errorsZh, ...out.errorsEn]), ...(hint ? [hint] : [])],
   };
   return JSON.stringify(payload, null, 2) + "\n";
 }
@@ -1601,10 +1641,19 @@ export function runCli(
     return 0;
   }
   const wantsJson = argv.includes("--json");
+  // Known before parsing, so a parse error is in the right language too.
+  const langAt = argv.findIndex((a) => a === "--lang" || a.startsWith("--lang="));
+  const langArg = langAt < 0 ? undefined : argv[langAt]!.includes("=") ? argv[langAt]!.split("=")[1] : argv[langAt + 1];
+  const envLang = typeof process !== "undefined" ? process.env?.OLTC_LANG : undefined;
+  const lang: "en" | "zh" = (langArg ?? envLang ?? "zh").toLowerCase() === "en" ? "en" : "zh";
   try {
     const args = parseCliArgs(argv);
     if (args.version) {
-      io.stdout(`oltc-selector ${APP_VERSION}\n`);
+      io.stdout(
+        wantsJson
+          ? JSON.stringify({ ok: true, version: APP_VERSION }, null, 2) + "\n"
+          : `oltc-selector ${APP_VERSION}\n`,
+      );
       return 0;
     }
     const input = cliToSelectInput(args);
@@ -1617,13 +1666,15 @@ export function runCli(
     return 0;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    // 2026-11-13: under --json an error is JSON too, so a caller never parses prose.
+    // Chinese output: the Chinese line, then the English one. English: as thrown.
+    const lines = cliErrorLines(msg, lang);
+    // 2026-11-13: under --json an error is JSON too, so a caller never parses
+    // prose. 2026-11-14: and nothing goes to stderr then, as when no type fits.
     if (wantsJson) {
-      io.stdout(
-        JSON.stringify({ ok: false, version: APP_VERSION, model: null, errors: msg.split("\n") }, null, 2) + "\n",
-      );
+      io.stdout(JSON.stringify({ ok: false, version: APP_VERSION, model: null, errors: lines }, null, 2) + "\n");
+      return 1;
     }
-    io.stderr(msg.endsWith("\n") ? msg : msg + "\n");
+    io.stderr(lines.join("\n") + "\n");
     return 1;
   }
 }

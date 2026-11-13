@@ -278,7 +278,7 @@ describe("F10 auto wiring reaches the engine", () => {
   it("delta line end drum, auto → WSGII like the CLI; IV only when asked", () => {
     const d = { connection: "D" as const, throughCurrentA: 364.5, plusMinusSteps: 2, preferStructure: "drum" as const };
     expect(models({ ...d, octcSeries: "auto" })[0]).toBe("WSGII-600D/40.5-4x5A");
-    expect(cliFirst(["--octc", "--mva", "40", "--kv", "38.5", "--pm", "2", "--step-pct", "2.5", "--conn", "D", "--structure", "drum"])).toBe(
+    expect(cliFirst(["--octc", "--mva", "40", "--kv", "38.5", "--pm", "2", "--step-pct", "2.5", "--tap", "line", "--winding", "delta", "--structure", "drum"])).toBe(
       "WSGII-600D/40.5-4x5A",
     );
     expect(models({ ...d, octcSeries: "IV" })[0]).toBe("WSGIV-600D/40.5-4x5A");

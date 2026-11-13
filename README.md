@@ -32,17 +32,17 @@ npx -y oltc-selector@latest --lang en --mva 25 --kv 110 --tap neutral
 ```text
 CV2III-350Y/72.5-10193W
 Minimum-adequate path: CV2 in-tank vacuum compound OLTC (selector switch), Ium 350 A ≥ 146 A, Um 72.5 kV.
-Basis: I = S/(√3×110 kV) = 131.2 A, lowest tap 145.8 A · Ust 793.9 V · neutral Um 72.5 (check the OS)
+Basis: I = S/(√3×110 kV) = 131.2 A, lowest tap 145.8 A · Ust 793.9 V · neutral Um 72.5
 Note: Neutral insulation not given: sized at Um 72.5 kV; the order specification (OS) decides.
-Insulation to earth open: Um 72.5 → CV2III-350Y/72.5-10193W · Um 126 → CV2III-350Y/126-10193W (take it from the tender's neutral / tap-winding insulation; use --earth-um)
+By insulation class: Um 72.5 → CV2III-350Y/72.5-10193W · Um 126 → CV2III-350Y/126-10193W (set it with --earth-um)
 
-Other
+Other types that cover the duty
 CV2III-600Y/72.5-10193W
 
-Assumed: two-winding (default) · tap at neutral · star winding (default) · Um to earth 72.5 (not stated) · k=1.0 (default) · step=1.25% (default) · lowest tap at −8 (minus not stated; give +a/−b with --range or --minus) · reg=W reversing (default) · ±8 steps (default) · vacuum (default) · in tank (default) · phases=III (default)
+Assumed: step 1.25% · lowest tap at −8 (not stated) · W reversing · ±8 steps
 ```
 
-The first line is the type. The lines after it say why, what you must still check, which other types cover the duty, and every default that was assumed.
+The first line is the type. The lines after it say why, what you must still check, which other types cover the duty, and what was assumed.
 
 ## Three ways in, one engine
 
@@ -190,7 +190,7 @@ oltc --line "220/110/35kV-125MVA 225±8x1,25%/115/35kV YNa0d11"
 # 3xCM2I-500/252D-10193W, plus the type at Um 126 / 170 / 252
 ```
 
-Output is in Chinese by default; `--lang en` gives English. Every run asks npm for a newer version and prints a notice when there is one. Nothing is installed for you.
+Output is in Chinese by default; `--lang en` gives English. An error on a Chinese run prints in Chinese, then English. Every run asks npm for a newer version and prints a notice when there is one. Nothing is installed for you.
 
 <details>
 <summary><b>All flags</b></summary>
@@ -213,7 +213,7 @@ Output is in Chinese by default; `--lang en` gives English. Every run asks npm f
 | `--across-li` `--across-ac` | Stated LI / AC withstand across the tap winding (kV): sets the selector grade B/C/D/DE | |
 | `--um` | Equipment Um (kV) | derived from `--kv` if omitted |
 | `--ust` | Step voltage (V) | 0, or derived on MVA path |
-| `--conn Y\|D` | Switch star / delta on the `--iu` path (with `--mva`, use `--tap`) | Y |
+| `--conn Y\|D` | Switch star / delta on the `--iu` path. With `--mva` or `--line` it is an error: use `--tap` | Y |
 | `--reg W\|G\|0` | Reversing / coarse-fine / linear | W |
 | `--pm` | ± steps, a whole number | 8 |
 | `--pos` / `--positions` | Operating positions (linear and off-circuit; on W/G the Fig. 3-3 row with that count) | |
@@ -246,7 +246,7 @@ Every flag with a value also takes `--flag=value`. A flag that cannot take effec
 
 <br>
 
-**`--json`** prints one object. For bad input (a flag that cannot be read) the object holds only `ok`, `version`, `model` and `errors`.
+**`--json`** prints one object, and nothing on stderr. For bad input (a flag that cannot be read) the object holds only `ok`, `version`, `model` and `errors`.
 
 | Key | Holds |
 |-----|-------|
@@ -258,8 +258,8 @@ Every flag with a value also takes `--flag=value`. A flag that cannot take effec
 | `line` | The `--line` read-back: `kind`, `mva`, `voltagesKv`, `vectorGroup`, `warnings` (or `null`) |
 | `basis` | Where current, Ust and Um came from on the capacity path (or `null`) |
 | `umChoices` | The type at each Um class when the insulation to earth is open |
-| `assumptions` | Every default that was applied, as text |
-| `errors` | Why there is no type |
+| `assumptions` | Every default that was applied, as text. The text output names only those that could change the type |
+| `errors` | Why there is no type. Chinese then English; English alone with `--lang en` |
 
 </details>
 
