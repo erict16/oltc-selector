@@ -167,15 +167,62 @@ export function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; s
   // own positions; the caption must not print another number under it.
   const count = /^\d+$/.test(m[3]) ? Number(m[3]) : r.positions;
   cells.push({ code: m[3], says: `${t(lang, "positions")} ${count}` });
+  // Where each coded part sits in the shown string, in characters. The type
+  // is set in a monospaced face, so a character is one `ch` wide and the
+  // key below can hang a leader from the middle of each part.
+  let from = 0;
+  const placed = cells.map((c) => {
+    const start = c.code ? shown.indexOf(c.code, from) : -1;
+    if (start >= 0) from = start + c.code.length;
+    return { ...c, start, len: c.code.length };
+  });
+  const keyed = placed.every((c) => c.start >= 0);
   return (
-    <dl className="type-segs" translate="no">
-      {cells.map((c, i) => (
-        <div key={i}>
-          <dt>{c.code}</dt>
-          <dd>{c.says}</dd>
+    <>
+      <dl className={cx("type-segs", keyed && "has-key")} translate="no">
+        {cells.map((c, i) => (
+          <div key={i}>
+            <dt>{c.code}</dt>
+            <dd>{c.says}</dd>
+          </div>
+        ))}
+      </dl>
+      {/* The type explained the way the catalogue's 型号说明 figure does it:
+          a bracket under each coded part and a leader down to what it says.
+          Wide cards only; it repeats the list above, so it is hidden from
+          screen readers and the list is hidden from the eye. */}
+      {keyed ? (
+        <div
+          className="type-key"
+          aria-hidden
+          translate="no"
+          style={{ "--rows": placed.length } as React.CSSProperties}
+        >
+          {placed.map((c, i) => (
+            <div
+              key={i}
+              className="tk"
+              style={
+                {
+                  "--s": c.start,
+                  "--l": c.len,
+                  "--k": placed.length - 1 - i,
+                } as React.CSSProperties
+              }
+            >
+              <i className="tk-bracket" />
+              <i className="tk-leader" />
+              <span className="tk-row">
+                {/* A bare unit reads better with its number: "350 A". */}
+                <span className="tk-says">
+                  {/^[A-Za-z]{1,3}$/.test(c.says) ? `${c.code} ${c.says}` : c.says}
+                </span>
+              </span>
+            </div>
+          ))}
         </div>
-      ))}
-    </dl>
+      ) : null}
+    </>
   );
 }
 
