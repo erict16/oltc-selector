@@ -102,14 +102,14 @@ export function ResultCard({
             </div>
           ) : (
             <>
-              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+              <div className="hero-top flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
                 <span className="plate-badge">
                   {showsMinimumLabel(loose) ? null : (
                     <ShieldCheckIcon className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden />
                   )}
                   {t(lang, showsMinimumLabel(loose) ? "recommended" : "allRound")}
                 </span>
-                <span className="no-print flex flex-wrap items-center gap-2">
+                <span className="hero-copy no-print flex flex-wrap items-center gap-2">
                   <CopyButton
                     lang={lang}
                     labelled
@@ -118,14 +118,19 @@ export function ResultCard({
                   />
                 </span>
               </div>
-              <p
-                key={primary.model}
-                translate="no"
-                className="plate-type plate-in mt-4 text-[clamp(1.375rem,6vw,1.875rem)] leading-[1.15] font-semibold tracking-[-0.025em] text-[var(--color-ink)] lg:text-[clamp(1.625rem,2.6vw,2.375rem)]"
+              <div
+                className="type-block"
+                style={{ "--len": displayModel(primary.model, lang).length } as React.CSSProperties}
               >
-                {modelNodes(displayModel(primary.model, lang))}
-              </p>
-              <TypeSegments lang={lang} r={primary} shown={displayModel(primary.model, lang)} />
+                <p
+                  key={primary.model}
+                  translate="no"
+                  className="plate-type plate-in type-hero"
+                >
+                  {modelNodes(displayModel(primary.model, lang))}
+                </p>
+                <TypeSegments lang={lang} r={primary} shown={displayModel(primary.model, lang)} />
+              </div>
             </>
           )}
         </div>

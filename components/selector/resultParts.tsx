@@ -85,8 +85,12 @@ export function BasisTable({
               <dt>{r.label}</dt>
               <dd className="num">
                 <b>{r.need}</b>
-                {r.rating != null ? <span> / {r.rating}</span> : null}
-                <span className="basis-unit">{r.unit}</span>
+                {/* Rating and unit are one cell, so every "/ rating unit"
+                    starts on the same line. */}
+                <span className="basis-of">
+                  {r.rating != null ? ` / ${r.rating}` : null}
+                  <span className="basis-unit">{r.unit}</span>
+                </span>
                 {pct != null ? <span className="basis-pct">{pct}%</span> : null}
               </dd>
               {pct != null ? (
@@ -139,7 +143,9 @@ export function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; s
     : head.endsWith(r.phases)
       ? head.slice(0, -r.phases.length)
       : head;
-  const cells: Array<{ code: string; says: string }> = [
+  // `says` is the short caption of the table; `key` the fuller one of the
+  // leader key, always a name with its value.
+  const cells: Array<{ code: string; says: string; key?: string }> = [
     {
       code: family,
       says: offCircuit
@@ -148,8 +154,14 @@ export function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; s
     },
   ];
   if (wiring) cells.push({ code: wiring[2], says: t(lang, "octcSeries") });
-  else if (family !== head) cells.push({ code: r.phases, says: t(lang, "phases") });
-  cells.push({ code: String(r.currentA), says: "A" });
+  else if (family !== head) {
+    cells.push({ code: r.phases, says: t(lang, "phases"), key: `${t(lang, "phases")} ${r.phases}` });
+  }
+  cells.push({
+    code: String(r.currentA),
+    says: "A",
+    key: `${t(lang, "specCurrent")} ${r.currentA} A`,
+  });
   // The rest is cut from the string as shown: a single-phase type has no
   // Y/D after the current, and a reactor type ends in its own step count.
   const rest = shown.slice(at + 1 + String(r.currentA).length);
@@ -162,20 +174,68 @@ export function TypeSegments({ lang, r, shown }: { lang: Lang; r: ModelResult; s
   // spelled as the form's own insulation menu spells them (2026-11-14).
   const withstand =
     r.earthPfKv != null && r.earthBilKv != null ? ` · ${r.earthPfKv} / ${r.earthBilKv}` : "";
-  cells.push({ code: m[2], says: `Um kV${withstand}` });
+  cells.push({
+    code: m[2],
+    says: `Um kV${withstand}`,
+    key: `Um ${m[2]} kV${withstand ? `${withstand} kV` : ""}`,
+  });
   // A type that ends in a bare count (reactor HWDK …-17, dry CZ) states its
   // own positions; the caption must not print another number under it.
   const count = /^\d+$/.test(m[3]) ? Number(m[3]) : r.positions;
   cells.push({ code: m[3], says: `${t(lang, "positions")} ${count}` });
+  // Where each coded part sits in the shown string, in characters. The type
+  // is set in a monospaced face, so a character is one `ch` wide and the
+  // key below can hang a leader from the middle of each part.
+  let from = 0;
+  const placed = cells.map((c) => {
+    const start = c.code ? shown.indexOf(c.code, from) : -1;
+    if (start >= 0) from = start + c.code.length;
+    return { ...c, start, len: c.code.length };
+  });
+  const keyed = placed.every((c) => c.start >= 0);
   return (
-    <dl className="type-segs" translate="no">
-      {cells.map((c, i) => (
-        <div key={i}>
-          <dt>{c.code}</dt>
-          <dd>{c.says}</dd>
+    <>
+      <dl className={cx("type-segs", keyed && "has-key")} translate="no">
+        {cells.map((c, i) => (
+          <div key={i}>
+            <dt>{c.code}</dt>
+            <dd>{c.says}</dd>
+          </div>
+        ))}
+      </dl>
+      {/* The type explained the way the catalogue's 型号说明 figure does it:
+          a bracket under each coded part and a leader down to what it says.
+          Wide cards only; it repeats the list above, so it is hidden from
+          screen readers and the list is hidden from the eye. */}
+      {keyed ? (
+        <div
+          className="type-key"
+          aria-hidden
+          translate="no"
+          style={{ "--rows": placed.length } as React.CSSProperties}
+        >
+          {placed.map((c, i) => (
+            <div
+              key={i}
+              className="tk"
+              style={
+                {
+                  "--s": c.start,
+                  "--l": c.len,
+                  "--k": placed.length - 1 - i,
+                } as React.CSSProperties
+              }
+            >
+              <span className="tk-bracket" />
+              <span className="tk-leader" />
+              <span className="tk-row">
+                <span className="tk-says">{c.key ?? c.says}</span>
+              </span>
+            </div>
+          ))}
         </div>
-      ))}
-    </dl>
+      ) : null}
+    </>
   );
 }
 
