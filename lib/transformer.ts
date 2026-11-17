@@ -435,14 +435,12 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
       cautionsEn.push(`Neutral insulation not given: sized at Um ${umKv} kV; the order specification (OS) decides.`);
     }
   }
+  // 2026-11-18 Eric: no caution for "combined only"; the result shows the
+  // structure and a forced compound pick is refused with the reason.
   // 2025–2026 OS: 67 tapped windings on 220 kV class and above, every one
   // CM / CM2 / SHZV, none compound. CV2's 200 kV across-tap limit does not
   // cover a 220 kV regulating winding, neutral end included.
   const highWinding = !auto && catalogueUmFromRatedKv(spec.tapKv) >= 252;
-  if (highWinding) {
-    cautionsZh.push("220 kV 级及以上调压绕组只用组合式。");
-    cautionsEn.push("220 kV-class tapped winding: combined types only.");
-  }
   if (auto) {
     if (spec.tapPoint === "auto_mv_line" && umRule === "auto_hv") {
       // 2026-11-04 audit UM-4: the HMR note printed on 400/220 at Um 252.
@@ -459,10 +457,6 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
       cautionsZh.push(`开关对地绝缘暂按 ${umKv} kV 选，订货前请按订货规范确认。`);
       cautionsEn.push(`Series winding MV end sized at the HV class, Um ${umKv} kV; the order specification (OS) decides.`);
     }
-    cautionsZh.push("自耦变只能用组合式开关。");
-    cautionsEn.push("Autotransformer: combined types only (compound types stop at 200 kV across the tap winding).");
-    cautionsZh.push("调压绕组两端的冲击电压、要不要加电位电阻，这里没有算，请向变压器厂确认。");
-    cautionsEn.push("Not checked: impulse across the tap winding (a), tie-in resistor.");
     // 2026-11-04 audit D5 (IEC 60214-2 §7.2.1.4.2): HMR MV-line OS Ust ran
     // −3.6…+5.7% around nominal. A stated Ust is the floor; else say so.
     if (!(statedStepV > 0 && statedStepV >= (derivedStepV ?? 0) - 0.5)) {

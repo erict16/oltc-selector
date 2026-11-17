@@ -329,15 +329,6 @@ const RULES: Rule[] = [
       id: `Referensi: ${m[1]}.`,
     }),
   ],
-  [
-    /^Not checked: impulse across the tap winding \(a\), tie-in resistor\.$/,
-    () => ({
-      vi: "Chưa kiểm tra: xung qua cuộn điều chỉnh (a), điện trở ghim thế.",
-      es: "Sin comprobar: impulso a través del devanado regulado (a), resistencia de fijación de potencial.",
-      tr: "Kontrol edilmedi: kademe sargısı boyunca darbe (a), bağlantı direnci.",
-      id: "Belum diperiksa: impuls melintasi belitan tap (a), resistor pengikat.",
-    }),
-  ],
   // Engine errors
   [
     /^Enter rated through-current \(A\)\.$/,
@@ -394,15 +385,6 @@ const RULES: Rule[] = [
     }),
   ],
   [
-    /^220 kV-class tapped winding: combined types only\.$/,
-    () => ({
-      vi: "Cuộn điều áp cấp 220 kV: chỉ kiểu tổ hợp.",
-      es: "Devanado regulado de clase 220 kV: solo tipos combinados.",
-      tr: "220 kV sınıfı kademeli sargı: yalnızca kombine tip.",
-      id: "Belitan bertap kelas 220 kV: hanya tipe kombinasi.",
-    }),
-  ],
-  [
     /^Needs the maker's technical review: (.+)\.$/,
     (m) => ({
       vi: `Cần nhà sản xuất xét duyệt kỹ thuật riêng: ${m[1]}.`,
@@ -427,15 +409,6 @@ const RULES: Rule[] = [
       es: `La Um indicada ${m[1]} kV está por debajo de la clase del sistema Um ${m[2]} kV en este punto. Revise la OS.`,
       tr: `Belirtilen Um ${m[1]} kV, bu noktadaki sistem sınıfı Um ${m[2]} kV değerinin altında. OS'u kontrol edin.`,
       id: `Um yang disebut ${m[1]} kV di bawah kelas sistem Um ${m[2]} kV di titik ini. Periksa OS.`,
-    }),
-  ],
-  [
-    /^Autotransformer: combined types only \(compound types stop at 200 kV across the tap winding\)\.$/,
-    () => ({
-      vi: "Máy biến áp tự ngẫu: chỉ kiểu tổ hợp (kiểu phức hợp chỉ chịu 200 kV qua cuộn điều chỉnh).",
-      es: "Autotransformador: solo tipos combinados (los compuestos llegan a 200 kV a través del devanado de regulación).",
-      tr: "Ototransformatör: yalnızca kombine tip (kompound tipler kademe sargısı boyunca 200 kV ile sınırlı).",
-      id: "Autotransformator: hanya tipe kombinasi (tipe majemuk terbatas 200 kV melintasi belitan tap).",
     }),
   ],
   [

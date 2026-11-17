@@ -1308,8 +1308,9 @@ export function selectOltc(input: SelectInput): SelectOutput {
           // Change-over selector recovery voltage: 35 kV combined, 15 kV CV2.
           if (
             tap.changeOver !== "0" &&
-            input.transformerKind !== "auto" &&
-            (input.tapWindingKv ?? 0) > 121
+            (input.transformerKind === "auto"
+              ? (input.umKv ?? 0) > 126
+              : (input.tapWindingKv ?? 0) > 121)
           ) {
             cautionsEn.push(
               "Change-over selector above 110 kV: check the recovery voltage and quote the tie-in resistor as an option (maker's Cw/Ce needed).",
