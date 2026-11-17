@@ -1380,6 +1380,18 @@ select.row-control,
   padding-top: 1.25rem;
   border-top: 1px solid var(--color-line);
 }
+/* The type's data: every cell is a label track and a value track shared
+   across its row, so a label that wraps (a long one in Spanish, say)
+   grows upward and the values in that row stay on one line. */
+.spec-grid > div {
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: 0.125rem;
+}
+.spec-grid dt {
+  align-self: end;
+}
 
 /* Detail pass (2026-11-14, Eric: the corners and the spacing did not look
    right). Nine radii from 4 to 18 px were in use, and a 16 px card around

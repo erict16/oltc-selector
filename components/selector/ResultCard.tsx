@@ -103,7 +103,7 @@ export function ResultCard({
         <p className="sr-only" aria-live="polite" aria-atomic="true">
           {announced}
         </p>
-        <div className={cx("px-5 pt-5 sm:px-8 sm:pt-7", primary ? "plate-hero" : "pb-5")}>
+        <div className={cx("px-5 pt-5 sm:px-8 sm:pt-8", primary ? "plate-hero" : "pb-5")}>
           {!primary ? (
             <div>
               <p
