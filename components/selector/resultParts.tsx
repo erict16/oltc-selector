@@ -1,7 +1,6 @@
 "use client";
 
 import { SERIES } from "@/lib/catalog";
-import { formatUmKv } from "@/lib/deriveUm";
 import { t, type Lang } from "@/lib/i18n";
 import type { DutyBasis } from "@/lib/transformer";
 import type { ModelResult, SelectInput, StructureKind } from "@/lib/types";
@@ -253,10 +252,12 @@ export function ModelSpec({
     value: t(lang, structureLabelKey(series?.structure)),
   });
   if (r.earthPfKv != null && r.earthBilKv != null) {
-    items.push({
-      key: "specEarth",
-      value: `Um${nb}${formatUmKv(r.umKv)} · ${r.earthPfKv}${nb}/${nb}${r.earthBilKv}${nb}kV`,
-    });
+    // Two cells with full names (2026-11-17 Eric). Um is already a cell of
+    // the type, so it is not repeated here.
+    items.push(
+      { key: "specEarthPf", value: `${r.earthPfKv}${nb}kV` },
+      { key: "specEarthLi", value: `${r.earthBilKv}${nb}kV` },
+    );
   }
   items.push({
     key: "mounting",

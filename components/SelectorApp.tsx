@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { LangSwitcher } from "@/components/LangSwitcher";
+import { TopBar } from "@/components/TopBar";
 import { useAppLang } from "@/components/LangProvider";
 import { ResultCard } from "@/components/selector/ResultCard";
 import { ResultDock } from "@/components/selector/ResultDock";
@@ -13,10 +13,9 @@ import { useFormActions } from "@/components/selector/useFormActions";
 import { useFormUrl } from "@/components/selector/useFormUrl";
 import { useSelection, type Choice } from "@/components/selector/useSelection";
 import { useStickyBoth } from "@/components/selector/useStickyBoth";
-import { APP_VERSION } from "@/lib/appVersion";
 import { copyText } from "@/lib/clipboard";
 import { INITIAL_FORM, type FormState } from "@/lib/formState";
-import { setAppLang, t } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 export function SelectorApp() {
   const lang = useAppLang();
@@ -67,15 +66,6 @@ export function SelectorApp() {
     return () => keep.disconnect();
   }, [lang]);
 
-  /** The header takes a hairline shadow once the page moves under it. */
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 4);
-    on();
-    window.addEventListener("scroll", on, { passive: true });
-    return () => window.removeEventListener("scroll", on);
-  }, []);
-
   const resultPaneRef = useRef<HTMLElement | null>(null);
   const resultCardRef = useRef<HTMLElement | null>(null);
   // 72 px: under the 56 px header with 16 px air; 24 px under the card's foot.
@@ -105,32 +95,7 @@ export function SelectorApp() {
 
   return (
     <div className="page flex w-full min-w-0 flex-1 flex-col">
-      <header className="topbar sticky top-0 z-30" data-scrolled={scrolled || undefined}>
-        <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-3 px-4 sm:px-8">
-          <div className="flex min-w-0 items-center gap-2.5">
-            {/* The ⚡ of the tab icon (2026-11-17 Eric: the emoji, not a drawn bolt). */}
-            <span className="brand-mark" aria-hidden>
-              ⚡
-            </span>
-            <h1 className="brand-name truncate">{t(lang, "title")}</h1>
-            <Link href="/changelog/" className="topbar-version num">
-              v{APP_VERSION}
-            </Link>
-          </div>
-          <nav className="topbar-nav ml-auto" aria-label={t(lang, "title")}>
-            <Link href="/agents/">{t(lang, "agentChip")}</Link>
-            <Link href="/changelog/">{t(lang, "changelogTitle")}</Link>
-          </nav>
-          <div className="topbar-lang">
-            <LangSwitcher
-              lang={lang}
-              onChange={setAppLang}
-              ariaLabel={t(lang, "langAria")}
-              showLabel
-            />
-          </div>
-        </div>
-      </header>
+      <TopBar lang={lang} current="home" />
       <div className="page-grid mx-auto grid w-full max-w-[1280px] flex-1 items-start gap-4 px-0 pt-4 pb-6 sm:gap-6 sm:px-8 sm:pt-8 lg:grid-cols-[minmax(25rem,2fr)_minmax(0,3fr)] lg:gap-8 lg:pb-10">
         <form
           className="flex min-w-0 flex-col"
