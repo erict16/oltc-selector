@@ -82,9 +82,15 @@ describe("autotransformer tapped at the series/common junction", () => {
     expect(out.errorsZh[0]).toContain("自耦变只用组合式");
   });
 
-  it("flags the unchecked tap-winding impulse and tie-in resistor", () => {
+  it("asks about the tie-in resistor for reversing only", () => {
+    const zh = (o: unknown) => JSON.stringify(o).includes("电位电阻");
+    expect(zh(run(tonight).out)).toBe(true);
+    expect(zh(run(tonight, { regulation: "linear", plusMinusSteps: 0 }).out)).toBe(false);
+  });
+
+  it("keeps only the cautions the user must act on", () => {
     const d = deriveDuty(tonight);
-    expect(d.cautionsZh.join()).toContain("电位电阻");
+    expect(d.cautionsZh.join()).not.toContain("只能用组合式");
     // 2026-11-13: the stray reference type (a different family) is gone.
     expect(d.cautionsZh.join()).not.toContain("3×SHZVI-600/252D-10193W");
     expect(d.cautionsZh.join()).toContain("暂按 252 kV");
