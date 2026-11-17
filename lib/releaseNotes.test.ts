@@ -1,9 +1,9 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { APP_VERSION } from "./appVersion";
 import { LANG_OPTIONS } from "./i18n";
-import { RELEASES } from "./releaseNotes";
+import { RELEASES, RELEASE_META } from "./releaseNotes";
 
 /** The page: SelectorApp plus the parts it was split into (2026-11-13). */
 function selectorSource(): string {
@@ -48,6 +48,20 @@ describe("release notes", () => {
           );
         }
       }
+    }
+  });
+
+  it("gives every release a title, and every screenshot a real file", () => {
+    for (const { id } of LANG_OPTIONS) {
+      for (const rel of RELEASES[id]) {
+        expect(rel.title.trim().length, `${id} v${rel.version}`).toBeGreaterThan(2);
+      }
+    }
+    const versions = new Set(RELEASES.zh.map((r) => r.version));
+    for (const [v, meta] of Object.entries(RELEASE_META)) {
+      expect(versions.has(v), v).toBe(true);
+      if (meta.day) expect(meta.day.slice(0, 7), v).toBe(RELEASES.zh.find((r) => r.version === v)?.date);
+      if (meta.image) expect(existsSync(resolve(__dirname, "../public", `.${meta.image}`)), v).toBe(true);
     }
   });
 

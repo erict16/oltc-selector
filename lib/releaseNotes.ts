@@ -6,7 +6,28 @@ export type Release = {
   version: string;
   /** YYYY-MM */
   date: string;
+  /** One line a reader can scan: what this release is about. */
+  title: string;
   groups: NoteGroup[];
+};
+
+/** What is the same in every language: the exact day (from the version
+ *  commit or tag, where git has one) and a screenshot of how the page looked
+ *  in that release, for the releases that changed its look. Screenshots are
+ *  real runs of that tag, in public/changelog/. */
+export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
+  "2.4.1": { day: "2026-11-14" },
+  "2.4.0": { day: "2026-11-14", image: "/changelog/v2.4.0.webp" },
+  "2.3.2": { day: "2026-11-14" },
+  "2.3.1": { day: "2026-11-14" },
+  "2.3.0": { day: "2026-11-13" },
+  "2.2.0": { day: "2026-10-31" },
+  "2.1.0": { day: "2026-10-31", image: "/changelog/v2.1.0.webp" },
+  "2.0.0": { day: "2026-10-28", image: "/changelog/v2.0.0.webp" },
+  "1.3.0": { day: "2026-10-22" },
+  "1.2.9": { day: "2026-09-18" },
+  "1.1.0": { day: "2026-08-20" },
+  "1.0.0": { day: "2026-08-19", image: "/changelog/v1.0.0.webp" },
 };
 
 /**
@@ -21,26 +42,31 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.4.1",
       date: "2026-11",
+      title: "命令行输出更短",
       groups: [{ kind: "imp", items: ["命令行：输出更短。「假定」一行只列可能改变型号的项（完整清单仍在 --json 里），对地绝缘不再重复说三遍，「其他」改为「其他可选」。", "命令行：报错先给中文再给英文（--lang en 只给英文）；--json 出错时只输出 JSON，--version --json 也输出 JSON。"] }, { kind: "fix", items: ["命令行：--line 能读小写联结组（如 ynd11）；只写 off-circuit 的行按无载选，不再选成有载；--mva 或 --line 旁边的 --conn 现在报错（以前会悄悄把电流公式换成 S/(3U)），请改用 --tap line 或 --winding delta。"] }],
     },
     {
       version: "2.4.0",
       date: "2026-11",
+      title: "结果卡重做，和表单齐平",
       groups: [{ kind: "imp", items: ["命令行：删除 --market 参数。它只认意大利和土耳其，多数情况下不起作用；开关对地绝缘请直接用 --earth-um，跨调压绕组的耐压用 --across-li / --across-ac。", "页面：结果卡高度重做，滚到底时和表单底部对齐，中间不再留空白，窗口矮时型号始终可见；去掉总是接近 100% 的对地绝缘进度条；页头不再放图标；下拉框边线调淡。"] }],
     },
     {
       version: "2.3.2",
       date: "2026-11",
+      title: "矛盾参数直接报错",
       groups: [{ kind: "fix", items: ["命令行：互相矛盾或不起作用的参数现在会报错，不再悄悄选一个：--oil 和 --vacuum 同时给、--octc 和 --duty oltc、--conn Y 配 --tap line、双绕组却给了 --hv / --mv、--iu 路径上的 --minus、--um 和 --earth-um 数值不同、--step-pct 小于 0.1。"] }, { kind: "imp", items: ["页面：结果栏和表单一样高，滚到底两边对齐；页头加了版本号、选型助手和更新记录；换了新图标；对地工频/雷电耐压写在 Um 下面；提示里的「订货规范」不再带（OS）。"] }],
     },
     {
       version: "2.3.1",
       date: "2026-11",
+      title: "命令行提示新版本",
       groups: [{ kind: "imp", items: ["命令行：每次运行都会查 npm 有没有新版本，有就在输出末尾提示，不会自动更新。", "页面：去掉表单顶部的粘贴框和「复制链接」；自耦变的提示改成更直白的说法；AI 选型页改为直接用 npm 上的 oltc-selector。"] }],
     },
     {
       version: "2.3.0",
       date: "2026-11",
+      title: "粘贴铭牌自动填表",
       groups: [
         {
           kind: "new",
@@ -68,11 +94,13 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.2.0",
       date: "2026-10",
+      title: "每天检查一次更新",
       groups: [{ kind: "new", items: ["命令行每天最多查一次 npm，有新版本时在输出末尾提示并给出更新命令，不会自动更新；--no-update-check 或 OLTC_NO_UPDATE_CHECK=1 可关闭。"] }],
     },
     {
       version: "2.1.0",
       date: "2026-10",
+      title: "改参数即出型号",
       groups: [
         {
           kind: "imp",
@@ -92,6 +120,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
+      title: "全新页面，按开关位置选型",
       groups: [
         { kind: "new", items: ["可以选择变压器种类（双绕组或自耦变）和开关位置（中性点、线端、串联/公共绕组连接点、中压出线），电流、级电压和开关绝缘按位置计算。"] },
         {
@@ -107,6 +136,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
+      title: "结果卡标出待工程确认项",
       groups: [
         {
           kind: "fix",
@@ -127,6 +157,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.9",
       date: "2026-09",
+      title: "新增双断口真空 SDZV",
       groups: [
         {
           kind: "new",
@@ -149,6 +180,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.6",
       date: "2026-09",
+      title: "助手技能独立成库",
       groups: [
         {
           kind: "imp",
@@ -159,6 +191,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.5",
       date: "2026-09",
+      title: "无载触头数与安全系数修正",
       groups: [
         {
           kind: "fix",
@@ -177,6 +210,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.4",
       date: "2026-09",
+      title: "每次运行都列出默认值",
       groups: [
         {
           kind: "new",
@@ -190,6 +224,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.3",
       date: "2026-09",
+      title: "助手带上图标",
       groups: [
         {
           kind: "imp",
@@ -200,6 +235,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.2",
       date: "2026-09",
+      title: "助手说明书重写",
       groups: [
         {
           kind: "imp",
@@ -210,6 +246,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.1",
       date: "2026-09",
+      title: "助手能读更多参数",
       groups: [
         {
           kind: "imp",
@@ -222,6 +259,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.0",
       date: "2026-09",
+      title: "命令行和选型助手上线",
       groups: [
         {
           kind: "new",
@@ -245,6 +283,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.1.0",
       date: "2026-08",
+      title: "油或真空可选，一键预设",
       groups: [
         {
           kind: "new",
@@ -262,6 +301,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.0.0",
       date: "2026-08",
+      title: "第一版上线",
       groups: [
         {
           kind: "new",
@@ -274,26 +314,31 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.4.1",
       date: "2026-11",
+      title: "Shorter CLI output",
       groups: [{ kind: "imp", items: ["CLI: shorter output. The Assumed line names only what could change the type (the full list stays in --json), the insulation to earth is no longer said three times, and Other is now Other types that cover the duty.", "CLI: on a Chinese run an error prints in Chinese, then English (--lang en prints English alone); under --json an error is JSON only, and --version --json is JSON too."] }, { kind: "fix", items: ["CLI: --line reads a lowercase vector group (ynd11); a line that says only off-circuit is sized as off-circuit, not on-load; --conn beside --mva or --line is now an error (it used to swap the current formula to S/(3U) unseen); use --tap line or --winding delta."] }],
     },
     {
       version: "2.4.0",
       date: "2026-11",
+      title: "The result card lines up with the form",
       groups: [{ kind: "imp", items: ["CLI: the --market flag is removed. It knew Italy and Turkey only and did nothing in most cases; state the insulation to earth with --earth-um and the across-tap levels with --across-li / --across-ac.", "Page: the result card's height is rebuilt, so it ends level with the form at the end of the page with no empty band, and the type stays in view on a short window; the insulation bar that always read about 100 % is removed; no mark in the header; lighter dropdown borders."] }],
     },
     {
       version: "2.3.2",
       date: "2026-11",
+      title: "Conflicting flags now stop with an error",
       groups: [{ kind: "fix", items: ["CLI: flags that contradict each other or cannot take effect are now errors instead of one being picked silently: --oil with --vacuum, --octc with --duty oltc, --conn Y with --tap line, --hv / --mv on a two-winding transformer, --minus on the --iu path, --um and --earth-um with different values, --step-pct below 0.1."] }, { kind: "imp", items: ["Page: the result column is as tall as the form, so both end on one line; the header shows the version and links to the assistant guide and the release notes; a new icon; the withstand levels to earth sit under Um."] }],
     },
     {
       version: "2.3.1",
       date: "2026-11",
+      title: "The CLI tells you about new versions",
       groups: [{ kind: "imp", items: ["CLI: every run checks npm for a newer version and prints a notice at the end when there is one; it never updates itself.", "Page: the paste box above the form and Copy link are removed; the Chinese autotransformer notes are in plainer words; the AI page now uses oltc-selector from npm directly."] }],
     },
     {
       version: "2.3.0",
       date: "2026-11",
+      title: "Paste a nameplate to fill the form",
       groups: [
         {
           kind: "new",
@@ -321,11 +366,13 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.2.0",
       date: "2026-10",
+      title: "A daily update check",
       groups: [{ kind: "new", items: ["The CLI checks npm at most once a day and, when a newer version exists, prints a notice with the update command at the end; it never updates itself. --no-update-check or OLTC_NO_UPDATE_CHECK=1 turns it off."] }],
     },
     {
       version: "2.1.0",
       date: "2026-10",
+      title: "The type updates as you type",
       groups: [
         {
           kind: "imp",
@@ -345,6 +392,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
+      title: "A new page: pick by transformer kind and tap position",
       groups: [
         { kind: "new", items: ["Pick the transformer kind (two-winding or autotransformer) and where the tap changer sits (neutral, line end, series–common junction, MV line lead); current, step voltage and switch insulation follow from that."] },
         {
@@ -360,6 +408,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
+      title: "The result flags what engineering must confirm",
       groups: [
         {
           kind: "fix",
@@ -380,6 +429,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.9",
       date: "2026-09",
+      title: "New: SDZV dual-break vacuum",
       groups: [
         {
           kind: "new",
@@ -402,6 +452,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.6",
       date: "2026-09",
+      title: "The assistant skill gets its own repository",
       groups: [
         {
           kind: "imp",
@@ -414,6 +465,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.5",
       date: "2026-09",
+      title: "Fixes for contact count and safety factor",
       groups: [
         {
           kind: "fix",
@@ -432,6 +484,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.4",
       date: "2026-09",
+      title: "Every run lists the defaults it used",
       groups: [
         {
           kind: "new",
@@ -445,6 +498,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.3",
       date: "2026-09",
+      title: "The assistant gets its icon",
       groups: [
         {
           kind: "imp",
@@ -457,6 +511,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.2",
       date: "2026-09",
+      title: "A rewritten assistant manual",
       groups: [
         {
           kind: "imp",
@@ -467,6 +522,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.1",
       date: "2026-09",
+      title: "The assistant reads more inputs",
       groups: [
         {
           kind: "imp",
@@ -479,6 +535,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.0",
       date: "2026-09",
+      title: "The CLI and the AI assistant launch",
       groups: [
         {
           kind: "new",
@@ -502,6 +559,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.1.0",
       date: "2026-08",
+      title: "Oil or vacuum, and one-click presets",
       groups: [
         {
           kind: "new",
@@ -519,6 +577,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.0.0",
       date: "2026-08",
+      title: "First release",
       groups: [
         {
           kind: "new",
@@ -531,26 +590,31 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.4.1",
       date: "2026-11",
+      title: "Đầu ra CLI ngắn hơn",
       groups: [{ kind: "imp", items: ["CLI: kết quả ngắn hơn. Dòng Giả định chỉ nêu những mục có thể đổi mã kiểu (danh sách đầy đủ vẫn có trong --json), cách điện đối với đất không còn nói ba lần, và mục Khác nay là các kiểu khác đáp ứng được.", "CLI: khi chạy tiếng Trung, lỗi in tiếng Trung rồi tiếng Anh (--lang en chỉ in tiếng Anh); với --json lỗi chỉ là JSON, và --version --json cũng là JSON."] }, { kind: "fix", items: ["CLI: --line đọc được tổ đấu dây viết thường (ynd11); dòng chỉ ghi off-circuit được chọn theo không tải, không phải có tải; --conn đi cùng --mva hoặc --line nay báo lỗi (trước đây âm thầm đổi công thức dòng sang S/(3U)); hãy dùng --tap line hoặc --winding delta."] }],
     },
     {
       version: "2.4.0",
       date: "2026-11",
+      title: "Thẻ kết quả thẳng hàng với biểu mẫu",
       groups: [{ kind: "imp", items: ["CLI: bỏ tham số --market. Nó chỉ biết Ý và Thổ Nhĩ Kỳ và phần lớn trường hợp không có tác dụng; hãy nêu cách điện đối với đất bằng --earth-um và mức chịu đựng ngang cuộn điều chỉnh bằng --across-li / --across-ac.", "Trang: chiều cao thẻ kết quả được làm lại, nên ở cuối trang thẻ kết thúc ngang với biểu mẫu, không còn dải trống, và mã kiểu luôn hiện trên cửa sổ thấp; bỏ thanh cách điện luôn gần 100 %; đầu trang không còn biểu tượng; viền ô chọn nhạt hơn."] }],
     },
     {
       version: "2.3.2",
       date: "2026-11",
+      title: "Tham số mâu thuẫn sẽ báo lỗi",
       groups: [{ kind: "fix", items: ["CLI: các tham số mâu thuẫn nhau hoặc không có tác dụng nay báo lỗi thay vì âm thầm chọn một: --oil cùng --vacuum, --octc cùng --duty oltc, --conn Y cùng --tap line, --hv / --mv với máy hai cuộn dây, --minus trên đường --iu, --um và --earth-um khác giá trị, --step-pct nhỏ hơn 0.1."] }, { kind: "imp", items: ["Trang: cột kết quả cao bằng biểu mẫu nên hai cột kết thúc trên cùng một đường; đầu trang có số phiên bản và liên kết tới hướng dẫn trợ lý và ghi chú phát hành; biểu tượng mới; mức chịu đựng đối với đất nằm dưới Um."] }],
     },
     {
       version: "2.3.1",
       date: "2026-11",
+      title: "CLI báo có phiên bản mới",
       groups: [{ kind: "imp", items: ["CLI: mỗi lần chạy đều kiểm tra npm xem có bản mới không và báo ở cuối kết quả nếu có; không tự cập nhật.", "Trang: bỏ ô dán ở đầu biểu mẫu và nút Sao chép liên kết; các ghi chú tiếng Trung cho máy biến áp tự ngẫu viết dễ hiểu hơn; trang AI nay dùng thẳng oltc-selector trên npm."] }],
     },
     {
       version: "2.3.0",
       date: "2026-11",
+      title: "Dán nhãn máy để điền biểu mẫu",
       groups: [
         {
           kind: "new",
@@ -578,11 +642,13 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.2.0",
       date: "2026-10",
+      title: "Kiểm tra cập nhật mỗi ngày",
       groups: [{ kind: "new", items: ["CLI kiểm tra npm tối đa mỗi ngày một lần và, khi có phiên bản mới, in thông báo kèm lệnh cập nhật ở cuối; nó không tự cập nhật. Tắt bằng --no-update-check hoặc OLTC_NO_UPDATE_CHECK=1."] }],
     },
     {
       version: "2.1.0",
       date: "2026-10",
+      title: "Kiểu cập nhật ngay khi nhập",
       groups: [
         {
           kind: "imp",
@@ -602,6 +668,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
+      title: "Trang mới: chọn theo loại máy và vị trí bộ chuyển nấc",
       groups: [
         { kind: "new", items: ["Chọn loại máy biến áp (hai cuộn dây hoặc tự ngẫu) và vị trí bộ ĐAPT (trung tính, đầu dây, điểm nối nối tiếp – chung, đầu ra trung áp); dòng điện, điện áp nấc và cách điện được tính theo vị trí đó."] },
         {
@@ -617,6 +684,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
+      title: "Kết quả nêu rõ mục cần kỹ thuật xác nhận",
       groups: [
         {
           kind: "fix",
@@ -637,6 +705,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.9",
       date: "2026-09",
+      title: "Mới: SDZV chân không hai điểm cắt",
       groups: [
         {
           kind: "new",
@@ -659,6 +728,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.6",
       date: "2026-09",
+      title: "Kỹ năng trợ lý có kho riêng",
       groups: [
         {
           kind: "imp",
@@ -671,6 +741,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.5",
       date: "2026-09",
+      title: "Sửa số tiếp điểm và hệ số an toàn",
       groups: [
         {
           kind: "fix",
@@ -689,6 +760,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.4",
       date: "2026-09",
+      title: "Mỗi lần chạy đều liệt kê giá trị mặc định",
       groups: [
         {
           kind: "new",
@@ -702,6 +774,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.3",
       date: "2026-09",
+      title: "Trợ lý có biểu tượng",
       groups: [
         {
           kind: "imp",
@@ -712,6 +785,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.2",
       date: "2026-09",
+      title: "Viết lại hướng dẫn trợ lý",
       groups: [
         {
           kind: "imp",
@@ -722,6 +796,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.1",
       date: "2026-09",
+      title: "Trợ lý hiểu thêm thông số",
       groups: [
         {
           kind: "imp",
@@ -734,6 +809,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.0",
       date: "2026-09",
+      title: "Ra mắt CLI và trợ lý AI",
       groups: [
         {
           kind: "new",
@@ -757,6 +833,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.1.0",
       date: "2026-08",
+      title: "Dầu hoặc chân không, mẫu cài sẵn một chạm",
       groups: [
         {
           kind: "new",
@@ -774,6 +851,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.0.0",
       date: "2026-08",
+      title: "Phiên bản đầu tiên",
       groups: [
         {
           kind: "new",
@@ -786,26 +864,31 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.4.1",
       date: "2026-11",
+      title: "Salida de la CLI más corta",
       groups: [{ kind: "imp", items: ["CLI: salida más corta. La línea de supuestos nombra solo lo que puede cambiar el tipo (la lista completa sigue en --json), el aislamiento a tierra ya no se dice tres veces, y Otros pasa a ser otros tipos que cubren el servicio.", "CLI: en una ejecución en chino el error sale en chino y luego en inglés (--lang en solo en inglés); con --json el error es solo JSON, y --version --json también es JSON."] }, { kind: "fix", items: ["CLI: --line lee un grupo de conexión en minúsculas (ynd11); una línea que solo dice off-circuit se dimensiona sin carga, no en carga; --conn junto a --mva o --line ahora es un error (antes cambiaba la fórmula de corriente a S/(3U) sin avisar); use --tap line o --winding delta."] }],
     },
     {
       version: "2.4.0",
       date: "2026-11",
+      title: "La tarjeta de resultado se alinea con el formulario",
       groups: [{ kind: "imp", items: ["CLI: se elimina el parámetro --market. Solo conocía Italia y Turquía y en la mayoría de los casos no hacía nada; indique el aislamiento a tierra con --earth-um y los niveles a través del devanado de regulación con --across-li / --across-ac.", "Página: se rehízo la altura de la tarjeta de resultado, de modo que al final de la página termina a la par del formulario, sin franja vacía, y el tipo sigue visible en una ventana baja; se quita la barra de aislamiento que siempre marcaba cerca del 100 %; sin icono en la cabecera; bordes de los desplegables más claros."] }],
     },
     {
       version: "2.3.2",
       date: "2026-11",
+      title: "Las opciones contradictorias dan error",
       groups: [{ kind: "fix", items: ["CLI: los parámetros que se contradicen o que no pueden tener efecto ahora dan error en lugar de elegirse uno en silencio: --oil con --vacuum, --octc con --duty oltc, --conn Y con --tap line, --hv / --mv en un transformador de dos devanados, --minus en la ruta --iu, --um y --earth-um con valores distintos, --step-pct menor que 0.1."] }, { kind: "imp", items: ["Página: la columna del resultado es tan alta como el formulario, así que ambas terminan en la misma línea; la cabecera muestra la versión y enlaces a la guía del asistente y a las notas de versión; icono nuevo; los niveles soportados a tierra están bajo Um."] }],
     },
     {
       version: "2.3.1",
       date: "2026-11",
+      title: "La CLI avisa de nuevas versiones",
       groups: [{ kind: "imp", items: ["CLI: cada ejecución comprueba en npm si hay una versión nueva y avisa al final cuando la hay; nunca se actualiza sola.", "Página: se quitan el cuadro para pegar encima del formulario y Copiar enlace; las notas en chino del autotransformador están en palabras más simples; la página de IA usa ahora oltc-selector de npm directamente."] }],
     },
     {
       version: "2.3.0",
       date: "2026-11",
+      title: "Pegue una placa para rellenar el formulario",
       groups: [
         {
           kind: "new",
@@ -833,11 +916,13 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.2.0",
       date: "2026-10",
+      title: "Comprobación diaria de actualizaciones",
       groups: [{ kind: "new", items: ["La CLI consulta npm como máximo una vez al día y, si hay una versión más nueva, muestra un aviso con el comando de actualización al final; nunca se actualiza sola. Se desactiva con --no-update-check u OLTC_NO_UPDATE_CHECK=1."] }],
     },
     {
       version: "2.1.0",
       date: "2026-10",
+      title: "El tipo se actualiza al escribir",
       groups: [
         {
           kind: "imp",
@@ -857,6 +942,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
+      title: "Página nueva: elija por tipo de transformador y posición",
       groups: [
         { kind: "new", items: ["Elija el tipo de transformador (dos devanados o autotransformador) y dónde va el cambiador (neutro, extremo de línea, unión serie–común, salida de MT); la corriente, la tensión de escalón y el aislamiento salen de esa posición."] },
         {
@@ -872,6 +958,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
+      title: "El resultado marca lo que debe confirmar ingeniería",
       groups: [
         {
           kind: "fix",
@@ -892,6 +979,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.9",
       date: "2026-09",
+      title: "Nuevo: SDZV de vacío con doble ruptura",
       groups: [
         {
           kind: "new",
@@ -914,6 +1002,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.6",
       date: "2026-09",
+      title: "La habilidad del asistente tiene su propio repositorio",
       groups: [
         {
           kind: "imp",
@@ -926,6 +1015,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.5",
       date: "2026-09",
+      title: "Correcciones de contactos y factor de seguridad",
       groups: [
         {
           kind: "fix",
@@ -944,6 +1034,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.4",
       date: "2026-09",
+      title: "Cada ejecución indica los valores por defecto",
       groups: [
         {
           kind: "new",
@@ -957,6 +1048,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.3",
       date: "2026-09",
+      title: "El asistente estrena icono",
       groups: [
         {
           kind: "imp",
@@ -969,6 +1061,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.2",
       date: "2026-09",
+      title: "Manual del asistente reescrito",
       groups: [
         {
           kind: "imp",
@@ -979,6 +1072,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.1",
       date: "2026-09",
+      title: "El asistente entiende más datos",
       groups: [
         {
           kind: "imp",
@@ -991,6 +1085,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.0",
       date: "2026-09",
+      title: "Llegan la CLI y el asistente de IA",
       groups: [
         {
           kind: "new",
@@ -1014,6 +1109,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.1.0",
       date: "2026-08",
+      title: "Aceite o vacío, y ajustes en un clic",
       groups: [
         {
           kind: "new",
@@ -1031,6 +1127,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.0.0",
       date: "2026-08",
+      title: "Primera versión",
       groups: [
         {
           kind: "new",
@@ -1043,26 +1140,31 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.4.1",
       date: "2026-11",
+      title: "Daha kısa CLI çıktısı",
       groups: [{ kind: "imp", items: ["CLI: çıktı daha kısa. Varsayılanlar satırı yalnızca tipi değiştirebilecek kalemleri adlandırır (tam liste --json içinde kalır), toprağa yalıtım artık üç kez söylenmez ve Diğer başlığı artık görevi karşılayan diğer tipler.", "CLI: Çince çalıştırmada hata önce Çince, sonra İngilizce yazılır (--lang en yalnızca İngilizce); --json ile hata yalnızca JSON olur, --version --json da JSON verir."] }, { kind: "fix", items: ["CLI: --line küçük harfli bağlantı grubunu okur (ynd11); yalnızca off-circuit yazan satır yük altında değil yüksüz olarak boyutlandırılır; --mva veya --line yanındaki --conn artık hatadır (eskiden akım formülünü sessizce S/(3U) yapıyordu); --tap line veya --winding delta kullanın."] }],
     },
     {
       version: "2.4.0",
       date: "2026-11",
+      title: "Sonuç kartı formla hizalandı",
       groups: [{ kind: "imp", items: ["CLI: --market parametresi kaldırıldı. Yalnızca İtalya ve Türkiye'yi biliyordu ve çoğu durumda hiçbir şey yapmıyordu; toprağa yalıtımı --earth-um ile, ayar sargısı üzerindeki dayanım seviyelerini --across-li / --across-ac ile verin.", "Sayfa: sonuç kartının yüksekliği yeniden yapıldı; sayfanın sonunda formla aynı hizada biter, boş şerit kalmaz ve alçak pencerede tip görünür kalır; hep yaklaşık %100 gösteren yalıtım çubuğu kaldırıldı; üst çubukta simge yok; açılır kutu kenarlıkları daha açık."] }],
     },
     {
       version: "2.3.2",
       date: "2026-11",
+      title: "Çelişen parametreler artık hata verir",
       groups: [{ kind: "fix", items: ["CLI: birbiriyle çelişen veya etkisi olmayan parametreler artık sessizce biri seçilmek yerine hata verir: --oil ile --vacuum, --octc ile --duty oltc, --conn Y ile --tap line, iki sargılı trafoda --hv / --mv, --iu yolunda --minus, farklı değerli --um ve --earth-um, 0.1'den küçük --step-pct."] }, { kind: "imp", items: ["Sayfa: sonuç sütunu form kadar yüksek, böylece ikisi aynı çizgide biter; üst çubukta sürüm numarası ile asistan kılavuzu ve sürüm notları bağlantıları var; yeni simge; toprağa dayanım seviyeleri Um'un altında."] }],
     },
     {
       version: "2.3.1",
       date: "2026-11",
+      title: "CLI yeni sürümleri bildirir",
       groups: [{ kind: "imp", items: ["CLI: her çalıştırmada npm'de yeni sürüm olup olmadığına bakar ve varsa çıktının sonunda bildirir; kendini güncellemez.", "Sayfa: formun üstündeki yapıştırma kutusu ve Bağlantıyı kopyala kaldırıldı; ototransformatör için Çince notlar daha sade yazıldı; AI sayfası artık doğrudan npm'deki oltc-selector'ı kullanıyor."] }],
     },
     {
       version: "2.3.0",
       date: "2026-11",
+      title: "Formu doldurmak için etiket yapıştırın",
       groups: [
         {
           kind: "new",
@@ -1090,11 +1192,13 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.2.0",
       date: "2026-10",
+      title: "Günlük güncelleme kontrolü",
       groups: [{ kind: "new", items: ["CLI, npm'i günde en fazla bir kez kontrol eder ve daha yeni bir sürüm varsa sonunda güncelleme komutuyla bir uyarı yazar; kendini asla güncellemez. --no-update-check veya OLTC_NO_UPDATE_CHECK=1 ile kapatılır."] }],
     },
     {
       version: "2.1.0",
       date: "2026-10",
+      title: "Tip, yazarken güncellenir",
       groups: [
         {
           kind: "imp",
@@ -1114,6 +1218,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
+      title: "Yeni sayfa: trafo tipine ve kademe konumuna göre seçim",
       groups: [
         { kind: "new", items: ["Transformatör tipini (iki sargılı veya ototransformatör) ve kademe değiştiricinin yerini (nötr, hat ucu, seri–ortak bağlantı noktası, OG çıkışı) seçin; akım, kademe gerilimi ve yalıtım bu konumdan hesaplanır."] },
         {
@@ -1129,6 +1234,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
+      title: "Sonuç, mühendisliğin onaylaması gerekenleri işaretler",
       groups: [
         {
           kind: "fix",
@@ -1149,6 +1255,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.9",
       date: "2026-09",
+      title: "Yeni: çift kesmeli vakum SDZV",
       groups: [
         {
           kind: "new",
@@ -1171,6 +1278,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.6",
       date: "2026-09",
+      title: "Asistan becerisi kendi deposunda",
       groups: [
         {
           kind: "imp",
@@ -1183,6 +1291,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.5",
       date: "2026-09",
+      title: "Kontak sayısı ve emniyet katsayısı düzeltmeleri",
       groups: [
         {
           kind: "fix",
@@ -1201,6 +1310,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.4",
       date: "2026-09",
+      title: "Her çalıştırma varsayılanları listeler",
       groups: [
         {
           kind: "new",
@@ -1214,6 +1324,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.3",
       date: "2026-09",
+      title: "Asistanın simgesi eklendi",
       groups: [
         {
           kind: "imp",
@@ -1224,6 +1335,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.2",
       date: "2026-09",
+      title: "Asistan kılavuzu yeniden yazıldı",
       groups: [
         {
           kind: "imp",
@@ -1234,6 +1346,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.1",
       date: "2026-09",
+      title: "Asistan daha fazla girdi anlar",
       groups: [
         {
           kind: "imp",
@@ -1246,6 +1359,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.0",
       date: "2026-09",
+      title: "CLI ve AI asistan yayında",
       groups: [
         {
           kind: "new",
@@ -1269,6 +1383,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.1.0",
       date: "2026-08",
+      title: "Yağ veya vakum, tek tıkla hazır ayarlar",
       groups: [
         {
           kind: "new",
@@ -1286,6 +1401,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.0.0",
       date: "2026-08",
+      title: "İlk sürüm",
       groups: [
         {
           kind: "new",
@@ -1298,26 +1414,31 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.4.1",
       date: "2026-11",
+      title: "Output CLI lebih singkat",
       groups: [{ kind: "imp", items: ["CLI: keluaran lebih pendek. Baris asumsi hanya menyebut hal yang dapat mengubah tipe (daftar lengkap tetap ada di --json), isolasi ke tanah tidak lagi disebut tiga kali, dan Lainnya kini menjadi tipe lain yang memenuhi tugas.", "CLI: pada keluaran bahasa Mandarin, galat dicetak dalam bahasa Mandarin lalu Inggris (--lang en hanya Inggris); dengan --json galat hanya berupa JSON, dan --version --json juga JSON."] }, { kind: "fix", items: ["CLI: --line membaca grup vektor huruf kecil (ynd11); baris yang hanya menyebut off-circuit dihitung sebagai tanpa beban, bukan berbeban; --conn di samping --mva atau --line kini menjadi galat (dulu diam-diam mengubah rumus arus menjadi S/(3U)); pakai --tap line atau --winding delta."] }],
     },
     {
       version: "2.4.0",
       date: "2026-11",
+      title: "Kartu hasil sejajar dengan formulir",
       groups: [{ kind: "imp", items: ["CLI: parameter --market dihapus. Parameter itu hanya mengenal Italia dan Turki dan pada kebanyakan kasus tidak berpengaruh; nyatakan isolasi ke tanah dengan --earth-um dan tingkat ketahanan melintasi belitan pengatur dengan --across-li / --across-ac.", "Halaman: tinggi kartu hasil dibuat ulang, sehingga di akhir halaman kartu berakhir sejajar dengan formulir tanpa pita kosong, dan tipe tetap terlihat pada jendela pendek; batang isolasi yang selalu menunjukkan sekitar 100 % dihapus; tidak ada ikon di kepala halaman; garis tepi dropdown lebih terang."] }],
     },
     {
       version: "2.3.2",
       date: "2026-11",
+      title: "Parameter yang bertentangan kini error",
       groups: [{ kind: "fix", items: ["CLI: parameter yang saling bertentangan atau tidak berpengaruh kini menjadi galat, bukan dipilih salah satu secara diam-diam: --oil dengan --vacuum, --octc dengan --duty oltc, --conn Y dengan --tap line, --hv / --mv pada trafo dua belitan, --minus pada jalur --iu, --um dan --earth-um dengan nilai berbeda, --step-pct di bawah 0.1."] }, { kind: "imp", items: ["Halaman: kolom hasil setinggi formulir sehingga keduanya berakhir pada satu garis; kepala halaman menampilkan versi serta tautan ke panduan asisten dan catatan rilis; ikon baru; tingkat ketahanan ke tanah berada di bawah Um."] }],
     },
     {
       version: "2.3.1",
       date: "2026-11",
+      title: "CLI memberi tahu versi baru",
       groups: [{ kind: "imp", items: ["CLI: setiap dijalankan memeriksa npm untuk versi baru dan memberi tahu di akhir keluaran bila ada; tidak memperbarui dirinya sendiri.", "Halaman: kotak tempel di atas formulir dan Salin tautan dihapus; catatan autotransformator dalam bahasa Mandarin ditulis lebih sederhana; halaman AI kini langsung memakai oltc-selector dari npm."] }],
     },
     {
       version: "2.3.0",
       date: "2026-11",
+      title: "Tempel pelat nama untuk mengisi formulir",
       groups: [
         {
           kind: "new",
@@ -1345,11 +1466,13 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.2.0",
       date: "2026-10",
+      title: "Cek pembaruan harian",
       groups: [{ kind: "new", items: ["CLI memeriksa npm paling banyak sekali sehari dan, jika ada versi baru, menampilkan pemberitahuan beserta perintah pembaruan di akhir; CLI tidak pernah memperbarui dirinya sendiri. Matikan dengan --no-update-check atau OLTC_NO_UPDATE_CHECK=1."] }],
     },
     {
       version: "2.1.0",
       date: "2026-10",
+      title: "Tipe diperbarui saat Anda mengetik",
       groups: [
         {
           kind: "imp",
@@ -1369,6 +1492,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
+      title: "Halaman baru: pilih menurut jenis trafo dan posisi tap",
       groups: [
         { kind: "new", items: ["Pilih jenis transformator (dua belitan atau autotransformator) dan letak OLTC (netral, ujung saluran, sambungan seri – bersama, saluran TM); arus, tegangan tap dan isolasi dihitung dari letak itu."] },
         {
@@ -1384,6 +1508,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
+      title: "Hasil menandai yang harus dikonfirmasi engineering",
       groups: [
         {
           kind: "fix",
@@ -1404,6 +1529,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.9",
       date: "2026-09",
+      title: "Baru: SDZV vakum dua titik putus",
       groups: [
         {
           kind: "new",
@@ -1426,6 +1552,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.6",
       date: "2026-09",
+      title: "Skill asisten punya repositori sendiri",
       groups: [
         {
           kind: "imp",
@@ -1438,6 +1565,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.5",
       date: "2026-09",
+      title: "Perbaikan jumlah kontak dan faktor keamanan",
       groups: [
         {
           kind: "fix",
@@ -1456,6 +1584,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.4",
       date: "2026-09",
+      title: "Setiap run mencantumkan nilai default",
       groups: [
         {
           kind: "new",
@@ -1469,6 +1598,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.3",
       date: "2026-09",
+      title: "Asisten kini punya ikon",
       groups: [
         {
           kind: "imp",
@@ -1481,6 +1611,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.2",
       date: "2026-09",
+      title: "Panduan asisten ditulis ulang",
       groups: [
         {
           kind: "imp",
@@ -1491,6 +1622,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.1",
       date: "2026-09",
+      title: "Asisten memahami lebih banyak input",
       groups: [
         {
           kind: "imp",
@@ -1503,6 +1635,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.2.0",
       date: "2026-09",
+      title: "CLI dan asisten AI diluncurkan",
       groups: [
         {
           kind: "new",
@@ -1526,6 +1659,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.1.0",
       date: "2026-08",
+      title: "Minyak atau vakum, preset sekali klik",
       groups: [
         {
           kind: "new",
@@ -1543,6 +1677,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.0.0",
       date: "2026-08",
+      title: "Rilis pertama",
       groups: [
         {
           kind: "new",
