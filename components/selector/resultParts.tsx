@@ -270,7 +270,7 @@ export function ModelSpec({
   return (
     <dl
       className={cx(
-        "grid grid-cols-2 gap-x-5",
+        "spec-grid grid grid-cols-2 gap-x-5",
         inline
           ? "spec-inline gap-y-4"
           : cx(
@@ -286,7 +286,7 @@ export function ModelSpec({
             {t(lang, item.key)}
           </dt>
           <dd
-            className="mt-0.5 text-[0.875rem] leading-snug tabular-nums text-[var(--color-ink)]"
+            className="text-[0.875rem] leading-snug tabular-nums text-[var(--color-ink)]"
             translate="no"
           >
             {item.value}
