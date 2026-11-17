@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import {
+  ArrowsRightLeftIcon,
   ChevronDownIcon,
   ExclamationTriangleIcon,
   ShieldCheckIcon,
@@ -27,6 +28,7 @@ export function ResultCard({
   sel,
   cardRef,
   onTap,
+  onPickModel,
   copiedModel,
   copyModel,
 }: {
@@ -35,6 +37,8 @@ export function ResultCard({
   sel: Selection;
   cardRef: RefObject<HTMLElement | null>;
   onTap: (p: TapPoint) => void;
+  /** Puts a type from 其他可选 on the card. */
+  onPickModel: (model: string) => void;
   /** What shows 已复制 just now. */
   copiedModel: string | null;
   copyModel: (text: string) => void;
@@ -47,6 +51,8 @@ export function ResultCard({
     loose,
     alts,
     insuranceId,
+    roomy,
+    firstModel,
     duty,
     derivedA,
     pickedDutyA,
@@ -59,12 +65,25 @@ export function ResultCard({
   const isOctc = formIsOctc(form);
   /** null: follow the default (open when a roomier type is offered). */
   const [altsPick, setAltsPick] = useState<boolean | null>(null);
-  const [openAlts, setOpenAlts] = useState<string[]>([]);
-  const primaryModel = primary?.model ?? null;
-  useEffect(() => {
-    setOpenAlts([]);
-  }, [primaryModel]);
   const altsOpen = altsPick ?? insuranceId != null;
+  // On a wide screen spare window height goes to the sketch. The open list
+  // adds its own height to the card, so it grows downward and its title
+  // stays under the pointer instead of taking the sketch's room.
+  const altsListRef = useRef<HTMLUListElement | null>(null);
+  const [altsExtra, setAltsExtra] = useState(0);
+  useLayoutEffect(() => {
+    const el = altsListRef.current;
+    if (!altsOpen || !el) {
+      setAltsExtra(0);
+      return;
+    }
+    const measure = () => setAltsExtra(el.offsetHeight);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [altsOpen, alts.length]);
   const setAltsOpen = (next: (open: boolean) => boolean) => setAltsPick(next(altsOpen));
   // Screen readers hear the type once typing settles, not on every keystroke.
   const [announced, setAnnounced] = useState("");
@@ -79,6 +98,7 @@ export function ResultCard({
         tabIndex={-1}
         aria-label={t(lang, "resultAria")}
         className="plate focus:outline-none"
+        style={{ "--alts-extra": `${altsExtra}px` } as CSSProperties}
       >
         <p className="sr-only" aria-live="polite" aria-atomic="true">
           {announced}
@@ -131,91 +151,6 @@ export function ResultCard({
         </div>
 
         <div className="plate-body">
-        {/* Right under the type, so the list opens downward. At the foot of a
-            window-high card it took its room from the sketch above it, and
-            its own title moved up under the pointer (2026-11-14 Eric). */}
-        {primary && alts.length > 0 ? (
-          <div className="plate-alts">
-            <button
-              type="button"
-              onClick={() => setAltsOpen((o) => !o)}
-              className="flex h-12 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:px-8"
-              aria-expanded={altsOpen}
-            >
-              <span>{t(lang, "otherOpts", { n: alts.length })}</span>
-              <ChevronDownIcon
-                className={cx(
-                  "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
-                  altsOpen && "rotate-180",
-                )}
-                aria-hidden
-              />
-            </button>
-            <div
-              className={cx(
-                "alts-drop grid transition-[grid-template-rows,opacity] duration-200 ease-out",
-                altsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-              )}
-            >
-              <div className="min-h-0 overflow-hidden" {...(altsOpen ? {} : { inert: true })}>
-                <ul className="divide-y divide-[var(--color-rule)] border-t border-[var(--color-rule)]">
-                  {alts.map((r) => {
-                    const open = openAlts.includes(r.model);
-                    const shown = displayModel(r.model, lang);
-                    return (
-                      <li key={r.model}>
-                        <div className="flex items-center gap-1 pr-1.5 pl-3 sm:pr-[1.125rem] sm:pl-6 lg:pr-6">
-                          <button
-                            type="button"
-                            aria-expanded={open}
-                            onClick={() => setOpenAlts(open ? [] : [r.model])}
-                            className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-[4px] px-2 py-1.5 text-left focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
-                          >
-                            <ChevronDownIcon
-                              className={cx(
-                                "h-4 w-4 shrink-0 text-[var(--color-caption)] transition-transform duration-200",
-                                open && "rotate-180",
-                              )}
-                              aria-hidden
-                            />
-                            <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-                              <span translate="no" className="plate-type min-w-0 text-[0.875rem] leading-snug text-[var(--color-ink)]">
-                                {modelNodes(shown)}
-                              </span>
-                              {insuranceId === r.model ? (
-                                <span className="shrink-0 text-[0.75rem] font-medium text-[var(--color-accent)]">
-                                  {t(lang, "allRound")}
-                                </span>
-                              ) : null}
-                            </span>
-                          </button>
-                          <CopyButton
-                            lang={lang}
-                            small
-                            copied={copiedModel === shown}
-                            onCopy={() => copyModel(shown)}
-                          />
-                        </div>
-                        <div className={cx("more-drop", open && "more-drop-open")}>
-                          <div className="min-h-0 overflow-hidden" {...(open ? {} : { inert: true })}>
-                            <div className="more-drop-inner">
-                              <ModelSpec
-                                lang={lang}
-                                r={r}
-                                dutyMounting={input.mounting}
-                                compact
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </div>
-          </div>
-        ) : null}
         <div className="plate-mid px-5 py-6 sm:px-8">
           <div className="plate-facts">
             <BasisTable
@@ -262,6 +197,85 @@ export function ResultCard({
           </ul>
         ) : null}
 
+        {/* At the card's foot (2026-11-17 Eric). The card now moves with the
+            page as one piece, so opening it adds height below and takes no
+            room from the sketch. */}
+        {primary && alts.length > 0 ? (
+          <div className="plate-alts">
+            <button
+              type="button"
+              onClick={() => setAltsOpen((o) => !o)}
+              className="flex h-12 w-full items-center justify-between px-5 text-left text-[0.8125rem] font-medium text-[var(--color-ink-2)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:px-8"
+              aria-expanded={altsOpen}
+            >
+              <span>{t(lang, "otherOpts", { n: alts.length })}</span>
+              <ChevronDownIcon
+                className={cx(
+                  "h-4 w-4 shrink-0 text-[var(--color-muted)] transition-transform duration-200",
+                  altsOpen && "rotate-180",
+                )}
+                aria-hidden
+              />
+            </button>
+            <div
+              className={cx(
+                "alts-drop grid transition-[grid-template-rows,opacity] duration-200 ease-out",
+                altsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+              )}
+            >
+              <div className="min-h-0 overflow-hidden" {...(altsOpen ? {} : { inert: true })}>
+                <ul
+                  ref={altsListRef}
+                  className="divide-y divide-[var(--color-rule)] border-t border-[var(--color-rule)]"
+                >
+                  {alts.map((r) => {
+                    const shown = displayModel(r.model, lang);
+                    const safe = roomy.has(r.model);
+                    return (
+                      <li key={r.model}>
+                        <div className="alt-row flex items-center gap-1 pr-1.5 pl-3 sm:pr-[1.125rem] sm:pl-6 lg:pr-6">
+                          <button
+                            type="button"
+                            onClick={() => onPickModel(r.model)}
+                            title={t(lang, "useThisType")}
+                            className="alt-pick flex min-h-12 min-w-0 flex-1 items-center gap-2.5 rounded-[8px] px-2 py-1.5 text-left focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+                          >
+                            <ArrowsRightLeftIcon
+                              className="alt-pick-icon h-4 w-4 shrink-0"
+                              strokeWidth={1.75}
+                              aria-hidden
+                            />
+                            <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2.5 gap-y-1">
+                              <span translate="no" className="plate-type min-w-0 text-[0.9375rem] leading-snug text-[var(--color-ink)]">
+                                {modelNodes(shown)}
+                              </span>
+                              {r.model === firstModel || safe ? (
+                                <span
+                                  className={cx(
+                                    "shrink-0 text-[0.75rem] font-medium",
+                                    safe ? "text-[var(--color-accent)]" : "text-[var(--color-muted)]",
+                                  )}
+                                >
+                                  {t(lang, safe ? "allRound" : "recommended")}
+                                </span>
+                              ) : null}
+                            </span>
+                          </button>
+                          <CopyButton
+                            lang={lang}
+                            small
+                            copied={copiedModel === shown}
+                            onCopy={() => copyModel(shown)}
+                          />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          </div>
+        ) : null}
         </div>
         <div className="plate-foot">
           <p>{t(lang, "disclaimer")}</p>

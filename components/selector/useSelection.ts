@@ -44,6 +44,12 @@ const safe = <T,>(get: () => T, fallback: T): T => {
   }
 };
 
+/** A type picked from 其他可选, and the first type it was picked against. */
+export interface Choice {
+  first: string;
+  model: string;
+}
+
 /** Everything the page shows that follows from the form. */
 export interface Selection {
   /** What went to the engine; null when the duty is incomplete or the sizing threw. */
@@ -53,12 +59,18 @@ export interface Selection {
   calcFailed: boolean;
   pickedDutyA: number | null;
   pickedStepV: number;
+  /** The type on the card: the engine's first, or the one picked from 其他可选. */
   primary: ModelResult | null;
-  /** The first type already is the roomier one. */
+  /** The engine's first type, whichever is on the card. */
+  firstModel: string | null;
+  /** The type on the card has margin on every load (安全选项). */
   loose: boolean;
+  /** The other types offered; after a swap the engine's first is among them. */
   alts: ModelResult[];
   /** The alternative offered as the one with margin. */
   insuranceId: string | null;
+  /** Types in the list that have margin on every load. */
+  roomy: ReadonlySet<string>;
   duty: DutyBasis;
   /** The duty with no stated insulation class: what the rule alone gives. */
   ruleDuty: DutyBasis;
@@ -80,7 +92,13 @@ export interface Selection {
  * disagree. A throw anywhere in the sizing becomes a visible state, not a
  * blank page.
  */
-export function selectionFor(form: FormState, lang: Lang): Selection {
+export function selectionFor(
+  form: FormState,
+  lang: Lang,
+  /** A type picked from 其他可选 while `first` led. It lapses once the
+      inputs give another first type, or when it is no longer offered. */
+  chosen: Choice | null = null,
+): Selection {
   let calcFailed = false;
   let sized: SelectInput | null = null;
   let result: SelectOutput;
@@ -105,24 +123,33 @@ export function selectionFor(form: FormState, lang: Lang): Selection {
   }
   const pickedDutyA = sized ? sized.throughCurrentA : null;
   const pickedStepV = sized && sized.stepVoltageV > 0 ? sized.stepVoltageV : 0;
-  const primary = result.ok ? (result.results[0] ?? null) : null;
+  const first = result.ok ? (result.results[0] ?? null) : null;
 
   const marginNeed = {
     acrossTapBilKv: form.input.acrossTapBilKv,
     acrossTapPfKv: form.input.acrossTapPfKv,
   };
-  const loose =
-    primary != null &&
+  const hasMargin = (r: ModelResult) =>
     pickedDutyA != null &&
-    safe(() => primaryIsInsurance(primary, pickedDutyA, pickedStepV, marginNeed), false);
-  const alts =
+    safe(() => primaryIsInsurance(r, pickedDutyA, pickedStepV, marginNeed), false);
+  const firstAlts =
     result.ok && pickedDutyA != null
       ? safe(() => optionsWithInsurance(result.results, pickedDutyA, pickedStepV, 3, marginNeed), [])
       : [];
   const insuranceId =
-    !loose && result.ok && pickedDutyA != null
+    first != null && !hasMargin(first) && result.ok && pickedDutyA != null
       ? safe(() => insuranceModel(result.results, pickedDutyA, pickedStepV, marginNeed), null)
       : null;
+  // 其他可选 swaps with the card: the picked type goes up, the first comes
+  // down into the list, so one click brings it back (2026-11-17 Eric).
+  const options = first ? [first, ...firstAlts] : [];
+  const primary =
+    (chosen && first && chosen.first === first.model
+      ? options.find((r) => r.model === chosen.model)
+      : undefined) ?? first;
+  const alts = options.filter((r) => r !== primary);
+  const loose = primary != null && hasMargin(primary);
+  const roomy = new Set(alts.filter(hasMargin).map((r) => r.model));
 
   const duty = safe(() => deriveDuty(formSpec(form)), NO_DUTY);
   const derivedA =
@@ -174,9 +201,11 @@ export function selectionFor(form: FormState, lang: Lang): Selection {
     pickedDutyA,
     pickedStepV,
     primary,
+    firstModel: first?.model ?? null,
     loose,
     alts,
     insuranceId,
+    roomy,
     duty,
     ruleDuty,
     derivedA,
@@ -188,6 +217,10 @@ export function selectionFor(form: FormState, lang: Lang): Selection {
   };
 }
 
-export function useSelection(form: FormState, lang: Lang): Selection {
-  return useMemo(() => selectionFor(form, lang), [form, lang]);
+export function useSelection(
+  form: FormState,
+  lang: Lang,
+  chosen: Choice | null = null,
+): Selection {
+  return useMemo(() => selectionFor(form, lang, chosen), [form, lang, chosen]);
 }

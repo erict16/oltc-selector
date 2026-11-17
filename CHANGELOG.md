@@ -1,5 +1,15 @@
 # Changelog
 
+## Page, 2026-11-17
+
+No new version: the CLI pack is unchanged.
+
+- The result card moves with the page as one piece. A card that fits the window stays in view while the form scrolls; a taller one scrolls with the page until its foot shows, and comes back as you scroll up. The type no longer stays pinned at the top while the rest of the card slides under it (`components/selector/useStickyBoth.ts`).
+- 其他可选 is at the foot of the card. Click a type in it and it becomes the card's type: the loads, the data, the notes, Copy and the phone bar all follow. The type it replaced moves into the list, so one click brings it back. The pick is dropped when the inputs give another first type. A row with margin on every load says 安全选项; the first type says what it is when it is in the list.
+- Opening 其他可选 makes the card taller instead of taking the sketch's room, so its title does not jump up under the pointer.
+- Header: the ⚡ mark, a larger name, the version as a small tag, a hairline and a soft shadow once the page scrolls under it. The language button shows which language is on (中文, EN, …). "Selection assistant" is now "CLI".
+- A browser in another language no longer sees the Chinese page flash first: the page waits, at most 2.5 s, until it is drawn in the reader's language.
+
 ## Page, after 2.4.1 (2026-11-14)
 
 No new version: the CLI pack is unchanged.

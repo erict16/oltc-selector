@@ -106,7 +106,7 @@ type Dict = Record<string, string>;
 const en: Dict = {
   title: "OLTC Selector",
   subtitle: "Enter the duty, then Select.",
-  agentChip: "Selection assistant",
+  agentChip: "CLI",
   footerNote: "Reference only",
   changelogNow: "current",
   changelogAll: "All release notes",
@@ -235,6 +235,7 @@ const en: Dict = {
   disclaimer:
     "For reference only. Confirm with engineering before the order specification (OS).",
   otherOpts: "Other options ({n})",
+  useThisType: "Use this type",
   copy: "Copy",
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Lowest catalogue rating that covers this duty.",
   whySel: ", tap selector {s}",
@@ -270,7 +271,7 @@ const en: Dict = {
 const zh: Dict = {
   title: "有载开关选型",
   subtitle: "填工况，点选型。",
-  agentChip: "选型助手",
+  agentChip: "CLI",
   footerNote: "仅供参考",
   changelogNow: "当前",
   changelogAll: "全部更新记录",
@@ -398,6 +399,7 @@ const zh: Dict = {
   copied: "已复制",
   disclaimer: "仅供参考，订货规范以工程确认为准。",
   otherOpts: "其他可选（{n}）",
+  useThisType: "换成这个型号",
   copy: "复制",
   why: "{code}，{i} A，Um {um} kV{sel}{multi}。满足工况的最低目录档。",
   whySel: " · 选择器 {s}",
@@ -433,7 +435,7 @@ const zh: Dict = {
 const vi: Dict = {
   title: "Chọn OLTC",
   subtitle: "Nhập thông số, bấm Chọn.",
-  agentChip: "Trợ lý chọn kiểu",
+  agentChip: "CLI",
   footerNote: "Chỉ tham khảo",
   changelogNow: "hiện tại",
   changelogAll: "Tất cả ghi chú",
@@ -562,6 +564,7 @@ const vi: Dict = {
   disclaimer:
     "Chỉ tham khảo. Xác nhận kỹ thuật trước khi lập quy cách đặt hàng (OS).",
   otherOpts: "Lựa chọn khác ({n})",
+  useThisType: "Dùng loại này",
   copy: "Chép",
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Mức danh mục thấp nhất đủ cho nhiệm vụ này.",
   whySel: ", bộ chọn {s}",
@@ -598,7 +601,7 @@ const vi: Dict = {
 const es: Dict = {
   title: "Selector OLTC",
   subtitle: "Introduzca el régimen y pulse Seleccionar.",
-  agentChip: "Asistente de selección",
+  agentChip: "CLI",
   footerNote: "Solo referencia",
   changelogNow: "actual",
   changelogAll: "Todas las notas",
@@ -727,6 +730,7 @@ const es: Dict = {
   disclaimer:
     "Solo referencia. Confirme con ingeniería antes de la especificación de pedido (OS).",
   otherOpts: "Otras opciones ({n})",
+  useThisType: "Usar este tipo",
   copy: "Copiar",
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Menor valor de catálogo que cubre este régimen.",
   whySel: ", selector {s}",
@@ -762,7 +766,7 @@ const es: Dict = {
 const tr: Dict = {
   title: "OLTC Seçici",
   subtitle: "İşletme verilerini girin, Seç’e basın.",
-  agentChip: "Seçim asistanı",
+  agentChip: "CLI",
   footerNote: "Yalnızca referans",
   changelogNow: "güncel",
   changelogAll: "Tüm sürüm notları",
@@ -891,6 +895,7 @@ const tr: Dict = {
   disclaimer:
     "Yalnızca referans. Sipariş şartnamesi (OS) öncesi mühendislik onayı alın.",
   otherOpts: "Diğer seçenekler ({n})",
+  useThisType: "Bu tipi kullan",
   copy: "Kopyala",
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Bu işletmeyi karşılayan en düşük katalog değeri.",
   whySel: ", seçici {s}",
@@ -926,7 +931,7 @@ const tr: Dict = {
 const idn: Dict = {
   title: "Pemilih OLTC",
   subtitle: "Isi kondisi kerja, lalu klik Pilih.",
-  agentChip: "Asisten pemilihan",
+  agentChip: "CLI",
   footerNote: "Hanya referensi",
   changelogNow: "saat ini",
   changelogAll: "Semua catatan rilis",
@@ -1055,6 +1060,7 @@ const idn: Dict = {
   disclaimer:
     "Hanya referensi. Konfirmasikan ke bagian engineering sebelum spesifikasi pesanan (OS).",
   otherOpts: "Opsi lain ({n})",
+  useThisType: "Pakai tipe ini",
   copy: "Salin",
   why: "{code}, {i} A, Um {um} kV{sel}{multi}. Rating katalog terendah yang memenuhi kondisi kerja ini.",
   whySel: ", selector {s}",

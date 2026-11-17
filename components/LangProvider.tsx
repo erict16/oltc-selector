@@ -34,7 +34,10 @@ export function LangProvider({
 function HtmlLang() {
   const lang = useAppLang();
   useEffect(() => {
-    document.documentElement.lang = htmlLang(lang);
+    const root = document.documentElement;
+    root.lang = htmlLang(lang);
+    // Drawn in the reader's language: show the page (see LANG_WAIT in layout).
+    if (lang === getAppLang()) root.classList.remove("lang-wait");
   }, [lang]);
   return null;
 }

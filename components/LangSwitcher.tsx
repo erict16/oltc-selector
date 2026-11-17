@@ -10,10 +10,13 @@ export function LangSwitcher({
   lang,
   onChange,
   ariaLabel,
+  showLabel = false,
 }: {
   lang: Lang;
   onChange: (l: Lang) => void;
   ariaLabel: string;
+  /** Show the current language's short name beside the icon. */
+  showLabel?: boolean;
   /** Kept for older call sites; the switch has one look. */
   tone?: "light" | "dark";
 }) {
@@ -72,7 +75,7 @@ export function LangSwitcher({
       <button
         ref={btnRef}
         type="button"
-        className="lang-btn"
+        className={showLabel ? "lang-btn has-label" : "lang-btn"}
         aria-label={ariaLabel}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -87,6 +90,11 @@ export function LangSwitcher({
         }}
       >
         <LanguageIcon className="h-5 w-5" strokeWidth={1.6} aria-hidden />
+        {showLabel ? (
+          <span className="lang-short" aria-hidden>
+            {LANG_OPTIONS.find((o) => o.id === lang)?.short}
+          </span>
+        ) : null}
       </button>
       {open ? (
         <div id={menuId} role="menu" aria-label={ariaLabel} className="lang-menu" onKeyDown={onMenuKey}>
