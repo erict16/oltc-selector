@@ -21,9 +21,9 @@ export type TransformerKind = "two_winding" | "auto";
  * Where the OLTC sits.
  * - neutral: star point of a star winding (two-winding only here).
  * - line_end: line end of the tapped winding (star or delta).
- * - auto_junction: autotransformer, between series and common winding;
+ * - auto_junction: autotransformer, series winding at its MV end (before the junction);
  *   carries the series (HV) current.
- * - auto_mv_line: autotransformer, in the MV line lead; carries MV current.
+ * - auto_mv_line: autotransformer, in the MV line after the junction; carries MV current.
  */
 export type TapPoint = "neutral" | "line_end" | "auto_junction" | "auto_mv_line";
 
@@ -404,13 +404,13 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     }
     return fail(
       `自耦变高压 Um ${umKv} kV 超出目录（最高 363 kV）。请按 OS 填开关对地绝缘（CLI：--earth-um），可选 ${open.join("、")} kV。`,
-      `Autotransformer HV class Um ${umKv} kV is above the catalogue (top 363 kV). Give the switch's insulation to earth from the OS (CLI: --earth-um): ${open.join(", ")} kV.`,
+      `Autotransformer HV class Um ${umKv} kV is above the catalogue (top 363 kV). Give the tap changer's insulation to earth from the OS (CLI: --earth-um): ${open.join(", ")} kV.`,
     );
   }
   if (!Number.isFinite(umKv) || umKv > 363) {
     return fail(
       "电压超出目录：开关最高 Um 363 kV。",
-      "Voltage above the catalogue: the highest switch class is Um 363 kV.",
+      "Voltage above the catalogue: the highest tap changer class is Um 363 kV.",
     );
   }
 
@@ -448,16 +448,16 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
       // 2026-11-04 audit UM-4: the HMR note printed on 400/220 at Um 252.
       if (umKv === 170) {
         cautionsZh.push("230/121 kV 自耦变中压出线通常用 Um 170 kV，请按厂家数据核对。");
-        cautionsEn.push("230/121 kV autotransformer MV line lead: Um 170 kV is usual; check the maker's data.");
+        cautionsEn.push("230/121 kV autotransformer MV line: Um 170 kV is usual; check the maker's data.");
       } else {
         cautionsZh.push(`开关对地绝缘暂按 ${umKv} kV 选，订货前请按订货规范确认。`);
-        cautionsEn.push(`MV line lead sized at the MV class, Um ${umKv} kV; the order specification (OS) decides.`);
+        cautionsEn.push(`MV line sized at the MV class, Um ${umKv} kV; the order specification (OS) decides.`);
       }
     } else if (spec.tapPoint === "auto_junction" && umRule === "auto_hv") {
       // 2026-11-04 (r3 UI-11): 132/33 at Um 145 is assumed, but the card
       // said so nowhere since the basis-row flag went (8b4bc64).
       cautionsZh.push(`开关对地绝缘暂按 ${umKv} kV 选，订货前请按订货规范确认。`);
-      cautionsEn.push(`Autotransformer junction sized at the HV class, Um ${umKv} kV; the order specification (OS) decides.`);
+      cautionsEn.push(`Series winding MV end sized at the HV class, Um ${umKv} kV; the order specification (OS) decides.`);
     }
     cautionsZh.push("自耦变只能用组合式开关。");
     cautionsEn.push("Autotransformer: combined types only (compound types stop at 200 kV across the tap winding).");

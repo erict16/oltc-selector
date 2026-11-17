@@ -391,7 +391,7 @@ describe("catalogue menu labels", () => {
     expect(t("en", "throughCurrent")).toBe("Max. through-current");
     expect(t("en", "currentBtn")).toBe("Imax");
     expect(t("en", "um")).toBe("Equipment Um");
-    expect(t("en", "umWinding")).toBe("Tap voltage");
+    expect(t("en", "umWinding")).toBe("Rated voltage");
     expect(t("en", "ust")).toBe("Step voltage");
   });
 

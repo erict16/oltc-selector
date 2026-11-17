@@ -201,7 +201,7 @@ describe("UI-10: 'Not stated, check' names the field to check", () => {
   const same = (lang: Lang, a: string, b: string) =>
     expect(t(lang, a).toLocaleLowerCase(lang)).toBe(t(lang, b).toLocaleLowerCase(lang));
 
-  it.each(LANGS)("%s: tap_winding = Tap voltage, winding = Tapped winding, mva = Capacity", (lang) => {
+  it.each(LANGS)("%s: tap_winding = rated voltage, winding = Tapped winding, mva = Capacity", (lang) => {
     same(lang, "lineF_tap_winding", "umWinding");
     same(lang, "lineF_winding", "winding");
     same(lang, "lineF_mva", "transformerMva");
@@ -233,7 +233,7 @@ describe("UI-11: an assumed auto-junction Um is said on the card", () => {
     expect(d.ok).toBe(true);
     expect(d.umKv).toBe(um);
     expect(d.umAssumed).toBe(true);
-    const en = `Autotransformer junction sized at the HV class, Um ${um} kV; the order specification (OS) decides.`;
+    const en = `Series winding MV end sized at the HV class, Um ${um} kV; the order specification (OS) decides.`;
     expect(d.cautionsEn).toContain(en);
     expect(d.cautionsZh).toContain(`开关对地绝缘暂按 ${um} kV 选，订货前请按订货规范确认。`);
     for (const lang of ["vi", "es", "tr", "id"] as const) {
@@ -244,7 +244,7 @@ describe("UI-11: an assumed auto-junction Um is said on the card", () => {
   });
 
   it("the 252 junction says its Um is assumed too; a stated Um has no such note", () => {
-    const note = /^Autotransformer junction sized at the HV class/;
+    const note = /^Series winding MV end sized at the HV class/;
     // 2026-11-13: 252 used to carry a reference type of another family instead.
     expect(deriveDuty(auto(225, 115)).cautionsEn.some((c) => note.test(c))).toBe(true);
     const stated = deriveDuty(auto(132, 33, { earthUmKv: 145 }));

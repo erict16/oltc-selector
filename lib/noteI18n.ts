@@ -10,15 +10,15 @@ type Rule = [RegExp, (m: RegExpMatchArray) => Tr];
 
 /** Mounting + arc medium words in the engine's no-result lines (limitScope). */
 const SCOPE: Record<string, Tr> = {
-  "in-tank vacuum": { vi: "chân không trong thùng", es: "de vacío en cuba", tr: "tank içi vakum", id: "vakum dalam tangki" },
-  "in-tank oil": { vi: "dầu trong thùng", es: "en aceite en cuba", tr: "tank içi yağlı", id: "minyak dalam tangki" },
-  "on-tank vacuum": { vi: "chân không ngoài thùng", es: "de vacío fuera de cuba", tr: "tank dışı vakum", id: "vakum luar tangki" },
-  "on-tank oil": { vi: "dầu ngoài thùng", es: "en aceite fuera de cuba", tr: "tank dışı yağlı", id: "minyak luar tangki" },
-  "in-tank": { vi: "trong thùng", es: "en cuba", tr: "tank içi", id: "dalam tangki" },
-  "on-tank": { vi: "ngoài thùng", es: "fuera de cuba", tr: "tank dışı", id: "luar tangki" },
+  "in-tank vacuum": { vi: "chân không trong thùng", es: "de vacío en cuba", tr: "kazan içi vakum", id: "vakum dalam tangki" },
+  "in-tank oil": { vi: "dầu trong thùng", es: "en aceite en cuba", tr: "kazan içi yağlı", id: "minyak dalam tangki" },
+  "on-tank vacuum": { vi: "chân không ngoài thùng", es: "de vacío fuera de cuba", tr: "kazan dışı vakum", id: "vakum luar tangki" },
+  "on-tank oil": { vi: "dầu ngoài thùng", es: "en aceite fuera de cuba", tr: "kazan dışı yağlı", id: "minyak luar tangki" },
+  "in-tank": { vi: "trong thùng", es: "en cuba", tr: "kazan içi", id: "dalam tangki" },
+  "on-tank": { vi: "ngoài thùng", es: "fuera de cuba", tr: "kazan dışı", id: "luar tangki" },
   "dry-type": { vi: "kiểu khô", es: "de tipo seco", tr: "kuru tip", id: "tipe kering" },
   reactor: { vi: "kiểu điện kháng", es: "de reactancia", tr: "reaktör tipi", id: "tipe reaktor" },
-  OCTC: { vi: "không tải (OCTC)", es: "sin carga (OCTC)", tr: "yüksüz (OCTC)", id: "tanpa beban (OCTC)" },
+  OCTC: { vi: "không tải (OCTC)", es: "sin tensión (OCTC)", tr: "yüksüz (OCTC)", id: "tanpa beban (OCTC)" },
 };
 const SCOPE_RE = Object.keys(SCOPE)
   .sort((a, b) => b.length - a.length)
@@ -43,7 +43,7 @@ const RULES: Rule[] = [
       vi: "Chưa cho điện áp nấc: chưa kiểm tra giới hạn điện áp nấc và công suất nấc.",
       es: "Sin tensión de escalón: no se comprobaron los límites de tensión ni de potencia de escalón.",
       tr: "Kademe gerilimi verilmedi: kademe gerilimi ve kademe gücü sınırları kontrol edilmedi.",
-      id: "Tegangan tap tidak diberikan: batas tegangan tap dan daya tap tidak diperiksa.",
+      id: "Tegangan per tap tidak diberikan: batas tegangan per tap dan daya per tap tidak diperiksa.",
     }),
   ],
   [
@@ -212,21 +212,21 @@ const RULES: Rule[] = [
     }),
   ],
   [
-    /^MV line lead sized at the MV class, Um ([\d.]+) kV; the order specification \(OS\) decides\.$/,
+    /^MV line sized at the MV class, Um ([\d.]+) kV; the order specification \(OS\) decides\.$/,
     (m) => ({
-      vi: `Đầu ra trung áp chọn theo cấp trung áp, Um ${m[1]} kV; theo quy cách đặt hàng (OS).`,
-      es: `Salida de MT dimensionada a la clase de MT, Um ${m[1]} kV; decide la especificación de pedido (OS).`,
-      tr: `OG hat çıkışı OG sınıfına göre seçildi, Um ${m[1]} kV; sipariş şartnamesi (OS) belirler.`,
+      vi: `Đường dây trung áp chọn theo cấp trung áp, Um ${m[1]} kV; theo quy cách đặt hàng (OS).`,
+      es: `Línea de MT dimensionada a la clase de MT, Um ${m[1]} kV; decide la especificación de pedido (OS).`,
+      tr: `OG hattı OG sınıfına göre seçildi, Um ${m[1]} kV; sipariş şartnamesi (OS) belirler.`,
       id: `Saluran TM dipilih pada kelas TM, Um ${m[1]} kV; spesifikasi pesanan (OS) yang menentukan.`,
     }),
   ],
   [
-    /^Autotransformer junction sized at the HV class, Um ([\d.]+) kV; the order specification \(OS\) decides\.$/,
+    /^Series winding MV end sized at the HV class, Um ([\d.]+) kV; the order specification \(OS\) decides\.$/,
     (m) => ({
-      vi: `Điểm nối nối tiếp – chung của máy biến áp tự ngẫu chọn theo cấp cao áp, Um ${m[1]} kV; theo quy cách đặt hàng (OS).`,
-      es: `Unión serie – común del autotransformador dimensionada a la clase de AT, Um ${m[1]} kV; decide la especificación de pedido (OS).`,
-      tr: `Ototransformatörün seri – ortak bağlantısı YG sınıfına göre seçildi, Um ${m[1]} kV; sipariş şartnamesi (OS) belirler.`,
-      id: `Sambungan seri – bersama autotransformator dipilih pada kelas TT, Um ${m[1]} kV; spesifikasi pesanan (OS) yang menentukan.`,
+      vi: `Phía trung áp của cuộn nối tiếp chọn theo cấp cao áp, Um ${m[1]} kV; theo quy cách đặt hàng (OS).`,
+      es: `Extremo MT del devanado serie dimensionado a la clase de AT, Um ${m[1]} kV; decide la especificación de pedido (OS).`,
+      tr: `Seri sargının OG ucu YG sınıfına göre seçildi, Um ${m[1]} kV; sipariş şartnamesi (OS) belirler.`,
+      id: `Ujung TM belitan seri dipilih pada kelas TT, Um ${m[1]} kV; spesifikasi pesanan (OS) yang menentukan.`,
     }),
   ],
   [
@@ -312,11 +312,11 @@ const RULES: Rule[] = [
     }),
   ],
   [
-    /^230\/121 kV autotransformer MV line lead: Um 170 kV is usual; check the maker's data\.$/,
+    /^230\/121 kV autotransformer MV line: Um 170 kV is usual; check the maker's data\.$/,
     () => ({
-      vi: "Đầu ra trung áp máy tự ngẫu 230/121 kV thường dùng Um 170 kV; hãy đối chiếu số liệu của nhà sản xuất.",
-      es: "Salida de MT de autotransformador 230/121 kV: lo habitual es Um 170 kV; compruebe los datos del fabricante.",
-      tr: "230/121 kV ototransformatör OG hat çıkışı: genellikle Um 170 kV; üretici verisiyle doğrulayın.",
+      vi: "Đường dây trung áp máy tự ngẫu 230/121 kV thường dùng Um 170 kV; hãy đối chiếu số liệu của nhà sản xuất.",
+      es: "Línea de MT de autotransformador 230/121 kV: lo habitual es Um 170 kV; compruebe los datos del fabricante.",
+      tr: "230/121 kV ototransformatör OG hattı: genellikle Um 170 kV; üretici verisiyle doğrulayın.",
       id: "Saluran TM autotransformator 230/121 kV: biasanya Um 170 kV; periksa data pabrikan.",
     }),
   ],
@@ -332,8 +332,8 @@ const RULES: Rule[] = [
   [
     /^Not checked: impulse across the tap winding \(a\), tie-in resistor\.$/,
     () => ({
-      vi: "Chưa kiểm tra: xung qua cuộn điều chỉnh (a), điện trở nối.",
-      es: "Sin comprobar: impulso a través del devanado de regulación (a), resistencia de enlace.",
+      vi: "Chưa kiểm tra: xung qua cuộn điều chỉnh (a), điện trở ghim thế.",
+      es: "Sin comprobar: impulso a través del devanado regulado (a), resistencia de fijación de potencial.",
       tr: "Kontrol edilmedi: kademe sargısı boyunca darbe (a), bağlantı direnci.",
       id: "Belum diperiksa: impuls melintasi belitan tap (a), resistor pengikat.",
     }),
@@ -363,7 +363,7 @@ const RULES: Rule[] = [
       vi: "Điện áp nấc phải là số ≥ 0 (0 = chưa cho).",
       es: "La tensión de escalón debe ser un número ≥ 0 (0 = sin dato).",
       tr: "Kademe gerilimi ≥ 0 bir sayı olmalı (0 = verilmedi).",
-      id: "Tegangan tap harus angka ≥ 0 (0 = tidak diberikan).",
+      id: "Tegangan per tap harus angka ≥ 0 (0 = tidak diberikan).",
     }),
   ],
   [
@@ -380,8 +380,8 @@ const RULES: Rule[] = [
     () => ({
       vi: "Máy biến áp tự ngẫu chỉ dùng kiểu tổ hợp: kiểu phức hợp (CV/CV2/SV) chỉ chịu 200 kV qua cuộn điều chỉnh.",
       es: "Los autotransformadores solo admiten tipos combinados: los compuestos (CV/CV2/SV) llegan a 200 kV a través del devanado de regulación.",
-      tr: "Ototransformatörler yalnızca kombine tip alır: kompakt tipler (CV/CV2/SV) kademe sargısı boyunca 200 kV ile sınırlı.",
-      id: "Autotransformator hanya memakai tipe kombinasi: tipe kompon (CV/CV2/SV) terbatas 200 kV melintasi belitan tap.",
+      tr: "Ototransformatörler yalnızca kombine tip alır: kompound tipler (CV/CV2/SV) kademe sargısı boyunca 200 kV ile sınırlı.",
+      id: "Autotransformator hanya memakai tipe kombinasi: tipe majemuk (CV/CV2/SV) terbatas 200 kV melintasi belitan tap.",
     }),
   ],
   [
@@ -389,8 +389,8 @@ const RULES: Rule[] = [
     () => ({
       vi: "Cuộn điều áp cấp 220 kV trở lên chỉ dùng kiểu tổ hợp: kiểu phức hợp (CV/CV2/SV) chỉ chịu 200 kV qua cuộn điều chỉnh.",
       es: "Los devanados regulados de clase 220 kV o más solo admiten tipos combinados: los compuestos (CV/CV2/SV) llegan a 200 kV a través del devanado de regulación.",
-      tr: "220 kV sınıfı ve üzeri kademeli sargılar yalnızca kombine tip alır: kompakt tipler (CV/CV2/SV) kademe sargısı boyunca 200 kV ile sınırlı.",
-      id: "Belitan bertap kelas 220 kV ke atas hanya memakai tipe kombinasi: tipe kompon (CV/CV2/SV) terbatas 200 kV melintasi belitan tap.",
+      tr: "220 kV sınıfı ve üzeri kademeli sargılar yalnızca kombine tip alır: kompound tipler (CV/CV2/SV) kademe sargısı boyunca 200 kV ile sınırlı.",
+      id: "Belitan bertap kelas 220 kV ke atas hanya memakai tipe kombinasi: tipe majemuk (CV/CV2/SV) terbatas 200 kV melintasi belitan tap.",
     }),
   ],
   [
@@ -434,8 +434,8 @@ const RULES: Rule[] = [
     () => ({
       vi: "Máy biến áp tự ngẫu: chỉ kiểu tổ hợp (kiểu phức hợp chỉ chịu 200 kV qua cuộn điều chỉnh).",
       es: "Autotransformador: solo tipos combinados (los compuestos llegan a 200 kV a través del devanado de regulación).",
-      tr: "Ototransformatör: yalnızca kombine tip (kompakt tipler kademe sargısı boyunca 200 kV ile sınırlı).",
-      id: "Autotransformator: hanya tipe kombinasi (tipe kompon terbatas 200 kV melintasi belitan tap).",
+      tr: "Ototransformatör: yalnızca kombine tip (kompound tipler kademe sargısı boyunca 200 kV ile sınırlı).",
+      id: "Autotransformator: hanya tipe kombinasi (tipe majemuk terbatas 200 kV melintasi belitan tap).",
     }),
   ],
   [
@@ -499,7 +499,7 @@ const RULES: Rule[] = [
       vi: `Điện áp nấc ${m[1]} V vượt mọi dòng ${sc(m[2]).vi} ở ${m[3]} tiếp điểm (tối đa ${m[4]} V, ${m[5]}).`,
       es: `La tensión de escalón de ${m[1]} V supera todas las familias ${sc(m[2]).es} con ${m[3]} contactos (máx. ${m[4]} V, ${m[5]}).`,
       tr: `${m[1]} V kademe gerilimi, ${m[3]} kontakta tüm ${sc(m[2]).tr} serilerinin üzerinde (en fazla ${m[4]} V, ${m[5]}).`,
-      id: `Tegangan tap ${m[1]} V di atas semua keluarga ${sc(m[2]).id} pada ${m[3]} kontak (maks. ${m[4]} V, ${m[5]}).`,
+      id: `Tegangan per tap ${m[1]} V di atas semua keluarga ${sc(m[2]).id} pada ${m[3]} kontak (maks. ${m[4]} V, ${m[5]}).`,
     }),
   ],
   [
@@ -561,7 +561,7 @@ const RULES: Rule[] = [
   [
     /^Tap position does not fit the transformer kind\.$/,
     () => ({
-      vi: "Vị trí bộ ĐAPT không phù hợp loại máy biến áp.",
+      vi: "Vị trí bộ chuyển nấc không phù hợp loại máy biến áp.",
       es: "La posición del cambiador no corresponde al tipo de transformador.",
       tr: "Kademe değiştirici konumu transformatör tipine uymuyor.",
       id: "Letak OLTC tidak sesuai dengan jenis transformator.",
@@ -588,8 +588,8 @@ const RULES: Rule[] = [
   [
     /^Enter the tapped winding's rated voltage\.$/,
     () => ({
-      vi: "Nhập điện áp định mức của cuộn điều chỉnh.",
-      es: "Introduzca la tensión nominal del devanado de regulación.",
+      vi: "Nhập điện áp định mức của cuộn điều áp.",
+      es: "Introduzca la tensión asignada del devanado regulado.",
       tr: "Kademeli sargının anma gerilimini girin.",
       id: "Masukkan tegangan pengenal belitan yang di-tap.",
     }),
@@ -597,25 +597,25 @@ const RULES: Rule[] = [
   [
     /^A delta winding has no neutral; the tap changer sits at the line end\.$/,
     () => ({
-      vi: "Cuộn tam giác không có trung tính; bộ ĐAPT đặt ở đầu dây.",
+      vi: "Cuộn tam giác không có trung tính; bộ chuyển nấc đặt ở đầu dây.",
       es: "Un devanado en triángulo no tiene neutro; el cambiador va en el extremo de línea.",
       tr: "Üçgen sargıda nötr yoktur; kademe değiştirici hat ucundadır.",
       id: "Belitan delta tidak punya netral; OLTC dipasang di ujung saluran.",
     }),
   ],
   [
-    /^Voltage above the catalogue: the highest switch class is Um 363 kV\.$/,
+    /^Voltage above the catalogue: the highest tap changer class is Um 363 kV\.$/,
     () => ({
-      vi: "Điện áp vượt catalogue: cấp cao nhất của bộ ĐAPT là Um 363 kV.",
+      vi: "Điện áp vượt catalogue: cấp cao nhất của bộ chuyển nấc là Um 363 kV.",
       es: "Tensión por encima del catálogo: la clase más alta del cambiador es Um 363 kV.",
       tr: "Gerilim katalog üstünde: en yüksek kademe değiştirici sınıfı Um 363 kV.",
       id: "Tegangan di atas katalog: kelas OLTC tertinggi Um 363 kV.",
     }),
   ],
   [
-    /^Autotransformer HV class Um ([\d.]+) kV is above the catalogue \(top 363 kV\)\. Give the switch's insulation to earth from the OS \(CLI: --earth-um\): ([\d., ]+) kV\.$/,
+    /^Autotransformer HV class Um ([\d.]+) kV is above the catalogue \(top 363 kV\)\. Give the tap changer's insulation to earth from the OS \(CLI: --earth-um\): ([\d., ]+) kV\.$/,
     (m) => ({
-      vi: `Cấp cao áp của biến áp tự ngẫu Um ${m[1]} kV vượt catalogue (cao nhất 363 kV). Nhập cách điện với đất của bộ ĐAPT theo OS: ${m[2]} kV.`,
+      vi: `Cấp cao áp của biến áp tự ngẫu Um ${m[1]} kV vượt catalogue (cao nhất 363 kV). Nhập cách điện với đất của bộ chuyển nấc theo OS: ${m[2]} kV.`,
       es: `La clase de AT del autotransformador, Um ${m[1]} kV, supera el catálogo (máx. 363 kV). Indique el aislamiento a tierra del cambiador según la OS: ${m[2]} kV.`,
       tr: `Ototransformatör YG sınıfı Um ${m[1]} kV katalog üstünde (en yüksek 363 kV). Kademe değiştiricinin toprağa yalıtımını OS'den girin: ${m[2]} kV.`,
       id: `Kelas TT autotransformator Um ${m[1]} kV di atas katalog (maks. 363 kV). Masukkan isolasi ke tanah OLTC dari OS: ${m[2]} kV.`,

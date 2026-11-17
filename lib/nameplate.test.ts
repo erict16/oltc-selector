@@ -465,6 +465,7 @@ describe("off-circuit-only lines (2026-11-07 field test)", () => {
   it("reads DETC, off-circuit, sin carga, 无载 and the like as off-circuit duty", () => {
     expect(off("1000 kVA 10±2x2.5%/0.4 kV Dyn11, off-circuit tap changer (DETC)")).toBe(true);
     expect(off("2500 kVA 22±2x2.5%/0.4 kV Dyn11, conmutador sin carga")).toBe(true);
+    expect(off("2500 kVA 22±2x2.5%/0.4 kV Dyn11, cambiador sin tensión")).toBe(true);
     expect(off("2000 kVA 35±2x2.5%/10.5 kV Yd11 无载调压")).toBe(true);
     expect(off("1600 kVA 20±2x2.5%/0.4 kV Dyn5, off-load tap changer")).toBe(true);
     expect(off("1600 kVA 20±2x2.5%/0.4 kV Dyn5, yüksüz kademe değiştirici")).toBe(true);

@@ -729,8 +729,8 @@ Flags:
                      combined-only, 330 kV grade) and Um if omitted.
   --kind two|auto    Transformer kind (--auto = --kind auto). Default two-winding.
   --tap P            Where the OLTC sits: neutral|line (two-winding),
-                     junction|mv-line (autotransformer, series/common junction
-                     or MV line lead). Default neutral; junction with
+                     junction|mv-line (autotransformer: series winding, MV
+                     end, or MV line after the junction). Default neutral; junction with
                      --kind auto. With --mva it replaces --conn.
   --winding star|delta  Tapped winding connection (two-winding). Sets the current
                      formula: star I = S/(√3U), delta I = S/(3U).
@@ -1135,7 +1135,7 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
   const tapZh: Record<TapPoint, string> = {
     neutral: "中性点",
     line_end: "线端",
-    auto_junction: "串联/公共绕组连接点",
+    auto_junction: "串联绕组中压端",
     auto_mv_line: "中压出线",
   };
   // 2026-11-04 R4: a delta the --line reader only guessed does not make its line end stated.
@@ -1316,8 +1316,8 @@ const ASSUMPTION_EN: Array<[RegExp | string, string]> = [
   [/^无载开关取 ([\d.]+) kV 绕组的范围（(默认，)?招标行有两个调压范围）$/, "off-circuit range from the $1 kV winding (two ranges on the line)"],
   [/^对地 Um ([\d.]+)（招标行中性点 BIL ([\d.]+) kV）$/, "Um to earth $1 (line neutral BIL $2 kV)"],
   ["Ust 未指定（级电压、级容量未校验）", "Ust not stated (step voltage and capacity not checked)"],
-  ["串联/公共绕组连接点", "series/common junction"],
-  ["中压出线", "MV line lead"],
+  ["串联绕组中压端", "series winding, MV end"],
+  ["中压出线", "MV line"],
   ["开关在中性点", "tap at neutral"],
   ["开关在线端", "tap at line end"],
   ["开关在", "tap at "],
