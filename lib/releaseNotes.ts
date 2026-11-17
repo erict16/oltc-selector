@@ -103,7 +103,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "全新页面，按开关位置选型",
+      title: "页面重新设计，按变压器种类和开关位置选型",
       groups: [
         { kind: "new", items: ["可以选择变压器种类（双绕组或自耦变）和开关位置（中性点、线端、串联/公共绕组连接点、中压出线），电流、级电压和开关绝缘按位置计算。"] },
         {
@@ -119,10 +119,10 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "结果卡会提醒哪些要工程确认",
+      title: "页面重新设计，结果卡提醒哪些要工程确认",
       groups: [
         { kind: "fix", items: ["绝缘超出所有选择器等级时，不再给出 DE 型号，而是提示联系工程。", "调节比例和安全系数可以输入小数。", "去掉了「不限」连接方式，免得级电压被少算。"] },
-        { kind: "imp", items: ["结果卡会标出要工程确认的情况，比如没给级电压或超出额定电流。"] },
+        { kind: "imp", items: ["页面重新设计：结果放在左侧的大面板，表单在右侧。", "结果卡会标出要工程确认的情况，比如没给级电压或超出额定电流。"] },
       ],
     },
     {
@@ -346,7 +346,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "A new page: pick by transformer kind and tap position",
+      title: "Redesigned page: pick by transformer kind and tap position",
       groups: [
         { kind: "new", items: ["Pick the transformer kind (two-winding or autotransformer) and where the tap changer sits (neutral, line end, series–common junction, MV line lead); current, step voltage and switch insulation follow from that."] },
         {
@@ -362,10 +362,10 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "The result card says what engineering must check",
+      title: "Redesigned page: the result card says what engineering must check",
       groups: [
         { kind: "fix", items: ["When the insulation is above every selector grade, the page asks you to contact engineering instead of giving a DE type.", "Step percent and safety factor accept decimals.", "The Any connection is gone, so step voltage is not counted too low."] },
-        { kind: "imp", items: ["The result card marks what engineering must confirm, such as a missing step voltage or a duty above the rating."] },
+        { kind: "imp", items: ["Page redesigned: the result sits in a large panel on the left, the form on the right.", "The result card marks what engineering must confirm, such as a missing step voltage or a duty above the rating."] },
       ],
     },
     {
@@ -593,7 +593,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "Trang mới: chọn theo loại máy và vị trí bộ chuyển nấc",
+      title: "Thiết kế lại trang: chọn theo loại máy và vị trí bộ chuyển nấc",
       groups: [
         { kind: "new", items: ["Chọn loại máy biến áp (hai cuộn dây hoặc tự ngẫu) và vị trí bộ ĐAPT (trung tính, đầu dây, điểm nối nối tiếp – chung, đầu ra trung áp); dòng điện, điện áp nấc và cách điện được tính theo vị trí đó."] },
         {
@@ -609,10 +609,10 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "Thẻ kết quả nêu những gì kỹ thuật phải kiểm tra",
+      title: "Thiết kế lại trang: thẻ kết quả nêu những gì kỹ thuật phải kiểm tra",
       groups: [
         { kind: "fix", items: ["Khi cách điện cao hơn mọi cấp bộ chọn, trang yêu cầu liên hệ kỹ thuật thay vì đưa ra kiểu DE.", "Tỷ lệ cấp và hệ số an toàn nhận số thập phân.", "Đã bỏ lựa chọn Bất kỳ để điện áp cấp không bị tính thiếu."] },
-        { kind: "imp", items: ["Thẻ kết quả đánh dấu những gì kỹ thuật phải xác nhận, ví dụ thiếu điện áp cấp hoặc tải vượt định mức."] },
+        { kind: "imp", items: ["Thiết kế lại trang: kết quả nằm trong khung lớn bên trái, biểu mẫu bên phải.", "Thẻ kết quả đánh dấu những gì kỹ thuật phải xác nhận, ví dụ thiếu điện áp cấp hoặc tải vượt định mức."] },
       ],
     },
     {
@@ -838,7 +838,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "Página nueva: elija por tipo de transformador y posición",
+      title: "Página rediseñada: elija por tipo de transformador y posición",
       groups: [
         { kind: "new", items: ["Elija el tipo de transformador (dos devanados o autotransformador) y dónde va el cambiador (neutro, extremo de línea, unión serie–común, salida de MT); la corriente, la tensión de escalón y el aislamiento salen de esa posición."] },
         {
@@ -854,10 +854,10 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "La tarjeta dice qué debe revisar ingeniería",
+      title: "Página rediseñada: la tarjeta dice qué debe revisar ingeniería",
       groups: [
         { kind: "fix", items: ["Cuando el aislamiento supera todos los grados del selector, la página pide contactar con ingeniería en vez de dar un tipo DE.", "El porcentaje de escalón y el factor de seguridad aceptan decimales.", "Se quita la conexión Cualquiera para no contar de menos la tensión de escalón."] },
-        { kind: "imp", items: ["La tarjeta marca lo que ingeniería debe confirmar, como una tensión de escalón que falta o una carga por encima de la capacidad."] },
+        { kind: "imp", items: ["Página rediseñada: el resultado ocupa un panel grande a la izquierda y el formulario queda a la derecha.", "La tarjeta marca lo que ingeniería debe confirmar, como una tensión de escalón que falta o una carga por encima de la capacidad."] },
       ],
     },
     {
@@ -1085,7 +1085,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "Yeni sayfa: trafo tipine ve kademe konumuna göre seçim",
+      title: "Yeniden tasarlanan sayfa: trafo tipine ve kademe konumuna göre seçim",
       groups: [
         { kind: "new", items: ["Transformatör tipini (iki sargılı veya ototransformatör) ve kademe değiştiricinin yerini (nötr, hat ucu, seri–ortak bağlantı noktası, OG çıkışı) seçin; akım, kademe gerilimi ve yalıtım bu konumdan hesaplanır."] },
         {
@@ -1101,10 +1101,10 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "Sonuç kartı mühendisliğin neyi kontrol etmesi gerektiğini söyler",
+      title: "Yeniden tasarlanan sayfa: sonuç kartı mühendisliğin neyi kontrol edeceğini söyler",
       groups: [
         { kind: "fix", items: ["Yalıtım tüm seçici kademelerini aşınca sayfa DE tipi vermek yerine mühendislikle iletişime geçmenizi ister.", "Kademe yüzdesi ve emniyet katsayısı ondalık kabul eder.", "Herhangi bağlantısı kaldırıldı, böylece kademe gerilimi eksik sayılmaz."] },
-        { kind: "imp", items: ["Sonuç kartı mühendisliğin onaylaması gerekenleri işaretler, örneğin eksik kademe gerilimi ya da değerin üstünde yük."] },
+        { kind: "imp", items: ["Sayfa yeniden tasarlandı: sonuç solda büyük bir panelde, form sağda.", "Sonuç kartı mühendisliğin onaylaması gerekenleri işaretler, örneğin eksik kademe gerilimi ya da değerin üstünde yük."] },
       ],
     },
     {
@@ -1330,7 +1330,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "Halaman baru: pilih menurut jenis trafo dan posisi tap",
+      title: "Halaman didesain ulang: pilih menurut jenis trafo dan letak tap",
       groups: [
         { kind: "new", items: ["Pilih jenis transformator (dua belitan atau autotransformator) dan letak OLTC (netral, ujung saluran, sambungan seri – bersama, saluran TM); arus, tegangan tap dan isolasi dihitung dari letak itu."] },
         {
@@ -1346,10 +1346,10 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "Kartu hasil menyebut yang harus dicek engineering",
+      title: "Halaman didesain ulang: kartu hasil menyebut yang harus dicek engineering",
       groups: [
         { kind: "fix", items: ["Bila isolasi melebihi semua tingkat selektor, halaman meminta Anda menghubungi engineering alih-alih memberi tipe DE.", "Persentase tahap dan faktor keamanan menerima desimal.", "Pilihan Bebas dihapus agar tegangan tahap tidak terhitung terlalu rendah."] },
-        { kind: "imp", items: ["Kartu hasil menandai yang harus dikonfirmasi engineering, misalnya tegangan tahap yang belum diisi atau beban di atas rating."] },
+        { kind: "imp", items: ["Halaman didesain ulang: hasil ada di panel besar sebelah kiri, formulir di sebelah kanan.", "Kartu hasil menandai yang harus dikonfirmasi engineering, misalnya tegangan tahap yang belum diisi atau beban di atas rating."] },
       ],
     },
     {
