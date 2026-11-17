@@ -82,6 +82,8 @@ describe("release notes", () => {
   it("prints 综合保险 on the insurance row, not only on the primary card", () => {
     const src = selectorSource();
     expect(src).toContain("insuranceModel");
-    expect(src).toMatch(/insuranceId === r\.model[\s\S]{0,320}allRound/);
+    // 2026-11-17: a row carries 安全选项 when it has margin on every load,
+    // so the swapped-out first type is tagged too.
+    expect(src).toMatch(/roomy\.has\(r\.model\)[\s\S]{0,2000}"allRound"/);
   });
 });

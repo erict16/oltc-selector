@@ -11,7 +11,8 @@ import { SwitchSection } from "@/components/selector/SwitchSection";
 import { TransformerSection } from "@/components/selector/TransformerSection";
 import { useFormActions } from "@/components/selector/useFormActions";
 import { useFormUrl } from "@/components/selector/useFormUrl";
-import { useSelection } from "@/components/selector/useSelection";
+import { useSelection, type Choice } from "@/components/selector/useSelection";
+import { useStickyBoth } from "@/components/selector/useStickyBoth";
 import { APP_VERSION } from "@/lib/appVersion";
 import { copyText } from "@/lib/clipboard";
 import { INITIAL_FORM, type FormState } from "@/lib/formState";
@@ -22,7 +23,13 @@ export function SelectorApp() {
   // First paint is lib/formState INITIAL_FORM, so the tests start where the page does.
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const actions = useFormActions(setForm);
-  const sel = useSelection(form, lang);
+  /** A type picked from 其他可选; it lapses when the inputs give another first type. */
+  const [choice, setChoice] = useState<Choice | null>(null);
+  const sel = useSelection(form, lang, choice);
+  const pickModel = (model: string) => {
+    if (!sel.firstModel) return;
+    setChoice(model === sel.firstModel ? null : { first: sel.firstModel, model });
+  };
 
   /** The tender line a shared link was filled from; it stays in the link. */
   const [readText, setReadText] = useState("");
@@ -60,8 +67,19 @@ export function SelectorApp() {
     return () => keep.disconnect();
   }, [lang]);
 
+  /** The header takes a hairline shadow once the page moves under it. */
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 4);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
+
   const resultPaneRef = useRef<HTMLElement | null>(null);
   const resultCardRef = useRef<HTMLElement | null>(null);
+  // 72 px: under the 56 px header with 16 px air; 24 px under the card's foot.
+  useStickyBoth(resultCardRef, { head: 72, foot: 24, media: "(min-width: 1024px)" });
   /** Phones: the dock hides while the full result card is on screen. */
   const [resultInView, setResultInView] = useState(false);
   useEffect(() => {
@@ -87,12 +105,14 @@ export function SelectorApp() {
 
   return (
     <div className="page flex w-full min-w-0 flex-1 flex-col">
-      <header className="topbar sticky top-0 z-30">
-        <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2.5 px-4 sm:gap-3 sm:px-8">
-          <div className="flex min-w-0 items-baseline gap-2 leading-tight">
-            <h1 className="truncate text-[0.9375rem] font-semibold whitespace-nowrap text-[var(--color-ink)]">
-              {t(lang, "title")}
-            </h1>
+      <header className="topbar sticky top-0 z-30" data-scrolled={scrolled || undefined}>
+        <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-3 px-4 sm:px-8">
+          <div className="flex min-w-0 items-center gap-2.5">
+            {/* The ⚡ of the tab icon (2026-11-17 Eric: the emoji, not a drawn bolt). */}
+            <span className="brand-mark" aria-hidden>
+              ⚡
+            </span>
+            <h1 className="brand-name truncate">{t(lang, "title")}</h1>
             <Link href="/changelog/" className="topbar-version num">
               v{APP_VERSION}
             </Link>
@@ -106,6 +126,7 @@ export function SelectorApp() {
               lang={lang}
               onChange={setAppLang}
               ariaLabel={t(lang, "langAria")}
+              showLabel
             />
           </div>
         </div>
@@ -140,6 +161,7 @@ export function SelectorApp() {
             sel={sel}
             cardRef={resultCardRef}
             onTap={actions.pickTap}
+            onPickModel={pickModel}
             copiedModel={copiedModel}
             copyModel={copyModel}
           />
