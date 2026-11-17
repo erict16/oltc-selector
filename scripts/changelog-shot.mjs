@@ -1,4 +1,5 @@
-// Screenshot one page for the release notes, with headless Edge over CDP.
+// Screenshot one page for the release notes, with headless Edge over CDP
+// (or any Chromium: set SHOT_BROWSER to its binary, e.g. on a Mac).
 // Run the version you want on its own port first (a git worktree of its
 // tag, sharing this repo's node_modules), then:
 //   node scripts/changelog-shot.mjs http://localhost:3101/ shot.png ["js to run first"]
@@ -13,7 +14,8 @@ import { join } from "node:path";
 
 const [url, out, js] = process.argv.slice(2);
 const port = 9300 + Math.floor(Math.random() * 500);
-const edge = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
+const edge =
+  process.env.SHOT_BROWSER ?? "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
 const prof = mkdtempSync(join(tmpdir(), "edgeshot-"));
 const proc = spawn(edge, [
   "--headless=new", "--disable-gpu", "--hide-scrollbars", "--lang=zh-CN",

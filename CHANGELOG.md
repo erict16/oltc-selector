@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.5.0 (2026-11-18)
+
+Ships the two page sections below (after 2.4.1, and 2026-11-17) as a version, with:
+
+- Tap-changer positions and terms use the standard names in all six languages: the autotransformer tap points are Series, MV end (串联绕组中压端) and MV line (中压出线); the winding's voltage is its rated voltage. The CLI output follows.
+- Fewer autotransformer cautions: "combined only" and the 220 kV-class line are gone (the engine refuses a compound type with its reason); the change-over / tie-in resistor caution shows only for W and G regulation.
+- Spanish "cambiador sin tensión" in a nameplate reads as off-circuit.
+- Release notes: a v2.5.0 entry; v2.0.0, v1.3.0 and v2.3.0 say the page was redesigned; v2.3.0 and v2.5.0 have screenshots; past notes use the standard names.
+- `scripts/changelog-shot.mjs` takes `SHOT_BROWSER` (any Chromium binary), so it runs on a Mac.
+
 ## Page, 2026-11-17
 
 No new version: the CLI pack is unchanged.
