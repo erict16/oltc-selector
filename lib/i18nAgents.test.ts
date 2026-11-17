@@ -14,7 +14,7 @@ describe("agent guide copy", () => {
       expect(c.s2q.length).toBeGreaterThan(10);
       expect(c.s3note.length).toBeGreaterThan(4);
       expect(c.npm.length).toBeGreaterThan(2);
-      for (const k of ["secAi", "secEx", "secFlags", "runT", "needNode", "nodeLink", "readOut", "moreT", "outT"] as const) {
+      for (const k of ["secAi", "secEx", "secFlags", "runT", "readOut", "moreT", "outT"] as const) {
         expect(c[k].length, `${id} ${k}`).toBeGreaterThan(1);
       }
     }

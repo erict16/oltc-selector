@@ -17,7 +17,7 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 Prefer `24/outline` for chrome; keep stroke consistent with surrounding muted ink.
 
-One exception: the header mark and the tab icon are one drawn yellow bolt, `components/BoltMark.tsx` and `app/icon.svg` (**2026-11-17 Eric**: "你自己画一个吧，和苹果的闪电稍微像一点就行"; the ⚡ emoji showed Microsoft's bolt on Windows, and Apple's emoji art cannot be used). Keep the two the same shape.
+One exception: the tab icon is a drawn yellow bolt, `app/icon.svg` (**2026-11-17 Eric**: "你自己画一个吧，和苹果的闪电稍微像一点就行"; the ⚡ emoji showed Microsoft's bolt on Windows, and Apple's emoji art cannot be used). **2026-11-17 Eric: no bolt in the page header** — the header starts with the name; the bolt is the tab icon only.
 
 ## OCTC wiring
 
@@ -29,7 +29,7 @@ Result card **开关结构** (not 工作位置): CV/CV2/SV/CVT/CZ → 复合式;
 
 CLI: `npm run oltc -- <args>` in this repo (published pack: `npx -y oltc-selector@2.4.1`). Same engine as the web app. `--kind auto --tap junction --hv 225 --mv 115` for autotransformers; the tap point, not a typed Y/D, sets current, Ust and Um (`lib/transformer.ts`). No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only). Do not commit list RMB, coefficients, or the 2025 xlsx.
 
-No agent dock on `/` (removed 2026-11-13); the header link "CLI" goes to `/agents/` (the CLI page: AI assistant, command line, examples, flags; redesigned 2026-11-17). Its examples are real CLI runs: re-run them when the engine changes a type. Agent skill is a separate private repo (not in this tree). Selection only; after `oltc`, check brochure existence and explain why the type is correct.
+No agent dock on `/` (removed 2026-11-13); the header link "CLI" goes to `/agents/` (the CLI page: a two-step guide — install, try it — then examples / flags / AI assistant as tabs; no Node.js line, the pack is on npm). `/agents/` and `/changelog/` share one white content-page style (`.doc-*` in `globals.css`, modelled on Linear / Cursor / Vercel): **2026-11-17 Eric: no Notion style**, no toggles or Notion tag colours; release notes are all open with version and month in a sticky left column. Its examples are real CLI runs: re-run them when the engine changes a type. Agent skill is a separate private repo (not in this tree). Selection only; after `oltc`, check brochure existence and explain why the type is correct.
 
 ## Tap codes
 

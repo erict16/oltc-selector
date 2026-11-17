@@ -10,8 +10,6 @@ export type AgentGuideCopy = {
   secEx: string;
   secFlags: string;
   runT: string;
-  needNode: string;
-  nodeLink: string;
   readOut: string;
   moreT: string;
   s1t: string;
@@ -32,6 +30,8 @@ export type AgentGuideCopy = {
   qDry: string;
   exShzv: string;
   qShzv: string;
+  qAuto: string;
+  qOctc: string;
   install: string;
   outT: string;
   copy: string;
@@ -41,13 +41,11 @@ export type AgentGuideCopy = {
 
 const zh: AgentGuideCopy = {
   title: "命令行选型",
-  lead: "装好以后，一行命令就出型号。",
+  lead: "把变压器参数发给 AI 助手，它用这个命令行帮你选型。",
   secAi: "AI 助手",
   secEx: "例子",
   secFlags: "参数",
   runT: "试一下",
-  needNode: "先装好 Node.js 20 或更高版本。",
-  nodeLink: "下载 Node.js",
   readOut: "第一行是型号。后面几行是理由、要核对的事和其他可选型号。",
   moreT: "更多",
   s1t: "把这句话发给 AI 助手",
@@ -69,6 +67,8 @@ const zh: AgentGuideCopy = {
   qDry: "帮我给这台干式变压器选个型：33/0.4 kV 站用变，干式，9 档线性 ±4×2.5%，真空电动有载。",
   exShzv: "3xSHZV",
   qShzv: "帮我选个有载开关：350 MVA，132±10×1.25%/11-11 kV，YNd11d11，高压侧中性点调压，最大电流 1750 A，开关对地 350/140。",
+  qAuto: "帮我给这台自耦变选个型：125MVA 225±8x1,25%/115/35kV YNa0d11。",
+  qOctc: "帮我选个无载开关：800 A，Um 72.5 kV，D 接，正反调，触头 6×5。",
   install: "安装",
   outT: "输出",
   copy: "复制",
@@ -78,13 +78,11 @@ const zh: AgentGuideCopy = {
 
 const en: AgentGuideCopy = {
   title: "Pick the type from the command line",
-  lead: "Install it once. Then one command prints the type.",
+  lead: "Send the transformer data to your AI assistant. It runs this command line and gives you the type.",
   secAi: "AI assistant",
   secEx: "Examples",
   secFlags: "Flags",
   runT: "Try it",
-  needNode: "You need Node.js 20 or later.",
-  nodeLink: "Get Node.js",
   readOut: "The first line is the type. The lines after it give the reason, what to check, and other types that fit.",
   moreT: "More",
   s1t: "Send this line to your AI assistant",
@@ -106,6 +104,8 @@ const en: AgentGuideCopy = {
   qDry: "Pick an OLTC for this dry-type transformer: 33/0.4 kV station, dry, 9 positions linear ±4×2.5%, vacuum motorised.",
   exShzv: "3xSHZV",
   qShzv: "Pick an on-load tap-changer for me: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, taps at the HV neutral, max 1750 A, OLTC earth 350/140.",
+  qAuto: "Pick the tap changer for this autotransformer: 125MVA 225±8x1,25%/115/35kV YNa0d11.",
+  qOctc: "Pick an off-circuit tap changer: 800 A, Um 72.5 kV, delta, reversing (II), contacts 6×5.",
   install: "Install",
   outT: "Output",
   copy: "Copy",
@@ -115,13 +115,11 @@ const en: AgentGuideCopy = {
 
 const vi: AgentGuideCopy = {
   title: "Chọn kiểu bằng dòng lệnh",
-  lead: "Cài một lần. Sau đó một lệnh in ra kiểu.",
+  lead: "Gửi thông số máy biến áp cho trợ lý AI. Trợ lý chạy dòng lệnh này và trả về kiểu.",
   secAi: "Trợ lý AI",
   secEx: "Ví dụ",
   secFlags: "Tham số",
   runT: "Chạy thử",
-  needNode: "Cần Node.js 20 trở lên.",
-  nodeLink: "Tải Node.js",
   readOut: "Dòng đầu là kiểu. Các dòng sau là lý do, điều cần kiểm tra và các kiểu khác cũng phù hợp.",
   moreT: "Thêm",
   s1t: "Gửi câu này cho trợ lý AI",
@@ -143,6 +141,8 @@ const vi: AgentGuideCopy = {
   qDry: "Chọn giúp tôi cho máy biến áp khô: 33/0.4 kV máy trạm, khô, 9 nấc tuyến tính ±4×2.5%, chân không chạy điện.",
   exShzv: "3xSHZV",
   qShzv: "Chọn giúp tôi bộ chuyển nấc có tải: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, điều áp ở trung tính cao áp, dòng max 1750 A, cách điện OLTC 350/140.",
+  qAuto: "Chọn bộ chuyển nấc cho máy biến áp tự ngẫu này: 125MVA 225±8x1,25%/115/35kV YNa0d11.",
+  qOctc: "Chọn bộ chuyển nấc không tải: 800 A, Um 72,5 kV, đấu tam giác, đảo chiều (II), tiếp điểm 6×5.",
   install: "Cài đặt",
   outT: "Đầu ra",
   copy: "Chép",
@@ -152,13 +152,11 @@ const vi: AgentGuideCopy = {
 
 const es: AgentGuideCopy = {
   title: "Elija el tipo desde la línea de comandos",
-  lead: "Instálelo una vez. Luego un comando imprime el tipo.",
+  lead: "Envíe los datos del transformador a su asistente de IA. Él ejecuta esta línea de comandos y le da el tipo.",
   secAi: "Asistente de IA",
   secEx: "Ejemplos",
   secFlags: "Opciones",
   runT: "Pruébelo",
-  needNode: "Necesita Node.js 20 o posterior.",
-  nodeLink: "Descargar Node.js",
   readOut: "La primera línea es el tipo. Las siguientes dan la razón, lo que debe revisar y otros tipos que sirven.",
   moreT: "Más",
   s1t: "Envíe esta línea a su asistente de IA",
@@ -180,6 +178,8 @@ const es: AgentGuideCopy = {
   qDry: "Elíjame un cambiador para este transformador seco: estación 33/0.4 kV, seco, 9 posiciones lineales ±4×2.5%, motorizado de vacío.",
   exShzv: "3xSHZV",
   qShzv: "Elíjame un cambiador en carga: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, regulación en el neutro de AT, 1750 A máx., aislamiento OLTC 350/140.",
+  qAuto: "Elija el cambiador para este autotransformador: 125MVA 225±8x1,25%/115/35kV YNa0d11.",
+  qOctc: "Elija un cambiador sin carga: 800 A, Um 72,5 kV, triángulo, inversor (II), contactos 6×5.",
   install: "Instalar",
   outT: "Salida",
   copy: "Copiar",
@@ -189,13 +189,11 @@ const es: AgentGuideCopy = {
 
 const tr: AgentGuideCopy = {
   title: "Tipi komut satırından seçin",
-  lead: "Bir kez kurun. Sonra tek komut tipi yazdırır.",
+  lead: "Transformatör bilgilerini AI asistanınıza gönderin. Asistan bu komut satırını çalıştırır ve tipi verir.",
   secAi: "AI asistan",
   secEx: "Örnekler",
   secFlags: "Parametreler",
   runT: "Deneyin",
-  needNode: "Node.js 20 veya üstü gerekir.",
-  nodeLink: "Node.js indir",
   readOut: "İlk satır tiptir. Sonraki satırlar gerekçeyi, kontrol edilecekleri ve uyan diğer tipleri verir.",
   moreT: "Daha fazla",
   s1t: "Bu satırı AI asistanınıza gönderin",
@@ -217,6 +215,8 @@ const tr: AgentGuideCopy = {
   qDry: "Kuru tipi trafo için seç: 33/0.4 kV istasyon, kuru, 9 kademe lineer ±4×2.5%, vakum motorlu.",
   exShzv: "3xSHZV",
   qShzv: "Bana yük altında kademe değiştirici seç: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, YG yıldız noktasından ayar, max 1750 A, OLTC toprağı 350/140.",
+  qAuto: "Bu ototransformatör için kademe değiştiriciyi seçin: 125MVA 225±8x1,25%/115/35kV YNa0d11.",
+  qOctc: "Yüksüz bir kademe değiştirici seçin: 800 A, Um 72,5 kV, üçgen, ters çevirmeli (II), kontak 6×5.",
   install: "Kurulum",
   outT: "Çıktı",
   copy: "Kopyala",
@@ -226,13 +226,11 @@ const tr: AgentGuideCopy = {
 
 const idn: AgentGuideCopy = {
   title: "Pilih tipe dari command line",
-  lead: "Pasang sekali. Setelah itu satu perintah mencetak tipenya.",
+  lead: "Kirim data trafo ke asisten AI Anda. Asisten menjalankan command line ini dan memberi tipenya.",
   secAi: "Asisten AI",
   secEx: "Contoh",
   secFlags: "Parameter",
   runT: "Coba",
-  needNode: "Perlu Node.js 20 atau lebih baru.",
-  nodeLink: "Unduh Node.js",
   readOut: "Baris pertama adalah tipenya. Baris berikutnya memberi alasan, hal yang perlu dicek, dan tipe lain yang cocok.",
   moreT: "Lainnya",
   s1t: "Kirim kalimat ini ke asisten AI Anda",
@@ -254,6 +252,8 @@ const idn: AgentGuideCopy = {
   qDry: "Pilihkan OLTC untuk trafo kering ini: trafo pemakaian sendiri 33/0.4 kV, kering, 9 posisi linear ±4×2.5%, vakum bermotor.",
   exShzv: "3xSHZV",
   qShzv: "Pilihkan OLTC berbeban: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, pengaturan di titik netral sisi TT, arus maks. 1750 A, isolasi OLTC ke tanah 350/140.",
+  qAuto: "Pilihkan tap changer untuk autotrafo ini: 125MVA 225±8x1,25%/115/35kV YNa0d11.",
+  qOctc: "Pilihkan tap changer tanpa beban: 800 A, Um 72,5 kV, delta, pembalik (II), kontak 6×5.",
   install: "Pasang",
   outT: "Keluaran",
   copy: "Salin",

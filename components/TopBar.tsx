@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BoltMark } from "@/components/BoltMark";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { APP_VERSION } from "@/lib/appVersion";
 import { setAppLang, t, type Lang } from "@/lib/i18n";
 
-/** The header of the selector and the CLI page: mark, name, version, the
+/** The header of every page: name, version, the
  *  two other pages, the language menu. Away from `/` the name links home. */
 export function TopBar({
   lang,
@@ -27,7 +26,6 @@ export function TopBar({
 
   const brand = (
     <>
-      <BoltMark className="brand-mark" />
       {current === "home" ? (
         <h1 className="brand-name truncate">{t(lang, "title")}</h1>
       ) : (

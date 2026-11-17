@@ -1,8 +1,6 @@
 "use client";
 
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { BoltMark } from "@/components/BoltMark";
 import { TopBar } from "@/components/TopBar";
 import { useAppLang } from "@/components/LangProvider";
 import { APP_VERSION } from "@/lib/appVersion";
@@ -15,7 +13,7 @@ const KIND_KEY = {
   imp: "kindImp",
 } as const satisfies Record<NoteKind, string>;
 
-/** Tag order inside a release head: what is new first. */
+/** Group order inside a release: what is new first. */
 const KIND_ORDER: NoteKind[] = ["new", "imp", "fix"];
 
 function anchor(version: string) {
@@ -35,42 +33,41 @@ function monthName(ym: string, lang: Lang) {
   }
 }
 
-/** Release notes as a Notion page (2026-11-17 Eric): a title, the months as
- *  headings, one toggle per version with coloured kind tags. The newest
- *  version starts open. */
+/** "命令行：…" / "CLI: …" → the area in bold, then the sentence. */
+function splitArea(line: string): [string | null, string] {
+  const m = /^([^：:。.]{1,16})(：|: )(.+)$/s.exec(line);
+  return m ? [m[1], m[3]] : [null, line];
+}
+
+/** CLI flags in a note (--json, --flag=value) set in mono. */
+function withCode(text: string) {
+  const parts = text.split(/(--[a-z][a-z0-9-]*(?:=[^\s，。；、,;)）]+)?)/);
+  return parts.map((p, i) => (i % 2 ? <code key={i}>{p}</code> : p));
+}
+
+/** Release notes in the style of Linear / Cursor (2026-11-17 Eric: "get rid
+ *  of Notion style"): every release open, version and month in a sticky
+ *  left column, the notes grouped by kind on the right. */
 export function ChangelogView() {
   const lang = useAppLang();
   const releases = RELEASES[lang];
-  const months: { ym: string; rels: Release[] }[] = [];
-  for (const rel of releases) {
-    const last = months[months.length - 1];
-    if (last && last.ym === rel.date) last.rels.push(rel);
-    else months.push({ ym: rel.date, rels: [rel] });
-  }
 
   return (
-    <div className="page notion-page flex w-full min-w-0 flex-1 flex-col">
+    <div className="page doc-page flex w-full min-w-0 flex-1 flex-col">
       <TopBar lang={lang} current="changelog" />
 
-      <main lang={lang} className="notion mx-auto w-full max-w-[45rem] px-4 sm:px-6">
-        <BoltMark className="notion-icon" />
-        <h1 className="notion-title">{t(lang, "changelogTitle")}</h1>
+      <main lang={lang} className="doc mx-auto w-full">
+        <header className="doc-hero">
+          <h1 className="doc-title">{t(lang, "changelogTitle")}</h1>
+        </header>
 
-        {months.map(({ ym, rels }) => (
-          <section key={ym} className="notion-month" aria-label={monthName(ym, lang)}>
-            <h2 className="notion-h2">{monthName(ym, lang)}</h2>
-            {rels.map((rel) => (
-              <ReleaseToggle
-                key={rel.version}
-                rel={rel}
-                lang={lang}
-                open={rel === releases[0]}
-              />
-            ))}
-          </section>
-        ))}
+        <div className="rel-list">
+          {releases.map((rel) => (
+            <ReleaseEntry key={rel.version} rel={rel} lang={lang} />
+          ))}
+        </div>
 
-        <p className="notion-born">{t(lang, "changelogBorn")}</p>
+        <p className="rel-born">{t(lang, "changelogBorn")}</p>
       </main>
 
       <footer className="page-foot">
@@ -87,37 +84,38 @@ export function ChangelogView() {
   );
 }
 
-function ReleaseToggle({ rel, lang, open }: { rel: Release; lang: Lang; open: boolean }) {
-  const kinds = KIND_ORDER.filter((k) => rel.groups.some((g) => g.kind === k));
+function ReleaseEntry({ rel, lang }: { rel: Release; lang: Lang }) {
   const groups = KIND_ORDER.flatMap((k) => rel.groups.filter((g) => g.kind === k));
+  const id = anchor(rel.version);
   return (
-    <details id={anchor(rel.version)} className="notion-toggle" open={open}>
-      <summary>
-        <ChevronRightIcon className="notion-chev h-4 w-4 shrink-0" aria-hidden />
-        <span className="notion-ver">v{rel.version}</span>
+    <article id={id} className="rel" aria-labelledby={`${id}-h`}>
+      <div className="rel-meta">
+        <h2 id={`${id}-h`} className="rel-ver">
+          <a href={`#${id}`}>v{rel.version}</a>
+        </h2>
+        <p className="rel-date">{monthName(rel.date, lang)}</p>
         {rel.version === APP_VERSION ? (
-          <span className="notion-tag notion-tag-gray">{t(lang, "changelogNow")}</span>
+          <span className="rel-now">{t(lang, "changelogNow")}</span>
         ) : null}
-        <span className="notion-tags">
-          {kinds.map((k) => (
-            <span key={k} className={`notion-tag notion-tag-${k}`}>
-              {t(lang, KIND_KEY[k])}
-            </span>
-          ))}
-        </span>
-      </summary>
-      <div className="notion-toggle-body">
+      </div>
+      <div className="rel-body">
         {groups.map((g) => (
-          <div key={g.kind} className="notion-group">
-            <span className={`notion-tag notion-tag-${g.kind}`}>{t(lang, KIND_KEY[g.kind])}</span>
+          <section key={g.kind} className="rel-group">
+            <h3 className={`rel-kind rel-kind-${g.kind}`}>{t(lang, KIND_KEY[g.kind])}</h3>
             <ul>
-              {g.items.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
+              {g.items.map((line) => {
+                const [area, text] = splitArea(line);
+                return (
+                  <li key={line}>
+                    {area ? <strong>{area}</strong> : null}
+                    {withCode(text)}
+                  </li>
+                );
+              })}
             </ul>
-          </div>
+          </section>
         ))}
       </div>
-    </details>
+    </article>
   );
 }
