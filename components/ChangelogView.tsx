@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState, type CSSProperties } from "react";
 import { TopBar } from "@/components/TopBar";
 import { useAppLang } from "@/components/LangProvider";
 import { ACTIVITY_FROM, ACTIVITY_TO, COMMITS_PER_DAY, COMMIT_TOTAL } from "@/lib/activity";
@@ -17,6 +18,8 @@ const KIND_KEY = {
 /** Group order inside a release: what is new first. */
 const KIND_ORDER: NoteKind[] = ["new", "imp", "fix"];
 const DAY_MS = 86_400_000;
+/** "/oltc-selector" on GitHub Pages, "" locally: files in public/ need it. */
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 function anchor(version: string) {
   return `v${version.replaceAll(".", "-")}`;
@@ -51,6 +54,34 @@ function releaseDate(rel: Release, lang: Lang) {
 function splitArea(line: string): [string | null, string] {
   const m = /^([^：:。.]{1,16})(：|: )(.+)$/s.exec(line);
   return m ? [m[1], m[3]] : [null, line];
+}
+
+/** A note that lists several changes ("…；…；…") → one line each. Splits
+ *  only outside brackets; drops the joining punctuation. */
+function clauses(text: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let cur = "";
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if ("（(".includes(ch)) depth++;
+    if ("）)".includes(ch)) depth = Math.max(0, depth - 1);
+    const latin = ch === ";" && text[i + 1] === " ";
+    if (depth === 0 && (ch === "；" || latin)) {
+      out.push(cur.trim());
+      cur = "";
+      if (latin) i++;
+      continue;
+    }
+    cur += ch;
+  }
+  out.push(cur.trim());
+  const parts = out.filter(Boolean);
+  if (parts.length < 2) return [text];
+  return parts.map((c) => {
+    const bare = c.replace(/[。.]$/, "");
+    return bare.charAt(0).toLocaleUpperCase() + bare.slice(1);
+  });
 }
 
 /** CLI flags in a note (--json, --flag=value) set in mono. */
@@ -121,49 +152,147 @@ export function ChangelogView() {
   );
 }
 
-/** Every day from the first commit to the last: a bar for its commits, a
- *  dot under the days a version shipped. */
+type Day = { ymd: string; count: number; total: number; rels: Release[] };
+
+/** The work, day by day (2026-11-17 Eric: "make this the highlight, be
+ *  creative"). Bars grow in on load, darker on busier days; a line climbs
+ *  to the running total of commits; every release day has a marker, the
+ *  major versions named. Hover or tap a day for its card;
+ *  click a release day to jump to its notes. Under it, three facts. */
 function Activity({ lang, releases }: { lang: Lang; releases: Release[] }) {
+  const [hover, setHover] = useState<number | null>(null);
   const start = utc(ACTIVITY_FROM).getTime();
   const n = Math.round((utc(ACTIVITY_TO).getTime() - start) / DAY_MS) + 1;
   const max = Math.max(...Object.values(COMMITS_PER_DAY));
-  const shipped = new Map<string, string[]>();
+
+  const byDay = new Map<string, Release[]>();
   for (const r of releases) {
     const day = RELEASE_META[r.version]?.day;
-    if (day) shipped.set(day, [...(shipped.get(day) ?? []), `v${r.version}`]);
+    if (day) byDay.set(day, [...(byDay.get(day) ?? []), r]);
   }
-  const cols = Array.from({ length: n }, (_, i) => {
+  let run = 0;
+  const days: Day[] = Array.from({ length: n }, (_, i) => {
     const ymd = new Date(start + i * DAY_MS).toISOString().slice(0, 10);
-    return { ymd, count: COMMITS_PER_DAY[ymd] ?? 0, versions: shipped.get(ymd) };
+    const count = COMMITS_PER_DAY[ymd] ?? 0;
+    run += count;
+    return { ymd, count, total: run, rels: byDay.get(ymd) ?? [] };
   });
-  const months = cols
-    .map((c, i) => ({ ...c, i }))
-    .filter((c) => c.ymd.endsWith("-01"));
+  const total = run;
+
+  // Facts: the busiest day, the longest run of days with commits, the pace.
+  const busiest = days.reduce((a, d) => (d.count > a.count ? d : a), days[0]);
+  let streak = 0;
+  let cur = 0;
+  for (const d of days) {
+    cur = d.count ? cur + 1 : 0;
+    streak = Math.max(streak, cur);
+  }
+  const pace = Math.max(1, Math.round(n / Math.max(1, releases.length - 1)));
+
+  // Running total as a line over the bars, 0..1000 wide, 100 tall.
+  const x = (i: number) => ((i + 0.5) / n) * 1000;
+  const y = (v: number) => 100 - (v / total) * 92;
+  const line = days.map((d, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(d.total).toFixed(1)}`).join("");
+  const area = `${line}L${x(n - 1).toFixed(1)},100L${x(0).toFixed(1)},100Z`;
+
+  const months = days.map((d, i) => ({ ...d, i })).filter((d) => d.ymd.endsWith("-01"));
+  const named = (r: Release) => r.version.endsWith(".0.0");
   const commits = t(lang, "statCommits");
+  const h = hover == null ? null : days[hover];
+  const jump = (d: Day) => {
+    const r = d.rels[d.rels.length - 1];
+    if (r) document.getElementById(anchor(r.version))?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
-    <figure className="log-activity" aria-label={t(lang, "activityAria")}>
-      <div className="log-bars">
-        {cols.map((c) => (
-          <span
-            key={c.ymd}
-            className={c.count ? "log-bar" : "log-bar is-zero"}
-            title={`${dateLabel(c.ymd, lang, { month: "short", day: "numeric" })} · ${c.count} ${commits}${
-              c.versions ? ` · ${c.versions.join(" ")}` : ""
-            }`}
+    <figure className="pulse" aria-label={t(lang, "activityAria")}>
+      <div className="pulse-chart" onMouseLeave={() => setHover(null)}>
+        <svg className="pulse-line" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden>
+          <defs>
+            <linearGradient id="pulse-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#0284c7" stopOpacity="0.16" />
+              <stop offset="1" stopColor="#0284c7" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d={area} fill="url(#pulse-fill)" className="pulse-area" />
+          <path d={line} pathLength={1} className="pulse-path" vectorEffect="non-scaling-stroke" />
+        </svg>
+
+        <div className="pulse-bars">
+          {days.map((d, i) => (
+            <span
+              key={d.ymd}
+              className={`pulse-day${d.count ? "" : " is-zero"}${d.rels.length ? " is-rel" : ""}${hover === i ? " is-on" : ""}`}
+              style={{ "--i": i, "--k": d.count / max } as CSSProperties}
+              onMouseEnter={() => setHover(i)}
+              onClick={() => (d.rels.length ? jump(d) : setHover(i))}
+            >
+              <i style={{ height: d.count ? `${Math.max(6, Math.sqrt(d.count / max) * 78)}%` : undefined }} />
+            </span>
+          ))}
+        </div>
+
+        {days.map((d, i) =>
+          d.rels.length ? (
+            <span
+              key={`f-${d.ymd}`}
+              className="pulse-flag"
+              style={{ left: `${((i + 0.5) / n) * 100}%` } as CSSProperties}
+              aria-hidden
+            >
+              {d.rels.some(named) ? (
+                <b>v{d.rels.find(named)!.version.replace(/\.0$/, "")}</b>
+              ) : null}
+            </span>
+          ) : null,
+        )}
+
+        {h ? (
+          <div
+            className="pulse-tip"
+            style={{ left: `clamp(6rem, ${((hover! + 0.5) / n) * 100}%, calc(100% - 6rem))` }}
+            role="status"
           >
-            <i style={{ height: c.count ? `${Math.max(8, Math.sqrt(c.count / max) * 100)}%` : undefined }} />
-            {c.versions ? <b aria-hidden /> : null}
-          </span>
-        ))}
+            <p className="pulse-tip-date">{dateLabel(h.ymd, lang, { month: "long", day: "numeric" })}</p>
+            <p className="pulse-tip-n">
+              <strong>{h.count}</strong> {commits}
+            </p>
+            {h.rels.map((r) => (
+              <p key={r.version} className="pulse-tip-rel">
+                <code>v{r.version}</code> {r.title}
+              </p>
+            ))}
+          </div>
+        ) : null}
       </div>
-      <div className="log-months" aria-hidden>
+
+      <div className="pulse-months" aria-hidden>
         {months.map((m) => (
           <span key={m.ymd} style={{ left: `${(m.i / n) * 100}%` }}>
             {dateLabel(m.ymd, lang, { month: "short" })}
           </span>
         ))}
       </div>
+
+      <dl className="pulse-facts">
+        <div>
+          <dt>{t(lang, "actBusiest")}</dt>
+          <dd>
+            {dateLabel(busiest.ymd, lang, { month: "long", day: "numeric" })}
+            <span>
+              {busiest.count} {commits}
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt>{t(lang, "actStreak")}</dt>
+          <dd>{t(lang, "actStreakVal", { n: streak })}</dd>
+        </div>
+        <div>
+          <dt>{t(lang, "actPace")}</dt>
+          <dd>{t(lang, "actPaceVal", { n: pace })}</dd>
+        </div>
+      </dl>
     </figure>
   );
 }
@@ -171,7 +300,8 @@ function Activity({ lang, releases }: { lang: Lang; releases: Release[] }) {
 function ReleaseEntry({ rel, lang }: { rel: Release; lang: Lang }) {
   const groups = KIND_ORDER.flatMap((k) => rel.groups.filter((g) => g.kind === k));
   const id = anchor(rel.version);
-  const image = RELEASE_META[rel.version]?.image;
+  const meta = RELEASE_META[rel.version]?.image;
+  const image = meta ? `${BASE}${meta}` : undefined;
   const current = rel.version === APP_VERSION;
   return (
     <li id={id} className={image ? "log-rel is-big" : "log-rel"}>
@@ -195,14 +325,26 @@ function ReleaseEntry({ rel, lang }: { rel: Release; lang: Lang }) {
           <section key={g.kind}>
             <h3 className={`log-kind log-kind-${g.kind}`}>{t(lang, KIND_KEY[g.kind])}</h3>
             <ul>
-              {g.items.map((line) => {
+              {g.items.flatMap((line) => {
                 const [area, text] = splitArea(line);
-                return (
-                  <li key={line}>
-                    {area ? <strong>{area}</strong> : null}
-                    {withCode(text)}
-                  </li>
-                );
+                const parts = clauses(text);
+                if (area) {
+                  return (
+                    <li key={line} className={parts.length > 1 ? "has-sub" : undefined}>
+                      <strong>{area}</strong>
+                      {parts.length > 1 ? (
+                        <ul className="log-sub">
+                          {parts.map((c) => (
+                            <li key={c}>{withCode(c)}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        withCode(text)
+                      )}
+                    </li>
+                  );
+                }
+                return parts.map((c) => <li key={c}>{withCode(c)}</li>);
               })}
             </ul>
           </section>
