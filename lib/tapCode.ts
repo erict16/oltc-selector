@@ -341,6 +341,23 @@ export function changeOverOf(regulation: Regulation): ChangeOver {
   return "G";
 }
 
+/**
+ * Tap positions the transformer sees, read from the end of a type string
+ * (2026-11-17 Eric: the card shows it beside the switch's own positions).
+ *   W / G  [pitch][P][mid]W|G  →  P − mid + 1   (10193W → 17, 12233W → 21)
+ *   linear [pitch][P]0         →  P
+ *   a bare count (CZ …-9, HWDK …-17) → that count
+ * Off-circuit contact codes (6x5A) and anything else give null.
+ */
+export function transformerTapsFromCode(tail: string): number | null {
+  const wg = /^(\d{2})(\d{2})([13])[WG]$/.exec(tail);
+  if (wg) return Number(wg[2]) - Number(wg[3]) + 1;
+  const lin = /^(\d{2})(\d{2})0$/.exec(tail);
+  if (lin) return Number(lin[2]);
+  if (/^\d{1,2}$/.test(tail)) return Number(tail);
+  return null;
+}
+
 export function buildTapCode(opts: {
   pitch: number;
   positions: number;

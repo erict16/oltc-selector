@@ -2,6 +2,7 @@
 
 import { SERIES } from "@/lib/catalog";
 import { t, type Lang } from "@/lib/i18n";
+import { transformerTapsFromCode } from "@/lib/tapCode";
 import type { DutyBasis } from "@/lib/transformer";
 import type { ModelResult, SelectInput, StructureKind } from "@/lib/types";
 import { cx } from "./fields";
@@ -263,6 +264,8 @@ export function ModelSpec({
     key: "mounting",
     value: t(lang, mountLabelKey(mount)),
   });
+  const taps = offCircuit ? null : transformerTapsFromCode(r.model.slice(r.model.lastIndexOf("-") + 1));
+  if (taps != null) items.push({ key: "specTransformerTaps", value: String(taps) });
 
   return (
     <dl

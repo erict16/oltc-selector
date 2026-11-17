@@ -7,10 +7,13 @@ export type AgentGuideCopy = {
   lead: string;
   /** Section names: the same words in the page menu and on each section. */
   secAi: string;
-  secCli: string;
   secEx: string;
   secFlags: string;
-  pageNav: string;
+  runT: string;
+  needNode: string;
+  nodeLink: string;
+  readOut: string;
+  moreT: string;
   s1t: string;
   s1b: string;
   s1prompt: string;
@@ -29,9 +32,7 @@ export type AgentGuideCopy = {
   qDry: string;
   exShzv: string;
   qShzv: string;
-  cliBody: string;
   install: string;
-  npx: string;
   outT: string;
   copy: string;
   copied: string;
@@ -40,12 +41,15 @@ export type AgentGuideCopy = {
 
 const zh: AgentGuideCopy = {
   title: "命令行选型",
-  lead: "一行命令出型号，和网页同一套引擎。不想敲命令，就交给 AI 助手。",
+  lead: "装好以后，一行命令就出型号。",
   secAi: "AI 助手",
-  secCli: "命令行",
   secEx: "例子",
   secFlags: "参数",
-  pageNav: "本页",
+  runT: "试一下",
+  needNode: "先装好 Node.js 20 或更高版本。",
+  nodeLink: "下载 Node.js",
+  readOut: "第一行是型号。后面几行是理由、要核对的事和其他可选型号。",
+  moreT: "更多",
   s1t: "把这句话发给 AI 助手",
   s1b: "Claude、ChatGPT、Codex 等能运行命令的助手都可以。它会用 npm 上的 oltc-selector，不用你自己装。",
   s1prompt:
@@ -65,9 +69,7 @@ const zh: AgentGuideCopy = {
   qDry: "帮我给这台干式变压器选个型：33/0.4 kV 站用变，干式，9 档线性 ±4×2.5%，真空电动有载。",
   exShzv: "3xSHZV",
   qShzv: "帮我选个有载开关：350 MVA，132±10×1.25%/11-11 kV，YNd11d11，高压侧中性点调压，最大电流 1750 A，开关对地 350/140。",
-  cliBody: "网页和命令行共用同一套选型引擎，结果一致。每次运行都会查有没有新版本，有就提示，不会自动更新。",
   install: "安装",
-  npx: "不安装直接跑",
   outT: "输出",
   copy: "复制",
   copied: "已复制",
@@ -76,12 +78,15 @@ const zh: AgentGuideCopy = {
 
 const en: AgentGuideCopy = {
   title: "Pick the type from the command line",
-  lead: "One command prints the type, from the same engine as the web page. Rather not type it? Let an AI assistant run it.",
+  lead: "Install it once. Then one command prints the type.",
   secAi: "AI assistant",
-  secCli: "Command line",
   secEx: "Examples",
   secFlags: "Flags",
-  pageNav: "On this page",
+  runT: "Try it",
+  needNode: "You need Node.js 20 or later.",
+  nodeLink: "Get Node.js",
+  readOut: "The first line is the type. The lines after it give the reason, what to check, and other types that fit.",
+  moreT: "More",
   s1t: "Send this line to your AI assistant",
   s1b: "Any assistant that can run commands works: Claude, ChatGPT, Codex. It uses oltc-selector from npm; you install nothing.",
   s1prompt:
@@ -101,9 +106,7 @@ const en: AgentGuideCopy = {
   qDry: "Pick an OLTC for this dry-type transformer: 33/0.4 kV station, dry, 9 positions linear ±4×2.5%, vacuum motorised.",
   exShzv: "3xSHZV",
   qShzv: "Pick an on-load tap-changer for me: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, taps at the HV neutral, max 1750 A, OLTC earth 350/140.",
-  cliBody: "The page and the CLI share one selection engine, so results match. Every run checks for a newer version and tells you; it never updates itself.",
   install: "Install",
-  npx: "Run without installing",
   outT: "Output",
   copy: "Copy",
   copied: "Copied",
@@ -112,12 +115,15 @@ const en: AgentGuideCopy = {
 
 const vi: AgentGuideCopy = {
   title: "Chọn kiểu bằng dòng lệnh",
-  lead: "Một lệnh in ra kiểu, cùng engine với trang web. Không muốn gõ lệnh? Để trợ lý AI chạy giúp.",
+  lead: "Cài một lần. Sau đó một lệnh in ra kiểu.",
   secAi: "Trợ lý AI",
-  secCli: "Dòng lệnh",
   secEx: "Ví dụ",
   secFlags: "Tham số",
-  pageNav: "Trên trang này",
+  runT: "Chạy thử",
+  needNode: "Cần Node.js 20 trở lên.",
+  nodeLink: "Tải Node.js",
+  readOut: "Dòng đầu là kiểu. Các dòng sau là lý do, điều cần kiểm tra và các kiểu khác cũng phù hợp.",
+  moreT: "Thêm",
   s1t: "Gửi câu này cho trợ lý AI",
   s1b: "Trợ lý nào chạy được lệnh đều dùng được: Claude, ChatGPT, Codex. Nó dùng oltc-selector trên npm; bạn không phải cài gì.",
   s1prompt:
@@ -137,9 +143,7 @@ const vi: AgentGuideCopy = {
   qDry: "Chọn giúp tôi cho máy biến áp khô: 33/0.4 kV máy trạm, khô, 9 nấc tuyến tính ±4×2.5%, chân không chạy điện.",
   exShzv: "3xSHZV",
   qShzv: "Chọn giúp tôi bộ chuyển nấc có tải: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, điều áp ở trung tính cao áp, dòng max 1750 A, cách điện OLTC 350/140.",
-  cliBody: "Trang web và CLI dùng chung một engine chọn kiểu, kết quả giống nhau. Mỗi lần chạy, CLI kiểm tra bản mới và báo cho bạn; nó không tự cập nhật.",
   install: "Cài đặt",
-  npx: "Chạy không cần cài",
   outT: "Đầu ra",
   copy: "Chép",
   copied: "Đã chép",
@@ -148,12 +152,15 @@ const vi: AgentGuideCopy = {
 
 const es: AgentGuideCopy = {
   title: "Elija el tipo desde la línea de comandos",
-  lead: "Un comando imprime el tipo, con el mismo motor que la web. ¿Prefiere no escribirlo? Que lo ejecute un asistente de IA.",
+  lead: "Instálelo una vez. Luego un comando imprime el tipo.",
   secAi: "Asistente de IA",
-  secCli: "Línea de comandos",
   secEx: "Ejemplos",
   secFlags: "Opciones",
-  pageNav: "En esta página",
+  runT: "Pruébelo",
+  needNode: "Necesita Node.js 20 o posterior.",
+  nodeLink: "Descargar Node.js",
+  readOut: "La primera línea es el tipo. Las siguientes dan la razón, lo que debe revisar y otros tipos que sirven.",
+  moreT: "Más",
   s1t: "Envíe esta línea a su asistente de IA",
   s1b: "Sirve cualquier asistente que ejecute comandos: Claude, ChatGPT, Codex. Usa oltc-selector desde npm; usted no instala nada.",
   s1prompt:
@@ -173,9 +180,7 @@ const es: AgentGuideCopy = {
   qDry: "Elíjame un cambiador para este transformador seco: estación 33/0.4 kV, seco, 9 posiciones lineales ±4×2.5%, motorizado de vacío.",
   exShzv: "3xSHZV",
   qShzv: "Elíjame un cambiador en carga: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, regulación en el neutro de AT, 1750 A máx., aislamiento OLTC 350/140.",
-  cliBody: "La web y la CLI comparten el mismo motor de selección, los resultados coinciden. En cada ejecución la CLI comprueba si hay una versión nueva y le avisa; nunca se actualiza sola.",
   install: "Instalar",
-  npx: "Ejecutar sin instalar",
   outT: "Salida",
   copy: "Copiar",
   copied: "Copiado",
@@ -184,12 +189,15 @@ const es: AgentGuideCopy = {
 
 const tr: AgentGuideCopy = {
   title: "Tipi komut satırından seçin",
-  lead: "Tek komut tipi yazdırır; web sayfasıyla aynı motor. Komut yazmak istemiyor musunuz? Bir AI asistan çalıştırsın.",
+  lead: "Bir kez kurun. Sonra tek komut tipi yazdırır.",
   secAi: "AI asistan",
-  secCli: "Komut satırı",
   secEx: "Örnekler",
   secFlags: "Parametreler",
-  pageNav: "Bu sayfada",
+  runT: "Deneyin",
+  needNode: "Node.js 20 veya üstü gerekir.",
+  nodeLink: "Node.js indir",
+  readOut: "İlk satır tiptir. Sonraki satırlar gerekçeyi, kontrol edilecekleri ve uyan diğer tipleri verir.",
+  moreT: "Daha fazla",
   s1t: "Bu satırı AI asistanınıza gönderin",
   s1b: "Komut çalıştırabilen her asistan olur: Claude, ChatGPT, Codex. npm'deki oltc-selector'ı kullanır; siz bir şey kurmazsınız.",
   s1prompt:
@@ -209,9 +217,7 @@ const tr: AgentGuideCopy = {
   qDry: "Kuru tipi trafo için seç: 33/0.4 kV istasyon, kuru, 9 kademe lineer ±4×2.5%, vakum motorlu.",
   exShzv: "3xSHZV",
   qShzv: "Bana yük altında kademe değiştirici seç: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, YG yıldız noktasından ayar, max 1750 A, OLTC toprağı 350/140.",
-  cliBody: "Web sayfası ve CLI aynı seçim motorunu paylaşır, sonuçlar aynıdır. CLI her çalıştırmada yeni sürüm olup olmadığına bakar ve haber verir; kendini güncellemez.",
   install: "Kurulum",
-  npx: "Kurmadan çalıştır",
   outT: "Çıktı",
   copy: "Kopyala",
   copied: "Kopyalandı",
@@ -220,12 +226,15 @@ const tr: AgentGuideCopy = {
 
 const idn: AgentGuideCopy = {
   title: "Pilih tipe dari command line",
-  lead: "Satu perintah mencetak tipenya, dengan mesin yang sama seperti halaman web. Tidak mau mengetik perintah? Biarkan asisten AI menjalankannya.",
+  lead: "Pasang sekali. Setelah itu satu perintah mencetak tipenya.",
   secAi: "Asisten AI",
-  secCli: "Command line",
   secEx: "Contoh",
   secFlags: "Parameter",
-  pageNav: "Di halaman ini",
+  runT: "Coba",
+  needNode: "Perlu Node.js 20 atau lebih baru.",
+  nodeLink: "Unduh Node.js",
+  readOut: "Baris pertama adalah tipenya. Baris berikutnya memberi alasan, hal yang perlu dicek, dan tipe lain yang cocok.",
+  moreT: "Lainnya",
   s1t: "Kirim kalimat ini ke asisten AI Anda",
   s1b: "Asisten apa pun yang bisa menjalankan perintah bisa dipakai: Claude, ChatGPT, Codex. Asisten memakai oltc-selector dari npm; Anda tidak perlu memasang apa pun.",
   s1prompt:
@@ -245,9 +254,7 @@ const idn: AgentGuideCopy = {
   qDry: "Pilihkan OLTC untuk trafo kering ini: trafo pemakaian sendiri 33/0.4 kV, kering, 9 posisi linear ±4×2.5%, vakum bermotor.",
   exShzv: "3xSHZV",
   qShzv: "Pilihkan OLTC berbeban: 350 MVA, 132±10×1.25%/11-11 kV, YNd11d11, pengaturan di titik netral sisi TT, arus maks. 1750 A, isolasi OLTC ke tanah 350/140.",
-  cliBody: "Halaman web dan CLI memakai mesin pemilihan yang sama, jadi hasilnya sama. Setiap dijalankan, CLI memeriksa versi baru dan memberi tahu Anda; CLI tidak memperbarui dirinya sendiri.",
   install: "Pasang",
-  npx: "Jalankan tanpa memasang",
   outT: "Keluaran",
   copy: "Salin",
   copied: "Tersalin",

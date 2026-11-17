@@ -4,6 +4,10 @@
 
 No new version: the CLI pack is unchanged.
 
+- CLI page made simple for an ordinary user: two steps, install (with the Node.js link) and try it (one real run and what its lines mean). The AI assistant, the examples, the flags and the npm link are folded under 更多. The page menu and the hero are gone.
+- Release notes page rebuilt as a Notion page: white, the app's bolt as the page icon, months as headings, one toggle per version with coloured tags (新增 green, 改进 blue, 修正 red). The newest version starts open. It has the shared header with 更新记录 marked.
+- Header: the current page's link is grey, not the accent blue.
+- Result card: 变压器档位 / Transformer taps beside 安装方式, read from the tap code (`transformerTapsFromCode` in `lib/tapCode.ts`): W/G is positions minus mid plus one (10193W → 17, 12233W → 21), linear and a bare count are the count. Off-circuit types show none. The 10193W cell keeps the switch's 19 positions.
 - The result card moves with the page as one piece. A card that fits the window stays in view while the form scrolls; a taller one scrolls with the page until its foot shows, and comes back as you scroll up. The type no longer stays pinned at the top while the rest of the card slides under it (`components/selector/useStickyBoth.ts`).
 - 其他可选 is at the foot of the card. Click a type in it and it becomes the card's type: the loads, the data, the notes, Copy and the phone bar all follow. The type it replaced moves into the list, so one click brings it back. The pick is dropped when the inputs give another first type. A row with margin on every load says 安全选项; the first type says what it is when it is in the list.
 - Opening 其他可选 makes the card taller instead of taking the sketch's room, so its title does not jump up under the pointer.
