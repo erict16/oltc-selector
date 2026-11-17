@@ -24,7 +24,7 @@ export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
   "2.2.0": { day: "2026-10-31" },
   "2.1.0": { day: "2026-10-31", image: "/changelog/v2.1.0.webp" },
   "2.0.0": { day: "2026-10-28", image: "/changelog/v2.0.0.webp" },
-  "1.3.0": { day: "2026-10-22" },
+  "1.3.0": { day: "2026-10-22", image: "/changelog/v1.3.0.webp" },
   "1.2.9": { day: "2026-09-18" },
   "1.1.0": { day: "2026-08-20" },
   "1.0.0": { day: "2026-08-19", image: "/changelog/v1.0.0.webp" },
@@ -44,8 +44,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "命令行输出更短、更好读",
       groups: [
-        { kind: "imp", items: ["命令行：结果更短。只列出可能影响型号的假定，对地绝缘只说一次。", "命令行：出错时先给中文再给英文；用 --json 时出错也只给 JSON，方便程序读取。"] },
-        { kind: "fix", items: ["命令行：小写的联结组（如 ynd11）也能读懂；只写了 off-circuit 的参数行会按无载开关选。", "命令行：给了容量又写 --conn 现在会报错，以前会悄悄把电流算错。请改用 --tap line 或 --winding delta。"] },
+        { kind: "imp", items: ["命令行的结果更短了，只列出可能影响型号的假定。", "命令行出错时先给中文、再给英文。"] },
+        { kind: "fix", items: ["命令行能读懂小写的联结组，比如 ynd11。", "只写了 off-circuit 的参数行，现在按无载开关选型。", "给了容量又写 --conn 时，命令行现在会报错，不再悄悄算错电流。"] },
       ],
     },
     {
@@ -53,7 +53,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "结果卡重新排版",
       groups: [
-        { kind: "imp", items: ["页面：结果卡和表单一样高，滚到底两边对齐，不再留一块空白；窗口矮时也能看到型号。", "页面：去掉总在 100% 附近的对地绝缘进度条；页头不再放图标；下拉框边线调淡。", "命令行：去掉 --market 参数（它只认意大利和土耳其，大多时候不起作用）。对地绝缘直接用 --earth-um 写。"] },
+        { kind: "imp", items: ["结果卡和表单一样高，滚到底时两边对齐。", "去掉了总在 100% 附近的对地绝缘进度条。", "命令行去掉了 --market 参数，对地绝缘请直接用 --earth-um 写。"] },
       ],
     },
     {
@@ -61,8 +61,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "参数写错会直接告诉你",
       groups: [
-        { kind: "fix", items: ["命令行：参数互相矛盾或不起作用时会报错，不再悄悄挑一个用。比如同时写了油和真空，或者双绕组却给了中压。"] },
-        { kind: "imp", items: ["页面：结果栏和表单一样高；页头加上版本号、选型助手和更新记录；换了新图标；对地工频和雷电耐压写在 Um 下面。"] },
+        { kind: "fix", items: ["命令行的参数互相矛盾时会直接报错，比如同时写了油和真空。"] },
+        { kind: "imp", items: ["页头加上了版本号、命令行和更新记录的入口。", "对地工频和雷电耐压显示在 Um 下面。"] },
       ],
     },
     {
@@ -70,7 +70,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "命令行会提醒有新版本",
       groups: [
-        { kind: "imp", items: ["命令行：每次运行都会看看 npm 上有没有新版本，有就在最后提醒一句，不会自己更新。", "页面：去掉表单上方的粘贴框和「复制链接」；自耦变的提示换成更直白的说法；AI 选型页直接用 npm 上的版本。"] },
+        { kind: "imp", items: ["命令行每次运行都会检查有没有新版本，有就在最后提醒一句。", "去掉了表单上方的粘贴框和「复制链接」。", "自耦变的提示换成了更直白的说法。"] },
       ],
     },
     {
@@ -78,9 +78,9 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "粘贴铭牌就能填表",
       groups: [
-        { kind: "new", items: ["页面：把铭牌或招标里的一行参数贴进来，表单自动填好；「复制链接」能把当前选型发给同事；第一次打开时按浏览器语言显示。", "命令行：--version 查看版本；不带参数时显示帮助；参数拼错会提示正确写法；给程序用的 JSON 输出更完整。"] },
-        { kind: "fix", items: ["无载：清单里有型号却说「超出目录」的问题已修好（例如 800 A、角接、Um 72.5 kV 现在给出 WSLIV-2000D/72.5-18x17E）。", "样本接线图里没有的档位码都会带提醒；± 级数必须是整数；干式 CVT 最多 9 档，用在 ± 调压时会提示它是线性调型号。", "命令行：铭牌里的全角符号（比如全角斜杠）能正确识别，以前可能按低压侧选错。"] },
-        { kind: "imp", items: ["页面：页脚加了更新记录、AI 选型、条款和隐私链接；打印时只打结果卡；文字和输入框更清楚；读屏软件会读出为什么没有型号。"] },
+        { kind: "new", items: ["把铭牌或招标里的一行参数贴进表单，就能自动填好。", "「复制链接」可以把当前选型发给同事。", "命令行可以用 --version 查看版本，拼错参数时会提示正确写法。"] },
+        { kind: "fix", items: ["无载开关在清单里有型号时，不再误报「超出目录」。", "样本接线图里没有的档位码，都会带上提醒。", "铭牌里的全角符号现在能正确识别。"] },
+        { kind: "imp", items: ["现在打印页面时，只打印结果卡。"] },
       ],
     },
     {
@@ -88,7 +88,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "每天检查一次新版本",
       groups: [
-        { kind: "new", items: ["命令行每天最多检查一次有没有新版本，有就在最后提醒并给出更新命令，不会自己更新。不想要提醒，加 --no-update-check。"] },
+        { kind: "new", items: ["命令行每天最多检查一次新版本，有就提醒你更新，不会自己更新。"] },
       ],
     },
     {
@@ -96,8 +96,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "改了参数，型号马上跟着变",
       groups: [
-        { kind: "imp", items: ["不用再点「选型」：改了参数，型号马上更新。结果卡把工况和型号额定值并排列出（最大通过电流、级电压、级容量、开关绝缘），并显示用了几成。", "手机上，当前型号固定在屏幕底部，可以直接复制；「开关」一组默认收起，标题下面一行列出当前的值。"] },
-        { kind: "fix", items: ["命令行：粗细调、正反调时写的工作位置数不再被 ±8 覆盖；线性调 ±8 按 17 个位置算；自耦变默认开关在串联/公共绕组连接点；363 kV 以上也能手动指定对地绝缘；只写角接时默认在线端。"] },
+        { kind: "imp", items: ["改了参数，型号马上更新，不用再点「选型」。", "结果卡把工况和型号的额定值并排列出，并显示用了几成。", "手机上，当前型号固定在屏幕底部，可以直接复制。"] },
+        { kind: "fix", items: ["命令行里粗细调和正反调的工作位置数，不再被 ±8 覆盖。", "自耦变按电流选型时，开关默认在串联和公共绕组的连接点。"] },
       ],
     },
     {
@@ -121,8 +121,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "结果卡会提醒哪些要工程确认",
       groups: [
-        { kind: "fix", items: ["调压绕组上的绝缘超出所有选择器等级时，不再给出 DE 型号，而是提示联系工程。", "自定义调节比例和安全系数可以输小数，写成 0,5 也行；无载里改过的档位不再带进有载选型。", "星接时电压旁边显示对地绝缘，角接时显示实际用的 Um；去掉「不限」连接方式，免得级电压被少算。"] },
-        { kind: "imp", items: ["结果卡会标出要工程确认的情况：没给级电压、超出额定电流、非标准档位码、选择器等级被上调。"] },
+        { kind: "fix", items: ["绝缘超出所有选择器等级时，不再给出 DE 型号，而是提示联系工程。", "调节比例和安全系数可以输入小数。", "去掉了「不限」连接方式，免得级电压被少算。"] },
+        { kind: "imp", items: ["结果卡会标出要工程确认的情况，比如没给级电压或超出额定电流。"] },
       ],
     },
     {
@@ -287,8 +287,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Shorter, easier CLI output",
       groups: [
-        { kind: "imp", items: ["CLI: shorter results. It lists only the assumptions that could change the type, and states the insulation to earth once.", "CLI: on a Chinese run an error shows Chinese first, then English; with --json an error is JSON only, so programs can read it."] },
-        { kind: "fix", items: ["CLI: a lower-case vector group (such as ynd11) is read correctly; a line that says only off-circuit picks an off-circuit switch.", "CLI: --conn next to a capacity now stops with an error, because it used to change the current quietly. Use --tap line or --winding delta."] },
+        { kind: "imp", items: ["The CLI gives shorter results and lists only the assumptions that could change the type.", "On a Chinese run, CLI errors show Chinese first, then English."] },
+        { kind: "fix", items: ["The CLI reads a lower-case vector group, such as ynd11.", "A line that says only off-circuit now picks an off-circuit switch.", "The CLI now stops with an error when --conn is given with a capacity, instead of quietly getting the current wrong."] },
       ],
     },
     {
@@ -296,7 +296,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "A cleaner result card",
       groups: [
-        { kind: "imp", items: ["Page: the result card is as tall as the form and ends level with it, with no empty band; on a short window the type stays in view.", "Page: the earth-insulation bar that always read near 100% is gone; no icon in the header; softer dropdown borders.", "CLI: the --market flag is gone (it knew only Italy and Turkey and did nothing in most cases). Give the insulation to earth with --earth-um."] },
+        { kind: "imp", items: ["The result card is as tall as the form, so both end level.", "The earth-insulation bar that always read near 100% is gone.", "The CLI no longer has the --market flag. Give the insulation to earth with --earth-um."] },
       ],
     },
     {
@@ -304,8 +304,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Wrong settings now get a clear error",
       groups: [
-        { kind: "fix", items: ["CLI: settings that contradict each other or do nothing now stop with an error, instead of one being picked quietly. For example oil and vacuum together, or an MV voltage on a two-winding transformer."] },
-        { kind: "imp", items: ["Page: the result column is as tall as the form; the header shows the version and links to the assistant and the release notes; a new icon; the earth withstand levels sit under Um."] },
+        { kind: "fix", items: ["The CLI stops with an error when settings contradict each other, such as oil and vacuum together."] },
+        { kind: "imp", items: ["The header now shows the version and links to the CLI and the release notes.", "The earth withstand levels are shown under Um."] },
       ],
     },
     {
@@ -313,7 +313,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "The CLI tells you about new versions",
       groups: [
-        { kind: "imp", items: ["CLI: each run checks npm for a newer version and adds a one-line note at the end; it never updates itself.", "Page: the paste box and Copy link above the form are gone; the autotransformer notes use plainer words; the AI page uses the npm version directly."] },
+        { kind: "imp", items: ["Each CLI run checks for a new version and adds a one-line note when there is one.", "The paste box and Copy link above the form are gone.", "The autotransformer notes use plainer words."] },
       ],
     },
     {
@@ -321,9 +321,9 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Paste a nameplate to fill the form",
       groups: [
-        { kind: "new", items: ["Page: paste a nameplate or tender line and the form fills itself; Copy link sends your selection to a colleague; the first visit uses your browser's language.", "CLI: --version shows the version; no flags shows help; a mistyped flag gets a suggestion; the JSON output for programs is more complete."] },
-        { kind: "fix", items: ["Off-circuit: a duty no longer says out of catalogue when the list has a type for it (800 A, delta, Um 72.5 kV now gives WSLIV-2000D/72.5-18x17E).", "A tap code that is not in the brochure's diagrams always comes with a note; ± steps must be a whole number; dry-type CVT stops at 9 positions and says it is a linear type when used for a ± range.", "CLI: full-width characters in a nameplate line, such as a full-width slash, are read correctly; before, they could size the LV winding."] },
-        { kind: "imp", items: ["Page: footer links to the release notes, AI selection, terms and privacy; printing gives only the result card; clearer text and field borders; screen readers say why there is no type."] },
+        { kind: "new", items: ["Paste a nameplate or tender line into the form and it fills itself in.", "Copy link sends your current selection to a colleague.", "The CLI has --version, and it suggests the right flag when you mistype one."] },
+        { kind: "fix", items: ["An off-circuit duty no longer reads out of catalogue when the list has a type for it.", "A tap code that is not in the brochure's diagrams always comes with a note.", "Full-width characters in a nameplate are now read correctly."] },
+        { kind: "imp", items: ["Printing gives only the result card."] },
       ],
     },
     {
@@ -331,7 +331,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "A daily check for new versions",
       groups: [
-        { kind: "new", items: ["The CLI checks for a new version at most once a day and, when there is one, ends with a note and the update command; it never updates itself. Add --no-update-check to turn it off."] },
+        { kind: "new", items: ["The CLI checks for a new version at most once a day and tells you to update. It never updates itself."] },
       ],
     },
     {
@@ -339,8 +339,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "The type follows your inputs at once",
       groups: [
-        { kind: "imp", items: ["No more Select button: the type updates as soon as you change a value. The result card puts the duty next to the type's rating (max through-current, step voltage, step capacity, switch insulation) and shows how much of each is used.", "On phones the type stays at the bottom of the screen, ready to copy; the Tap changer section starts folded, with its values in one line under the title."] },
-        { kind: "fix", items: ["CLI: a position count given for coarse-fine or reversing is no longer replaced by ±8; linear ±8 counts as 17 positions; an autotransformer defaults to the series–common junction; a stated insulation to earth works above 363 kV; delta alone defaults to the line end."] },
+        { kind: "imp", items: ["The type updates as soon as you change a value. There is no Select button any more.", "The result card shows the duty next to the type's rating, and how much of it is used.", "On phones the type stays at the bottom of the screen, ready to copy."] },
+        { kind: "fix", items: ["In the CLI, a position count for coarse-fine or reversing is no longer replaced by ±8.", "An autotransformer sized from current now defaults to the series–common junction."] },
       ],
     },
     {
@@ -364,8 +364,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "The result card says what engineering must check",
       groups: [
-        { kind: "fix", items: ["When the insulation across the regulating winding is above every selector grade, the page asks you to contact engineering instead of giving a DE type.", "Custom step percent and safety factor take decimals, also with a comma (0,5); taps changed in off-circuit mode no longer carry into on-load.", "For star, the voltage note shows the insulation to earth; for delta, the Um actually used. The Any connection is gone, so step voltage is not counted too low."] },
-        { kind: "imp", items: ["The result card marks what engineering must confirm: no step voltage given, duty above the rating, a non-standard tap code, or a raised selector grade."] },
+        { kind: "fix", items: ["When the insulation is above every selector grade, the page asks you to contact engineering instead of giving a DE type.", "Step percent and safety factor accept decimals.", "The Any connection is gone, so step voltage is not counted too low."] },
+        { kind: "imp", items: ["The result card marks what engineering must confirm, such as a missing step voltage or a duty above the rating."] },
       ],
     },
     {
@@ -534,8 +534,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Kết quả CLI ngắn và dễ đọc hơn",
       groups: [
-        { kind: "imp", items: ["CLI: kết quả ngắn hơn. Chỉ liệt kê các giả định có thể làm đổi kiểu, và nói cách điện với đất một lần.", "CLI: khi chạy tiếng Trung, lỗi hiện tiếng Trung trước rồi tiếng Anh; với --json, lỗi chỉ ở dạng JSON để chương trình đọc được."] },
-        { kind: "fix", items: ["CLI: tổ đấu dây viết thường (như ynd11) được đọc đúng; dòng chỉ ghi off-circuit sẽ chọn bộ chuyển nấc không tải.", "CLI: ghi --conn cùng với công suất giờ báo lỗi, vì trước đây nó lặng lẽ làm sai dòng điện. Hãy dùng --tap line hoặc --winding delta."] },
+        { kind: "imp", items: ["CLI cho kết quả ngắn hơn, chỉ liệt kê các giả định có thể làm đổi kiểu.", "Khi chạy tiếng Trung, lỗi của CLI hiện tiếng Trung trước rồi tiếng Anh."] },
+        { kind: "fix", items: ["CLI đọc được tổ đấu dây viết thường, ví dụ ynd11.", "Dòng chỉ ghi off-circuit giờ chọn bộ chuyển nấc không tải.", "CLI giờ báo lỗi khi ghi --conn cùng công suất, thay vì lặng lẽ tính sai dòng điện."] },
       ],
     },
     {
@@ -543,7 +543,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Thẻ kết quả gọn hơn",
       groups: [
-        { kind: "imp", items: ["Trang: thẻ kết quả cao bằng biểu mẫu và kết thúc ngang hàng, không còn khoảng trống; cửa sổ thấp vẫn thấy kiểu.", "Trang: bỏ thanh cách điện với đất luôn gần 100%; đầu trang không còn biểu tượng; viền ô chọn nhạt hơn.", "CLI: bỏ tham số --market (chỉ biết Ý và Thổ Nhĩ Kỳ, phần lớn không có tác dụng). Ghi cách điện với đất bằng --earth-um."] },
+        { kind: "imp", items: ["Thẻ kết quả cao bằng biểu mẫu, nên hai bên kết thúc ngang nhau.", "Đã bỏ thanh cách điện với đất luôn gần 100%.", "CLI bỏ tham số --market. Hãy ghi cách điện với đất bằng --earth-um."] },
       ],
     },
     {
@@ -551,8 +551,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Cài đặt sai sẽ báo lỗi rõ ràng",
       groups: [
-        { kind: "fix", items: ["CLI: tham số mâu thuẫn nhau hoặc không có tác dụng giờ báo lỗi, không lặng lẽ chọn một cái. Ví dụ ghi cả dầu và chân không, hoặc máy hai cuộn dây mà lại có điện áp trung áp."] },
-        { kind: "imp", items: ["Trang: cột kết quả cao bằng biểu mẫu; đầu trang có số phiên bản, liên kết tới trợ lý và nhật ký cập nhật; biểu tượng mới; mức chịu điện áp với đất nằm dưới Um."] },
+        { kind: "fix", items: ["CLI báo lỗi khi các tham số mâu thuẫn nhau, ví dụ ghi cả dầu và chân không."] },
+        { kind: "imp", items: ["Đầu trang hiện số phiên bản và liên kết tới CLI và nhật ký cập nhật.", "Mức chịu điện áp với đất hiện dưới Um."] },
       ],
     },
     {
@@ -560,7 +560,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "CLI báo khi có phiên bản mới",
       groups: [
-        { kind: "imp", items: ["CLI: mỗi lần chạy sẽ kiểm tra npm có phiên bản mới không và thêm một dòng nhắc ở cuối; không bao giờ tự cập nhật.", "Trang: bỏ ô dán và nút Sao chép liên kết phía trên biểu mẫu; ghi chú máy tự ngẫu dùng lời dễ hiểu hơn; trang AI dùng thẳng bản trên npm."] },
+        { kind: "imp", items: ["Mỗi lần chạy, CLI kiểm tra phiên bản mới và nhắc một dòng nếu có.", "Đã bỏ ô dán và nút Sao chép liên kết phía trên biểu mẫu.", "Ghi chú về máy biến áp tự ngẫu dùng lời dễ hiểu hơn."] },
       ],
     },
     {
@@ -568,9 +568,9 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Dán nhãn máy để điền biểu mẫu",
       groups: [
-        { kind: "new", items: ["Trang: dán một dòng nhãn máy hoặc hồ sơ thầu, biểu mẫu tự điền; Sao chép liên kết gửi lựa chọn cho đồng nghiệp; lần mở đầu dùng ngôn ngữ của trình duyệt.", "CLI: --version cho biết phiên bản; không có tham số thì hiện trợ giúp; gõ sai tham số sẽ được gợi ý; đầu ra JSON cho chương trình đầy đủ hơn."] },
-        { kind: "fix", items: ["Không tải: không còn báo ngoài catalogue khi danh sách có kiểu phù hợp (800 A, tam giác, Um 72,5 kV nay cho WSLIV-2000D/72.5-18x17E).", "Mã nấc không có trong sơ đồ của catalogue luôn kèm ghi chú; số cấp ± phải là số nguyên; CVT khô tối đa 9 vị trí và báo là kiểu tuyến tính khi dùng cho dải ±.", "CLI: ký tự toàn độ trong dòng nhãn máy, như dấu gạch chéo toàn độ, được đọc đúng; trước đây có thể chọn theo phía hạ áp."] },
-        { kind: "imp", items: ["Trang: chân trang có liên kết tới nhật ký cập nhật, chọn bằng AI, điều khoản và quyền riêng tư; in chỉ ra thẻ kết quả; chữ và viền ô rõ hơn; trình đọc màn hình nói lý do không có kiểu."] },
+        { kind: "new", items: ["Dán một dòng nhãn máy hoặc hồ sơ thầu vào biểu mẫu, biểu mẫu sẽ tự điền.", "Sao chép liên kết gửi lựa chọn hiện tại cho đồng nghiệp.", "CLI có --version và gợi ý đúng tham số khi bạn gõ sai."] },
+        { kind: "fix", items: ["Chế độ không tải không còn báo ngoài catalogue khi danh sách có kiểu phù hợp.", "Mã nấc không có trong sơ đồ của catalogue luôn kèm ghi chú.", "Ký tự toàn độ trong nhãn máy giờ được đọc đúng."] },
+        { kind: "imp", items: ["Khi in chỉ in thẻ kết quả."] },
       ],
     },
     {
@@ -578,7 +578,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "Kiểm tra phiên bản mới mỗi ngày",
       groups: [
-        { kind: "new", items: ["CLI kiểm tra phiên bản mới tối đa một lần mỗi ngày; nếu có, cuối kết quả sẽ nhắc kèm lệnh cập nhật, không bao giờ tự cập nhật. Thêm --no-update-check để tắt."] },
+        { kind: "new", items: ["CLI kiểm tra phiên bản mới tối đa một lần mỗi ngày và nhắc bạn cập nhật. Nó không bao giờ tự cập nhật."] },
       ],
     },
     {
@@ -586,8 +586,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "Kiểu thay đổi ngay khi bạn nhập",
       groups: [
-        { kind: "imp", items: ["Không còn nút Chọn: kiểu cập nhật ngay khi bạn đổi một giá trị. Thẻ kết quả đặt tải bên cạnh định mức của kiểu (dòng qua lớn nhất, điện áp cấp, công suất cấp, cách điện) và cho thấy đã dùng bao nhiêu.", "Trên điện thoại, kiểu luôn nằm ở cuối màn hình, sao chép được ngay; nhóm Bộ chuyển nấc mặc định thu gọn, giá trị hiện trên một dòng dưới tiêu đề."] },
-        { kind: "fix", items: ["CLI: số vị trí ghi cho thô-tinh hoặc đảo chiều không còn bị ±8 thay thế; tuyến tính ±8 tính là 17 vị trí; máy tự ngẫu mặc định ở điểm nối cuộn nối tiếp–chung; cách điện với đất ghi tay dùng được trên 363 kV; chỉ ghi tam giác thì mặc định ở đầu đường dây."] },
+        { kind: "imp", items: ["Kiểu cập nhật ngay khi bạn đổi một giá trị. Không còn nút Chọn.", "Thẻ kết quả đặt tải bên cạnh định mức của kiểu và cho thấy đã dùng bao nhiêu.", "Trên điện thoại, kiểu luôn ở cuối màn hình và sao chép được ngay."] },
+        { kind: "fix", items: ["Trong CLI, số vị trí cho thô-tinh hoặc đảo chiều không còn bị ±8 thay thế.", "Máy tự ngẫu chọn theo dòng điện giờ mặc định ở điểm nối cuộn nối tiếp–chung."] },
       ],
     },
     {
@@ -611,8 +611,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "Thẻ kết quả nêu những gì kỹ thuật phải kiểm tra",
       groups: [
-        { kind: "fix", items: ["Khi cách điện trên cuộn điều chỉnh cao hơn mọi cấp bộ chọn, trang yêu cầu liên hệ kỹ thuật thay vì đưa ra kiểu DE.", "Tỷ lệ cấp tự nhập và hệ số an toàn nhận số thập phân, cả dấu phẩy (0,5); nấc đã đổi ở chế độ không tải không còn mang sang có tải.", "Với sao, ghi chú điện áp hiện cách điện với đất; với tam giác, hiện Um thực dùng. Bỏ lựa chọn Bất kỳ để điện áp cấp không bị tính thiếu."] },
-        { kind: "imp", items: ["Thẻ kết quả đánh dấu những gì kỹ thuật phải xác nhận: chưa có điện áp cấp, tải vượt định mức, mã nấc không chuẩn, hoặc cấp bộ chọn bị nâng."] },
+        { kind: "fix", items: ["Khi cách điện cao hơn mọi cấp bộ chọn, trang yêu cầu liên hệ kỹ thuật thay vì đưa ra kiểu DE.", "Tỷ lệ cấp và hệ số an toàn nhận số thập phân.", "Đã bỏ lựa chọn Bất kỳ để điện áp cấp không bị tính thiếu."] },
+        { kind: "imp", items: ["Thẻ kết quả đánh dấu những gì kỹ thuật phải xác nhận, ví dụ thiếu điện áp cấp hoặc tải vượt định mức."] },
       ],
     },
     {
@@ -779,8 +779,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Salida de la CLI más corta y clara",
       groups: [
-        { kind: "imp", items: ["CLI: resultados más cortos. Solo lista las suposiciones que pueden cambiar el tipo, y dice una sola vez el aislamiento a tierra.", "CLI: en una ejecución en chino, un error sale primero en chino y luego en inglés; con --json el error es solo JSON, para que lo lean los programas."] },
-        { kind: "fix", items: ["CLI: un grupo de conexión en minúsculas (como ynd11) se lee bien; una línea que solo dice off-circuit elige un cambiador sin carga.", "CLI: --conn junto a una potencia ahora da error, porque antes cambiaba la corriente sin avisar. Use --tap line o --winding delta."] },
+        { kind: "imp", items: ["La CLI da resultados más cortos y solo lista las suposiciones que pueden cambiar el tipo.", "En una ejecución en chino, los errores de la CLI salen primero en chino y luego en inglés."] },
+        { kind: "fix", items: ["La CLI lee un grupo de conexión en minúsculas, como ynd11.", "Una línea que solo dice off-circuit ahora elige un cambiador sin carga.", "La CLI ahora da error si se indica --conn junto a una potencia, en vez de calcular mal la corriente sin avisar."] },
       ],
     },
     {
@@ -788,7 +788,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Una tarjeta de resultado más limpia",
       groups: [
-        { kind: "imp", items: ["Página: la tarjeta de resultado tiene la misma altura que el formulario y termina a su nivel, sin franja vacía; en una ventana baja el tipo sigue a la vista.", "Página: desaparece la barra de aislamiento a tierra, siempre cerca del 100 %; sin icono en la cabecera; bordes de desplegables más suaves.", "CLI: se elimina la opción --market (solo conocía Italia y Turquía y casi nunca hacía nada). Indique el aislamiento a tierra con --earth-um."] },
+        { kind: "imp", items: ["La tarjeta de resultado tiene la misma altura que el formulario, así que ambos terminan al mismo nivel.", "Desaparece la barra de aislamiento a tierra, que siempre marcaba cerca del 100 %.", "La CLI ya no tiene la opción --market. Indique el aislamiento a tierra con --earth-um."] },
       ],
     },
     {
@@ -796,8 +796,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Los ajustes erróneos dan un error claro",
       groups: [
-        { kind: "fix", items: ["CLI: las opciones que se contradicen o no tienen efecto ahora dan error, en vez de elegir una sin avisar. Por ejemplo aceite y vacío a la vez, o tensión de MT en un transformador de dos devanados."] },
-        { kind: "imp", items: ["Página: la columna de resultado tiene la altura del formulario; la cabecera muestra la versión y enlaza al asistente y a las notas de versión; icono nuevo; las tensiones soportadas a tierra van bajo Um."] },
+        { kind: "fix", items: ["La CLI da error cuando las opciones se contradicen, por ejemplo aceite y vacío a la vez."] },
+        { kind: "imp", items: ["La cabecera muestra la versión y enlaza a la CLI y a las notas de versión.", "Las tensiones soportadas a tierra se muestran bajo Um."] },
       ],
     },
     {
@@ -805,7 +805,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "La CLI avisa de nuevas versiones",
       groups: [
-        { kind: "imp", items: ["CLI: cada ejecución mira en npm si hay una versión nueva y añade un aviso de una línea al final; nunca se actualiza sola.", "Página: se quitan la caja para pegar y Copiar enlace sobre el formulario; las notas de autotransformador usan palabras más sencillas; la página de IA usa directamente la versión de npm."] },
+        { kind: "imp", items: ["Cada ejecución de la CLI busca una versión nueva y añade un aviso de una línea si la hay.", "Se quitan la caja para pegar y Copiar enlace sobre el formulario.", "Las notas de autotransformador usan palabras más sencillas."] },
       ],
     },
     {
@@ -813,9 +813,9 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Pegue una placa para rellenar el formulario",
       groups: [
-        { kind: "new", items: ["Página: pegue una línea de placa o de licitación y el formulario se rellena solo; Copiar enlace envía su selección a un colega; la primera visita usa el idioma del navegador.", "CLI: --version muestra la versión; sin opciones muestra la ayuda; una opción mal escrita recibe una sugerencia; la salida JSON para programas es más completa."] },
-        { kind: "fix", items: ["Sin carga: ya no dice fuera de catálogo cuando la lista tiene un tipo para el caso (800 A, triángulo, Um 72,5 kV ahora da WSLIV-2000D/72.5-18x17E).", "Un código de tomas que no está en los esquemas del catálogo siempre lleva nota; los escalones ± deben ser enteros; el CVT seco llega a 9 posiciones y avisa de que es lineal si se usa para un rango ±.", "CLI: los caracteres de ancho completo en una línea de placa, como la barra de ancho completo, se leen bien; antes podían dimensionar el devanado de BT."] },
-        { kind: "imp", items: ["Página: el pie enlaza a las notas de versión, selección con IA, términos y privacidad; al imprimir sale solo la tarjeta de resultado; texto y bordes más claros; los lectores de pantalla dicen por qué no hay tipo."] },
+        { kind: "new", items: ["Pegue una línea de placa o de licitación en el formulario y se rellena solo.", "Copiar enlace envía su selección actual a un colega.", "La CLI tiene --version y sugiere la opción correcta si escribe mal una."] },
+        { kind: "fix", items: ["Un caso sin carga ya no sale fuera de catálogo cuando la lista tiene un tipo para él.", "Un código de tomas que no está en los esquemas del catálogo siempre lleva una nota.", "Los caracteres de ancho completo de una placa ahora se leen bien."] },
+        { kind: "imp", items: ["Al imprimir solo sale la tarjeta de resultado."] },
       ],
     },
     {
@@ -823,7 +823,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "Comprobación diaria de versiones nuevas",
       groups: [
-        { kind: "new", items: ["La CLI busca una versión nueva como mucho una vez al día y, si la hay, termina con un aviso y el comando para actualizar; nunca se actualiza sola. Añada --no-update-check para desactivarlo."] },
+        { kind: "new", items: ["La CLI busca una versión nueva como mucho una vez al día y le avisa para actualizar. Nunca se actualiza sola."] },
       ],
     },
     {
@@ -831,8 +831,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "El tipo sigue sus datos al instante",
       groups: [
-        { kind: "imp", items: ["Ya no hay botón Seleccionar: el tipo se actualiza en cuanto cambia un valor. La tarjeta de resultado pone la carga junto a la capacidad del tipo (corriente máxima, tensión de escalón, capacidad de escalón, aislamiento) y muestra cuánto se usa.", "En el móvil, el tipo queda al pie de la pantalla, listo para copiar; la sección del cambiador empieza plegada, con sus valores en una línea bajo el título."] },
-        { kind: "fix", items: ["CLI: un número de posiciones dado para grueso-fino o inversor ya no se sustituye por ±8; lineal ±8 cuenta 17 posiciones; un autotransformador va por defecto en la unión serie–común; un aislamiento a tierra indicado funciona por encima de 363 kV; triángulo solo va por defecto en el extremo de línea."] },
+        { kind: "imp", items: ["El tipo se actualiza en cuanto cambia un valor. Ya no hay botón Seleccionar.", "La tarjeta de resultado pone la carga junto a la capacidad del tipo y muestra cuánto se usa.", "En el móvil, el tipo queda al pie de la pantalla, listo para copiar."] },
+        { kind: "fix", items: ["En la CLI, el número de posiciones para grueso-fino o inversor ya no se sustituye por ±8.", "Un autotransformador dimensionado por corriente va ahora por defecto en la unión serie–común."] },
       ],
     },
     {
@@ -856,8 +856,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "La tarjeta dice qué debe revisar ingeniería",
       groups: [
-        { kind: "fix", items: ["Cuando el aislamiento en el devanado de regulación supera todos los grados del selector, la página pide contactar con ingeniería en vez de dar un tipo DE.", "El porcentaje de escalón y el factor de seguridad aceptan decimales, también con coma (0,5); las tomas cambiadas en modo sin carga ya no pasan al modo en carga.", "En estrella, la nota de tensión muestra el aislamiento a tierra; en triángulo, la Um realmente usada. Se quita la conexión Cualquiera para no contar de menos la tensión de escalón."] },
-        { kind: "imp", items: ["La tarjeta marca lo que ingeniería debe confirmar: sin tensión de escalón, carga por encima de la capacidad, código de tomas no estándar o grado de selector elevado."] },
+        { kind: "fix", items: ["Cuando el aislamiento supera todos los grados del selector, la página pide contactar con ingeniería en vez de dar un tipo DE.", "El porcentaje de escalón y el factor de seguridad aceptan decimales.", "Se quita la conexión Cualquiera para no contar de menos la tensión de escalón."] },
+        { kind: "imp", items: ["La tarjeta marca lo que ingeniería debe confirmar, como una tensión de escalón que falta o una carga por encima de la capacidad."] },
       ],
     },
     {
@@ -1026,8 +1026,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Daha kısa ve okunur CLI çıktısı",
       groups: [
-        { kind: "imp", items: ["CLI: sonuçlar daha kısa. Yalnızca tipi değiştirebilecek varsayımları listeler ve toprağa yalıtımı bir kez söyler.", "CLI: Çince çalıştırmada hata önce Çince, sonra İngilizce gelir; --json ile hata yalnızca JSON olur, programlar okuyabilsin diye."] },
-        { kind: "fix", items: ["CLI: küçük harfli bağlantı grubu (ynd11 gibi) doğru okunur; yalnızca off-circuit yazan satır yüksüz bir kademe değiştirici seçer.", "CLI: güçle birlikte yazılan --conn artık hata verir, çünkü eskiden akımı sessizce değiştiriyordu. --tap line veya --winding delta kullanın."] },
+        { kind: "imp", items: ["CLI daha kısa sonuç verir ve yalnızca tipi değiştirebilecek varsayımları listeler.", "Çince çalıştırmada CLI hataları önce Çince, sonra İngilizce gelir."] },
+        { kind: "fix", items: ["CLI küçük harfli bağlantı grubunu okur, örneğin ynd11.", "Yalnızca off-circuit yazan satır artık yüksüz bir kademe değiştirici seçer.", "CLI artık güçle birlikte --conn verilince hata verir, akımı sessizce yanlış hesaplamaz."] },
       ],
     },
     {
@@ -1035,7 +1035,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Daha sade bir sonuç kartı",
       groups: [
-        { kind: "imp", items: ["Sayfa: sonuç kartı formla aynı yükseklikte ve onunla aynı hizada biter, boş şerit kalmaz; alçak pencerede de tip görünür kalır.", "Sayfa: hep %100 civarında duran toprağa yalıtım çubuğu kaldırıldı; başlıkta simge yok; açılır kutu kenarları daha yumuşak.", "CLI: --market parametresi kaldırıldı (yalnızca İtalya ve Türkiye'yi biliyordu, çoğu zaman bir işe yaramıyordu). Toprağa yalıtımı --earth-um ile verin."] },
+        { kind: "imp", items: ["Sonuç kartı formla aynı yükseklikte, böylece ikisi aynı hizada biter.", "Hep %100 civarında duran toprağa yalıtım çubuğu kaldırıldı.", "CLI'da artık --market parametresi yok. Toprağa yalıtımı --earth-um ile verin."] },
       ],
     },
     {
@@ -1043,8 +1043,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Yanlış ayarlar artık açık bir hata verir",
       groups: [
-        { kind: "fix", items: ["CLI: birbiriyle çelişen ya da etkisi olmayan parametreler artık hata verir; biri sessizce seçilmez. Örneğin yağ ve vakum birlikte ya da iki sargılı trafoda OG gerilimi."] },
-        { kind: "imp", items: ["Sayfa: sonuç sütunu formla aynı yükseklikte; başlıkta sürüm ile asistan ve sürüm notları bağlantıları var; yeni simge; toprağa dayanım değerleri Um'nin altında."] },
+        { kind: "fix", items: ["Parametreler birbiriyle çelişince CLI hata verir, örneğin yağ ve vakum birlikte."] },
+        { kind: "imp", items: ["Başlık artık sürümü gösterir ve CLI ile sürüm notlarına bağlantı verir.", "Toprağa dayanım değerleri Um'nin altında gösterilir."] },
       ],
     },
     {
@@ -1052,7 +1052,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "CLI yeni sürümleri bildirir",
       groups: [
-        { kind: "imp", items: ["CLI: her çalıştırmada npm'de yeni sürüm var mı diye bakar ve sona tek satırlık bir not ekler; kendini asla güncellemez.", "Sayfa: formun üstündeki yapıştırma kutusu ve Bağlantıyı kopyala kaldırıldı; ototransformatör notları daha sade; AI sayfası doğrudan npm'deki sürümü kullanır."] },
+        { kind: "imp", items: ["CLI her çalıştırmada yeni sürüm olup olmadığına bakar ve varsa tek satırlık bir not ekler.", "Formun üstündeki yapıştırma kutusu ve Bağlantıyı kopyala kaldırıldı.", "Ototransformatör notları daha sade bir dille yazıldı."] },
       ],
     },
     {
@@ -1060,9 +1060,9 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Formu doldurmak için etiket yapıştırın",
       groups: [
-        { kind: "new", items: ["Sayfa: bir etiket ya da ihale satırı yapıştırın, form kendini doldurur; Bağlantıyı kopyala seçiminizi bir meslektaşa gönderir; ilk ziyaret tarayıcı dilini kullanır.", "CLI: --version sürümü gösterir; parametresiz çalıştırma yardımı gösterir; yanlış yazılan parametreye öneri gelir; programlar için JSON çıktısı daha eksiksiz."] },
-        { kind: "fix", items: ["Yüksüz: listede uygun tip varken artık katalog dışı demez (800 A, üçgen, Um 72,5 kV artık WSLIV-2000D/72.5-18x17E verir).", "Katalog şemalarında olmayan kademe kodu her zaman not ile gelir; ± kademe sayısı tam sayı olmalı; kuru CVT en fazla 9 konumdur ve ± aralık için kullanılınca lineer tip olduğunu söyler.", "CLI: etiket satırındaki tam genişlikli karakterler, örneğin tam genişlikli eğik çizgi, doğru okunur; eskiden AG sargısına göre seçebiliyordu."] },
-        { kind: "imp", items: ["Sayfa: altbilgide sürüm notları, AI ile seçim, koşullar ve gizlilik bağlantıları; yazdırınca yalnızca sonuç kartı çıkar; daha net yazı ve kutu kenarları; ekran okuyucular tip olmamasının nedenini söyler."] },
+        { kind: "new", items: ["Forma bir etiket ya da ihale satırı yapıştırın, form kendini doldurur.", "Bağlantıyı kopyala, mevcut seçiminizi bir meslektaşa gönderir.", "CLI'da --version var ve yanlış yazılan parametre için doğrusunu önerir."] },
+        { kind: "fix", items: ["Listede uygun tip varken yüksüz bir durum artık katalog dışı görünmez.", "Katalog şemalarında olmayan bir kademe kodu her zaman bir notla gelir.", "Etiketteki tam genişlikli karakterler artık doğru okunur."] },
+        { kind: "imp", items: ["Yazdırınca yalnızca sonuç kartı çıkar."] },
       ],
     },
     {
@@ -1070,7 +1070,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "Yeni sürüm için günlük kontrol",
       groups: [
-        { kind: "new", items: ["CLI yeni sürümü günde en fazla bir kez kontrol eder; varsa sonda bir not ve güncelleme komutu verir, kendini asla güncellemez. Kapatmak için --no-update-check ekleyin."] },
+        { kind: "new", items: ["CLI yeni sürümü günde en fazla bir kez kontrol eder ve güncellemenizi hatırlatır. Kendini asla güncellemez."] },
       ],
     },
     {
@@ -1078,8 +1078,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "Tip, girdilerinizi anında izler",
       groups: [
-        { kind: "imp", items: ["Seç düğmesi yok artık: bir değeri değiştirdiğiniz anda tip güncellenir. Sonuç kartı yükü tipin değerlerinin yanına koyar (en büyük geçiş akımı, kademe gerilimi, kademe gücü, yalıtım) ve ne kadarının kullanıldığını gösterir.", "Telefonda tip ekranın altında durur, hemen kopyalanabilir; Kademe değiştirici bölümü kapalı başlar, değerleri başlığın altında tek satırda görünür."] },
-        { kind: "fix", items: ["CLI: kaba-ince veya ters çevirmeli için verilen konum sayısı artık ±8 ile değiştirilmez; lineer ±8, 17 konum sayılır; ototransformatör varsayılan olarak seri–ortak bağlantı noktasındadır; elle verilen toprağa yalıtım 363 kV üstünde de çalışır; yalnızca üçgen yazılınca varsayılan hat ucudur."] },
+        { kind: "imp", items: ["Bir değeri değiştirdiğiniz anda tip güncellenir. Seç düğmesi artık yok.", "Sonuç kartı yükü tipin değerlerinin yanına koyar ve ne kadarının kullanıldığını gösterir.", "Telefonda tip ekranın altında durur ve hemen kopyalanabilir."] },
+        { kind: "fix", items: ["CLI'da kaba-ince veya ters çevirmeli için konum sayısı artık ±8 ile değiştirilmez.", "Akıma göre seçilen ototransformatör artık varsayılan olarak seri–ortak bağlantı noktasındadır."] },
       ],
     },
     {
@@ -1103,8 +1103,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "Sonuç kartı mühendisliğin neyi kontrol etmesi gerektiğini söyler",
       groups: [
-        { kind: "fix", items: ["Ayar sargısı üzerindeki yalıtım tüm seçici kademelerini aşınca sayfa DE tipi vermek yerine mühendislikle iletişime geçmenizi ister.", "Özel kademe yüzdesi ve emniyet katsayısı ondalık kabul eder, virgülle de (0,5); yüksüz modda değiştirilen kademeler artık yüklüye taşınmaz.", "Yıldızda gerilim notu toprağa yalıtımı, üçgende gerçekten kullanılan Um'yi gösterir. Herhangi bağlantısı kaldırıldı, böylece kademe gerilimi eksik sayılmaz."] },
-        { kind: "imp", items: ["Sonuç kartı mühendisliğin onaylaması gerekenleri işaretler: kademe gerilimi verilmemiş, yük değerin üstünde, standart dışı kademe kodu ya da yükseltilmiş seçici kademesi."] },
+        { kind: "fix", items: ["Yalıtım tüm seçici kademelerini aşınca sayfa DE tipi vermek yerine mühendislikle iletişime geçmenizi ister.", "Kademe yüzdesi ve emniyet katsayısı ondalık kabul eder.", "Herhangi bağlantısı kaldırıldı, böylece kademe gerilimi eksik sayılmaz."] },
+        { kind: "imp", items: ["Sonuç kartı mühendisliğin onaylaması gerekenleri işaretler, örneğin eksik kademe gerilimi ya da değerin üstünde yük."] },
       ],
     },
     {
@@ -1271,8 +1271,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Output CLI lebih singkat dan mudah dibaca",
       groups: [
-        { kind: "imp", items: ["CLI: hasil lebih singkat. Hanya mencantumkan asumsi yang bisa mengubah tipe, dan menyebut isolasi ke tanah sekali saja.", "CLI: pada run berbahasa Tionghoa, error tampil dalam bahasa Tionghoa lalu Inggris; dengan --json, error hanya berupa JSON agar bisa dibaca program."] },
-        { kind: "fix", items: ["CLI: vector group huruf kecil (misalnya ynd11) terbaca benar; baris yang hanya menulis off-circuit memilih tap changer tanpa beban.", "CLI: --conn bersama kapasitas kini menghasilkan error, karena dulu diam-diam mengubah arus. Gunakan --tap line atau --winding delta."] },
+        { kind: "imp", items: ["CLI memberi hasil lebih singkat dan hanya mencantumkan asumsi yang bisa mengubah tipe.", "Pada run berbahasa Tionghoa, error CLI tampil dalam bahasa Tionghoa lalu Inggris."] },
+        { kind: "fix", items: ["CLI membaca vector group huruf kecil, misalnya ynd11.", "Baris yang hanya menulis off-circuit kini memilih tap changer tanpa beban.", "CLI kini memberi error bila --conn ditulis bersama kapasitas, alih-alih diam-diam salah menghitung arus."] },
       ],
     },
     {
@@ -1280,7 +1280,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Kartu hasil yang lebih rapi",
       groups: [
-        { kind: "imp", items: ["Halaman: kartu hasil setinggi formulir dan berakhir sejajar dengannya, tanpa ruang kosong; di jendela pendek tipe tetap terlihat.", "Halaman: bilah isolasi ke tanah yang selalu dekat 100% dihapus; tanpa ikon di header; garis tepi dropdown lebih lembut.", "CLI: parameter --market dihapus (hanya mengenal Italia dan Turki dan hampir selalu tidak berpengaruh). Tulis isolasi ke tanah dengan --earth-um."] },
+        { kind: "imp", items: ["Kartu hasil setinggi formulir, jadi keduanya berakhir sejajar.", "Bilah isolasi ke tanah yang selalu dekat 100% dihapus.", "CLI tidak lagi punya parameter --market. Tulis isolasi ke tanah dengan --earth-um."] },
       ],
     },
     {
@@ -1288,8 +1288,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Pengaturan yang salah kini memberi error yang jelas",
       groups: [
-        { kind: "fix", items: ["CLI: parameter yang saling bertentangan atau tidak berpengaruh kini menghasilkan error, bukan diam-diam memilih salah satunya. Misalnya minyak dan vakum sekaligus, atau tegangan TM pada trafo dua belitan."] },
-        { kind: "imp", items: ["Halaman: kolom hasil setinggi formulir; header menampilkan versi serta tautan ke asisten dan catatan rilis; ikon baru; nilai ketahanan ke tanah ada di bawah Um."] },
+        { kind: "fix", items: ["CLI memberi error bila parameter saling bertentangan, misalnya minyak dan vakum sekaligus."] },
+        { kind: "imp", items: ["Header kini menampilkan versi serta tautan ke CLI dan catatan rilis.", "Nilai ketahanan ke tanah ditampilkan di bawah Um."] },
       ],
     },
     {
@@ -1297,7 +1297,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "CLI memberi tahu jika ada versi baru",
       groups: [
-        { kind: "imp", items: ["CLI: setiap run memeriksa versi baru di npm dan menambahkan catatan satu baris di akhir; tidak pernah memperbarui dirinya sendiri.", "Halaman: kotak tempel dan Salin tautan di atas formulir dihapus; catatan autotrafo memakai kata yang lebih sederhana; halaman AI langsung memakai versi di npm."] },
+        { kind: "imp", items: ["Setiap run, CLI memeriksa versi baru dan menambahkan catatan satu baris bila ada.", "Kotak tempel dan Salin tautan di atas formulir dihapus.", "Catatan autotrafo memakai kata yang lebih sederhana."] },
       ],
     },
     {
@@ -1305,9 +1305,9 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-11",
       title: "Tempel pelat nama untuk mengisi formulir",
       groups: [
-        { kind: "new", items: ["Halaman: tempel satu baris pelat nama atau tender dan formulir terisi sendiri; Salin tautan mengirim pilihan Anda ke rekan; kunjungan pertama memakai bahasa browser.", "CLI: --version menampilkan versi; tanpa parameter menampilkan bantuan; parameter yang salah ketik mendapat saran; output JSON untuk program lebih lengkap."] },
-        { kind: "fix", items: ["Tanpa beban: tidak lagi menyebut di luar katalog saat daftar punya tipe yang cocok (800 A, delta, Um 72,5 kV kini memberi WSLIV-2000D/72.5-18x17E).", "Kode tap yang tidak ada di diagram katalog selalu disertai catatan; jumlah tahap ± harus bilangan bulat; CVT kering maksimal 9 posisi dan memberi tahu bahwa itu tipe linear bila dipakai untuk rentang ±.", "CLI: karakter lebar penuh di baris pelat nama, seperti garis miring lebar penuh, terbaca benar; dulu bisa memilih berdasarkan sisi TR."] },
-        { kind: "imp", items: ["Halaman: footer berisi tautan ke catatan rilis, pemilihan dengan AI, ketentuan, dan privasi; cetak hanya mengeluarkan kartu hasil; teks dan tepi kolom lebih jelas; pembaca layar menyebut alasan tidak ada tipe."] },
+        { kind: "new", items: ["Tempel satu baris pelat nama atau tender ke formulir, dan formulir terisi sendiri.", "Salin tautan mengirim pilihan Anda saat ini ke rekan.", "CLI punya --version dan menyarankan parameter yang benar bila Anda salah ketik."] },
+        { kind: "fix", items: ["Kasus tanpa beban tidak lagi tampil di luar katalog bila daftar punya tipe yang cocok.", "Kode tap yang tidak ada di diagram katalog selalu disertai catatan.", "Karakter lebar penuh di pelat nama kini terbaca benar."] },
+        { kind: "imp", items: ["Saat dicetak, hanya kartu hasil yang keluar."] },
       ],
     },
     {
@@ -1315,7 +1315,7 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "Cek versi baru setiap hari",
       groups: [
-        { kind: "new", items: ["CLI memeriksa versi baru paling banyak sekali sehari; jika ada, hasil diakhiri catatan dan perintah pembaruan, tanpa pernah memperbarui sendiri. Tambahkan --no-update-check untuk mematikannya."] },
+        { kind: "new", items: ["CLI memeriksa versi baru paling banyak sekali sehari dan mengingatkan Anda untuk memperbarui. CLI tidak pernah memperbarui dirinya sendiri."] },
       ],
     },
     {
@@ -1323,8 +1323,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "Tipe langsung mengikuti input Anda",
       groups: [
-        { kind: "imp", items: ["Tidak ada lagi tombol Pilih: tipe diperbarui begitu Anda mengubah nilai. Kartu hasil menaruh beban di samping rating tipe (arus lewat maksimum, tegangan tahap, kapasitas tahap, isolasi) dan menunjukkan berapa yang terpakai.", "Di ponsel, tipe tetap di bagian bawah layar dan siap disalin; bagian Tap changer mulai dalam keadaan terlipat, dengan nilainya dalam satu baris di bawah judul."] },
-        { kind: "fix", items: ["CLI: jumlah posisi untuk kasar-halus atau pembalik tidak lagi diganti ±8; linear ±8 dihitung 17 posisi; autotrafo bawaannya di titik sambung seri–bersama; isolasi ke tanah yang ditulis berlaku di atas 363 kV; hanya delta bawaannya di ujung saluran."] },
+        { kind: "imp", items: ["Tipe diperbarui begitu Anda mengubah nilai. Tombol Pilih sudah tidak ada.", "Kartu hasil menaruh beban di samping rating tipe dan menunjukkan berapa yang terpakai.", "Di ponsel, tipe tetap di bagian bawah layar dan siap disalin."] },
+        { kind: "fix", items: ["Di CLI, jumlah posisi untuk kasar-halus atau pembalik tidak lagi diganti ±8.", "Autotrafo yang dipilih dari arus kini bawaannya di titik sambung seri–bersama."] },
       ],
     },
     {
@@ -1348,8 +1348,8 @@ export const RELEASES: Record<Lang, Release[]> = {
       date: "2026-10",
       title: "Kartu hasil menyebut yang harus dicek engineering",
       groups: [
-        { kind: "fix", items: ["Bila isolasi pada belitan pengatur melebihi semua tingkat selektor, halaman meminta Anda menghubungi engineering alih-alih memberi tipe DE.", "Persentase tahap dan faktor keamanan kustom menerima desimal, juga dengan koma (0,5); tap yang diubah di mode tanpa beban tidak lagi terbawa ke mode berbeban.", "Untuk bintang, catatan tegangan menunjukkan isolasi ke tanah; untuk delta, Um yang benar-benar dipakai. Pilihan Bebas dihapus agar tegangan tahap tidak terhitung terlalu rendah."] },
-        { kind: "imp", items: ["Kartu hasil menandai yang harus dikonfirmasi engineering: tanpa tegangan tahap, beban di atas rating, kode tap tidak standar, atau tingkat selektor dinaikkan."] },
+        { kind: "fix", items: ["Bila isolasi melebihi semua tingkat selektor, halaman meminta Anda menghubungi engineering alih-alih memberi tipe DE.", "Persentase tahap dan faktor keamanan menerima desimal.", "Pilihan Bebas dihapus agar tegangan tahap tidak terhitung terlalu rendah."] },
+        { kind: "imp", items: ["Kartu hasil menandai yang harus dikonfirmasi engineering, misalnya tegangan tahap yang belum diisi atau beban di atas rating."] },
       ],
     },
     {
