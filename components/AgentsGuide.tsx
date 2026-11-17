@@ -4,12 +4,11 @@ import {
   ArrowLongRightIcon,
   ArrowTopRightOnSquareIcon,
   CheckIcon,
-  ChevronRightIcon,
   ExclamationTriangleIcon,
   Square2StackIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { TopBar } from "@/components/TopBar";
 import { useAppLang } from "@/components/LangProvider";
 import { copyText } from "@/lib/clipboard";
@@ -135,16 +134,25 @@ const DEMO: Record<"zh" | "en", Line[]> = {
   ],
 };
 
-const NODE_PAGE = "https://nodejs.org/";
+type Tab = "ex" | "flags" | "install";
+const TABS: Tab[] = ["ex", "flags", "install"];
 
-/** The CLI page for an ordinary user (2026-11-17 Eric: "only teach how to
- *  install, and show an example of the output"). The AI assistant, the
- *  examples and the flags stay on the page, folded. */
+/** The CLI page (2026-11-17 Eric: "get rid of Notion style", "要有指引",
+ *  then: running the command is the AI agent's job). The guide is asking
+ *  an AI assistant: send this line, send the data, get the type. Then real
+ *  questions people ask and the type each one gets. The commands, flags
+ *  and a manual install stay below as tabs, for reference. */
 export function AgentsGuide() {
   const lang = useAppLang();
   const c = agentGuide(lang);
   const [copied, setCopied] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>("ex");
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tabRefs = useRef<Record<Tab, HTMLButtonElement | null>>({
+    ex: null,
+    flags: null,
+    install: null,
+  });
 
   useEffect(() => {
     return () => {
@@ -161,114 +169,134 @@ export function AgentsGuide() {
   };
 
   const copyProps = { copied, copyLabel: c.copy, copiedLabel: c.copied, onCopy };
+  const tabName: Record<Tab, string> = { ex: c.secEx, flags: c.secFlags, install: c.install };
+  const demoCmd = `oltc ${lang === "zh" ? "" : "--lang en "}${DEMO_ARGS}`;
+
+  const onTabKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    const next = TABS[(TABS.indexOf(tab) + step + TABS.length) % TABS.length];
+    setTab(next);
+    tabRefs.current[next]?.focus();
+  };
 
   return (
-    <div className="page cli-page flex w-full min-w-0 flex-1 flex-col">
+    <div className="page doc-page flex w-full min-w-0 flex-1 flex-col">
       <TopBar lang={lang} current="cli" />
 
-      <main lang={lang} className="cli mx-auto w-full max-w-[46rem] px-4 sm:px-6">
-        <div className="cli-head">
-          <h1 className="cli-title">{c.title}</h1>
-          <p className="cli-lead">{c.lead}</p>
-        </div>
+      <main lang={lang} className="doc cli mx-auto w-full">
+        <header className="doc-hero">
+          <h1 className="doc-title">{c.title}</h1>
+          <p className="doc-lead">{c.lead}</p>
+        </header>
 
-        <ol className="cli-how">
-          <li className="cli-how-step">
-            <span className="cli-how-n" aria-hidden>
-              1
-            </span>
-            <div className="cli-how-body">
-              <h2>{c.install}</h2>
-              <p>
-                {c.needNode}{" "}
-                <a className="cli-link" href={NODE_PAGE} target="_blank" rel="noreferrer">
-                  {c.nodeLink}
-                  <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" aria-hidden />
-                </a>
+        <ol className="cli-guide">
+          <GuideStep n={1} title={c.s1t} body={c.s1b}>
+            <div className="cli-prompt">
+              <p>{c.s1prompt}</p>
+              <CopyBtn id="prompt" text={c.s1prompt} {...copyProps} />
+            </div>
+          </GuideStep>
+          <GuideStep n={2} title={c.s2t} body={c.s2b}>
+            <p className="cli-bubble">{c.s2q}</p>
+          </GuideStep>
+          <GuideStep n={3} title={c.s3t} body={c.s3b}>
+            <div className="cli-answer">
+              <TypeChip type="CV2III-350Y/72.5-10193W" tag={c.tagOltc} />
+              <TypeChip type="WSLIV-600Y/72.5-6x5A" tag={c.tagOctc} />
+              <p className="cli-answer-note">
+                <CheckIcon className="h-4 w-4 shrink-0" aria-hidden />
+                {c.s3note}
               </p>
-              <Cmd id="install" command={INSTALL} {...copyProps} />
             </div>
-          </li>
-          <li className="cli-how-step">
-            <span className="cli-how-n" aria-hidden>
-              2
-            </span>
-            <div className="cli-how-body">
-              <h2>{c.runT}</h2>
-              <Terminal lang={lang} {...copyProps} />
-              <p>{c.readOut}</p>
-            </div>
-          </li>
+          </GuideStep>
         </ol>
 
-        <section className="cli-more" aria-label={c.moreT}>
-          <h2 className="cli-more-h">{c.moreT}</h2>
-
-          <Fold title={c.secAi}>
-            <ol className="cli-steps">
-              <Step n={1} title={c.s1t} body={c.s1b}>
-                <div className="cli-prompt">
-                  <p>{c.s1prompt}</p>
-                  <CopyBtn id="prompt" text={c.s1prompt} {...copyProps} />
-                </div>
-              </Step>
-              <Step n={2} title={c.s2t} body={c.s2b}>
-                <p className="cli-bubble">{c.s2q}</p>
-              </Step>
-              <Step n={3} title={c.s3t} body={c.s3b}>
-                <div className="cli-answer">
-                  <TypeChip type="CV2III-350Y/72.5-10193W" tag={c.tagOltc} />
-                  <TypeChip type="WSLIV-600Y/72.5-6x5A" tag={c.tagOctc} />
-                  <p className="cli-answer-note">
-                    <CheckIcon className="h-4 w-4 shrink-0" aria-hidden />
-                    {c.s3note}
-                  </p>
-                </div>
-              </Step>
-            </ol>
-            <h3 className="cli-h3">{c.more}</h3>
-            <div className="cli-more-cases">
-              <Case label={c.exDry} q={c.qDry} type="3xCZI-500/40.5-9" tag={c.tagDry} />
-              <Case label={c.exShzv} q={c.qShzv} type="3xSHZVI-2400/72.5B-12233W" />
-            </div>
-          </Fold>
-
-          <Fold title={c.secEx}>
-            <div className="cli-examples">
-              {EXAMPLES.map((ex, i) => (
-                <div key={ex.cmd} className="cli-ex">
-                  <p className="cli-ex-k">{t(lang, ex.label)}</p>
-                  <Cmd id={`ex-${i}`} command={ex.cmd} dark {...copyProps} />
-                  <p className="cli-ex-out">
-                    <ArrowLongRightIcon className="h-4 w-4 shrink-0" aria-hidden />
-                    <code>{ex.type}</code>
-                  </p>
-                </div>
-              ))}
-            </div>
-          </Fold>
-
-          <Fold title={c.secFlags}>
-            <div className="cli-flags">
-              {FLAG_GROUPS.map((g) => (
-                <FlagCard key={g.title} title={t(lang, g.title)} flags={g.flags} lang={lang} />
-              ))}
-              <FlagCard title={c.outT} flags={OUTPUT_FLAGS} lang={lang} />
-            </div>
-          </Fold>
-
-          <p className="cli-npm">
-            <a className="cli-link" href={NPM_PAGE} target="_blank" rel="noreferrer">
-              {c.npm}
-              <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" aria-hidden />
-            </a>
-          </p>
+        <section className="cli-cases-sec" aria-labelledby="cli-cases-h">
+          <h2 id="cli-cases-h" className="cli-sec-h">
+            {c.more}
+          </h2>
+          <div className="cli-cases">
+            <Case label={c.exDry} q={c.qDry} type="3xCZI-500/40.5-9" tag={c.tagDry} />
+            <Case label={c.exShzv} q={c.qShzv} type="3xSHZVI-2400/72.5B-12233W" />
+            <Case label={t(lang, "kindAuto")} q={c.qAuto} type="3xCM2I-500/252D-10193W" />
+            <Case label={t(lang, "dutyOctc")} q={c.qOctc} type="WSLII-800D/72.5-6x5A" tag={c.tagOctc} />
+          </div>
         </section>
 
-        <p className="cli-limit">
-          <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" aria-hidden />
-          {c.limit}
-        </p>
+        <section className="cli-more">
+          <div className="cli-tabs" role="tablist" aria-label={c.moreT} onKeyDown={onTabKey}>
+            {TABS.map((k) => (
+              <button
+                key={k}
+                ref={(el) => {
+                  tabRefs.current[k] = el;
+                }}
+                type="button"
+                role="tab"
+                id={`tab-${k}`}
+                aria-selected={tab === k}
+                aria-controls={`panel-${k}`}
+                tabIndex={tab === k ? 0 : -1}
+                className="cli-tab"
+                onClick={() => setTab(k)}
+              >
+                {tabName[k]}
+              </button>
+            ))}
+          </div>
+
+          <div
+            role="tabpanel"
+            id={`panel-${tab}`}
+            aria-labelledby={`tab-${tab}`}
+            className="cli-panel"
+          >
+            {tab === "ex" ? (
+              <div className="cli-examples">
+                {EXAMPLES.map((ex, i) => (
+                  <div key={ex.cmd} className="cli-ex">
+                    <p className="cli-ex-k">{t(lang, ex.label)}</p>
+                    <Cmd id={`ex-${i}`} command={ex.cmd} {...copyProps} />
+                    <p className="cli-ex-out">
+                      <ArrowLongRightIcon className="h-4 w-4 shrink-0" aria-hidden />
+                      <code>{ex.type}</code>
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            {tab === "flags" ? (
+              <div className="cli-flags">
+                {FLAG_GROUPS.map((g) => (
+                  <FlagGroup key={g.title} title={t(lang, g.title)} flags={g.flags} lang={lang} />
+                ))}
+                <FlagGroup title={c.outT} flags={OUTPUT_FLAGS} lang={lang} />
+              </div>
+            ) : null}
+
+            {tab === "install" ? (
+              <div className="cli-manual">
+                <Cmd id="install" command={INSTALL} {...copyProps} />
+                <Cmd id="demo" command={demoCmd} {...copyProps} />
+                <Terminal lang={lang} />
+              </div>
+            ) : null}
+          </div>
+        </section>
+
+        <div className="cli-end">
+          <p className="cli-limit">
+            <ExclamationTriangleIcon className="h-4 w-4 shrink-0" aria-hidden />
+            {c.limit}
+          </p>
+          <a className="cli-link" href={NPM_PAGE} target="_blank" rel="noreferrer">
+            {c.npm}
+            <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" aria-hidden />
+          </a>
+        </div>
       </main>
 
       <footer className="page-foot">
@@ -285,16 +313,30 @@ export function AgentsGuide() {
   );
 }
 
-/** A folded section, like a Notion toggle. */
-function Fold({ title, children }: { title: string; children: ReactNode }) {
+/** One step of the guide: number and words on the left, what to type and
+ *  what you get on the right. */
+function GuideStep({
+  n,
+  title,
+  body,
+  children,
+}: {
+  n: number;
+  title: string;
+  body?: string;
+  children: ReactNode;
+}) {
   return (
-    <details className="cli-fold">
-      <summary>
-        <ChevronRightIcon className="cli-fold-chev h-4 w-4 shrink-0" aria-hidden />
-        {title}
-      </summary>
-      <div className="cli-fold-body">{children}</div>
-    </details>
+    <li className="cli-gstep">
+      <div className="cli-gstep-text">
+        <span className="cli-gstep-n" aria-hidden>
+          {n}
+        </span>
+        <h2>{title}</h2>
+        {body ? <p>{body}</p> : null}
+      </div>
+      <div className="cli-gstep-show">{children}</div>
+    </li>
   );
 }
 
@@ -305,58 +347,23 @@ type CopyProps = {
   onCopy: (id: string, text: string) => void;
 };
 
-function Terminal({ lang, ...copy }: { lang: Lang } & CopyProps) {
+function Terminal({ lang }: { lang: Lang }) {
   const out = lang === "zh" ? "zh" : "en";
-  const cmd = `oltc ${out === "en" ? "--lang en " : ""}${DEMO_ARGS}`;
   return (
     <div className="cli-term">
-      <div className="cli-term-bar">
-        <span className="cli-term-name">oltc</span>
-        <CopyBtn id="demo" text={cmd} small {...copy} />
+      <div className="cli-term-bar" aria-hidden>
+        <i />
+        <i />
+        <i />
       </div>
       <pre className="cli-term-body">
-        <span className="term-line term-cmd" style={{ "--i": 0 } as CSSProperties}>
-          <span className="term-ps" aria-hidden>
-            ${" "}
-          </span>
-          {cmd}
-        </span>
         {DEMO[out].map(([kind, text], i) => (
-          <span
-            key={i}
-            className={`term-line term-${kind}`}
-            style={{ "--i": i + 2 } as CSSProperties}
-          >
+          <span key={i} className={`term-line term-${kind}`}>
             {text || " "}
           </span>
         ))}
       </pre>
     </div>
-  );
-}
-
-function Step({
-  n,
-  title,
-  body,
-  children,
-}: {
-  n: number;
-  title: string;
-  body: string;
-  children: ReactNode;
-}) {
-  return (
-    <li className="cli-step">
-      <div className="cli-step-text">
-        <span className="cli-step-n" aria-hidden>
-          {n}
-        </span>
-        <h3>{title}</h3>
-        <p>{body}</p>
-      </div>
-      <div className="cli-step-show">{children}</div>
-    </li>
   );
 }
 
@@ -382,9 +389,9 @@ function Case({ label, q, type, tag }: { label: string; q: string; type: string;
   );
 }
 
-function FlagCard({ title, flags, lang }: { title: string; flags: Flag[]; lang: Lang }) {
+function FlagGroup({ title, flags, lang }: { title: string; flags: Flag[]; lang: Lang }) {
   return (
-    <div className="cli-flag-card">
+    <div className="cli-flag-group">
       <h3>{title}</h3>
       <dl>
         {flags.map(([flag, label, values]) => (
@@ -444,7 +451,6 @@ function Cmd({
   id,
   label,
   command,
-  dark,
   copied,
   copyLabel,
   copiedLabel,
@@ -453,13 +459,12 @@ function Cmd({
   id: string;
   label?: string;
   command: string;
-  dark?: boolean;
 } & CopyProps) {
   const is = copied === id;
   return (
     <button
       type="button"
-      className={`cli-cmd${dark ? " is-dark" : ""}${is ? " is-copied" : ""}`}
+      className={`cli-cmd${is ? " is-copied" : ""}`}
       onClick={() => onCopy(id, command)}
       aria-label={`${copyLabel}: ${command}`}
     >
@@ -468,7 +473,14 @@ function Cmd({
         <span className="cli-cmd-ps" aria-hidden>
           $
         </span>
-        <code>{command}</code>
+        <code>
+          {command.split(" ").map((w, i) => (
+            <span key={i} className="cli-word">
+              {i ? " " : ""}
+              {w}
+            </span>
+          ))}
+        </code>
         <span className="cli-cmd-hint" aria-live="polite">
           {is ? (
             <CheckIcon className="h-4 w-4" aria-hidden />
