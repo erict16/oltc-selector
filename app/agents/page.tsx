@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { AgentsGuide } from "@/components/AgentsGuide";
 
 export const metadata: Metadata = {
-  title: "Let an AI assistant pick the type · OLTC Selector",
+  title: "CLI · OLTC Selector",
   description:
-    "Send one line to your AI assistant. It runs oltc-selector from npm and picks a type from the catalogue.",
+    "oltc picks the tap-changer type from the command line, with the same engine as the web page. Or send one line to an AI assistant and let it run oltc for you.",
 };
 
 export default function AgentsPage() {

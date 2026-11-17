@@ -80,11 +80,12 @@ writeFileSync(
 );
 
 // The npm page gets the CLI part only: no screenshot link that breaks there,
-// no develop notes for a repository the reader has not cloned.
+// no develop notes for a repository the reader has not cloned, no mermaid
+// chart (npm does not draw it).
 const readme = readFileSync(path.join(root, "README.md"), "utf8");
-const from = readme.indexOf("## CLI");
-const to = readme.indexOf("## Develop");
-if (from < 0 || to < from) throw new Error("pack: README needs ## CLI before ## Develop");
+const from = readme.search(/^## CLI$/m);
+const to = readme.search(/^## How it picks$/m);
+if (from < 0 || to < from) throw new Error("pack: README needs ## CLI before ## How it picks");
 const cliReadme =
   "# oltc-selector\n\n" +
   "Tap-changer type selection from the command line. The command is `oltc`. " +

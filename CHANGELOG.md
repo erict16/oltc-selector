@@ -9,6 +9,8 @@ No new version: the CLI pack is unchanged.
 - Opening 其他可选 makes the card taller instead of taking the sketch's room, so its title does not jump up under the pointer.
 - Header: the ⚡ mark, a larger name, the version as a small tag, a hairline and a soft shadow once the page scrolls under it. The language button shows which language is on (中文, EN, …). "Selection assistant" is now "CLI".
 - A browser in another language no longer sees the Chinese page flash first: the page waits, at most 2.5 s, until it is drawn in the reader's language.
+- CLI page (`/agents/`) redesigned. It has the selector's header (CLI marked as the current page; the name goes back to the selector) and opens with a real run of `oltc` in a terminal, in the reader's language (zh or en). A page menu (a sticky row on a phone, a side list on a wide screen) leads to four sections: AI assistant (the three steps and two more cases), Command line (install, or run with npx), Examples (six commands, click to copy, each with its type), Flags (grouped as Transformer, Duty, Tap changer, Output, each flag named by its field on the selector). The header is one component now, `components/TopBar.tsx`.
+- README and README.zh-CN rewritten: a page index, a line-by-line key to the output, a "you have → run → you get" table of eleven checked commands, the flags grouped like the page's cards. The npm README is now the `## CLI` section up to `## How it picks`.
 
 ## Page, after 2.4.1 (2026-11-14)
 
