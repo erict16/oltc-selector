@@ -14,6 +14,7 @@
     "oltc": "npx vite-node scripts/oltc.ts",
     "pack:cli": "node scripts/pack-cli.mjs",
     "gen:list-index": "python scripts/gen-list-index.py",
+    "gen:activity": "node scripts/gen-activity.mjs",
     "os:excel": "python scripts/os-to-excel.py"
   },
   "dependencies": {
