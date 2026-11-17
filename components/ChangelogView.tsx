@@ -50,40 +50,6 @@ function releaseDate(rel: Release, lang: Lang) {
     : dateLabel(rel.date, lang, { year: "numeric", month: "long" });
 }
 
-/** "命令行：…" / "CLI: …" → the area in bold, then the sentence. */
-function splitArea(line: string): [string | null, string] {
-  const m = /^([^：:。.]{1,16})(：|: )(.+)$/s.exec(line);
-  return m ? [m[1], m[3]] : [null, line];
-}
-
-/** A note that lists several changes ("…；…；…") → one line each. Splits
- *  only outside brackets; drops the joining punctuation. */
-function clauses(text: string): string[] {
-  const out: string[] = [];
-  let depth = 0;
-  let cur = "";
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if ("（(".includes(ch)) depth++;
-    if ("）)".includes(ch)) depth = Math.max(0, depth - 1);
-    const latin = ch === ";" && text[i + 1] === " ";
-    if (depth === 0 && (ch === "；" || latin)) {
-      out.push(cur.trim());
-      cur = "";
-      if (latin) i++;
-      continue;
-    }
-    cur += ch;
-  }
-  out.push(cur.trim());
-  const parts = out.filter(Boolean);
-  if (parts.length < 2) return [text];
-  return parts.map((c) => {
-    const bare = c.replace(/[。.]$/, "");
-    return bare.charAt(0).toLocaleUpperCase() + bare.slice(1);
-  });
-}
-
 /** CLI flags in a note (--json, --flag=value) set in mono. */
 function withCode(text: string) {
   const parts = text.split(/(--[a-z][a-z0-9-]*(?:=[^\s，。；、,;)）]+)?)/);
@@ -118,14 +84,13 @@ export function ChangelogView() {
       <main lang={lang} className="log mx-auto w-full">
         <header className="log-hero">
           <h1 className="log-title">{t(lang, "changelogTitle")}</h1>
-          <dl className="log-stats">
+          <p className="log-stats">
             {stats.map(([n, label]) => (
-              <div key={label}>
-                <dt>{label}</dt>
-                <dd>{nf.format(n)}</dd>
-              </div>
+              <span key={label}>
+                <b>{nf.format(n)}</b> {label}
+              </span>
             ))}
-          </dl>
+          </p>
           <Activity lang={lang} releases={releases} />
         </header>
 
@@ -158,7 +123,7 @@ type Day = { ymd: string; count: number; total: number; rels: Release[] };
  *  creative"). Bars grow in on load, darker on busier days; a line climbs
  *  to the running total of commits; every release day has a marker, the
  *  major versions named. Hover or tap a day for its card;
- *  click a release day to jump to its notes. Under it, three facts. */
+ *  click a release day to jump to its notes. */
 function Activity({ lang, releases }: { lang: Lang; releases: Release[] }) {
   const [hover, setHover] = useState<number | null>(null);
   const start = utc(ACTIVITY_FROM).getTime();
@@ -178,16 +143,6 @@ function Activity({ lang, releases }: { lang: Lang; releases: Release[] }) {
     return { ymd, count, total: run, rels: byDay.get(ymd) ?? [] };
   });
   const total = run;
-
-  // Facts: the busiest day, the longest run of days with commits, the pace.
-  const busiest = days.reduce((a, d) => (d.count > a.count ? d : a), days[0]);
-  let streak = 0;
-  let cur = 0;
-  for (const d of days) {
-    cur = d.count ? cur + 1 : 0;
-    streak = Math.max(streak, cur);
-  }
-  const pace = Math.max(1, Math.round(n / Math.max(1, releases.length - 1)));
 
   // Running total as a line over the bars, 0..1000 wide, 100 tall.
   const x = (i: number) => ((i + 0.5) / n) * 1000;
@@ -274,25 +229,6 @@ function Activity({ lang, releases }: { lang: Lang; releases: Release[] }) {
         ))}
       </div>
 
-      <dl className="pulse-facts">
-        <div>
-          <dt>{t(lang, "actBusiest")}</dt>
-          <dd>
-            {dateLabel(busiest.ymd, lang, { month: "long", day: "numeric" })}
-            <span>
-              {busiest.count} {commits}
-            </span>
-          </dd>
-        </div>
-        <div>
-          <dt>{t(lang, "actStreak")}</dt>
-          <dd>{t(lang, "actStreakVal", { n: streak })}</dd>
-        </div>
-        <div>
-          <dt>{t(lang, "actPace")}</dt>
-          <dd>{t(lang, "actPaceVal", { n: pace })}</dd>
-        </div>
-      </dl>
     </figure>
   );
 }
@@ -325,27 +261,9 @@ function ReleaseEntry({ rel, lang }: { rel: Release; lang: Lang }) {
           <section key={g.kind}>
             <h3 className={`log-kind log-kind-${g.kind}`}>{t(lang, KIND_KEY[g.kind])}</h3>
             <ul>
-              {g.items.flatMap((line) => {
-                const [area, text] = splitArea(line);
-                const parts = clauses(text);
-                if (area) {
-                  return (
-                    <li key={line} className={parts.length > 1 ? "has-sub" : undefined}>
-                      <strong>{area}</strong>
-                      {parts.length > 1 ? (
-                        <ul className="log-sub">
-                          {parts.map((c) => (
-                            <li key={c}>{withCode(c)}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        withCode(text)
-                      )}
-                    </li>
-                  );
-                }
-                return parts.map((c) => <li key={c}>{withCode(c)}</li>);
-              })}
+              {g.items.map((line) => (
+                <li key={line}>{withCode(line)}</li>
+              ))}
             </ul>
           </section>
         ))}
