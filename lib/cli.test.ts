@@ -266,7 +266,7 @@ describe("oltc CLI tap range and tap point", () => {
     expect(a.out.split(/\r?\n/)[0]).toBe("3xCM2I-600/252D-10193W");
     expect(a.out).toContain("D 线端");
     expect(a.out).not.toContain("Y 星点");
-    expect(a.out).toContain("开关在串联/公共绕组连接点");
+    expect(a.out).toContain("开关在串联绕组中压端");
     const b = capture(["--iu", "600", "--um", "252", "--kind", "auto", "--tap", "junction"]);
     expect(b.out.split(/\r?\n/)[0]).toBe("3xCM2I-600/252D-10193W");
     expect(b.out).toContain("D 线端");
