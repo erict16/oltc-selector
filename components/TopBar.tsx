@@ -14,7 +14,7 @@ export function TopBar({
   current,
 }: {
   lang: Lang;
-  current: "home" | "cli";
+  current: "home" | "cli" | "changelog";
 }) {
   /** A hairline shadow once the page moves under it. */
   const [scrolled, setScrolled] = useState(false);
@@ -55,7 +55,9 @@ export function TopBar({
           <Link href="/agents/" aria-current={current === "cli" ? "page" : undefined}>
             {t(lang, "agentChip")}
           </Link>
-          <Link href="/changelog/">{t(lang, "changelogTitle")}</Link>
+          <Link href="/changelog/" aria-current={current === "changelog" ? "page" : undefined}>
+            {t(lang, "changelogTitle")}
+          </Link>
         </nav>
         <div className="topbar-lang">
           <LangSwitcher

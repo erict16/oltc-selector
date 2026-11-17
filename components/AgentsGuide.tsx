@@ -4,6 +4,7 @@ import {
   ArrowLongRightIcon,
   ArrowTopRightOnSquareIcon,
   CheckIcon,
+  ChevronRightIcon,
   ExclamationTriangleIcon,
   Square2StackIcon,
 } from "@heroicons/react/24/outline";
@@ -17,7 +18,6 @@ import { agentGuide } from "@/lib/i18nAgents";
 
 const NPM_PAGE = "https://www.npmjs.com/package/oltc-selector";
 const INSTALL = "npm i -g oltc-selector";
-const NPX = "npx -y oltc-selector@latest --help";
 
 /** Each example is a real run of the CLI (2026-11-17, v2.4.1). */
 const EXAMPLES: { label: string; cmd: string; type: string }[] = [
@@ -135,38 +135,21 @@ const DEMO: Record<"zh" | "en", Line[]> = {
   ],
 };
 
-const SECTIONS = ["ai", "cli", "examples", "flags"] as const;
-type SectionId = (typeof SECTIONS)[number];
+const NODE_PAGE = "https://nodejs.org/";
 
+/** The CLI page for an ordinary user (2026-11-17 Eric: "only teach how to
+ *  install, and show an example of the output"). The AI assistant, the
+ *  examples and the flags stay on the page, folded. */
 export function AgentsGuide() {
   const lang = useAppLang();
   const c = agentGuide(lang);
   const [copied, setCopied] = useState<string | null>(null);
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [active, setActive] = useState<SectionId>("ai");
 
   useEffect(() => {
     return () => {
       if (copiedTimer.current) clearTimeout(copiedTimer.current);
     };
-  }, []);
-
-  // The page menu follows the section in the middle of the window.
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) setActive(e.target.id as SectionId);
-        }
-      },
-      { rootMargin: "-35% 0px -60% 0px" },
-    );
-    for (const id of SECTIONS) {
-      const el = document.getElementById(id);
-      if (el) io.observe(el);
-    }
-    return () => io.disconnect();
   }, []);
 
   const onCopy = async (id: string, text: string) => {
@@ -178,123 +161,114 @@ export function AgentsGuide() {
   };
 
   const copyProps = { copied, copyLabel: c.copy, copiedLabel: c.copied, onCopy };
-  const secName: Record<SectionId, string> = {
-    ai: c.secAi,
-    cli: c.secCli,
-    examples: c.secEx,
-    flags: c.secFlags,
-  };
 
   return (
     <div className="page cli-page flex w-full min-w-0 flex-1 flex-col">
       <TopBar lang={lang} current="cli" />
 
-      <main lang={lang} className="cli mx-auto w-full max-w-[1280px] px-4 sm:px-8">
-        <section className="cli-hero">
-          <div className="cli-hero-text">
-            <h1 className="cli-title">{c.title}</h1>
-            <p className="cli-lead">{c.lead}</p>
-            <div className="cli-hero-actions">
-              <Cmd id="install" label={c.install} command={INSTALL} {...copyProps} />
-              <a className="cli-ext" href={NPM_PAGE} target="_blank" rel="noreferrer">
-                {c.npm}
-                <ArrowTopRightOnSquareIcon className="h-4 w-4" aria-hidden />
-              </a>
+      <main lang={lang} className="cli mx-auto w-full max-w-[46rem] px-4 sm:px-6">
+        <div className="cli-head">
+          <h1 className="cli-title">{c.title}</h1>
+          <p className="cli-lead">{c.lead}</p>
+        </div>
+
+        <ol className="cli-how">
+          <li className="cli-how-step">
+            <span className="cli-how-n" aria-hidden>
+              1
+            </span>
+            <div className="cli-how-body">
+              <h2>{c.install}</h2>
+              <p>
+                {c.needNode}{" "}
+                <a className="cli-link" href={NODE_PAGE} target="_blank" rel="noreferrer">
+                  {c.nodeLink}
+                  <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" aria-hidden />
+                </a>
+              </p>
+              <Cmd id="install" command={INSTALL} {...copyProps} />
             </div>
-          </div>
-          <Terminal lang={lang} {...copyProps} />
+          </li>
+          <li className="cli-how-step">
+            <span className="cli-how-n" aria-hidden>
+              2
+            </span>
+            <div className="cli-how-body">
+              <h2>{c.runT}</h2>
+              <Terminal lang={lang} {...copyProps} />
+              <p>{c.readOut}</p>
+            </div>
+          </li>
+        </ol>
+
+        <section className="cli-more" aria-label={c.moreT}>
+          <h2 className="cli-more-h">{c.moreT}</h2>
+
+          <Fold title={c.secAi}>
+            <ol className="cli-steps">
+              <Step n={1} title={c.s1t} body={c.s1b}>
+                <div className="cli-prompt">
+                  <p>{c.s1prompt}</p>
+                  <CopyBtn id="prompt" text={c.s1prompt} {...copyProps} />
+                </div>
+              </Step>
+              <Step n={2} title={c.s2t} body={c.s2b}>
+                <p className="cli-bubble">{c.s2q}</p>
+              </Step>
+              <Step n={3} title={c.s3t} body={c.s3b}>
+                <div className="cli-answer">
+                  <TypeChip type="CV2III-350Y/72.5-10193W" tag={c.tagOltc} />
+                  <TypeChip type="WSLIV-600Y/72.5-6x5A" tag={c.tagOctc} />
+                  <p className="cli-answer-note">
+                    <CheckIcon className="h-4 w-4 shrink-0" aria-hidden />
+                    {c.s3note}
+                  </p>
+                </div>
+              </Step>
+            </ol>
+            <h3 className="cli-h3">{c.more}</h3>
+            <div className="cli-more-cases">
+              <Case label={c.exDry} q={c.qDry} type="3xCZI-500/40.5-9" tag={c.tagDry} />
+              <Case label={c.exShzv} q={c.qShzv} type="3xSHZVI-2400/72.5B-12233W" />
+            </div>
+          </Fold>
+
+          <Fold title={c.secEx}>
+            <div className="cli-examples">
+              {EXAMPLES.map((ex, i) => (
+                <div key={ex.cmd} className="cli-ex">
+                  <p className="cli-ex-k">{t(lang, ex.label)}</p>
+                  <Cmd id={`ex-${i}`} command={ex.cmd} dark {...copyProps} />
+                  <p className="cli-ex-out">
+                    <ArrowLongRightIcon className="h-4 w-4 shrink-0" aria-hidden />
+                    <code>{ex.type}</code>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Fold>
+
+          <Fold title={c.secFlags}>
+            <div className="cli-flags">
+              {FLAG_GROUPS.map((g) => (
+                <FlagCard key={g.title} title={t(lang, g.title)} flags={g.flags} lang={lang} />
+              ))}
+              <FlagCard title={c.outT} flags={OUTPUT_FLAGS} lang={lang} />
+            </div>
+          </Fold>
+
+          <p className="cli-npm">
+            <a className="cli-link" href={NPM_PAGE} target="_blank" rel="noreferrer">
+              {c.npm}
+              <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" aria-hidden />
+            </a>
+          </p>
         </section>
 
-        <div className="cli-body">
-          <nav className="cli-toc" aria-label={c.pageNav}>
-            <ul>
-              {SECTIONS.map((id) => (
-                <li key={id}>
-                  <a
-                    href={`#${id}`}
-                    aria-current={active === id ? "true" : undefined}
-                    onClick={() => setActive(id)}
-                  >
-                    {secName[id]}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          <div className="cli-sections">
-            <section id="ai" className="cli-sec" aria-labelledby="ai-h">
-              <h2 id="ai-h" className="cli-h2">{c.secAi}</h2>
-              <ol className="cli-steps">
-                <Step n={1} title={c.s1t} body={c.s1b}>
-                  <div className="cli-prompt">
-                    <p>{c.s1prompt}</p>
-                    <CopyBtn id="prompt" text={c.s1prompt} {...copyProps} />
-                  </div>
-                </Step>
-                <Step n={2} title={c.s2t} body={c.s2b}>
-                  <p className="cli-bubble">{c.s2q}</p>
-                </Step>
-                <Step n={3} title={c.s3t} body={c.s3b}>
-                  <div className="cli-answer">
-                    <TypeChip type="CV2III-350Y/72.5-10193W" tag={c.tagOltc} />
-                    <TypeChip type="WSLIV-600Y/72.5-6x5A" tag={c.tagOctc} />
-                    <p className="cli-answer-note">
-                      <CheckIcon className="h-4 w-4 shrink-0" aria-hidden />
-                      {c.s3note}
-                    </p>
-                  </div>
-                </Step>
-              </ol>
-
-              <h3 className="cli-h3">{c.more}</h3>
-              <div className="cli-more">
-                <Case label={c.exDry} q={c.qDry} type="3xCZI-500/40.5-9" tag={c.tagDry} />
-                <Case label={c.exShzv} q={c.qShzv} type="3xSHZVI-2400/72.5B-12233W" />
-              </div>
-            </section>
-
-            <section id="cli" className="cli-sec" aria-labelledby="cli-h">
-              <h2 id="cli-h" className="cli-h2">{c.secCli}</h2>
-              <p className="cli-p">{c.cliBody}</p>
-              <div className="cli-cmds">
-                <Cmd id="install-2" label={c.install} command={INSTALL} {...copyProps} />
-                <Cmd id="npx" label={c.npx} command={NPX} {...copyProps} />
-              </div>
-            </section>
-
-            <section id="examples" className="cli-sec" aria-labelledby="ex-h">
-              <h2 id="ex-h" className="cli-h2">{c.secEx}</h2>
-              <div className="cli-examples">
-                {EXAMPLES.map((ex, i) => (
-                  <div key={ex.cmd} className="cli-ex">
-                    <p className="cli-ex-k">{t(lang, ex.label)}</p>
-                    <Cmd id={`ex-${i}`} command={ex.cmd} dark {...copyProps} />
-                    <p className="cli-ex-out">
-                      <ArrowLongRightIcon className="h-4 w-4 shrink-0" aria-hidden />
-                      <code>{ex.type}</code>
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section id="flags" className="cli-sec" aria-labelledby="flags-h">
-              <h2 id="flags-h" className="cli-h2">{c.secFlags}</h2>
-              <div className="cli-flags">
-                {FLAG_GROUPS.map((g) => (
-                  <FlagCard key={g.title} title={t(lang, g.title)} flags={g.flags} lang={lang} />
-                ))}
-                <FlagCard title={c.outT} flags={OUTPUT_FLAGS} lang={lang} />
-              </div>
-            </section>
-
-            <p className="cli-limit">
-              <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" aria-hidden />
-              {c.limit}
-            </p>
-          </div>
-        </div>
+        <p className="cli-limit">
+          <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" aria-hidden />
+          {c.limit}
+        </p>
       </main>
 
       <footer className="page-foot">
@@ -308,6 +282,19 @@ export function AgentsGuide() {
         </nav>
       </footer>
     </div>
+  );
+}
+
+/** A folded section, like a Notion toggle. */
+function Fold({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <details className="cli-fold">
+      <summary>
+        <ChevronRightIcon className="cli-fold-chev h-4 w-4 shrink-0" aria-hidden />
+        {title}
+      </summary>
+      <div className="cli-fold-body">{children}</div>
+    </details>
   );
 }
 

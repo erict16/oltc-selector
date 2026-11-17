@@ -84,51 +84,6 @@ h1 {
   text-decoration: underline;
 }
 
-/* Release-note timeline (footer popover + /changelog page). */
-.note-tl {
-  position: relative;
-  padding-left: 1.125rem;
-}
-.note-tl::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 6px;
-  bottom: 6px;
-  width: 1px;
-  background: var(--color-rule-2);
-}
-.note-rel {
-  position: relative;
-}
-.note-rel::before {
-  content: "";
-  position: absolute;
-  left: -1.125rem;
-  top: 5px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid var(--color-caption);
-}
-.note-rel.cur::before {
-  border-color: var(--color-accent);
-  background: var(--color-accent);
-}
-/* Kind chips stay neutral on purpose: the word (修正/新增/改进) carries the
-   meaning, and the only accent on the page is the current-version marker. */
-.note-chip {
-  display: inline-block;
-  font-size: 0.625rem;
-  font-weight: 650;
-  line-height: 1.4;
-  border-radius: 4px;
-  padding: 1.5px 7px;
-  color: var(--color-muted);
-  background: var(--color-soft);
-}
-
 .prose-legal strong {
   color: var(--color-ink);
   font-weight: 600;
@@ -1690,8 +1645,8 @@ html.lang-wait body {
    sections with a page menu: a sticky row on phones, a side list on wide
    screens. Cards, radii and type follow the selector page. */
 .topbar-nav a[aria-current="page"] {
-  background: #eef3fb;
-  color: var(--color-accent);
+  background: #f1f4f8;
+  color: var(--color-ink);
 }
 .brand-link {
   border-radius: 8px;
@@ -1710,72 +1665,97 @@ html.lang-wait body {
   --cli-accent-line: oklch(89% 0.04 252);
 }
 
-/* Hero */
-.cli-hero {
-  display: grid;
-  gap: 2rem;
-  align-items: center;
-  padding: 2.25rem 0 2.5rem;
+/* Page head and the two steps: install, try it. */
+.cli-head {
+  padding: 2.5rem 0 1.75rem;
 }
-@media (min-width: 1024px) {
-  .cli-hero {
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-    gap: 3.5rem;
-    padding: 4rem 0;
+@media (min-width: 640px) {
+  .cli-head {
+    padding: 3.5rem 0 2rem;
   }
 }
 .cli-title {
   margin: 0;
   font-size: 2rem;
   font-weight: 600;
-  line-height: 1.15;
+  line-height: 1.2;
   letter-spacing: -0.03em;
   color: var(--color-ink);
-  text-wrap: balance;
 }
 @media (min-width: 640px) {
   .cli-title {
-    font-size: 2.625rem;
+    font-size: 2.375rem;
   }
 }
 .cli-lead {
-  margin: 1rem 0 0;
-  max-width: 34rem;
+  margin: 0.625rem 0 0;
   font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--color-ink-2);
+}
+.cli-how {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cli-how-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  gap: 1rem;
+  padding-bottom: 2rem;
+}
+.cli-how-step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 2.25rem;
+  bottom: 0.5rem;
+  left: calc(0.875rem - 0.5px);
+  width: 1px;
+  background: var(--color-line-2);
+}
+.cli-how-n {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #fff;
+}
+.cli-how-body {
+  min-width: 0;
+}
+.cli-how-body h2 {
+  margin: 0.125rem 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.cli-how-body > p {
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
   line-height: 1.65;
   color: var(--color-ink-2);
-  text-wrap: pretty;
 }
-.cli[lang="zh"] .cli-lead {
-  line-height: 1.8;
+.cli-how-body > .cli-term + p {
+  margin: 0.75rem 0 0;
+  color: var(--color-muted);
 }
-.cli-hero-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.875rem;
-  margin-top: 1.75rem;
-  max-width: 28rem;
-}
-.cli-hero-actions .cli-cmd {
+.cli-how-body .cli-cmd {
   width: 100%;
 }
-.cli-ext {
+.cli-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  min-height: 2.25rem;
-  font-size: 0.875rem;
+  gap: 0.25rem;
   font-weight: 500;
   color: var(--color-accent);
 }
-.cli-ext:hover {
+.cli-link:hover {
   text-decoration: underline;
-}
-.cli-ext:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: 6px;
 }
 
 /* Terminal: a real run, line by line. */
@@ -1974,141 +1954,62 @@ html.lang-wait body {
   color: oklch(85% 0.12 160);
 }
 
-/* Body: page menu + sections */
-.cli-body {
-  padding-bottom: 1rem;
+/* 更多: everything else, folded like Notion toggles. */
+.cli-more {
+  margin-top: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-line);
 }
-@media (min-width: 1024px) {
-  .cli-body {
-    display: grid;
-    grid-template-columns: 10.5rem minmax(0, 1fr);
-    gap: 3rem;
-  }
+.cli-more-h {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-muted);
 }
-.cli-toc {
-  position: sticky;
-  top: 3.5rem;
-  z-index: 20;
-  margin: 0 -1rem;
-  padding: 0.5rem 1rem;
-  background: var(--color-page);
-  border-bottom: 1px solid var(--color-line);
-  overflow-x: auto;
-  scrollbar-width: none;
+.cli-fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.5rem;
+  margin: 0 -0.5rem;
+  padding: 0 0.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-ink);
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 150ms ease;
 }
-.cli-toc::-webkit-scrollbar {
+.cli-fold > summary::-webkit-details-marker {
   display: none;
 }
-.cli-toc ul {
-  display: flex;
-  gap: 0.25rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.cli-fold > summary:hover {
+  background: #eceff3;
 }
-.cli-toc a {
-  display: inline-flex;
-  height: 2.25rem;
-  align-items: center;
-  padding: 0 0.875rem;
-  border-radius: 999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  white-space: nowrap;
-  color: var(--color-ink-2);
-  transition: background-color 150ms ease, color 150ms ease;
-}
-.cli-toc a:hover {
-  background: #e9edf3;
-  color: var(--color-ink);
-}
-.cli-toc a[aria-current] {
-  background: var(--color-ink);
-  color: #fff;
-}
-.cli-toc a:focus-visible {
+.cli-fold > summary:focus-visible {
   outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline-offset: 0;
 }
-@media (min-width: 640px) {
-  .cli-toc {
-    margin: 0 -2rem;
-    padding: 0.5rem 2rem;
-  }
+.cli-fold-chev {
+  color: var(--color-muted);
+  transition: transform 150ms ease;
 }
-@media (min-width: 1024px) {
-  .cli-toc {
-    top: 5.5rem;
-    align-self: start;
-    margin: 0;
-    padding: 0;
-    background: none;
-    border: 0;
-    overflow: visible;
-  }
-  .cli-toc ul {
-    flex-direction: column;
-    gap: 0.125rem;
-    border-left: 1px solid var(--color-line-2);
-  }
-  .cli-toc a {
-    width: 100%;
-    height: 2rem;
-    margin-left: -1px;
-    padding: 0 0.875rem;
-    border-left: 2px solid transparent;
-    border-radius: 0;
-    color: var(--color-muted);
-  }
-  .cli-toc a:hover {
-    background: none;
-    color: var(--color-ink);
-  }
-  .cli-toc a[aria-current] {
-    border-left-color: var(--color-accent);
-    background: none;
-    color: var(--color-ink);
-    font-weight: 600;
-  }
+.cli-fold[open] > summary .cli-fold-chev {
+  transform: rotate(90deg);
 }
-
-.cli-sections {
-  min-width: 0;
+.cli-fold-body {
+  padding: 0.5rem 0 1.25rem 1.375rem;
 }
-.cli-sec {
-  padding-top: 2.5rem;
-  scroll-margin-top: 6.5rem;
-}
-@media (min-width: 1024px) {
-  .cli-sec {
-    scroll-margin-top: 4.5rem;
-  }
-  .cli-sec:first-child {
-    padding-top: 0;
-  }
-}
-.cli-h2 {
-  margin: 0 0 1rem;
-  font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--color-ink);
+.cli-npm {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
 }
 .cli-h3 {
-  margin: 1.75rem 0 0.75rem;
+  margin: 1.5rem 0 0.75rem;
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--color-ink);
-}
-.cli-p {
-  margin: 0 0 1rem;
-  max-width: 44rem;
-  font-size: 0.9375rem;
-  line-height: 1.7;
-  color: var(--color-ink-2);
-}
-.cli[lang="zh"] .cli-p {
-  line-height: 1.8;
 }
 
 /* AI assistant: three steps, each with what you send or get. */
@@ -2133,7 +2034,7 @@ html.lang-wait body {
   gap: 1rem;
   padding: 1.25rem;
 }
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .cli-step {
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
     gap: 1.5rem;
@@ -2243,16 +2144,14 @@ html.lang-wait body {
   font-weight: 500;
   color: var(--color-accent);
 }
-.cli-more,
-.cli-examples,
-.cli-cmds {
+.cli-more-cases,
+.cli-examples {
   display: grid;
   gap: 0.75rem;
 }
-@media (min-width: 768px) {
-  .cli-more,
-  .cli-examples,
-  .cli-cmds {
+@media (min-width: 640px) {
+  .cli-more-cases,
+  .cli-examples {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -2377,6 +2276,152 @@ html.lang-wait body {
 }
 @media (min-width: 640px) {
   .cli-page .page-foot .foot-dup {
+    display: none;
+  }
+}
+
+/* ── Release notes as a Notion page (/changelog/, 2026-11-17) ───────────
+   White page, Notion's ink and greys, its tag colours: new green,
+   improved blue, fix red. One toggle per version, months as headings. */
+.notion-page {
+  background: #fff;
+}
+.notion {
+  --n-ink: #37352f;
+  --n-gray: #787774;
+  --n-line: #e9e9e7;
+  --n-hover: rgb(55 53 47 / 0.06);
+  padding-top: 3.5rem;
+  padding-bottom: 3rem;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+    "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  color: var(--n-ink);
+}
+.notion-icon {
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-left: -0.25rem;
+}
+.notion-title {
+  margin: 0.75rem 0 1.5rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--n-ink);
+}
+.notion-month {
+  padding-top: 1.75rem;
+}
+.notion-h2 {
+  margin: 0 0 0.375rem;
+  padding-bottom: 0.375rem;
+  border-bottom: 1px solid var(--n-line);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--n-ink);
+}
+.notion-toggle > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
+  min-height: 2.375rem;
+  margin: 0 -0.375rem;
+  padding: 0.25rem 0.375rem;
+  border-radius: 4px;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 120ms ease;
+}
+.notion-toggle > summary::-webkit-details-marker {
+  display: none;
+}
+.notion-toggle > summary:hover {
+  background: var(--n-hover);
+}
+.notion-toggle > summary:focus-visible {
+  outline: 2px solid #2383e2;
+  outline-offset: 0;
+}
+.notion-chev {
+  color: var(--n-gray);
+  transition: transform 150ms ease;
+}
+.notion-toggle[open] > summary .notion-chev {
+  transform: rotate(90deg);
+}
+.notion-ver {
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.notion-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+.notion-tag {
+  display: inline-flex;
+  height: 1.25rem;
+  align-items: center;
+  padding: 0 0.375rem;
+  border-radius: 3px;
+  font-size: 0.8125rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+.notion-tag-gray {
+  background: #f1f1ef;
+  color: #787774;
+}
+.notion-tag-new {
+  background: #edf3ec;
+  color: #448361;
+}
+.notion-tag-imp {
+  background: #e7f3f8;
+  color: #337ea9;
+}
+.notion-tag-fix {
+  background: #fdebec;
+  color: #d44c47;
+}
+.notion-toggle-body {
+  padding: 0.25rem 0 1rem 1.625rem;
+}
+.notion-group + .notion-group {
+  margin-top: 0.875rem;
+}
+.notion-group ul {
+  margin: 0.375rem 0 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.notion-group li {
+  margin: 0.25rem 0;
+  padding-left: 0.125rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+.notion-group li::marker {
+  color: var(--n-ink);
+}
+.notion-born {
+  margin: 2.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--n-gray);
+}
+.notion-page .page-foot {
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+}
+.notion-page .page-foot .foot-dup {
+  display: inline-flex;
+}
+@media (min-width: 640px) {
+  .notion-page .page-foot .foot-dup {
     display: none;
   }
 }
