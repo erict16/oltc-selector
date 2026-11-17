@@ -722,6 +722,11 @@ select.row-control,
   font-weight: 600;
   color: var(--color-accent-strong);
 }
+/* Margin on every load (2026-11-17 Eric): green, not the accent. */
+.plate-badge.is-roomy {
+  background: color-mix(in srgb, var(--color-ok) 10%, white);
+  color: var(--color-ok);
+}
 .copy-btn {
   display: inline-flex;
   height: 2.25rem;
@@ -997,8 +1002,10 @@ select.row-control,
 .page .basis-bar {
   background: #eceef2;
 }
+/* Loads: a plain blue (2026-11-17 Eric: #2563eb read as purple on his
+   screen). Tight and over keep amber and red. */
 .page .basis-bar i {
-  background: var(--color-accent);
+  background: #0284c7;
 }
 .page .basis-row.is-tight .basis-bar i {
   background: #d97706;
@@ -1617,8 +1624,8 @@ select.row-control,
 }
 .brand-mark {
   flex: none;
-  font-size: 1.375rem;
-  line-height: 1;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 .brand-name {
   font-size: 1rem;

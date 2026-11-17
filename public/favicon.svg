@@ -1,3 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <text x="16" y="23" text-anchor="middle" font-size="22">⚡</text>
+  <defs>
+    <linearGradient id="f" x1="0.3" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#FFE55C"/>
+      <stop offset="0.55" stop-color="#FFCA1F"/>
+      <stop offset="1" stop-color="#FFAA00"/>
+    </linearGradient>
+  </defs>
+  <path d="M12.6 2.2h9.1l-4.3 10.4h7.9L11.2 30.2l3.4-12.6H6.9z" fill="url(#f)" stroke="#F09A00" stroke-width="1.1" stroke-linejoin="round"/>
 </svg>

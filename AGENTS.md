@@ -17,7 +17,7 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 Prefer `24/outline` for chrome; keep stroke consistent with surrounding muted ink.
 
-One exception: the header mark is the ⚡ emoji, the same as the tab icon (**2026-11-17 Eric**: "change back to emoji lightning", after a Heroicons bolt in a blue tile).
+One exception: the header mark and the tab icon are one drawn yellow bolt, `components/BoltMark.tsx` and `app/icon.svg` (**2026-11-17 Eric**: "你自己画一个吧，和苹果的闪电稍微像一点就行"; the ⚡ emoji showed Microsoft's bolt on Windows, and Apple's emoji art cannot be used). Keep the two the same shape.
 
 ## OCTC wiring
 

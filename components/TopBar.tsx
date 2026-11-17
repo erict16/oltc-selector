@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BoltMark } from "@/components/BoltMark";
 import { LangSwitcher } from "@/components/LangSwitcher";
 import { APP_VERSION } from "@/lib/appVersion";
 import { setAppLang, t, type Lang } from "@/lib/i18n";
@@ -26,10 +27,7 @@ export function TopBar({
 
   const brand = (
     <>
-      {/* The ⚡ of the tab icon (2026-11-17 Eric: the emoji, not a drawn bolt). */}
-      <span className="brand-mark" aria-hidden>
-        ⚡
-      </span>
+      <BoltMark className="brand-mark" />
       {current === "home" ? (
         <h1 className="brand-name truncate">{t(lang, "title")}</h1>
       ) : (

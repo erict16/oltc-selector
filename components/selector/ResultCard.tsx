@@ -123,7 +123,7 @@ export function ResultCard({
           ) : (
             <>
               <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                <span className="plate-badge">
+                <span className={cx("plate-badge", !showsMinimumLabel(loose) && "is-roomy")}>
                   {showsMinimumLabel(loose) ? null : (
                     <ShieldCheckIcon className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden />
                   )}
@@ -253,7 +253,7 @@ export function ResultCard({
                                 <span
                                   className={cx(
                                     "shrink-0 text-[0.75rem] font-medium",
-                                    safe ? "text-[var(--color-accent)]" : "text-[var(--color-muted)]",
+                                    safe ? "text-[var(--color-ok)]" : "text-[var(--color-muted)]",
                                   )}
                                 >
                                   {t(lang, safe ? "allRound" : "recommended")}

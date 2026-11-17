@@ -235,8 +235,8 @@ describe("insurance label", () => {
     expect(s.loose).toBe(false);
     expect(s.tag).toMatch(/^CM2III-500Y\/72\.5/);
     expect(s.shown.map((r) => r.model)).toEqual([s.tag]);
-    expect(t("en", "allRound")).toBe("Safe choice");
-    expect(t("zh", "allRound")).toBe("安全选项");
+    expect(t("en", "allRound")).toBe("Ample margin");
+    expect(t("zh", "allRound")).toBe("裕度充足");
   });
 
   it("keeps 900 A on SHZV-1000 as the margin card", () => {
