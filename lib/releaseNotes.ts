@@ -16,11 +16,12 @@ export type Release = {
  *  in that release, for the releases that changed its look. Screenshots are
  *  real runs of that tag, in public/changelog/. */
 export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
+  "2.5.0": { day: "2026-11-18", image: "/changelog/v2.5.0.webp" },
   "2.4.1": { day: "2026-11-14" },
   "2.4.0": { day: "2026-11-14", image: "/changelog/v2.4.0.webp" },
   "2.3.2": { day: "2026-11-14" },
   "2.3.1": { day: "2026-11-14" },
-  "2.3.0": { day: "2026-11-13" },
+  "2.3.0": { day: "2026-11-13", image: "/changelog/v2.3.0.webp" },
   "2.2.0": { day: "2026-10-31" },
   "2.1.0": { day: "2026-10-31", image: "/changelog/v2.1.0.webp" },
   "2.0.0": { day: "2026-10-28", image: "/changelog/v2.0.0.webp" },
@@ -39,6 +40,14 @@ export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
  */
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
+    {
+      version: "2.5.0",
+      date: "2026-11",
+      title: "页面重新设计：新的页头、下拉菜单和结果卡",
+      groups: [
+        { kind: "imp", items: ["页面重新设计：新的页头和下拉菜单，结果卡带绿色「裕度充足」标记和蓝色负载条；命令行页面和更新记录页面也重新设计了。", "开关位置和术语在六种语言里都用标准叫法；自耦变的提示更少。"] },
+      ],
+    },
     {
       version: "2.4.1",
       date: "2026-11",
@@ -76,11 +85,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.3.0",
       date: "2026-11",
-      title: "粘贴铭牌就能填表",
+      title: "页面重新设计，粘贴铭牌就能填表",
       groups: [
         { kind: "new", items: ["把铭牌或招标里的一行参数贴进表单，就能自动填好。", "「复制链接」可以把当前选型发给同事。", "命令行可以用 --version 查看版本，拼错参数时会提示正确写法。"] },
         { kind: "fix", items: ["无载开关在清单里有型号时，不再误报「超出目录」。", "样本接线图里没有的档位码，都会带上提醒。", "铭牌里的全角符号现在能正确识别。"] },
-        { kind: "imp", items: ["现在打印页面时，只打印结果卡。"] },
+        { kind: "imp", items: ["页面重新设计：表单排成一列，结果合成一张带负载条的卡，换了新的配色和图标。", "现在打印页面时，只打印结果卡。"] },
       ],
     },
     {
@@ -97,15 +106,15 @@ export const RELEASES: Record<Lang, Release[]> = {
       title: "改了参数，型号马上跟着变",
       groups: [
         { kind: "imp", items: ["改了参数，型号马上更新，不用再点「选型」。", "结果卡把工况和型号的额定值并排列出，并显示用了几成。", "手机上，当前型号固定在屏幕底部，可以直接复制。"] },
-        { kind: "fix", items: ["命令行里粗细调和正反调的工作位置数，不再被 ±8 覆盖。", "自耦变按电流选型时，开关默认在串联和公共绕组的连接点。"] },
+        { kind: "fix", items: ["命令行里粗细调和正反调的工作位置数，不再被 ±8 覆盖。", "自耦变按电流选型时，开关默认在串联绕组中压端。"] },
       ],
     },
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "全新页面，按开关位置选型",
+      title: "页面重新设计，按变压器种类和开关位置选型",
       groups: [
-        { kind: "new", items: ["可以选择变压器种类（双绕组或自耦变）和开关位置（中性点、线端、串联/公共绕组连接点、中压出线），电流、级电压和开关绝缘按位置计算。"] },
+        { kind: "new", items: ["可以选择变压器种类（双绕组或自耦变）和开关位置（中性点、线端、串联绕组中压端、中压出线），电流、级电压和对地绝缘按位置计算。"] },
         {
           kind: "fix",
           items: [
@@ -113,16 +122,16 @@ export const RELEASES: Record<Lang, Release[]> = {
             "中性点绝缘没给时按 Um 72.5 选，并标「待 OS 核对」；35 kV 级中性点同样提示。",
           ],
         },
-        { kind: "imp", items: ["页面重新设计：表单和结果并排，结果区实时显示电流、级电压、开关绝缘和开关位置；手机端单独排版。"] },
+        { kind: "imp", items: ["页面重新设计：表单和结果并排，结果区实时显示电流、级电压、对地绝缘和开关位置；手机端单独排版。"] },
       ],
     },
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "结果卡会提醒哪些要工程确认",
+      title: "页面重新设计，结果卡提醒哪些要工程确认",
       groups: [
         { kind: "fix", items: ["绝缘超出所有选择器等级时，不再给出 DE 型号，而是提示联系工程。", "调节比例和安全系数可以输入小数。", "去掉了「不限」连接方式，免得级电压被少算。"] },
-        { kind: "imp", items: ["结果卡会标出要工程确认的情况，比如没给级电压或超出额定电流。"] },
+        { kind: "imp", items: ["页面重新设计：结果放在左侧的大面板，表单在右侧。", "结果卡会标出要工程确认的情况，比如没给级电压或超出额定电流。"] },
       ],
     },
     {
@@ -283,6 +292,14 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   en: [
     {
+      version: "2.5.0",
+      date: "2026-11",
+      title: "Redesigned page: new header, menus and result card",
+      groups: [
+        { kind: "imp", items: ["Page redesigned: a new header and menus, and a result card with a green Ample margin badge and blue load bars; the CLI and release notes pages are redesigned too.", "Tap-changer positions and terms use the standard names in all six languages; an autotransformer shows fewer cautions."] },
+      ],
+    },
+    {
       version: "2.4.1",
       date: "2026-11",
       title: "Shorter, easier CLI output",
@@ -319,11 +336,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.3.0",
       date: "2026-11",
-      title: "Paste a nameplate to fill the form",
+      title: "Redesigned page, and paste a nameplate to fill the form",
       groups: [
         { kind: "new", items: ["Paste a nameplate or tender line into the form and it fills itself in.", "Copy link sends your current selection to a colleague.", "The CLI has --version, and it suggests the right flag when you mistype one."] },
         { kind: "fix", items: ["An off-circuit duty no longer reads out of catalogue when the list has a type for it.", "A tap code that is not in the brochure's diagrams always comes with a note.", "Full-width characters in a nameplate are now read correctly."] },
-        { kind: "imp", items: ["Printing gives only the result card."] },
+        { kind: "imp", items: ["Page redesigned: the form is one list, the result is one card with load bars, and the colours and icon are new.", "Printing gives only the result card."] },
       ],
     },
     {
@@ -340,15 +357,15 @@ export const RELEASES: Record<Lang, Release[]> = {
       title: "The type follows your inputs at once",
       groups: [
         { kind: "imp", items: ["The type updates as soon as you change a value. There is no Select button any more.", "The result card shows the duty next to the type's rating, and how much of it is used.", "On phones the type stays at the bottom of the screen, ready to copy."] },
-        { kind: "fix", items: ["In the CLI, a position count for coarse-fine or reversing is no longer replaced by ±8.", "An autotransformer sized from current now defaults to the series–common junction."] },
+        { kind: "fix", items: ["In the CLI, a position count for coarse-fine or reversing is no longer replaced by ±8.", "An autotransformer sized from current now puts the tap changer at the series winding's MV end by default."] },
       ],
     },
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "A new page: pick by transformer kind and tap position",
+      title: "Redesigned page: pick by transformer kind and tap position",
       groups: [
-        { kind: "new", items: ["Pick the transformer kind (two-winding or autotransformer) and where the tap changer sits (neutral, line end, series–common junction, MV line lead); current, step voltage and switch insulation follow from that."] },
+        { kind: "new", items: ["Pick the transformer kind (two-winding or autotransformer) and where the tap changer sits (neutral, line end, series winding MV end, MV line); current, step voltage and insulation to earth follow from that."] },
         {
           kind: "fix",
           items: [
@@ -356,16 +373,16 @@ export const RELEASES: Record<Lang, Release[]> = {
             "An unstated neutral insulation is sized at Um 72.5 and marked Check OS; a 35 kV-class neutral is marked the same way.",
           ],
         },
-        { kind: "imp", items: ["Redesigned page: form and result side by side, with current, step voltage, switch insulation and tap position shown live; a separate phone layout."] },
+        { kind: "imp", items: ["Redesigned page: form and result side by side, with current, step voltage, insulation to earth and tap position shown live; a separate phone layout."] },
       ],
     },
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "The result card says what engineering must check",
+      title: "Redesigned page: the result card says what engineering must check",
       groups: [
         { kind: "fix", items: ["When the insulation is above every selector grade, the page asks you to contact engineering instead of giving a DE type.", "Step percent and safety factor accept decimals.", "The Any connection is gone, so step voltage is not counted too low."] },
-        { kind: "imp", items: ["The result card marks what engineering must confirm, such as a missing step voltage or a duty above the rating."] },
+        { kind: "imp", items: ["Page redesigned: the result sits in a large panel on the left, the form on the right.", "The result card marks what engineering must confirm, such as a missing step voltage or a duty above the rating."] },
       ],
     },
     {
@@ -530,6 +547,14 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.5.0",
+      date: "2026-11",
+      title: "Thiết kế lại trang: đầu trang, menu và thẻ kết quả mới",
+      groups: [
+        { kind: "imp", items: ["Thiết kế lại trang: đầu trang và menu mới, thẻ kết quả có nhãn Dư địa rộng màu xanh lá và thanh tải màu xanh dương; trang CLI và trang ghi chú phát hành cũng được thiết kế lại.", "Vị trí bộ chuyển nấc và thuật ngữ dùng tên chuẩn trong cả sáu ngôn ngữ; máy tự ngẫu hiện ít lưu ý hơn."] },
+      ],
+    },
+    {
       version: "2.4.1",
       date: "2026-11",
       title: "Kết quả CLI ngắn và dễ đọc hơn",
@@ -566,11 +591,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.3.0",
       date: "2026-11",
-      title: "Dán nhãn máy để điền biểu mẫu",
+      title: "Thiết kế lại trang, và dán nhãn máy để điền biểu mẫu",
       groups: [
         { kind: "new", items: ["Dán một dòng nhãn máy hoặc hồ sơ thầu vào biểu mẫu, biểu mẫu sẽ tự điền.", "Sao chép liên kết gửi lựa chọn hiện tại cho đồng nghiệp.", "CLI có --version và gợi ý đúng tham số khi bạn gõ sai."] },
         { kind: "fix", items: ["Chế độ không tải không còn báo ngoài catalogue khi danh sách có kiểu phù hợp.", "Mã nấc không có trong sơ đồ của catalogue luôn kèm ghi chú.", "Ký tự toàn độ trong nhãn máy giờ được đọc đúng."] },
-        { kind: "imp", items: ["Khi in chỉ in thẻ kết quả."] },
+        { kind: "imp", items: ["Thiết kế lại trang: biểu mẫu thành một danh sách, kết quả gộp vào một thẻ có thanh tải, màu và biểu tượng mới.", "Khi in chỉ in thẻ kết quả."] },
       ],
     },
     {
@@ -587,15 +612,15 @@ export const RELEASES: Record<Lang, Release[]> = {
       title: "Kiểu thay đổi ngay khi bạn nhập",
       groups: [
         { kind: "imp", items: ["Kiểu cập nhật ngay khi bạn đổi một giá trị. Không còn nút Chọn.", "Thẻ kết quả đặt tải bên cạnh định mức của kiểu và cho thấy đã dùng bao nhiêu.", "Trên điện thoại, kiểu luôn ở cuối màn hình và sao chép được ngay."] },
-        { kind: "fix", items: ["Trong CLI, số vị trí cho thô-tinh hoặc đảo chiều không còn bị ±8 thay thế.", "Máy tự ngẫu chọn theo dòng điện giờ mặc định ở điểm nối cuộn nối tiếp–chung."] },
+        { kind: "fix", items: ["Trong CLI, số vị trí cho thô-tinh hoặc đảo chiều không còn bị ±8 thay thế.", "Máy tự ngẫu chọn theo dòng điện giờ mặc định đặt bộ chuyển nấc ở cuộn nối tiếp, phía trung áp."] },
       ],
     },
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "Trang mới: chọn theo loại máy và vị trí bộ chuyển nấc",
+      title: "Thiết kế lại trang: chọn theo loại máy và vị trí bộ chuyển nấc",
       groups: [
-        { kind: "new", items: ["Chọn loại máy biến áp (hai cuộn dây hoặc tự ngẫu) và vị trí bộ ĐAPT (trung tính, đầu dây, điểm nối nối tiếp – chung, đầu ra trung áp); dòng điện, điện áp nấc và cách điện được tính theo vị trí đó."] },
+        { kind: "new", items: ["Chọn loại máy biến áp (hai cuộn dây hoặc tự ngẫu) và vị trí bộ chuyển nấc (trung tính, đầu dây, cuộn nối tiếp phía trung áp, đường dây trung áp); dòng điện, điện áp nấc và cách điện với đất được tính theo vị trí đó."] },
         {
           kind: "fix",
           items: [
@@ -603,16 +628,16 @@ export const RELEASES: Record<Lang, Release[]> = {
             "Khi chưa cho cách điện trung tính, chọn theo Um 72.5 và ghi Kiểm tra OS; trung tính cấp 35 kV cũng được ghi như vậy.",
           ],
         },
-        { kind: "imp", items: ["Thiết kế lại trang: biểu mẫu và kết quả đặt cạnh nhau, hiển thị trực tiếp dòng điện, điện áp nấc, cách điện và vị trí bộ ĐAPT; bố cục riêng cho điện thoại."] },
+        { kind: "imp", items: ["Thiết kế lại trang: biểu mẫu và kết quả đặt cạnh nhau, hiển thị trực tiếp dòng điện, điện áp nấc, cách điện với đất và vị trí bộ chuyển nấc; bố cục riêng cho điện thoại."] },
       ],
     },
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "Thẻ kết quả nêu những gì kỹ thuật phải kiểm tra",
+      title: "Thiết kế lại trang: thẻ kết quả nêu những gì kỹ thuật phải kiểm tra",
       groups: [
         { kind: "fix", items: ["Khi cách điện cao hơn mọi cấp bộ chọn, trang yêu cầu liên hệ kỹ thuật thay vì đưa ra kiểu DE.", "Tỷ lệ cấp và hệ số an toàn nhận số thập phân.", "Đã bỏ lựa chọn Bất kỳ để điện áp cấp không bị tính thiếu."] },
-        { kind: "imp", items: ["Thẻ kết quả đánh dấu những gì kỹ thuật phải xác nhận, ví dụ thiếu điện áp cấp hoặc tải vượt định mức."] },
+        { kind: "imp", items: ["Thiết kế lại trang: kết quả nằm trong khung lớn bên trái, biểu mẫu bên phải.", "Thẻ kết quả đánh dấu những gì kỹ thuật phải xác nhận, ví dụ thiếu điện áp cấp hoặc tải vượt định mức."] },
       ],
     },
     {
@@ -775,6 +800,14 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   es: [
     {
+      version: "2.5.0",
+      date: "2026-11",
+      title: "Página rediseñada: nueva cabecera, menús y tarjeta de resultado",
+      groups: [
+        { kind: "imp", items: ["Página rediseñada: cabecera y menús nuevos, y una tarjeta de resultado con distintivo verde Margen holgado y barras de carga azules; también se rediseñan la página de la CLI y la de novedades.", "Las posiciones del cambiador y los términos usan los nombres normalizados en los seis idiomas; un autotransformador muestra menos avisos."] },
+      ],
+    },
+    {
       version: "2.4.1",
       date: "2026-11",
       title: "Salida de la CLI más corta y clara",
@@ -811,11 +844,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.3.0",
       date: "2026-11",
-      title: "Pegue una placa para rellenar el formulario",
+      title: "Página rediseñada, y pegue una placa para rellenar el formulario",
       groups: [
         { kind: "new", items: ["Pegue una línea de placa o de licitación en el formulario y se rellena solo.", "Copiar enlace envía su selección actual a un colega.", "La CLI tiene --version y sugiere la opción correcta si escribe mal una."] },
         { kind: "fix", items: ["Un caso sin carga ya no sale fuera de catálogo cuando la lista tiene un tipo para él.", "Un código de tomas que no está en los esquemas del catálogo siempre lleva una nota.", "Los caracteres de ancho completo de una placa ahora se leen bien."] },
-        { kind: "imp", items: ["Al imprimir solo sale la tarjeta de resultado."] },
+        { kind: "imp", items: ["Página rediseñada: el formulario es una sola lista, el resultado una tarjeta con barras de carga, y los colores y el icono son nuevos.", "Al imprimir solo sale la tarjeta de resultado."] },
       ],
     },
     {
@@ -832,15 +865,15 @@ export const RELEASES: Record<Lang, Release[]> = {
       title: "El tipo sigue sus datos al instante",
       groups: [
         { kind: "imp", items: ["El tipo se actualiza en cuanto cambia un valor. Ya no hay botón Seleccionar.", "La tarjeta de resultado pone la carga junto a la capacidad del tipo y muestra cuánto se usa.", "En el móvil, el tipo queda al pie de la pantalla, listo para copiar."] },
-        { kind: "fix", items: ["En la CLI, el número de posiciones para grueso-fino o inversor ya no se sustituye por ±8.", "Un autotransformador dimensionado por corriente va ahora por defecto en la unión serie–común."] },
+        { kind: "fix", items: ["En la CLI, el número de posiciones para grueso-fino o inversor ya no se sustituye por ±8.", "Un autotransformador dimensionado por corriente lleva ahora por defecto el cambiador en el extremo MT del devanado serie."] },
       ],
     },
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "Página nueva: elija por tipo de transformador y posición",
+      title: "Página rediseñada: elija por tipo de transformador y posición",
       groups: [
-        { kind: "new", items: ["Elija el tipo de transformador (dos devanados o autotransformador) y dónde va el cambiador (neutro, extremo de línea, unión serie–común, salida de MT); la corriente, la tensión de escalón y el aislamiento salen de esa posición."] },
+        { kind: "new", items: ["Elija el tipo de transformador (dos devanados o autotransformador) y dónde va el cambiador (neutro, extremo de línea, extremo MT del devanado serie, línea de MT); la corriente, la tensión de escalón y el aislamiento a tierra salen de esa posición."] },
         {
           kind: "fix",
           items: [
@@ -848,16 +881,16 @@ export const RELEASES: Record<Lang, Release[]> = {
             "Si no se indica el aislamiento del neutro, se dimensiona a Um 72.5 y se marca Verificar en OS; un neutro de clase 35 kV se marca igual.",
           ],
         },
-        { kind: "imp", items: ["Página rediseñada: formulario y resultado lado a lado, con corriente, tensión de escalón, aislamiento y posición en vivo; diseño propio para móvil."] },
+        { kind: "imp", items: ["Página rediseñada: formulario y resultado lado a lado, con corriente, tensión de escalón, aislamiento a tierra y posición en vivo; diseño propio para móvil."] },
       ],
     },
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "La tarjeta dice qué debe revisar ingeniería",
+      title: "Página rediseñada: la tarjeta dice qué debe revisar ingeniería",
       groups: [
         { kind: "fix", items: ["Cuando el aislamiento supera todos los grados del selector, la página pide contactar con ingeniería en vez de dar un tipo DE.", "El porcentaje de escalón y el factor de seguridad aceptan decimales.", "Se quita la conexión Cualquiera para no contar de menos la tensión de escalón."] },
-        { kind: "imp", items: ["La tarjeta marca lo que ingeniería debe confirmar, como una tensión de escalón que falta o una carga por encima de la capacidad."] },
+        { kind: "imp", items: ["Página rediseñada: el resultado ocupa un panel grande a la izquierda y el formulario queda a la derecha.", "La tarjeta marca lo que ingeniería debe confirmar, como una tensión de escalón que falta o una carga por encima de la capacidad."] },
       ],
     },
     {
@@ -1022,6 +1055,14 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.5.0",
+      date: "2026-11",
+      title: "Yeniden tasarlanan sayfa: yeni başlık, menüler ve sonuç kartı",
+      groups: [
+        { kind: "imp", items: ["Sayfa yeniden tasarlandı: yeni başlık ve menüler, yeşil Geniş pay rozetli ve mavi yük çubuklu bir sonuç kartı; CLI sayfası ve sürüm notları sayfası da yeniden tasarlandı.", "Kademe değiştirici konumları ve terimler altı dilde de standart adları kullanır; ototransformatör daha az uyarı gösterir."] },
+      ],
+    },
+    {
       version: "2.4.1",
       date: "2026-11",
       title: "Daha kısa ve okunur CLI çıktısı",
@@ -1058,11 +1099,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.3.0",
       date: "2026-11",
-      title: "Formu doldurmak için etiket yapıştırın",
+      title: "Yeniden tasarlanan sayfa ve formu dolduran etiket yapıştırma",
       groups: [
         { kind: "new", items: ["Forma bir etiket ya da ihale satırı yapıştırın, form kendini doldurur.", "Bağlantıyı kopyala, mevcut seçiminizi bir meslektaşa gönderir.", "CLI'da --version var ve yanlış yazılan parametre için doğrusunu önerir."] },
         { kind: "fix", items: ["Listede uygun tip varken yüksüz bir durum artık katalog dışı görünmez.", "Katalog şemalarında olmayan bir kademe kodu her zaman bir notla gelir.", "Etiketteki tam genişlikli karakterler artık doğru okunur."] },
-        { kind: "imp", items: ["Yazdırınca yalnızca sonuç kartı çıkar."] },
+        { kind: "imp", items: ["Sayfa yeniden tasarlandı: form tek bir liste, sonuç yük çubuklu tek bir kart; renkler ve simge yeni.", "Yazdırınca yalnızca sonuç kartı çıkar."] },
       ],
     },
     {
@@ -1079,15 +1120,15 @@ export const RELEASES: Record<Lang, Release[]> = {
       title: "Tip, girdilerinizi anında izler",
       groups: [
         { kind: "imp", items: ["Bir değeri değiştirdiğiniz anda tip güncellenir. Seç düğmesi artık yok.", "Sonuç kartı yükü tipin değerlerinin yanına koyar ve ne kadarının kullanıldığını gösterir.", "Telefonda tip ekranın altında durur ve hemen kopyalanabilir."] },
-        { kind: "fix", items: ["CLI'da kaba-ince veya ters çevirmeli için konum sayısı artık ±8 ile değiştirilmez.", "Akıma göre seçilen ototransformatör artık varsayılan olarak seri–ortak bağlantı noktasındadır."] },
+        { kind: "fix", items: ["CLI'da kaba-ince veya ters çevirmeli için konum sayısı artık ±8 ile değiştirilmez.", "Akıma göre seçilen ototransformatör artık varsayılan olarak kademe değiştiriciyi seri sargının OG ucuna koyar."] },
       ],
     },
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "Yeni sayfa: trafo tipine ve kademe konumuna göre seçim",
+      title: "Yeniden tasarlanan sayfa: trafo tipine ve kademe konumuna göre seçim",
       groups: [
-        { kind: "new", items: ["Transformatör tipini (iki sargılı veya ototransformatör) ve kademe değiştiricinin yerini (nötr, hat ucu, seri–ortak bağlantı noktası, OG çıkışı) seçin; akım, kademe gerilimi ve yalıtım bu konumdan hesaplanır."] },
+        { kind: "new", items: ["Transformatör tipini (iki sargılı veya ototransformatör) ve kademe değiştiricinin yerini (nötr, hat ucu, seri sargının OG ucu, OG hattı) seçin; akım, kademe gerilimi ve toprağa yalıtım bu konumdan hesaplanır."] },
         {
           kind: "fix",
           items: [
@@ -1095,16 +1136,16 @@ export const RELEASES: Record<Lang, Release[]> = {
             "Nötr yalıtımı verilmediğinde Um 72.5 ile seçilir ve OS ile teyit olarak işaretlenir; 35 kV sınıfı nötr de aynı şekilde işaretlenir.",
           ],
         },
-        { kind: "imp", items: ["Sayfa yeniden tasarlandı: form ve sonuç yan yana, akım, kademe gerilimi, yalıtım ve konum canlı gösterilir; telefon için ayrı düzen."] },
+        { kind: "imp", items: ["Sayfa yeniden tasarlandı: form ve sonuç yan yana, akım, kademe gerilimi, toprağa yalıtım ve konum canlı gösterilir; telefon için ayrı düzen."] },
       ],
     },
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "Sonuç kartı mühendisliğin neyi kontrol etmesi gerektiğini söyler",
+      title: "Yeniden tasarlanan sayfa: sonuç kartı mühendisliğin neyi kontrol edeceğini söyler",
       groups: [
         { kind: "fix", items: ["Yalıtım tüm seçici kademelerini aşınca sayfa DE tipi vermek yerine mühendislikle iletişime geçmenizi ister.", "Kademe yüzdesi ve emniyet katsayısı ondalık kabul eder.", "Herhangi bağlantısı kaldırıldı, böylece kademe gerilimi eksik sayılmaz."] },
-        { kind: "imp", items: ["Sonuç kartı mühendisliğin onaylaması gerekenleri işaretler, örneğin eksik kademe gerilimi ya da değerin üstünde yük."] },
+        { kind: "imp", items: ["Sayfa yeniden tasarlandı: sonuç solda büyük bir panelde, form sağda.", "Sonuç kartı mühendisliğin onaylaması gerekenleri işaretler, örneğin eksik kademe gerilimi ya da değerin üstünde yük."] },
       ],
     },
     {
@@ -1267,6 +1308,14 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   id: [
     {
+      version: "2.5.0",
+      date: "2026-11",
+      title: "Halaman didesain ulang: header, menu, dan kartu hasil baru",
+      groups: [
+        { kind: "imp", items: ["Halaman didesain ulang: header dan menu baru, serta kartu hasil dengan lencana hijau Margin longgar dan bilah beban biru; halaman CLI dan catatan rilis juga didesain ulang.", "Letak OLTC dan istilahnya memakai nama standar di keenam bahasa; autotrafo menampilkan lebih sedikit peringatan."] },
+      ],
+    },
+    {
       version: "2.4.1",
       date: "2026-11",
       title: "Output CLI lebih singkat dan mudah dibaca",
@@ -1303,11 +1352,11 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.3.0",
       date: "2026-11",
-      title: "Tempel pelat nama untuk mengisi formulir",
+      title: "Halaman didesain ulang, dan tempel pelat nama untuk mengisi formulir",
       groups: [
         { kind: "new", items: ["Tempel satu baris pelat nama atau tender ke formulir, dan formulir terisi sendiri.", "Salin tautan mengirim pilihan Anda saat ini ke rekan.", "CLI punya --version dan menyarankan parameter yang benar bila Anda salah ketik."] },
         { kind: "fix", items: ["Kasus tanpa beban tidak lagi tampil di luar katalog bila daftar punya tipe yang cocok.", "Kode tap yang tidak ada di diagram katalog selalu disertai catatan.", "Karakter lebar penuh di pelat nama kini terbaca benar."] },
-        { kind: "imp", items: ["Saat dicetak, hanya kartu hasil yang keluar."] },
+        { kind: "imp", items: ["Halaman didesain ulang: formulir menjadi satu daftar, hasil menjadi satu kartu dengan bilah beban, serta warna dan ikon baru.", "Saat dicetak, hanya kartu hasil yang keluar."] },
       ],
     },
     {
@@ -1324,15 +1373,15 @@ export const RELEASES: Record<Lang, Release[]> = {
       title: "Tipe langsung mengikuti input Anda",
       groups: [
         { kind: "imp", items: ["Tipe diperbarui begitu Anda mengubah nilai. Tombol Pilih sudah tidak ada.", "Kartu hasil menaruh beban di samping rating tipe dan menunjukkan berapa yang terpakai.", "Di ponsel, tipe tetap di bagian bawah layar dan siap disalin."] },
-        { kind: "fix", items: ["Di CLI, jumlah posisi untuk kasar-halus atau pembalik tidak lagi diganti ±8.", "Autotrafo yang dipilih dari arus kini bawaannya di titik sambung seri–bersama."] },
+        { kind: "fix", items: ["Di CLI, jumlah posisi untuk kasar-halus atau pembalik tidak lagi diganti ±8.", "Autotrafo yang dipilih dari arus kini bawaannya menaruh OLTC di ujung TM belitan seri."] },
       ],
     },
     {
       version: "2.0.0",
       date: "2026-10",
-      title: "Halaman baru: pilih menurut jenis trafo dan posisi tap",
+      title: "Halaman didesain ulang: pilih menurut jenis trafo dan letak tap",
       groups: [
-        { kind: "new", items: ["Pilih jenis transformator (dua belitan atau autotransformator) dan letak OLTC (netral, ujung saluran, sambungan seri – bersama, saluran TM); arus, tegangan tap dan isolasi dihitung dari letak itu."] },
+        { kind: "new", items: ["Pilih jenis transformator (dua belitan atau autotransformator) dan letak OLTC (netral, ujung saluran, ujung TM belitan seri, saluran TM); arus, tegangan tap dan isolasi ke tanah dihitung dari letak itu."] },
         {
           kind: "fix",
           items: [
@@ -1340,16 +1389,16 @@ export const RELEASES: Record<Lang, Release[]> = {
             "Bila isolasi netral tidak diberikan, dipilih pada Um 72.5 dan ditandai Cek OS; netral kelas 35 kV ditandai sama.",
           ],
         },
-        { kind: "imp", items: ["Halaman didesain ulang: formulir dan hasil berdampingan, arus, tegangan tap, isolasi dan letak OLTC tampil langsung; tata letak khusus ponsel."] },
+        { kind: "imp", items: ["Halaman didesain ulang: formulir dan hasil berdampingan, arus, tegangan tap, isolasi ke tanah dan letak OLTC tampil langsung; tata letak khusus ponsel."] },
       ],
     },
     {
       version: "1.3.0",
       date: "2026-10",
-      title: "Kartu hasil menyebut yang harus dicek engineering",
+      title: "Halaman didesain ulang: kartu hasil menyebut yang harus dicek engineering",
       groups: [
         { kind: "fix", items: ["Bila isolasi melebihi semua tingkat selektor, halaman meminta Anda menghubungi engineering alih-alih memberi tipe DE.", "Persentase tahap dan faktor keamanan menerima desimal.", "Pilihan Bebas dihapus agar tegangan tahap tidak terhitung terlalu rendah."] },
-        { kind: "imp", items: ["Kartu hasil menandai yang harus dikonfirmasi engineering, misalnya tegangan tahap yang belum diisi atau beban di atas rating."] },
+        { kind: "imp", items: ["Halaman didesain ulang: hasil ada di panel besar sebelah kiri, formulir di sebelah kanan.", "Kartu hasil menandai yang harus dikonfirmasi engineering, misalnya tegangan tahap yang belum diisi atau beban di atas rating."] },
       ],
     },
     {
