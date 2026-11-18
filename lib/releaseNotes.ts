@@ -43,9 +43,9 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.5.0",
       date: "2026-11",
-      title: "页面重新设计：新的页头、下拉菜单和结果卡",
+      title: "下拉菜单、结果卡和说明页面的改进",
       groups: [
-        { kind: "imp", items: ["页面重新设计：新的页头和下拉菜单，结果卡带绿色「裕度充足」标记和蓝色负载条；命令行页面和更新记录页面也重新设计了。", "开关位置和术语在六种语言里都用标准叫法；自耦变的提示更少。"] },
+        { kind: "imp", items: ["下拉菜单在控件正下方展开，长列表可以滚动；结果卡带绿色「裕度充足」标记和蓝色负载条；命令行页面有了分步指引，更新记录页面能看到每天的提交。", "开关位置和术语在六种语言里都用标准叫法；自耦变的提示更少。"] },
       ],
     },
     {
@@ -60,7 +60,7 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.4.0",
       date: "2026-11",
-      title: "结果卡重新排版",
+      title: "结果卡更简洁",
       groups: [
         { kind: "imp", items: ["结果卡和表单一样高，滚到底时两边对齐。", "去掉了总在 100% 附近的对地绝缘进度条。", "命令行去掉了 --market 参数，对地绝缘请直接用 --earth-um 写。"] },
       ],
@@ -294,9 +294,9 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.5.0",
       date: "2026-11",
-      title: "Redesigned page: new header, menus and result card",
+      title: "Better menus, result card and help pages",
       groups: [
-        { kind: "imp", items: ["Page redesigned: a new header and menus, and a result card with a green Ample margin badge and blue load bars; the CLI and release notes pages are redesigned too.", "Tap-changer positions and terms use the standard names in all six languages; an autotransformer shows fewer cautions."] },
+        { kind: "imp", items: ["Menus open right under their control and long lists scroll; the result card has a green Ample margin badge and blue load bars; the CLI page has a step-by-step guide, and the release notes show the commits of each day.", "Tap-changer positions and terms use the standard names in all six languages; an autotransformer shows fewer cautions."] },
       ],
     },
     {
@@ -549,9 +549,9 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.5.0",
       date: "2026-11",
-      title: "Thiết kế lại trang: đầu trang, menu và thẻ kết quả mới",
+      title: "Cải thiện menu, thẻ kết quả và các trang hướng dẫn",
       groups: [
-        { kind: "imp", items: ["Thiết kế lại trang: đầu trang và menu mới, thẻ kết quả có nhãn Dư địa rộng màu xanh lá và thanh tải màu xanh dương; trang CLI và trang ghi chú phát hành cũng được thiết kế lại.", "Vị trí bộ chuyển nấc và thuật ngữ dùng tên chuẩn trong cả sáu ngôn ngữ; máy tự ngẫu hiện ít lưu ý hơn."] },
+        { kind: "imp", items: ["Menu mở ngay dưới ô chọn và danh sách dài có thể cuộn; thẻ kết quả có nhãn Dư địa rộng màu xanh lá và thanh tải màu xanh dương; trang CLI có hướng dẫn từng bước, trang ghi chú phát hành hiện commit của từng ngày.", "Vị trí bộ chuyển nấc và thuật ngữ dùng tên chuẩn trong cả sáu ngôn ngữ; máy tự ngẫu hiện ít lưu ý hơn."] },
       ],
     },
     {
@@ -802,9 +802,9 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.5.0",
       date: "2026-11",
-      title: "Página rediseñada: nueva cabecera, menús y tarjeta de resultado",
+      title: "Mejores menús, tarjeta de resultado y páginas de ayuda",
       groups: [
-        { kind: "imp", items: ["Página rediseñada: cabecera y menús nuevos, y una tarjeta de resultado con distintivo verde Margen holgado y barras de carga azules; también se rediseñan la página de la CLI y la de novedades.", "Las posiciones del cambiador y los términos usan los nombres normalizados en los seis idiomas; un autotransformador muestra menos avisos."] },
+        { kind: "imp", items: ["Los menús se abren justo bajo su control y las listas largas se desplazan; la tarjeta de resultado lleva el distintivo verde Margen holgado y barras de carga azules; la página de la CLI tiene una guía paso a paso y la de novedades muestra los commits de cada día.", "Las posiciones del cambiador y los términos usan los nombres normalizados en los seis idiomas; un autotransformador muestra menos avisos."] },
       ],
     },
     {
@@ -1057,9 +1057,9 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.5.0",
       date: "2026-11",
-      title: "Yeniden tasarlanan sayfa: yeni başlık, menüler ve sonuç kartı",
+      title: "Daha iyi menüler, sonuç kartı ve yardım sayfaları",
       groups: [
-        { kind: "imp", items: ["Sayfa yeniden tasarlandı: yeni başlık ve menüler, yeşil Geniş pay rozetli ve mavi yük çubuklu bir sonuç kartı; CLI sayfası ve sürüm notları sayfası da yeniden tasarlandı.", "Kademe değiştirici konumları ve terimler altı dilde de standart adları kullanır; ototransformatör daha az uyarı gösterir."] },
+        { kind: "imp", items: ["Menüler kendi kontrolünün hemen altında açılır ve uzun listeler kayar; sonuç kartında yeşil Geniş pay rozeti ve mavi yük çubukları var; CLI sayfasında adım adım bir rehber, sürüm notlarında her günün commit'leri var.", "Kademe değiştirici konumları ve terimler altı dilde de standart adları kullanır; ototransformatör daha az uyarı gösterir."] },
       ],
     },
     {
@@ -1310,9 +1310,9 @@ export const RELEASES: Record<Lang, Release[]> = {
     {
       version: "2.5.0",
       date: "2026-11",
-      title: "Halaman didesain ulang: header, menu, dan kartu hasil baru",
+      title: "Menu, kartu hasil, dan halaman bantuan yang lebih baik",
       groups: [
-        { kind: "imp", items: ["Halaman didesain ulang: header dan menu baru, serta kartu hasil dengan lencana hijau Margin longgar dan bilah beban biru; halaman CLI dan catatan rilis juga didesain ulang.", "Letak OLTC dan istilahnya memakai nama standar di keenam bahasa; autotrafo menampilkan lebih sedikit peringatan."] },
+        { kind: "imp", items: ["Menu terbuka tepat di bawah kontrolnya dan daftar panjang bisa digulir; kartu hasil punya lencana hijau Margin longgar dan bilah beban biru; halaman CLI punya panduan langkah demi langkah, dan catatan rilis menampilkan commit tiap hari.", "Letak OLTC dan istilahnya memakai nama standar di keenam bahasa; autotrafo menampilkan lebih sedikit peringatan."] },
       ],
     },
     {
