@@ -13,17 +13,17 @@ export type Release = {
 
 /** What is the same in every language: the exact day (from the version
  *  commit or tag, where git has one) and a screenshot of how the page looked
- *  in that release, for the releases that changed its look. Screenshots are
+ *  in that release, for the big redesigns only (not small steps). Screenshots are
  *  real runs of that tag, in public/changelog/. */
 export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
-  "2.5.0": { day: "2026-11-18", image: "/changelog/v2.5.0.webp" },
+  "2.5.0": { day: "2026-11-18" },
   "2.4.1": { day: "2026-11-14" },
-  "2.4.0": { day: "2026-11-14", image: "/changelog/v2.4.0.webp" },
+  "2.4.0": { day: "2026-11-14" },
   "2.3.2": { day: "2026-11-14" },
   "2.3.1": { day: "2026-11-14" },
   "2.3.0": { day: "2026-11-13", image: "/changelog/v2.3.0.webp" },
   "2.2.0": { day: "2026-10-31" },
-  "2.1.0": { day: "2026-10-31", image: "/changelog/v2.1.0.webp" },
+  "2.1.0": { day: "2026-10-31" },
   "2.0.0": { day: "2026-10-28", image: "/changelog/v2.0.0.webp" },
   "1.3.0": { day: "2026-10-22", image: "/changelog/v1.3.0.webp" },
   "1.2.9": { day: "2026-09-18" },
