@@ -3,12 +3,13 @@
 
 /** First and last day with a commit, YYYY-MM-DD. */
 export const ACTIVITY_FROM = "2026-07-26";
-export const ACTIVITY_TO = "2026-11-18";
+export const ACTIVITY_TO = "2026-11-20";
 /** All commits in the repository. */
-export const COMMIT_TOTAL = 474;
+export const COMMIT_TOTAL = 479;
 /** Commits per day; days with none are left out. */
 export const COMMITS_PER_DAY: Record<string, number> = {
-  "2026-11-18": 5,
+  "2026-11-20": 1,
+  "2026-11-18": 9,
   "2026-11-17": 17,
   "2026-11-14": 30,
   "2026-11-13": 3,

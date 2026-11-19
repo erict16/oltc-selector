@@ -27,7 +27,7 @@ Result card **开关结构** (not 工作位置): CV/CV2/SV/CVT/CZ → 复合式;
 
 ## CLI
 
-CLI: `npm run oltc -- <args>` in this repo (published pack: `npx -y oltc-selector@2.5.0`). Same engine as the web app. `--kind auto --tap junction --hv 225 --mv 115` for autotransformers; the tap point, not a typed Y/D, sets current, Ust and Um (`lib/transformer.ts`). No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. WSL/WDL existence is `lib/listIndex.ts` (keys only). Do not commit list RMB, coefficients, or the 2025 xlsx.
+CLI: `npm run oltc -- <args>` in this repo (published pack: `npx -y oltc-selector@2.6.0`). Same engine as the web app. `--kind auto --tap junction --hv 225 --mv 115` for autotransformers; the tap point, not a typed Y/D, sets current, Ust and Um (`lib/transformer.ts`). No prices. `--octc`, `--structure combined|compound|cage|drum`, `--series II…VIII`. `--grade B|C|D|DE`, or stated withstand `--across-li/-ac` (a), `--b-li/-ac`, `--c1-li/-ac`, `--c2-li/-ac`. WSL/WDL existence is `lib/listIndex.ts` (keys only). Do not commit list RMB, coefficients, or the 2025 xlsx.
 
 No agent dock on `/` (removed 2026-11-13); the header link "CLI" goes to `/agents/` (the CLI page: a two-step guide — install, try it — then examples / flags / AI assistant as tabs; no Node.js line, the pack is on npm). `/agents/` and `/changelog/` share one white content-page style (`.doc-*` in `globals.css`, modelled on Linear / Cursor / Vercel): **2026-11-17 Eric: no Notion style**, no toggles or Notion tag colours; release notes are all open with version and month in a sticky left column. Its examples are real CLI runs: re-run them when the engine changes a type. Agent skill is a separate private repo (not in this tree). Selection only; after `oltc`, check brochure existence and explain why the type is correct.
 
@@ -39,7 +39,7 @@ Brochure Fig. 3-3: `P = 2 × (±N) + mid`. See `lib/tapCode.ts`. Never invent no
 
 Emit only a commercial type that exists in the brochure / 2025 list. `CM2III-500D` is not a type (CM2 III is star-point Y). Covering delta with `3xCM2I-…` is because that single-phase type exists, not because every D job is 3×. `CV2III-…D` and `HWVIII-…D` exist — emit them. 3× I and CM2/CM/CMD II omit Y/D after current. CV2 has no II. WSL/WDL rows must exist on the 2025 list (gate in `lib/typeExists.ts`). SHZVG has no brochure extract; III-Y-only is assumed from catalogue notes. SDZV is the dual-break vacuum family (Ust 6000 V, III 400/600/1000, I 400/600/1000/1600/2400, positions 14/27). No `SDZVIII-…D`, no II, no I-1200/1500, no III-1300.
 
-Form **开关结构**: OLTC 自动 / 复合式 / 组合式; OCTC 自动 / 笼式 / 鼓式. **接线方式** (II/IV/V…) stays a separate OCTC field (winding scheme, not cage vs drum).
+Form **开关结构**: OLTC 自动 / 复合式 / 组合式; OCTC 自动 / 笼式 / 鼓式. **选择器绝缘等级** is one row: 自动 / B / C / D / DE / 填耐压值 (rows a, b, c1, c2, each 雷电 + 工频 kV; OCTC has 自动 / 填耐压值 and row a only). A picked letter keeps to the families with `usesSelectorSize`; compound + letter is an error, not a silent drop. b and c2 count on three-phase units, c1 and c2 with a change-over selector (`statedDistances` in `lib/engine.ts`). **接线方式** (II/IV/V…) stays a separate OCTC field (winding scheme, not cage vs drum).
 
 Default form: **单次调节比例** (tap %) plus rated kV → derived Ust caption. The volt dropdown is the Um-mode fallback only (`ustV == null`). Do not changelog `STEP_VOLTAGE_MENU` as a first-paint control.
 

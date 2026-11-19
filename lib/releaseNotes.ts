@@ -16,6 +16,7 @@ export type Release = {
  *  in that release, for the releases that changed its look. Screenshots are
  *  real runs of that tag, in public/changelog/. */
 export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
+  "2.6.0": { day: "2026-11-20" },
   "2.5.0": { day: "2026-11-18", image: "/changelog/v2.5.0.webp" },
   "2.4.1": { day: "2026-11-14" },
   "2.4.0": { day: "2026-11-14", image: "/changelog/v2.4.0.webp" },
@@ -40,6 +41,15 @@ export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
  */
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
+    {
+      version: "2.6.0",
+      date: "2026-11",
+      title: "选择器绝缘等级可以填耐压值算出来",
+      groups: [
+        { kind: "new", items: ["选择器绝缘等级可以填 a、b、c1、c2 的雷电和工频耐压值，由页面算出 B、C、D 或 DE；也可以自己直接选等级。", "命令行新增 --b-li、--b-ac、--c1-li、--c1-ac、--c2-li、--c2-ac 和 --grade 参数。"] },
+        { kind: "imp", items: ["手机上，雷电和工频两个输入框排在同一行。", "直接选了等级时，只在带等级字母的型号里选；没有合适的型号时，会提示把等级改回自动。"] },
+      ],
+    },
     {
       version: "2.5.0",
       date: "2026-11",
@@ -291,6 +301,15 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.6.0",
+      date: "2026-11",
+      title: "Selector grade worked out from your withstand values",
+      groups: [
+        { kind: "new", items: ["Selector insulation grade: enter the LI and AC withstand for a, b, c1 and c2, and the page works out B, C, D or DE. You can still pick the grade yourself.", "CLI: new flags --b-li, --b-ac, --c1-li, --c1-ac, --c2-li, --c2-ac and --grade."] },
+        { kind: "imp", items: ["On a phone, the LI and AC boxes sit side by side on one row.", "A picked grade keeps the selection to types that carry a grade letter; if none fits, the error says to set the grade back to Auto."] },
+      ],
+    },
     {
       version: "2.5.0",
       date: "2026-11",
@@ -547,6 +566,15 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.6.0",
+      date: "2026-11",
+      title: "Cấp bộ chọn được tính từ giá trị chịu đựng bạn nhập",
+      groups: [
+        { kind: "new", items: ["Cấp cách điện bộ chọn: nhập giá trị chịu đựng LI và AC cho a, b, c1 và c2, trang sẽ tính ra B, C, D hoặc DE. Bạn vẫn có thể tự chọn cấp.", "CLI: thêm các cờ --b-li, --b-ac, --c1-li, --c1-ac, --c2-li, --c2-ac và --grade."] },
+        { kind: "imp", items: ["Trên điện thoại, hai ô LI và AC nằm cạnh nhau trên một hàng.", "Khi tự chọn cấp, chỉ chọn trong các kiểu có chữ cấp; nếu không có kiểu phù hợp, thông báo lỗi sẽ nhắc đặt cấp về Tự động."] },
+      ],
+    },
+    {
       version: "2.5.0",
       date: "2026-11",
       title: "Thiết kế lại trang: đầu trang, menu và thẻ kết quả mới",
@@ -799,6 +827,15 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.6.0",
+      date: "2026-11",
+      title: "La clase del selector se calcula con sus tensiones soportadas",
+      groups: [
+        { kind: "new", items: ["Clase del selector: introduzca la tensión soportada LI y AC para a, b, c1 y c2, y la página calcula B, C, D o DE. También puede elegir la clase directamente.", "CLI: nuevas opciones --b-li, --b-ac, --c1-li, --c1-ac, --c2-li, --c2-ac y --grade."] },
+        { kind: "imp", items: ["En el móvil, las casillas LI y AC quedan una al lado de la otra en una sola fila.", "Con una clase elegida, la selección se limita a los tipos que llevan letra de clase; si ninguno sirve, el error indica volver a poner la clase en Auto."] },
+      ],
+    },
     {
       version: "2.5.0",
       date: "2026-11",
@@ -1055,6 +1092,15 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.6.0",
+      date: "2026-11",
+      title: "Seçici sınıfı, girdiğiniz dayanım değerlerinden hesaplanır",
+      groups: [
+        { kind: "new", items: ["Seçici yalıtım sınıfı: a, b, c1 ve c2 için LI ve AC dayanım değerlerini girin, sayfa B, C, D veya DE sınıfını hesaplar. Sınıfı yine kendiniz de seçebilirsiniz.", "CLI: yeni --b-li, --b-ac, --c1-li, --c1-ac, --c2-li, --c2-ac ve --grade seçenekleri."] },
+        { kind: "imp", items: ["Telefonda LI ve AC kutuları tek satırda yan yana durur.", "Sınıf elle seçildiğinde yalnızca sınıf harfi taşıyan tipler arasından seçim yapılır; uygun tip yoksa hata, sınıfı Otomatik'e geri almanızı söyler."] },
+      ],
+    },
+    {
       version: "2.5.0",
       date: "2026-11",
       title: "Yeniden tasarlanan sayfa: yeni başlık, menüler ve sonuç kartı",
@@ -1307,6 +1353,15 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.6.0",
+      date: "2026-11",
+      title: "Kelas selector dihitung dari nilai ketahanan yang Anda isi",
+      groups: [
+        { kind: "new", items: ["Kelas isolasi selector: isi nilai ketahanan LI dan AC untuk a, b, c1, dan c2, lalu halaman menghitung B, C, D, atau DE. Anda tetap bisa memilih kelasnya sendiri.", "CLI: flag baru --b-li, --b-ac, --c1-li, --c1-ac, --c2-li, --c2-ac, dan --grade."] },
+        { kind: "imp", items: ["Di ponsel, kotak LI dan AC berdampingan dalam satu baris.", "Jika kelas dipilih sendiri, pemilihan hanya di antara tipe yang memiliki huruf kelas; jika tidak ada yang cocok, pesan galat meminta kelas dikembalikan ke Otomatis."] },
+      ],
+    },
     {
       version: "2.5.0",
       date: "2026-11",
