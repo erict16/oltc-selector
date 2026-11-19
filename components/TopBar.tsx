@@ -13,7 +13,7 @@ export function TopBar({
   current,
 }: {
   lang: Lang;
-  current: "home" | "cli" | "changelog";
+  current: "home" | "cli" | "changelog" | "legal";
 }) {
   /** A hairline shadow once the page moves under it. */
   const [scrolled, setScrolled] = useState(false);
