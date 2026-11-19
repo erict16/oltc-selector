@@ -1008,27 +1008,14 @@ select.row-control,
   opacity: 1;
 }
 
-@media (max-width: 639px) {
-  /* Two menus in one row: the name goes above so "Otomatik" / "Tự động" fit. */
-  .row.row-wide {
-    flex-wrap: wrap;
-    gap: 0.375rem;
-    padding-block: 0.625rem;
-  }
-  .row-wide .row-value {
-    width: 100%;
-  }
+/* Two typed values in one row (LI and AC): they share the width one
+   control has, so the column edge stays straight on a phone too. */
+.row-pair .row-value {
+  flex-wrap: nowrap;
 }
-
-/* Two menus share the width one menu has, so the column edge stays straight. */
-.row-wide .row-value > div {
-  gap: 0.375rem;
-}
-.row-wide select.row-control,
-.row-wide .row-control.menu-btn {
-  padding-left: 0.625rem;
-  padding-right: 1.5rem;
-  background-position: right 0.3125rem center;
+.row-pair .row-control {
+  flex: 1 1 0;
+  padding-inline: 0.5rem;
 }
 
 /* Links to the other pages, under the form and the result. */

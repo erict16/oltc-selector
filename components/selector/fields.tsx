@@ -37,8 +37,11 @@ export function DecimalInput({
   placeholder,
   groupedError,
   autoFocus,
+  label,
 }: {
   autoFocus?: boolean;
+  /** Own name, for a row with two typed fields (the row label names both). */
+  label?: string;
   value: number;
   onValue: (n: number) => void;
   onBlur?: () => void;
@@ -72,7 +75,8 @@ export function DecimalInput({
         // Opened from the menu: typing replaces the old value.
         onFocus={autoFocus ? (e) => e.currentTarget.select() : undefined}
         className={className}
-        aria-labelledby={labelledBy}
+        aria-label={label}
+        aria-labelledby={label ? undefined : labelledBy}
         aria-invalid={grouped || undefined}
         aria-describedby={grouped ? errorId : undefined}
         placeholder={placeholder}

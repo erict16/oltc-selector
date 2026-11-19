@@ -76,7 +76,16 @@ describe("internal insulation per family", () => {
     expect(internalInsulation("cm", "C").a_li).toBe(350);
     expect(internalInsulation("shzv", "C").a_li).toBe(365);
     expect(internalInsulation("sdzv", "C").a_li).toBe(365);
-    expect(internalInsulation("cmd", "D")).toEqual({ a_li: 490, a_pf: 105, b_li: 490, b_pf: 146 });
+    expect(internalInsulation("cmd", "D")).toEqual({
+      a_li: 490,
+      a_pf: 105,
+      b_li: 490,
+      b_pf: 146,
+      c1_li: 590,
+      c1_pf: 225,
+      c2_li: 590,
+      c2_pf: 225,
+    });
     expect(internalInsulation("shzv", "D").a_li).toBe(460);
   });
 

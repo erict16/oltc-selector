@@ -125,10 +125,8 @@ export function selectionFor(
   const pickedStepV = sized && sized.stepVoltageV > 0 ? sized.stepVoltageV : 0;
   const first = result.ok ? (result.results[0] ?? null) : null;
 
-  const marginNeed = {
-    acrossTapBilKv: form.input.acrossTapBilKv,
-    acrossTapPfKv: form.input.acrossTapPfKv,
-  };
+  // The stated insulation and the regulation it applies to (c1 / c2).
+  const marginNeed = form.input;
   const hasMargin = (r: ModelResult) =>
     pickedDutyA != null &&
     safe(() => primaryIsInsurance(r, pickedDutyA, pickedStepV, marginNeed), false);

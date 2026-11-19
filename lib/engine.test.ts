@@ -14,10 +14,6 @@ import { maxThroughCurrent, throughCurrentFromRated } from "./deriveUm";
 import { parseTypeString } from "./orderReplay";
 import {
   SERIES,
-  ACROSS_BIL_MENU,
-  ACROSS_BIL_OPTIONS_KV,
-  ACROSS_PF_MENU,
-  ACROSS_PF_OPTIONS_KV,
   CURRENT_MENU,
   CURRENT_OPTIONS_A,
   STEP_VOLTAGE_MENU,
@@ -338,8 +334,6 @@ describe("catalogue menu labels", () => {
     ...CURRENT_MENU,
     ...UM_MENU,
     ...STEP_VOLTAGE_MENU,
-    ...ACROSS_BIL_MENU,
-    ...ACROSS_PF_MENU,
   ];
 
   it("prints the catalogue number and unit, with no ≤ ≥ >", () => {
@@ -360,10 +354,6 @@ describe("catalogue menu labels", () => {
       "1500 V",
     );
     expect(STEP_VOLTAGE_MENU.at(-1)?.labelEn).toBe("6000 V");
-    expect(ACROSS_BIL_MENU.find((x) => x.value === 285)?.labelEn).toBe(
-      "285 kV",
-    );
-    expect(ACROSS_BIL_MENU.at(-1)?.labelEn).toBe("750 kV");
   });
 
   it("keeps option values as the discrete steps", () => {
@@ -371,12 +361,6 @@ describe("catalogue menu labels", () => {
     expect(UM_MENU.map((x) => x.value)).toEqual([...UM_OPTIONS_KV]);
     expect(STEP_VOLTAGE_MENU.map((x) => x.value)).toEqual([
       ...STEP_VOLTAGE_OPTIONS_V,
-    ]);
-    expect(ACROSS_BIL_MENU.map((x) => x.value)).toEqual([
-      ...ACROSS_BIL_OPTIONS_KV,
-    ]);
-    expect(ACROSS_PF_MENU.map((x) => x.value)).toEqual([
-      ...ACROSS_PF_OPTIONS_KV,
     ]);
   });
 

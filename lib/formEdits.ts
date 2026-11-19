@@ -5,7 +5,13 @@
  * value from an older render.
  */
 import { DEFAULT_WINDING_RATED_KV } from "./deriveUm";
-import { commitRange, formSpec, geometryForPm, type FormState } from "./formState";
+import {
+  NO_STATED_INSULATION,
+  commitRange,
+  formSpec,
+  geometryForPm,
+  type FormState,
+} from "./formState";
 import { safetyKKeepsCapacity } from "./safetyK";
 import { lookupByPositions } from "./tapCode";
 import {
@@ -45,6 +51,14 @@ export function patchInput<K extends keyof SelectInput>(
   const input = { ...f.input, [k]: v };
   if (k === "connection" && f.voltageMode === "winding") input.umKv = 0;
   return { ...f, input };
+}
+
+/**
+ * Auto or a grade letter. The typed distances go, so a picked letter and
+ * typed values never disagree on one form.
+ */
+export function pickSelectorGrade(f: FormState, size: SelectInput["selectorSize"]): FormState {
+  return { ...f, input: { ...f.input, ...NO_STATED_INSULATION, selectorSize: size } };
 }
 
 export function setVoltageEntry(f: FormState, mode: FormState["voltageMode"]): FormState {

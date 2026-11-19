@@ -81,28 +81,6 @@ export const STEP_VOLTAGE_MENU: CatalogueMenuItem[] = catalogueMenu(
   "V",
 );
 
-/**
- * Across-tap winding insulation menus (training cases + brochure a-distance ladder).
- * Empty selection = size selector from Um only.
- */
-export const ACROSS_BIL_OPTIONS_KV = [
-  75, 95, 105, 120, 150, 170, 200, 250, 285, 320, 350, 450, 520, 550, 650, 750,
-] as const;
-
-export const ACROSS_PF_OPTIONS_KV = [
-  20, 30, 38, 45, 50, 65, 70, 80, 85, 95, 100, 110, 125, 140, 150,
-] as const;
-
-export const ACROSS_BIL_MENU: CatalogueMenuItem[] = catalogueMenu(
-  ACROSS_BIL_OPTIONS_KV,
-  "kV",
-);
-
-export const ACROSS_PF_MENU: CatalogueMenuItem[] = catalogueMenu(
-  ACROSS_PF_OPTIONS_KV,
-  "kV",
-);
-
 /** Re-export ± options (brochure W/G geometry lives in tapCode) */
 export { PM_STEP_OPTIONS } from "./tapCode";
 
@@ -140,26 +118,72 @@ export type InternalInsulation = {
   a_pf: number;
   b_li: number;
   b_pf: number;
+  c1_li: number;
+  c1_pf: number;
+  c2_li: number;
+  c2_pf: number;
 };
 
 /**
- * Internal insulation withstand (kV) by selector size — SHZV Table 4-2 (a / b distances).
- * Used for across-tap winding stress → grade letter. Default for every
- * combined family; see INTERNAL_INSULATION_BY_FAMILY for brochure overrides.
+ * The distances that change with the selector size. a0 and a1 are the same
+ * on every size, and CM / CM2 d (across the coarse winding) equals a.
+ *   a  across one tap winding (fine or coarse), same phase
+ *   b  between tap windings of different phases
+ *   c1 change-over selector (−) contact to the take-off terminal, same phase
+ *   c2 change-over selector (−) contacts of different phases
+ */
+export const INTERNAL_DISTANCES = ["a", "b", "c1", "c2"] as const;
+export type InternalDistance = (typeof INTERNAL_DISTANCES)[number];
+
+/** Stated withstand a transformer design needs on each distance (kV). */
+export type InternalNeed = Partial<
+  Record<InternalDistance, { li?: number; pf?: number }>
+>;
+
+const ins = (
+  a: [number, number],
+  b: [number, number],
+  c1: [number, number],
+  c2: [number, number],
+): InternalInsulation => ({
+  a_li: a[0],
+  a_pf: a[1],
+  b_li: b[0],
+  b_pf: b[1],
+  c1_li: c1[0],
+  c1_pf: c1[1],
+  c2_li: c2[0],
+  c2_pf: c2[1],
+});
+const NO_INSULATION = ins([0, 0], [0, 0], [0, 0], [0, 0]);
+
+/**
+ * Internal insulation withstand (kV) by selector size — SHZV Table 4-2.
+ * Default for every combined family; see INTERNAL_INSULATION_BY_FAMILY for
+ * brochure overrides.
  */
 export const INTERNAL_INSULATION: Record<SelectorSize, InternalInsulation> = {
-  "": { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
-  A: { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
-  B: { a_li: 265, a_pf: 50, b_li: 265, b_pf: 50 },
-  C: { a_li: 365, a_pf: 82, b_li: 350, b_pf: 82 },
-  D: { a_li: 460, a_pf: 105, b_li: 460, b_pf: 146 },
-  DE: { a_li: 550, a_pf: 120, b_li: 550, b_pf: 160 },
-  E: { a_li: 0, a_pf: 0, b_li: 0, b_pf: 0 },
+  "": NO_INSULATION,
+  A: NO_INSULATION,
+  B: ins([265, 50], [265, 50], [500, 145], [500, 145]),
+  C: ins([365, 82], [350, 82], [550, 180], [550, 195]),
+  D: ins([460, 105], [460, 146], [590, 225], [590, 225]),
+  DE: ins([550, 120], [550, 160], [660, 230], [660, 250]),
+  E: NO_INSULATION,
+};
+
+/** CM2 Table 2 (HM0.154.5701) and CM Table 2 (HM0.154.301): the same numbers. */
+const CM_INSULATION: Partial<Record<SelectorSize, InternalInsulation>> = {
+  B: ins([265, 50], [265, 50], [485, 143], [495, 150]),
+  C: ins([350, 82], [350, 82], [545, 178], [550, 182]),
+  D: ins([460, 105], [460, 146], [590, 208], [590, 225]),
+  DE: ins([550, 120], [550, 160], [660, 230], [660, 250]),
 };
 
 /**
  * Grades where a family's own brochure table differs from SHZV Table 4-2.
- *  - CM2 Table 2 (HM0.154.5701) and CM Table 2 (HM0.154.301): C a = 350 kV LI (SHZV 365).
+ *  - CM2 / CM Table 2: C a = 350 kV LI (SHZV 365); c1 and c2 lower on B, C
+ *    and D (B c1 485 / 143, C c1 545 / 178, D c1 590 / 208).
  *  - CMD Table 2 (HM0.154.1901): D a / b = 490 kV LI (SHZV 460).
  * SHZV / SDZV / SHZVG keep the default table.
  */
@@ -167,9 +191,9 @@ export const INTERNAL_INSULATION_BY_FAMILY: Record<
   string,
   Partial<Record<SelectorSize, InternalInsulation>>
 > = {
-  cm2: { C: { a_li: 350, a_pf: 82, b_li: 350, b_pf: 82 } },
-  cm: { C: { a_li: 350, a_pf: 82, b_li: 350, b_pf: 82 } },
-  cmd: { D: { a_li: 490, a_pf: 105, b_li: 490, b_pf: 146 } },
+  cm2: CM_INSULATION,
+  cm: CM_INSULATION,
+  cmd: { D: ins([490, 105], [490, 146], [590, 225], [590, 225]) },
 };
 
 /** Internal insulation of this grade on this family (default: SHZV table). */
@@ -179,6 +203,44 @@ export function internalInsulation(
 ): InternalInsulation {
   const own = seriesId ? INTERNAL_INSULATION_BY_FAMILY[seriesId]?.[size] : undefined;
   return own ?? INTERNAL_INSULATION[size];
+}
+
+/**
+ * The stated distance this grade is fullest on: its name, the test, and
+ * stated / withstand. Null when nothing is stated. A distance the grade has
+ * no number for counts as not covered (ratio Infinity).
+ */
+export function internalPeak(
+  size: SelectorSize,
+  need: InternalNeed,
+  seriesId?: string,
+): { distance: InternalDistance; test: "li" | "pf"; ratio: number } | null {
+  const table = internalInsulation(seriesId, size);
+  let peak: { distance: InternalDistance; test: "li" | "pf"; ratio: number } | null = null;
+  for (const distance of INTERNAL_DISTANCES) {
+    for (const test of ["li", "pf"] as const) {
+      const want = need[distance]?.[test] ?? 0;
+      if (!(want > 0)) continue;
+      const has = table[`${distance}_${test}`];
+      const ratio = has > 0 ? want / has : Infinity;
+      if (!peak || ratio > peak.ratio) peak = { distance, test, ratio };
+    }
+  }
+  return peak;
+}
+
+/** Every stated distance is within this grade's withstand (0.5 kV rounding). */
+export function coversInternal(
+  size: SelectorSize,
+  need: InternalNeed,
+  seriesId?: string,
+): boolean {
+  const table = internalInsulation(seriesId, size);
+  return INTERNAL_DISTANCES.every((d) =>
+    (["li", "pf"] as const).every(
+      (test) => table[`${d}_${test}`] + 0.5 >= (need[d]?.[test] ?? 0),
+    ),
+  );
 }
 
 /** Smallest listed pitch at or above `pitch`; past the last one, the last one. */
@@ -881,9 +943,9 @@ export function coversAcrossTap(
   needALi: number,
   needAPf: number,
   seriesId?: string,
+  more?: InternalNeed,
 ): boolean {
-  const ins = internalInsulation(seriesId, size);
-  return ins.a_li + 0.5 >= needALi && ins.a_pf + 0.5 >= needAPf;
+  return coversInternal(size, { ...more, a: { li: needALi, pf: needAPf } }, seriesId);
 }
 
 export type SelectorSizePick = {
@@ -911,6 +973,8 @@ export type SelectorSizePick = {
  * 2026-11-04 r2 ENGINE-1: both LI and AC must be stated to go below the Um
  * default. A missing value read as 0 kV, so LI 260 alone gave 170B.
  * `minSize`: an untyped floor above the Um default (ORDERS-1, 330 kV class).
+ * `more`: stated b / c1 / c2 withstand. They raise the grade like a; going
+ * below the Um default still rests on a (LI and AC both stated).
  */
 export function resolveSelectorSize(
   um: number,
@@ -920,6 +984,7 @@ export function resolveSelectorSize(
   seriesId?: string,
   statedFloor = false,
   minSize?: SelectorSize,
+  more?: InternalNeed,
 ): SelectorSizePick {
   const allowed = SELECTOR_SIZES_BY_UM[um] ?? ["B", "C", "D", "DE"];
   const needALi = acrossTapBilKv ?? 0;
@@ -941,8 +1006,9 @@ export function resolveSelectorSize(
   for (let i = SIZE_ORDER.indexOf(floor); i < SIZE_ORDER.length; i++) {
     const cand = SIZE_ORDER[i];
     if (!allowed.includes(cand)) continue;
-    // Across-tap winding (a distance) — training case 2: BIL 285 → C
-    if (!coversAcrossTap(cand, needALi, needAPf, seriesId)) continue;
+    // Across-tap winding (a distance) — training case 2: BIL 285 → C.
+    // b / c1 / c2, when the design states them, are held the same way.
+    if (!coversAcrossTap(cand, needALi, needAPf, seriesId, more)) continue;
     if (typed && cand !== typed) return { size: cand, raisedFrom: typed };
     if (!typed && SIZE_ORDER.indexOf(cand) < SIZE_ORDER.indexOf(umDefault)) {
       return { size: cand, loweredFrom: umDefault };
