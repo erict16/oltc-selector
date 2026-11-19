@@ -4,8 +4,9 @@ import {
   SERIES,
   coveringUms,
   coversAcrossTap,
+  internalPeak,
+  type InternalNeed,
   defaultSelectorSizeForUm,
-  internalInsulation,
   nearestCurrent,
   nearestUm,
   phaseToken,
@@ -234,6 +235,59 @@ function compoundCoversAcrossTap(
   const aLi = 200;
   const aPf = 50;
   return aLi + 0.5 >= needBil && aPf + 0.5 >= needPf;
+}
+
+/** The stated across-tap (a) pair, as the grade functions take it. */
+export type InsulationInput = Pick<
+  SelectInput,
+  | "acrossTapBilKv"
+  | "acrossTapPfKv"
+  | "insulBBilKv"
+  | "insulBPfKv"
+  | "insulC1BilKv"
+  | "insulC1PfKv"
+  | "insulC2BilKv"
+  | "insulC2PfKv"
+>;
+
+/**
+ * Stated b / c1 / c2 that exist on this unit. b and c2 are between phases:
+ * a single-phase unit has neither. c1 and c2 sit on the change-over
+ * selector: linear regulation has neither.
+ */
+export function statedDistances(
+  input: InsulationInput,
+  phases: string | undefined,
+  regulation: SelectInput["regulation"] | undefined,
+): InternalNeed {
+  const threePhase = phases === "III";
+  const changeOver = regulation !== "linear";
+  const pair = (li?: number, pf?: number) =>
+    (li ?? 0) > 0 || (pf ?? 0) > 0 ? { li: li ?? 0, pf: pf ?? 0 } : undefined;
+  const need: InternalNeed = {};
+  const b = threePhase ? pair(input.insulBBilKv, input.insulBPfKv) : undefined;
+  const c1 = changeOver ? pair(input.insulC1BilKv, input.insulC1PfKv) : undefined;
+  const c2 =
+    threePhase && changeOver ? pair(input.insulC2BilKv, input.insulC2PfKv) : undefined;
+  if (b) need.b = b;
+  if (c1) need.c1 = c1;
+  if (c2) need.c2 = c2;
+  return need;
+}
+
+/** "b LI 350 / AC 82, c1 LI 520" for the reason line; "" when none. */
+function distancesText(need: InternalNeed, li: string, ac: string): string {
+  return (["b", "c1", "c2"] as const)
+    .filter((d) => need[d])
+    .map((d) => {
+      const v = need[d]!;
+      const parts = [
+        (v.li ?? 0) > 0 ? `${li} ${v.li}` : "",
+        (v.pf ?? 0) > 0 ? `${ac} ${v.pf}` : "",
+      ].filter(Boolean);
+      return `${d} ${parts.join(" / ")}`;
+    })
+    .join(", ");
 }
 
 function formatUmToken(
@@ -875,6 +929,12 @@ export function selectOltc(input: SelectInput): SelectOutput {
   for (const [name, v] of [
     ["Across-tap LI", input.acrossTapBilKv],
     ["Across-tap AC", input.acrossTapPfKv],
+    ["b LI", input.insulBBilKv],
+    ["b AC", input.insulBPfKv],
+    ["c1 LI", input.insulC1BilKv],
+    ["c1 AC", input.insulC1PfKv],
+    ["c2 LI", input.insulC2BilKv],
+    ["c2 AC", input.insulC2PfKv],
     ["Earth LI", input.bilKv],
     ["Earth AC", input.pfKv],
   ] as const) {
@@ -979,6 +1039,29 @@ export function selectOltc(input: SelectInput): SelectOutput {
     candidates = candidates.filter((s) => s.structure === wantStruct);
   }
 
+  // 2026-11-20: a picked grade letter (B / C / D / DE) exists only on the families that carry one.
+  if (!wantOctc && (input.selectorSize ?? "auto") !== "auto") {
+    const graded = candidates.filter((s) => s.usesSelectorSize);
+    if (wantStruct === "compound" || !graded.length) {
+      const compound = wantStruct === "compound";
+      return {
+        ok: false,
+        results: [],
+        errorsEn: [
+          compound
+            ? `Compound types carry no selector grade: set the grade ${input.selectorSize} back to Auto, or pick the combined construction.`
+            : `No type with a selector grade fits this mounting / medium: set the grade ${input.selectorSize} back to Auto.`,
+        ],
+        errorsZh: [
+          compound
+            ? `复合式没有选择器等级：把等级 ${input.selectorSize} 改回自动，或把开关结构改为组合式。`
+            : `当前安装方式/介质下没有带选择器等级的型号：把等级 ${input.selectorSize} 改回自动。`,
+        ],
+      };
+    }
+    candidates = graded;
+  }
+
   if (!candidates.length) {
     return {
       ok: false,
@@ -1000,6 +1083,14 @@ export function selectOltc(input: SelectInput): SelectOutput {
   const seen = new Set<string>();
   /** A family fit on current/Um/Ust but no grade covered the across-tap stress. */
   let acrossTapShort = false;
+  const moreStated = [
+    input.insulBBilKv,
+    input.insulBPfKv,
+    input.insulC1BilKv,
+    input.insulC1PfKv,
+    input.insulC2BilKv,
+    input.insulC2PfKv,
+  ].some((v) => (v ?? 0) > 0);
   /** r3 ORDERS-11: results raised by the TR practice, with the Um-default letter. */
   const trRaised = new Map<ModelResult, SelectorSize>();
 
@@ -1110,6 +1201,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
         // Siemens Brazil 440 kV and HMR 330 kV 72.5C; EFACEC bought 126C). Held
         // out: fit on 2025 it gains 8 / loses 0 on 2026; fit on 2026 it nets +1 on 2025.
         const umDefault = defaultSelectorSizeForUm(att.um);
+        const moreNeed = statedDistances(input, att.phases, input.regulation);
         const classBump =
           !octc &&
           s.usesSelectorSize &&
@@ -1136,7 +1228,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
           // 2026-11-04 final ENGINE-11: one stated value above what B withstands
           // (LI 350 > 265) sets C from the stress, not from practice: no
           // "B also fits" caution and no B copy.
-          coversAcrossTap(umDefault, input.acrossTapBilKv ?? 0, input.acrossTapPfKv ?? 0, s.id)
+          coversAcrossTap(umDefault, input.acrossTapBilKv ?? 0, input.acrossTapPfKv ?? 0, s.id, moreNeed)
             ? SIZE_ORDER[SIZE_ORDER.indexOf(umDefault) + 1]
             : undefined;
         const gradePick =
@@ -1147,10 +1239,11 @@ export function selectOltc(input: SelectInput): SelectOutput {
                 input.acrossTapBilKv,
                 input.acrossTapPfKv,
                 s.id,
-                // Only a, not b, is checked: the stated stress may lower the
-                // grade where no phase-to-phase gap matters (2026-11-04 GRADE-2).
+                // The stated a may lower the grade where no phase-to-phase gap
+                // matters (2026-11-04 GRADE-2). Stated b / c1 / c2 only raise it.
                 att.phases === "I" || (att.phases === "III" && input.connection === "Y"),
                 classBump ?? trBump,
+                moreNeed,
               )
             : null;
         if (gradePick && gradePick.size == null) {
@@ -1327,10 +1420,10 @@ export function selectOltc(input: SelectInput): SelectOutput {
         }
         if (gradePick?.raisedFrom) {
           cautionsEn.push(
-            `Selector grade raised from ${gradePick.raisedFrom} to ${selectorSize} (Um ${att.um} kV / across-tap stress).`,
+            `Selector grade raised from ${gradePick.raisedFrom} to ${selectorSize} (Um ${att.um} kV / stated insulation).`,
           );
           cautionsZh.push(
-            `选择器等级已由 ${gradePick.raisedFrom} 升为 ${selectorSize}（Um ${att.um} kV 或调压绕组间绝缘要求）。`,
+            `选择器等级已由 ${gradePick.raisedFrom} 升为 ${selectorSize}（Um ${att.um} kV 或给定的绝缘要求）。`,
           );
         }
         // 2026-11-04 r3 ENGINE-10: the class caution only for the class step; a
@@ -1390,6 +1483,14 @@ export function selectOltc(input: SelectInput): SelectOutput {
           );
         }
 
+        if (!octc && !s.usesSelectorSize && Object.keys(moreNeed).length > 0) {
+          const names = Object.keys(moreNeed).join(" / ");
+          cautionsEn.push(
+            `${s.code} carries no selector grade: stated ${names} insulation not checked.`,
+          );
+          cautionsZh.push(`${s.code} 没有选择器等级：给定的 ${names} 绝缘未校验。`);
+        }
+
         // 需求电流取整展示：174.954… 这种长小数没有工程意义
         const dutyA =
           input.throughCurrentA >= 100
@@ -1412,11 +1513,14 @@ export function selectOltc(input: SelectInput): SelectOutput {
         }
 
         if (s.usesSelectorSize) {
+          const moreEn = distancesText(moreNeed, "LI", "AC");
+          const moreZh = distancesText(moreNeed, "雷电", "工频");
           reasonsEn.push(
             `Tap selector grade ${selectorSize} (smallest covering Um` +
               (input.acrossTapBilKv
                 ? ` + across-tap BIL ${input.acrossTapBilKv} kV`
                 : "") +
+              (moreEn ? ` + ${moreEn} kV` : "") +
               ").",
           );
           reasonsZh.push(
@@ -1424,6 +1528,7 @@ export function selectOltc(input: SelectInput): SelectOutput {
               (input.acrossTapBilKv
                 ? ` 与调压绕组间 BIL ${input.acrossTapBilKv} kV`
                 : "") +
+              (moreZh ? ` 与 ${moreZh} kV` : "") +
               " 的最小规格）。",
           );
         }
@@ -1562,7 +1667,16 @@ export function selectOltc(input: SelectInput): SelectOutput {
     const model = r.model.replace(`/${r.umToken}-`, `/${umToken}-`);
     if (model === r.model || seen.has(model) || !commercialTypeExists(model, s)) continue;
     // ENGINE-11 second guard: never a copy below the stated across-tap stress.
-    if (!coversAcrossTap(from, input.acrossTapBilKv ?? 0, input.acrossTapPfKv ?? 0, r.seriesId)) continue;
+    if (
+      !coversAcrossTap(
+        from,
+        input.acrossTapBilKv ?? 0,
+        input.acrossTapPfKv ?? 0,
+        r.seriesId,
+        statedDistances(input, r.phases, input.regulation),
+      )
+    )
+      continue;
     seen.add(model);
     const keep = r.cautionsEn.map((c) => !c.startsWith("Selector grade raised to "));
     results.push({
@@ -1693,12 +1807,16 @@ export function selectOltc(input: SelectInput): SelectOutput {
       ok: false,
       results: [],
       errorsEn: [
-        acrossTapShort
+        acrossTapShort && moreStated
+          ? "Stated insulation (a / b / c1 / c2) is above every selector grade that fits this duty. Contact engineering."
+          : acrossTapShort
           ? "Across-tap insulation is above every selector grade that fits this duty. Contact engineering."
           : "Parameters out of catalogue range (current, Um, step voltage, or positions).",
       ],
       errorsZh: [
-        acrossTapShort
+        acrossTapShort && moreStated
+          ? "给定的绝缘要求（a / b / c1 / c2）超出满足此工况的所有选择器等级。请联系工程。"
+          : acrossTapShort
           ? "调压绕组间绝缘超出满足此工况的所有选择器等级。请联系工程。"
           : "参数超出目录范围（电流、Um、级电压或档位数）。",
       ],
@@ -1854,9 +1972,9 @@ const STEP_CAPACITY_LINE = 0.95;
 const INSULATION_LINE = 0.95;
 const LINE_EPS = 1e-9;
 
-export type MarginNeed = {
-  acrossTapBilKv?: number;
-  acrossTapPfKv?: number;
+export type MarginNeed = InsulationInput & {
+  /** Linear regulation has no change-over selector: c1 / c2 do not count. */
+  regulation?: SelectInput["regulation"];
 };
 
 type DutyUse = { iUse: number; uUse: number; pUse: number; nUse: number };
@@ -1865,27 +1983,22 @@ function pastLine(use: number, line: number): boolean {
   return use > line + LINE_EPS;
 }
 
-/** Across-tap fill against this model's own withstand. No number → 0. */
+/** Stated insulation against this model's own withstand, fullest distance. No number → 0. */
 function insulationUse(row: ModelResult, need?: MarginNeed): number {
   const bil = need?.acrossTapBilKv ?? 0;
   const pf = need?.acrossTapPfKv ?? 0;
-  if (bil <= 0 && pf <= 0) return 0;
   const series = SERIES.find((s) => s.id === row.seriesId);
-  let aLi = 0;
-  let aPf = 0;
   if (series?.structure === "compound") {
     // Same fixed a-distance as compoundCoversAcrossTap.
-    aLi = 200;
-    aPf = 50;
-  } else if (row.selectorSize) {
-    const ins = internalInsulation(row.seriesId, row.selectorSize);
-    aLi = ins?.a_li ?? 0;
-    aPf = ins?.a_pf ?? 0;
+    return Math.max(bil > 0 ? bil / 200 : 0, pf > 0 ? pf / 50 : 0);
   }
-  let peak = 0;
-  if (bil > 0 && aLi > 0) peak = Math.max(peak, bil / aLi);
-  if (pf > 0 && aPf > 0) peak = Math.max(peak, pf / aPf);
-  return peak;
+  if (!need || !row.selectorSize) return 0;
+  const peak = internalPeak(
+    row.selectorSize,
+    { ...statedDistances(need, row.phases, need.regulation), a: { li: bil, pf } },
+    row.seriesId,
+  );
+  return peak && Number.isFinite(peak.ratio) ? peak.ratio : 0;
 }
 
 /**

@@ -56,12 +56,30 @@ const RULES: Rule[] = [
     }),
   ],
   [
-    /^Selector grade raised from (\S+) to (\S+) \(Um ([\d.]+) kV \/ across-tap stress\)\.$/,
+    /^Compound types carry no selector grade: set the grade (\S+) back to Auto, or pick the combined construction\.$/,
     (m) => ({
-      vi: `Cấp bộ chọn nấc nâng từ ${m[1]} lên ${m[2]} (Um ${m[3]} kV hoặc cách điện giữa các nấc).`,
-      es: `Grado del selector elevado de ${m[1]} a ${m[2]} (Um ${m[3]} kV o aislamiento entre tomas).`,
-      tr: `Seçici sınıfı ${m[1]}'den ${m[2]}'ye yükseltildi (Um ${m[3]} kV veya kademeler arası yalıtım).`,
-      id: `Kelas selektor dinaikkan dari ${m[1]} ke ${m[2]} (Um ${m[3]} kV atau isolasi antar-tap).`,
+      vi: `Loại phức hợp không có cấp bộ chọn nấc: đặt cấp ${m[1]} về Tự động, hoặc chọn kết cấu tổ hợp.`,
+      es: `Los tipos compuestos no llevan grado de selector: vuelva el grado ${m[1]} a Automático o elija la construcción combinada.`,
+      tr: `Bileşik tiplerde seçici sınıfı yoktur: ${m[1]} sınıfını Otomatik'e alın veya kombine yapıyı seçin.`,
+      id: `Tipe kompon tidak memiliki kelas selektor: kembalikan kelas ${m[1]} ke Otomatis, atau pilih konstruksi kombinasi.`,
+    }),
+  ],
+  [
+    /^No type with a selector grade fits this mounting \/ medium: set the grade (\S+) back to Auto\.$/,
+    (m) => ({
+      vi: `Không có loại có cấp bộ chọn nấc cho kiểu lắp / môi chất này: đặt cấp ${m[1]} về Tự động.`,
+      es: `Ningún tipo con grado de selector sirve para este montaje / medio: vuelva el grado ${m[1]} a Automático.`,
+      tr: `Bu montaj / ortam için seçici sınıflı tip yok: ${m[1]} sınıfını Otomatik'e alın.`,
+      id: `Tidak ada tipe berkelas selektor untuk pemasangan / media ini: kembalikan kelas ${m[1]} ke Otomatis.`,
+    }),
+  ],
+  [
+    /^Selector grade raised from (\S+) to (\S+) \(Um ([\d.]+) kV \/ stated insulation\)\.$/,
+    (m) => ({
+      vi: `Cấp bộ chọn nấc nâng từ ${m[1]} lên ${m[2]} (Um ${m[3]} kV hoặc cách điện đã nêu).`,
+      es: `Grado del selector elevado de ${m[1]} a ${m[2]} (Um ${m[3]} kV o aislamiento indicado).`,
+      tr: `Seçici sınıfı ${m[1]}'den ${m[2]}'ye yükseltildi (Um ${m[3]} kV veya belirtilen yalıtım).`,
+      id: `Kelas selektor dinaikkan dari ${m[1]} ke ${m[2]} (Um ${m[3]} kV atau isolasi yang dinyatakan).`,
     }),
   ],
   [
@@ -418,6 +436,24 @@ const RULES: Rule[] = [
       es: `Ninguna familia ${m[1]} coincide con este montaje / medio. Ajuste los filtros o contacte con ingeniería.`,
       tr: `Bu montaj / ortam kombinasyonuna uyan ${m[1]} serisi yok. Filtreleri değiştirin veya mühendislikle görüşün.`,
       id: `Tidak ada keluarga ${m[1]} yang cocok dengan pemasangan / media ini. Ubah filter atau hubungi bagian teknik.`,
+    }),
+  ],
+  [
+    /^Stated insulation \(a \/ b \/ c1 \/ c2\) is above every selector grade that fits this duty\. Contact engineering\.$/,
+    () => ({
+      vi: "Cách điện yêu cầu (a / b / c1 / c2) vượt mọi cấp bộ chọn nấc phù hợp. Liên hệ kỹ thuật.",
+      es: "El aislamiento indicado (a / b / c1 / c2) supera todos los grados de selector válidos para este servicio. Contacte con ingeniería.",
+      tr: "Belirtilen yalıtım (a / b / c1 / c2) bu göreve uyan tüm seçici sınıflarının üzerinde. Mühendislikle görüşün.",
+      id: "Isolasi yang diminta (a / b / c1 / c2) di atas semua kelas selektor yang sesuai. Hubungi bagian teknik.",
+    }),
+  ],
+  [
+    /^(\S+) carries no selector grade: stated (.+) insulation not checked\.$/,
+    (m) => ({
+      vi: `${m[1]} không có cấp bộ chọn nấc: chưa kiểm tra cách điện ${m[2]} đã nêu.`,
+      es: `${m[1]} no lleva grado de selector: no se comprobó el aislamiento ${m[2]} indicado.`,
+      tr: `${m[1]} seçici sınıfı taşımaz: belirtilen ${m[2]} yalıtımı kontrol edilmedi.`,
+      id: `${m[1]} tidak memiliki kelas selektor: isolasi ${m[2]} yang diminta tidak diperiksa.`,
     }),
   ],
   [

@@ -140,7 +140,13 @@ type InputKey =
   | "selectorSize"
   | "preferStructure"
   | "acrossTapBilKv"
-  | "acrossTapPfKv";
+  | "acrossTapPfKv"
+  | "insulBBilKv"
+  | "insulBPfKv"
+  | "insulC1BilKv"
+  | "insulC1PfKv"
+  | "insulC2BilKv"
+  | "insulC2PfKv";
 type InputSpec = { [K in InputKey]: [short: string, codec: Codec<SelectInput[K]>] };
 
 const INPUT: InputSpec = {
@@ -165,6 +171,12 @@ const INPUT: InputSpec = {
   preferStructure: ["st", optional(oneOf("auto", "combined", "compound", "cage", "drum"))],
   acrossTapBilKv: ["bil", optional(num(5000))],
   acrossTapPfKv: ["pf", optional(num(5000))],
+  insulBBilKv: ["bli", optional(num(5000))],
+  insulBPfKv: ["bac", optional(num(5000))],
+  insulC1BilKv: ["c1li", optional(num(5000))],
+  insulC1PfKv: ["c1ac", optional(num(5000))],
+  insulC2BilKv: ["c2li", optional(num(5000))],
+  insulC2PfKv: ["c2ac", optional(num(5000))],
 };
 
 const LINE_KEY = "ln";

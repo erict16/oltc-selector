@@ -257,7 +257,11 @@ Grouped like the cards of the web page.
 | `--mount` | `in-tank` / `on-tank` / `dry` / `reactor` (oil HWDK) | in-tank |
 | `--vacuum` / `--oil` | Switching medium | vacuum (on-load) |
 | `--contact` | Off-circuit contact, e.g. `6x5` | |
-| `--across-li` `--across-ac` | Stated LI / AC withstand across the tap winding (kV). Sets the selector grade B / C / D / DE | |
+| `--across-li` `--across-ac` | Stated LI / AC withstand across the tap winding, distance a (kV). Sets the selector grade B / C / D / DE | |
+| `--b-li` `--b-ac` | Stated withstand between tap windings of different phases, distance b (kV). Three-phase units | |
+| `--c1-li` `--c1-ac` | Stated withstand from the change-over selector to the take-off terminal, distance c1 (kV). W or G regulation | |
+| `--c2-li` `--c2-ac` | Stated withstand between change-over selectors of different phases, distance c2 (kV). Three-phase units, W or G | |
+| `--grade` | Selector grade picked by hand: `B` / `C` / `D` / `DE`. Raised, with a note, when the duty needs more | auto |
 
 </details>
 

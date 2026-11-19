@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.6.0 (2026-11-20)
+
+- Selector insulation grade: one row with Auto / B / C / D / DE / enter kV values. The typed LI and AC withstand for the inner distances a, b, c1 and c2 gives the smallest grade that covers all of them. b and c2 count on three-phase units, c1 and c2 with a change-over selector. A three-phase duty whose c2 is above DE goes to three single-phase units.
+- CLI: `--b-li` `--b-ac` `--c1-li` `--c1-ac` `--c2-li` `--c2-ac` and `--grade B|C|D|DE`. `--across-li` / `--across-ac` stay as distance a.
+- A picked grade keeps the selection to the families that carry a grade letter. With the compound construction, or a mounting / medium that has no such family, the error says to set the grade back to Auto.
+- A stated distance on a type without a grade letter shows a caution: the value was not checked.
+- Phone: the LI and AC boxes sit on one row; the old stacked BIL / PF row is gone.
+- Form links keep the typed values (`bli`, `bac`, `c1li`, `c1ac`, `c2li`, `c2ac`).
+
 ## 2.5.0 (2026-11-18)
 
 Ships the two page sections below (after 2.4.1, and 2026-11-17) as a version, with:

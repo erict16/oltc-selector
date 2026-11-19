@@ -95,8 +95,11 @@ const FLAG_GROUPS: { title: string; flags: Flag[] }[] = [
       ["--structure", "specStructure", "auto | combined | compound | cage | drum"],
       ["--series", "octcSeries", "II | IV | V | VI | VII | VIII"],
       ["--mount", "mounting", "in-tank | on-tank | dry | reactor"],
-      ["--across-li", "acrossBil", "kV"],
-      ["--across-ac", "acrossPf", "kV"],
+      ["--across-li / --across-ac", "insulA", "kV"],
+      ["--b-li / --b-ac", "insulB", "kV"],
+      ["--c1-li / --c1-ac", "insulC1", "kV"],
+      ["--c2-li / --c2-ac", "insulC2", "kV"],
+      ["--grade", "selectorSize", "B | C | D | DE"],
     ],
   },
 ];

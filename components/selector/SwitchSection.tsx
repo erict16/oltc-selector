@@ -1,21 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ACROSS_BIL_MENU,
-  ACROSS_BIL_OPTIONS_KV,
-  ACROSS_PF_MENU,
-  ACROSS_PF_OPTIONS_KV,
-} from "@/lib/catalog";
 import { isOctc as formIsOctc, type FormState } from "@/lib/formState";
-import { currentLabel, t, type Lang } from "@/lib/i18n";
+import { t, type Lang } from "@/lib/i18n";
 import type { SelectInput } from "@/lib/types";
-import { UpSelect } from "@/components/UpSelect";
-import { CardHead, Field, FieldSelect, PickOrType, controlClass } from "./fields";
+import { CardHead, DecimalInput, Field, FieldSelect, PickOrType, controlClass } from "./fields";
 import type { FormActions } from "./useFormActions";
 
 const SAFETY_K_OPTIONS = [
   1, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.5, 1.6, 1.7, 1.8,
+] as const;
+
+const GRADES = ["B", "C", "D", "DE"] as const;
+
+/** The selector's inner distances (brochure Table 4-2), each with LI and AC. */
+const DISTANCES = [
+  { id: "a", label: "insulA", li: "acrossTapBilKv", pf: "acrossTapPfKv" },
+  { id: "b", label: "insulB", li: "insulBBilKv", pf: "insulBPfKv" },
+  { id: "c1", label: "insulC1", li: "insulC1BilKv", pf: "insulC1PfKv" },
+  { id: "c2", label: "insulC2", li: "insulC2BilKv", pf: "insulC2PfKv" },
 ] as const;
 
 /** Card 3: on-load or off-circuit, interrupter, construction, mounting, insulation, safety factor. */
@@ -29,9 +32,24 @@ export function SwitchSection({
   actions: FormActions;
 }) {
   const { input, safetyK } = form;
-  const { patch, setOffCircuit, setArc, setMounting, commitSafetyK } = actions;
+  const { patch, pickSelectorGrade, setOffCircuit, setArc, setMounting, commitSafetyK } = actions;
   const isOctc = formIsOctc(form);
   const [safetyKCustom, setSafetyKCustom] = useState(false);
+  const [fillOpen, setFillOpen] = useState(false);
+  // b and c2 are between phases; c1 and c2 sit on the change-over selector.
+  const threePhase = !isOctc && input.phases === "III";
+  const changeOver = !isOctc && input.regulation !== "linear";
+  const distances = DISTANCES.filter(
+    (d) =>
+      d.id === "a" ||
+      (d.id === "b" && threePhase) ||
+      (d.id === "c1" && changeOver) ||
+      (d.id === "c2" && threePhase && changeOver),
+  );
+  const fill =
+    fillOpen || distances.some((d) => (input[d.li] ?? 0) > 0 || (input[d.pf] ?? 0) > 0);
+  const typed = input.selectorSize;
+  const grade = !isOctc && GRADES.some((g) => g === typed) ? typed : "auto";
   return (
     <section aria-label={t(lang, "cardSwitch")} className="sheet-section">
       <CardHead title={t(lang, "cardSwitch")} />
@@ -108,78 +126,49 @@ export function SwitchSection({
             </FieldSelect>
           </Field>
 
-          <Field as="div" className="row-wide" label={t(lang, "acrossInsul")}>
-            <div className="flex min-w-0 flex-1 gap-1">
-              <UpSelect
-                label={t(lang, "acrossBil")}
-                value={
-                  input.acrossTapBilKv != null &&
-                  input.acrossTapBilKv > 0
-                    ? String(input.acrossTapBilKv)
-                    : ""
-                }
-                onChange={(raw) =>
-                  patch(
-                    "acrossTapBilKv",
-                    raw === "" ? undefined : Number(raw),
-                  )
-                }
-                options={[
-                  { value: "", label: t(lang, "acrossUnset") },
-                  ...(input.acrossTapBilKv != null &&
-                  input.acrossTapBilKv > 0 &&
-                  !(ACROSS_BIL_OPTIONS_KV as readonly number[]).includes(
-                    input.acrossTapBilKv,
-                  )
-                    ? [
-                        {
-                          value: String(input.acrossTapBilKv),
-                          label: `${input.acrossTapBilKv} kV`,
-                        },
-                      ]
-                    : []),
-                  ...ACROSS_BIL_MENU.map((item) => ({
-                    value: String(item.value),
-                    label: currentLabel(lang, item.labelZh, item.labelEn),
-                  })),
-                ]}
-              />
-              <UpSelect
-                label={t(lang, "acrossPf")}
-                value={
-                  input.acrossTapPfKv != null &&
-                  input.acrossTapPfKv > 0
-                    ? String(input.acrossTapPfKv)
-                    : ""
-                }
-                onChange={(raw) =>
-                  patch(
-                    "acrossTapPfKv",
-                    raw === "" ? undefined : Number(raw),
-                  )
-                }
-                options={[
-                  { value: "", label: t(lang, "acrossUnset") },
-                  ...(input.acrossTapPfKv != null &&
-                  input.acrossTapPfKv > 0 &&
-                  !(ACROSS_PF_OPTIONS_KV as readonly number[]).includes(
-                    input.acrossTapPfKv,
-                  )
-                    ? [
-                        {
-                          value: String(input.acrossTapPfKv),
-                          label: `${input.acrossTapPfKv} kV`,
-                        },
-                      ]
-                    : []),
-                  ...ACROSS_PF_MENU.map((item) => ({
-                    value: String(item.value),
-                    label: currentLabel(lang, item.labelZh, item.labelEn),
-                  })),
-                ]}
-              />
-            </div>
+          <Field label={t(lang, "selectorSize")}>
+            <FieldSelect
+              className={controlClass}
+              value={fill ? "fill" : grade}
+              onChange={(e) => {
+                const v = e.target.value;
+                setFillOpen(v === "fill");
+                // A letter or Auto drops the typed values: the two never disagree.
+                pickSelectorGrade(v === "fill" ? "auto" : (v as SelectInput["selectorSize"]));
+              }}
+            >
+              <option value="auto">{t(lang, "auto")}</option>
+              {isOctc
+                ? null
+                : GRADES.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
+                  ))}
+              <option value="fill">{t(lang, "gradeFill")}</option>
+            </FieldSelect>
           </Field>
+          {fill
+            ? distances.map((d) => (
+                <Field key={d.id} as="div" className="row-pair" label={t(lang, d.label)}>
+                  <DecimalInput
+                    className={controlClass}
+                    label={`${d.id} ${t(lang, "insulLi")} kV`}
+                    placeholder={t(lang, "insulLi")}
+                    value={input[d.li] ?? 0}
+                    onValue={(n) => patch(d.li, n > 0 ? n : undefined)}
+                  />
+                  <DecimalInput
+                    className={controlClass}
+                    label={`${d.id} ${t(lang, "insulAc")} kV`}
+                    placeholder={t(lang, "insulAc")}
+                    value={input[d.pf] ?? 0}
+                    onValue={(n) => patch(d.pf, n > 0 ? n : undefined)}
+                  />
+                  <span className="row-unit">kV</span>
+                </Field>
+              ))
+            : null}
           <Field label={t(lang, "safetyK")}>
             <PickOrType
               lang={lang}

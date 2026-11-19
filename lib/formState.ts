@@ -37,6 +37,21 @@ import {
 } from "./transformer";
 import type { Regulation, SelectInput } from "./types";
 
+/**
+ * The selector grade and stated insulation of one transformer. A new line or
+ * a new winding starts without them (2026-11-04 r3 UI-8).
+ */
+export const NO_STATED_INSULATION = {
+  acrossTapBilKv: undefined,
+  acrossTapPfKv: undefined,
+  insulBBilKv: undefined,
+  insulBPfKv: undefined,
+  insulC1BilKv: undefined,
+  insulC1PfKv: undefined,
+  insulC2BilKv: undefined,
+  insulC2PfKv: undefined,
+} satisfies Partial<SelectInput>;
+
 type Pitch = 10 | 12 | 14 | 16 | 18;
 type Geometry = Pick<SelectInput, "plusMinusSteps" | "positions" | "midPositions" | "pitch">;
 
@@ -463,8 +478,8 @@ function applyLine(f: FormState, tl: TenderLine, s: LineSettings): FormState {
       connection: connFor(s.tapPoint),
       umKv: 0,
       phases,
-      acrossTapBilKv: undefined,
-      acrossTapPfKv: undefined,
+      ...NO_STATED_INSULATION,
+      selectorSize: "auto",
       // Dry-type and reactor describe the last transformer, not this line:
       // after a dry job an oil 25 MVA line found no type, then 3xCZI.
       ...(tl.dryType
@@ -555,8 +570,8 @@ function readLineInner(f0: FormState, text: string): FormState {
       input: {
         ...f.input,
         ...(winding ? {} : { umKv: 0 }),
-        acrossTapBilKv: undefined,
-        acrossTapPfKv: undefined,
+        ...NO_STATED_INSULATION,
+        selectorSize: "auto",
       },
     };
   }
@@ -601,8 +616,8 @@ function remapLine(f: FormState, tl: TenderLine, octc: boolean): FormState | nul
         ...next.input,
         connection: connFor(b.tapPoint),
         umKv: 0,
-        acrossTapBilKv: undefined,
-        acrossTapPfKv: undefined,
+        ...NO_STATED_INSULATION,
+        selectorSize: "auto",
       },
     };
   }
@@ -636,6 +651,14 @@ export function toOctc(f: FormState): FormState {
       ...next.input,
       dutyKind: "octc",
       preferStructure: "auto",
+      // B…DE and b / c1 / c2 are on-load selector terms; a stays.
+      selectorSize: "auto",
+      insulBBilKv: undefined,
+      insulBPfKv: undefined,
+      insulC1BilKv: undefined,
+      insulC1PfKv: undefined,
+      insulC2BilKv: undefined,
+      insulC2PfKv: undefined,
       octcSeries: next.input.octcSeries ?? "auto",
     },
   };

@@ -75,6 +75,15 @@ export type CliArgs = {
   /** Stated across-tap-winding LI / AC (kV). */
   acrossLi?: number;
   acrossAc?: number;
+  /** Stated b / c1 / c2 LI / AC (kV): the other selector distances. */
+  bLi?: number;
+  bAc?: number;
+  c1Li?: number;
+  c1Ac?: number;
+  c2Li?: number;
+  c2Ac?: number;
+  /** --grade: a selector grade picked by hand. */
+  grade?: "B" | "C" | "D" | "DE";
   /** Mid positions of the W/G diagram (--mid, or the +a/−b geometry). */
   mid?: 1 | 3;
   /** +a/−b as stated by --range or --line, for the 假定 echo. */
@@ -126,10 +135,21 @@ function num(raw: string, flag: string, bound: Bound = "positive"): number {
   throw new CliError(`Invalid number for ${flag}: ${raw}`);
 }
 
+/** b / c1 / c2 withstand flags → the argument they fill. */
+const DISTANCE_FLAGS: Record<string, "bLi" | "bAc" | "c1Li" | "c1Ac" | "c2Li" | "c2Ac"> = {
+  "--b-li": "bLi",
+  "--b-ac": "bAc",
+  "--c1-li": "c1Li",
+  "--c1-ac": "c1Ac",
+  "--c2-li": "c2Li",
+  "--c2-ac": "c2Ac",
+};
+
 /** Every flag the parser reads, for "did you mean". */
 const KNOWN_FLAGS = [
   "--help", "--version", "--json", "--lang", "--no-update-check", "--octc", "--oil",
   "--vacuum", "--iu", "--imax", "--os-imax", "--market", "--across-li", "--across-ac",
+  "--b-li", "--b-ac", "--c1-li", "--c1-ac", "--c2-li", "--c2-ac", "--grade",
   "--mva", "--kv", "--um", "--ust", "--step-pct", "--k", "--conn", "--connection",
   "--kind", "--auto", "--tap", "--winding", "--hv", "--mv", "--earth-um", "--reg",
   "--pm", "--positions", "--pos", "--structure", "--series", "--mount", "--contact",
@@ -453,6 +473,27 @@ export function parseCliArgs(rawArgv: string[]): CliArgs {
       i = n;
       continue;
     }
+    if (Object.hasOwn(DISTANCE_FLAGS, a)) {
+      const key = DISTANCE_FLAGS[a]!;
+      out.given.add(key);
+      const [v, n] = take(i, a);
+      out[key] = num(v, a, "nonNegative");
+      i = n;
+      continue;
+    }
+    if (a === "--grade") {
+      out.given.add("grade");
+      const [v, n] = take(i, a);
+      const g = v.toUpperCase();
+      if (g !== "AUTO") {
+        if (g !== "B" && g !== "C" && g !== "D" && g !== "DE") {
+          throw new CliError("--grade must be auto|B|C|D|DE");
+        }
+        out.grade = g;
+      }
+      i = n;
+      continue;
+    }
     if (a === "--structure") {
       out.given.add("structure");
       const [v, n] = take(i, a);
@@ -742,8 +783,18 @@ Flags:
   --ust V            Step voltage. With --mva/--kv/--step-pct, derived if omitted;
                      given, it is the OS figure and a floor (never lowers Ust).
   --across-li kV --across-ac kV
-                     Stated across-tap-winding LI / AC withstand: sets the
-                     selector grade (B/C/D/DE).
+                     Stated across-tap-winding LI / AC withstand (distance a):
+                     sets the selector grade (B/C/D/DE).
+  --b-li kV --b-ac kV
+  --c1-li kV --c1-ac kV
+  --c2-li kV --c2-ac kV
+                     Stated LI / AC on the other selector distances. b: between
+                     tap windings of different phases. c1: change-over (−)
+                     contact to take-off terminal. c2: (−) contacts of different
+                     phases. The grade is the smallest that covers all of them.
+                     b and c2 count on three-phase units, c1 and c2 with W or G.
+  --grade B|C|D|DE   Selector grade picked by hand. Raised, with a note, when it
+                     does not cover the stated values. On-load only.
   --step-pct %       Step as percent (1.25 means 1.25%). Capacity path only.
   --k n              Safety factor on capacity path only (default 1.0, same as the web app).
   --conn Y|D         Switch connection (star point / line end). Default Y.
@@ -943,6 +994,10 @@ function checkConflicts(args: CliArgs): void {
       );
     }
   } else {
+    if (g("grade")) throw new CliError("--grade is the on-load selector grade: remove --octc");
+    for (const [flag, key] of Object.entries(DISTANCE_FLAGS)) {
+      if (g(key)) throw new CliError(`${flag} is an on-load selector distance: remove --octc`);
+    }
     if (args.structure === "combined" || args.structure === "compound") {
       throw new CliError(
         `--structure ${args.structure} is on-load only: with --octc use cage or drum`,
@@ -1081,9 +1136,15 @@ export function cliToSelectInput(args: CliArgs): SelectInput {
     umKv: um,
     stepVoltageV: ust,
     regulation: args.octc ? "linear" : args.reg,
-    selectorSize: "auto",
+    selectorSize: args.grade ?? "auto",
     ...(args.acrossLi != null && args.acrossLi > 0 ? { acrossTapBilKv: args.acrossLi } : {}),
     ...(args.acrossAc != null && args.acrossAc > 0 ? { acrossTapPfKv: args.acrossAc } : {}),
+    ...(args.bLi != null && args.bLi > 0 ? { insulBBilKv: args.bLi } : {}),
+    ...(args.bAc != null && args.bAc > 0 ? { insulBPfKv: args.bAc } : {}),
+    ...(args.c1Li != null && args.c1Li > 0 ? { insulC1BilKv: args.c1Li } : {}),
+    ...(args.c1Ac != null && args.c1Ac > 0 ? { insulC1PfKv: args.c1Ac } : {}),
+    ...(args.c2Li != null && args.c2Li > 0 ? { insulC2BilKv: args.c2Li } : {}),
+    ...(args.c2Ac != null && args.c2Ac > 0 ? { insulC2PfKv: args.c2Ac } : {}),
     preferStructure: args.structure,
     mdu: "none",
   };
@@ -1199,6 +1260,15 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     const half = li.includes("未指定") !== ac.includes("未指定");
     items.push(`调压绕组间 ${li} / ${ac} kV${half ? "（只给一项：等级不低于 Um 默认）" : ""}`);
   }
+  for (const [name, li, ac] of [
+    ["b", args.bLi, args.bAc],
+    ["c1", args.c1Li, args.c1Ac],
+    ["c2", args.c2Li, args.c2Ac],
+  ] as const) {
+    const parts = [(li ?? 0) > 0 ? `LI ${li}` : "", (ac ?? 0) > 0 ? `AC ${ac}` : ""].filter(Boolean);
+    if (parts.length) items.push(`${name} ${parts.join(" / ")} kV`);
+  }
+  if (args.grade) items.push(`选择器等级=${args.grade}（指定）`);
   const phases = `相数=${args.phases}${mark("phases")}`;
   if (args.octc) {
     if (args.positions != null) {
@@ -1468,10 +1538,7 @@ export function formatCliText(input: SelectInput, args?: CliArgs): string {
     input.throughCurrentA,
     input.stepVoltageV,
     3,
-    {
-      acrossTapBilKv: input.acrossTapBilKv,
-      acrossTapPfKv: input.acrossTapPfKv,
-    },
+    input,
   );
   const lines = [
     primary.model,
@@ -1530,10 +1597,7 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
     input.throughCurrentA,
     input.stepVoltageV,
     3,
-    {
-      acrossTapBilKv: input.acrossTapBilKv,
-      acrossTapPfKv: input.acrossTapPfKv,
-    },
+    input,
   ).map((r) => r.model);
   const en = args?.lang === "en";
   const dutyJ = args ? cliDuty(args) : null;

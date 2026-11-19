@@ -5,6 +5,7 @@ import {
   applyMid,
   commitSafetyK,
   patchInput,
+  pickSelectorGrade,
   pickTap,
   pickWinding,
   setArc,
@@ -56,6 +57,8 @@ export function useFormActions(setForm: Dispatch<SetStateAction<FormState>>) {
       clearLineFailed: () => run((f) => setField(f, "lineFailed", false)),
       patch: <K extends keyof SelectInput>(k: K, v: SelectInput[K]) =>
         run((f) => patchInput(f, k, v)),
+      pickSelectorGrade: (size: SelectInput["selectorSize"]) =>
+        run((f) => pickSelectorGrade(f, size)),
       setTransformerMva: (n: number) => run((f) => setField(f, "transformerMva", n)),
       setMvaCustom: (on: boolean) => run((f) => setField(f, "mvaCustom", on)),
       setCurrentEntry: (mode: FormState["currentMode"]) => run((f) => setCurrentEntry(f, mode)),

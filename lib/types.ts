@@ -102,6 +102,15 @@ export interface SelectInput {
   acrossTapBilKv?: number;
   /** Across tap winding PF (kV) */
   acrossTapPfKv?: number;
+  /** Distance b, between tap windings of different phases: LI / PF (kV). */
+  insulBBilKv?: number;
+  insulBPfKv?: number;
+  /** Distance c1, change-over (−) contact to take-off terminal: LI / PF (kV). */
+  insulC1BilKv?: number;
+  insulC1PfKv?: number;
+  /** Distance c2, change-over (−) contacts of different phases: LI / PF (kV). */
+  insulC2BilKv?: number;
+  insulC2PfKv?: number;
   switchesPerDay?: number;
   mdu?: "CMA7" | "SHM-D" | "SHM-DA" | "none" | "auto";
 }
