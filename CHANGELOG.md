@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.7.0 (2026-11-20)
+
+- Autotransformer tapped at the neutral end (中性点调压): a third tap point beside Series, MV end and MV line. One three-phase star-point switch (III Y) on the neutral Um class instead of three single-phase units on the MV class.
+- The switch carries the common-winding current I_MV − I_HV. Regulation is variable flux, so current and Ust are taken at the worst tap; the card and the CLI show that tap and the flux, with a caution to check the maker's per-tap table. A range that would bring HV down to MV (or MV up to HV) is refused.
+- New field 调压侧 / Regulated voltage (HV or MV), shown only for this tap point. CLI: `--kind auto --tap neutral` and `--regulates hv|mv`; JSON `basis.common`.
+- A tender line that says 中性点调压 / "OLTC at neutral end" on an autotransformer sets the tap point; the side comes from where the ± range is written.
+- Form links keep the side (`ar`). The sketch draws the autotransformer with all three tap points.
+
 ## 2.6.0 (2026-11-20)
 
 - Selector insulation grade: one row with Auto / B / C / D / DE / enter kV values. The typed LI and AC withstand for the inner distances a, b, c1 and c2 gives the smallest grade that covers all of them. b and c2 count on three-phase units, c1 and c2 with a change-over selector. A three-phase duty whose c2 is above DE goes to three single-phase units.

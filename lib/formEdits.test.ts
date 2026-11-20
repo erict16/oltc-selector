@@ -46,7 +46,13 @@ describe("single-control form edits", () => {
     const d = pickWinding(F, "delta");
     expect(pickTap(d, "neutral")).toBe(d);
     const auto = pickKind(F, "auto");
-    expect(pickTap(auto, "neutral")).toBe(auto);
+    expect(pickTap(auto, "line_end")).toBe(auto);
+  });
+
+  it("an autotransformer can be tapped at the neutral end (star-point switch)", () => {
+    const n = pickTap(pickKind(F, "auto"), "neutral");
+    expect(n.tapPoint).toBe("neutral");
+    expect(n.input.connection).toBe("Y");
   });
 
   it("switching to current entry carries the current the capacity gave", () => {

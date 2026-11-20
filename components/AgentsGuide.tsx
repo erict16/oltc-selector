@@ -61,6 +61,7 @@ const FLAG_GROUPS: { title: string; flags: Flag[] }[] = [
       ["--line", "lineLabel", '"…"'],
       ["--kind", "kindLabel", "two | auto"],
       ["--tap", "tapPoint", "neutral | line | junction | mv-line"],
+      ["--regulates", "autoReg", "hv | mv"],
       ["--winding", "winding", "star | delta"],
       ["--kv", "umWinding", "kV"],
       ["--hv", "hvKv", "kV"],

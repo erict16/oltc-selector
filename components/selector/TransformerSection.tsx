@@ -6,6 +6,7 @@ import { isOctc as formIsOctc, type FormState } from "@/lib/formState";
 import { t, type Lang } from "@/lib/i18n";
 import {
   TAP_POINTS_FOR,
+  type RegulatedSide,
   type TapPoint,
   type TransformerKind,
   type WindingConnection,
@@ -39,8 +40,8 @@ export function TransformerSection({
   actions: FormActions;
   sel: Selection;
 }) {
-  const { kind, tapPoint, winding, hvKv, mvKv, windingRatedKv, earthUm } = form;
-  const { pickKind, pickTap, pickWinding, setHvKv, setMvKv, setVoltageKv, setEarthUm } = actions;
+  const { kind, tapPoint, winding, hvKv, mvKv, autoReg, windingRatedKv, earthUm } = form;
+  const { pickKind, pickTap, pickWinding, setHvKv, setMvKv, setAutoReg, setVoltageKv, setEarthUm } = actions;
   const { ruleDuty } = sel;
   const isOctc = formIsOctc(form);
   return (
@@ -120,6 +121,18 @@ export function TransformerSection({
                 kvValue={mvKv}
                 onKv={setMvKv}
               />
+              {tapPoint === "neutral" ? (
+                <Field label={t(lang, "autoReg")}>
+                  <FieldSelect
+                    className={controlClass}
+                    value={autoReg}
+                    onChange={(e) => setAutoReg(e.target.value as RegulatedSide)}
+                  >
+                    <option value="hv">{t(lang, "autoRegHv")}</option>
+                    <option value="mv">{t(lang, "autoRegMv")}</option>
+                  </FieldSelect>
+                </Field>
+              ) : null}
             </>
           ) : (
             <KvField

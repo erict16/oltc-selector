@@ -188,6 +188,7 @@ npm i -g oltc-selector
 | 容量和电压，中性点调压 | `oltc --mva 25 --kv 110 --tap neutral` | `CV2III-350Y/72.5-10193W` |
 | 同上，线端调压 | `oltc --mva 16 --kv 22 --tap line --winding star` | `CV2III-600D/40.5-10193W` |
 | 自耦变 | `oltc --mva 125 --kind auto --hv 225 --mv 115` | `3xCM2I-500/252D-10193W` |
+| 自耦变，中性点调压 | `oltc --mva 125 --kind auto --tap neutral --hv 225 --mv 115` | `CM2III-500Y/72.5B-10193W` |
 | 一行招标文字 | `oltc --line "125MVA 225±8x1,25%/115/35kV YNa0d11"` | `3xCM2I-500/252D-10193W` |
 | 正负不对称的范围 | `oltc --mva 40 --kv 110 --range +4/-12x1.25%` | `CV2III-350Y/72.5-10193W` |
 | 订货规范给了对地绝缘 | `oltc --mva 25 --kv 110 --tap neutral --earth-um 126` | `CV2III-350Y/126-10193W` |
@@ -206,7 +207,7 @@ npm i -g oltc-selector
 
 | 卡片 | 参数 |
 |------|------|
-| **变压器** | `--line` 招标文字 · `--kind two\|auto` 类型 · `--tap` 开关位置 · `--winding star\|delta` 调压绕组接法 · `--kv` 调压侧额定电压 · `--hv` `--mv` 高压 / 中压额定电压 · `--earth-um` 开关对地绝缘 |
+| **变压器** | `--line` 招标文字 · `--kind two\|auto` 类型 · `--tap` 开关位置 · `--regulates hv\|mv` 调压侧（自耦变中性点调压）· `--winding star\|delta` 调压绕组接法 · `--kv` 调压侧额定电压 · `--hv` `--mv` 高压 / 中压额定电压 · `--earth-um` 开关对地绝缘 |
 | **工况** | `--mva` 变压器容量 · `--iu` 最大通过电流（不乘安全系数）· `--os-imax` OS 最大通过电流 · `--k` 安全系数（只用于容量路径）· `--reg W\|G\|0` 调压方式 · `--pm` ± 级数 · `--pos` 工作位置数 · `--range` 不对称范围 · `--minus` 负向级数 · `--step-pct` 单次调节比例 · `--mid 1\|3` 中间位 · `--ust` 级电压 · `--um` 设备最高电压 · `--conn Y\|D` 开关连接 · `--phases` 相数 |
 | **开关** | `--octc` 无载 · `--structure` 开关结构（`auto` / `combined` 组合式 / `compound` 复合式 / `cage` 笼式 / `drum` 鼓式）· `--series` 接线方式 · `--mount` 安装方式 · `--vacuum` / `--oil` 灭弧方式 · `--contact` 无载触头 · `--across-li` `--across-ac` 雷电冲击 / 工频耐压 |
 | **输出** | `--json` · `--lang en\|zh` · `--version` · `--help` · `--no-update-check` |

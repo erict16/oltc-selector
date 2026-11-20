@@ -6,6 +6,7 @@ import {
   deriveDuty,
   umChoices,
   type DutyBasis,
+  type RegulatedSide,
   type TapPoint,
   type TransformerKind,
   type WindingConnection,
@@ -69,6 +70,8 @@ export type CliArgs = {
   line?: TenderLine;
   /** Minus steps of an asymmetric range (+4-12): sizes the lowest-tap current. */
   minus?: number;
+  /** --regulates: autotransformer tapped at the neutral, the side the range is on. */
+  regulates?: RegulatedSide;
   /** OS / maker Imax on the --mva path (--os-imax, or --imax beside --mva). */
   osImax?: number;
   /** Buyer's country (ISO code) for the neutral Um practice. */
@@ -152,6 +155,7 @@ const KNOWN_FLAGS = [
   "--b-li", "--b-ac", "--c1-li", "--c1-ac", "--c2-li", "--c2-ac", "--grade",
   "--mva", "--kv", "--um", "--ust", "--step-pct", "--k", "--conn", "--connection",
   "--kind", "--auto", "--tap", "--winding", "--hv", "--mv", "--earth-um", "--reg",
+  "--regulates",
   "--pm", "--positions", "--pos", "--structure", "--series", "--mount", "--contact",
   "--phases", "--line", "--nameplate", "--minus", "--range", "--mid", "--duty",
 ];
@@ -418,6 +422,15 @@ export function parseCliArgs(rawArgv: string[]): CliArgs {
       const t = map[v.toLowerCase()];
       if (!t) throw new CliError(`--tap must be neutral|line|junction|mv-line`);
       out.tap = t;
+      i = n;
+      continue;
+    }
+    if (a === "--regulates") {
+      out.given.add("regulates");
+      const [v, n] = take(i, a);
+      const side = v.toLowerCase();
+      if (side !== "hv" && side !== "mv") throw new CliError(`--regulates must be hv or mv`);
+      out.regulates = side;
       i = n;
       continue;
     }
@@ -729,6 +742,7 @@ function applyTenderLine(out: CliArgs, raw: string): void {
     fill("winding", () => (out.winding = s.winding), s.windingStated);
   }
   fill("tap", () => (out.tap = s.tapPoint), s.tapPointStated);
+  if (s.regulates) fill("regulates", () => (out.regulates = s.regulates!));
   if (s.octcWinding && s.tapKv != null) out.lineOctcKv = s.tapKv;
   if (s.regulation) fill("reg", () => (out.reg = s.regulation!), s.regulationStated);
   if (s.plus != null && s.minus != null) {
@@ -770,15 +784,20 @@ Flags:
                      combined-only, 330 kV grade) and Um if omitted.
   --kind two|auto    Transformer kind (--auto = --kind auto). Default two-winding.
   --tap P            Where the OLTC sits: neutral|line (two-winding),
-                     junction|mv-line (autotransformer: series winding, MV
-                     end, or MV line after the junction). Default neutral; junction with
+                     junction|mv-line|neutral (autotransformer: series winding,
+                     MV end; MV line after the junction; or the neutral end of
+                     the common winding). Default neutral; junction with
                      --kind auto. With --mva it replaces --conn.
+  --regulates hv|mv  Autotransformer with --tap neutral: the voltage the ±
+                     range is on (the other stays constant). Default hv.
+                     Variable flux: current and Ust are taken at the worst tap.
   --winding star|delta  Tapped winding connection (two-winding). Sets the current
                      formula: star I = S/(√3U), delta I = S/(3U).
   --hv kV --mv kV    Autotransformer HV / MV rated voltage (with --kind auto).
   --earth-um kV      OLTC insulation to earth from the OS or maker (catalogue
                      class). Overrides the rule: line end = winding system,
-                     neutral ≤72.5 full else 72.5 assumed, autotransformer = HV.
+                     neutral ≤72.5 full else 72.5 assumed, autotransformer = HV
+                     (its neutral as any neutral).
   --um kV            Equipment Um (OLTC). With --kv, derived if omitted.
   --ust V            Step voltage. With --mva/--kv/--step-pct, derived if omitted;
                      given, it is the OS figure and a floor (never lowers Ust).
@@ -966,6 +985,12 @@ function computeCliDuty(args: CliArgs): DutyBasis | null {
     hvKv: args.hv ?? 0,
     mvKv: args.mv ?? 0,
     minusSteps: cliMinusSteps(args),
+    ...(auto && tap === "neutral"
+      ? {
+          plusSteps: args.range ? args.range.plus : pmGiven(args) ? args.pm! : cliMinusSteps(args),
+          regulates: args.regulates ?? "hv",
+        }
+      : {}),
     stepFraction: pct,
     // 2026-11-04 final ENGINE-12: a defaulted 1.25 % yields to the step --ust implies.
     stepFractionStated: args.given.has("stepPct"),
@@ -1030,6 +1055,9 @@ function checkConflicts(args: CliArgs): void {
   }
   if (args.kind !== "auto" && (typed("--hv") || typed("--mv"))) {
     throw new CliError("--hv and --mv are autotransformer voltages: add --kind auto (a two-winding transformer takes --kv)");
+  }
+  if (typed("--regulates") && !(args.kind === "auto" && cliTapPoint(args) === "neutral")) {
+    throw new CliError("--regulates is for an autotransformer tapped at the neutral: add --kind auto --tap neutral");
   }
   if (typed("--minus") && args.mva == null) {
     throw new CliError("--minus sets the lowest-tap current on the --mva path; with --iu give the current itself");
@@ -1208,6 +1236,9 @@ export function assumptionsFromArgs(args: CliArgs, family?: string): string[] {
     items.push(`${args.kind === "auto" ? "自耦变" : "双绕组"}${mark("kind")}`);
     if (!args.given.has("mva")) items.push(`容量 ${args.mva} MVA（默认）`);
     items.push(`开关在${tapZh[tap]}${tapGiven ? "" : "（默认）"}`);
+    if (args.kind === "auto" && tap === "neutral") {
+      items.push(`调压侧${(args.regulates ?? "hv") === "hv" ? "高压" : "中压"}${mark("regulates")}`);
+    }
     if (args.kind !== "auto") {
       const w = args.winding ?? (tap === "neutral" || args.conn === "Y" ? "star" : "delta");
       items.push(`${w === "star" ? "星形" : "角形"}绕组${args.given.has("winding") ? "" : "（默认）"}`);
@@ -1386,6 +1417,8 @@ const ASSUMPTION_EN: Array<[RegExp | string, string]> = [
   [/^无载开关取 ([\d.]+) kV 绕组的范围（(默认，)?招标行有两个调压范围）$/, "off-circuit range from the $1 kV winding (two ranges on the line)"],
   [/^对地 Um ([\d.]+)（招标行中性点 BIL ([\d.]+) kV）$/, "Um to earth $1 (line neutral BIL $2 kV)"],
   ["Ust 未指定（级电压、级容量未校验）", "Ust not stated (step voltage and capacity not checked)"],
+  ["调压侧高压", "range on HV"],
+  ["调压侧中压", "range on MV"],
   ["串联绕组中压端", "series winding, MV end"],
   ["中压出线", "MV line"],
   ["开关在中性点", "tap at neutral"],
@@ -1434,6 +1467,9 @@ export function assumptionEn(item: string): string {
   return s;
 }
 
+/** +0.1 → "+10%": the tap an autotransformer's neutral-end duty is taken at. */
+const signedPct = (x: number): string => `${x < 0 ? "−" : "+"}${Math.round(Math.abs(x) * 10000) / 100}%`;
+
 /** --lang en form of basisLineZh. */
 export function basisLineEn(d: DutyBasis): string {
   const div = d.currentDivisor === "three" ? "3" : "√3";
@@ -1447,6 +1483,11 @@ export function basisLineEn(d: DutyBasis): string {
   const max = d.maxRule === "stated" ? "OS Imax" : "lowest tap";
   // --iu with --kv: the current is typed, only the voltage basis is derived.
   if (!(d.ratedA > 0)) return `Imax as given · ${um}`;
+  if (d.common) {
+    const c = d.common;
+    const at = d.maxRule === "stated" ? "OS Imax" : `at the ${signedPct(c.worstTap)} tap`;
+    return `I = I_MV − I_HV = ${round1(c.mvA)} − ${round1(c.hvA)} = ${round1(d.ratedA)} A, ${at} ${round1(d.maxA)} A${ust} · ${um}`;
+  }
   return `I = S/(${div}×${d.currentKv} kV) = ${round1(d.ratedA)} A, ${max} ${round1(d.maxA)} A${ust} · ${um}`;
 }
 
@@ -1462,6 +1503,11 @@ export function basisLineZh(d: DutyBasis): string {
   const ust = d.stepV == null ? "" : ` · Ust ${round1(d.stepV)} V`;
   const max = d.maxRule === "stated" ? "OS Imax" : "最低档";
   if (!(d.ratedA > 0)) return `Imax 按给定值 · ${um}`;
+  if (d.common) {
+    const c = d.common;
+    const at = d.maxRule === "stated" ? "OS Imax" : `${signedPct(c.worstTap)} 档`;
+    return `I = I中压 − I高压 = ${round1(c.mvA)} − ${round1(c.hvA)} = ${round1(d.ratedA)} A，${at} ${round1(d.maxA)} A${ust} · ${um}`;
+  }
   return `I = S/(${div}×${d.currentKv} kV) = ${round1(d.ratedA)} A，${max} ${round1(d.maxA)} A${ust} · ${um}`;
 }
 
@@ -1648,6 +1694,17 @@ export function formatCliJson(input: SelectInput, args?: CliArgs): string {
             umKv: d.umKv,
             umRule: d.umRule,
             umAssumed: d.umAssumed,
+            ...(d.common
+              ? {
+                  common: {
+                    regulates: d.common.regulates,
+                    hvA: round1(d.common.hvA),
+                    mvA: round1(d.common.mvA),
+                    worstTapPct: Math.round(d.common.worstTap * 10000) / 100,
+                    fluxPct: Math.round(d.common.fluxFactor * 1000) / 10,
+                  },
+                }
+              : {}),
           }
         : null;
     })(),

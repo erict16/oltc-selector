@@ -186,6 +186,7 @@ Find the row that matches what you have.
 | Capacity and voltage, tapped at the star point | `oltc --mva 25 --kv 110 --tap neutral` | `CV2III-350Y/72.5-10193W` |
 | The same, tapped at the line end | `oltc --mva 16 --kv 22 --tap line --winding star` | `CV2III-600D/40.5-10193W` |
 | An autotransformer | `oltc --mva 125 --kind auto --hv 225 --mv 115` | `3xCM2I-500/252D-10193W` |
+| An autotransformer tapped at the neutral end | `oltc --mva 125 --kind auto --tap neutral --hv 225 --mv 115` | `CM2III-500Y/72.5B-10193W` |
 | A line from the tender | `oltc --line "125MVA 225±8x1,25%/115/35kV YNa0d11"` | `3xCM2I-500/252D-10193W` |
 | An uneven range | `oltc --mva 40 --kv 110 --range +4/-12x1.25%` | `CV2III-350Y/72.5-10193W` |
 | Insulation to earth from the OS | `oltc --mva 25 --kv 110 --tap neutral --earth-um 126` | `CV2III-350Y/126-10193W` |
@@ -211,7 +212,8 @@ Grouped like the cards of the web page.
 |------|---------|---------|
 | `--line "text"` | Tender line: MVA, kV ratio with ±N×x%, vector group. Reads autotransformer from `YNa0` / auto, delta line end from `D`, star neutral from `Y`. Flags given beside it win. `--nameplate` is the same | |
 | `--kind two\|auto` | Transformer kind. `--auto` is `--kind auto` | two-winding |
-| `--tap` | Where the tap changer sits: `neutral` / `line` (two-winding), `junction` / `mv-line` (autotransformer). Sets current, Ust and Um | neutral; junction with `--kind auto` |
+| `--tap` | Where the tap changer sits: `neutral` / `line` (two-winding), `junction` / `mv-line` / `neutral` (autotransformer). Sets current, Ust and Um | neutral; junction with `--kind auto` |
+| `--regulates hv\|mv` | Autotransformer tapped at the neutral: the voltage the ± range is on. The other one stays constant. Current and Ust are taken at the worst tap (variable flux) | hv |
 | `--winding star\|delta` | Tapped winding connection (two-winding). Star I = S/(√3U), delta I = S/(3U) | star |
 | `--kv` | Rated voltage of the tapped winding (kV). With `--iu`, it sets the winding voltage for the 220 / 330 kV rules | |
 | `--hv` `--mv` | Autotransformer HV / MV rated voltage (kV) | |

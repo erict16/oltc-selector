@@ -109,6 +109,7 @@ const TOP: TopSpec = {
   tapForced: ["tf", bool],
   hvKv: ["hv", num(2000)],
   mvKv: ["mv", num(2000)],
+  autoReg: ["ar", oneOf("hv", "mv")],
   earthUm: ["um", num(2000)],
   osImaxA: ["oi", num(100000)],
   osUstV: ["ou", num(100000)],

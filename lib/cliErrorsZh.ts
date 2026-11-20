@@ -32,6 +32,11 @@ const ROWS: Array<[RegExp, string | ((m: RegExpMatchArray) => string)]> = [
   [/^--kind must be two or auto$/, "--kind 只能是 two 或 auto"],
   [/^--tap must be neutral\|line\|junction\|mv-line$/, "--tap 只能是 neutral、line、junction 或 mv-line"],
   [/^--winding must be star or delta$/, "--winding 只能是 star 或 delta"],
+  [/^--regulates must be hv or mv$/, "--regulates 只能是 hv 或 mv"],
+  [
+    /^--regulates is for an autotransformer tapped at the neutral: add --kind auto --tap neutral$/,
+    "--regulates 只用于中性点调压的自耦变：请加 --kind auto --tap neutral",
+  ],
   [/^--reg must be W, G, or 0$/, "--reg 只能是 W、G 或 0"],
   [/^--pm must be a whole number of at least 1$/, "--pm 必须是不小于 1 的整数"],
   [/^(\S+) must be a whole number of at least 2$/, "$1 必须是不小于 2 的整数"],

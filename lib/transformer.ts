@@ -19,7 +19,10 @@ export type TransformerKind = "two_winding" | "auto";
 
 /**
  * Where the OLTC sits.
- * - neutral: star point of a star winding (two-winding only here).
+ * - neutral: star point of a star winding. On an autotransformer the
+ *   regulating winding sits at the neutral end of the common winding
+ *   (variable flux); it carries the common-winding current and takes one
+ *   three-phase star-point switch.
  * - line_end: line end of the tapped winding (star or delta).
  * - auto_junction: autotransformer, series winding at its MV end (before the junction);
  *   carries the series (HV) current.
@@ -31,8 +34,11 @@ export type WindingConnection = "star" | "delta";
 
 export const TAP_POINTS_FOR: Record<TransformerKind, readonly TapPoint[]> = {
   two_winding: ["neutral", "line_end"],
-  auto: ["auto_junction", "auto_mv_line"],
+  auto: ["auto_junction", "auto_mv_line", "neutral"],
 };
+
+/** Autotransformer, neutral-end taps: the voltage the ± range is written on. */
+export type RegulatedSide = "hv" | "mv";
 
 /**
  * Two-winding tap point after the winding changes. Delta has no neutral, so
@@ -68,6 +74,13 @@ export interface TransformerSpec {
   hvKv: number;
   mvKv: number;
   minusSteps: number;
+  /** Plus steps, when the range is uneven. Unset = same as minus. */
+  plusSteps?: number;
+  /**
+   * Autotransformer with neutral-end taps: which voltage carries the ± range
+   * (the other one stays constant). Unset = HV, as tender lines write it.
+   */
+  regulates?: RegulatedSide;
   /** Step as a fraction (0.0125). Null when not given. */
   stepFraction: number | null;
   /**
@@ -139,6 +152,19 @@ export interface DutyBasis {
   currentKv: number;
   /** Current divisor: √3 (line current) or 3 (delta phase current). */
   currentDivisor: "sqrt3" | "three";
+  /**
+   * Autotransformer neutral end: the switch carries the common-winding
+   * current, MV line current minus HV line current.
+   */
+  common?: {
+    hvA: number;
+    mvA: number;
+    regulates: RegulatedSide;
+    /** Tap where current and Ust peak, as a signed fraction of that voltage. */
+    worstTap: number;
+    /** Core flux at that tap over rated. */
+    fluxFactor: number;
+  };
   stepV: number | null;
   /** Compound (CV/CV2/SV) excluded. */
   combinedOnly: boolean;
@@ -214,7 +240,13 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   let currentKv: number;
   let currentDivisor: "sqrt3" | "three";
   let stepBaseV: number;
-  if (auto) {
+  const autoNeutral = auto && spec.tapPoint === "neutral";
+  const stepFr = spec.stepFraction != null && spec.stepFraction > 0 ? spec.stepFraction : 0;
+  if (autoNeutral) {
+    currentKv = spec.mvKv;
+    currentDivisor = "sqrt3";
+    stepBaseV = (spec.mvKv * 1000) / SQRT3;
+  } else if (auto) {
     currentKv = spec.tapPoint === "auto_junction" ? spec.hvKv : spec.mvKv;
     currentDivisor = "sqrt3";
     // The ± range sits on the voltage the switch regulates.
@@ -229,10 +261,74 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     stepBaseV = (spec.tapKv * 1000) / SQRT3;
   }
   // No MVA (current typed directly): Um and Ust still follow; current is NaN.
-  const ratedA =
+  let ratedA =
     spec.mva > 0
       ? (spec.mva * 1000) / ((currentDivisor === "three" ? 3 : SQRT3) * currentKv)
       : NaN;
+  /**
+   * Neutral-end taps on an autotransformer (Dohnal, On-Load Tap-Changers for
+   * Power Transformers §3.2, fig. 8a; IEEMA manual ch. 2 §1.3.8 scheme a).
+   * Turns: common 1, series r−1 (r = HV/MV), taps t at the neutral, shared by
+   * both voltages, so the ratio is (r+t)/(1+t) and the flux moves with the
+   * tap. The switch carries the common-winding current I_MV − I_HV.
+   * HV on the range, MV constant: worst tap is the top one. Flux
+   * (r(1+x)−1)/(r−1), current I_MV − I_HV/(1+x).
+   * MV on the range, HV constant: worst tap is the bottom one. Flux
+   * (r−1+x)/(r−1), current I_MV/(1−x) − I_HV.
+   * 125 MVA 225/115 kV ±8×1.25 % on HV: 336 A and 2134 V a step, against
+   * 830 V in the MV line and 1624 V at the series winding's MV end.
+   */
+  let neutralEnd: { maxA: number; stepV: number | null; common: NonNullable<DutyBasis["common"]> } | null = null;
+  if (autoNeutral) {
+    const r = spec.hvKv / spec.mvKv;
+    const regulates: RegulatedSide = spec.regulates ?? "hv";
+    const nMinus = spec.minusSteps > 0 ? spec.minusSteps : 0;
+    const nPlus = spec.plusSteps != null && spec.plusSteps >= 0 ? spec.plusSteps : nMinus;
+    const xPlus = nPlus * stepFr;
+    const xMinus = nMinus * stepFr;
+    const hvA = spec.mva > 0 ? (spec.mva * 1000) / (SQRT3 * spec.hvKv) : NaN;
+    const mvA = spec.mva > 0 ? (spec.mva * 1000) / (SQRT3 * spec.mvKv) : NaN;
+    ratedA = mvA - hvA;
+    let tLow: number;
+    let tHigh: number;
+    let fluxFactor: number;
+    let peakA: number;
+    if (regulates === "hv") {
+      if (!(r * (1 - xMinus) > 1)) {
+        return fail(
+          "调压范围太大：最低档高压已不高于中压。",
+          "Range too wide: at the lowest tap HV is no longer above MV.",
+        );
+      }
+      tLow = (-r * xPlus) / (r * (1 + xPlus) - 1);
+      tHigh = (r * xMinus) / (r * (1 - xMinus) - 1);
+      fluxFactor = (r * (1 + xPlus) - 1) / (r - 1);
+      peakA = mvA - hvA / (1 + xPlus);
+    } else {
+      if (!(r - 1 - xPlus > 0) || xMinus >= 1) {
+        return fail(
+          "调压范围太大：最高档中压已不低于高压。",
+          "Range too wide: at the highest tap MV is no longer below HV.",
+        );
+      }
+      tHigh = (r * xPlus) / (r - 1 - xPlus);
+      tLow = (-r * xMinus) / (r - 1 + xMinus);
+      fluxFactor = (r - 1 + xMinus) / (r - 1);
+      peakA = mvA / (1 - xMinus) - hvA;
+    }
+    const steps = nPlus + nMinus;
+    neutralEnd = {
+      maxA: peakA,
+      stepV: stepFr > 0 && steps > 0 ? ((tHigh - tLow) / steps) * stepBaseV * fluxFactor : null,
+      common: {
+        hvA,
+        mvA,
+        regulates,
+        worstTap: regulates === "hv" ? xPlus : -xMinus,
+        fluxFactor,
+      },
+    };
+  }
   // 2026-11-04 r3 ENGINE-8: the lowest-tap current is no longer capped at −45%.
   const minusDrop =
     spec.stepFraction != null && spec.stepFraction > 0 && spec.minusSteps > 0
@@ -241,8 +337,9 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   if (minusDrop >= 1) {
     return fail("负分接范围 ≥ 100%。", "Minus range ≥ 100%.");
   }
-  const derivedMaxA =
-    spec.stepFraction != null && spec.stepFraction > 0
+  const derivedMaxA = neutralEnd
+    ? neutralEnd.maxA
+    : spec.stepFraction != null && spec.stepFraction > 0
       ? maxThroughCurrent(ratedA, spec.minusSteps, spec.stepFraction)
       : ratedA;
   if (minusDrop > 0.45 && Number.isFinite(derivedMaxA)) {
@@ -276,8 +373,9 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     }
   }
   const k = spec.safetyK > 0 ? spec.safetyK : 1;
-  const derivedStepV =
-    spec.stepFraction != null && spec.stepFraction > 0
+  const derivedStepV = neutralEnd
+    ? neutralEnd.stepV
+    : spec.stepFraction != null && spec.stepFraction > 0
       ? stepBaseV * spec.stepFraction
       : null;
   let stepV = derivedStepV;
@@ -304,7 +402,9 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
       statedMaxA <= 0 &&
       ratio > 1.03 &&
       Number.isFinite(ratedA) &&
-      !(auto && spec.stepFractionStated)
+      !(auto && spec.stepFractionStated) &&
+      // Neutral-end taps: the step voltage is not step % × one voltage.
+      !autoNeutral
     ) {
       const implied = statedStepV / stepBaseV;
       const pct = (x: number) => String(Math.round(x * 1e4) / 100);
@@ -326,7 +426,9 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   let umRule: UmRule;
   let umAssumed = false;
   let neutralMarket: "IT" | "TR" | null = null;
-  if (auto) {
+  // The neutral of an autotransformer is the neutral of its HV winding.
+  const neutralKv = auto ? spec.hvKv : spec.tapKv;
+  if (auto && !autoNeutral) {
     umSystemKv = spec.hvKv;
     umKv = catalogueUmFromRatedKv(spec.hvKv);
     umRule = "auto_hv";
@@ -339,8 +441,8 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     }
     umAssumed = true;
   } else if (spec.tapPoint === "neutral") {
-    umSystemKv = spec.tapKv;
-    const lineClass = catalogueUmFromRatedKv(spec.tapKv);
+    umSystemKv = neutralKv;
+    const lineClass = catalogueUmFromRatedKv(neutralKv);
     if (lineClass <= NEUTRAL_DEFAULT_UM) {
       umKv = lineClass;
       umRule = "neutral_full";
@@ -351,7 +453,8 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
       umKv = lineClass > 363 ? NEUTRAL_400KV_UM : NEUTRAL_DEFAULT_UM;
       umRule = "neutral_assumed";
       umAssumed = true;
-      const market = (spec.market ?? "").trim().toUpperCase();
+      // The country evidence below is two-winding orders only.
+      const market = auto ? "" : (spec.market ?? "").trim().toUpperCase();
       // 2026-11-04 audit UM-2, sold Um on neutrals above the 72.5 class.
       // Italy: 150 kV class 170 on 17 of 20, 220–230 kV 252 on 3 of 3; its
       // 400 kV TERNA rows bought 72.5, so above 252 the voltage rule stays.
@@ -378,7 +481,7 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     const floor =
       umRule === "line"
         ? umKv
-        : auto
+        : auto && !autoNeutral
           ? catalogueUmFromRatedKv(spec.mvKv)
           : 0;
     if (spec.earthUmKv < floor - 0.01) {
@@ -441,7 +544,12 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
   // CM / CM2 / SHZV, none compound. CV2's 200 kV across-tap limit does not
   // cover a 220 kV regulating winding, neutral end included.
   const highWinding = !auto && catalogueUmFromRatedKv(spec.tapKv) >= 252;
-  if (auto) {
+  if (neutralEnd) {
+    // The figures are already the worst tap; say what the buyer must expect.
+    const flux = Math.round(neutralEnd.common.fluxFactor * 100);
+    cautionsZh.push(`中性点调压是变磁通：电流和级电压按最不利档算（磁通为额定的 ${flux}%），第三绕组电压随档位变。请按变压器厂的分接表核对。`);
+    cautionsEn.push(`Neutral-end regulation is variable flux: current and Ust are taken at the worst tap (flux ${flux} % of rated), and the tertiary voltage moves with the tap. Check the maker's per-tap table.`);
+  } else if (auto) {
     if (spec.tapPoint === "auto_mv_line" && umRule === "auto_hv") {
       // 2026-11-04 audit UM-4: the HMR note printed on 400/220 at Um 252.
       if (umKv === 170) {
@@ -480,6 +588,7 @@ export function deriveDuty(spec: TransformerSpec): DutyBasis {
     dutyA: maxA * k,
     currentKv,
     currentDivisor,
+    ...(neutralEnd ? { common: neutralEnd.common } : {}),
     stepV,
     combinedOnly: auto || highWinding,
     cautionsZh,
@@ -502,7 +611,8 @@ export function umChoices(d: DutyBasis, spec: TransformerSpec): number[] {
     // 35 kV-class neutrals: many orders bought 72.5, so offer it too. An
     // assumed 126/170/252 (400 kV class, market) still offers 72.5: Brazil
     // and TERNA bought it (2026-11-04 audit UM-1/UM-2).
-    const top = Math.max(catalogueUmFromRatedKv(spec.tapKv), NEUTRAL_DEFAULT_UM);
+    const neutralKv = spec.kind === "auto" ? spec.hvKv : spec.tapKv;
+    const top = Math.max(catalogueUmFromRatedKv(neutralKv), NEUTRAL_DEFAULT_UM);
     const low = Math.min(d.umKv, NEUTRAL_DEFAULT_UM);
     return ladder.filter((u) => u >= low - 0.01 && u <= top + 0.01);
   }
