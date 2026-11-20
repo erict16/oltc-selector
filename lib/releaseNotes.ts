@@ -16,6 +16,7 @@ export type Release = {
  *  in that release, for the big redesigns only (not small steps). Screenshots are
  *  real runs of that tag, in public/changelog/. */
 export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
+  "2.7.1": { day: "2026-11-20" },
   "2.7.0": { day: "2026-11-20" },
   "2.6.0": { day: "2026-11-20" },
   "2.5.0": { day: "2026-11-18" },
@@ -42,6 +43,14 @@ export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
  */
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
+    {
+      version: "2.7.1",
+      date: "2026-11",
+      title: "命令行页面重新设计",
+      groups: [
+        { kind: "imp", items: ["命令行页面重新设计：三步指引（把一句话发给 AI 助手、发参数、拿到型号），更多选型案例；命令例子、参数和安装放在标签页里。"] },
+      ],
+    },
     {
       version: "2.7.0",
       date: "2026-11",
@@ -310,6 +319,14 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.7.1",
+      date: "2026-11",
+      title: "A new look for the CLI page",
+      groups: [
+        { kind: "imp", items: ["The CLI page is redesigned: three steps (send one line to your AI assistant, send the data, get the type), more selection cases, and command examples, flags and install in tabs."] },
+      ],
+    },
     {
       version: "2.7.0",
       date: "2026-11",
@@ -583,6 +600,14 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.7.1",
+      date: "2026-11",
+      title: "Giao diện mới cho trang CLI",
+      groups: [
+        { kind: "imp", items: ["Trang CLI được thiết kế lại: ba bước (gửi một câu cho trợ lý AI, gửi thông số, nhận mã hiệu), thêm các ví dụ chọn, còn ví dụ lệnh, tham số và cách cài đặt nằm trong các thẻ."] },
+      ],
+    },
+    {
       version: "2.7.0",
       date: "2026-11",
       title: "Máy biến áp tự ngẫu có thể điều chỉnh ở đầu trung tính",
@@ -852,6 +877,14 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.7.1",
+      date: "2026-11",
+      title: "Nuevo diseño de la página de la CLI",
+      groups: [
+        { kind: "imp", items: ["La página de la CLI tiene un nuevo diseño: tres pasos (enviar una frase al asistente de IA, enviar los datos, obtener el tipo), más casos de selección, y ejemplos de comandos, opciones e instalación en pestañas."] },
+      ],
+    },
     {
       version: "2.7.0",
       date: "2026-11",
@@ -1125,6 +1158,14 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.7.1",
+      date: "2026-11",
+      title: "CLI sayfası için yeni görünüm",
+      groups: [
+        { kind: "imp", items: ["CLI sayfası yeniden tasarlandı: üç adım (yapay zekâ asistanına tek bir cümle gönderin, verileri gönderin, tipi alın), daha fazla seçim örneği; komut örnekleri, seçenekler ve kurulum sekmelerde."] },
+      ],
+    },
+    {
       version: "2.7.0",
       date: "2026-11",
       title: "Ototransformatörler nötr ucundan ayarlanabilir",
@@ -1394,6 +1435,14 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.7.1",
+      date: "2026-11",
+      title: "Tampilan baru halaman CLI",
+      groups: [
+        { kind: "imp", items: ["Halaman CLI didesain ulang: tiga langkah (kirim satu kalimat ke asisten AI, kirim datanya, dapatkan tipenya), lebih banyak contoh pemilihan, serta contoh perintah, opsi, dan instalasi dalam tab."] },
+      ],
+    },
     {
       version: "2.7.0",
       date: "2026-11",

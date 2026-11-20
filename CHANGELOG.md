@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.7.1 (2026-11-20)
+
+- CLI page redesigned: a numbered timeline (send one line to the AI assistant, send the data, get the type), real selection cases as a list, then examples / flags / install as tabs. Light surfaces; the only dark block is the CLI output in the install tab.
+- Flags table: a unit shows as a unit only when it stands alone.
+
 ## 2.7.0 (2026-11-20)
 
 - Autotransformer tapped at the neutral end (中性点调压): a third tap point beside Series, MV end and MV line. One three-phase star-point switch (III Y) on the neutral Um class instead of three single-phase units on the MV class.
