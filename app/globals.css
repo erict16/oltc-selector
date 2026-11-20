@@ -1637,6 +1637,11 @@ html.lang-wait body {
   outline-offset: 2px;
 }
 
+/* ── CLI page (2026-11-20 redesign) ───────────────────────────────────
+   The release notes' narrow column: a numbered timeline (send this line,
+   send the data, get the type), then real questions as a list, then the
+   commands / flags / install as tabs. Light surfaces only; the one dark
+   block is the CLI's own output in the install tab. */
 .cli {
   --cli-term-bg: oklch(20% 0.018 258);
   --cli-term-ink: oklch(91% 0.012 250);
@@ -1644,6 +1649,35 @@ html.lang-wait body {
   --cli-term-accent: oklch(78% 0.11 252);
   --cli-accent-soft: oklch(96.5% 0.018 252);
   --cli-accent-line: oklch(88% 0.045 252);
+  max-width: 46rem;
+  padding: 0 1.25rem 3rem;
+}
+.cli-hero {
+  padding: 3rem 0 2.5rem;
+}
+@media (min-width: 640px) {
+  .cli-hero {
+    padding: 4.5rem 0 3rem;
+  }
+}
+.cli-title {
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  color: var(--color-ink);
+}
+@media (min-width: 640px) {
+  .cli-title {
+    font-size: 2.25rem;
+  }
+}
+.cli-lead {
+  margin: 0.875rem 0 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--color-muted);
 }
 .cli-link {
   display: inline-flex;
@@ -1661,77 +1695,426 @@ html.lang-wait body {
   border-radius: 4px;
 }
 
-/* The guide: numbered steps joined by a line. */
-.cli-guide {
+/* The guide: numbered dots on one line, like the release timeline. */
+.cli-steps {
   margin: 0;
-  padding: 0;
+  padding: 2.5rem 0 0;
   list-style: none;
   border-top: 1px solid var(--color-line);
 }
-.cli-gstep {
+.cli-step {
+  position: relative;
+  padding: 0 0 2.75rem 2.75rem;
+}
+.cli-step::before {
+  content: "";
+  position: absolute;
+  top: 2rem;
+  bottom: 0.5rem;
+  left: 0.8125rem;
+  width: 1px;
+  background: var(--color-line);
+}
+.cli-step:last-child::before {
+  display: none;
+}
+.cli-step-n {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: grid;
-  gap: 1.25rem;
-  padding: 2.25rem 0;
-}
-.cli-gstep + .cli-gstep {
-  border-top: 1px solid var(--color-line);
-}
-@media (min-width: 900px) {
-  .cli-gstep {
-    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
-    gap: 4rem;
-    padding: 3rem 0;
-  }
-}
-.cli-gstep-text {
-  display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr);
-  column-gap: 1rem;
-  align-content: start;
-  align-items: center;
-}
-.cli-gstep-n {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   place-items: center;
-  border: 1px solid var(--color-line-2);
   border-radius: 50%;
-  background: #fff;
-  font-size: 0.875rem;
+  background: var(--color-ink);
+  font-size: 0.8125rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--color-ink);
+  color: #fff;
 }
-.cli-gstep-text h2 {
+.cli-step h2 {
   margin: 0;
-  font-size: 1.25rem;
+  padding-top: 0.125rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  letter-spacing: -0.015em;
+  line-height: 1.5rem;
+  letter-spacing: -0.01em;
   color: var(--color-ink);
 }
-.cli-gstep-text p {
-  grid-column: 2;
-  margin: 0.625rem 0 0;
+.cli-step-b {
+  margin: 0.375rem 0 0;
   font-size: 0.9375rem;
-  line-height: 1.7;
+  line-height: 1.65;
   color: var(--color-muted);
 }
-.cli-gstep-show {
-  display: grid;
-  gap: 0.75rem;
+.cli-step-show {
+  margin-top: 1rem;
   min-width: 0;
 }
 
-/* Terminal: the CLI's real output for the command above it. */
+/* Step 1: the line to send, with its copy button. */
+.cli-prompt {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1rem 1rem 1.125rem;
+  border: 1px solid var(--color-line-2);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+.cli-prompt p {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+.cli-copy {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--color-line-2);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-ink-2);
+  touch-action: manipulation;
+  transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+}
+.cli-copy:hover {
+  border-color: var(--cli-accent-line);
+  background: var(--cli-accent-soft);
+  color: var(--color-accent);
+}
+.cli-copy.is-copied {
+  border-color: color-mix(in oklab, var(--color-ok) 35%, white);
+  color: var(--color-ok);
+}
+.cli-copy:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Step 2: what you send, as a chat message. */
+.cli-bubble {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 16px 16px 16px 4px;
+  background: var(--cli-accent-soft);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--color-ink);
+}
+
+/* Step 3: the types it gives back. */
+.cli-reply {
+  overflow: hidden;
+  border: 1px solid var(--color-line-2);
+  border-radius: 12px;
+}
+.cli-type-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.75rem;
+  margin: 0;
+  padding: 0.875rem 1.125rem;
+  border-bottom: 1px solid var(--color-line);
+}
+.cli-type-row code {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+.cli-tag {
+  flex-shrink: 0;
+  min-width: 2.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background: var(--cli-accent-soft);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-accent);
+}
+.cli-reply-note {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0.625rem 1.125rem;
+  background: #f8fafc;
+  font-size: 0.8125rem;
+  color: var(--color-ok);
+}
+
+/* Sections below the guide. */
+.cli-sec {
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--color-line);
+}
+.cli-sec + .cli-sec {
+  margin-top: 3rem;
+}
+.cli-sec-h {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+/* A labelled row: what it is on the left, the content on the right. */
+.cli-cases,
+.cli-examples {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cli-case,
+.cli-ex {
+  display: grid;
+  gap: 0.375rem 1.5rem;
+  padding: 1.125rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.cli-case:last-child,
+.cli-ex:last-child {
+  border-bottom: 0;
+}
+@media (min-width: 640px) {
+  .cli-case,
+  .cli-ex {
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+}
+.cli-row-k {
+  margin: 0;
+  padding-top: 0.125rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.cli-case-body,
+.cli-ex-body {
+  min-width: 0;
+}
+.cli-q {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--color-ink-2);
+}
+.cli-out {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0;
+  color: var(--color-caption);
+}
+.cli-out > code {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  overflow-wrap: anywhere;
+}
+
+/* Tabs: examples · flags · install. */
+.cli-tabs {
+  display: flex;
+  gap: 0.25rem;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.25rem;
+  overflow-x: auto;
+  border-radius: 10px;
+  background: #f1f4f8;
+  scrollbar-width: none;
+}
+.cli-tab {
+  flex-shrink: 0;
+  height: 2rem;
+  padding: 0 0.875rem;
+  border-radius: 7px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  transition: color 150ms ease, background-color 150ms ease;
+}
+.cli-tab:hover {
+  color: var(--color-ink);
+}
+.cli-tab[aria-selected="true"] {
+  background: #fff;
+  color: var(--color-ink);
+  box-shadow: 0 1px 2px rgb(15 27 51 / 0.1), 0 0 0 1px rgb(15 27 51 / 0.04);
+}
+.cli-tab:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+.cli-panel {
+  padding-top: 0.75rem;
+}
+
+/* A command you click to copy. */
+.cli-cmd {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--color-line-2);
+  border-radius: 10px;
+  background: #f8fafc;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+.cli-cmd:hover {
+  border-color: var(--cli-accent-line);
+  background: var(--cli-accent-soft);
+}
+.cli-cmd:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.cli-cmd-k {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-caption);
+}
+.cli-cmd-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+.cli-cmd-ps {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--color-caption);
+  user-select: none;
+}
+.cli-cmd code {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+.cli-word {
+  white-space: nowrap;
+}
+.cli-cmd-hint {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.1rem;
+  font-size: 0.75rem;
+  color: var(--color-caption);
+  transition: color 150ms ease;
+}
+.cli-cmd:hover .cli-cmd-hint {
+  color: var(--color-accent);
+}
+.cli-cmd.is-copied .cli-cmd-hint {
+  color: var(--color-ok);
+}
+
+/* Flags: one reference table per group, named like the selector's fields. */
+.cli-flags {
+  display: grid;
+  gap: 2rem;
+  padding-top: 0.75rem;
+}
+.cli-flag-group h3 {
+  margin: 0 0 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.cli-flag-group dl {
+  margin: 0;
+}
+.cli-flag {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+  padding: 0.5625rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+@media (min-width: 640px) {
+  .cli-flag {
+    grid-template-columns: 12rem 9rem minmax(0, 1fr);
+  }
+  .cli-flag-vals {
+    grid-column: 3;
+  }
+}
+.cli-flag dt code {
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+.cli-flag dd {
+  margin: 0;
+  min-width: 0;
+}
+.cli-flag-label {
+  font-size: 0.875rem;
+  color: var(--color-ink-2);
+}
+.cli-flag-vals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.cli-flag-vals code {
+  padding: 0.0625rem 0.375rem;
+  border-radius: 5px;
+  background: #f1f4f8;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+.cli-flag-unit {
+  font-size: 0.75rem;
+  color: var(--color-caption);
+}
+
+/* Install: the two commands and what the second one prints. */
+.cli-manual {
+  display: grid;
+  gap: 0.625rem;
+  padding-top: 0.75rem;
+}
 .cli-term {
   min-width: 0;
   overflow: hidden;
+  margin-top: 0.375rem;
   border-radius: 12px;
   background: var(--cli-term-bg);
-  box-shadow:
-    0 1px 2px rgb(15 27 51 / 0.08),
-    0 24px 48px -24px rgb(15 27 51 / 0.35);
 }
 .cli-term-bar {
   display: flex;
@@ -1776,350 +2159,6 @@ html.lang-wait body {
   color: var(--cli-term-accent);
 }
 
-/* A command you click to copy. */
-.cli-cmd {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  padding: 0.8125rem 1rem;
-  border: 1px solid var(--color-line-2);
-  border-radius: 10px;
-  background: #f8fafc;
-  text-align: left;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: border-color 150ms ease, background-color 150ms ease;
-}
-.cli-cmd:hover {
-  border-color: var(--cli-accent-line);
-  background: var(--cli-accent-soft);
-}
-.cli-cmd:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-.cli-cmd-k {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--color-caption);
-}
-.cli-cmd-line {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-.cli-cmd-ps {
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--color-caption);
-  user-select: none;
-}
-.cli-cmd code {
-  flex: 1;
-  min-width: 0;
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--color-ink);
-  overflow-wrap: anywhere;
-}
-.cli-word {
-  white-space: nowrap;
-}
-.cli-cmd-hint {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.15rem;
-  font-size: 0.75rem;
-  color: var(--color-caption);
-  transition: color 150ms ease;
-}
-.cli-cmd:hover .cli-cmd-hint {
-  color: var(--color-accent);
-}
-.cli-cmd.is-copied .cli-cmd-hint {
-  color: var(--color-ok);
-}
-
-/* Copy pill on the dark prompt. */
-.cli-copy {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 0.375rem;
-  height: 2rem;
-  padding: 0 0.75rem;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.1);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--cli-term-ink);
-  touch-action: manipulation;
-  transition: background-color 150ms ease, color 150ms ease;
-}
-.cli-copy:hover {
-  background: rgb(255 255 255 / 0.18);
-  color: #fff;
-}
-.cli-copy.is-copied {
-  color: oklch(85% 0.12 160);
-}
-.cli-copy:focus-visible {
-  outline: 2px solid var(--cli-term-accent);
-  outline-offset: 2px;
-}
-
-/* Examples · flags · AI assistant, as tabs. */
-.cli-more {
-  padding-top: 3rem;
-  border-top: 1px solid var(--color-line);
-}
-.cli-tabs {
-  display: flex;
-  gap: 1.75rem;
-  overflow-x: auto;
-  border-bottom: 1px solid var(--color-line);
-  scrollbar-width: none;
-}
-.cli-tab {
-  position: relative;
-  flex-shrink: 0;
-  height: 2.75rem;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--color-muted);
-  transition: color 150ms ease;
-}
-.cli-tab:hover {
-  color: var(--color-ink);
-}
-.cli-tab[aria-selected="true"] {
-  color: var(--color-ink);
-}
-.cli-tab[aria-selected="true"]::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: -1px;
-  left: 0;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--color-ink);
-}
-.cli-tab:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: -2px;
-  border-radius: 6px;
-}
-.cli-panel {
-  padding-top: 1.75rem;
-}
-
-/* Examples: what it is for, the command, the type it prints. */
-.cli-examples,
-.cli-cases {
-  display: grid;
-  gap: 1rem;
-}
-@media (min-width: 640px) {
-  .cli-examples,
-  .cli-cases {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (min-width: 1100px) {
-  .cli-examples {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-.cli-ex,
-.cli-case {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.cli-case .cli-ex-out {
-  margin-top: 0.75rem;
-}
-.cli-ex .cli-cmd,
-.cli-case .cli-bubble {
-  flex: 1;
-}
-.cli-ex-k {
-  margin: 0 0 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-ink);
-}
-.cli-ex-out {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0.625rem 0 0;
-  padding-left: 0.25rem;
-  color: var(--color-caption);
-}
-.cli-ex-out > code {
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-accent);
-  overflow-wrap: anywhere;
-}
-
-/* Flags: a reference table per group, named like the selector's fields. */
-.cli-flags {
-  display: grid;
-  gap: 2rem 3rem;
-}
-@media (min-width: 900px) {
-  .cli-flags {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
-}
-.cli-flag-group h3 {
-  margin: 0 0 0.25rem;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--color-ink);
-}
-.cli-flag-group dl {
-  margin: 0;
-}
-.cli-flag {
-  display: grid;
-  grid-template-columns: 9.5rem minmax(0, 1fr);
-  column-gap: 1rem;
-  row-gap: 0.25rem;
-  align-items: baseline;
-  padding: 0.625rem 0;
-  border-bottom: 1px solid var(--color-line);
-}
-.cli-flag dt code {
-  white-space: nowrap;
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-ink);
-}
-.cli-flag dd {
-  margin: 0;
-  min-width: 0;
-}
-.cli-flag-label {
-  font-size: 0.875rem;
-  color: var(--color-ink-2);
-}
-.cli-flag-vals {
-  display: flex;
-  grid-column: 2;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-.cli-flag-vals code {
-  padding: 0.0625rem 0.375rem;
-  border-radius: 5px;
-  background: #f1f4f8;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--color-muted);
-}
-.cli-flag-unit {
-  font-size: 0.75rem;
-  color: var(--color-caption);
-}
-
-/* What you send the AI assistant and what it gives back. */
-.cli-prompt {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.875rem 0.75rem 0.875rem 1rem;
-  border-radius: 10px;
-  background: var(--cli-term-bg);
-}
-.cli-prompt p {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.65;
-  color: var(--cli-term-ink);
-  overflow-wrap: anywhere;
-}
-.cli-bubble {
-  margin: 0;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--cli-accent-line);
-  border-radius: 14px 14px 14px 4px;
-  background: var(--cli-accent-soft);
-  font-size: 0.875rem;
-  line-height: 1.65;
-  color: var(--color-ink-2);
-}
-.cli-answer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.cli-answer-note {
-  display: flex;
-  flex-basis: 100%;
-  align-items: center;
-  gap: 0.375rem;
-  margin: 0.25rem 0 0;
-  font-size: 0.8125rem;
-  color: var(--color-ok);
-}
-.cli-type {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  max-width: 100%;
-  padding: 0.375rem 0.625rem;
-  border: 1px solid var(--color-line-2);
-  border-radius: 8px;
-  background: #fff;
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-ink);
-  overflow-wrap: anywhere;
-}
-.cli-type-tag {
-  flex-shrink: 0;
-  padding: 0.0625rem 0.4375rem;
-  border-radius: 999px;
-  background: var(--cli-accent-soft);
-  font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  color: var(--color-accent);
-}
-/* Questions people ask, and the type each one gets. */
-.cli-cases-sec {
-  padding: 3rem 0;
-  border-top: 1px solid var(--color-line);
-}
-.cli-sec-h {
-  margin: 0 0 1.5rem;
-  font-size: 1.25rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: var(--color-ink);
-}
-.cli-manual {
-  display: grid;
-  gap: 0.75rem;
-  max-width: 48rem;
-}
-
 /* Closing row: the caution the user must act on, and npm. */
 .cli-end {
   display: flex;
@@ -2128,6 +2167,8 @@ html.lang-wait body {
   justify-content: space-between;
   gap: 1rem;
   margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-line);
   font-size: 0.875rem;
 }
 .cli-limit {
@@ -2148,43 +2189,6 @@ html.lang-wait body {
    cards. Modelled on Linear, Cursor and Vercel's changelog and docs. */
 .doc-page {
   background: #fff;
-}
-.doc {
-  max-width: 72rem;
-  padding: 0 1rem 3rem;
-}
-@media (min-width: 640px) {
-  .doc {
-    padding-inline: 2rem;
-  }
-}
-.doc-hero {
-  padding: 3rem 0 2rem;
-}
-@media (min-width: 768px) {
-  .doc-hero {
-    padding: 5rem 0 3rem;
-  }
-}
-.doc-title {
-  margin: 0;
-  font-size: 2.25rem;
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.035em;
-  color: var(--color-ink);
-}
-@media (min-width: 768px) {
-  .doc-title {
-    font-size: 3.25rem;
-  }
-}
-.doc-lead {
-  max-width: 36rem;
-  margin: 1rem 0 0;
-  font-size: 1.125rem;
-  line-height: 1.6;
-  color: var(--color-muted);
 }
 .doc-page .page-foot {
   border-top: 1px solid var(--color-line);

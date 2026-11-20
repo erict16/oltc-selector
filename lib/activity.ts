@@ -5,10 +5,10 @@
 export const ACTIVITY_FROM = "2026-07-26";
 export const ACTIVITY_TO = "2026-11-20";
 /** All commits in the repository. */
-export const COMMIT_TOTAL = 486;
+export const COMMIT_TOTAL = 487;
 /** Commits per day; days with none are left out. */
 export const COMMITS_PER_DAY: Record<string, number> = {
-  "2026-11-20": 5,
+  "2026-11-20": 6,
   "2026-11-18": 12,
   "2026-11-17": 17,
   "2026-11-14": 30,

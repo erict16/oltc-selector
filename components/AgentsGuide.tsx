@@ -104,7 +104,8 @@ const FLAG_GROUPS: { title: string; flags: Flag[] }[] = [
     ],
   },
 ];
-/** Shown as a unit, not as a value to type. */
+/** Shown as a unit, not as a value to type (only when it stands alone:
+ *  the V in II | IV | V is a wiring scheme). */
 const UNITS = new Set(["kV", "A", "V", "MVA", "N"]);
 const OUTPUT_FLAGS: Flag[] = [
   ["--json", null, ""],
@@ -142,10 +143,11 @@ type Tab = "ex" | "flags" | "install";
 const TABS: Tab[] = ["ex", "flags", "install"];
 
 /** The CLI page (2026-11-17 Eric: "get rid of Notion style", "要有指引",
- *  then: running the command is the AI agent's job). The guide is asking
- *  an AI assistant: send this line, send the data, get the type. Then real
- *  questions people ask and the type each one gets. The commands, flags
- *  and a manual install stay below as tabs, for reference. */
+ *  then: running the command is the AI agent's job; 2026-11-20 redone in
+ *  the release notes' narrow column). The guide is asking an AI assistant:
+ *  send this line, send the data, get the type, as a numbered timeline.
+ *  Then real questions people ask and the type each one gets. The
+ *  commands, flags and a manual install stay below as tabs. */
 export function AgentsGuide() {
   const lang = useAppLang();
   const c = agentGuide(lang);
@@ -189,13 +191,13 @@ export function AgentsGuide() {
     <div className="page doc-page flex w-full min-w-0 flex-1 flex-col">
       <TopBar lang={lang} current="cli" />
 
-      <main lang={lang} className="doc cli mx-auto w-full">
-        <header className="doc-hero">
-          <h1 className="doc-title">{c.title}</h1>
-          <p className="doc-lead">{c.lead}</p>
+      <main lang={lang} className="cli mx-auto w-full">
+        <header className="cli-hero">
+          <h1 className="cli-title">{c.title}</h1>
+          <p className="cli-lead">{c.lead}</p>
         </header>
 
-        <ol className="cli-guide">
+        <ol className="cli-steps">
           <GuideStep n={1} title={c.s1t} body={c.s1b}>
             <div className="cli-prompt">
               <p>{c.s1prompt}</p>
@@ -206,10 +208,10 @@ export function AgentsGuide() {
             <p className="cli-bubble">{c.s2q}</p>
           </GuideStep>
           <GuideStep n={3} title={c.s3t} body={c.s3b}>
-            <div className="cli-answer">
-              <TypeChip type="CV2III-350Y/72.5-10193W" tag={c.tagOltc} />
-              <TypeChip type="WSLIV-600Y/72.5-6x5A" tag={c.tagOctc} />
-              <p className="cli-answer-note">
+            <div className="cli-reply">
+              <TypeRow type="CV2III-350Y/72.5-10193W" tag={c.tagOltc} />
+              <TypeRow type="WSLIV-600Y/72.5-6x5A" tag={c.tagOctc} />
+              <p className="cli-reply-note">
                 <CheckIcon className="h-4 w-4 shrink-0" aria-hidden />
                 {c.s3note}
               </p>
@@ -217,19 +219,19 @@ export function AgentsGuide() {
           </GuideStep>
         </ol>
 
-        <section className="cli-cases-sec" aria-labelledby="cli-cases-h">
+        <section className="cli-sec" aria-labelledby="cli-cases-h">
           <h2 id="cli-cases-h" className="cli-sec-h">
             {c.more}
           </h2>
-          <div className="cli-cases">
-            <Case label={c.exDry} q={c.qDry} type="3xCZI-500/40.5-9" tag={c.tagDry} />
+          <ul className="cli-cases">
+            <Case label={c.exDry} q={c.qDry} type="3xCZI-500/40.5-9" />
             <Case label={c.exShzv} q={c.qShzv} type="3xSHZVI-2400/72.5B-12233W" />
             <Case label={t(lang, "kindAuto")} q={c.qAuto} type="3xCM2I-500/252D-10193W" />
-            <Case label={t(lang, "dutyOctc")} q={c.qOctc} type="WSLII-800D/72.5-6x5A" tag={c.tagOctc} />
-          </div>
+            <Case label={t(lang, "dutyOctc")} q={c.qOctc} type="WSLII-800D/72.5-6x5A" />
+          </ul>
         </section>
 
-        <section className="cli-more">
+        <section className="cli-sec">
           <div className="cli-tabs" role="tablist" aria-label={c.moreT} onKeyDown={onTabKey}>
             {TABS.map((k) => (
               <button
@@ -258,18 +260,20 @@ export function AgentsGuide() {
             className="cli-panel"
           >
             {tab === "ex" ? (
-              <div className="cli-examples">
+              <ul className="cli-examples">
                 {EXAMPLES.map((ex, i) => (
-                  <div key={ex.cmd} className="cli-ex">
-                    <p className="cli-ex-k">{t(lang, ex.label)}</p>
-                    <Cmd id={`ex-${i}`} command={ex.cmd} {...copyProps} />
-                    <p className="cli-ex-out">
-                      <ArrowLongRightIcon className="h-4 w-4 shrink-0" aria-hidden />
-                      <code>{ex.type}</code>
-                    </p>
-                  </div>
+                  <li key={ex.cmd} className="cli-ex">
+                    <p className="cli-row-k">{t(lang, ex.label)}</p>
+                    <div className="cli-ex-body">
+                      <Cmd id={`ex-${i}`} command={ex.cmd} {...copyProps} />
+                      <p className="cli-out">
+                        <ArrowLongRightIcon className="h-4 w-4 shrink-0" aria-hidden />
+                        <code>{ex.type}</code>
+                      </p>
+                    </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             ) : null}
 
             {tab === "flags" ? (
@@ -317,8 +321,8 @@ export function AgentsGuide() {
   );
 }
 
-/** One step of the guide: number and words on the left, what to type and
- *  what you get on the right. */
+/** One step of the guide: a numbered dot on the line, the words, then
+ *  what to send or what comes back. */
 function GuideStep({
   n,
   title,
@@ -331,15 +335,13 @@ function GuideStep({
   children: ReactNode;
 }) {
   return (
-    <li className="cli-gstep">
-      <div className="cli-gstep-text">
-        <span className="cli-gstep-n" aria-hidden>
-          {n}
-        </span>
-        <h2>{title}</h2>
-        {body ? <p>{body}</p> : null}
-      </div>
-      <div className="cli-gstep-show">{children}</div>
+    <li className="cli-step">
+      <span className="cli-step-n" aria-hidden>
+        {n}
+      </span>
+      <h2>{title}</h2>
+      {body ? <p className="cli-step-b">{body}</p> : null}
+      <div className="cli-step-show">{children}</div>
     </li>
   );
 }
@@ -371,25 +373,27 @@ function Terminal({ lang }: { lang: Lang }) {
   );
 }
 
-function TypeChip({ type, tag }: { type: string; tag?: string }) {
+function TypeRow({ type, tag }: { type: string; tag: string }) {
   return (
-    <code className="cli-type">
-      {type}
-      {tag ? <span className="cli-type-tag">{tag}</span> : null}
-    </code>
+    <p className="cli-type-row">
+      <span className="cli-tag">{tag}</span>
+      <code>{type}</code>
+    </p>
   );
 }
 
-function Case({ label, q, type, tag }: { label: string; q: string; type: string; tag?: string }) {
+function Case({ label, q, type }: { label: string; q: string; type: string }) {
   return (
-    <div className="cli-case">
-      <p className="cli-ex-k">{label}</p>
-      <p className="cli-bubble">{q}</p>
-      <p className="cli-ex-out">
-        <ArrowLongRightIcon className="h-4 w-4 shrink-0" aria-hidden />
-        <TypeChip type={type} tag={tag} />
-      </p>
-    </div>
+    <li className="cli-case">
+      <p className="cli-row-k">{label}</p>
+      <div className="cli-case-body">
+        <p className="cli-q">{q}</p>
+        <p className="cli-out">
+          <ArrowLongRightIcon className="h-4 w-4 shrink-0" aria-hidden />
+          <code>{type}</code>
+        </p>
+      </div>
+    </li>
   );
 }
 
@@ -406,8 +410,8 @@ function FlagGroup({ title, flags, lang }: { title: string; flags: Flag[]; lang:
             {label ? <dd className="cli-flag-label">{t(lang, label).replace(/…$/, "")}</dd> : null}
             {values ? (
               <dd className="cli-flag-vals">
-                {values.split(" | ").map((v) =>
-                  UNITS.has(v) ? (
+                {values.split(" | ").map((v, _i, all) =>
+                  all.length === 1 && UNITS.has(v) ? (
                     <span key={v} className="cli-flag-unit">
                       {v}
                     </span>
