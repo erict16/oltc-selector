@@ -61,6 +61,19 @@ describe("form in the URL hash", () => {
     expect(formSelectInput(back.form)).toEqual(formSelectInput(f));
   });
 
+  it("round-trips an autotransformer tapped at the neutral with the range on MV", () => {
+    const f: FormState = {
+      ...INITIAL_FORM,
+      kind: "auto",
+      tapPoint: "neutral",
+      autoReg: "mv",
+      input: { ...INITIAL_FORM.input, connection: "Y" },
+    };
+    expect(encodeForm(f)).toContain("ar=mv");
+    const back = roundTrip(f).form;
+    expect([back.kind, back.tapPoint, back.autoReg]).toEqual(["auto", "neutral", "mv"]);
+  });
+
   it("round-trips a custom +a/−b range", () => {
     let f = pickPm(INITIAL_FORM, "");
     f = commitRange(f, 4, 12, 1.25);
@@ -125,7 +138,8 @@ describe("form in the URL hash", () => {
       "#mva=99999999999",
       "#kd=__proto__",
       "#__proto__=1&constructor=2&kd=nope",
-      "#kd=auto&tap=neutral",
+      "#kd=auto&tap=line_end",
+      "#ar=lv",
       "#w=delta&tap=neutral",
       "#tr=1_2_3",
       "#tr=a_b_c_d",

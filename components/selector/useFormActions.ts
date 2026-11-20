@@ -26,7 +26,7 @@ import {
   toOltc,
   type FormState,
 } from "@/lib/formState";
-import type { TapPoint, TransformerKind, WindingConnection } from "@/lib/transformer";
+import type { RegulatedSide, TapPoint, TransformerKind, WindingConnection } from "@/lib/transformer";
 import type { SelectInput } from "@/lib/types";
 
 /**
@@ -45,6 +45,7 @@ export function useFormActions(setForm: Dispatch<SetStateAction<FormState>>) {
       pickWinding: (w: WindingConnection) => run((f) => pickWinding(f, w)),
       setHvKv: (kv: number) => run((f) => setField(f, "hvKv", kv)),
       setMvKv: (kv: number) => run((f) => setField(f, "mvKv", kv)),
+      setAutoReg: (side: RegulatedSide) => run((f) => setField(f, "autoReg", side)),
       setVoltageKv: (kv: number) => run((f) => setVoltageKv(f, kv)),
       setEarthUm: (um: number) => run((f) => setField(f, "earthUm", um)),
       /**

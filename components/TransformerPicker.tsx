@@ -29,8 +29,8 @@ const TAP_HIT = 1; // tap the contact rests on
 const SLOT_AT: Record<TapPoint, { x: number; y: number; dir: "down" | "right" }> = {
   line_end: { x: X, y: 28, dir: "down" },
   neutral: { x: X, y: 160, dir: "down" },
-  auto_junction: { x: X, y: 92, dir: "down" },
-  auto_mv_line: { x: 150, y: 152, dir: "right" },
+  auto_junction: { x: X, y: 64, dir: "down" },
+  auto_mv_line: { x: 150, y: 116, dir: "right" },
 };
 
 function fmtKv(kv: number): string {
@@ -271,19 +271,19 @@ export function TransformerSketch({
   let labels: Partial<Record<TapPoint, { x: number; y: number; anchor: "start" | "end" | "middle" }>>;
 
   if (kind === "auto") {
-    const row = 152; // MV junction row
+    const row = 116; // MV junction row
     const mvEnd = toGlobal("auto_mv_line", 0, SLOT).x;
     body = (
       <>
         <Terminal x={X} y={12} label={`A ${fmtKv(hvKv)} kV`} lx={X - 12} ly={16} anchor="end" />
-        <Wire d={`M${X} 16.5 V22`} />
-        <Winding y={22} loops={6} />
-        <Wire d={`M${X} 82 V92`} />
+        <Wire d={`M${X} 16.5 V20`} />
+        <Winding y={20} loops={4} />
+        <Wire d={`M${X} 60 V64`} />
         <SlotWire slot="auto_junction" on={on("auto_junction")} />
         {on("auto_junction") ? (
           <Wire d={`M${pv.x} ${pv.y} V${row}`} />
         ) : (
-          <Wire d={`M${X} 132 V${row}`} />
+          <Wire d={`M${X} 104 V${row}`} />
         )}
         <Wire d={`M${X} ${row} H${SLOT_AT.auto_mv_line.x}`} />
         <SlotWire slot="auto_mv_line" on={on("auto_mv_line")} />
@@ -294,9 +294,15 @@ export function TransformerSketch({
         )}
         <Terminal x={220} y={row} label={`Am ${fmtKv(mvKv)} kV`} lx={234} ly={row + 22} anchor="end" />
         <Node x={on("auto_junction") ? pv.x : X} y={row} />
-        <Wire d={`M${X} ${row} V162`} />
-        <Winding y={162} loops={5} />
-        <Wire d={`M${X} 212 V222`} />
+        <Wire d={`M${X} ${row} V122`} />
+        <Winding y={122} loops={3} />
+        <Wire d={`M${X} 152 V160`} />
+        <SlotWire slot="neutral" on={on("neutral")} />
+        {on("neutral") ? (
+          <Wire d={`M${pv.x} ${pv.y} V224 H${X}`} />
+        ) : (
+          <Wire d={`M${X} 200 V224`} />
+        )}
         <Node x={X} y={224} />
         <text x={X - 10} y={228} textAnchor="end" className="fill-[var(--color-ink)] text-[11px] font-medium">
           N
@@ -304,8 +310,9 @@ export function TransformerSketch({
       </>
     );
     labels = {
-      auto_junction: { x: X - 16, y: 116, anchor: "end" },
+      auto_junction: { x: X - 16, y: 88, anchor: "end" },
       auto_mv_line: { x: 164, y: row + 22, anchor: "end" },
+      neutral: { x: X - 16, y: 184, anchor: "end" },
     };
   } else {
     const delta = winding === "delta";

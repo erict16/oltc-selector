@@ -30,6 +30,7 @@ import {
 import {
   deriveDuty,
   type DutyBasis,
+  type RegulatedSide,
   type TapPoint,
   type TransformerKind,
   type TransformerSpec,
@@ -77,6 +78,8 @@ export interface FormState {
   tapForced: boolean;
   hvKv: number;
   mvKv: number;
+  /** Autotransformer tapped at the neutral: the voltage the ± range is on. */
+  autoReg: RegulatedSide;
   earthUm: number;
   osImaxA: number;
   osUstV: number;
@@ -135,6 +138,7 @@ export const INITIAL_FORM: FormState = {
   tapForced: false,
   hvKv: 220,
   mvKv: 110,
+  autoReg: "hv",
   earthUm: 0,
   osImaxA: 0,
   osUstV: 0,
@@ -179,6 +183,14 @@ export function formMinusSteps(f: FormState): number {
   return floor > 0 ? floor : 8;
 }
 
+/** Plus steps: an uneven range's own, else the same as minus. */
+export function formPlusSteps(f: FormState): number {
+  if (rangeLive(f) && f.tapRange && f.tapRange.plus >= 0 && f.tapRange.minus > 0) return f.tapRange.plus;
+  const r = f.lineRead ? tenderLineSettings(f.lineRead, { octc: isOctc(f) }) : null;
+  if (r?.ok && r.s.plus != null && r.s.minus != null && r.s.plus !== r.s.minus) return r.s.plus;
+  return formMinusSteps(f);
+}
+
 /** Transformer → duty. The one place current, Ust and Um come from. */
 export function formSpec(f: FormState): TransformerSpec {
   return {
@@ -190,6 +202,9 @@ export function formSpec(f: FormState): TransformerSpec {
     hvKv: f.hvKv,
     mvKv: f.mvKv,
     minusSteps: formMinusSteps(f),
+    ...(f.kind === "auto" && f.tapPoint === "neutral"
+      ? { plusSteps: formPlusSteps(f), regulates: f.autoReg }
+      : {}),
     stepFraction: formStepFraction(f),
     stepFractionStated: f.stepStated === true,
     safetyK: f.safetyK,
@@ -455,6 +470,7 @@ function applyLine(f: FormState, tl: TenderLine, s: LineSettings): FormState {
         }),
     tapPoint: s.tapPoint,
     tapForced: false,
+    autoReg: s.regulates ?? INITIAL_FORM.autoReg,
     earthUm: s.earthUm ?? 0,
     // 2026-11-04 (UI-1): an OS Imax / Ust belongs to one transformer. A 346 A
     // typed for 59 MVA sized the next 61 MVA line (355.7 A) on a 350 A switch.

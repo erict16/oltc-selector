@@ -16,6 +16,7 @@ export type Release = {
  *  in that release, for the big redesigns only (not small steps). Screenshots are
  *  real runs of that tag, in public/changelog/. */
 export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
+  "2.7.0": { day: "2026-11-20" },
   "2.6.0": { day: "2026-11-20" },
   "2.5.0": { day: "2026-11-18" },
   "2.4.1": { day: "2026-11-14" },
@@ -41,6 +42,14 @@ export const RELEASE_META: Record<string, { day?: string; image?: string }> = {
  */
 export const RELEASES: Record<Lang, Release[]> = {
   zh: [
+    {
+      version: "2.7.0",
+      date: "2026-11",
+      title: "自耦变可以选中性点调压",
+      groups: [
+        { kind: "new", items: ["自耦变的开关位置新增「中性点」：选出一台三相星点开关，对地绝缘按中性点等级。电流取公共绕组电流，电流和级电压按最不利档算。", "新增「调压侧」（高压或中压），只在自耦变中性点调压时出现。招标文字里写了「中性点调压」会自动识别。", "命令行：--kind auto --tap neutral，新增 --regulates hv|mv 参数。"] },
+      ],
+    },
     {
       version: "2.6.0",
       date: "2026-11",
@@ -301,6 +310,14 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   en: [
+    {
+      version: "2.7.0",
+      date: "2026-11",
+      title: "Autotransformers can be tapped at the neutral end",
+      groups: [
+        { kind: "new", items: ["Autotransformer tap position: new “Neutral”. It gives one three-phase star-point switch, with insulation to earth on the neutral class. The current is the common-winding current; current and step voltage are taken at the worst tap.", "New field “Regulated voltage” (HV or MV), shown only for an autotransformer tapped at the neutral. A tender line that says “OLTC at neutral end” is read on its own.", "CLI: --kind auto --tap neutral, and a new flag --regulates hv|mv."] },
+      ],
+    },
     {
       version: "2.6.0",
       date: "2026-11",
@@ -566,6 +583,14 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   vi: [
     {
+      version: "2.7.0",
+      date: "2026-11",
+      title: "Máy biến áp tự ngẫu có thể điều chỉnh ở đầu trung tính",
+      groups: [
+        { kind: "new", items: ["Vị trí bộ điều áp của máy tự ngẫu: thêm “Trung tính”. Kết quả là một bộ điều áp ba pha đấu sao, cách điện với đất theo cấp trung tính. Dòng điện là dòng cuộn chung; dòng điện và điện áp bước được tính ở nấc bất lợi nhất.", "Thêm ô “Phía điều chỉnh” (cao áp hoặc trung áp), chỉ hiện khi máy tự ngẫu điều chỉnh ở trung tính. Dòng thầu ghi “OLTC at neutral end” được tự nhận ra.", "CLI: --kind auto --tap neutral, thêm cờ --regulates hv|mv."] },
+      ],
+    },
+    {
       version: "2.6.0",
       date: "2026-11",
       title: "Cấp bộ chọn được tính từ giá trị chịu đựng bạn nhập",
@@ -827,6 +852,14 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   es: [
+    {
+      version: "2.7.0",
+      date: "2026-11",
+      title: "Los autotransformadores pueden regularse en el neutro",
+      groups: [
+        { kind: "new", items: ["Posición del cambiador en autotransformadores: nueva opción «Neutro». Da un solo cambiador trifásico en estrella, con aislamiento a tierra de la clase del neutro. La corriente es la del devanado común; la corriente y la tensión de escalón se toman en la toma más desfavorable.", "Nuevo campo «Tensión regulada» (AT o MT), visible solo con un autotransformador regulado en el neutro. Una línea de licitación que dice «OLTC at neutral end» se reconoce sola.", "CLI: --kind auto --tap neutral, y la nueva opción --regulates hv|mv."] },
+      ],
+    },
     {
       version: "2.6.0",
       date: "2026-11",
@@ -1092,6 +1125,14 @@ export const RELEASES: Record<Lang, Release[]> = {
   ],
   tr: [
     {
+      version: "2.7.0",
+      date: "2026-11",
+      title: "Ototransformatörler nötr ucundan ayarlanabilir",
+      groups: [
+        { kind: "new", items: ["Ototransformatörde kademe değiştirici konumu: yeni “Nötr” seçeneği. Tek bir üç fazlı yıldız noktası kademe değiştirici verir; toprağa yalıtım nötr sınıfına göredir. Akım ortak sargı akımıdır; akım ve kademe gerilimi en elverişsiz kademede alınır.", "Yeni “Ayarlanan taraf” alanı (YG veya OG), yalnızca nötrden ayarlanan ototransformatörde görünür. “OLTC at neutral end” yazan şartname satırı kendiliğinden tanınır.", "CLI: --kind auto --tap neutral ve yeni --regulates hv|mv seçeneği."] },
+      ],
+    },
+    {
       version: "2.6.0",
       date: "2026-11",
       title: "Seçici sınıfı, girdiğiniz dayanım değerlerinden hesaplanır",
@@ -1353,6 +1394,14 @@ export const RELEASES: Record<Lang, Release[]> = {
     },
   ],
   id: [
+    {
+      version: "2.7.0",
+      date: "2026-11",
+      title: "Autotransformator dapat diatur di ujung netral",
+      groups: [
+        { kind: "new", items: ["Posisi tap changer pada autotransformator: pilihan baru “Netral”. Hasilnya satu tap changer tiga fase titik bintang, dengan isolasi ke tanah menurut kelas netral. Arusnya adalah arus belitan bersama; arus dan tegangan langkah diambil pada tap yang paling berat.", "Kolom baru “Sisi yang diatur” (TT atau TM), hanya muncul untuk autotransformator yang diatur di netral. Baris tender yang menulis “OLTC at neutral end” dikenali sendiri.", "CLI: --kind auto --tap neutral, dan flag baru --regulates hv|mv."] },
+      ],
+    },
     {
       version: "2.6.0",
       date: "2026-11",

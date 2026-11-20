@@ -215,7 +215,71 @@ describe("guards", () => {
   });
 
   it("tap point must fit the kind", () => {
-    expect(deriveDuty(spec({ kind: "auto", tapPoint: "neutral", hvKv: 225, mvKv: 115 })).ok).toBe(false);
+    expect(deriveDuty(spec({ kind: "auto", tapPoint: "line_end", hvKv: 225, mvKv: 115 })).ok).toBe(false);
+    expect(deriveDuty(spec({ tapPoint: "auto_junction" })).ok).toBe(false);
+  });
+});
+
+/**
+ * Neutral-end regulation (Dohnal §3.2 fig. 8a): taps at the neutral of the
+ * common winding, variable flux, one three-phase star-point switch.
+ * 125 MVA 225/115 kV: I_HV 320.8 A, I_MV 627.6 A, common 306.8 A.
+ */
+describe("autotransformer tapped at the neutral end", () => {
+  const auto = (over: Partial<TransformerSpec> = {}) =>
+    spec({ kind: "auto", tapPoint: "neutral", mva: 125, hvKv: 225, mvKv: 115, ...over });
+
+  it("HV on the range: common-winding current and Ust at the top tap", () => {
+    const d = deriveDuty(auto());
+    expect(d.ok).toBe(true);
+    expect(d.connection).toBe("Y");
+    expect(d.ratedA).toBeCloseTo(306.8, 1);
+    // I_MV − I_HV/1.1
+    expect(d.maxA).toBeCloseTo(336.0, 1);
+    expect(d.stepV).toBeCloseTo(2134, 0);
+    expect(d.common?.regulates).toBe("hv");
+    expect(d.common?.worstTap).toBeCloseTo(0.1, 6);
+    // (r·1.1 − 1)/(r − 1), r = 225/115
+    expect(d.common?.fluxFactor).toBeCloseTo(1.2045, 3);
+    expect(d.cautionsEn.join(" ")).toContain("variable flux");
+  });
+
+  it("MV on the range: the bottom tap is the worst", () => {
+    const d = deriveDuty(auto({ regulates: "mv" }));
+    // I_MV/0.9 − I_HV
+    expect(d.maxA).toBeCloseTo(376.5, 1);
+    expect(d.stepV).toBeCloseTo(1896, 0);
+    expect(d.common?.worstTap).toBeCloseTo(-0.1, 6);
+    expect(d.common?.fluxFactor).toBeCloseTo(1.1045, 3);
+  });
+
+  it("an uneven range uses its own plus and minus steps", () => {
+    const d = deriveDuty(auto({ plusSteps: 4, minusSteps: 12 }));
+    // I_MV − I_HV/1.05
+    expect(d.maxA).toBeCloseTo(322.1, 1);
+    expect(d.common?.worstTap).toBeCloseTo(0.05, 6);
+  });
+
+  it("the neutral takes the neutral Um rule on the HV class", () => {
+    expect(deriveDuty(auto()).umKv).toBe(72.5);
+    expect(deriveDuty(auto()).umRule).toBe("neutral_assumed");
+    expect(deriveDuty(auto({ mva: 500, hvKv: 400, mvKv: 220 })).umKv).toBe(126);
+    expect(deriveDuty(auto({ earthUmKv: 126 })).umKv).toBe(126);
+  });
+
+  it("gets one three-phase star-point type where the junction takes 3 × single-phase", () => {
+    const n = run(auto());
+    expect(n.out.results[0]?.model).toBe("CM2III-500Y/72.5B-10193W");
+    const j = run(auto({ tapPoint: "auto_junction" }));
+    expect(j.out.results[0]?.model).toMatch(/^3xCM2I-/);
+  });
+
+  it("refuses a range that crosses the other voltage", () => {
+    const hv = deriveDuty(auto({ hvKv: 132, mvKv: 110, minusSteps: 16 }));
+    expect(hv.ok).toBe(false);
+    expect(hv.errorEn).toContain("Range too wide");
+    const mv = deriveDuty(auto({ hvKv: 132, mvKv: 110, plusSteps: 16, minusSteps: 16, regulates: "mv" }));
+    expect(mv.ok).toBe(false);
   });
 });
 

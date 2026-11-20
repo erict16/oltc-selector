@@ -248,6 +248,15 @@ const RULES: Rule[] = [
     }),
   ],
   [
+    /^Neutral-end regulation is variable flux: current and Ust are taken at the worst tap \(flux (\d+) % of rated\), and the tertiary voltage moves with the tap\. Check the maker's per-tap table\.$/,
+    (m) => ({
+      vi: `Điều chỉnh ở đầu trung tính là từ thông thay đổi: dòng điện và Ust lấy ở nấc bất lợi nhất (từ thông ${m[1]} % định mức), điện áp cuộn thứ ba thay đổi theo nấc. Hãy đối chiếu bảng từng nấc của nhà sản xuất.`,
+      es: `La regulación en el neutro es de flujo variable: la corriente y la Ust se toman en la toma más desfavorable (flujo ${m[1]} % del nominal) y la tensión del terciario cambia con la toma. Compruebe la tabla por toma del fabricante.`,
+      tr: `Nötr ucundan ayar değişken akılıdır: akım ve Ust en elverişsiz kademede alındı (akı anma değerinin %${m[1]}'i), tersiyer gerilimi kademeyle değişir. Üreticinin kademe tablosuyla karşılaştırın.`,
+      id: `Pengaturan di ujung netral adalah fluks variabel: arus dan Ust diambil pada tap terburuk (fluks ${m[1]} % dari pengenal), dan tegangan tersier berubah mengikuti tap. Periksa tabel per tap dari pabrikan.`,
+    }),
+  ],
+  [
     /^Variable flux: Ust and current differ per tap; Ust at the extreme tap is not checked\. Get the maker's per-tap table\.$/,
     () => ({
       vi: "Từ thông thay đổi: Ust và dòng điện khác nhau ở mỗi nấc; chưa kiểm tra Ust ở nấc cực biên. Hãy lấy bảng từng nấc của nhà sản xuất.",
@@ -583,6 +592,24 @@ const RULES: Rule[] = [
       es: "Introduzca las tensiones nominales de AT y MT del autotransformador.",
       tr: "Ototransformatörün YG ve OG anma gerilimlerini girin.",
       id: "Masukkan tegangan pengenal TT dan TM autotransformator.",
+    }),
+  ],
+  [
+    /^Range too wide: at the lowest tap HV is no longer above MV\.$/,
+    () => ({
+      vi: "Dải điều chỉnh quá rộng: ở nấc thấp nhất cao áp không còn lớn hơn trung áp.",
+      es: "Rango demasiado amplio: en la toma más baja la AT ya no supera a la MT.",
+      tr: "Ayar aralığı çok geniş: en alt kademede YG artık OG'den büyük değil.",
+      id: "Rentang terlalu lebar: di tap terendah TT tidak lagi di atas TM.",
+    }),
+  ],
+  [
+    /^Range too wide: at the highest tap MV is no longer below HV\.$/,
+    () => ({
+      vi: "Dải điều chỉnh quá rộng: ở nấc cao nhất trung áp không còn nhỏ hơn cao áp.",
+      es: "Rango demasiado amplio: en la toma más alta la MT ya no queda por debajo de la AT.",
+      tr: "Ayar aralığı çok geniş: en üst kademede OG artık YG'den küçük değil.",
+      id: "Rentang terlalu lebar: di tap tertinggi TM tidak lagi di bawah TT.",
     }),
   ],
   [

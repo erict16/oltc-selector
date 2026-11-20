@@ -117,6 +117,18 @@ describe("parseTenderLine", () => {
     expect(t.tapKv).toBe(33);
   });
 
+  it("reads a stated neutral-end tap on an autotransformer, and the side the range is on", () => {
+    const zh = parseTenderLine("OSFPSZ-180000/220 220±8x1.25%/121/11kV YNa0d11 中性点调压")!;
+    expect([zh.kind, zh.tapPoint, zh.regulates]).toEqual(["auto", "neutral", "hv"]);
+    expect(zh.assumed).not.toContain("tap_point");
+    const en = parseTenderLine("500 MVA autotransformer 400/220±10x1.25%/33 kV YNa0d11, OLTC at neutral end")!;
+    expect([en.tapPoint, en.regulates]).toEqual(["neutral", "mv"]);
+    // An earthed neutral is not a tap site.
+    const earthed = parseTenderLine("125 MVA 225±8x1.25%/115/35kV YNa0d11, neutral solidly earthed")!;
+    expect(earthed.tapPoint).toBe("auto_junction");
+    expect(earthed.regulates).toBeUndefined();
+  });
+
   it("puts a range on the MV figure of an auto in the MV lead", () => {
     const t = parseTenderLine("250 MVA 230/121±8x1.25%/38.5 kV YNa0d11")!;
     expect(t.kind).toBe("auto");

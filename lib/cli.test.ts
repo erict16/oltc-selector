@@ -225,6 +225,26 @@ describe("oltc CLI", () => {
 describe("oltc CLI tap range and tap point", () => {
   const first = (argv: string[]) => capture(argv).out.trim().split(/\r?\n/)[0];
 
+  it("--kind auto --tap neutral: one star-point type on the common-winding current", () => {
+    const base = ["--mva", "125", "--kind", "auto", "--tap", "neutral", "--hv", "225", "--mv", "115", "--pm", "8", "--step-pct", "1.25"];
+    const hv = capture(base).out;
+    expect(hv.split(/\r?\n/)[0]).toBe("CM2III-500Y/72.5B-10193W");
+    expect(hv).toContain("I = I中压 − I高压 = 627.6 − 320.8 = 306.8 A，+10% 档 336 A");
+    expect(hv).toContain("调压侧高压");
+    const mv = capture([...base, "--regulates", "mv", "--lang", "en"]).out;
+    expect(mv).toContain("at the −10% tap 376.5 A");
+    const j = JSON.parse(capture([...base, "--json"]).out);
+    expect(j.basis.common).toEqual({ regulates: "hv", hvA: 320.8, mvA: 627.6, worstTapPct: 10, fluxPct: 120.5 });
+    // The side comes from the line: range on the MV figure.
+    const line = capture(["--line", "500 MVA autotransformer 400/220±10x1.25%/33 kV YNa0d11, OLTC at neutral end", "--json"]);
+    expect(JSON.parse(line.out).basis.common.regulates).toBe("mv");
+  });
+
+  it("--regulates without an autotransformer neutral tap is an error", () => {
+    expect(capture(["--mva", "125", "--kv", "110", "--regulates", "mv"]).err).toContain("--kind auto --tap neutral");
+    expect(capture(["--mva", "125", "--kind", "auto", "--hv", "225", "--mv", "115", "--regulates", "hv"]).code).toBe(1);
+  });
+
   it("--pos on W/G sets the brochure ±N instead of the ±8 default", () => {
     // 27 positions G is ±12 mid 3; CV2 stops at 23, so CM2.
     expect(first(["--iu", "300", "--um", "72.5", "--reg", "G", "--pos", "27"])).toBe(

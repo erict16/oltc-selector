@@ -12,7 +12,7 @@
  * Every field the line does not state is listed in `assumed` so the page and
  * CLI can say so. Nothing here sizes the switch: deriveDuty does that.
  */
-import type { TapPoint, TransformerKind, WindingConnection } from "./transformer";
+import type { RegulatedSide, TapPoint, TransformerKind, WindingConnection } from "./transformer";
 import type { Regulation } from "./types";
 import { umForEarthInsulation } from "./catalog";
 import { lookupDiagram, pitchFor, pmStepOptionsFor, preferredMid, defaultPitch } from "./tapCode";
@@ -60,6 +60,8 @@ export interface TenderLine {
   /** Autotransformer: HV and MV rated kV. */
   hvKv: number | null;
   mvKv: number | null;
+  /** Autotransformer tapped at the neutral: the voltage the range is written on. */
+  regulates?: RegulatedSide;
   /** Neutral LI (BIL) in kV when the line states it. */
   neutralBilKv: number | null;
   /** "single-phase" written: the MVA is one unit's. */
@@ -1422,13 +1424,16 @@ export function parseTenderLine(raw: string): TenderLine | null {
     // Range on the HV figure: the tap winding sits at the series/common
     // junction and carries the HV current (Colin 2026-10-27). Range on the
     // MV figure: regulating winding in the MV lead (HMR 230/121 kV).
-    const tapPoint: TapPoint = tapIndex === 1 ? "auto_mv_line" : "auto_junction";
-    assumed.push("tap_point");
+    // "Neutral-end regulation", 中性点调压: taps at the neutral of the common
+    // winding (variable flux), one star-point switch. Stated, not guessed.
+    const tapPoint: TapPoint = starTap ? "neutral" : tapIndex === 1 ? "auto_mv_line" : "auto_junction";
+    if (!starTap) assumed.push("tap_point");
     if (tapIndex != null && tapIndex > 1) notes.push({ key: "auto_tertiary" });
     return {
       ...base,
       kind: "auto",
       tapPoint,
+      ...(starTap ? { regulates: tapIndex === 1 ? ("mv" as const) : ("hv" as const) } : {}),
       winding: "star",
       tapKv: null,
       hvKv,
@@ -1597,6 +1602,8 @@ export type LineSettings = {
   windingStated: boolean;
   tapPoint: TapPoint;
   tapPointStated: boolean;
+  /** Autotransformer tapped at the neutral: the side the range is on. */
+  regulates?: RegulatedSide;
   /** The range this duty uses (the off-circuit winding's when octc). */
   plus: number | null;
   minus: number | null;
@@ -1669,6 +1676,7 @@ export function tenderLineSettings(
       windingStated,
       tapPoint,
       tapPointStated,
+      ...(tl.regulates ? { regulates: tl.regulates } : {}),
       plus,
       minus,
       stepPct,
